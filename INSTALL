@@ -1,0 +1,18 @@
+BUILD
+=====
+
+1. Edit Makefile. Change SUIFHOME and OMEGAHOME to correct paths.
+
+2. Do "make depend" in the chill directory.
+
+3. Optional, do "make clean" or "make veryclean" which removes additional
+   target files and flex/bison generated files.
+
+4. Do "make".
+
+
+INSTALLATION
+============
+
+You can use CHiLL in source directory since all links are already
+created in bin/, lib/ and include/ directories.

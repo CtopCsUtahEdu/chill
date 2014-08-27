@@ -1,0 +1,18 @@
+source: ccd.f
+procedure: clean_sd_t_s1_1
+format : rose
+loop: 0
+
+
+
+original()
+
+UN=4
+
+unroll(0,5,4)
+unroll(0,4,4)
+unroll(0,3,4)
+unroll(0,2,4)
+unroll(0,1,4)
+
+print
