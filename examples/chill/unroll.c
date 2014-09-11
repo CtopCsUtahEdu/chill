@@ -1,6 +1,8 @@
+
 #define N 14
+#define DT 0.314
+
 void foo(int n, float* x, float* y, float* z, float* f3, float* f1, float* w) {
-	int dt;
 
 	int i, j;
 
@@ -16,7 +18,7 @@ void foo(int n, float* x, float* y, float* z, float* f3, float* f1, float* w) {
 	for (i = 0; i <= N; i++) {
 		for (j = i; j <= i + N; j++)
 			f3[i] = f3[i] + f1[j] * w[j - i];
-		f3[i] = f3[i] * dt;
+		f3[i] = f3[i] * DT;
 	}
 
 	return 0;
