@@ -1,0 +1,21 @@
+#
+# tiling imperfect jacobi loop nest, more details in the paper
+# "Automatic Tiling of Iterative Stencil Loops" by Zhiyuan Li and
+# Yonghong Song, TOPLAS, 2004.
+#
+
+source: jacobi2.c
+procedure: main
+format: rose
+loop: 0
+
+print dep
+
+original()
+shift([1], 2, 1)
+fuse([0,1], 2)  # optional
+skew([0,1], 2, [2,1])
+tile(0, 2, 32, 1)
+
+print dep
+print

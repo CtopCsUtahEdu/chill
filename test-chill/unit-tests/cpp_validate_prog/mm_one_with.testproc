@@ -1,0 +1,7 @@
+
+with {evendist2:lambda i,j: random(-8,8), zero2:lambda i,j: 0}
+procedure void mm(
+    in  float[3][5] A = matrix([*,*],evendist2),
+    in  float[5][2] B = matrix([*,*],evendist2),
+    out float[3][2] C = matrix([*,*],zero2))
+

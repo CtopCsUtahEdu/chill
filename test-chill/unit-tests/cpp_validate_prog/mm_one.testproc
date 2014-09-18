@@ -1,0 +1,6 @@
+
+procedure void mm(
+    in  float[3][5] A = matrix([*,*],lambda i,j: random(-8,8)),
+    in  float[5][2] B = matrix([*,*],lambda i,j: random(-8,8)),
+    out float[3][2] C = matrix([*,*],lambda i,j: 0))
+
