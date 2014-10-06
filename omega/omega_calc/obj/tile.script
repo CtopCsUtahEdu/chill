@@ -1,0 +1,5 @@
+sym = n; 
+s1:={[In_1,In_2,In_3,In_4] : exists ( t2,t4,t6,t8,t2',t4',t6',t8' : ( exists ( alpha,beta : t2 = 16beta && t2' = 16alpha && t4' = t4 && t6' = 1+t6 && t8' = 1+t8 && t2' = t2+In_1 && t4' = t4+In_2 && t6' = t6+In_3 && t8' = t8+In_4 && 0, t8-15 <= t2 <= t8 <= t2'+14 && 0 <= t2' <= t8+1, n-1 && 0 <= t6 <= n-2 && 0 <= t4 < n && t2 < n) )) };
+s2:={[t8]: 0 < t8 < 8};
+
+gist(s1,s2);

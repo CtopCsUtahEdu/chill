@@ -1,0 +1,12 @@
+#matrix multiply large array size for intel machine
+source: test_lex_order.c
+procedure: main
+format: rose
+loop: 0
+
+original()
+
+
+
+print
+

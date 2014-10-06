@@ -1,0 +1,40 @@
+>>> # test new hull calculation method RectHull
+>>> 
+>>> symbolic m,n;
+>>> 
+>>> r1 := {[i,j]: i>=0 && j>=0 && i+j<=1};
+>>> r2 := {[i,j]: j>=0 && i<=1 && j<=i};
+>>> 
+>>> ConvexHull (r1 union r2);
+{[i,j]: 0 <= i <= 1 && 0 <= j <= 1}
+>>> RectHull (r1 union r2);
+{[i,j]: 0 <= i <= 1 && 0 <= j <= 1}
+>>> QuickHull (r1 union r2);
+{[i,j]: 0 <= j}
+>>> Hull (r1 union r2);
+{[i,j]: 0 <= i <= 1 && 0 <= j <= 1}
+>>> 
+>>> r1 := {[i]:i<=n && n>=7};
+>>> r2 := {[i]:i<=n-2 && n>=6};
+>>> 
+>>> ConvexHull (r1 union r2);
+{[i]: i <= 3n-14, n && 6 <= n}
+>>> RectHull (r1 union r2);
+{[i]: i <= n && 6 <= n}
+>>> QuickHull (r1 union r2);
+{[i]: i <= n && 6 <= n}
+>>> Hull (r1 union r2);
+{[i]: i <= n, 3n-14 && 6 <= n}
+>>> 
+>>> r1 := {[i,j]:0<=i,j<=2};
+>>> r2 := {[i,j]:0<=i && 1<=j && i+j<=4};
+>>> 
+>>> ConvexHull (r1 union r2);
+{[i,j]: 0 <= i <= j+2, -j+4 && 0 <= j}
+>>> RectHull (r1 union r2);
+{[i,j]: 0 <= i <= -j+4, 3 && 0 <= j}
+>>> QuickHull (r1 union r2);
+{[i,j]: 0 <= i && 0 <= j}
+>>> Hull (r1 union r2);
+{[i,j]: 0 <= i <= -j+4, j+2 && 0 <= j}
+

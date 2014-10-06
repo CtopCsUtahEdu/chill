@@ -1,0 +1,117 @@
+>>> # Perform imperfect loop interchange of LU decomposition 
+>>> # to get jki form and then block the k and i loops
+>>> #
+>>> #for k = 1 to n do
+>>> # for i = k+1 to n do
+>>> #  a(i,k) = a(i,k) / a(k,k)
+>>> #  for j = k+1 to n do
+>>> #   a(i,j) = a(i,j) - a(k,j)*a(i,k)
+>>> #  endfor
+>>> # endfor
+>>> #endfor
+>>> #
+>>> #
+>>> 
+>>> symbolic n;
+>>> 
+>>> IS10 := {[k,i] : 1 <= k <= n && k+1 <= i <= n};
+>>> IS20 := {[k,i,j] : 1 <= k <= n && k+1 <= i <= n && k+1 <= j <= n};
+>>> 
+>>> T10 := {[k,i] -> [t1,t2,k,k,i]:
+>>> exists (alpha,beta: t1 = 64beta+1 && k-1 = alpha + 64 beta &&
+>>>                     alpha >= 0 && alpha <= 63)
+>>> && exists (gamma,delta: t2 = 64delta && i = gamma +64delta &&
+>>>            gamma >= 0 && gamma <= 63)};
+>>> 
+>>> T20 := {[k,i,j] -> [t1,t2,j,k,i]:
+>>> exists (alpha,beta: t1 = 64beta+1 && k-1 = alpha + 64 beta &&
+>>>                     alpha >= 0 && alpha <= 63)
+>>> && exists (gamma,delta: t2 = 64delta && i = gamma +64delta &&
+>>>            gamma >= 0 && gamma <= 63)};
+>>> 
+>>> T10;
+{[k,i] -> [t1,t2,k,k,i] : exists ( alpha,beta : t1 = 1+64alpha && t2 = 64beta && k-63 <= t1 <= k && i-63 <= t2 <= i)}
+>>> T20;
+{[k,i,j] -> [t1,t2,j,k,i] : exists ( alpha,beta : t1 = 1+64alpha && t2 = 64beta && k-63 <= t1 <= k && i-63 <= t2 <= i)}
+>>> 
+>>> # Generate code with different ammounts of overhead remove
+>>> # The more overhead we remove, the more code duplication may occur
+>>> codegen 0 T10:IS10,T20:IS20;
+for(t1 = 1; t1 <= n-1; t1 += 64) {
+  for(t2 = t1-1; t2 <= n; t2 += 64) {
+    for(t3 = t1; t3 <= n; t3++) {
+      for(t4 = t1; t4 <= min(t3-1,t2+62,t1+63); t4++) {
+        for(t5 = max(t2,t4+1); t5 <= min(n,t2+63); t5++) {
+          s1(t4,t5,t3);
+        }
+      }
+      if (t1 >= t3-63) {
+        for(t5 = max(t3+1,t2); t5 <= min(n,t2+63); t5++) {
+          s0(t3,t5);
+        }
+      }
+    }
+  }
+}
+
+>>> codegen 1 T10:IS10,T20:IS20;
+for(t1 = 1; t1 <= n-1; t1 += 64) {
+  for(t2 = t1-1; t2 <= n; t2 += 64) {
+    for(t3 = t1; t3 <= n; t3++) {
+      for(t4 = t1; t4 <= min(t3-1,t2+62,t1+63); t4++) {
+        for(t5 = max(t2,t4+1); t5 <= min(n,t2+63); t5++) {
+          s1(t4,t5,t3);
+        }
+      }
+      if (t1 >= t3-63) {
+        for(t5 = max(t3+1,t2); t5 <= min(n,t2+63); t5++) {
+          s0(t3,t5);
+        }
+      }
+    }
+  }
+}
+
+>>> codegen 2 T10:IS10,T20:IS20;
+for(t1 = 1; t1 <= n-1; t1 += 64) {
+  for(t2 = t1-1; t2 <= n; t2 += 64) {
+    for(t3 = t1; t3 <= n; t3++) {
+      for(t4 = t1; t4 <= min(t3-1,t2+62,t1+63); t4++) {
+        for(t5 = max(t2,t4+1); t5 <= min(n,t2+63); t5++) {
+          s1(t4,t5,t3);
+        }
+      }
+      if (t1 >= t3-63) {
+        for(t5 = max(t3+1,t2); t5 <= min(n,t2+63); t5++) {
+          s0(t3,t5);
+        }
+      }
+    }
+  }
+}
+
+>>> codegen 3 T10:IS10,T20:IS20;
+for(t1 = 1; t1 <= n-1; t1 += 64) {
+  for(t2 = t1-1; t2 <= n; t2 += 64) {
+    for(t3 = t1; t3 <= min(t1+63,n); t3++) {
+      for(t4 = t1; t4 <= min(t2+62,t3-1); t4++) {
+        for(t5 = max(t2,t4+1); t5 <= min(t2+63,n); t5++) {
+          s1(t4,t5,t3);
+        }
+      }
+      for(t5 = max(t2,t3+1); t5 <= min(n,t2+63); t5++) {
+        s0(t3,t5);
+      }
+    }
+    for(t3 = t1+64; t3 <= n; t3++) {
+      for(t4 = t1; t4 <= min(t2+62,t1+63); t4++) {
+        for(t5 = max(t2,t4+1); t5 <= min(t2+63,n); t5++) {
+          s1(t4,t5,t3);
+        }
+      }
+    }
+  }
+}
+
+>>> 
+>>> 

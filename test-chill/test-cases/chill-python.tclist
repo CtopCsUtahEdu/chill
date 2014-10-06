@@ -1,0 +1,19 @@
+
+chill-testcase  test-cases/chill/test_distribute.py    test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_fuse.py          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_known.py         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_original.py      test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_peel.py          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_permute.py       test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_code.py    test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_dep.py     test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_space.py   test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_reverse.py       test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_scale.py         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_shift.py         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_shift_to.py      test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_skew.py          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_tile.py          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_unroll_extra.py  test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_unroll.py        test-cases/chill/mm.c  --check-run-script
+

@@ -1,0 +1,158 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+CG_split	CG.cc	/^CG_split::CG_split(IntTuple &active, int lvl, const Relation &cond_, CG_result *T, CG_result *F) { $/;"	f	class:omega::CG_split
+CG_stringRepr	CG_stringRepr.cc	/^CG_stringRepr::CG_stringRepr() {$/;"	f	class:omega::CG_stringRepr
+CG_stringRepr	CG_stringRepr.cc	/^CG_stringRepr::CG_stringRepr(const std::string& _s) : s(_s) {$/;"	f	class:omega::CG_stringRepr
+CG_suifRepr	CG_suifRepr.cc	/^CG_suifRepr::CG_suifRepr(): tnl_(NULL), op_() {$/;"	f	class:omega::CG_suifRepr
+CG_suifRepr	CG_suifRepr.cc	/^CG_suifRepr::CG_suifRepr(operand op): tnl_(NULL), op_(op) {$/;"	f	class:omega::CG_suifRepr
+CG_suifRepr	CG_suifRepr.cc	/^CG_suifRepr::CG_suifRepr(tree_node_list *tnl): tnl_(tnl),op_() {$/;"	f	class:omega::CG_suifRepr
+CreateAnd	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateAnd(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateAnd	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateAnd(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateAssignment	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateAssignment(int indent, $/;"	f	class:omega::CG_stringBuilder
+CreateAssignment	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateAssignment(int, CG_outputRepr *lhs,$/;"	f	class:omega::CG_suifBuilder
+CreateComment	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateComment(int indent, const std::string &commentText) const {$/;"	f	class:omega::CG_stringBuilder
+CreateComment	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateComment(int, const std::string &commentText) const {$/;"	f	class:omega::CG_suifBuilder
+CreateEQ	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateEQ(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateEQ	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateEQ(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateGE	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateGE(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateGE	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateGE(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateIdent	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateIdent(const std::string &_s) const {$/;"	f	class:omega::CG_stringBuilder
+CreateIdent	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateIdent(const std::string &_s) const {$/;"	f	class:omega::CG_suifBuilder
+CreateIf	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateIf(int indent, CG_outputRepr* guardList,$/;"	f	class:omega::CG_stringBuilder
+CreateIf	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateIf(int, CG_outputRepr *guardList,$/;"	f	class:omega::CG_suifBuilder
+CreateInductive	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateInductive(CG_outputRepr* index,$/;"	f	class:omega::CG_stringBuilder
+CreateInductive	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateInductive(CG_outputRepr *index,$/;"	f	class:omega::CG_suifBuilder
+CreateInt	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateInt(int _i) const {$/;"	f	class:omega::CG_stringBuilder
+CreateInt	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateInt(int _i) const {$/;"	f	class:omega::CG_suifBuilder
+CreateIntegerCeil	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateIntegerCeil(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateIntegerDivide	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateIntegerDivide(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateIntegerDivide	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateIntegerDivide(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateIntegerMod	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateIntegerMod(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateIntegerMod	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateIntegerMod(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateInvoke	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateInvoke(const std::string &fname,$/;"	f	class:omega::CG_stringBuilder
+CreateInvoke	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateInvoke(const std::string &fname,$/;"	f	class:omega::CG_suifBuilder
+CreateLE	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateLE(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateLE	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateLE(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateLoop	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateLoop(int indent, CG_outputRepr* control,$/;"	f	class:omega::CG_stringBuilder
+CreateLoop	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateLoop(int, CG_outputRepr *control,$/;"	f	class:omega::CG_suifBuilder
+CreateMinus	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateMinus(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateMinus	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateMinus(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreatePlaceHolder	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreatePlaceHolder(int indent, CG_outputRepr *stmt,$/;"	f	class:omega::CG_stringBuilder
+CreatePlaceHolder	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreatePlaceHolder (int, CG_outputRepr *stmt,$/;"	f	class:omega::CG_suifBuilder
+CreatePlus	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreatePlus(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreatePlus	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreatePlus(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+CreateTimes	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::CreateTimes(CG_outputRepr* lop, CG_outputRepr* rop) const {$/;"	f	class:omega::CG_stringBuilder
+CreateTimes	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::CreateTimes(CG_outputRepr *lop,$/;"	f	class:omega::CG_suifBuilder
+Dump	CG_stringRepr.cc	/^void CG_stringRepr::Dump() const {$/;"	f	class:omega::CG_stringRepr
+Dump	CG_suifRepr.cc	/^void CG_suifRepr::Dump() const {$/;"	f	class:omega::CG_suifRepr
+DumpToFile	CG_stringRepr.cc	/^void CG_stringRepr::DumpToFile(FILE *fp) const {$/;"	f	class:omega::CG_stringRepr
+DumpToFile	CG_suifRepr.cc	/^void CG_suifRepr::DumpToFile(FILE *fp) const {$/;"	f	class:omega::CG_suifRepr
+GetCode	CG_suifRepr.cc	/^tree_node_list* CG_suifRepr::GetCode() const {$/;"	f	class:omega::CG_suifRepr
+GetExpression	CG_suifRepr.cc	/^operand CG_suifRepr::GetExpression() const {$/;"	f	class:omega::CG_suifRepr
+GetIndentSpaces	CG_stringBuilder.cc	/^std::string GetIndentSpaces(int indent) {$/;"	f	namespace:omega
+GetString	CG_stringBuilder.cc	/^std::string GetString(CG_outputRepr* repr) {$/;"	f	namespace:omega
+GetString	CG_stringRepr.cc	/^std::string CG_stringRepr::GetString() const { $/;"	f	class:omega::CG_stringRepr
+JunkStaticInit	code_gen.cc	/^class JunkStaticInit{ public: JunkStaticInit(){ checkLoopLevel=0; fillInBounds=false;} };$/;"	c	namespace:omega	file:
+JunkStaticInit	code_gen.cc	/^class JunkStaticInit{ public: JunkStaticInit(){ checkLoopLevel=0; fillInBounds=false;} };$/;"	f	class:omega::JunkStaticInit
+MMGenerateCode	code_gen.cc	/^CG_outputRepr* MMGenerateCode(CG_outputBuilder* ocg, RelTuple &T, SetTuple &old_IS, $/;"	f	namespace:omega
+MMGenerateCode	code_gen.cc	/^CG_outputRepr* MMGenerateCode(CG_outputBuilder* ocg, RelTuple &T, SetTuple &old_IS, const Tuple<CG_outputRepr *> &stmt_content, Relation &known, int effort) {$/;"	f	namespace:omega
+MMGenerateCode	code_gen.cc	/^std::string MMGenerateCode(RelTuple &T, SetTuple &old_IS, Relation &known, int effort) {$/;"	f	namespace:omega
+SafeguardString	CG_stringBuilder.cc	/^static std::string SafeguardString(const std::string &s, char op) {$/;"	f	namespace:omega
+StmtListAppend	CG_stringBuilder.cc	/^CG_outputRepr* CG_stringBuilder::StmtListAppend(CG_outputRepr* list1, CG_outputRepr* list2) const {$/;"	f	class:omega::CG_stringBuilder
+StmtListAppend	CG_suifBuilder.cc	/^CG_outputRepr* CG_suifBuilder::StmtListAppend(CG_outputRepr *list1, $/;"	f	class:omega::CG_suifBuilder
+boundHitsStride	output_repr.cc	/^bool boundHitsStride(const GEQ_Handle &g, Variable_ID v,$/;"	f	namespace:omega
+checkLoopLevel	code_gen.cc	/^int checkLoopLevel;$/;"	m	namespace:omega	file:
+clear	CG_suifRepr.cc	/^void CG_suifRepr::clear() {$/;"	f	class:omega::CG_suifRepr
+clone	CG_stringRepr.cc	/^CG_outputRepr* CG_stringRepr::clone() {$/;"	f	class:omega::CG_stringRepr
+clone	CG_suifRepr.cc	/^CG_outputRepr* CG_suifRepr::clone() {$/;"	f	class:omega::CG_suifRepr
+code_gen_debug	code_gen.cc	/^int code_gen_debug=0;$/;"	m	namespace:omega	file:
+countStrides	output_repr.cc	/^int countStrides(Conjunct *c, Variable_ID v, EQ_Handle &strideEQ, $/;"	f	namespace:omega
+create_stride_on_bound	output_repr.cc	/^Relation create_stride_on_bound(int n, const std::map<Variable_ID, coef_t> &lb, coef_t stride) {$/;"	f	namespace:omega::__anon2
+exit_code_gen	CG_suifBuilder.cc	/^void exit_code_gen(void) {$/;"	f	namespace:omega
+extract_function_symbols	code_gen.cc	/^RelTuple extract_function_symbols(SetTuple &sets) {$/;"	f	namespace:omega
+fillInBounds	code_gen.cc	/^bool fillInBounds;$/;"	m	namespace:omega	file:
+filter_function_symbols	code_gen.cc	/^SetTuple filter_function_symbols(SetTuple &sets, bool keep_fs){$/;"	f	namespace:omega
+findFloorInequality	output_repr.cc	/^bool findFloorInequality(Relation &r, Variable_ID v, GEQ_Handle &h, Variable_ID excluded) {$/;"	f	namespace:omega
+findOverhead	CG.cc	/^Relation CG_leaf::findOverhead(int liftTo) {$/;"	f	class:omega::CG_leaf
+findOverhead	CG.cc	/^Relation CG_loop::findOverhead(int liftTo) {$/;"	f	class:omega::CG_loop
+findOverhead	CG.cc	/^Relation CG_split::findOverhead(int liftTo) {$/;"	f	class:omega::CG_split
+find_any_constraint	output_repr.cc	/^bool find_any_constraint(int s, int level, Relation &kr, int direction,$/;"	f	namespace:omega
+find_simplest_assignment	output_repr.cc	/^std::pair<EQ_Handle, int> find_simplest_assignment(const Relation &R_, Variable_ID v, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+force_finite_bounds	CG.cc	/^CG_result * CG_loop::force_finite_bounds() {$/;"	f	class:omega::CG_loop
+force_finite_bounds	CG.cc	/^CG_result * CG_split::force_finite_bounds() {$/;"	f	class:omega::CG_split
+gen_recursive	code_gen.cc	/^CG_result *gen_recursive(int level, IntTuple &isActive) {$/;"	f	namespace:omega
+get_stride	output_repr.cc	/^void get_stride(const Constraint_Handle &h, Variable_ID &wc, coef_t &step){$/;"	f	namespace:omega::__anon1
+greatest_common_step	output_repr.cc	/^Relation greatest_common_step(const Tuple<Relation> &I, const Tuple<int> &active, int level, const Relation &known) {$/;"	f	namespace:omega
+hasBound	output_repr.cc	/^bool hasBound(Relation r, int level, int UB) {$/;"	f	namespace:omega
+hasEQ	output_repr.cc	/^bool hasEQ(Relation r, int level) {$/;"	f	namespace:omega::__anon3
+has_nonstride_EQ	output_repr.cc	/^bool has_nonstride_EQ(Relation r, int level) {$/;"	f	namespace:omega
+hoistGuard	CG.cc	/^Relation CG_leaf::hoistGuard() {$/;"	f	class:omega::CG_leaf
+hoistGuard	CG.cc	/^Relation CG_loop::hoistGuard() {$/;"	f	class:omega::CG_loop
+hoistGuard	CG.cc	/^Relation CG_split::hoistGuard() {$/;"	f	class:omega::CG_split
+init_code_gen	CG_suifBuilder.cc	/^void init_code_gen(int&, char* []) {$/;"	f	namespace:omega
+isSimpleStride	output_repr.cc	/^bool isSimpleStride(const EQ_Handle &g, Variable_ID v) {$/;"	f	namespace:omega
+junkInitInstance__	code_gen.cc	/^static JunkStaticInit junkInitInstance__;$/;"	m	namespace:omega	file:
+k_ocg_comment	CG_suifBuilder.cc	/^char *k_ocg_comment;$/;"	m	namespace:omega	file:
+last_level	code_gen.cc	/^int last_level;\/\/ Should not be global, but it is.$/;"	m	namespace:omega	file:
+libcode_gen_suif_string	CG_suifBuilder.cc	/^const char *libcode_gen_suif_string = "";$/;"	m	namespace:omega	file:
+libcode_gen_ver_string	CG_suifBuilder.cc	/^const char *libcode_gen_ver_string = "";$/;"	m	namespace:omega	file:
+libcode_gen_who_string	CG_suifBuilder.cc	/^const char *libcode_gen_who_string = "";$/;"	m	namespace:omega	file:
+liftOverhead	CG.cc	/^CG_result * CG_loop::liftOverhead(int depth) {$/;"	f	class:omega::CG_loop
+liftOverhead	CG.cc	/^CG_result * CG_split::liftOverhead(int depth) {$/;"	f	class:omega::CG_split
+loopIdxNames	code_gen.cc	/^Tuple< Tuple<std::string> > loopIdxNames;\/\/per stmt$/;"	m	namespace:omega	file:
+lowerBoundForLevel	code_gen.cc	/^int lowerBoundForLevel;$/;"	m	namespace:omega	file:
+max_fs_arity	output_repr.cc	/^int max_fs_arity(const Constraint_Handle &c) {$/;"	f	namespace:omega
+minMaxOverhead	output_repr.cc	/^Relation minMaxOverhead(Relation r, int level) {$/;"	f	namespace:omega
+new_IS	code_gen.cc	/^SetTuple new_IS;$/;"	m	namespace:omega	file:
+omega	CG.cc	/^namespace omega {$/;"	n	file:
+omega	CG_stringBuilder.cc	/^namespace omega {$/;"	n	file:
+omega	CG_stringRepr.cc	/^namespace omega {$/;"	n	file:
+omega	CG_suifBuilder.cc	/^namespace omega {$/;"	n	file:
+omega	CG_suifRepr.cc	/^namespace omega {$/;"	n	file:
+omega	code_gen.cc	/^namespace omega {$/;"	n	file:
+omega	output_repr.cc	/^namespace omega {$/;"	n	file:
+outputAssignment	output_repr.cc	/^std::pair<CG_outputRepr *, bool> outputAssignment(CG_outputBuilder *ocg, const Relation &R_,  Variable_ID v, Relation &enforced, CG_outputRepr *&if_repr, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputBounds	output_repr.cc	/^std::pair<CG_outputRepr *, bool> outputBounds(CG_outputBuilder* ocg, const Relation &bounds, Variable_ID v, int indent, Relation &enforced, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputEasyBoundAsRepr	output_repr.cc	/^CG_outputRepr* outputEasyBoundAsRepr(CG_outputBuilder* ocg, Relation &bounds,$/;"	f	namespace:omega
+outputGuard	output_repr.cc	/^CG_outputRepr *outputGuard(CG_outputBuilder* ocg, const Relation &guards_in, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputIdent	output_repr.cc	/^CG_outputRepr* outputIdent(CG_outputBuilder* ocg, const Relation &R_, Variable_ID v, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputLBasRepr	output_repr.cc	/^CG_outputRepr *outputLBasRepr(CG_outputBuilder* ocg, const GEQ_Handle &g, $/;"	f	namespace:omega
+outputStatement	output_repr.cc	/^CG_outputRepr* outputStatement(CG_outputBuilder *ocg, CG_outputRepr *stmt, int indent, const Relation &mapping_, const Relation &known_, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputSubstitution	output_repr.cc	/^Tuple<CG_outputRepr*> outputSubstitution(CG_outputBuilder* ocg, const Relation &R_, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+outputUBasRepr	output_repr.cc	/^CG_outputRepr *outputUBasRepr(CG_outputBuilder* ocg, const GEQ_Handle &g, $/;"	f	namespace:omega
+output_EQ_strides	output_repr.cc	/^CG_outputRepr *output_EQ_strides(CG_outputBuilder* ocg, const Relation &guards_in, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+output_GEQ_strides	output_repr.cc	/^CG_outputRepr *output_GEQ_strides(CG_outputBuilder* ocg, const Relation &guards_in, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+output_as_guard	output_repr.cc	/^CG_outputRepr* output_as_guard(CG_outputBuilder* ocg, const Relation &guards_in, Constraint_Handle e, bool is_equality, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	namespace:omega
+pickBound	output_repr.cc	/^Relation pickBound(Relation r, int level, int UB) {$/;"	f	namespace:omega::__anon3
+pickEQ	output_repr.cc	/^static Relation pickEQ(Relation r, int level) {$/;"	f	namespace:omega::__anon3
+pickOverhead	output_repr.cc	/^Relation pickOverhead(Relation r, int liftTo) {$/;"	f	namespace:omega
+print	CG.cc	/^std::string CG_result::print(int indent) {$/;"	f	class:omega::CG_result
+printRepr	CG.cc	/^CG_outputRepr* CG_leaf::printRepr(CG_outputBuilder* ocg, int indent, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	class:omega::CG_leaf
+printRepr	CG.cc	/^CG_outputRepr* CG_loop::printRepr(CG_outputBuilder* ocg, int indent, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	class:omega::CG_loop
+printRepr	CG.cc	/^CG_outputRepr* CG_split::printRepr(CG_outputBuilder* ocg, int indent, const std::vector<CG_outputRepr *> &assigned_on_the_fly) {$/;"	f	class:omega::CG_split
+printStructure	CG.cc	/^std::string CG_leaf::printStructure(int) {$/;"	f	class:omega::CG_leaf
+printStructure	CG.cc	/^std::string CG_loop::printStructure(int indent) {$/;"	f	class:omega::CG_loop
+printStructure	CG.cc	/^std::string CG_split::printStructure(int indent) {$/;"	f	class:omega::CG_split
+project_onto_levels	output_repr.cc	/^Relation project_onto_levels(Relation R, int last_level, bool wildcards) {$/;"	f	namespace:omega
+projected_nIS	code_gen.cc	/^SetTupleTuple projected_nIS;$/;"	m	namespace:omega	file:
+recompute	CG.cc	/^CG_result * CG_loop::recompute(const Relation &k, const Relation &r) {$/;"	f	class:omega::CG_loop
+recompute	CG.cc	/^CG_result * CG_split::recompute(const Relation &k, const Relation &r) {$/;"	f	class:omega::CG_split
+recompute	CG.cc	/^CG_result* CG_leaf::recompute(const Relation &k, const Relation &r) {$/;"	f	class:omega::CG_leaf
+removeGuard	CG.cc	/^void CG_leaf::removeGuard() {$/;"	f	class:omega::CG_leaf
+smtNonSplitLevels	code_gen.cc	/^Tuple< IntTuple > smtNonSplitLevels;$/;"	m	namespace:omega	file:
+statementInfo	code_gen.cc	/^Tuple<CG_outputRepr *> statementInfo;$/;"	m	namespace:omega	file:
+stmtForLoopCheck	code_gen.cc	/^int stmtForLoopCheck;$/;"	m	namespace:omega	file:
+strip_function_symbols	code_gen.cc	/^RelTuple strip_function_symbols(SetTuple &sets) {$/;"	f	namespace:omega
+substitute	CG_suifBuilder.cc	/^bool substitute(instruction *in, var_sym *sym, operand expr, base_symtab *st) {$/;"	f	namespace:omega
+substitute	CG_suifBuilder.cc	/^bool substitute(tree_node *tn, var_sym *sym, operand expr, base_symtab *st) {$/;"	f	namespace:omega
+substitute	CG_suifBuilder.cc	/^bool substitute(tree_node_list *tnl, var_sym *sym, operand expr,$/;"	f	namespace:omega
+syncs	code_gen.cc	/^std::vector< std::pair<int, std::string> > syncs;$/;"	m	namespace:omega	file:
+transformations	code_gen.cc	/^RelTuple transformations;$/;"	m	namespace:omega	file:
+upperBoundForLevel	code_gen.cc	/^int upperBoundForLevel;$/;"	m	namespace:omega	file:
+var_substitution_threshold	output_repr.cc	/^int var_substitution_threshold = 4;$/;"	m	namespace:omega	file:
+~CG_stringRepr	CG_stringRepr.cc	/^CG_stringRepr::~CG_stringRepr() {$/;"	f	class:omega::CG_stringRepr
+~CG_suifRepr	CG_suifRepr.cc	/^CG_suifRepr::~CG_suifRepr() {$/;"	f	class:omega::CG_suifRepr
