@@ -1,0 +1,34 @@
+BUILD
+=====
+
+0. Install Rose using the rose installation instructions given.
+
+1. Edit Makefile.config. Change BUILD_CODEGEN to false if you don't want
+   CodeGen+ library to be built.
+
+2. Do "make depend".
+
+3. Optionally, do "make clean" to remove object files or "make veryclean"
+   to additionally remove target files.
+
+4. Do "make".
+
+
+INSTALLATION
+============
+
+You can use Omega+ and CodeGen+ in source directory since all links
+are already created in bin/, lib/ and include/ subdirectories.
+
+omega/            source directory root
+  bin/            command line interface "oc"
+  lib/            libraries "libomega.a" and "libcode_gen.a"
+  include/
+    omega.h       main Omega+ header file
+    omega/        Omega+ header files
+    basic/        basic utility header files
+    code_gen/     CodeGen+ header files
+
+You can also do "make install" to copy necessary files into
+/usr/local for root account, or use home directory for other accounts.
+

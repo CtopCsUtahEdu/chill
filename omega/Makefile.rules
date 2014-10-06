@@ -1,0 +1,37 @@
+# DON'T EDIT -- put changes in Makefile.config.
+
+.SUFFIXES:
+.PHONY: all depend clean veryclean depend_self clean_self veryclean_self
+
+# Executable target; can have only one per directory 
+$(EXEC_TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(LIB_PATH) $(OBJS) $(LIBS) -o $(EXEC_TARGET)
+
+# Library target; can have only one per directory 
+$(LIB_TARGET): $(OBJS)
+	$(AR) -rs $(LIB_TARGET) $(OBJS)
+
+
+# Implicit rules: make C files in ../src/ directory
+
+%.o: ../src/%.c
+	$(CC) $(CFLAGS) $(INCL_PATH) -c $<
+
+%.o: %.cc
+	$(CC) $(CFLAGS) $(INCL_PATH) -c $<
+
+%.o: ../src/%.cc
+	$(CC) $(CFLAGS) $(INCL_PATH) -c $<
+
+#Special rule for .cc files in basic directory, ConstString and Link
+%.o: $(BASEDIR)/basic/src/%.cc
+	$(CC) $(CFLAGS) $(INCL_PATH) -c $< 
+
+depend_self:
+	$(CC) $(DEPENDENCE_CFLAGS) $(INCL_PATH) $(SRCS) > Makefile.deps
+
+clean_self:
+	-rm -f *.o
+
+veryclean_self: clean_self
+	-rm -f $(LIB_TARGET) $(EXEC_TARGET)

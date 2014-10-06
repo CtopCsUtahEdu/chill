@@ -1,0 +1,60 @@
+#
+# Test gist function and code generation for modular equations
+# 
+
+symbolic n;
+
+# basic gist function
+#
+R:={[t1,t2]: exists (aa : 2aa = t1 &&  2 <= t1 && t1 <= 8)};
+known := {[t1,t2]: 1 <= t1 <= 9};
+gist R given known;
+
+
+# test modulo equations by coprime numbers
+#
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+4*alpha && j = i+3*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+4*alpha) };
+gist is given known;
+
+codegen is;
+
+# test modulo equations by numbers in multiple
+#
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+4*alpha && j = i+8*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+4*alpha) };
+gist is given known;
+
+codegen is;
+
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+256*alpha && j = i+8*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+256*alpha) };
+gist is given known;
+
+codegen is;
+
+# test modulo equations by gcd != 1
+#
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+4*alpha && j = i+1+6*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+4*alpha) };
+gist is given known;
+codegen is;
+
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+6*alpha && j = i+4*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+6*alpha) };
+gist is given known;
+codegen is;
+
+# gist won't simpilfy to the result we want, but the code generation
+# takes care of it
+#
+is := { [i,j] : 1 <= i <= n && i <= j <= n && exists (alpha, beta: i= 1+12*alpha && j = i+8*beta)  };
+is;
+known := { [i,j] : 1 <= i <= n && exists (alpha: i = 1+12*alpha) };
+gist is given known;
+codegen is;

@@ -1,0 +1,64 @@
+# test ConvexRepresentation
+
+symbolic n;
+
+#
+# result is convex, same behavior as PairwiseCheck
+#
+r1:={[i,j]: 0<=i,j<=100};
+r2:={[i,j]: i>=100 && j>=0 && i+j<=200};
+r3:={[i,j]: i>=0 && j>=100 && i+j<=200};
+PairwiseCheck (r1 union r2 union r3);
+ConvexRepresentation (r1 union r2 union r3);
+
+r1:={[i]: 1<=i<=n && exists (alpha: i=2alpha)};
+r2:={[i]: 1<=i<=n && exists (alpha: i=2alpha+1)};
+PairwiseCheck (r1 union r2);
+ConvexRepresentation (r1 union r2);
+
+#
+# test neighboring regions merge
+#
+r1:={[i]: 1<=i<=9 && exists (alpha: i=2alpha+1)};
+r2:={[i]: 9<=i<=99 && exists (alpha: i=2alpha+1)};
+PairwiseCheck (r1 union r2);
+ConvexRepresentation (r1 union r2);
+
+r1:={[i,j]:1<=i,j<=100};
+r2:={[i,j]:50<=i<=100 && 100<=j<=200};
+r3:={[i,j]:1<=i<=50 && 100<=j<=200};
+r4:={[i,j]: 1000<=i,j<=2000};
+PairwiseCheck (r1 union r2 union r3 union r4);
+ConvexRepresentation (r1 union r2 union r3 union r4);
+
+#
+# test stride condition merge, filling up holes
+#
+r1:={[i]:1<=i<=100 && exists (alpha: 1+7alpha<=i<=3+7alpha)};
+r2:={[i]:1<=i<=100 && exists (alpha: i=4+7alpha)};
+r3:={[i]:1<=i<=100 && exists (alpha: i=5+7alpha)};
+r4:={[i]:1<=i<=100 && exists (alpha: 6+7alpha<=i<=9+7alpha)};
+PairwiseCheck (r1 union r2 union r3);
+ConvexRepresentation (r1 union r2 union r3);
+
+PairwiseCheck (r1 union r2 union r4);
+ConvexRepresentation (r1 union r2 union r4);
+
+r1:={[i]:6<=i<=96 && exists (alpha: i=6alpha)};
+r2:={[i]:3<=i<=93 && exists (alpha: i=3+6alpha)};
+PairwiseCheck (r1 union r2);
+ConvexRepresentation (r1 union r2);
+
+r1:={[i]:1<=i<=100 && exists (alpha: 1+15alpha<=i<=4+15alpha)};
+r2:={[i]:1<=i<=100 && exists (alpha: 6+15alpha<=i<=8+15alpha)};
+r3:={[i]:1<=i<=100 && exists (alpha: 11+15alpha<=i<=13+15alpha)};
+PairwiseCheck (r1 union r2 union r3);
+ConvexRepresentation (r1 union r2 union r3);
+
+#
+# additional test cases
+#
+r1:={[i]:0<=i<=100};
+r2:={[i]: 10<=i<=100 && exists (alpha: i=1+5alpha)};
+PairwiseCheck (r1 union r2);
+ConvexRepresentation (r1 union r2);
