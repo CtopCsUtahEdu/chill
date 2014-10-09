@@ -138,7 +138,7 @@ def callonce(func):
             globals()[pred_name] = True
             return func(*args, **kwargs)
         else:
-            raise Exception
+            raise Exception('{} was invoked multiple times.'.format(func.__name___))
     return wrapper
 
 def isdiff(strone, strtwo):

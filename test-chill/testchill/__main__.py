@@ -170,7 +170,7 @@ def add_local_args(arg_parser):
     Command line arguments for the local command
     @param arg_parser The local ArgumentParser object
     """
-    arg_parser.add_argument('chill_dir', metavar='chill-home')
+    arg_parser.add_argument('chill_dir', metavar='chill-home', default='../')
     arg_parser.add_argument('-v', '--chill-branch', dest='chill_version', default='dev', choices=['release','dev'])
     # - Testing should consider all interface languages. Will uncomment if testing takes too long
     # arg_parser.add_argument('-i', '--interface-lang', nargs=1, action='append', dest='chill_script_lang_list', choices=['script','lua','python'])
