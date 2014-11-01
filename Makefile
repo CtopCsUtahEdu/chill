@@ -6,7 +6,7 @@
 CC = g++
 CFLAGS = -g -Wno-write-strings
 DEPENDENCE_CFLAGS = -M
-#OMEGAHOME ?= ./omega
+OMEGAHOME=./omega
 
 ifdef TEST_COVERAGE
   CFLAGS := $(CFLAGS) -fprofile-arcs -ftest-coverage

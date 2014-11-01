@@ -27,6 +27,8 @@ def make_local(argsns, arg_parser):
     argsns.chill_tc_dir = os.path.join(os.getcwd(), 'test-cases') # formally from the commandline
     argsns.chill_dir = os.path.abspath(argsns.chill_dir)
     argsns.omega_dir = os.path.abspath(argsns.omega_dir)
+    argsns.chill_build_coverage = argsns.coverage_set is not None #TODO: make arg passed to local.
+    argsns.chill_test_coverage = argsns.coverage_set is not None
     
     util.mkdir_p(argsns.wd)
     util.mkdir_p(argsns.bin_dir)
@@ -35,7 +37,7 @@ def make_local(argsns, arg_parser):
     
     chill_version = argsns.chill_version
     for config in chill.ChillConfig.configs(argsns.omega_dir, argsns.chill_dir, argsns.bin_dir, version=chill_version):
-        build_testcase = chill.BuildChillTestCase(config, coverage_set=argsns.coverage_set)
+        build_testcase = chill.BuildChillTestCase(config, options={'coverage': argsns.chill_build_coverage}, coverage_set=argsns.coverage_set)
         yield build_testcase
         batch_file = os.path.join(argsns.chill_tc_dir, config.name() + '.tclist')
         for tc in make_batch_testcaselist(argsns, arg_parser, batch_file):
@@ -359,10 +361,10 @@ def args_to_tclist(args=sys.argv[1:], arg_parser=make_argparser(), argsns=None, 
 
 @util.callonce
 def main():
-    #coverage = gcov.GcovSet()
-    coverage=None
+    coverage = gcov.GcovSet()
+    #coverage=None
     results = list(test.run(args_to_tclist(coverage_set=coverage)))
-    test.pretty_print_results(results)
+    #test.pretty_print_results(results)
     #util.rmtemp()
     #coverage.pretty_print()
     
