@@ -3,6 +3,7 @@ import functools
 import itertools
 import os
 import os.path
+import pickle
 import sys
 
 from . import util
@@ -193,21 +194,48 @@ class GcovSet(object):
             file_lines = iter((f.src_file_name, iter(l for l in f.lines if l.count() == 0)) for f in files)
             yield src, file_lines
     
-    def pretty_print(self, outfile=sys.stdout, width=60, stats=['unexecuted', 'unexecuted.bysrc']):
-        print('='*width, file=outfile)
-        print('  CODE COVERAGE', file=outfile)
-        
-        if 'unexecuted' in stats:
-            print('='*width, file=outfile)
-            print('    unexecuted lines', file=outfile)
-            if 'unexecuted.bysrc' in stats:
-                for src, file_lines in self.unexecuted_lines():
-                    print((src + ':'), file=outfile)
-                    print('-'*width, file=outfile)
-                    for src_file_name, lines in file_lines:
-                        print('  ' + src_file_name + ':', file=outfile)
-                        for line in lines:
-                            print("{}:{}".format(str(line.lineno).rjust(5), line.code), file=outfile)
-        #print('='*width, file=outfile)
-        #print(prog, file=outfile)
-        #print('-'*width, file=outfile)
+    #def pretty_print(self, outfile=sys.stdout, width=60, stats=['unexecuted', 'unexecuted.bysrc']):
+    #    print('='*width, file=outfile)
+    #    print('  CODE COVERAGE', file=outfile)
+    #    
+    #    if 'unexecuted' in stats:
+    #        print('='*width, file=outfile)
+    #        print('    unexecuted lines', file=outfile)
+    #        if 'unexecuted.bysrc' in stats:
+    #            for src, file_lines in self.unexecuted_lines():
+    #                print((src + ':'), file=outfile)
+    #                print('-'*width, file=outfile)
+    #                for src_file_name, lines in file_lines:
+    #                    print('  ' + src_file_name + ':', file=outfile)
+    #                    for line in lines:
+    #                        print("{}:{}".format(str(line.lineno).rjust(5), line.code), file=outfile)
+    #    #print('='*width, file=outfile)
+    #    #print(prog, file=outfile)
+    #    #print('-'*width, file=outfile)
+    
+    def _get_coverage_by_file(self):
+        return functools.reduce(lambda a,b: a|b, self.coverage_by_program.values()).files
+    
+    coverage_by_file = property(_get_coverage_by_file)
+
+
+def load(filename = 'coverage.pickle'):
+    with open(filename) as f:
+        return pickle.load(f)
+
+
+def lines(covset, filename, predicate=None):
+    if predicate is None:
+        predicate = lambda l: True
+    for line in filter(predicate, covset.coverage_by_file[filename].lines):
+        yield line.lineno, line.count(), line.code
+
+
+def nonexecuted(covset, filename):
+    return lines(covset, filename, lambda line: line.count() == 0)
+
+
+def commented(covset, filename):
+    return lines(covset, filename, lambda line: line.count() is None)
+
+
