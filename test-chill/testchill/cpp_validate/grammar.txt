@@ -1,0 +1,124 @@
+terminals:
+    Identifier     '[a-zA-Z_][a-zA-Z_0-9]*'
+    NumericLiteral '[0-9]+(\.[0-9]+)?'
+    Comment        '\#([^\x0a])*'
+    WS             '\s+'
+ignore: WS, <NL>, Comment
+rules:
+<proc-unit> ::=
+    <with-stmt>:w                                           => w
+    <proc>:p                                                => p
+<with-stmt> ::=
+    'with' '{' <with-decl-list-opt>:decls '}' <proc-unit>:p => addbindings(p, dict(decls))
+<with-decl-list-opt> ::=
+    eps                                                     => []
+    <with-decl-list>:l                                      => l
+<with-decl-list> ::=
+    <with-decl-list>:l ',' <with-decl>:decl                 => l + [decl]
+    <with-decl>:decl                                        => [decl]
+<with-decl> ::=
+    Identifier:name ':' <expr>:e                            => (name, (None, e))
+    <c-type>:ctype Identifier:name ':' <expr>:e             => (name, (ctype, e))
+    
+<proc> ::=
+    'procedure' <c-type>:rtype Identifier:name '(' <param-list-opt>:plist ')'
+                                                            => Procedure(name, rtype, plist)
+<c-type> ::=
+    <c-type>:bt '*'                                         => CppPointerType(bt)
+    <c-type>:bt <c-array-dim-list>:dims                     => CppArrayType(bt, dims)
+    'void'                                                  => CppVoidType()
+    'char'                                                  => CppPrimitiveType.get_from_cppname('char')
+    'signed' 'char'                                         => CppPrimitiveType.get_from_cppname('signed char')
+    'unsigned' 'char'                                       => CppPrimitiveType.get_from_cppname('unsigned char')
+    'short'                                                 => CppPrimitiveType.get_from_cppname('short')
+    'unsigned' 'short'                                      => CppPrimitiveType.get_from_cppname('unsigned short')
+    'int'                                                   => CppPrimitiveType.get_from_cppname('int')
+    'unsigned' 'int'                                        => CppPrimitiveType.get_from_cppname('unsigned int')
+    'long'                                                  => CppPrimitiveType.get_from_cppname('long')
+    'unsigned' 'long'                                       => CppPrimitiveType.get_from_cppname('unsigned long')
+    'long' 'long'                                           => CppPrimitiveType.get_from_cppname('long long')
+    'unsigned' 'long' 'long'                                => CppPrimitiveType.get_from_cppname('unsigned long long')
+    'float'                                                 => CppPrimitiveType.get_from_cppname('float')
+    'double'                                                => CppPrimitiveType.get_from_cppname('double')
+<c-array-dim-list> ::=
+    <c-array-dim-list>:dlist '[' <expr>:e ']'               => dlist + [e]
+    <c-array-dim-list>:dlist '[' ']'                        => dlist + [None]
+    '[' ']'                                                 => [None]
+    '[' <expr>:e ']'                                        => [e]
+<param-list-opt> ::=
+    eps                                                     => []
+    <param-list>:l                                          => l
+<param-list> ::=
+    <param-list>:l ',' <param>:p                            => l + [p]
+    <param>:p                                               => [p]
+<param> ::=
+    <direction>:d <c-type>:t Identifier:name '=' <expr>:e   => Parameter(name, t, d, e)
+    <direction>:d <c-type>:t Identifier:name                => Parameter(name, t, d, None)
+<direction> ::=
+    'in'                                                    => 'in'
+    'out'                                                   => 'out'
+    'in' 'out'                                              => 'inout'
+    'out' 'in'                                              => 'inout'
+    eps                                                     => 'inout'
+
+
+<expr> ::=
+    <add-expr>:e                                            => e
+    'lambda' <id-list-opt>:params ':' <expr>:e              => LambdaExpr(params, e)
+    'matrix' '(' <dim-list-expr>:d ',' <expr>:e ')'         => MatrixGenerator(d, e)
+    'matrix' <named-dim-list-expr>:dims <expr>:e            => MatrixGenerator([d[1] for d in dims], LambdaExpr([d[0] for d in dims], e))
+<add-expr> ::=
+    <add-expr>:l '+' <mul-expr>:r                           => BinExpr(l, '+', r)
+    <add-expr>:l '-' <mul-expr>:r                           => BinExpr(l, '-', r)
+    <mul-expr>:e                                            => e
+<mul-expr> ::=
+    <mul-expr>:l '*' <prefix-expr>:r                        => BinExpr(l, '*', r)
+    <mul-expr>:l '/' <prefix-expr>:r                        => BinExpr(l, '/', r)
+    <prefix-expr>:e                                         => e
+<prefix-expr> ::=
+    '-' <prefix-expr>:e                                     => UnaryExpr('-', e)
+    <postfix-expr>:e                                        => e
+<postfix-expr> ::=
+    <pow-expr>:e                                            => e
+<pow-expr> ::=
+    <term-expr>:l '**' <pow-expr>:r                         => BinExpr(l, '**', r)
+    <term-expr>:e                                           => e
+<term-expr> ::=
+    '(' <expr>:e ')'                                        => e
+    '[' <expr-list-opt>:l ']'                               => l
+    Identifier:name                                         => NameExpr(name)
+    NumericLiteral:num                                      => ConstantExpr(num)
+    'random' '(' <expr>:mn ',' <expr>:mx ')'                => RandomExpr(mn, mx)
+    <term-expr>:f '(' <expr-list-opt>:l ')'                 => InvokeExpr(f, l)
+    <term-expr>:n '.' Identifier:attr                       => AttributeExpr(n, attr)
+<expr-list-opt> ::=
+    eps                                                     => []
+    <expr-list>:l                                           => l
+<expr-list> ::=
+    <expr-list>:l ',' <expr>:e                              => l + [e]
+    <expr>:e                                                => [e]
+<dim-list-expr> ::=
+    '[' <dim-expr-list>:l ']'                               => l
+<dim-expr-list> ::=
+    <dim-expr-list>:l ',' <dim-expr>:e                      => l + [e]
+    <dim-expr>:e                                            => [e]
+<dim-expr> ::=
+    eps                                                     => None
+    '*'                                                     => None
+    <expr>:e                                                => e
+<id-list-opt> ::=
+    eps                                                     => []
+    <id-list>:l                                             => l
+<id-list> ::=
+    <id-list>:l ',' Identifier:ident                        => l + [ident]
+    Identifier:ident                                        => [ident]
+<named-dim-list-expr> ::=
+    '[' <named-dim-expr-list>:l ']'                         => l
+<named-dim-expr-list> ::=
+    <named-dim-expr-list>:l ',' <named-dim-expr>:e          => l + [e]
+    <named-dim-expr>:e                                      => [e]
+<named-dim-expr> ::=
+    Identifier:name                                         => (name, None)
+    Identifier:name ':' <expr>:e                            => (name, e)
+    
+

@@ -6,7 +6,7 @@
 CC = g++
 CFLAGS = -g -Wno-write-strings
 DEPENDENCE_CFLAGS = -M
-#OMEGAHOME = $(HOME)/omega
+OMEGAHOME=./omega
 
 ifdef TEST_COVERAGE
   CFLAGS := $(CFLAGS) -fprofile-arcs -ftest-coverage
@@ -154,7 +154,11 @@ CHILL_OBJS     = $(CHILL_SRCS:.cc=.o)
 CUDACHILL_OBJS = $(CUDACHILL_SRCS:.cc=.o)
 
 
-all: cuda-chill chill 
+all:
+	$(MAKE) depend-chill
+	$(MAKE) chill
+	$(MAKE) depend-cuda-chill
+	$(MAKE) cuda-chill 
 
 
 # can't these be combined to a superset of all source files?

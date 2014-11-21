@@ -1,0 +1,76 @@
+>>> #
+>>> # Test floor/ceiling variable definitions in loop bounds
+>>> #
+>>> 
+>>> symbolic m, n;
+>>> 
+>>> # loop is strided
+>>> #
+>>> is := {[i]: exists (alpha: i = 4alpha && m <= 3i <= n)};
+>>> codegen is;
+for(t1 = 4*intDiv(intDiv(m+2,3)+3,4); t1 <= intDiv(n,3); t1 += 4) {
+  s1(t1);
+}
+
+>>> 
+>>> # only one single floor/ceiling variable in bound
+>>> #
+>>> is := {[i]: exists (lb: m-4 < 4*lb <= m && lb <= i <= n)};
+>>> codegen is;
+for(t1 = intDiv(m-3+3,4); t1 <= n; t1++) {
+  s1(t1);
+}
+
+>>> 
+>>> # the floor/ceiling variable in bound has coefficient
+>>> #
+>>> is := {[i]: exists (lb: m-4 < 4*lb <= m && 4*lb <= i <= n)};
+>>> codegen is;
+for(t1 = 4*intDiv(m,4); t1 <= n; t1++) {
+  s1(t1);
+}
+
+>>> 
+>>> # mutiple floor/ceiling variables in bound
+>>> #
+>>> is := {[i]:exists (alpha,beta: m-4<4alpha<=m && m-3<3beta<=m &&
+>>>            4alpha+3*beta<=i<=n )};
+>>> codegen is;
+for(t1 = 3*intDiv(m,3)+4*intDiv(m,4); t1 <= n; t1++) {
+  s1(t1);
+}
+
+>>> 
+>>> # non-tight floor/ceiling definition
+>>> #
+>>> is := {[i]: exists (ub: n-2 < 3*ub <= n && m <= i <= 5*ub)};
+>>> codegen is;
+if (n-1 <= 3*intDiv(n,3)) {
+  for(t1 = m; t1 <= 5*intDiv(n,3); t1++) {
+    s1(t1);
+  }
+}
+
+>>> 
+>>> # chain floor/ceiling definitions
+>>> #
+>>> is := {[i]: exists (alpha, beta: beta-4<4alpha<=beta &&
+>>>             m-8<8beta<=m && 4alpha<=i<=n )};
+>>> codegen is;
+for(t1 = 4*intDiv(m,32); t1 <= n; t1++) {
+  s1(t1);
+}
+
+>>> 
+>>> # one complicated case
+>>> #
+>>> is := {[i]: exists (alpha, beta: beta-4<4alpha<=beta &&
+>>>             m-7<8beta<=m && 4alpha<=i<=n )};
+>>> codegen is;
+if (m-6 <= 8*intDiv(m,8)) {
+  for(t1 = 4*intDiv(m,32); t1 <= n; t1++) {
+    s1(t1);
+  }
+}
+
+

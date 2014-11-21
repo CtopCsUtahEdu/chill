@@ -1,0 +1,60 @@
+# Example taken from http://www.cloog.org
+#
+
+r0:={[i,j]:i>=1 && j<=7 && j>=i-1};
+r1:={[i,j]:2<=i<=6 && 0<=j<=4};
+
+# CLooG optimized for size
+##
+## for (i=1;i<=8;i++) {
+##    for (j=i-1;j<=7;j++) {
+##      S0(i,j);
+##    }
+##    if ((i>=2)&&(i<=6)) {
+##      for (j=0;j<=4;j++) {
+##        S1(i,j);
+##      }
+##    }
+##  }
+##
+## Since CLooG might not preserve the lexcicographical order other than
+## the default code generation strategy (custom -f or -l values). Its
+## generated code might not be correct should there exist reorder-preventing
+## dependence among statements.
+##
+
+# no overhead removal, minimal code size
+codegen 0 r0,r1;
+
+# remove one-deep loop nest (innermost loop) overhead
+codegen 1 r0,r1;
+
+# CLooG optimized for control
+##
+## for (t2=0;t2<=7;t2++) {
+##   S0(1,t2);
+## }
+## for (t1=2;t1<=6;t1++) {
+##   for (t2=0;t2<=t1-2;t2++) {
+##     S1(t1,t2);
+##   }
+##   for (t2=t1-1;t2<=4;t2++) {
+##     S0(t1,t2);
+##     S1(t1,t2);
+##   }
+##   for (t2=5;t2<=7;t2++) {
+##     S0(t1,t2);
+##   }
+## }
+## for (t1=7;t1<=8;t1++) {
+##   for (t2=t1-1;t2<=7;t2++) {
+##     S0(t1,t2);
+##   }
+## }
+##
+## This is CLooG's default code generation strategy. It guarantees
+## the lexicographical order as shown in input iteration spaces.
+##
+
+# minimal control overhead, removing overhead from 2-deep loop nest
+codegen 2 r0,r1;

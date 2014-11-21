@@ -1,0 +1,36 @@
+
+chill-testcase  test-cases/chill/test_distribute.script    test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_fuse.script          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_known.script         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_original.script      test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_peel.script          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_permute.script       test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_code.script    test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_dep.script     test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_print_space.script   test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_reverse.script       test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_scale.script         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_shift.script         test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_shift_to.script      test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_skew.script          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_tile.script          test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_unroll_extra.script  test-cases/chill/mm.c  --check-run-script
+chill-testcase  test-cases/chill/test_unroll.script        test-cases/chill/mm.c  --check-run-script
+
+chill-testcase  test-cases/examples/chill/gemm.script             test-cases/examples/chill/gemm.c
+chill-testcase  test-cases/examples/chill/gemv.script             test-cases/examples/chill/gemv.c
+chill-testcase  test-cases/examples/chill/jacobi1.script          test-cases/examples/chill/jacobi1.c
+chill-testcase  test-cases/examples/chill/jacobi2.script          test-cases/examples/chill/jacobi2.c
+chill-testcase  test-cases/examples/chill/qr.script               test-cases/examples/chill/qr.c
+#chill-testcase  test-cases/examples/chill/scalar_test.script      test-cases/examples/chill/scalar_test.c      --check-run-script --fail-run-script
+chill-testcase  test-cases/examples/chill/swim.script             test-cases/examples/chill/swim.c
+chill-testcase  test-cases/examples/chill/test_align.script       test-cases/examples/chill/test_align.c
+#chill-testcase  test-cases/examples/chill/test_fusion.script      test-cases/examples/chill/test_fusion.c      --check-run-script --fail-run-script
+#chill-testcase  test-cases/examples/chill/test_lex_order.script   test-cases/examples/chill/test_lex_order.c   --check-run-script --fail-run-script
+chill-testcase  test-cases/examples/chill/test_split.script       test-cases/examples/chill/test_split.c
+#chill-testcase  test-cases/examples/chill/test_split2.script      test-cases/examples/chill/test_split2.c      --check-run-script --fail-run-script
+chill-testcase  test-cases/examples/chill/test_tile.script        test-cases/examples/chill/test_tile.c
+#chill-testcase  test-cases/examples/chill/tile_violation.script   test-cases/examples/chill/tile_violation.c   --check-run-script --fail-run-script
+chill-testcase  test-cases/examples/chill/unroll.script           test-cases/examples/chill/unroll.c
+#chill-testcase  test-cases/examples/chill/unroll_violation.script test-cases/examples/chill/unroll_violation.c --check-run-script --fail-run-script
+

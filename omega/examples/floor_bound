@@ -1,0 +1,46 @@
+#
+# Test floor/ceiling variable definitions in loop bounds
+# Notes:
+#   intFloor, intCeil are strict mathematical definition,
+#   intMod(a,b) always has input b>0 and returns [0,b).
+#
+
+symbolic m, n;
+
+# loop is strided
+#
+is := {[i]: exists (alpha: i = 4alpha && m <= 3i <= n)};
+codegen is;
+
+# only one single floor/ceiling variable in bound
+#
+is := {[i]: exists (lb: m-4 < 4*lb <= m && lb <= i <= n)};
+codegen is;
+
+# the floor/ceiling variable in bound has coefficient
+#
+is := {[i]: exists (lb: m-4 < 4*lb <= m && 4*lb <= i <= n)};
+codegen is;
+
+# mutiple floor/ceiling variables in bound
+#
+is := {[i]:exists (alpha,beta: m-4<4alpha<=m && m-3<3beta<=m &&
+           4alpha+3*beta<=i<=n )};
+codegen is;
+
+# non-tight floor/ceiling definition
+#
+is := {[i]: exists (ub: n-2 < 3*ub <= n && m <= i <= 5*ub)};
+codegen is;
+
+# chain floor/ceiling definitions
+#
+is := {[i]: exists (alpha, beta: beta-4<4alpha<=beta &&
+            m-8<8beta<=m && 4alpha<=i<=n )};
+codegen is;
+
+# one complicated case
+#
+is := {[i]: exists (alpha, beta: beta-4<4alpha<=beta &&
+            m-7<8beta<=m && 4alpha<=i<=n )};
+codegen is;

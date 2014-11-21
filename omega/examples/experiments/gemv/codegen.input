@@ -1,0 +1,14 @@
+symbolic n, over1, over2;
+
+s0:= { [t1,t2,t3,t4,t5] : exists ( alpha,beta : t2 = 1+4beta && t4 = 1+4alpha && t1 = 1 && t3 = 1 && t5 = 0 && 0 <= over2 <= 3 && 0 <= over1 <= 3 && 1 <= t4 && 1 <= t2 && over1+t2 <= n && over2+t4 <= n) };
+s1:= { [t1] : 1+t1 = 0 && 0 <= over2 <= 3 && 0 <= over1 <= 3 && 1 <= n };
+s2:= { [t1,t2,t3,t4,t5] : t1 = 2 && t3 = 0 && t5 = 0 && 1 <= t2 <= n && 1 <= t4 <= n && 0 <= over2 <= 3 && over1 <= 3 && n < over1+t2 };
+s3:= { [t1,t2,t3,t4,t5] : exists ( alpha,beta : t2 = 1+4beta && t4 = 1+4alpha && t1 = 1 && t3 = 1 && t5 = 1 && 0 <= over2 <= 3 && 0 <= over1 <= 3 && 1 <= t4 && 1 <= t2 && over1+t2 <= n && over2+t4 <= n) };
+s4:= { [t1,t2,t3] : exists ( alpha : t2 = 1+4alpha && 1+t3 = 0 && t1 = 1 && 0 <= over1 <= 3 && 0 <= over2 <= 3 && over1+t2 <= n && 1 <= t2) };
+s5:= { [t1,t2,t3,t4,t5] : exists ( alpha : t2 = 1+4alpha && t5 = 0 && t1 = 1 && t3 = 2 && 0 <= over1 <= 3 && 1 <= t4 <= n && over2 <= 3 && 1 <= t2 && over1+t2 <= n && n < over2+t4) };
+s6:= { [t1,t2,t3,t4,t5] : exists ( alpha : t2 = 1+4alpha && t5 = 1 && t1 = 1 && t3 = 2 && 0 <= over1 <= 3 && 1 <= t4 <= n && over2 <= 3 && 1 <= t2 && over1+t2 <= n && n < over2+t4) };
+s7:= { [t1,t2,t3,t4,t5] : exists ( alpha,beta : t2 = 1+4beta && t4 = 1+4alpha && t5 = 2 && t1 = 1 && t3 = 1 && 0 <= over1 <= 3 && 0 <= over2 <= 3 && 1 <= t4 && 1 <= t2 && over1+t2 <= n && over2+t4 <= n) };
+
+codegen s0,s1,s2,s3,s4,s5,s6,s7;
+
+

@@ -1,0 +1,17 @@
+symbolic M, N;
+
+s1:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : 1+In_3 = 0 && In_4 = 1+In_6 && In_2 = In_6 && In_7 = 0 && In_1 = 0 && In_5 = 0 && 0 <= In_6 < N };
+s2:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_3 = 0 && 1+In_2 = In_4 && In_7 = 0 && In_1 = 0 && In_5 = 0 && 1 <= In_4 <= In_6+1, N && In_6 < M };
+s3:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_3 = 0 && In_4 = 1+In_6 && In_2 = In_6 && In_7 = 0 && In_1 = 0 && In_5 = 1 && 0 <= In_6 < N };
+s4:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_3 = 0 && 1+In_2 = In_4 && In_7 = 0 && In_1 = 0 && In_5 = 2 && 1 <= In_4 <= In_6+1, N && In_6 < M };
+s5:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_3 = 1 && In_4 = 1+In_6 && In_2 = In_6 && In_7 = 0 && In_1 = 0 && In_5 = 0 && 0 <= In_6 < N };
+s6:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_1 = 0 && In_3 = 4 && In_5 = 0 && In_7 = 0 && In_6 = In_2 && 0 <= In_2 <= In_4-2 && In_4 < N };
+s7:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_1 = 0 && In_3 = 4 && In_5 = 3 && In_7 = 0 && 0 <= In_2 <= In_6 < M && In_2+2 <= In_4 < N };
+s8:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_1 = 0 && In_3 = 4 && In_5 = 2 && In_7 = 0 && In_6 = M && In_2+2 <= In_4 <= N && 0 <= In_2 };
+s9:= { [In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_1 = 0 && In_3 = 4 && In_5 = 3 && In_7 = 1 && 0 <= In_2 <= In_6 < M && In_2+2 <= In_4 <= N };
+s10:= {[In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_3 = 2 && In_4 = N && In_6 = M && In_5 = 0 && In_7 = 0 && In_1 = 0 && 0 <= In_2 < N };
+s11:= {[In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_5 = 0 && In_3 = 3 && In_7 = 0 && In_1 = 0 && In_6 = In_2 && In_4 = 1+In_2 && 0 <= In_2 <= N-2 };
+s12:= {[In_1,In_2,In_3,In_4,In_5,In_6,In_7] : In_5 = 3 && In_3 = 3 && In_7 = 0 && In_1 = 0 && In_4 = 1+In_2 && 0 <= In_2 <= In_6 < M && In_2 <= N-2 };
+
+
+codegen s1,s2,s3,s4,s5,s6,s7,s8,s9,s10,s11,s12;
