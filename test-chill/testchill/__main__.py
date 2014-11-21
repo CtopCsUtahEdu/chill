@@ -27,6 +27,8 @@ def make_local(argsns, arg_parser):
     argsns.chill_tc_dir = os.path.join(os.getcwd(), 'test-cases') # formally from the commandline
     argsns.chill_dir = os.path.abspath(argsns.chill_dir)
     argsns.omega_dir = os.path.abspath(argsns.omega_dir)
+    argsns.chill_build_coverage = argsns.coverage_set is not None #TODO: make arg passed to local.
+    argsns.chill_test_coverage = argsns.coverage_set is not None
     
     util.mkdir_p(argsns.wd)
     util.mkdir_p(argsns.bin_dir)
@@ -35,7 +37,7 @@ def make_local(argsns, arg_parser):
     
     chill_version = argsns.chill_version
     for config in chill.ChillConfig.configs(argsns.omega_dir, argsns.chill_dir, argsns.bin_dir, version=chill_version):
-        build_testcase = chill.BuildChillTestCase(config, coverage_set=argsns.coverage_set)
+        build_testcase = chill.BuildChillTestCase(config, options={'coverage': argsns.chill_build_coverage}, coverage_set=argsns.coverage_set)
         yield build_testcase
         batch_file = os.path.join(argsns.chill_tc_dir, config.name() + '.tclist')
         for tc in make_batch_testcaselist(argsns, arg_parser, batch_file):
@@ -170,7 +172,7 @@ def add_local_args(arg_parser):
     Command line arguments for the local command
     @param arg_parser The local ArgumentParser object
     """
-    arg_parser.add_argument('chill_dir', metavar='chill-home')
+    arg_parser.add_argument('chill_dir', metavar='chill-home', default='../')
     arg_parser.add_argument('-v', '--chill-branch', dest='chill_version', default='dev', choices=['release','dev'])
     # - Testing should consider all interface languages. Will uncomment if testing takes too long
     # arg_parser.add_argument('-i', '--interface-lang', nargs=1, action='append', dest='chill_script_lang_list', choices=['script','lua','python'])
@@ -315,7 +317,7 @@ def add_global_args(arg_parser):
     arg_parser.add_argument('-w', '--working-dir', dest='wd', default=os.getcwd(), help='The working directory. (Defaults to the current directory)', metavar='working-directory')
     arg_parser.add_argument('-R', '--rose-home', dest='rose_dir', default=os.getenv('ROSEHOME'), help='Rose home directory. (Defaults to ROSEHOME)', metavar='rose-home')
     arg_parser.add_argument('-C', '--chill-home', dest='chill_dir', default=os.getenv('CHILLHOME'), help='Chill home directory. (Defaults to CHILLHOME)', metavar='chill-home')
-    arg_parser.add_argument('-O', '--omega-home', dest='omega_dir', default=os.getenv('OMEGAHOME'), help='Omega home directory. (Defaults to OMEGAHOME)', metavar='omega-home')
+    arg_parser.add_argument('-O', '--omega-home', dest='omega_dir', default=os.joinpath(os.getcwd(), '../omega'), help='Omega home directory. (Defaults to ../omega)', metavar='omega-home')
     arg_parser.add_argument('-b', '--binary-dir', dest='bin_dir', default=None, help='Binary directory.', metavar='bin-dir')
     
 @util.callonce
@@ -359,10 +361,10 @@ def args_to_tclist(args=sys.argv[1:], arg_parser=make_argparser(), argsns=None, 
 
 @util.callonce
 def main():
-    #coverage = gcov.GcovSet()
-    coverage=None
+    coverage = gcov.GcovSet()
+    #coverage=None
     results = list(test.run(args_to_tclist(coverage_set=coverage)))
-    test.pretty_print_results(results)
+    #test.pretty_print_results(results)
     #util.rmtemp()
     #coverage.pretty_print()
     

@@ -186,28 +186,39 @@ class GcovSet(object):
         cov = self.coverage_by_program[prog_name]
         cov.merge(Gcov.parse(cov.srcdir, process_name))
     
-    def unexecuted_lines(self):
-        covlist = sorted(self.coverage_by_program.values(), key=lambda c: c.srcdir)
-        for src, grp in itertools.groupby(covlist, lambda c: c.srcdir):
-            files = functools.reduce(lambda a, c: a | c, grp).files.values()
-            file_lines = iter((f.src_file_name, iter(l for l in f.lines if l.count() == 0)) for f in files)
-            yield src, file_lines
+    #def unexecuted_lines(self):
+    #    covlist = sorted(self.coverage_by_program.values(), key=lambda c: c.srcdir)
+    #    for src, grp in itertools.groupby(covlist, lambda c: c.srcdir):
+    #        files = functools.reduce(lambda a, c: a | c, grp).files.values()
+    #        file_lines = iter((f.src_file_name, iter(l for l in f.lines if l.count() == 0)) for f in files)
+    #        yield src, file_lines
+    #
+    #def pretty_print(self, outfile=sys.stdout, width=60, stats=['unexecuted', 'unexecuted.bysrc']):
+    #    print('='*width, file=outfile)
+    #    print('  CODE COVERAGE', file=outfile)
+    #    
+    #    if 'unexecuted' in stats:
+    #        print('='*width, file=outfile)
+    #        print('    unexecuted lines', file=outfile)
+    #        if 'unexecuted.bysrc' in stats:
+    #            for src, file_lines in self.unexecuted_lines():
+    #                print((src + ':'), file=outfile)
+    #                print('-'*width, file=outfile)
+    #                for src_file_name, lines in file_lines:
+    #                    print('  ' + src_file_name + ':', file=outfile)
+    #                    for line in lines:
+    #                        print("{}:{}".format(str(line.lineno).rjust(5), line.code), file=outfile)
+    #    #print('='*width, file=outfile)
+    #    #print(prog, file=outfile)
+    #    #print('-'*width, file=outfile)
     
-    def pretty_print(self, outfile=sys.stdout, width=60, stats=['unexecuted', 'unexecuted.bysrc']):
-        print('='*width, file=outfile)
-        print('  CODE COVERAGE', file=outfile)
-        
-        if 'unexecuted' in stats:
-            print('='*width, file=outfile)
-            print('    unexecuted lines', file=outfile)
-            if 'unexecuted.bysrc' in stats:
-                for src, file_lines in self.unexecuted_lines():
-                    print((src + ':'), file=outfile)
-                    print('-'*width, file=outfile)
-                    for src_file_name, lines in file_lines:
-                        print('  ' + src_file_name + ':', file=outfile)
-                        for line in lines:
-                            print("{}:{}".format(str(line.lineno).rjust(5), line.code), file=outfile)
-        #print('='*width, file=outfile)
-        #print(prog, file=outfile)
-        #print('-'*width, file=outfile)
+    def _get_coverage_by_file(self):
+        return functools.reduce(lambda a,b: a|b, self.coverage_by_program.values()).files
+    
+    def _get_filenames(self):
+        return self.coverage_by_file.keys()
+    
+    coverage_by_file = property(_get_coverage_by_file)
+    filenames = property(_get_filenames)
+
+

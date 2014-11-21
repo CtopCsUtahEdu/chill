@@ -54,11 +54,11 @@ class ChillConfig(object):
     
     def _buildfunc(self, cc, link=True):
         if not link:
-            compile_args = ['-c']
+            compile_args = ['-c -Wuninitialized']
         elif link and cc == 'nvcc':
-            compile_args = ['-L/usr/local/cuda/lib64/lib', '-lcuda', '-lcudart', '-lstdc++', '-lrt']
+            compile_args = ['-L/usr/local/cuda/lib64/lib', '-lcuda', '-lcudart', '-lstdc++', '-lrt', '-Wuninitialized']
         else:
-            compile_args = ['-lstdc++', '-lrt']
+            compile_args = ['-lstdc++', '-lrt', '-Wuninitialized']
         
         def build(src, dest, args=[], defines={}, wd=None):
             if wd is None:
