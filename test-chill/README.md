@@ -12,12 +12,12 @@ It can also optionally test optimized code for correctness and provide code cove
 testchill is a Python module, and can be run like any other Python module:  
 `python -m testchill <suite-args>* <sub-command> <sub-command-args>*`  
 
-The most basic subcommands run the testsuite are [`local`](#-local-chill-home-) and [`repo`](#-repo-svn-username). `local` runs a set of tests on a local chill source directory, and `repo` will grab the latest version of both omega and chill and run the same set of tests.  
+The most basic subcommand that runs the testsuite is [`local`](#-local-chill-home-). `local` runs a set of tests
+on the parent chill source directory.
 
-`python -m testchill [-O <path-to-omega>] local <path-to-chill>` If the environment variable $OMEGAHOME is set, the `-O` argument can be ommited.  
-`python -m testchill repo <svn-user-name>`  
+`python -m testchill [-O <path-to-omega>] local [-C <path-to-chill>]` If the environment variable $OMEGAHOME is set, the `-O` argument can be ommited.
 
-### Arguments common to all sub commands (with the exception of `repo` and `local`):  
+### Arguments common to all sub commands (with the exception of `local`):  
 - `-w <working-directory>, --working-dir <working-directory>`
 
    Sets the working directory where testchill will compile and run test scripts. If not set, the current working  directory will be used.
@@ -143,15 +143,7 @@ The most basic subcommands run the testsuite are [`local`](#-local-chill-home-) 
   - `-v {release | dev}` or `--chill-branch {release | dev}`
    
      `release` will run scripts as the old release version, and `dev` will run them  as the current development version.  
-     `dev` is used by default.  
-  
-- <h4> `repo <svn-username>`
-  
-  Checkout the latest version of omega and chill, compile both and test chill.  
-  Arguments:  
-  - `<svn-username>`
-    
-    Svn username.  
+     `dev` is used by default.
   
 
 
