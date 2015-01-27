@@ -316,8 +316,8 @@ def add_global_args(arg_parser):
     """
     arg_parser.add_argument('-w', '--working-dir', dest='wd', default=os.getcwd(), help='The working directory. (Defaults to the current directory)', metavar='working-directory')
     arg_parser.add_argument('-R', '--rose-home', dest='rose_dir', default=os.getenv('ROSEHOME'), help='Rose home directory. (Defaults to ROSEHOME)', metavar='rose-home')
-    arg_parser.add_argument('-C', '--chill-home', dest='chill_dir', default=os.getenv('CHILLHOME'), help='Chill home directory. (Defaults to CHILLHOME)', metavar='chill-home')
-    arg_parser.add_argument('-O', '--omega-home', dest='omega_dir', default=os.joinpath(os.getcwd(), '../omega'), help='Omega home directory. (Defaults to ../omega)', metavar='omega-home')
+    arg_parser.add_argument('-C', '--chill-home', dest='chill_dir', default=os.path.join(os.getcwd(), '..'), help='Chill home directory. (Defaults to CHILLHOME)', metavar='chill-home')
+    arg_parser.add_argument('-O', '--omega-home', dest='omega_dir', default=os.path.join(os.getcwd(), '../omega'), help='Omega home directory. (Defaults to ../omega)', metavar='omega-home')
     arg_parser.add_argument('-b', '--binary-dir', dest='bin_dir', default=None, help='Binary directory.', metavar='bin-dir')
     
 @util.callonce
@@ -364,8 +364,8 @@ def main():
     coverage = gcov.GcovSet()
     #coverage=None
     results = list(test.run(args_to_tclist(coverage_set=coverage)))
-    #test.pretty_print_results(results)
-    #util.rmtemp()
+    test.pretty_print_results(results)
+    util.rmtemp()
     #coverage.pretty_print()
     
     with open('coverage.pickle', 'wb') as f:

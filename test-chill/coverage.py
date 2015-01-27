@@ -36,6 +36,14 @@ def print_nonexec(argsns, cov):
             print('{}: {}'.format(str(lineno).rjust(5), code))
 
 
+def print_full_nonexec(argsns, cov):
+    for filename in cov.filenames:
+        with open('coverage_report/' + filename + '.txt', 'w') as f:
+            minline, maxline = map(int,argsns.linerange)
+            for lineno, count, code in linerange(nonexecuted(cov, filename), minline, maxline):
+                f.write('{}: {}\n'.format(str(lineno).rjust(5),code))
+
+
 def make_argparser():
     arg_parser = argparse.ArgumentParser('coverage.py')
     cmd_parser_set = arg_parser.add_subparsers()
@@ -43,6 +51,9 @@ def make_argparser():
     nonexec_cmd.add_argument('-f', dest='filename', default=None)
     nonexec_cmd.add_argument('-r', dest='linerange', nargs=2, default=(0, 120000), metavar='STARTLINE ENDLINE')
     nonexec_cmd.set_defaults(func=print_nonexec)
+    full_nonexec_cmd = cmd_parser_set.add_parser('full_nonexec')
+    full_nonexec_cmd.add_argument('-r', dest='linerange', nargs=2, default=(0, 120000), metavar='STARTLINE ENDLINE')
+    full_nonexec_cmd.set_defaults(func=print_full_nonexec)
     return arg_parser
     
 
