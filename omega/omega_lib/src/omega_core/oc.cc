@@ -749,27 +749,6 @@ void Problem::checkGistInvariant() const {
     fprintf(outputFile,"] Done checking gist invariant on\n");
   }
 #endif
-} 
-
-inline void eqnncpy(eqn *dest, eqn *src, int nVars) {
-  dest->key = src->key;
-  dest->touched = src->touched;
-  dest->color = src->color;
-  dest->essential = src->essential;
-  dest->varCount = src->varCount;
-  for (int i = 0; i <= nVars; i++)
-    dest->coef[i] = src->coef[i];
-}
-
-
-inline void eqnnzero(eqn *e, int nVars) {
-  e->key = 0;
-  e->touched = 0;
-  e->color = EQ_BLACK;
-  e->essential = 0;
-  e->varCount = 0;
-  for (int i = 0; i <= nVars; i++)
-    e->coef[i] = 0;
 }
 
 } // namespace

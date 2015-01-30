@@ -8,6 +8,7 @@
 typedef std::map<std::string, int>               simap_t;
 typedef std::vector<std::map<std::string, int> > simap_vec_t;
 
+// in chill_run_util.cc
 simap_vec_t* make_prog(simap_vec_t* cond);
 simap_vec_t* make_cond_gt(simap_t* lhs, simap_t* rhs);
 simap_vec_t* make_cond_lt(simap_t* lhs, simap_t* rhs);
@@ -21,6 +22,8 @@ simap_t* make_cond_item_neg(simap_t* expr);
 simap_t* make_cond_item_number(int n);
 simap_t* make_cond_item_variable(const char* var);
 simap_t* make_cond_item_level(int n);
+
+// in parse_expr.yy
 simap_vec_t* parse_relation_vector(const char* expr);
 
 #endif
