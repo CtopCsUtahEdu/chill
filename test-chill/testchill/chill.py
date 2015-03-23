@@ -188,7 +188,7 @@ class BuildChillTestCase(test.TestCase):
         if self.test_result.passed():
             if self.config.bin_dir:
                 util.shell('mv', [os.path.join(self.config.chill_dir, self.config.make_target()), os.path.join(self.config.bin_dir, self.config.name())])
-            else:
+            elif not self.config.make_target() == self.config.name():
                 util.shell('mv', [os.path.join(self.config.chill_dir, self.config.make_target()), os.path.join(self.config.chill_dir, self.config.name())])
 
 
