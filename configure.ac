@@ -19,21 +19,21 @@ AM_PATH_PYTHON([2.7],[
         [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`])
     AC_SUBST([PYTHON_LIBDIR],
         [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"`])
-    AC_SUBST([with_python],[yes])],[
-    AC_SUBST([with_python],[no])])
+    AC_SUBST([with_python],["yes"])],[
+    AC_SUBST([with_python],["no"])])
 
 
 AC_ARG_ENABLE([cuda],[
     AS_HELP_STRING([--enable-cuda],[builds cudachill])],[
     AS_IF([test "x$enableval" != xno],[
         AC_SUBST([enable_cuda],[yes])],[])])
-AM_CONDITIONAL([CUDACHILL_OPT],[test "$enable_cuda" = yes])
+AM_CONDITIONAL([CUDACHILL_OPT],[test "x$enable_cuda" == xyes])
 
 
 AC_ARG_ENABLE([coverage],[
     AS_HELP_STRING([--enable-coverage],[enables coverage testing])],[
     
-    AS_IF([test "x$enableval" != xno],[
+    AS_IF(["x$enableval" != xno],[
         AC_SUBST([enable_coverage],[yes])
         AC_SUBST([CFLAGS],["-g -fprofile-arcs -ftest-coverage"])
         AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
@@ -65,23 +65,23 @@ AC_ARG_WITH([omega],[
 AC_ARG_WITH([interface],[
     AS_HELP_STRING([--with-interface],[select interface language])],[
     AC_SUBST([interface_lang],[$withval])],[
-    AC_SUBST([interface_lang],["default"])])
+    AC_SUBST([interface_lang],[default])])
 
-AS_IF([test "$interface_lang" = default],[
-    AS_IF([test "$enable_cuda" != no],[
+AS_IF([test "x$interface_lang" == xdefault],[
+    AS_IF([test "x$enable_cuda" != xno],[
         AC_SUBST([use_python],[no])
         AC_SUBST([use_lua],[yes])
         ],[
         AC_SUBST([use_python],[no])
-        AC_SUBST([use_lua],[no])])])
+        AC_SUBST([use_lua],[no])])],[])
 
-AS_IF([test "$interface_lang" = lua],[
-    AC_SUBST([use_lua],[yes])])
-AS_IF([test "$interface_lang" = python],[
-    AC_SUBST([use_python],[yes])])
+AS_IF([test "x$interface_lang" == xlua],[
+    AC_SUBST([use_lua],[yes])],[])
+AS_IF([test "x$interface_lang" == xpython],[
+    AC_SUBST([use_python],[yes])],[])
 
-AM_CONDITIONAL([PYTHON_OPT],[test "$use_python" = yes])
-AM_CONDITIONAL([LUA_OPT],[test "$use_lua" = yes])
+AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" == xyes])
+AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" == xyes])
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
