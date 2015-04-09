@@ -376,7 +376,7 @@ int main( int argc, char* argv[] )
     #endif
 #endif
     #ifdef BUILD_ROSE
-    //finalize_loop(lnum_start, lnum_end);
+    finalize_loop(lnum_start, lnum_end);
     //((IR_roseCode*)(ir_cide))->commit_loop(myloop, lnum);
     ((IR_roseCode*)(ir_code))->finalizeRose();
     //#elif BUILD_SUIF

@@ -9,7 +9,6 @@ import textwrap
 
 from . import chill
 from . import gcov
-from . import omega
 from . import test
 from . import util
 
@@ -26,7 +25,6 @@ def make_local(argsns, arg_parser):
     argsns.bin_dir = os.path.join(os.getcwd(), '.staging/bin')
     argsns.chill_tc_dir = os.path.join(os.getcwd(), 'test-cases') # formally from the commandline
     argsns.chill_dir = os.path.abspath(argsns.chill_dir)
-    argsns.omega_dir = os.path.abspath(argsns.omega_dir)
     argsns.chill_build_coverage = argsns.coverage_set is not None #TODO: make arg passed to local.
     argsns.chill_test_coverage = argsns.coverage_set is not None
     
@@ -35,11 +33,10 @@ def make_local(argsns, arg_parser):
     util.shell('cp', [os.path.join(argsns.chill_dir, 'examples/cuda-chill/cudaize.lua'), argsns.wd])
     util.shell('cp', [os.path.join(argsns.chill_dir, 'examples/cuda-chill/cudaize.py'), argsns.wd])
     
-    chill_version = argsns.chill_version
-    for config in chill.ChillConfig.configs(argsns.omega_dir, argsns.chill_dir, argsns.bin_dir, version=chill_version):
+    for config in chill.ChillConfig.configs(argsns.chill_dir, argsns.bin_dir):
         build_testcase = chill.BuildChillTestCase(config, options={'coverage': argsns.chill_build_coverage}, coverage_set=argsns.coverage_set)
         yield build_testcase
-        batch_file = os.path.join(argsns.chill_tc_dir, config.name() + '.tclist')
+        batch_file = os.path.join(argsns.chill_tc_dir, config.name + '.tclist')
         for tc in make_batch_testcaselist(argsns, arg_parser, batch_file):
             yield tc
 
@@ -116,12 +113,10 @@ def make_runchill_testcase(argsns):
         argsns.chill_script_lang = chill.ChillConfig.ext_to_script_lang(chill_script.split('.')[-1])
     
     config = chill.ChillConfig(
-        omega_dir = os.path.abspath(argsns.omega_dir) if argsns.omega_dir != None else None,
         chill_dir = os.path.abspath(argsns.chill_dir) if argsns.chill_dir != None else None,
         bin_dir = os.path.abspath(argsns.bin_dir) if argsns.bin_dir != None else None,
         build_cuda = argsns.build_cuda,
-        script_lang = argsns.chill_script_lang,
-        version = argsns.chill_version)
+        script_lang = argsns.chill_script_lang)
     
     return chill.RunChillTestCase(config, chill_script, chill_src, wd=wd, options=options, coverage_set=coverage_set)
 
@@ -131,7 +126,6 @@ def make_buildchill_testcase(argsns):
     @param argsns Command line arguments
     """
     assert argsns.chill_dir != None
-    assert argsns.omega_dir != None
     
     coverage_set = argsns.coverage_set
     
@@ -139,12 +133,10 @@ def make_buildchill_testcase(argsns):
     options['coverage'] = argsns.chill_build_coverage
     
     config = chill.ChillConfig(
-        omega_dir = os.path.abspath(argsns.omega_dir) if argsns.omega_dir != None else None,
         chill_dir = os.path.abspath(argsns.chill_dir) if argsns.chill_dir != None else None,
         bin_dir = os.path.abspath(argsns.bin_dir) if argsns.bin_dir != None else None,
         build_cuda = argsns.build_cuda,
-        script_lang = argsns.chill_script_lang,
-        version = argsns.chill_version)
+        script_lang = argsns.chill_script_lang)
     
     return chill.BuildChillTestCase(config, options=options, coverage_set=coverage_set)
 
@@ -173,12 +165,12 @@ def add_local_args(arg_parser):
     @param arg_parser The local ArgumentParser object
     """
     arg_parser.add_argument('chill_dir', metavar='chill-home', default='../')
-    arg_parser.add_argument('-v', '--chill-branch', dest='chill_version', default='dev', choices=['release','dev'])
+    #arg_parser.add_argument('-v', '--chill-branch', dest='chill_version', default='dev', choices=['release','dev'])
     # - Testing should consider all interface languages. Will uncomment if testing takes too long
     # arg_parser.add_argument('-i', '--interface-lang', nargs=1, action='append', dest='chill_script_lang_list', choices=['script','lua','python'])
     # arg_parser.add_argument('-t', '--testcase-dir', dest='chill_tc_dir', default=os.path.join(os.getcwd(), 'test-cases/'))
-    arg_parser.set_defaults(wd=os.path.join(os.getcwd(), '.staging/wd'))       # - These don't seem to work
-    arg_parser.set_defaults(bin_dir=os.path.join(os.getcwd(), '.staging/bin')) # -
+    arg_parser.set_defaults(wd=os.path.join(os.getcwd(), '.staging/wd'))
+    arg_parser.set_defaults(bin_dir=os.path.join(os.getcwd(), '.staging/bin'))
 
 @util.callonce
 def add_repo_args(arg_parser):
@@ -207,7 +199,6 @@ def add_chill_common_args(arg_parser):
     Common chill command line arguments.
     @param arg_parser The ArgumentParser object
     """
-    arg_parser.add_argument('-v', '--chill-branch', dest='chill_version', default='dev', choices=['release','dev'])
     cuda_group = arg_parser.add_mutually_exclusive_group()
     cuda_group.add_argument('-u', '--target-cuda', action='store_const', const=True, dest='build_cuda', default=False, help='Test cuda-chill. (Default is chill)')
     cuda_group.add_argument('-c', '--target-c', action='store_const', const=False, dest='build_cuda', default=False, help='Test chill. (Default is chill)')
@@ -303,7 +294,7 @@ def add_commands(arg_parser):
     """
     command_group = arg_parser.add_subparsers(title='commands')
     add_local_command(command_group)
-    add_repo_command(command_group)
+    #add_repo_command(command_group)
     add_chill_command(command_group)
     add_buildchill_command(command_group)
     add_batch_command(command_group)
@@ -315,9 +306,8 @@ def add_global_args(arg_parser):
     @param arg_parser The ArgumentParser object
     """
     arg_parser.add_argument('-w', '--working-dir', dest='wd', default=os.getcwd(), help='The working directory. (Defaults to the current directory)', metavar='working-directory')
-    arg_parser.add_argument('-R', '--rose-home', dest='rose_dir', default=os.getenv('ROSEHOME'), help='Rose home directory. (Defaults to ROSEHOME)', metavar='rose-home')
+    arg_parser.add_argument('-R', '--rose-home',  dest='rose_dir', default=os.getenv('ROSEHOME'), help='Rose home directory. (Defaults to ROSEHOME)', metavar='rose-home')
     arg_parser.add_argument('-C', '--chill-home', dest='chill_dir', default=os.path.join(os.getcwd(), '..'), help='Chill home directory. (Defaults to CHILLHOME)', metavar='chill-home')
-    arg_parser.add_argument('-O', '--omega-home', dest='omega_dir', default=os.path.join(os.getcwd(), '../omega'), help='Omega home directory. (Defaults to ../omega)', metavar='omega-home')
     arg_parser.add_argument('-b', '--binary-dir', dest='bin_dir', default=None, help='Binary directory.', metavar='bin-dir')
     
 @util.callonce
@@ -331,8 +321,7 @@ def make_argparser():
             
             To test a local working copy of chill (from the development branch):
             --------------------------------------------------------------------  
-            - Set $OMEGAHOME and compile omega.
-            - Run `python -m testchill local <path-to-chill>`
+            - Run `python -m testchill local`
             
         '''),
         epilog='EPILOG',

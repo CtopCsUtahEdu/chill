@@ -38,12 +38,6 @@ AC_ARG_ENABLE([coverage],[
         AC_SUBST([CFLAGS],["-g -fprofile-arcs -ftest-coverage"])
         AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
 
-
-AC_ARG_WITH([lua],[
-    AS_HELP_STRING([--with-lua],[set lua home])],[
-    AC_SUBST([LUAHOME], [$withval])],[
-    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
-
 AC_ARG_WITH([rose],[
     AS_HELP_STRING([--with-rose],[set rose home])],[
     AC_SUBST([ROSEHOME], [$withval])
@@ -61,11 +55,23 @@ AC_ARG_WITH([omega],[
     AC_SUBST([OMEGAHOME], [$withval])],[
     AC_SUBST([OMEGAHOME], ["$(pwd)/omega"])])
 
-
-AC_ARG_WITH([interface],[
-    AS_HELP_STRING([--with-interface],[select interface language])],[
-    AC_SUBST([interface_lang],[$withval])],[
+AC_ARG_WITH([python],[
+    AS_HELP_STRING([--with-python],[set python as the interface languge])],[
+    AC_SUBST([interface_lang],[python])
+    ],[
     AC_SUBST([interface_lang],[default])])
+
+AC_ARG_WITH([lua],[
+    AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
+    AC_SUBST([LUAHOME], ["${LUAHOME}"])
+    AC_SUBST([interfae_lang], [lua])
+    ],[
+    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
+
+#AC_ARG_WITH([interface],[
+#    AS_HELP_STRING([--with-interface],[select interface language])],[
+#    AC_SUBST([interface_lang],[$withval])],[
+#    AC_SUBST([interface_lang],[default])])
 
 AS_IF([test "x$interface_lang" == xdefault],[
     AS_IF([test "x$enable_cuda" != xno],[
