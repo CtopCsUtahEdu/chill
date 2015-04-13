@@ -146,13 +146,12 @@ class BuildChillTestCase(test.TestCase):
         util.shell('rm', ['-f', '*.gcda'], wd=self.config.chill_dir)
         
         util.shell('make clean', wd=self.config.chill_dir)
-        util.shell('make veryclean', wd=self.config.chill_dir)
     
     def run(self):
         """
         Build chill
         """
-        util.shell('make', ['clean'], wd=self.config.chill_dir)
+        util.shell('make', ['distclean'], wd=self.config.chill_dir)
         util.shell('./configure', self.config.config_args, wd=self.config.chill_dir)
         util.shell('make', [], wd=self.config.chill_dir)
         

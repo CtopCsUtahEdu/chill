@@ -19,35 +19,46 @@ AM_PATH_PYTHON([2.7],[
         [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`])
     AC_SUBST([PYTHON_LIBDIR],
         [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"`])
-    AC_SUBST([with_python],["yes"])],[
-    AC_SUBST([with_python],["no"])])
+    AC_SUBST([python_builds],[yes])],[
+    AC_SUBST([python_builds],[no])])
 
+
+#AC_ARG_ENABLE([cuda],[
+#    AS_HELP_STRING([--enable-cuda],[builds cudachill])],[
+#    AS_IF([test "x$enableval" != xno],[
+#        AC_SUBST([enable_cuda],[yes])])])
 
 AC_ARG_ENABLE([cuda],[
-    AS_HELP_STRING([--enable-cuda],[builds cudachill])],[
+    AS_HELP_STRING([--enable-cuda],[builds cudachill])
+    ],[
     AS_IF([test "x$enableval" != xno],[
-        AC_SUBST([enable_cuda],[yes])],[])])
+        AC_SUBST([enable_cuda],[yes])])])
+
 AM_CONDITIONAL([CUDACHILL_OPT],[test "x$enable_cuda" == xyes])
 
 
 AC_ARG_ENABLE([coverage],[
-    AS_HELP_STRING([--enable-coverage],[enables coverage testing])],[
-    
+    AS_HELP_STRING([--enable-coverage],[enables coverage testing])
+    ],[
     AS_IF(["x$enableval" != xno],[
         AC_SUBST([enable_coverage],[yes])
         AC_SUBST([CFLAGS],["-g -fprofile-arcs -ftest-coverage"])
         AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
 
 AC_ARG_WITH([rose],[
-    AS_HELP_STRING([--with-rose],[set rose home])],[
+    AS_HELP_STRING([--with-rose],[set rose home])
+    ],[
     AC_SUBST([ROSEHOME], [$withval])
-    AC_DEFINE([BUILD_ROSE],[],[Use ROSE])],[
+    AC_DEFINE([BUILD_ROSE],[],[Use ROSE])
+    ],[
     AC_SUBST([ROSEHOME], ["${ROSEHOME}"])
     AC_DEFINE([BUILD_ROSE],[],[Use ROSE])])
 
 AC_ARG_WITH([boost],[
-    AS_HELP_STRING([--with-boost],[set boost home])],[
-    AC_SUBST([BOOSTHOME], [$withval])],[
+    AS_HELP_STRING([--with-boost],[set boost home])
+    ],[
+    AC_SUBST([BOOSTHOME], [$withval])
+    ],[
     AC_SUBST([BOOSTHOME], ["${BOOSTHOME}"])])
 
 AC_ARG_WITH([omega],[
@@ -56,7 +67,8 @@ AC_ARG_WITH([omega],[
     AC_SUBST([OMEGAHOME], ["$(pwd)/omega"])])
 
 AC_ARG_WITH([python],[
-    AS_HELP_STRING([--with-python],[set python as the interface languge])],[
+    AS_HELP_STRING([--with-python],[set python as the interface languge])
+    ],[
     AC_SUBST([interface_lang],[python])
     ],[
     AC_SUBST([interface_lang],[default])])
@@ -68,13 +80,18 @@ AC_ARG_WITH([lua],[
     ],[
     AC_SUBST([LUAHOME], ["${LUAHOME}"])])
 
+AC_ARG_WITH([script],[
+    AS_HELP_STRING([--with-script],[set the legacy scripting language as the interface language (CHiLL only)]),
+    ],[
+    AC_SUBST([interface_lang],[default])])
+
 #AC_ARG_WITH([interface],[
 #    AS_HELP_STRING([--with-interface],[select interface language])],[
 #    AC_SUBST([interface_lang],[$withval])],[
 #    AC_SUBST([interface_lang],[default])])
 
 AS_IF([test "x$interface_lang" == xdefault],[
-    AS_IF([test "x$enable_cuda" != xno],[
+    AS_IF([test "x$enable_cuda" == xyes],[
         AC_SUBST([use_python],[no])
         AC_SUBST([use_lua],[yes])
         ],[
