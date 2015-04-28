@@ -76,7 +76,7 @@ AC_ARG_WITH([python],[
 AC_ARG_WITH([lua],[
     AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
     AC_SUBST([LUAHOME], ["${LUAHOME}"])
-    AC_SUBST([interfae_lang], [lua])
+    AC_SUBST([interface_lang], [lua])
     ],[
     AC_SUBST([LUAHOME], ["${LUAHOME}"])])
 

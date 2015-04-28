@@ -40,52 +40,52 @@ def make_local(argsns, arg_parser):
         for tc in make_batch_testcaselist(argsns, arg_parser, batch_file):
             yield tc
 
-def make_repo(argsns, arg_parser):
+#def make_repo(argsns, arg_parser):
     """
     Make the repo test case list. A convinience function for testing chill from the repsitory.
     @params argsns Command line arguments
     @params arg_parser The ArgumentParser object
     """
-    util.mkdir_p(os.path.join(os.getcwd(), '.staging'), temp=True)
-    argsns.bin_dir = os.path.join(os.getcwd(), '.staging/bin')
-    argsns.repo_dir = os.path.join(os.getcwd(), '.staging/repo')
-    argsns.chill_tc_dir = os.path.join(os.getcwd(), 'test-cases') # formally from the commandline
-    argsns.wd = os.path.join(os.getcwd(), '.staging/wd')
-    
-    util.mkdir_p(argsns.bin_dir)
-    util.mkdir_p(argsns.repo_dir)
-    util.mkdir_p(argsns.wd)
-    
-    #TODO: Should these be hard coded?
-    repo_root = 'shell.cs.utah.edu/uusoc/facility/res/hallresearch/svn_repo/resRepo/projects'
-    for version in ['release', 'dev']:
-        new_args = util.copy(argsns)
-        if version == 'dev':
-            chill_repo = 'svn+ssh://{}@{}/chill/branches/cuda-chill-rose'.format(new_args.svnuser, repo_root)
-            chill_repo_name = 'chill'
-            omega_repo = 'svn+ssh://{}@{}/omega/branches/cuda-omega-rose'.format(new_args.svnuser, repo_root)
-            omega_repo_name = 'omega'
-        elif version == 'release':
-            chill_repo = 'svn+ssh://{}@{}/chill/release'.format(new_args.svnuser, repo_root)
-            chill_repo_name = 'chill-release'
-            omega_repo = 'svn+ssh://{}@{}/omega/release'.format(new_args.svnuser, repo_root)
-            omega_repo_name = 'omega-release'
-        new_args.omega_dir = os.path.join(new_args.repo_dir, omega_repo_name)
-        new_args.chill_dir = os.path.join(new_args.repo_dir, chill_repo_name)
-        util.shell('svn', ['export', '--force', omega_repo, new_args.omega_dir])
-        util.shell('svn', ['export', '--force', chill_repo, new_args.chill_dir])
-        util.shell('cp', [os.path.join(new_args.chill_dir, 'examples/cuda-chill/cudaize.lua'), new_args.wd])
-        if version == 'dev':
-            util.shell('cp', [os.path.join(new_args.chill_dir, 'examples/cuda-chill/cudaize.py'), new_args.wd])
-        # do omega: (just build it for now)
-        yield omega.BuildOmegaTestCase(new_args.omega_dir ,version)
-        # do chill
-        for config in chill.ChillConfig.configs(new_args.omega_dir, new_args.chill_dir, new_args.bin_dir, version=version):
-            yield chill.BuildChillTestCase(config, coverage_set=argsns.coverage_set)
-            batch_file = os.path.join(argsns.chill_tc_dir, config.name() + '.tclist')
-            if os.path.exists(batch_file):
-                for tc in make_batch_testcaselist(new_args, arg_parser, batch_file):
-                    yield tc
+#    util.mkdir_p(os.path.join(os.getcwd(), '.staging'), temp=True)
+#    argsns.bin_dir = os.path.join(os.getcwd(), '.staging/bin')
+#    argsns.repo_dir = os.path.join(os.getcwd(), '.staging/repo')
+#    argsns.chill_tc_dir = os.path.join(os.getcwd(), 'test-cases') # formally from the commandline
+#    argsns.wd = os.path.join(os.getcwd(), '.staging/wd')
+#    
+#    util.mkdir_p(argsns.bin_dir)
+#    util.mkdir_p(argsns.repo_dir)
+#    util.mkdir_p(argsns.wd)
+#    
+#    #TODO: Should these be hard coded?
+#    repo_root = 'shell.cs.utah.edu/uusoc/facility/res/hallresearch/svn_repo/resRepo/projects'
+#    for version in ['release', 'dev']:
+#        new_args = util.copy(argsns)
+#        if version == 'dev':
+#            chill_repo = 'svn+ssh://{}@{}/chill/branches/cuda-chill-rose'.format(new_args.svnuser, repo_root)
+#            chill_repo_name = 'chill'
+#            omega_repo = 'svn+ssh://{}@{}/omega/branches/cuda-omega-rose'.format(new_args.svnuser, repo_root)
+#            omega_repo_name = 'omega'
+#        elif version == 'release':
+#            chill_repo = 'svn+ssh://{}@{}/chill/release'.format(new_args.svnuser, repo_root)
+#            chill_repo_name = 'chill-release'
+#            omega_repo = 'svn+ssh://{}@{}/omega/release'.format(new_args.svnuser, repo_root)
+#            omega_repo_name = 'omega-release'
+#        new_args.omega_dir = os.path.join(new_args.repo_dir, omega_repo_name)
+#        new_args.chill_dir = os.path.join(new_args.repo_dir, chill_repo_name)
+#        util.shell('svn', ['export', '--force', omega_repo, new_args.omega_dir])
+#        util.shell('svn', ['export', '--force', chill_repo, new_args.chill_dir])
+#        util.shell('cp', [os.path.join(new_args.chill_dir, 'examples/cuda-chill/cudaize.lua'), new_args.wd])
+#        if version == 'dev':
+#            util.shell('cp', [os.path.join(new_args.chill_dir, 'examples/cuda-chill/cudaize.py'), new_args.wd])
+#        # do omega: (just build it for now)
+#        yield omega.BuildOmegaTestCase(new_args.omega_dir ,version)
+#        # do chill
+#        for config in chill.ChillConfig.configs(new_args.omega_dir, new_args.chill_dir, new_args.bin_dir, version=version):
+#            yield chill.BuildChillTestCase(config, coverage_set=argsns.coverage_set)
+#            batch_file = os.path.join(argsns.chill_tc_dir, config.name() + '.tclist')
+#            if os.path.exists(batch_file):
+#                for tc in make_batch_testcaselist(new_args, arg_parser, batch_file):
+#                    yield tc
 
 def make_runchill_testcase(argsns):
     """
@@ -216,7 +216,7 @@ def add_chill_run_args(arg_parser):
     add_boolean_option(arg_parser, 'run-script', dest='chill_test_run_script', default=True, help_on='Run chill script.', help_off='Do not run chill script.')
     add_boolean_option(arg_parser, 'compile-gensrc', dest='chill_test_compile_gensrc', default=True, help_on='Compile generated source file', help_off='Do not compile generated source file.')
     add_boolean_option(arg_parser, 'check-run-script', dest='chill_test_check_run_script', default=False, help_on='Diff stdout from chill script against a benchmark.')
-    add_boolean_option(arg_parser, 'test-coverage', 'chill_test_coverage', default=True, help_on='Run chill and record code coverage (default).', help_off='Run chill normally without recording code coverage.')
+    add_boolean_option(arg_parser, 'test-coverage', 'chill_test_coverage', default=False, help_on='Run chill and record code coverage (default).', help_off='Run chill normally without recording code coverage.')
 
 @util.callonce
 def add_chill_build_args(arg_parser):
@@ -224,7 +224,7 @@ def add_chill_build_args(arg_parser):
     Command line arguments specific to building chill and testing the build process
     @params arg_parser The ArgumentParser object
     """
-    add_boolean_option(arg_parser, 'build-coverage', 'chill_build_coverage', default=True, help_on='Build chill for code coverage flags (default).', help_off='Build chill normally without code coverage flags.')
+    add_boolean_option(arg_parser, 'build-coverage', 'chill_build_coverage', default=False, help_on='Build chill for code coverage flags (default).', help_off='Build chill normally without code coverage flags.')
 
 @util.callonce
 def add_local_command(command_group):
@@ -308,7 +308,7 @@ def add_global_args(arg_parser):
     arg_parser.add_argument('-w', '--working-dir', dest='wd', default=os.getcwd(), help='The working directory. (Defaults to the current directory)', metavar='working-directory')
     arg_parser.add_argument('-R', '--rose-home',  dest='rose_dir', default=os.getenv('ROSEHOME'), help='Rose home directory. (Defaults to ROSEHOME)', metavar='rose-home')
     arg_parser.add_argument('-C', '--chill-home', dest='chill_dir', default=os.path.join(os.getcwd(), '..'), help='Chill home directory. (Defaults to CHILLHOME)', metavar='chill-home')
-    arg_parser.add_argument('-b', '--binary-dir', dest='bin_dir', default=None, help='Binary directory.', metavar='bin-dir')
+    arg_parser.add_argument('-b', '--binary-dir', dest='bin_dir', default=os.path.join(os.getcwd(), '..'), help='Binary directory.', metavar='bin-dir')
     
 @util.callonce
 def make_argparser():
@@ -351,11 +351,9 @@ def args_to_tclist(args=sys.argv[1:], arg_parser=make_argparser(), argsns=None, 
 @util.callonce
 def main():
     coverage = gcov.GcovSet()
-    #coverage=None
     results = list(test.run(args_to_tclist(coverage_set=coverage)))
     test.pretty_print_results(results)
     util.rmtemp()
-    #coverage.pretty_print()
     
     with open('coverage.pickle', 'wb') as f:
         pickle.dump(coverage, f, 2)
