@@ -11,46 +11,16 @@ from . import cpp_validate
 
 
 class ChillConfig(object):
-    _config_map = dict(('-'.join(map(str,k)),v) for k,v in [
-            (('dev',False,'script'),     ('chill',              'depend-chill',      'chill',      '')),
-            (('dev',False,'lua'),        ('chill-lua',          'depend-chill',      'chill',      'SCRIPT_LANG=lua')),
-            (('dev',False,'python'),     ('chill-python',       'depend-chill',      'chill',      'SCRIPT_LANG=python')),
-            (('dev',True,'lua'),         ('cuda-chill',         'depend-cuda-chill', 'cuda-chill', '')),
-            (('dev',True,'python'),      ('cuda-chill-python',  'depend-cuda-chill', 'cuda-chill', 'SCRIPT_LANG=python')),
-            (('release',False,'script'), ('chill-release',      'depend',            'chill',      '')),
-            (('release',True,'lua'),     ('cuda-chill-release', 'depend-cuda-chill', 'cuda-chill', ''))
-        ])
-    
-    def __init__(self, omega_dir=None, chill_dir=None, bin_dir=None, build_cuda=False, script_lang=None, version='dev'):
-        self.version = version
+    def __init__(self, chill_dir=None, bin_dir=None, build_cuda=False, script_lang=None):
         self.build_cuda = build_cuda
         self.script_lang = script_lang
-        self.omega_dir = omega_dir
         self.chill_dir = chill_dir
         self.bin_dir = bin_dir
         if self.script_lang is None:
             self.script_lang = self.default_script_lang()
     
-    def _get(self, index):
-        return ChillConfig._config_map[self.version + '-' + str(self.build_cuda) + '-' + self.script_lang][index]
-    
     def default_script_lang(self):
-        if self.build_cuda:
-            return 'lua'
-        else:
-            return 'script'
-    
-    def name(self):
-        return self._get(0)
-    
-    def make_depend_target(self):
-        return self._get(1)
-    
-    def make_target(self):
-        return self._get(2)
-    
-    def make_args(self):
-        return self._get(3)
+        return 'python'
     
     def _buildfunc(self, cc, link=True):
         if not link:
@@ -87,38 +57,51 @@ class ChillConfig(object):
         else:
             return self._buildfunc('gcc')
     
-    def env(self):
-        chill_env = {'OMEGAHOME':self.omega_dir}
-        if self.version == 'release' and self.build_cuda:
-            chill_env['CUDACHILL']='true'
-        return chill_env
+    @property
+    def config_args(self):
+        args = []
+        if self.build_cuda:
+            args += ['--enable-cuda']
+        if self.script_lang is not None:
+            args += ['--with-' + self.script_lang]
+        return args
+    
+    @property
+    def buildname(self):
+        if self.build_cuda:
+            return 'cudachill'
+        else:
+            return 'chill'
+    
+    @property
+    def name(self):
+        if self.buildname == 'cudachill':
+            return 'cuda-chill-' + self.script_lang
+        else:
+            return 'chill-' + self.script_lang
     
     @staticmethod
     def ext_to_script_lang(ext):
         return {'script':'script', 'lua':'lua', 'py':'python'}[ext]
     
     @staticmethod
-    def configs(omega_dir, chill_dir, bin_dir, build_cuda=None, script_lang=None, version=None):
+    def configs(chill_dir, bin_dir, build_cuda=None, script_lang=None):
         all_configs = [
-                (False, 'script', 'dev'),
-                (False, 'script', 'release'),
-                (False, 'lua', 'dev'),
-                (False, 'python', 'dev'),
-                (True, 'lua', 'dev'),
-                (True, 'lua', 'release'),
-                (True, 'python', 'dev')]
+                (False, 'script'),
+                (False, 'lua'),
+                (False, 'python'),
+                (True, 'lua'),
+                (True, 'python')]
                 
         pred_list = [lambda x: True]
         if not build_cuda is None:
             pred_list += [lambda x: x[0] == build_cuda]
         if not script_lang is None:
             pred_list += [lambda x: x[1] == script_lang]
-        if not version is None:
-            pred_list += [lambda x: x[2] == version]
         
         cond = lambda x: all(p(x) for p in pred_list)
         
-        return iter(ChillConfig(omega_dir, chill_dir, bin_dir, *conf) for conf in filter(cond, all_configs))
+        return iter(ChillConfig(chill_dir, bin_dir, *conf) for conf in filter(cond, all_configs))
 
 
 # -                               - #
@@ -143,18 +126,15 @@ class BuildChillTestCase(test.TestCase):
         if config.script_lang == None:
             config.script_lang = config.default_script_lang()
         self.config = config
-        super(BuildChillTestCase,self).__init__(self.config.name())
+        super(BuildChillTestCase,self).__init__(self.config.name)
         self._set_options(options, coverage_set)
     
     def _set_options(self, options, coverage_set):
         self.options = dict(BuildChillTestCase.default_options)
         self.options.update(options)
         
-        self.build_env = self.config.env()
-        self.build_args = self.config.make_args()
         if self.options['coverage']:
-            self.build_args += ' "TEST_COVERAGE=1"'
-            coverage_set.addprogram(self.config.name(), self.config.chill_dir)
+            coverage_set.addprogram(self.config.name, self.config.chill_dir)
     
     def setUp(self):
         """
@@ -166,18 +146,19 @@ class BuildChillTestCase(test.TestCase):
         util.shell('rm', ['-f', '*.gcda'], wd=self.config.chill_dir)
         
         util.shell('make clean', wd=self.config.chill_dir)
-        util.shell('make veryclean', wd=self.config.chill_dir)
     
     def run(self):
         """
         Build chill
         """
-        depend_target = self.config.make_depend_target()
-        target = self.config.make_target()
-        util.shell('make', ['clean'], wd=self.config.chill_dir)
-        util.shell('make', ['veryclean'], wd=self.config.chill_dir)
-        util.shell('make', [depend_target] + [self.build_args], env=self.build_env, wd=self.config.chill_dir)
-        util.shell('make', [target] + [self.build_args], env=self.build_env, wd=self.config.chill_dir)
+        util.shell('make', ['distclean'], wd=self.config.chill_dir)
+        util.shell('./configure', self.config.config_args, wd=self.config.chill_dir)
+        util.shell('make', [], wd=self.config.chill_dir)
+        
+        #util.shell('make', ['clean'], wd=self.config.chill_dir)
+        #util.shell('make', ['veryclean'], wd=self.config.chill_dir)
+        #util.shell('make', [depend_target] + [self.build_args], env=self.build_env, wd=self.config.chill_dir)
+        #util.shell('make', [target] + [self.build_args], env=self.build_env, wd=self.config.chill_dir)
         return self.make_pass()
         
     def tearDown(self):
@@ -187,9 +168,9 @@ class BuildChillTestCase(test.TestCase):
         """
         if self.test_result.passed():
             if self.config.bin_dir:
-                util.shell('mv', [os.path.join(self.config.chill_dir, self.config.make_target()), os.path.join(self.config.bin_dir, self.config.name())])
-            elif not self.config.make_target() == self.config.name():
-                util.shell('mv', [os.path.join(self.config.chill_dir, self.config.make_target()), os.path.join(self.config.chill_dir, self.config.name())])
+                util.shell('mv', [os.path.join(self.config.chill_dir, self.config.buildname), os.path.join(self.config.bin_dir, self.config.name)])
+            elif not self.config.buildname == self.config.name:
+                util.shell('mv', [os.path.join(self.config.chill_dir, self.config.buildname), os.path.join(self.config.chill_dir, self.config.name)])
 
 
 # -                              - #
@@ -225,14 +206,14 @@ class RunChillTestCase(test.SequencialTestCase):
         
         assert isinstance(config, ChillConfig)
         
-        super(RunChillTestCase,self).__init__(config.name() + ':' + os.path.basename(chill_script))
+        super(RunChillTestCase,self).__init__(config.name + ':' + os.path.basename(chill_script))
         
         self.config = config
         self.wd = wd if (wd != None) else os.getcwd()
         
         self.chill_src_path = os.path.abspath(chill_src)
         self.chill_script_path = os.path.abspath(chill_script)
-        self.chill_bin = os.path.join(self.config.bin_dir, self.config.name())
+        self.chill_bin = os.path.join(self.config.bin_dir, self.config.name)
         self.chill_src = os.path.basename(self.chill_src_path)
         self.chill_script = os.path.basename(self.chill_script_path)
         self.chill_gensrc = self._get_gensrc(self.chill_src)
@@ -291,7 +272,7 @@ class RunChillTestCase(test.SequencialTestCase):
         util.shell('rm', ['-f', self.chill_script], wd=self.wd)
         util.shell('rm', ['-f', self.chill_gensrc], wd=self.wd)
         if self.options['coverage'] and self.coverage_set is not None:
-            self.coverage_set.addcoverage(self.config.name(), self.name)
+            self.coverage_set.addcoverage(self.config.name, self.name)
     
     # -             - #
     # - Chill Tests - #

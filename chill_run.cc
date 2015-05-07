@@ -359,6 +359,7 @@ int main( int argc, char* argv[] )
     #endif
     #ifdef BUILD_ROSE
     ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
+    ((IR_roseCode*)(ir_code))->finalizeRose();
     #elif BUILD_SUIF
     ((IR_cudasuifCode *)(ir_code))->commit_loop(myloop, lnum);
     #endif
@@ -374,14 +375,16 @@ int main( int argc, char* argv[] )
     lnum_end = get_loop_num_end(L);
     DEBUG_PRINT("calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
-#endif
+    
     #ifdef BUILD_ROSE
-    //finalize_loop(lnum_start, lnum_end);
+    finalize_loop(lnum_start, lnum_end);
     //((IR_roseCode*)(ir_cide))->commit_loop(myloop, lnum);
     ((IR_roseCode*)(ir_code))->finalizeRose();
-    //#elif BUILD_SUIF
-    //((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
+    #elif BUILD_SUIF
+    ((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
     #endif
+    
+#endif
     delete ir_code;
   }
 #ifdef PYTHON
