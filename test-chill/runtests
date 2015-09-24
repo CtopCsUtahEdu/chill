@@ -1,0 +1,17 @@
+#/bin/sh
+for file in *.py; do
+    echo -n "Testing "
+    echo -n $file | sed 's/test_//g;s/.py//g'
+    echo -n " ... "
+    ../chill $file > /dev/null 2>&1 
+    cmp -s rose_mm.c with/$file.out 
+    if [ $? -eq 0 ]
+       	then echo OK
+    else
+        cmp -s rose_mm.c without/$file.out 
+	if [ $? -eq 0 ]; then echo OK; else echo failed; fi
+   fi
+done
+rm rose_mm.c
+
+

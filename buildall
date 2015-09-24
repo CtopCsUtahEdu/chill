@@ -1,0 +1,140 @@
+#!/bin/bash
+# Set up environment to build and install CHiLL at Blue Waters
+
+echo "This script needs to be customized before it is executed..."
+exit
+
+# Package directory ...
+export PACKAGEDIR=/sw/sources/chill
+
+# Directory to build in ...
+export BUILDDIR=/u/sciteam/rwheeler/scratch
+
+# Directory to install permanent files ...
+export INSTALLDIR=/sw/xe/chill
+
+# Install tools in seperate directories
+export AUTOCONFINSTALLDIR=$INSTALLDIR/autoconf
+export GCCINSTALLDIR=$INSTALLDIR/gcc
+export BOOSTINSTALLDIR=$INSTALLDIR/boost
+export ROSEINSTALLDIR=$INSTALLDIR/rose
+
+# Packages already installed
+export JAVA_HOME=/opt/java/jdk1.7.0_45
+export PYTHON_INCDIR=/usr/include/python2.6
+export PYTHON_LIBDIR=/usr/lib64
+export PYTHON_VERSION=2.6
+
+# Create toplevel build and installation directories if they do not already exist...
+if false; then
+mkdir -p $BUILDDIR
+mkdir -p $INSTALLDIR
+mkdir -p $INSTALLDIR/lib
+mkdir -p $INSTALLDIR/lib64
+mkdir -p $INSTALLDIR/bin
+mkdir -p $AUTOCONFINSTALLDIR
+mkdir -p $GCCINSTALLDIR
+mkdir -p $BOOSTINSTALLDIR
+mkdir -p $ROSEINSTALLDIR
+fi
+
+export PATH=$INSTALLDIR/bin:$PATH
+
+#
+#  Unpack needed items into the build area
+#
+if false; then
+cd $BUILDDIR
+for dir in autoconf/autoconf-2.69 gcc/gcc-4.4.7 boost/boost_1_45_0 rose/edg4x-rose chill/chill-0.2.1; do
+    mkdir -p `dirname $dir`/build
+    echo checking for `basename $dir`
+    if [ ! -d $dir ]; then
+	echo unpacking tar file `basename $dir`.tar.gz
+ 	(cd `dirname $dir`; tar xzf $PACKAGEDIR/`basename $dir`.tar.gz)
+    fi
+done
+fi
+
+#
+#  Configure and build autoconf
+#
+if false; then
+echo Building autoconf
+cd $BUILDDIR/autoconf/build
+../autoconf-2.69/configure --prefix=$AUTOCONFINSTALLDIR
+make -j`nproc`
+make -j`nproc` install
+fi
+
+export PATH=$AUTOCONFINSTALLDIR/bin:$PATH
+
+#
+#  Configure and build gcc
+#
+if false; then
+echo Building gcc
+cd $BUILDDIR/gcc/build
+../gcc-4.4.7/configure --prefix=$GCCINSTALLDIR
+make -j`nproc`
+make -j`nproc` install
+fi
+
+export PATH=$GCCINSTALLDIR/bin:$PATH
+export LD_LIBRARY_PATH=$GCCINSTALLDIR/lib64:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$GCCINSTALLDIR/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
+
+#
+#  Configure and build boost
+#
+if false; then
+echo Building Boost
+export BOOSTLIBSNEEDED=date_time,filesystem,program_options,regex,system,thread,wave,iostreams
+cd $BUILDDIR/boost/boost_1_45_0
+./bootstrap.sh --prefix=$BOOSTINSTALLDIR --with-libraries=$BOOSTLIBSNEEDED
+./bjam install --prefix=$BOOSTINSTALLDIR --build-dir=../build 
+fi
+
+export LD_LIBRARY_PATH=$BOOSTINSTALLDIR/lib:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$BOOSTINSTALLDIR/include:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
+
+#
+#  Configure and build rose
+#
+if false; then
+echo Building Rose
+cd $BUILDDIR/rose/build
+../edg4x-rose/configure --prefix=$ROSEINSTALLDIR --with-boost=$BOOSTINSTALLDIR
+make -j`nproc`
+make -j`nproc` install
+fi
+
+export LD_LIBRARY_PATH=$ROSEINSTALLDIR/lib:$JAVA_HOME/jre/lib/amd64/server:$LD_LIBRARY_PATH
+export C_INCLUDE_PATH=$ROSEINSTALLDIR/include:$ROSEINSTALLDIR/include/rose:$C_INCLUDE_PATH
+export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
+
+#
+#  Configure and build chill
+#
+if false; then
+echo Building CHiLL
+cd $BUILDDIR/chill/chill-0.2.1
+./configure --with-interface=python --prefix=$INSTALLDIR --with-rose=$ROSEINSTALLDIR --with-boost=$BOOSTINSTALLDIR
+make -j`nproc`
+make -j`nproc` install
+fi
+
+#
+# Test CHiLL
+#
+if false; then
+echo Testing CHiLL
+cd $BUILDDIR/chill/chill-0.2.1/test-chill
+./runtests
+fi
+
+echo Remember to set your paths to...
+echo
+echo 'export PATH=$PATH:'$INSTALLDIR/bin
+echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:'$ROSEINSTALLDIR/lib:$BOOSTINSTALLDIR/lib:$JAVA_HOME/jre/lib/amd64/server

@@ -4,7 +4,7 @@
 
 # http://www.gnu.org/software/autoconf
 
-#/autom4te.cache
+/autom4te.cache
 #/aclocal.m4
 #/compile
 #/configure
@@ -13,7 +13,7 @@
 #/missing
 #/stamp-h1
 
-#/omega/autom4te.cache
+/omega/autom4te.cache
 #/omega/aclocal.m4
 #/omega/compile
 #/omega/depcomp

@@ -281,14 +281,14 @@ int main( int argc, char* argv[] )
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CUDA-CHiLL v0.2.0 (built on %s)\n", CHILL_BUILD_DATE);
+    printf("CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
     printf("Copyright (C) 2008 University of Southern California\n");
     printf("Copyright (C) 2009-2012 University of Utah\n");
     //is_interactive = true; // let the lua interpreter know.
     fflush(stdout);
     // TODO: read lines of python code.
     //Not sure if we should set fail from interactive mode
-    printf("CUDA-CHiLL ending...\n");
+    printf("CHiLL ending...\n");
     fflush(stdout);
   }
 
@@ -336,7 +336,7 @@ int main( int argc, char* argv[] )
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CUDA-CHiLL v0.2.0 (built on %s)\n", CHILL_BUILD_DATE);
+    printf("CUDA-CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
     printf("Copyright (C) 2008 University of Southern California\n");
     printf("Copyright (C) 2009-2012 University of Utah\n");
     is_interactive = true; // let the lua interpreter know.
@@ -359,7 +359,6 @@ int main( int argc, char* argv[] )
     #endif
     #ifdef BUILD_ROSE
     ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
-    ((IR_roseCode*)(ir_code))->finalizeRose();
     #elif BUILD_SUIF
     ((IR_cudasuifCode *)(ir_code))->commit_loop(myloop, lnum);
     #endif
@@ -375,16 +374,14 @@ int main( int argc, char* argv[] )
     lnum_end = get_loop_num_end(L);
     DEBUG_PRINT("calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
-    
+#endif
     #ifdef BUILD_ROSE
     finalize_loop(lnum_start, lnum_end);
     //((IR_roseCode*)(ir_cide))->commit_loop(myloop, lnum);
     ((IR_roseCode*)(ir_code))->finalizeRose();
-    #elif BUILD_SUIF
-    ((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
+    //#elif BUILD_SUIF
+    //((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
     #endif
-    
-#endif
     delete ir_code;
   }
 #ifdef PYTHON

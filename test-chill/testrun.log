@@ -1,0 +1,16 @@
+Test Run By bobw on Mon Sep 21 12:59:26 2015
+Native configuration is x86_64-unknown-linux-gnu
+
+		===  tests ===
+
+Schedule of variations:
+    unix
+
+Running target unix
+Using /usr/local/share/dejagnu/baseboards/unix.exp as board description file for target.
+Using /usr/local/share/dejagnu/config/unix.exp as generic interface file for target.
+WARNING: Couldn't find tool config file for unix, using default.
+
+		===  Summary ===
+
+runtest completed at Mon Sep 21 12:59:26 2015

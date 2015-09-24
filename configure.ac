@@ -1,6 +1,6 @@
 AC_INIT([chill],[0.2.1])
 AC_CONFIG_AUX_DIR([.])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 #AC_SUBST([prefix],["$(pwd)/bin"])
 
@@ -8,6 +8,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_SUBST([CCLD],["$""(CXX)"])
 AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.1\\\""])
 
+AM_PROG_AC
 AM_PROG_LEX
 AC_PROG_CC
 AC_PROG_CXX
@@ -87,16 +88,18 @@ AC_ARG_WITH([lua],[
 
 AS_IF([test "x$interface_lang" == xdefault],[
     AS_IF([test "x$enable_cuda" == xyes],[
-        AC_SUBST([use_python],[no])
-        AC_SUBST([use_lua],[yes])
+        AC_SUBST([use_python],[yes])
+        AC_SUBST([use_lua],[no])
         ],[
-        AC_SUBST([use_python],[no])
+        AC_SUBST([use_python],[yes])
         AC_SUBST([use_lua],[no])])],[])
 
 AS_IF([test "x$interface_lang" == xlua],[
+    AC_SUBST([use_python],[no])
     AC_SUBST([use_lua],[yes])],[])
 AS_IF([test "x$interface_lang" == xpython],[
-    AC_SUBST([use_python],[yes])],[])
+    AC_SUBST([use_python],[yes])
+    AC_SUBST([use_lua],[no])],[])
 
 AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" == xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" == xyes])
