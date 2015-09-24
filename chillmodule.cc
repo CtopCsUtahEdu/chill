@@ -1431,7 +1431,7 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
     int stmt_num = intArg(args, 1);
     int level = intArg(args, 2);
     std::vector<int> pi;
-    if(!tointvector(args, 2, pi))
+    if(!tointvector(args, 3, pi))
       throw std::runtime_error("the third argument in permute(stmt_num, level, pi) must be an int vector");
     myloop->permute(stmt_num, level, pi);
   }
@@ -1750,7 +1750,7 @@ static PyMethodDef ChillMethods[] = {
   {"print_space",         chill_print_space,         METH_VARARGS,    "print something or other "},
   {"add_sync",            chill_add_sync,            METH_VARARGS,    "add sync, whatever that is"},
   {"rename_index",        chill_rename_index,        METH_VARARGS,    "rename a loop index"},
-  {"permute",             chill_permute_v2,          METH_VARARGS,    "change the order of loops?"},
+  {"permute",             chill_permute,             METH_VARARGS,    "change the order of loops?"},
   {"tile3",               chill_tile_v2_3arg,        METH_VARARGS,    "something to do with tile"},
   {"tile7",               chill_tile_v2_7arg,        METH_VARARGS,    "something to do with tile"},
   {"thread_dims",         thread_dims,               METH_VARARGS,    "tx, ty, tz "},

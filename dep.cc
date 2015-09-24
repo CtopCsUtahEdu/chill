@@ -37,7 +37,7 @@ std::ostream& operator<<(std::ostream &os, const DependenceVector &d) {
   
   switch (d.type) {
   case DEP_W2R:
-    os << "flow";
+    os << "true";
     if (d.is_reduction)
       os << "_reduction";
     break;

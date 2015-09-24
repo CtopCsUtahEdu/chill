@@ -53,6 +53,7 @@ bool Loop::isInitialized() const {
 
 bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
                      std::vector<ir_tree_node *> &ir_stmt) {
+
   ir_stmt = extract_ir_stmts(ir_tree);
   stmt_nesting_level_.resize(ir_stmt.size());
   std::vector<int> stmt_nesting_level(ir_stmt.size());
