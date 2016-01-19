@@ -13,7 +13,7 @@ core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
 
 ## Core Includes ##
 core_includes  = -Iomega/include
-core_includes += -I$(ROSEHOME)/include/rose
+core_includes += -I$(ROSEHOME)/include
 core_includes += -I$(BOOSTHOME)/include
 
 

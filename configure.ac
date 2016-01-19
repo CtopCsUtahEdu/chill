@@ -67,44 +67,44 @@ AC_ARG_WITH([omega],[
     AC_SUBST([OMEGAHOME], [$withval])],[
     AC_SUBST([OMEGAHOME], ["$(pwd)/omega"])])
 
-#AC_ARG_WITH([python],[
-#    AS_HELP_STRING([--with-python],[set python as the interface languge])
-#    ],[
-#    AC_SUBST([interface_lang],[python])
-#    ],[
-#    AC_SUBST([interface_lang],[python])])
+AC_ARG_WITH([python],[
+    AS_HELP_STRING([--with-python],[set python as the interface languge])
+    ],[
+    AC_SUBST([interface_lang],[python])
+    ],[
+    AC_SUBST([interface_lang],[default])])
 
-#AC_ARG_WITH([lua],[
-#    AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
-#    AC_SUBST([LUAHOME], ["${LUAHOME}"])
-#    AC_SUBST([interface_lang], [lua])
-#    ],[
-#    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
+AC_ARG_WITH([lua],[
+    AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
+    AC_SUBST([LUAHOME], ["${LUAHOME}"])
+    AC_SUBST([interface_lang], [lua])
+    ],[
+    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
 
 #AC_ARG_WITH([interface],[
 #    AS_HELP_STRING([--with-interface],[select interface language])],[
 #    AC_SUBST([interface_lang],[$withval])],[
 #    AC_SUBST([interface_lang],[default])])
 
-#AS_IF([test "x$interface_lang" == xdefault],[
-#    AS_IF([test "x$enable_cuda" == xyes],[
-#        AC_SUBST([use_python],[yes])
-#        AC_SUBST([use_lua],[no])
-#        AC_SUBST([interface_lang],[python])
-#        ],[
-#        AC_SUBST([use_python],[yes])
-#        AC_SUBST([use_lua],[no])
-#        AC_SUBST([interface_lang],[python])])],[])
+AS_IF([test "x$interface_lang" == xdefault],[
+    AS_IF([test "x$enable_cuda" == xyes],[
+        AC_SUBST([use_python],[yes])
+        AC_SUBST([use_lua],[no])
+        AC_SUBST([interface_lang],[python])
+        ],[
+        AC_SUBST([use_python],[yes])
+        AC_SUBST([use_lua],[no])
+        AC_SUBST([interface_lang],[python])])],[])
 
-#AS_IF([test "x$interface_lang" == xlua],[
-#    AC_SUBST([use_python],[no])
-#    AC_SUBST([use_lua],[yes])],[])
-#AS_IF([test "x$interface_lang" == xpython],[
-#    AC_SUBST([use_python],[yes])
-#    AC_SUBST([use_lua],[no])],[])
+AS_IF([test "x$interface_lang" == xlua],[
+    AC_SUBST([use_python],[no])
+    AC_SUBST([use_lua],[yes])],[])
+AS_IF([test "x$interface_lang" == xpython],[
+    AC_SUBST([use_python],[yes])
+    AC_SUBST([use_lua],[no])],[])
 
-AM_CONDITIONAL([PYTHON_OPT],[test 1 = 1])
-AM_CONDITIONAL([LUA_OPT],[test 1 = 0])
+AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
+AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
