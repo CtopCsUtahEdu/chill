@@ -269,7 +269,7 @@ libcodegen_a_SOURCES = ../src/codegen.cc ../src/CG_stringBuilder.cc \
 	../src/CG.cc ../src/CG_utils.cc ../src/rose_attributes.cc \
 	../src/CG_roseRepr.cc ../src/CG_roseBuilder.cc
 libcodegen_a_CFLAGS = -Wno-write-strings
-libcodegen_a_CPPFLAGS = -I../include -I../../omega_lib/include -I$(ROSEHOME)/include -I$(BOOSTHOME)/include
+libcodegen_a_CPPFLAGS = -I../include -I../../omega_lib/include -I$(ROSEHOME)/include/rose -I$(BOOSTHOME)/include
 all: all-am
 
 .SUFFIXES:

@@ -4,7 +4,7 @@ build_date = "\"`date +%m/%d/%Y`\""
 ## Core Libraries ##
 core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl
 core_libs    += -lboost_date_time -lboost_filesystem -lboost_program_options
-core_libs    += -lboost_regex -lboost_system -lboost_thread -lboost_wave
+core_libs    += -lboost_regex -lboost_system -lboost_wave -lboost_iostreams
 
 core_libdirs  = -Lomega/code_gen/obj -Lomega/omega_lib/obj
 core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
@@ -12,7 +12,8 @@ core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
 
 
 ## Core Includes ##
-core_includes  = -Iomega/include -I$(ROSEHOME)/include
+core_includes  = -Iomega/include
+core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
 
 

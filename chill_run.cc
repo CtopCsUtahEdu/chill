@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "chill_env.hh"
+//#include "chill_env.hh"
 
 #include "loop.hh"
 #include <omega.h>
