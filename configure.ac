@@ -90,9 +90,11 @@ AS_IF([test "x$interface_lang" == xdefault],[
     AS_IF([test "x$enable_cuda" == xyes],[
         AC_SUBST([use_python],[yes])
         AC_SUBST([use_lua],[no])
+        AC_SUBST([interface_lang],[python])
         ],[
         AC_SUBST([use_python],[yes])
-        AC_SUBST([use_lua],[no])])],[])
+        AC_SUBST([use_lua],[no])
+        AC_SUBST([interface_lang],[python])])],[])
 
 AS_IF([test "x$interface_lang" == xlua],[
     AC_SUBST([use_python],[no])
@@ -101,8 +103,8 @@ AS_IF([test "x$interface_lang" == xpython],[
     AC_SUBST([use_python],[yes])
     AC_SUBST([use_lua],[no])],[])
 
-AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" == xyes])
-AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" == xyes])
+AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
+AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])

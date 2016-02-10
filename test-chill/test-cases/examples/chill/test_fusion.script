@@ -1,0 +1,7 @@
+source: test_fusion.c
+procedure: main
+loop: 0
+original()
+fuse([0,1],2)
+print
+

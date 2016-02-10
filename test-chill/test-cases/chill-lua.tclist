@@ -1,0 +1,19 @@
+
+#chill-testcase  test-cases/chill/test_distribute.lua    test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_fuse.lua          test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_known.lua         test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_original.lua      test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_peel.lua          test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_permute.lua       test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_print_code.lua    test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_print_dep.lua     test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_print_space.lua   test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_reverse.lua       test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_scale.lua         test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_shift.lua         test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_shift_to.lua      test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_skew.lua          test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_tile.lua          test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_unroll_extra.lua  test-cases/chill/mm.c  --check-run-script
+#chill-testcase  test-cases/chill/test_unroll.lua        test-cases/chill/mm.c  --check-run-script
+
