@@ -1,22 +1,23 @@
 # http://www.gnu.org/software/automake
 
-#Makefile.in
+Makefile.in
+Makefile
 
 # http://www.gnu.org/software/autoconf
 
 /autom4te.cache
-#/aclocal.m4
-#/compile
-#/configure
-#/depcomp
-#/install-sh
-#/missing
-#/stamp-h1
+/aclocal.m4
+/compile
+/configure
+/depcomp
+/install-sh
+/missing
+/stamp-h1
 
 /omega/autom4te.cache
-#/omega/aclocal.m4
-#/omega/compile
-#/omega/depcomp
-#/omega/install-sh
-#/omega/missing
+/omega/aclocal.m4
+/omega/compile
+/omega/depcomp
+/omega/install-sh
+/omega/missing
 
