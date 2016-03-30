@@ -2,45 +2,57 @@ SUBDIRS = omega/omega_lib/obj omega/code_gen/obj
 build_date = "\"`date +%m/%d/%Y`\""
 
 ## Core Libraries ##
-core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl
+core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl -lisl
 core_libs    += -lboost_date_time -lboost_filesystem -lboost_program_options
 core_libs    += -lboost_regex -lboost_system -lboost_wave -lboost_iostreams
+#core_libs    += -liegenlib
 
 core_libdirs  = -Lomega/code_gen/obj -Lomega/omega_lib/obj
 core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
+#core_libdirs += -L$(IEGENHOME)/iegen/lib
 
 
 
 ## Core Includes ##
 core_includes  = -Iomega/include
-core_includes += -I$(ROSEHOME)/include
+core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
+#core_includes += -I$(IEGENHOME)/iegen/include/iegenlib
 
 
 ## Source ##
 # Core #
-core_src  = dep.cc
+core_src  = calculator_eval.cc
+core_src += chill_ast.cc
+core_src += dep.cc
 core_src += irtools.cc
 core_src += loop.cc
 core_src += loop_basic.cc
 core_src += loop_datacopy.cc
 core_src += loop_extra.cc
+core_src += loop_ghostcells.cc
+core_src += loop_stencil.cc
 core_src += loop_tile.cc
 core_src += loop_unroll.cc
 core_src += omegatools.cc
+core_src += stencil.cc
 
 # chill #
 # cudachill #
 cudachill_src  = mem_mapping_utils.cc
-cudachill_src += loop_cuda_rose.cc
+cudachill_src += loop_cuda.cc
+cudachill_src += loop_cuda_chill.cc
+#cudachill_src += loop_cuda_rose.cc
 
 # IR #
 #  chill
-ir_chill_src      = ir_rose.cc
+ir_chill_src      = ir_chill.cc
+ir_chill_src     += ir_rose.cc
 ir_chill_src     += ir_rose_utils.cc
 
 #  cudachill
-ir_cudachill_src  = ir_rose.cc
+ir_cudachill_src  = ir_chill.cc
+ir_cudachill_src += ir_rose.cc
 ir_cudachill_src += ir_rose_utils.cc
 ir_cudachill_src += ir_cudarose.cc
 ir_cudachill_src += ir_cuda_rose_utils.cc
@@ -116,7 +128,7 @@ parse_expr.tab.cc: parse_expr.yy
 ## Common ##
 common_cppflags  = $(core_includes) $(runner_includes)
 common_cppflags += $(runner_flags)
-common_cppflags += -DBUILD_ROSE
+common_cppflags += -DBUILD_ROSE -DFRONTEND_ROSE
 common_libs      = $(core_libs) $(runner_libs)
 common_libdirs   = $(core_libdirs) $(runner_libdirs)
 

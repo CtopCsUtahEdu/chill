@@ -8,46 +8,33 @@
 
 std::string tmp_e();
 
-void exp2formula(IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
+void exp2formula(IR_Code *ir, 
+                 omega::Relation &r, 
+                 omega::F_And *f_root,
                  std::vector<omega::Free_Var_Decl *> &freevars,
-                 omega::CG_outputRepr *repr, omega::Variable_ID lhs, char side,
-                 IR_CONDITION_TYPE rel, bool destroy);
+                 omega::CG_outputRepr *repr, 
+                 omega::Variable_ID lhs, 
+                 char side,
+                 IR_CONDITION_TYPE rel, 
+                 bool destroy,  
+                 std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
+                 std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
+
 omega::Relation arrays2relation(IR_Code *ir, std::vector<omega::Free_Var_Decl*> &freevars,
                                 const IR_ArrayRef *ref_src, const omega::Relation &IS_w,
-                                const IR_ArrayRef *ref_dst, const omega::Relation &IS_r);
+                                const IR_ArrayRef *ref_dst, const omega::Relation &IS_r,  
+                                std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
+                                std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
+
 std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relation2dependences(
-  const IR_ArrayRef *ref_src, const IR_ArrayRef *ref_dst, const omega::Relation &r);
+                                                                                              const IR_ArrayRef *ref_src, const IR_ArrayRef *ref_dst, const omega::Relation &r);
 
 void exp2constraint(IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
                     std::vector<omega::Free_Var_Decl *> &freevars,
-                    omega::CG_outputRepr *repr, bool destroy);
+                    omega::CG_outputRepr *repr, bool destroy,  
+                    std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
+                    std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
 
-// suif legacy code
-// void suif2formula(Relation &r, F_And *f_root,
-//                   std::vector<Free_Var_Decl*> &freevars,
-//                   operand op, Variable_ID lhs,
-//                   char side, char rel);
-// void suif2formula(Relation &r, F_And *f_root,
-//                   std::vector<Free_Var_Decl*> &freevars,
-//                   instruction *ins, Variable_ID lhs,
-//                   char side, char rel);
-// void add_loop_stride_constraints(omega::Relation &r, omega::F_And *f_root,
-//                                  std::vector<omega::Free_Var_Decl*> &freevars,
-//                                  tree_for *tnf, char side);
-// void add_loop_bound_constraints(IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
-//                                 std::vector<omega::Free_Var_Decl*> &freevars,
-//                                 tree_for *tnf,
-//                                 char upper_or_lower, char side, IR_CONDITION_TYPE rel);
-// Relation loop_iteration_space(std::vector<Free_Var_Decl*> &freevars,
-//                               tree_node *tn, std::vector<tree_for*> &loops);
-
-// Relation arrays2relation(std::vector<Free_Var_Decl*> &freevars,
-//                          in_array *ia_w, const Relation &IS1,
-//                          in_array *ia_r, const Relation &IS2);
-// std::vector<DependenceVector> relation2dependences(IR_Code *ir, in_array *ia_w,
-//                                                    in_array *ia_r, const Relation &r);
-
-// end of suif legacy code
 
 bool is_single_iteration(const omega::Relation &r, int dim);
 void assign_const(omega::Relation &r, int dim, int val);
@@ -63,6 +50,21 @@ void add_loop_stride(omega::Relation &r, const omega::Relation &bound, int dim, 
 bool is_inner_loop_depend_on_level(const omega::Relation &r, int level, const omega::Relation &known);
 // void adjust_loop_bound(omega::Relation &r, int dim, int adjustment, std::vector<omega::Free_Var_Decl *> globals = std::vector<omega::Free_Var_Decl *>());
 omega::Relation adjust_loop_bound(const omega::Relation &r, int level, int adjustment);
+bool lowerBoundIsZero(const omega::Relation &bound, int dim);
+omega::Relation and_with_relation_and_replace_var(const omega::Relation &R, omega::Variable_ID v1,
+                                                  omega::Relation &g);
+omega::Relation replicate_IS_and_add_at_pos(const omega::Relation &R, int level, omega::Relation &bound);
+omega::Relation replicate_IS_and_add_bound(const omega::Relation &R, int level, omega::Relation &bound) ;
+
+omega::CG_outputRepr * construct_int_floor(omega::CG_outputBuilder * ocg, const omega::Relation &R, const omega::GEQ_Handle &h, omega::Variable_ID v,const std::vector<std::pair<omega::CG_outputRepr *, int> > &assigned_on_the_fly,
+                                           std::map<std::string, std::vector<omega::CG_outputRepr *> > unin);
+//omega::CG_outputRepr * modified_output_subs_repr(omega::CG_outputBuilder * ocg, const omega::Relation &R, const omega::EQ_Handle &h, omega::Variable_ID v,const std::vector<std::pair<omega::CG_outputRepr *, int> > &assigned_on_the_fly,
+//    std::map<std::string, std::vector<omega::CG_outputRepr *> > unin);
+std::pair<omega::Relation, bool> replace_set_var_as_existential(const omega::Relation &R,int pos, std::vector<omega::Relation> &bound);
+omega::Relation replace_set_var_as_Global(const omega::Relation &R,int pos,std::vector<omega::Relation> &bound);
+omega::Relation replace_set_var_as_another_set_var(const omega::Relation &old_relation, const omega::Relation &new_relation, int old_pos, int new_pos);
+omega::Relation extract_upper_bound(const omega::Relation &R, omega::Variable_ID v1);
+
 // void adjust_loop_bound(Relation &r, int dim, int adjustment);
 // void adjust_loop_bound(Relation &r, int dim, Free_Var_Decl *global_var, int adjustment);
 // boolean is_private_statement(const omega::Relation &r, int dim);

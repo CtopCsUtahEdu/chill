@@ -37,15 +37,22 @@ std::ostream& operator<<(std::ostream &os, const DependenceVector &d) {
   
   switch (d.type) {
   case DEP_W2R:
-    os << "true";
+    os << "flow";
+    // Check for reduction implemetation correctness
     if (d.is_reduction)
       os << "_reduction";
     break;
   case DEP_R2W:
     os << "anti";
+    // TODO: Remove Check for reduction implemetation correctness
+    if (d.is_reduction)
+      os << "_reduction";
     break;
   case DEP_W2W:
     os << "output";
+    // TODO: Remove Check for reduction implemetation correctness
+    if (d.is_reduction)
+      os << "_reduction";
     break;
   case DEP_R2R:
     os << "input";
@@ -112,6 +119,7 @@ DependenceVector::DependenceVector(const DependenceVector &that) {
   quasi = that.quasi;
   is_scalar_dependence = that.is_scalar_dependence;
   is_reduction = that.is_reduction;
+  is_reduction_cand = that.is_reduction_cand; // Manu
 }
 
 DependenceVector &DependenceVector::operator=(const DependenceVector &that) {
@@ -127,6 +135,7 @@ DependenceVector &DependenceVector::operator=(const DependenceVector &that) {
     quasi = that.quasi;
     is_scalar_dependence = that.is_scalar_dependence;
     is_reduction = that.is_reduction;
+    is_reduction_cand = that.is_reduction_cand;
   }
   return *this;
 }
@@ -307,7 +316,7 @@ bool DependenceVector::isCarried(int dim, omega::coef_t distance) const {
 bool DependenceVector::canPermute(const std::vector<int> &pi) const {
   if (pi.size() != lbounds.size())
     throw std::invalid_argument(
-      "permute dimensionality do not match dependence space");
+                                "permute dimensionality do not match dependence space");
   
   for (int i = 0; i < pi.size(); i++) {
     if (lbounds[pi[i]] > 0)
@@ -348,10 +357,10 @@ std::vector<DependenceVector> DependenceVector::normalize() const {
 }
 
 std::vector<DependenceVector> DependenceVector::permute(
-  const std::vector<int> &pi) const {
+                                                        const std::vector<int> &pi) const {
   if (pi.size() != lbounds.size())
     throw std::invalid_argument(
-      "permute dimensionality do not match dependence space");
+                                "permute dimensionality do not match dependence space");
   
   const int n = lbounds.size();
   

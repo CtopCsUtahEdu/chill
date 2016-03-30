@@ -62,6 +62,13 @@ AC_ARG_WITH([boost],[
     ],[
     AC_SUBST([BOOSTHOME], ["${BOOSTHOME}"])])
 
+#AC_ARG_WITH([iegen],[
+#    AS_HELP_STRING([--with-iegen],[set path to iegenlib])
+#    ],[
+#    AC_SUBST([IEGENHOME], [$withval])
+#    ],[
+#    AC_SUBST([IEGENHOME], ["${IEGENHOME}"])])
+
 AC_ARG_WITH([omega],[
     AS_HELP_STRING([--with-omega],[set omega home])],[
     AC_SUBST([OMEGAHOME], [$withval])],[

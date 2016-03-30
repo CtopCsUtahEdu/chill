@@ -30,8 +30,8 @@ def make_local(argsns, arg_parser):
     
     util.mkdir_p(argsns.wd)
     util.mkdir_p(argsns.bin_dir)
-    util.shell('cp', [os.path.join(argsns.chill_dir, 'examples/cuda-chill/cudaize.lua'), argsns.wd])
-    util.shell('cp', [os.path.join(argsns.chill_dir, 'examples/cuda-chill/cudaize.py'), argsns.wd])
+    #util.shell('cp', ['test-cases/examples/cuda-chill/cudaize.lua', argsns.wd])
+    util.shell('cp', ['test-cases/examples/cuda-chill/cudaize.py', argsns.wd])
     
     for config in chill.ChillConfig.configs(argsns.chill_dir, argsns.bin_dir):
         build_testcase = chill.BuildChillTestCase(config, options={'coverage': argsns.chill_build_coverage}, coverage_set=argsns.coverage_set)
@@ -351,12 +351,12 @@ def args_to_tclist(args=sys.argv[1:], arg_parser=make_argparser(), argsns=None, 
 @util.callonce
 def main():
     coverage = gcov.GcovSet()
-    results = list(test.run(args_to_tclist(coverage_set=coverage)))
+    results = list(test.run(args_to_tclist(coverage_set=None)))
     test.pretty_print_results(results)
     util.rmtemp()
     
-    with open('coverage.pickle', 'wb') as f:
-        pickle.dump(coverage, f, 2)
+    #with open('coverage.pickle', 'wb') as f:
+    #    pickle.dump(coverage, f, 2)
     with open('testresults.pickle', 'wb') as f:
         pickle.dump(results, f, 2)
     

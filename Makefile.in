@@ -95,16 +95,21 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__chill_SOURCES_DIST = dep.cc irtools.cc loop.cc loop_basic.cc \
-	loop_datacopy.cc loop_extra.cc loop_tile.cc loop_unroll.cc \
-	omegatools.cc lex.yy.cc parser.tab.cc chill_run.cc \
-	chill_run_util.cc chill_env.cc parse_expr.yy.cc \
-	parse_expr.tab.cc chillmodule.cc ir_rose.cc ir_rose_utils.cc
-am__objects_1 = chill-dep.$(OBJEXT) chill-irtools.$(OBJEXT) \
-	chill-loop.$(OBJEXT) chill-loop_basic.$(OBJEXT) \
-	chill-loop_datacopy.$(OBJEXT) chill-loop_extra.$(OBJEXT) \
-	chill-loop_tile.$(OBJEXT) chill-loop_unroll.$(OBJEXT) \
-	chill-omegatools.$(OBJEXT)
+am__chill_SOURCES_DIST = calculator_eval.cc chill_ast.cc dep.cc \
+	irtools.cc loop.cc loop_basic.cc loop_datacopy.cc \
+	loop_extra.cc loop_ghostcells.cc loop_stencil.cc loop_tile.cc \
+	loop_unroll.cc omegatools.cc stencil.cc lex.yy.cc \
+	parser.tab.cc chill_run.cc chill_run_util.cc chill_env.cc \
+	parse_expr.yy.cc parse_expr.tab.cc chillmodule.cc ir_chill.cc \
+	ir_rose.cc ir_rose_utils.cc
+am__objects_1 = chill-calculator_eval.$(OBJEXT) \
+	chill-chill_ast.$(OBJEXT) chill-dep.$(OBJEXT) \
+	chill-irtools.$(OBJEXT) chill-loop.$(OBJEXT) \
+	chill-loop_basic.$(OBJEXT) chill-loop_datacopy.$(OBJEXT) \
+	chill-loop_extra.$(OBJEXT) chill-loop_ghostcells.$(OBJEXT) \
+	chill-loop_stencil.$(OBJEXT) chill-loop_tile.$(OBJEXT) \
+	chill-loop_unroll.$(OBJEXT) chill-omegatools.$(OBJEXT) \
+	chill-stencil.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = chill-lex.yy.$(OBJEXT) chill-parser.tab.$(OBJEXT)
 am__objects_4 = chill-chill_run.$(OBJEXT) \
@@ -118,7 +123,8 @@ am__objects_6 = chill-chill_run.$(OBJEXT) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@am__objects_7 = $(am__objects_4) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@	$(am__objects_5)
 @PYTHON_OPT_TRUE@am__objects_7 = $(am__objects_6) $(am__objects_5)
-am__objects_8 = chill-ir_rose.$(OBJEXT) chill-ir_rose_utils.$(OBJEXT)
+am__objects_8 = chill-ir_chill.$(OBJEXT) chill-ir_rose.$(OBJEXT) \
+	chill-ir_rose_utils.$(OBJEXT)
 am_chill_OBJECTS = $(am__objects_1) $(am__objects_7) $(am__objects_8)
 chill_OBJECTS = $(am_chill_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -126,17 +132,24 @@ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 chill_DEPENDENCIES = $(am__DEPENDENCIES_2)
 chill_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(chill_LDFLAGS) \
 	$(LDFLAGS) -o $@
-am__cudachill_SOURCES_DIST = dep.cc irtools.cc loop.cc loop_basic.cc \
-	loop_datacopy.cc loop_extra.cc loop_tile.cc loop_unroll.cc \
-	omegatools.cc chill_run.cc chill_run_util.cc chill_env.cc \
-	parse_expr.yy.cc parse_expr.tab.cc chillmodule.cc \
-	mem_mapping_utils.cc loop_cuda_rose.cc ir_rose.cc \
+am__cudachill_SOURCES_DIST = calculator_eval.cc chill_ast.cc dep.cc \
+	irtools.cc loop.cc loop_basic.cc loop_datacopy.cc \
+	loop_extra.cc loop_ghostcells.cc loop_stencil.cc loop_tile.cc \
+	loop_unroll.cc omegatools.cc stencil.cc chill_run.cc \
+	chill_run_util.cc chill_env.cc parse_expr.yy.cc \
+	parse_expr.tab.cc chillmodule.cc mem_mapping_utils.cc \
+	loop_cuda.cc loop_cuda_chill.cc ir_chill.cc ir_rose.cc \
 	ir_rose_utils.cc ir_cudarose.cc ir_cuda_rose_utils.cc
-am__objects_9 = cudachill-dep.$(OBJEXT) cudachill-irtools.$(OBJEXT) \
-	cudachill-loop.$(OBJEXT) cudachill-loop_basic.$(OBJEXT) \
+am__objects_9 = cudachill-calculator_eval.$(OBJEXT) \
+	cudachill-chill_ast.$(OBJEXT) cudachill-dep.$(OBJEXT) \
+	cudachill-irtools.$(OBJEXT) cudachill-loop.$(OBJEXT) \
+	cudachill-loop_basic.$(OBJEXT) \
 	cudachill-loop_datacopy.$(OBJEXT) \
-	cudachill-loop_extra.$(OBJEXT) cudachill-loop_tile.$(OBJEXT) \
-	cudachill-loop_unroll.$(OBJEXT) cudachill-omegatools.$(OBJEXT)
+	cudachill-loop_extra.$(OBJEXT) \
+	cudachill-loop_ghostcells.$(OBJEXT) \
+	cudachill-loop_stencil.$(OBJEXT) cudachill-loop_tile.$(OBJEXT) \
+	cudachill-loop_unroll.$(OBJEXT) cudachill-omegatools.$(OBJEXT) \
+	cudachill-stencil.$(OBJEXT)
 am__objects_10 = cudachill-chill_run.$(OBJEXT) \
 	cudachill-chill_run_util.$(OBJEXT) \
 	cudachill-chill_env.$(OBJEXT)
@@ -149,9 +162,10 @@ am__objects_12 = cudachill-chill_run.$(OBJEXT) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@	$(am__objects_11)
 @PYTHON_OPT_TRUE@am__objects_13 = $(am__objects_12) $(am__objects_11)
 am__objects_14 = cudachill-mem_mapping_utils.$(OBJEXT) \
-	cudachill-loop_cuda_rose.$(OBJEXT)
-am__objects_15 = cudachill-ir_rose.$(OBJEXT) \
-	cudachill-ir_rose_utils.$(OBJEXT) \
+	cudachill-loop_cuda.$(OBJEXT) \
+	cudachill-loop_cuda_chill.$(OBJEXT)
+am__objects_15 = cudachill-ir_chill.$(OBJEXT) \
+	cudachill-ir_rose.$(OBJEXT) cudachill-ir_rose_utils.$(OBJEXT) \
 	cudachill-ir_cudarose.$(OBJEXT) \
 	cudachill-ir_cuda_rose_utils.$(OBJEXT)
 am_cudachill_OBJECTS = $(am__objects_9) $(am__objects_13) \
@@ -315,6 +329,7 @@ LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
+LUAHOME = @LUAHOME@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
 OBJEXT = @OBJEXT@
@@ -368,6 +383,7 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
+interface_lang = @interface_lang@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -393,31 +409,39 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+use_lua = @use_lua@
+use_python = @use_python@
 SUBDIRS = omega/omega_lib/obj omega/code_gen/obj
 build_date = "\"`date +%m/%d/%Y`\""
-core_libs = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl \
+core_libs = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl -lisl \
 	-lboost_date_time -lboost_filesystem -lboost_program_options \
 	-lboost_regex -lboost_system -lboost_wave -lboost_iostreams
+#core_libs    += -liegenlib
 core_libdirs = -Lomega/code_gen/obj -Lomega/omega_lib/obj \
 	-L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
+#core_libdirs += -L$(IEGENHOME)/iegen/lib
 core_includes = -Iomega/include -I$(ROSEHOME)/include/rose \
 	-I$(BOOSTHOME)/include
+#core_includes += -I$(IEGENHOME)/iegen/include/iegenlib
 
 # Core #
-core_src = dep.cc irtools.cc loop.cc loop_basic.cc loop_datacopy.cc \
-	loop_extra.cc loop_tile.cc loop_unroll.cc omegatools.cc
+core_src = calculator_eval.cc chill_ast.cc dep.cc irtools.cc loop.cc \
+	loop_basic.cc loop_datacopy.cc loop_extra.cc \
+	loop_ghostcells.cc loop_stencil.cc loop_tile.cc loop_unroll.cc \
+	omegatools.cc stencil.cc
 
 # chill #
 # cudachill #
-cudachill_src = mem_mapping_utils.cc loop_cuda_rose.cc
+cudachill_src = mem_mapping_utils.cc loop_cuda.cc loop_cuda_chill.cc
+#cudachill_src += loop_cuda_rose.cc
 
 # IR #
 #  chill
-ir_chill_src = ir_rose.cc ir_rose_utils.cc
+ir_chill_src = ir_chill.cc ir_rose.cc ir_rose_utils.cc
 
 #  cudachill
-ir_cudachill_src = ir_rose.cc ir_rose_utils.cc ir_cudarose.cc \
-	ir_cuda_rose_utils.cc
+ir_cudachill_src = ir_chill.cc ir_rose.cc ir_rose_utils.cc \
+	ir_cudarose.cc ir_cuda_rose_utils.cc
 
 # runner (interface) #
 #  cc
@@ -460,7 +484,7 @@ chill_python_yacc_src = parse_expr.yy.cc parse_expr.tab.cc
 BUILT_SOURCES = $(yacc_src)
 AM_YFLAGS = -d -t
 common_cppflags = $(core_includes) $(runner_includes) $(runner_flags) \
-	-DBUILD_ROSE
+	-DBUILD_ROSE -DFRONTEND_ROSE
 common_libs = $(core_libs) $(runner_libs)
 common_libdirs = $(core_libdirs) $(runner_libdirs)
 cudachill_CPPFLAGS = -DCUDACHILL $(common_cppflags)
@@ -582,11 +606,14 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-calculator_eval.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-chill_ast.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-chill_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-chill_run.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-chill_run_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-chillmodule.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-dep.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-ir_chill.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-ir_rose.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-ir_rose_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-irtools.Po@am__quote@
@@ -595,17 +622,23 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_datacopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_extra.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_ghostcells.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_unroll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-omegatools.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-parse_expr.tab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-parse_expr.yy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-parser.tab.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-stencil.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-calculator_eval.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-chill_ast.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-chill_env.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-chill_run.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-chill_run_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-chillmodule.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-dep.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-ir_chill.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-ir_cuda_rose_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-ir_cudarose.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-ir_rose.Po@am__quote@
@@ -613,15 +646,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-irtools.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_basic.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_cuda_rose.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_cuda.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_cuda_chill.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_datacopy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_extra.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_ghostcells.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_stencil.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-loop_unroll.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-mem_mapping_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-omegatools.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-parse_expr.tab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-parse_expr.yy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cudachill-stencil.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -638,6 +675,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+chill-calculator_eval.o: calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-calculator_eval.o -MD -MP -MF $(DEPDIR)/chill-calculator_eval.Tpo -c -o chill-calculator_eval.o `test -f 'calculator_eval.cc' || echo '$(srcdir)/'`calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-calculator_eval.Tpo $(DEPDIR)/chill-calculator_eval.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='calculator_eval.cc' object='chill-calculator_eval.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-calculator_eval.o `test -f 'calculator_eval.cc' || echo '$(srcdir)/'`calculator_eval.cc
+
+chill-calculator_eval.obj: calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-calculator_eval.obj -MD -MP -MF $(DEPDIR)/chill-calculator_eval.Tpo -c -o chill-calculator_eval.obj `if test -f 'calculator_eval.cc'; then $(CYGPATH_W) 'calculator_eval.cc'; else $(CYGPATH_W) '$(srcdir)/calculator_eval.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-calculator_eval.Tpo $(DEPDIR)/chill-calculator_eval.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='calculator_eval.cc' object='chill-calculator_eval.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-calculator_eval.obj `if test -f 'calculator_eval.cc'; then $(CYGPATH_W) 'calculator_eval.cc'; else $(CYGPATH_W) '$(srcdir)/calculator_eval.cc'; fi`
+
+chill-chill_ast.o: chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-chill_ast.o -MD -MP -MF $(DEPDIR)/chill-chill_ast.Tpo -c -o chill-chill_ast.o `test -f 'chill_ast.cc' || echo '$(srcdir)/'`chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-chill_ast.Tpo $(DEPDIR)/chill-chill_ast.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='chill_ast.cc' object='chill-chill_ast.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-chill_ast.o `test -f 'chill_ast.cc' || echo '$(srcdir)/'`chill_ast.cc
+
+chill-chill_ast.obj: chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-chill_ast.obj -MD -MP -MF $(DEPDIR)/chill-chill_ast.Tpo -c -o chill-chill_ast.obj `if test -f 'chill_ast.cc'; then $(CYGPATH_W) 'chill_ast.cc'; else $(CYGPATH_W) '$(srcdir)/chill_ast.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-chill_ast.Tpo $(DEPDIR)/chill-chill_ast.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='chill_ast.cc' object='chill-chill_ast.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-chill_ast.obj `if test -f 'chill_ast.cc'; then $(CYGPATH_W) 'chill_ast.cc'; else $(CYGPATH_W) '$(srcdir)/chill_ast.cc'; fi`
 
 chill-dep.o: dep.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-dep.o -MD -MP -MF $(DEPDIR)/chill-dep.Tpo -c -o chill-dep.o `test -f 'dep.cc' || echo '$(srcdir)/'`dep.cc
@@ -723,6 +788,34 @@ chill-loop_extra.obj: loop_extra.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-loop_extra.obj `if test -f 'loop_extra.cc'; then $(CYGPATH_W) 'loop_extra.cc'; else $(CYGPATH_W) '$(srcdir)/loop_extra.cc'; fi`
 
+chill-loop_ghostcells.o: loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-loop_ghostcells.o -MD -MP -MF $(DEPDIR)/chill-loop_ghostcells.Tpo -c -o chill-loop_ghostcells.o `test -f 'loop_ghostcells.cc' || echo '$(srcdir)/'`loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-loop_ghostcells.Tpo $(DEPDIR)/chill-loop_ghostcells.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_ghostcells.cc' object='chill-loop_ghostcells.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-loop_ghostcells.o `test -f 'loop_ghostcells.cc' || echo '$(srcdir)/'`loop_ghostcells.cc
+
+chill-loop_ghostcells.obj: loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-loop_ghostcells.obj -MD -MP -MF $(DEPDIR)/chill-loop_ghostcells.Tpo -c -o chill-loop_ghostcells.obj `if test -f 'loop_ghostcells.cc'; then $(CYGPATH_W) 'loop_ghostcells.cc'; else $(CYGPATH_W) '$(srcdir)/loop_ghostcells.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-loop_ghostcells.Tpo $(DEPDIR)/chill-loop_ghostcells.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_ghostcells.cc' object='chill-loop_ghostcells.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-loop_ghostcells.obj `if test -f 'loop_ghostcells.cc'; then $(CYGPATH_W) 'loop_ghostcells.cc'; else $(CYGPATH_W) '$(srcdir)/loop_ghostcells.cc'; fi`
+
+chill-loop_stencil.o: loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-loop_stencil.o -MD -MP -MF $(DEPDIR)/chill-loop_stencil.Tpo -c -o chill-loop_stencil.o `test -f 'loop_stencil.cc' || echo '$(srcdir)/'`loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-loop_stencil.Tpo $(DEPDIR)/chill-loop_stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_stencil.cc' object='chill-loop_stencil.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-loop_stencil.o `test -f 'loop_stencil.cc' || echo '$(srcdir)/'`loop_stencil.cc
+
+chill-loop_stencil.obj: loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-loop_stencil.obj -MD -MP -MF $(DEPDIR)/chill-loop_stencil.Tpo -c -o chill-loop_stencil.obj `if test -f 'loop_stencil.cc'; then $(CYGPATH_W) 'loop_stencil.cc'; else $(CYGPATH_W) '$(srcdir)/loop_stencil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-loop_stencil.Tpo $(DEPDIR)/chill-loop_stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_stencil.cc' object='chill-loop_stencil.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-loop_stencil.obj `if test -f 'loop_stencil.cc'; then $(CYGPATH_W) 'loop_stencil.cc'; else $(CYGPATH_W) '$(srcdir)/loop_stencil.cc'; fi`
+
 chill-loop_tile.o: loop_tile.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-loop_tile.o -MD -MP -MF $(DEPDIR)/chill-loop_tile.Tpo -c -o chill-loop_tile.o `test -f 'loop_tile.cc' || echo '$(srcdir)/'`loop_tile.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-loop_tile.Tpo $(DEPDIR)/chill-loop_tile.Po
@@ -764,6 +857,20 @@ chill-omegatools.obj: omegatools.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='omegatools.cc' object='chill-omegatools.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-omegatools.obj `if test -f 'omegatools.cc'; then $(CYGPATH_W) 'omegatools.cc'; else $(CYGPATH_W) '$(srcdir)/omegatools.cc'; fi`
+
+chill-stencil.o: stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-stencil.o -MD -MP -MF $(DEPDIR)/chill-stencil.Tpo -c -o chill-stencil.o `test -f 'stencil.cc' || echo '$(srcdir)/'`stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-stencil.Tpo $(DEPDIR)/chill-stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='stencil.cc' object='chill-stencil.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-stencil.o `test -f 'stencil.cc' || echo '$(srcdir)/'`stencil.cc
+
+chill-stencil.obj: stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-stencil.obj -MD -MP -MF $(DEPDIR)/chill-stencil.Tpo -c -o chill-stencil.obj `if test -f 'stencil.cc'; then $(CYGPATH_W) 'stencil.cc'; else $(CYGPATH_W) '$(srcdir)/stencil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-stencil.Tpo $(DEPDIR)/chill-stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='stencil.cc' object='chill-stencil.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-stencil.obj `if test -f 'stencil.cc'; then $(CYGPATH_W) 'stencil.cc'; else $(CYGPATH_W) '$(srcdir)/stencil.cc'; fi`
 
 chill-lex.yy.o: lex.yy.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-lex.yy.o -MD -MP -MF $(DEPDIR)/chill-lex.yy.Tpo -c -o chill-lex.yy.o `test -f 'lex.yy.cc' || echo '$(srcdir)/'`lex.yy.cc
@@ -877,6 +984,20 @@ chill-chillmodule.obj: chillmodule.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-chillmodule.obj `if test -f 'chillmodule.cc'; then $(CYGPATH_W) 'chillmodule.cc'; else $(CYGPATH_W) '$(srcdir)/chillmodule.cc'; fi`
 
+chill-ir_chill.o: ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-ir_chill.o -MD -MP -MF $(DEPDIR)/chill-ir_chill.Tpo -c -o chill-ir_chill.o `test -f 'ir_chill.cc' || echo '$(srcdir)/'`ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-ir_chill.Tpo $(DEPDIR)/chill-ir_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ir_chill.cc' object='chill-ir_chill.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-ir_chill.o `test -f 'ir_chill.cc' || echo '$(srcdir)/'`ir_chill.cc
+
+chill-ir_chill.obj: ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-ir_chill.obj -MD -MP -MF $(DEPDIR)/chill-ir_chill.Tpo -c -o chill-ir_chill.obj `if test -f 'ir_chill.cc'; then $(CYGPATH_W) 'ir_chill.cc'; else $(CYGPATH_W) '$(srcdir)/ir_chill.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-ir_chill.Tpo $(DEPDIR)/chill-ir_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ir_chill.cc' object='chill-ir_chill.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-ir_chill.obj `if test -f 'ir_chill.cc'; then $(CYGPATH_W) 'ir_chill.cc'; else $(CYGPATH_W) '$(srcdir)/ir_chill.cc'; fi`
+
 chill-ir_rose.o: ir_rose.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-ir_rose.o -MD -MP -MF $(DEPDIR)/chill-ir_rose.Tpo -c -o chill-ir_rose.o `test -f 'ir_rose.cc' || echo '$(srcdir)/'`ir_rose.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-ir_rose.Tpo $(DEPDIR)/chill-ir_rose.Po
@@ -904,6 +1025,34 @@ chill-ir_rose_utils.obj: ir_rose_utils.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ir_rose_utils.cc' object='chill-ir_rose_utils.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-ir_rose_utils.obj `if test -f 'ir_rose_utils.cc'; then $(CYGPATH_W) 'ir_rose_utils.cc'; else $(CYGPATH_W) '$(srcdir)/ir_rose_utils.cc'; fi`
+
+cudachill-calculator_eval.o: calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-calculator_eval.o -MD -MP -MF $(DEPDIR)/cudachill-calculator_eval.Tpo -c -o cudachill-calculator_eval.o `test -f 'calculator_eval.cc' || echo '$(srcdir)/'`calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-calculator_eval.Tpo $(DEPDIR)/cudachill-calculator_eval.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='calculator_eval.cc' object='cudachill-calculator_eval.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-calculator_eval.o `test -f 'calculator_eval.cc' || echo '$(srcdir)/'`calculator_eval.cc
+
+cudachill-calculator_eval.obj: calculator_eval.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-calculator_eval.obj -MD -MP -MF $(DEPDIR)/cudachill-calculator_eval.Tpo -c -o cudachill-calculator_eval.obj `if test -f 'calculator_eval.cc'; then $(CYGPATH_W) 'calculator_eval.cc'; else $(CYGPATH_W) '$(srcdir)/calculator_eval.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-calculator_eval.Tpo $(DEPDIR)/cudachill-calculator_eval.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='calculator_eval.cc' object='cudachill-calculator_eval.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-calculator_eval.obj `if test -f 'calculator_eval.cc'; then $(CYGPATH_W) 'calculator_eval.cc'; else $(CYGPATH_W) '$(srcdir)/calculator_eval.cc'; fi`
+
+cudachill-chill_ast.o: chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-chill_ast.o -MD -MP -MF $(DEPDIR)/cudachill-chill_ast.Tpo -c -o cudachill-chill_ast.o `test -f 'chill_ast.cc' || echo '$(srcdir)/'`chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-chill_ast.Tpo $(DEPDIR)/cudachill-chill_ast.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='chill_ast.cc' object='cudachill-chill_ast.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-chill_ast.o `test -f 'chill_ast.cc' || echo '$(srcdir)/'`chill_ast.cc
+
+cudachill-chill_ast.obj: chill_ast.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-chill_ast.obj -MD -MP -MF $(DEPDIR)/cudachill-chill_ast.Tpo -c -o cudachill-chill_ast.obj `if test -f 'chill_ast.cc'; then $(CYGPATH_W) 'chill_ast.cc'; else $(CYGPATH_W) '$(srcdir)/chill_ast.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-chill_ast.Tpo $(DEPDIR)/cudachill-chill_ast.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='chill_ast.cc' object='cudachill-chill_ast.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-chill_ast.obj `if test -f 'chill_ast.cc'; then $(CYGPATH_W) 'chill_ast.cc'; else $(CYGPATH_W) '$(srcdir)/chill_ast.cc'; fi`
 
 cudachill-dep.o: dep.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-dep.o -MD -MP -MF $(DEPDIR)/cudachill-dep.Tpo -c -o cudachill-dep.o `test -f 'dep.cc' || echo '$(srcdir)/'`dep.cc
@@ -989,6 +1138,34 @@ cudachill-loop_extra.obj: loop_extra.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_extra.obj `if test -f 'loop_extra.cc'; then $(CYGPATH_W) 'loop_extra.cc'; else $(CYGPATH_W) '$(srcdir)/loop_extra.cc'; fi`
 
+cudachill-loop_ghostcells.o: loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_ghostcells.o -MD -MP -MF $(DEPDIR)/cudachill-loop_ghostcells.Tpo -c -o cudachill-loop_ghostcells.o `test -f 'loop_ghostcells.cc' || echo '$(srcdir)/'`loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_ghostcells.Tpo $(DEPDIR)/cudachill-loop_ghostcells.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_ghostcells.cc' object='cudachill-loop_ghostcells.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_ghostcells.o `test -f 'loop_ghostcells.cc' || echo '$(srcdir)/'`loop_ghostcells.cc
+
+cudachill-loop_ghostcells.obj: loop_ghostcells.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_ghostcells.obj -MD -MP -MF $(DEPDIR)/cudachill-loop_ghostcells.Tpo -c -o cudachill-loop_ghostcells.obj `if test -f 'loop_ghostcells.cc'; then $(CYGPATH_W) 'loop_ghostcells.cc'; else $(CYGPATH_W) '$(srcdir)/loop_ghostcells.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_ghostcells.Tpo $(DEPDIR)/cudachill-loop_ghostcells.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_ghostcells.cc' object='cudachill-loop_ghostcells.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_ghostcells.obj `if test -f 'loop_ghostcells.cc'; then $(CYGPATH_W) 'loop_ghostcells.cc'; else $(CYGPATH_W) '$(srcdir)/loop_ghostcells.cc'; fi`
+
+cudachill-loop_stencil.o: loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_stencil.o -MD -MP -MF $(DEPDIR)/cudachill-loop_stencil.Tpo -c -o cudachill-loop_stencil.o `test -f 'loop_stencil.cc' || echo '$(srcdir)/'`loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_stencil.Tpo $(DEPDIR)/cudachill-loop_stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_stencil.cc' object='cudachill-loop_stencil.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_stencil.o `test -f 'loop_stencil.cc' || echo '$(srcdir)/'`loop_stencil.cc
+
+cudachill-loop_stencil.obj: loop_stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_stencil.obj -MD -MP -MF $(DEPDIR)/cudachill-loop_stencil.Tpo -c -o cudachill-loop_stencil.obj `if test -f 'loop_stencil.cc'; then $(CYGPATH_W) 'loop_stencil.cc'; else $(CYGPATH_W) '$(srcdir)/loop_stencil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_stencil.Tpo $(DEPDIR)/cudachill-loop_stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_stencil.cc' object='cudachill-loop_stencil.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_stencil.obj `if test -f 'loop_stencil.cc'; then $(CYGPATH_W) 'loop_stencil.cc'; else $(CYGPATH_W) '$(srcdir)/loop_stencil.cc'; fi`
+
 cudachill-loop_tile.o: loop_tile.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_tile.o -MD -MP -MF $(DEPDIR)/cudachill-loop_tile.Tpo -c -o cudachill-loop_tile.o `test -f 'loop_tile.cc' || echo '$(srcdir)/'`loop_tile.cc
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_tile.Tpo $(DEPDIR)/cudachill-loop_tile.Po
@@ -1030,6 +1207,20 @@ cudachill-omegatools.obj: omegatools.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='omegatools.cc' object='cudachill-omegatools.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-omegatools.obj `if test -f 'omegatools.cc'; then $(CYGPATH_W) 'omegatools.cc'; else $(CYGPATH_W) '$(srcdir)/omegatools.cc'; fi`
+
+cudachill-stencil.o: stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-stencil.o -MD -MP -MF $(DEPDIR)/cudachill-stencil.Tpo -c -o cudachill-stencil.o `test -f 'stencil.cc' || echo '$(srcdir)/'`stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-stencil.Tpo $(DEPDIR)/cudachill-stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='stencil.cc' object='cudachill-stencil.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-stencil.o `test -f 'stencil.cc' || echo '$(srcdir)/'`stencil.cc
+
+cudachill-stencil.obj: stencil.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-stencil.obj -MD -MP -MF $(DEPDIR)/cudachill-stencil.Tpo -c -o cudachill-stencil.obj `if test -f 'stencil.cc'; then $(CYGPATH_W) 'stencil.cc'; else $(CYGPATH_W) '$(srcdir)/stencil.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-stencil.Tpo $(DEPDIR)/cudachill-stencil.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='stencil.cc' object='cudachill-stencil.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-stencil.obj `if test -f 'stencil.cc'; then $(CYGPATH_W) 'stencil.cc'; else $(CYGPATH_W) '$(srcdir)/stencil.cc'; fi`
 
 cudachill-chill_run.o: chill_run.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-chill_run.o -MD -MP -MF $(DEPDIR)/cudachill-chill_run.Tpo -c -o cudachill-chill_run.o `test -f 'chill_run.cc' || echo '$(srcdir)/'`chill_run.cc
@@ -1129,19 +1320,47 @@ cudachill-mem_mapping_utils.obj: mem_mapping_utils.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-mem_mapping_utils.obj `if test -f 'mem_mapping_utils.cc'; then $(CYGPATH_W) 'mem_mapping_utils.cc'; else $(CYGPATH_W) '$(srcdir)/mem_mapping_utils.cc'; fi`
 
-cudachill-loop_cuda_rose.o: loop_cuda_rose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda_rose.o -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda_rose.Tpo -c -o cudachill-loop_cuda_rose.o `test -f 'loop_cuda_rose.cc' || echo '$(srcdir)/'`loop_cuda_rose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda_rose.Tpo $(DEPDIR)/cudachill-loop_cuda_rose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda_rose.cc' object='cudachill-loop_cuda_rose.o' libtool=no @AMDEPBACKSLASH@
+cudachill-loop_cuda.o: loop_cuda.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda.o -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda.Tpo -c -o cudachill-loop_cuda.o `test -f 'loop_cuda.cc' || echo '$(srcdir)/'`loop_cuda.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda.Tpo $(DEPDIR)/cudachill-loop_cuda.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda.cc' object='cudachill-loop_cuda.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda_rose.o `test -f 'loop_cuda_rose.cc' || echo '$(srcdir)/'`loop_cuda_rose.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda.o `test -f 'loop_cuda.cc' || echo '$(srcdir)/'`loop_cuda.cc
 
-cudachill-loop_cuda_rose.obj: loop_cuda_rose.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda_rose.obj -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda_rose.Tpo -c -o cudachill-loop_cuda_rose.obj `if test -f 'loop_cuda_rose.cc'; then $(CYGPATH_W) 'loop_cuda_rose.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda_rose.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda_rose.Tpo $(DEPDIR)/cudachill-loop_cuda_rose.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda_rose.cc' object='cudachill-loop_cuda_rose.obj' libtool=no @AMDEPBACKSLASH@
+cudachill-loop_cuda.obj: loop_cuda.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda.obj -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda.Tpo -c -o cudachill-loop_cuda.obj `if test -f 'loop_cuda.cc'; then $(CYGPATH_W) 'loop_cuda.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda.Tpo $(DEPDIR)/cudachill-loop_cuda.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda.cc' object='cudachill-loop_cuda.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda_rose.obj `if test -f 'loop_cuda_rose.cc'; then $(CYGPATH_W) 'loop_cuda_rose.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda_rose.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda.obj `if test -f 'loop_cuda.cc'; then $(CYGPATH_W) 'loop_cuda.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda.cc'; fi`
+
+cudachill-loop_cuda_chill.o: loop_cuda_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda_chill.o -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda_chill.Tpo -c -o cudachill-loop_cuda_chill.o `test -f 'loop_cuda_chill.cc' || echo '$(srcdir)/'`loop_cuda_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda_chill.Tpo $(DEPDIR)/cudachill-loop_cuda_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda_chill.cc' object='cudachill-loop_cuda_chill.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda_chill.o `test -f 'loop_cuda_chill.cc' || echo '$(srcdir)/'`loop_cuda_chill.cc
+
+cudachill-loop_cuda_chill.obj: loop_cuda_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-loop_cuda_chill.obj -MD -MP -MF $(DEPDIR)/cudachill-loop_cuda_chill.Tpo -c -o cudachill-loop_cuda_chill.obj `if test -f 'loop_cuda_chill.cc'; then $(CYGPATH_W) 'loop_cuda_chill.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda_chill.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-loop_cuda_chill.Tpo $(DEPDIR)/cudachill-loop_cuda_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='loop_cuda_chill.cc' object='cudachill-loop_cuda_chill.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-loop_cuda_chill.obj `if test -f 'loop_cuda_chill.cc'; then $(CYGPATH_W) 'loop_cuda_chill.cc'; else $(CYGPATH_W) '$(srcdir)/loop_cuda_chill.cc'; fi`
+
+cudachill-ir_chill.o: ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-ir_chill.o -MD -MP -MF $(DEPDIR)/cudachill-ir_chill.Tpo -c -o cudachill-ir_chill.o `test -f 'ir_chill.cc' || echo '$(srcdir)/'`ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-ir_chill.Tpo $(DEPDIR)/cudachill-ir_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ir_chill.cc' object='cudachill-ir_chill.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-ir_chill.o `test -f 'ir_chill.cc' || echo '$(srcdir)/'`ir_chill.cc
+
+cudachill-ir_chill.obj: ir_chill.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-ir_chill.obj -MD -MP -MF $(DEPDIR)/cudachill-ir_chill.Tpo -c -o cudachill-ir_chill.obj `if test -f 'ir_chill.cc'; then $(CYGPATH_W) 'ir_chill.cc'; else $(CYGPATH_W) '$(srcdir)/ir_chill.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/cudachill-ir_chill.Tpo $(DEPDIR)/cudachill-ir_chill.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='ir_chill.cc' object='cudachill-ir_chill.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cudachill-ir_chill.obj `if test -f 'ir_chill.cc'; then $(CYGPATH_W) 'ir_chill.cc'; else $(CYGPATH_W) '$(srcdir)/ir_chill.cc'; fi`
 
 cudachill-ir_rose.o: ir_rose.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(cudachill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cudachill-ir_rose.o -MD -MP -MF $(DEPDIR)/cudachill-ir_rose.Tpo -c -o cudachill-ir_rose.o `test -f 'ir_rose.cc' || echo '$(srcdir)/'`ir_rose.cc

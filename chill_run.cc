@@ -1,4 +1,9 @@
+//#define PYTHON 1 
+// uncomment above line to have python interpret something.lua transformation files
+// TODO: put in Makefile?
+
 #include "chilldebug.h"
+
 
 // this is a little messy. the Makefile should be able to define one or the other
 #ifndef PYTHON
@@ -12,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-//#include "chill_env.hh"
+#include "chill_env.hh"
 
 #include "loop.hh"
 #include <omega.h>
@@ -20,20 +25,16 @@
 
 #ifdef CUDACHILL
 
-#ifdef BUILD_ROSE
-#include "loop_cuda_rose.hh"
+#ifdef FRONTEND_ROSE
+//#include "loop_cuda_rose.hh"
+#include "loop_cuda_chill.hh"
 #include "ir_cudarose.hh"
-#elif BUILD_SUIF
-#include "loop_cuda.hh"
-#include "ir_cudasuif.hh"
 #endif
 
 #else
 
-#ifdef BUILD_ROSE
+#ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
-#elif BUILD_SUIF
-#include "ir_suif.hh"
 #endif
 
 #endif
@@ -119,7 +120,7 @@ static int traceback (lua_State *L) {
 
 
 static int docall (lua_State *L, int narg, int clear) {
-  DEBUG_PRINT("\ndocall()\n"); 
+  DEBUG_PRINT("\ndocall() narg %d  clear %d\n", narg, clear); 
   int status;
   int base = lua_gettop(L) - narg;  /* function index */
   lua_pushcfunction(L, traceback);  /* push traceback function */
@@ -128,7 +129,11 @@ static int docall (lua_State *L, int narg, int clear) {
   
   DEBUG_PRINT("status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);\n"); 
   
+  fprintf(stderr, "chill_run.cc L122\n"); 
+
   status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
+  fprintf(stderr, "docall will return status %d\n", status); 
+
   signal(SIGINT, SIG_DFL);
   lua_remove(L, base);  /* remove traceback function */
   /* force a complete garbage collection in case of errors */
@@ -137,7 +142,17 @@ static int docall (lua_State *L, int narg, int clear) {
 }
 
 static int dofile (lua_State *L, const char *name) {
-  int status = luaL_loadfile(L, name) || docall(L, 0, 1);
+  // FORMERLY int status = luaL_loadfile(L, name) || docall(L, 0, 1);
+
+  fprintf(stderr,"dofile %s\n", name);
+  int status =  luaL_loadfile(L, name);
+  fprintf(stderr, "loadfile stat %d\n", status); 
+  
+  if (status == 0) { 
+    fprintf(stderr, "calling docall()\n");
+    status = docall(L, 0, 1);
+    fprintf(stderr, "docall status %d\n", status); 
+  }
   return report(L, status);
 }
 
@@ -247,6 +262,14 @@ int main( int argc, char* argv[] )
   int fail = 0;
   
 #ifdef PYTHON
+  // PYTHON version  (python interprets the transformation file )            
+  
+  //Operate on a single global IR_Code and Loop instance
+  ir_code = NULL;
+  myloop = NULL;
+  omega::initializeOmega();
+  DEBUG_PRINT("Omega initialized\n"); 
+  
   // Create PYTHON interpreter
   /* Pass argv[0] to the Python interpreter */
   Py_SetProgramName(argv[0]);
@@ -263,6 +286,7 @@ int main( int argc, char* argv[] )
     // file interpretlua.py  has routines to read the lua transformation file
     PyRun_SimpleString("from interpretlua import *");
     //DEBUG_PRINT("DONE calling python import of functions\n\n");
+
     char pythoncommand[800];
     sprintf(pythoncommand, "\n\ndopytransform(\"%s\")\0", argv[1]);
     //DEBUG_PRINT("in C, running python command '%s'\n", pythoncommand);
@@ -281,14 +305,14 @@ int main( int argc, char* argv[] )
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
+    printf("CUDA-CHiLL v0.2.0 (built on %s)\n", CHILL_BUILD_DATE);
     printf("Copyright (C) 2008 University of Southern California\n");
     printf("Copyright (C) 2009-2012 University of Utah\n");
     //is_interactive = true; // let the lua interpreter know.
     fflush(stdout);
     // TODO: read lines of python code.
     //Not sure if we should set fail from interactive mode
-    printf("CHiLL ending...\n");
+    printf("CUDA-CHiLL ending...\n");
     fflush(stdout);
   }
 
@@ -336,7 +360,7 @@ int main( int argc, char* argv[] )
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CUDA-CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
+    printf("CUDA-CHiLL v0.2.0 (built on %s)\n", CHILL_BUILD_DATE);
     printf("Copyright (C) 2008 University of Southern California\n");
     printf("Copyright (C) 2009-2012 University of Utah\n");
     is_interactive = true; // let the lua interpreter know.
@@ -348,21 +372,28 @@ int main( int argc, char* argv[] )
   }
 #endif
   
+  fprintf(stderr, "BIG IF\n"); 
+  fprintf(stderr, "fail %d\n", fail);
+  fprintf(stderr, "ir_code %p\n", ir_code);
+  fprintf(stderr, "myloop %p\n", myloop);
   
   if (!fail && ir_code != NULL && myloop != NULL && myloop->stmt.size() != 0 && !myloop->stmt[0].xform.is_null()) {
+    fprintf(stderr, "big if true\n"); 
 #ifdef CUDACHILL
+    fprintf(stderr, "CUDACHILL IS DEFINED\n"); 
     int lnum;
     #ifdef PYTHON
     lnum = 0;
     #else
     lnum = get_loop_num( L );
     #endif
-    #ifdef BUILD_ROSE
+    #ifdef FRONTEND_ROSE
+    //DEBUG_PRINT("calling ROSE code gen?   loop num %d\n", lnum); 
+    fprintf(stderr, "calling commit_loop()\n"); 
     ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
-    #elif BUILD_SUIF
-    ((IR_cudasuifCode *)(ir_code))->commit_loop(myloop, lnum);
     #endif
 #else
+    fprintf(stderr, "CUDACHILL IS NOT DEFINED\n"); 
     int lnum_start;
     int lnum_end;
     #ifdef PYTHON
@@ -375,15 +406,15 @@ int main( int argc, char* argv[] )
     DEBUG_PRINT("calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
 #endif
-    #ifdef BUILD_ROSE
-    finalize_loop(lnum_start, lnum_end);
+    #ifdef FRONTEND_ROSE
+    //finalize_loop(lnum_start, lnum_end);
     //((IR_roseCode*)(ir_cide))->commit_loop(myloop, lnum);
     ((IR_roseCode*)(ir_code))->finalizeRose();
-    //#elif BUILD_SUIF
-    //((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
     #endif
     delete ir_code;
   }
+  else     fprintf(stderr, "big if FALSE\n"); 
+
 #ifdef PYTHON
   Py_Finalize();
 #endif

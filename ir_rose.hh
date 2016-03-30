@@ -2,6 +2,10 @@
 #define IR_ROSE_HH
 
 #include <omega.h>
+#include <code_gen/CG_chillRepr.h>  // just for CreateArrayRefRepr.  probably a bad idea 
+
+#include "chill_ast.hh"  // needed now that we're going immediately from rose ast to chill ast 
+
 #include "ir_code.hh"
 #include "ir_rose_utils.hh"
 #include <AstInterface_ROSE.h>
@@ -10,15 +14,39 @@
 #include "VariableRenaming.h"
 #include "ssaUnfilteredCfg.h"
 #include "virtualCFG.h"
-#include <omega.h>
+
+
+// IR_roseCode is built on IR_chillCode
+#include "ir_chill.hh" 
+
+// fwd decl
+chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename ); 
+
+
+extern vector<chillAST_VarDecl *> VariableDeclarations; 
+extern vector<chillAST_FunctionDecl *> FunctionDeclarations; 
+
+// forward definitions. things defined in this file 
+struct IR_roseScalarSymbol; 
+struct IR_roseArraySymbol;  
+struct IR_rosePointerSymbol;
+//struct IR_roseConstantRef:  public IR_ConstantRef ;
+//struct IR_roseScalarRef:    public IR_ScalarRef ;
+//struct IR_roseArrayRef:     public IR_ArrayRef ;
+//struct IR_roseLoop:         public IR_Loop ;
+//struct IR_roseBlock:        public IR_chillBlock ;
+//struct IR_roseIf:           public IR_If ;
+//struct IR_roseCCast:        public IR_CCast; 
+
 
 struct IR_roseScalarSymbol: public IR_ScalarSymbol {
-  SgVariableSymbol* vs_;
-  
-  IR_roseScalarSymbol(const IR_Code *ir, SgVariableSymbol *vs) {
+  chillAST_VarDecl *chillvd; 
+  IR_roseScalarSymbol(const IR_Code *ir, chillAST_VarDecl *vd) {
+    //fprintf(stderr, "making ROSE scalar symbol %s\n", vd->varname); 
     ir_ = ir;
-    vs_ = vs;
+    chillvd = vd; // using chill internals ... 
   }
+  
   
   std::string name() const;
   int size() const;
@@ -26,23 +54,61 @@ struct IR_roseScalarSymbol: public IR_ScalarSymbol {
   IR_Symbol *clone() const;
 };
 
+
+
 struct IR_roseArraySymbol: public IR_ArraySymbol {
+  chillAST_VarDecl *chillvd; 
   
-  SgVariableSymbol* vs_;
-  
-  IR_roseArraySymbol(const IR_Code *ir, SgVariableSymbol* vs) {
-    ir_ = ir;
-    vs_ = vs;
+  IR_roseArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
+    //fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
+    ir_     = ir;
+    chillvd = vd; 
+    //fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
+    //offset_ = offset;
   }
-  std::string name() const;
+  virtual ~IR_roseArraySymbol() { /* fprintf(stderr, "deleting  IR_roseArraySymbol %p\n", this);*/ } 
+  
+  std::string name() const;  // IR_roseArraySymbol
   int elem_size() const;
   int n_dim() const;
-  omega::CG_outputRepr *size(int dim) const;
+  IR_CONSTANT_TYPE elem_type() const;
+  omega::CG_outputRepr *size(int dim) const;          // why not int ? 
   bool operator==(const IR_Symbol &that) const;
   IR_ARRAY_LAYOUT_TYPE layout_type() const;
   IR_Symbol *clone() const;
-  
 };
+
+
+struct IR_rosePointerSymbol: public IR_PointerSymbol {
+  chillAST_VarDecl *chillvd; 
+
+  std::string name_;  // these could be gotten by looking at the vardecl
+  int dim_;
+  std::vector<omega::CG_outputRepr *> dims; // ??? 
+
+  IR_rosePointerSymbol(const IR_Code *ir, chillAST_VarDecl *v ) {
+    ir_ = ir;
+    chillvd = v;
+    
+    name_ = chillvd->varname;
+    dim_ = chillvd->numdimensions;
+    dims.resize(dim_);
+    // TODO set sizes 
+  };
+  virtual ~IR_rosePointerSymbol() { }
+
+  std::string name() const;
+  int n_dim() const;
+
+	bool operator==(const IR_Symbol &that) const;
+	omega::CG_outputRepr *size(int dim) const ;
+	void set_size(int dim, omega::CG_outputRepr*) ;
+  IR_Symbol *clone() const;
+	IR_CONSTANT_TYPE elem_type() const;
+};
+
+
+
 
 struct IR_roseConstantRef: public IR_ConstantRef {
   union {
@@ -59,11 +125,11 @@ struct IR_roseConstantRef: public IR_ConstantRef {
     ir_ = ir;
     type_ = IR_CONSTANT_FLOAT;
     f_ = f;
-  }
+  };
   omega::coef_t integer() const {
     assert(is_integer());
     return i_;
-  }
+  };
   bool operator==(const IR_Ref &that) const;
   omega::CG_outputRepr *convert();
   IR_Ref *clone() const;
@@ -71,42 +137,30 @@ struct IR_roseConstantRef: public IR_ConstantRef {
 };
 
 struct IR_roseScalarRef: public IR_ScalarRef {
-  SgAssignOp *ins_pos_;
-  int op_pos_; // -1 means destination operand, otherwise source operand
-  SgVarRefExp *vs_;
+  OP_POSITION op_pos_; // -1 means destination operand, 0== unknown, 1 == source operand
+  chillAST_DeclRefExpr    *dre;   // declrefexpr that uses this scalar ref, if that exists
+  chillAST_VarDecl        *chillvd; // the vardecl for this scalar 
+  
   int is_write_;
-  IR_roseScalarRef(const IR_Code *ir, SgVarRefExp *sym) {
+  
+  
+  IR_roseScalarRef(const IR_Code *ir, chillAST_DeclRefExpr *d) { 
     ir_ = ir;
-    ins_pos_ = isSgAssignOp(sym->get_parent());
-    op_pos_ = 0;
-    if (ins_pos_ != NULL)
-      if (sym == isSgVarRefExp(ins_pos_->get_lhs_operand()))
-        op_pos_ = -1;
-    
-    vs_ = sym;
+    dre = d;
+    //bop = NULL;
+    chillvd = d->getVarDecl(); 
+    op_pos_ = OP_UNKNOWN; 
   }
-  IR_roseScalarRef(const IR_Code *ir, SgVarRefExp *ins, int pos) {
+  
+  IR_roseScalarRef(const IR_Code *ir, chillAST_VarDecl *vd) { 
     ir_ = ir;
-    /*  ins_pos_ = ins;
-        op_pos_ = pos;
-        SgExpression* op;
-        if (pos == -1)
-        op = ins->get_lhs_operand();
-        else
-        op = ins->get_rhs_operand();
-        
-    */
-    
-    is_write_ = pos;
-    
-    /*  if (vs_ == NULL || pos > 0)
-        throw ir_error(
-        "Src operand not a variable or more than one src operand!!");
-    */
-    
-    vs_ = ins;
-    
+    dre = NULL;  // ?? 
+    //bop = NULL;
+    chillvd = vd;
+    op_pos_ = OP_UNKNOWN; 
   }
+  
+  
   bool is_write() const;
   IR_ScalarSymbol *symbol() const;
   bool operator==(const IR_Ref &that) const;
@@ -114,31 +168,43 @@ struct IR_roseScalarRef: public IR_ScalarRef {
   IR_Ref *clone() const;
 };
 
+
+
 struct IR_roseArrayRef: public IR_ArrayRef {
+  chillAST_ArraySubscriptExpr* chillASE; 
+  int iswrite; 
   
-  SgPntrArrRefExp *ia_;
-  
-  int is_write_;
-  IR_roseArrayRef(const IR_Code *ir, SgPntrArrRefExp *ia, int write) {
+  IR_roseArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, int write ) { 
+    //fprintf(stderr, "IR_XXXXArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
     ir_ = ir;
-    ia_ = ia;
-    is_write_ = write;
+    chillASE = ase; 
+    // dies? ase->dump(); fflush(stdout); 
+    
+    iswrite = write;  // ase->imwrittento;
   }
+  
+  
   bool is_write() const;
   omega::CG_outputRepr *index(int dim) const;
   IR_ArraySymbol *symbol() const;
   bool operator==(const IR_Ref &that) const;
+  bool operator!=(const IR_Ref &that) const; // not the opposite logic to ==     TODO 
   omega::CG_outputRepr *convert();
   IR_Ref *clone() const;
+  virtual void Dump() const;
 };
 
 struct IR_roseLoop: public IR_Loop {
-  SgNode *tf_;
+  int step_size_;
   
-  IR_roseLoop(const IR_Code *ir, SgNode *tf) {
-    ir_ = ir;
-    tf_ = tf;
-  }
+  chillAST_DeclRefExpr *chillindex;   // the loop index variable  (I)  // was DeclRefExpr
+  chillAST_ForStmt     *chillforstmt; 
+  chillAST_node        *chilllowerbound;
+  chillAST_node        *chillupperbound;
+  chillAST_node        *chillbody;    // presumably a compound statement, but not guaranteeed
+  IR_CONDITION_TYPE conditionoperator;
+  
+  IR_roseLoop(const IR_Code *ir, chillAST_node *forstmt);
   
   IR_ScalarSymbol *index() const;
   omega::CG_outputRepr *lower_bound() const;
@@ -146,42 +212,142 @@ struct IR_roseLoop: public IR_Loop {
   IR_CONDITION_TYPE stop_cond() const;
   IR_Block *body() const;
   IR_Block *convert();
-  int step_size() const;
+  int step_size() const;  
   IR_Control *clone() const;
 };
 
-struct IR_roseBlock: public IR_Block {
-  SgNode* tnl_;
-  SgNode *start_, *end_;
+
+
+
+struct IR_roseBlock: public IR_chillBlock {
+  SgNode* tnl_;           // TODO delete 
+  SgNode *start_, *end_;  // TODO delete 
+  
+  // Block is a basic block?? (no, just a chunk of code )
+  vector<chillAST_node *>statements;
+  chillAST_node *chillAST;             // how about for now we say if there are statements, which is presumably the top level of statements from ... somewhere, otherwise the code is in   chillAST
+  
+  IR_roseBlock(const IR_Code *ir, chillAST_node *ast) { 
+    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir, chillast )\n"); 
+    ir_ = ir;
+    chillAST = ast; 
+    //fprintf(stderr, "making a new IR_roseBlock %p with chillAST %p\nit is:\n", this, ast); 
+    //ast->print(); printf("\n"); fflush(stdout); 
+    //fprintf(stderr, "block %p still has chillAST %p\n", this, ast); 
+  }
+  
+  IR_roseBlock(const IR_Code *ir) { 
+    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir );  NO AST\n"); 
+    chillAST = NULL;
+    ir_ = ir;
+    //fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
+    //fprintf(stderr, "this roseBlock is %p\n", this); 
+  }
+  
   
   IR_roseBlock(const IR_Code *ir, SgNode *tnl, SgNode *start, SgNode *end) {
-    ir_ = ir;
-    tnl_ = tnl;
-    start_ = start;
-    end_ = end;
+    fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl, SgNode *start, SgNode *end)    die\n"); 
+    int *i = 0; int j = i[0]; 
   }
   
   IR_roseBlock(const IR_Code *ir, SgNode *tnl) {
-    ir_ = ir;
-    tnl_ = tnl;
-    start_ = tnl_->get_traversalSuccessorByIndex(0);
-    end_ = tnl_->get_traversalSuccessorByIndex(
-      (tnl_->get_numberOfTraversalSuccessors()) - 1);
+    fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl)   (die)\n"); 
+    int *i = 0; int j = i[0]; 
+  } 
+  
+  IR_roseBlock( const IR_roseBlock *CB ) {  // clone existing IR_roseBlock
+    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\nblock %p\n", this); 
+    ir_ = CB->ir_;
+    fprintf(stderr, "%d statements    AST %p\n", CB->statements.size(), CB->chillAST); 
+    for (int i=0; i<CB->statements.size(); i++) {
+      CB->statements[i]->print(0, stderr); fprintf(stderr, "\n"); 
+      statements.push_back( CB->statements[i] ); 
+    }
+    chillAST = CB->chillAST; 
   }
+  
+  virtual ~IR_roseBlock() { }
+  
+  
+  
   omega::CG_outputRepr *extract() const;
   omega::CG_outputRepr *original() const;
   IR_Control *clone() const;
+  
+  // all access of statements and chillAST must be through these, else it will use the IR_chillBlock version and die 
+  void addStatement( chillAST_node *s ) { /* fprintf(stderr, "IR_roseBlock::addStatement()\n"); */ statements.push_back( s );
+    //fprintf(stderr, "now %d statements\n", statements.size()); 
+  } 
+  vector<chillAST_node *> getStatements() { return statements; } 
+  vector<chillAST_node *> getStmtList() const { return statements; } 
+  
+  int numstatements() const { return statements.size(); } 
+  
+  void setChillAst( chillAST_node *ast ) { chillAST = ast; } ;
+  chillAST_node *getChillAST() const { return chillAST; } 
 };
 
+
+
 struct IR_roseIf: public IR_If {
-  SgNode *ti_;
+  SgNode *ti_; // TODO remove 
+  chillAST_node *cond;
+  chillAST_node *thenbody;
+  chillAST_node *elsebody;  // perhaps NULL
   
-  IR_roseIf(const IR_Code *ir, SgNode *ti) {
-    ir_ = ir;
-    ti_ = ti;
+  // IR parts as well?   how to keep in sync?
+  
+  
+  IR_roseIf(const IR_Code *irc) { // empty 
+    //fprintf(stderr, "IR_roseIf( const IR_Code *irc) %p\n", this); 
+    ir_ = irc;
+    cond     = NULL;
+    thenbody = NULL;
+    elsebody = NULL;
   }
-  ~IR_roseIf() {
+  
+  IR_roseIf(const IR_roseIf *irrif) { // copy 
+    ir_      = irrif->ir_;
+    cond     = irrif->cond;
+    thenbody = irrif->thenbody;
+    elsebody = irrif->elsebody;
   }
+  
+  IR_roseIf( const IR_Code *irc, chillAST_node *c, chillAST_node *t, chillAST_node *e) {
+    //fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *c, chillAST_node *t, chillAST_node *e) %p\n", this); 
+    ir_ = irc;
+    cond = c;
+    thenbody = t;
+    elsebody = e;
+  }
+  
+  
+  IR_roseIf( const IR_Code *irc, chillAST_node *anif) { // will take any single chill node, but checks to make sure it's an if
+    //fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *anif)  %p\n", this); 
+    if ( anif->isIfStmt()) { 
+      chillAST_IfStmt *cif = (chillAST_IfStmt *) anif;
+      ir_ = irc;
+      cond = cif->cond;
+      thenbody = cif->thenpart;
+      elsebody = cif->elsepart;
+    }
+    else { 
+      fprintf(stderr, "IR_roseIf::IR_roseIf( const IR_Code *irc, chillAST_node *anif ) node is not a chillAST_ItStmt\n");
+      exit(-1); 
+    }
+    
+  }
+  
+  IR_roseIf(const IR_Code *irc, SgNode *ti) { // TODO remove 
+    ir_ = irc;
+    fprintf(stderr, "WARNING: IR_roseIf using rose internals (die)\n"); 
+    int *i = 0;  i[0] = 123; // die
+  }
+  
+  
+  virtual ~IR_roseIf() {
+  }
+  
   omega::CG_outputRepr *condition() const;
   IR_Block *then_body() const;
   IR_Block *else_body() const;
@@ -189,16 +355,15 @@ struct IR_roseIf: public IR_If {
   IR_Control *clone() const;
 };
 
-class IR_roseCode_Global_Init {
-private:
-  static IR_roseCode_Global_Init *pinstance;
-public:
-  SgProject* project;
-  static IR_roseCode_Global_Init *Instance(char** argv);
-};
 
-class IR_roseCode: public IR_Code {
+
+
+extern SgProject *OneAndOnlySageProject;  // a global 
+
+class IR_roseCode: public IR_chillCode {
 protected:
+  // things that start with Sg are rose-specific (Sage, actually)
+  SgProject* project;
   SgSourceFile* file;
   SgGlobal *root;
   SgGlobal *firstScope;
@@ -207,22 +372,60 @@ protected:
   SgSymbolTable* symtab3_;
   SgDeclarationStatementPtrList::iterator p;
   SgFunctionDeclaration *func;
+  
+  
   bool is_fortran_;
   int i_;
   StaticSingleAssignment *ssa_for_scalar;
   ssa_unfiltered_cfg::SSA_UnfilteredCfg *main_ssa;
   VariableRenaming *varRenaming_for_scalar;
-public:
-  IR_roseCode(const char *filename, const char* proc_name);
-  ~IR_roseCode();
   
-  IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int memory_type =
-                                      0);
-  IR_ArraySymbol *CreateArraySymbol(const IR_Symbol *sym,
-                                    std::vector<omega::CG_outputRepr *> &size, int memory_type = 0);
+  
+  std::vector<chillAST_VarDecl> entire_file_symbol_table;
+  
+  // TODO yeah, these need to be associated with a sourcefile ?? 
+  std::map<std::string, chillAST_node *> defined_macros;  // TODO these need to be in a LOCATION 
+  
+public:
+  chillAST_SourceFile *entire_file_AST;
+  chillAST_FunctionDecl * chillfunc;   // the function we're currenly modifying
+  
+  void print() { chillfunc->print(); printf("\n"); fflush(stdout); }; 
+  
+  IR_roseCode(const char *filename, const char* proc_name, const char* dest_name = NULL );
+  virtual ~IR_roseCode();
+  
+  IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int memory_type=0);
+  IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
+  
+  
+  IR_ArraySymbol *CreateArraySymbol(const IR_Symbol *sym, 
+                                    std::vector<omega::CG_outputRepr *> &size, 
+                                    int memory_type);
+  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *type,
+                                    std::vector<omega::CG_outputRepr *> &size_repr);
+  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *size, const IR_Symbol *sym);
+  
+  
+  
+  IR_PointerSymbol *CreatePointerSymbol(const IR_Symbol *sym,
+                                        std::vector<omega::CG_outputRepr *> &size_repr);
+  IR_PointerSymbol *CreatePointerSymbol(const IR_CONSTANT_TYPE type,
+                                        std::vector<omega::CG_outputRepr *> &size_repr, 
+                                        std::string name="");
+  IR_PointerSymbol *CreatePointerSymbol(omega::CG_outputRepr *type,
+                                        std::vector<omega::CG_outputRepr *> &size_repr);
+  
+  
+  
   IR_ScalarRef *CreateScalarRef(const IR_ScalarSymbol *sym);
   IR_ArrayRef *CreateArrayRef(const IR_ArraySymbol *sym,
                               std::vector<omega::CG_outputRepr *> &index);
+  
+  omega::CG_outputRepr*  CreateArrayRefRepr(const IR_ArraySymbol *sym,
+                                            std::vector<omega::CG_outputRepr *> &index);
+  
+  
   int ArrayIndexStartAt() {
     if (is_fortran_)
       return 1;
@@ -258,23 +461,27 @@ public:
         std::map<SgVarRefExp*, IR_ScalarRef*> &write_scalars_1,
         std::vector<std::string> &index, int i, int j);
   */
-  std::vector<IR_ArrayRef *> FindArrayRef(
-    const omega::CG_outputRepr *repr) const;
-  std::vector<IR_ScalarRef *> FindScalarRef(
-    const omega::CG_outputRepr *repr) const;
-  std::vector<IR_Control *> FindOneLevelControlStructure(
-    const IR_Block *block) const;
+  std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
+  std::vector<IR_ArrayRef *>  FindArrayRef(const omega::CG_outputRepr *repr) const;
+  bool parent_is_array(IR_ArrayRef *a); // looking for nested array refs?? 
+  
+  
+  // just use the one at ir_chillcode?
+  //std::vector<IR_Control *> FindOneLevelControlStructure(const IR_Block *block) const;
   IR_Block *MergeNeighboringControlStructures(
-    const std::vector<IR_Control *> &controls) const;
-  IR_Block *GetCode() const;
+                                              const std::vector<IR_Control *> &controls) const;
+  
+  IR_Block*   GetCode() const;
+  IR_Control* GetCode(omega::CG_outputRepr*) const; // what is this ??? 
+  
   void ReplaceCode(IR_Control *old, omega::CG_outputRepr *repr);
   void ReplaceExpression(IR_Ref *old, omega::CG_outputRepr *repr);
   
   IR_OPERATION_TYPE QueryExpOperation(const omega::CG_outputRepr *repr) const;
   IR_CONDITION_TYPE QueryBooleanExpOperation(
-    const omega::CG_outputRepr *repr) const;
+                                             const omega::CG_outputRepr *repr) const;
   std::vector<omega::CG_outputRepr *> QueryExpOperand(
-    const omega::CG_outputRepr *repr) const;
+                                                      const omega::CG_outputRepr *repr) const;
   IR_Ref *Repr2Ref(const omega::CG_outputRepr *) const;
   /*    std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> >
         FindScalarDeps(const omega::CG_outputRepr *repr1,
@@ -282,8 +489,46 @@ public:
         int i, int j);
   */
   void finalizeRose();
+  
+  // Manu:: Added functions required for reduction operation
+  // virtual omega::CG_outputRepr * FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B) = 0;
+  bool FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B);
+  void printStmt(const omega::CG_outputRepr *repr);
+  int getStmtType(const omega::CG_outputRepr *repr);
+  IR_OPERATION_TYPE getReductionOp(const omega::CG_outputRepr *repr);
+  IR_Control *  FromForStmt(const omega::CG_outputRepr *repr);
+  
+  // Manu:: Added functions for scalar expansion
+  IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
+                                            std::vector<omega::CG_outputRepr *> &index); 
+  void CreateDefineMacro(std::string s,std::string args,  omega::CG_outputRepr *repr);
+  void CreateDefineMacro(std::string s,std::string args, std::string repr);
+  
+  void CreateDefineMacro(std::string s,std::vector<std::string>args, omega::CG_outputRepr *repr);
+  
+  omega::CG_outputRepr *CreateArrayType(IR_CONSTANT_TYPE type, omega::CG_outputRepr* size);
+  omega::CG_outputRepr *CreatePointerType(IR_CONSTANT_TYPE type);
+  omega::CG_outputRepr *CreatePointerType(omega::CG_outputRepr *type);
+  omega::CG_outputRepr *CreateScalarType(IR_CONSTANT_TYPE type);
+  
+  //std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const; // inherit from chillcode ?? 
+  
+  
+  bool ReplaceRHSExpression(omega::CG_outputRepr *code, IR_Ref *ref);
+  bool ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef *ref);
+  omega::CG_outputRepr * GetRHSExpression(omega::CG_outputRepr *code);
+  omega::CG_outputRepr * GetLHSExpression(omega::CG_outputRepr *code);
+  omega::CG_outputRepr *CreateMalloc(const IR_CONSTANT_TYPE type, std::string lhs,
+                                     omega::CG_outputRepr * size_repr);
+  omega::CG_outputRepr *CreateMalloc  (omega::CG_outputRepr *type, std::string lhs,
+                                       omega::CG_outputRepr * size_repr);
+  omega::CG_outputRepr *CreateFree( omega::CG_outputRepr *exp);
+  
+  //static int rose_pointer_counter ; // for manufactured arrays
+  
   friend class IR_roseArraySymbol;
   friend class IR_roseArrayRef;
 };
+
 
 #endif

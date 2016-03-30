@@ -4,7 +4,7 @@
  All Rights Reserved.
 
  Purpose:
-   SUIF interface utilities.
+   ROSE interface utilities.  TODO kill all references to Sg 
 
  Notes:
 
@@ -12,11 +12,8 @@
    01/2006 created by Chun Chen
 *****************************************************************************/
 
-//#include <suif1.h>
-//#include <useful.h>
-//#include <vector>
-//#include <algorithm>
-//#include <code_gen/CG_suifRepr.h>
+#ifdef FRONTEND_ROSE 
+
 #include "ir_rose_utils.hh"
 
 
@@ -86,3 +83,4 @@ std::vector<SgForStatement *> find_deepest_loops(SgNode *tn) {
     return std::vector<SgForStatement *>();               
 }
 
+#endif

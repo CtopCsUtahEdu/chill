@@ -11,6 +11,9 @@
 #include "ir_code.hh"
 #include "chill_error.hh"
 
+// for find_floor_definition and find_floor_definition_temp ?? 
+#include <code_gen/CG_utils.h>
+
 using namespace omega;
 
 
@@ -18,6 +21,8 @@ using namespace omega;
 
 void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                 TilingMethodType method, int alignment_offset, int alignment_multiple) {
+  fprintf(stderr, "loop_tile.cc,  Loop::tile( 7 args )\n"); 
+
   // check for sanity of parameters
   if (tile_size < 0)
     throw std::invalid_argument("invalid tile size");
@@ -27,21 +32,24 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
   if (level <= 0)
     throw std::invalid_argument("invalid loop level " + to_string(level));
+
   if (level > stmt[stmt_num].loop_level.size())
     throw std::invalid_argument(
-      "there is no loop level " + to_string(level) + " for statement "
-      + to_string(stmt_num));
+                                "there is no loop level " + to_string(level) + " for statement "
+                                + to_string(stmt_num));
+
   if (outer_level <= 0 || outer_level > level)
     throw std::invalid_argument(
-      "invalid tile controlling loop level "
-      + to_string(outer_level));
+                                "invalid tile controlling loop level "
+                                + to_string(outer_level));
   
   // invalidate saved codegen computation
   delete last_compute_cgr_;
   last_compute_cgr_ = NULL;
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
-  
+  apply_xform(stmt_num);  // Anand Apr 2015 
+
   int dim = 2 * level - 1;
   int outer_dim = 2 * outer_level - 1;
   std::vector<int> lex = getLexicalOrder(stmt_num);
@@ -69,11 +77,11 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                 if (stmt[*i].loop_level[l - 1].type
                     != LoopLevelTile) {
                   if (dv.isCarried(
-                        stmt[*i].loop_level[l - 1].payload)
+                                   stmt[*i].loop_level[l - 1].payload)
                       && dv.hasPositive(
-                        stmt[*i].loop_level[l - 1].payload))
+                                        stmt[*i].loop_level[l - 1].payload))
                     throw loop_error(
-                      "loop error: Tiling is illegal, dependence violation!");
+                                     "loop error: Tiling is illegal, dependence violation!");
                 } else {
                   
                   int dim3 = l - 1;
@@ -90,7 +98,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                     if (dv.isCarried(dim3)
                         && dv.hasPositive(dim3))
                       throw loop_error(
-                        "loop error: Tiling is illegal, dependence violation!");
+                                       "loop error: Tiling is illegal, dependence violation!");
                 }
             }
           }
@@ -126,11 +134,11 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
     std::set<int> private_stmt;
     for (std::set<int>::iterator i = same_tile_controlling_loop.begin();
          i != same_tile_controlling_loop.end(); i++) {
-//     if (same_tiled_loop.find(*i) == same_tiled_loop.end() && !is_single_iteration(getNewIS(*i), dim))
-//       same_tiled_loop.insert(*i);
+      //     if (same_tiled_loop.find(*i) == same_tiled_loop.end() && !is_single_iteration(getNewIS(*i), dim))
+      //       same_tiled_loop.insert(*i);
       
       // should test dim's value directly but it is ok for now
-//    if (same_tiled_loop.find(*i) == same_tiled_loop.end() && get_const(stmt[*i].xform, dim+1, Output_Var) == posInfinity)
+      //    if (same_tiled_loop.find(*i) == same_tiled_loop.end() && get_const(stmt[*i].xform, dim+1, Output_Var) == posInfinity)
       if (same_tiled_loop.find(*i) == same_tiled_loop.end()
           && overflow.find(*i) != overflow.end())
         private_stmt.insert(*i);
@@ -160,6 +168,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
     
     {
       std::vector<Relation> r_list;
+      bool floor_defined = false;
       
       for (std::set<int>::iterator i = same_tile_controlling_loop.begin();
            i != same_tile_controlling_loop.end(); i++)
@@ -172,10 +181,46 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
           for (int j = 0; j < outer_dim; j += 2)
             r = Project(r, j + 1, Set_Var);
           r.simplify(2, 4);
+          std::set<Variable_ID> excluded_floor_vars;
+          excluded_floor_vars.insert(r.set_var(dim+1));
+          ;
+          
+          for (GEQ_Iterator e(copy(r).single_conjunct()->GEQs()); e;
+               e++)
+            if ((*e).get_coef(r.set_var(dim+1)) != 0) {
+              bool is_bound = true;
+              for (Constr_Vars_Iter cvi(*e, true); cvi; cvi++) {
+                std::pair<bool, GEQ_Handle> result =
+                  find_floor_definition(copy(r),
+                                        cvi.curr_var(),
+                                        excluded_floor_vars);
+                if (!result.first) {
+                  is_bound = false;
+                  
+                  //break;
+                }
+                
+                if (!is_bound) {
+                  std::vector<std::pair<bool, GEQ_Handle> > result =
+                    find_floor_definition_temp(copy(r),
+                                               cvi.curr_var(),
+                                               excluded_floor_vars);
+                  
+                  if (result.size() == 2)
+                    floor_defined = true;
+                  
+                  break;
+                }
+              }
+            }
+          
           r_list.push_back(r);
         }
       
-      hull = SimpleHull(r_list);
+      if (!floor_defined)
+        hull = SimpleHull(r_list);
+      else
+        hull = SimpleHull(r_list, true, true);
       // hull = Hull(r_list, std::vector<bool>(r_list.size(), true), 1, true);
     }
     
@@ -211,10 +256,10 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
     }
     if (lb_list.size() == 0)
       throw loop_error(
-        "unable to calculate tile controlling loop lower bound");
+                       "unable to calculate tile controlling loop lower bound");
     if (ub_list.size() == 0)
       throw loop_error(
-        "unable to calculate tile controlling loop upper bound");
+                       "unable to calculate tile controlling loop upper bound");
     
     // find the simplest lower bound for StridedTile or simplest iteration count for CountedTile
     int simplest_lb = 0, simplest_ub = 0;
@@ -354,7 +399,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
       {
         Variable_ID lb = f_exists->declare();
         coef_t coef = lb_list[simplest_lb].get_coef(
-          bound.set_var(dim + 1));
+                                                    bound.set_var(dim + 1));
         if (coef == 1) { // e.g. if i >= m+5, then LB = m+5
           EQ_Handle h = f_root->add_EQ();
           h.update_coef(lb, 1);
@@ -377,6 +422,20 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                                              (*ci).var->function_of());
               h.update_coef(v, (*ci).coef);
               break;
+            }
+            case Wildcard_Var: {
+              //Anand adding check for floor definition: 8/4/2013
+              //Check if wildcard Var is floor defined
+              
+              Variable_ID v2;
+              std::map<Variable_ID, Variable_ID> exists_mapping;
+              v2 = replicate_floor_definition(copy(bound), (*ci).var,
+                                              stmt[*i].xform, f_exists, f_root,
+                                              exists_mapping);
+              
+              h.update_coef(v2, ci.curr_coef());
+              break;
+              
             }
             default:
               throw loop_error("cannot handle tile bounds");
@@ -457,7 +516,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
       Variable_ID ub = f_exists->declare();
       {
         coef_t coef = -ub_list[simplest_ub].get_coef(
-          bound.set_var(dim + 1));
+                                                     bound.set_var(dim + 1));
         if (coef == 1) { // e.g. if i <= m+5, then UB = m+5
           EQ_Handle h = f_root->add_EQ();
           h.update_coef(ub, -1);
@@ -615,16 +674,21 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
         break;
       default:
         throw loop_error(
-          "unknown loop level type for statement "
-          + to_string(*i));
+                         "unknown loop level type for statement "
+                         + to_string(*i));
       }
     
     LoopLevel ll;
     ll.type = LoopLevelTile;
     ll.payload = level + 1;
     ll.parallel_level = 0;
+    ll.segreducible = stmt[*i].loop_level[level - 1].segreducible;
+    if (ll.segreducible)
+      ll.segment_descriptor =
+        stmt[*i].loop_level[level - 1].segment_descriptor;
+    
     stmt[*i].loop_level.insert(
-      stmt[*i].loop_level.begin() + (outer_level - 1), ll);
+                               stmt[*i].loop_level.begin() + (outer_level - 1), ll);
   }
 }
 

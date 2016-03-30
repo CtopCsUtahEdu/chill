@@ -87,11 +87,8 @@ class ChillConfig(object):
     @staticmethod
     def configs(chill_dir, bin_dir, build_cuda=None, script_lang=None):
         all_configs = [
-                (False, 'script'),
-                (False, 'lua'),
                 (False, 'python'),
-                (True, 'lua'),
-                (True, 'python')]
+                (True,  'python')]
                 
         pred_list = [lambda x: True]
         if not build_cuda is None:

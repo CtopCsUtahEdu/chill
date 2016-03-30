@@ -1,1 +1,12 @@
-
+#chill-testcase -u  test-cases/examples/cuda-chill/ident.py      test-cases/examples/cuda-chill/mm.c         --no-compile-gensrc
+chill-testcase -u  test-cases/examples/cuda-chill/cp.py         test-cases/examples/cuda-chill/cp.c         --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mm.py         test-cases/examples/cuda-chill/mm.c         --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mpeg4.py      test-cases/examples/cuda-chill/mpeg4.c      --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mriq.py       test-cases/examples/cuda-chill/mriq.c       --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mriq-fh.py    test-cases/examples/cuda-chill/mriq-fh.c    --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mv.py         test-cases/examples/cuda-chill/mv.c         --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mv-shadow.py  test-cases/examples/cuda-chill/mv-shadow.c  --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/mv_try.py     test-cases/examples/cuda-chill/mv_try.c     --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/nbody.py      test-cases/examples/cuda-chill/nbody.c      --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/tmv.py        test-cases/examples/cuda-chill/tmv.c        --no-compile-gensrc
+#chill-testcase -u  test-cases/examples/cuda-chill/tmv-shadow.py test-cases/examples/cuda-chill/tmv-shadow.c --no-compile-gensrc

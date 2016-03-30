@@ -1,3 +1,6 @@
+
+#ifdef FRONTEND_ROSE 
+
 #include <code_gen/rose_attributes.h>
 
 namespace omega {
@@ -181,3 +184,6 @@ void MMPrefetchInsertion::addDim(int offset, const std::string& indexer) {
 	this->indexCount++;
 }
 }
+
+
+#endif 

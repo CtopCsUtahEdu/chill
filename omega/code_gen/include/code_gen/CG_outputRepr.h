@@ -15,15 +15,19 @@
 #ifndef _CG_OUTPUTREPR_H
 #define _CG_OUTPUTREPR_H
 
+#include <string.h>
+
 namespace omega {
 
 class CG_outputRepr {
 public:
+  
   CG_outputRepr() {}
   virtual ~CG_outputRepr() { /* shallow delete */ }
   virtual CG_outputRepr *clone() const = 0;
   virtual void clear() { /* delete actual IR code wrapped inside */ }
   virtual void dump() const {}
+  virtual char *type() const = 0; 
 };
 
 }

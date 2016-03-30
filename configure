@@ -591,6 +591,10 @@ LUA_OPT_FALSE
 LUA_OPT_TRUE
 PYTHON_OPT_FALSE
 PYTHON_OPT_TRUE
+use_lua
+use_python
+LUAHOME
+interface_lang
 OMEGAHOME
 BOOSTHOME
 ROSEHOME
@@ -716,6 +720,8 @@ enable_coverage
 with_rose
 with_boost
 with_omega
+with_python
+with_lua
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1369,6 +1375,11 @@ Optional Packages:
 
 
       --with-omega            set omega home
+
+      --with-python           set python as the interface languge
+
+
+      --with-lua              set lua as the interface langauge.
 
 Some influential environment variables:
   CC          C compiler command
@@ -5353,6 +5364,13 @@ else
 fi
 
 
+#AC_ARG_WITH([iegen],[
+#    AS_HELP_STRING([--with-iegen],[set path to iegenlib])
+#    ],[
+#    AC_SUBST([IEGENHOME], [$withval])
+#    ],[
+#    AC_SUBST([IEGENHOME], ["${IEGENHOME}"])])
+
 
 # Check whether --with-omega was given.
 if test "${with_omega+set}" = set; then :
@@ -5366,43 +5384,79 @@ else
 fi
 
 
-#AC_ARG_WITH([python],[
-#    AS_HELP_STRING([--with-python],[set python as the interface languge])
-#    ],[
-#    AC_SUBST([interface_lang],[python])
-#    ],[
-#    AC_SUBST([interface_lang],[python])])
 
-#AC_ARG_WITH([lua],[
-#    AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
-#    AC_SUBST([LUAHOME], ["${LUAHOME}"])
-#    AC_SUBST([interface_lang], [lua])
-#    ],[
-#    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
+# Check whether --with-python was given.
+if test "${with_python+set}" = set; then :
+  withval=$with_python;
+    interface_lang=python
+
+
+else
+
+    interface_lang=default
+
+fi
+
+
+
+# Check whether --with-lua was given.
+if test "${with_lua+set}" = set; then :
+  withval=$with_lua;
+    LUAHOME="${LUAHOME}"
+
+    interface_lang=lua
+
+
+else
+
+    LUAHOME="${LUAHOME}"
+
+fi
+
 
 #AC_ARG_WITH([interface],[
 #    AS_HELP_STRING([--with-interface],[select interface language])],[
 #    AC_SUBST([interface_lang],[$withval])],[
 #    AC_SUBST([interface_lang],[default])])
 
-#AS_IF([test "x$interface_lang" == xdefault],[
-#    AS_IF([test "x$enable_cuda" == xyes],[
-#        AC_SUBST([use_python],[yes])
-#        AC_SUBST([use_lua],[no])
-#        AC_SUBST([interface_lang],[python])
-#        ],[
-#        AC_SUBST([use_python],[yes])
-#        AC_SUBST([use_lua],[no])
-#        AC_SUBST([interface_lang],[python])])],[])
+if test "x$interface_lang" == xdefault; then :
 
-#AS_IF([test "x$interface_lang" == xlua],[
-#    AC_SUBST([use_python],[no])
-#    AC_SUBST([use_lua],[yes])],[])
-#AS_IF([test "x$interface_lang" == xpython],[
-#    AC_SUBST([use_python],[yes])
-#    AC_SUBST([use_lua],[no])],[])
+    if test "x$enable_cuda" == xyes; then :
 
- if test 1 = 1; then
+        use_python=yes
+
+        use_lua=no
+
+        interface_lang=python
+
+
+else
+
+        use_python=yes
+
+        use_lua=no
+
+        interface_lang=python
+
+fi
+fi
+
+if test "x$interface_lang" == xlua; then :
+
+    use_python=no
+
+    use_lua=yes
+
+fi
+if test "x$interface_lang" == xpython; then :
+
+    use_python=yes
+
+    use_lua=no
+
+fi
+
+ if test "x$use_python" = xyes; then
   PYTHON_OPT_TRUE=
   PYTHON_OPT_FALSE='#'
 else
@@ -5410,7 +5464,7 @@ else
   PYTHON_OPT_FALSE=
 fi
 
- if test 1 = 0; then
+ if test "x$use_lua" = xyes; then
   LUA_OPT_TRUE=
   LUA_OPT_FALSE='#'
 else

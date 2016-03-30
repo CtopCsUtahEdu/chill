@@ -97,6 +97,9 @@ libcodegen_a_AR = $(AR) $(ARFLAGS)
 libcodegen_a_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_libcodegen_a_OBJECTS = ../src/libcodegen_a-codegen.$(OBJEXT) \
+	../src/libcodegen_a-CG_chillBuilder.$(OBJEXT) \
+	../src/libcodegen_a-CG_chillRepr.$(OBJEXT) \
+	../src/libcodegen_a-CG_roseRepr.$(OBJEXT) \
 	../src/libcodegen_a-CG_stringBuilder.$(OBJEXT) \
 	../src/libcodegen_a-CG.$(OBJEXT) \
 	../src/libcodegen_a-CG_utils.$(OBJEXT) \
@@ -265,11 +268,13 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libcodegen.a
 #if BUILD_ROSE
-libcodegen_a_SOURCES = ../src/codegen.cc ../src/CG_stringBuilder.cc \
-	../src/CG.cc ../src/CG_utils.cc ../src/rose_attributes.cc \
-	../src/CG_roseRepr.cc ../src/CG_roseBuilder.cc
-libcodegen_a_CFLAGS = -Wno-write-strings
-libcodegen_a_CPPFLAGS = -I../include -I../../omega_lib/include -I$(ROSEHOME)/include/rose -I$(BOOSTHOME)/include
+libcodegen_a_SOURCES = ../src/codegen.cc ../src/CG_chillBuilder.cc \
+	../src/CG_chillRepr.cc ../src/CG_roseRepr.cc \
+	../src/CG_stringBuilder.cc ../src/CG.cc ../src/CG_utils.cc \
+	../src/rose_attributes.cc ../src/CG_roseRepr.cc \
+	../src/CG_roseBuilder.cc
+libcodegen_a_CFLAGS = -DFRONTEND_ROSE -Wno-write-strings
+libcodegen_a_CPPFLAGS = -DFRONTEND_ROSE -I../../.. -I../include -I../../omega_lib/include -I$(ROSEHOME)/include/rose -I$(BOOSTHOME)/include
 all: all-am
 
 .SUFFIXES:
@@ -315,6 +320,12 @@ clean-noinstLIBRARIES:
 	@: > ../src/$(DEPDIR)/$(am__dirstamp)
 ../src/libcodegen_a-codegen.$(OBJEXT): ../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
+../src/libcodegen_a-CG_chillBuilder.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/libcodegen_a-CG_chillRepr.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
+../src/libcodegen_a-CG_roseRepr.$(OBJEXT): ../src/$(am__dirstamp) \
+	../src/$(DEPDIR)/$(am__dirstamp)
 ../src/libcodegen_a-CG_stringBuilder.$(OBJEXT):  \
 	../src/$(am__dirstamp) ../src/$(DEPDIR)/$(am__dirstamp)
 ../src/libcodegen_a-CG.$(OBJEXT): ../src/$(am__dirstamp) \
@@ -322,8 +333,6 @@ clean-noinstLIBRARIES:
 ../src/libcodegen_a-CG_utils.$(OBJEXT): ../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
 ../src/libcodegen_a-rose_attributes.$(OBJEXT): ../src/$(am__dirstamp) \
-	../src/$(DEPDIR)/$(am__dirstamp)
-../src/libcodegen_a-CG_roseRepr.$(OBJEXT): ../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
 ../src/libcodegen_a-CG_roseBuilder.$(OBJEXT): ../src/$(am__dirstamp) \
 	../src/$(DEPDIR)/$(am__dirstamp)
@@ -341,6 +350,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG_roseBuilder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@../src/$(DEPDIR)/libcodegen_a-CG_stringBuilder.Po@am__quote@
@@ -377,6 +388,48 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/codegen.cc' object='../src/libcodegen_a-codegen.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-codegen.obj `if test -f '../src/codegen.cc'; then $(CYGPATH_W) '../src/codegen.cc'; else $(CYGPATH_W) '$(srcdir)/../src/codegen.cc'; fi`
+
+../src/libcodegen_a-CG_chillBuilder.o: ../src/CG_chillBuilder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_chillBuilder.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Tpo -c -o ../src/libcodegen_a-CG_chillBuilder.o `test -f '../src/CG_chillBuilder.cc' || echo '$(srcdir)/'`../src/CG_chillBuilder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_chillBuilder.cc' object='../src/libcodegen_a-CG_chillBuilder.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_chillBuilder.o `test -f '../src/CG_chillBuilder.cc' || echo '$(srcdir)/'`../src/CG_chillBuilder.cc
+
+../src/libcodegen_a-CG_chillBuilder.obj: ../src/CG_chillBuilder.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_chillBuilder.obj -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Tpo -c -o ../src/libcodegen_a-CG_chillBuilder.obj `if test -f '../src/CG_chillBuilder.cc'; then $(CYGPATH_W) '../src/CG_chillBuilder.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_chillBuilder.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_chillBuilder.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_chillBuilder.cc' object='../src/libcodegen_a-CG_chillBuilder.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_chillBuilder.obj `if test -f '../src/CG_chillBuilder.cc'; then $(CYGPATH_W) '../src/CG_chillBuilder.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_chillBuilder.cc'; fi`
+
+../src/libcodegen_a-CG_chillRepr.o: ../src/CG_chillRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_chillRepr.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Tpo -c -o ../src/libcodegen_a-CG_chillRepr.o `test -f '../src/CG_chillRepr.cc' || echo '$(srcdir)/'`../src/CG_chillRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_chillRepr.cc' object='../src/libcodegen_a-CG_chillRepr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_chillRepr.o `test -f '../src/CG_chillRepr.cc' || echo '$(srcdir)/'`../src/CG_chillRepr.cc
+
+../src/libcodegen_a-CG_chillRepr.obj: ../src/CG_chillRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_chillRepr.obj -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Tpo -c -o ../src/libcodegen_a-CG_chillRepr.obj `if test -f '../src/CG_chillRepr.cc'; then $(CYGPATH_W) '../src/CG_chillRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_chillRepr.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_chillRepr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_chillRepr.cc' object='../src/libcodegen_a-CG_chillRepr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_chillRepr.obj `if test -f '../src/CG_chillRepr.cc'; then $(CYGPATH_W) '../src/CG_chillRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_chillRepr.cc'; fi`
+
+../src/libcodegen_a-CG_roseRepr.o: ../src/CG_roseRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_roseRepr.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo -c -o ../src/libcodegen_a-CG_roseRepr.o `test -f '../src/CG_roseRepr.cc' || echo '$(srcdir)/'`../src/CG_roseRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_roseRepr.cc' object='../src/libcodegen_a-CG_roseRepr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_roseRepr.o `test -f '../src/CG_roseRepr.cc' || echo '$(srcdir)/'`../src/CG_roseRepr.cc
+
+../src/libcodegen_a-CG_roseRepr.obj: ../src/CG_roseRepr.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_roseRepr.obj -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo -c -o ../src/libcodegen_a-CG_roseRepr.obj `if test -f '../src/CG_roseRepr.cc'; then $(CYGPATH_W) '../src/CG_roseRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_roseRepr.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_roseRepr.cc' object='../src/libcodegen_a-CG_roseRepr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_roseRepr.obj `if test -f '../src/CG_roseRepr.cc'; then $(CYGPATH_W) '../src/CG_roseRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_roseRepr.cc'; fi`
 
 ../src/libcodegen_a-CG_stringBuilder.o: ../src/CG_stringBuilder.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_stringBuilder.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_stringBuilder.Tpo -c -o ../src/libcodegen_a-CG_stringBuilder.o `test -f '../src/CG_stringBuilder.cc' || echo '$(srcdir)/'`../src/CG_stringBuilder.cc
@@ -433,20 +486,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/rose_attributes.cc' object='../src/libcodegen_a-rose_attributes.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-rose_attributes.obj `if test -f '../src/rose_attributes.cc'; then $(CYGPATH_W) '../src/rose_attributes.cc'; else $(CYGPATH_W) '$(srcdir)/../src/rose_attributes.cc'; fi`
-
-../src/libcodegen_a-CG_roseRepr.o: ../src/CG_roseRepr.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_roseRepr.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo -c -o ../src/libcodegen_a-CG_roseRepr.o `test -f '../src/CG_roseRepr.cc' || echo '$(srcdir)/'`../src/CG_roseRepr.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_roseRepr.cc' object='../src/libcodegen_a-CG_roseRepr.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_roseRepr.o `test -f '../src/CG_roseRepr.cc' || echo '$(srcdir)/'`../src/CG_roseRepr.cc
-
-../src/libcodegen_a-CG_roseRepr.obj: ../src/CG_roseRepr.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_roseRepr.obj -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo -c -o ../src/libcodegen_a-CG_roseRepr.obj `if test -f '../src/CG_roseRepr.cc'; then $(CYGPATH_W) '../src/CG_roseRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_roseRepr.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Tpo ../src/$(DEPDIR)/libcodegen_a-CG_roseRepr.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='../src/CG_roseRepr.cc' object='../src/libcodegen_a-CG_roseRepr.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ../src/libcodegen_a-CG_roseRepr.obj `if test -f '../src/CG_roseRepr.cc'; then $(CYGPATH_W) '../src/CG_roseRepr.cc'; else $(CYGPATH_W) '$(srcdir)/../src/CG_roseRepr.cc'; fi`
 
 ../src/libcodegen_a-CG_roseBuilder.o: ../src/CG_roseBuilder.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcodegen_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ../src/libcodegen_a-CG_roseBuilder.o -MD -MP -MF ../src/$(DEPDIR)/libcodegen_a-CG_roseBuilder.Tpo -c -o ../src/libcodegen_a-CG_roseBuilder.o `test -f '../src/CG_roseBuilder.cc' || echo '$(srcdir)/'`../src/CG_roseBuilder.cc

@@ -11,6 +11,12 @@
 #include "omegatools.hh"
 #include <string.h>
 
+#include "ir_rose.hh" 
+
+#include <code_gen/CG_utils.h>
+//#include "iegenlib.h"
+
+
 using namespace omega;
 
 void Loop::permute(const std::vector<int> &pi) {
@@ -436,8 +442,7 @@ void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
           break;
         case LoopLevelTile: {
           new_loop_level[j - 1].type = LoopLevelTile;
-          int ref_level = stmt[*i].loop_level[reverse_pi[j - level]
-                                              - 1].payload;
+          int ref_level = stmt[*i].loop_level[reverse_pi[j - level]-1].payload;
           if (ref_level >= level && ref_level < level + pi.size())
             new_loop_level[j - 1].payload = reverse_pi[ref_level
                                                        - level];
@@ -484,6 +489,12 @@ void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
   
   setLexicalOrder(2 * level - 2, active);
 }
+
+
+void Loop::set_array_size(std::string name, int size ){
+  array_dims.insert(std::pair<std::string, int >(name, size));
+}
+
 
 std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
   // check for sanity of parameters
@@ -784,8 +795,17 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
       
       stmt[*i].IS = part1;
       
-      if (Intersection(copy(part2),
-                       Extend_Set(copy(this->known), n - this->known.n_set())).is_upper_bound_satisfiable()) {
+      int n1 = part2.n_set();
+      int m = this->known.n_set();
+      Relation test;
+      if(m > n1)
+        test = Intersection(copy(this->known),
+                            Extend_Set(copy(part2), m - part2.n_set()));
+      else
+        test = Intersection(copy(part2),
+                            Extend_Set(copy(this->known), n1 - this->known.n_set()));
+      
+      if (test.is_upper_bound_satisfiable()) {
         Statement new_stmt;
         new_stmt.code = stmt[*i].code->clone();
         new_stmt.IS = part2;
@@ -793,46 +813,12 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
         new_stmt.ir_stmt_node = NULL;
         new_stmt.loop_level = stmt[*i].loop_level;
         
+        new_stmt.has_inspector = stmt[*i].has_inspector;
+        new_stmt.reduction = stmt[*i].reduction;
+        new_stmt.reductionOp = stmt[*i].reductionOp;
+        
         stmt_nesting_level_.push_back(stmt_nesting_level_[*i]);
         
-        /*std::pair<std::vector<DependenceVector>,
-          std::vector<DependenceVector> > dv =
-          test_data_dependences(ir, stmt[*i].code, part1,
-          stmt[*i].code, part2, freevar, index,
-          stmt_nesting_level_[*i],
-          stmt_nesting_level_[stmt.size() - 1]);
-          
-          
-          
-          
-          for (int k = 0; k < dv.first.size(); k++)
-          part1_to_part2++;
-          if (part1_to_part2 > 0 && part2_to_part1 > 0)
-          throw loop_error(
-          "loop error: Aborting, split resulted in impossible dependence cycle!");
-          
-          for (int k = 0; k < dv.second.size(); k++)
-          part2_to_part1++;
-          
-          
-          
-          if (part1_to_part2 > 0 && part2_to_part1 > 0)
-          throw loop_error(
-          "loop error: Aborting, split resulted in impossible dependence cycle!");
-          
-          
-          
-          if (part2_to_part1 > 0){
-          temp_place_after = false;
-          assigned = true;
-          
-          }else if (part1_to_part2 > 0){
-          temp_place_after = true;
-          
-          assigned = true;
-          }
-          
-        */
         
         if (place_after)
           assign_const(new_stmt.xform, dim - 1, cur_lex + 1);
@@ -840,6 +826,8 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
           assign_const(new_stmt.xform, dim - 1, cur_lex - 1);
         
         stmt.push_back(new_stmt);
+        uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
+        uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
         dep.insert();
         what_stmt_num[*i] = stmt.size() - 1;
         if (*i == stmt_num)
@@ -991,76 +979,56 @@ void Loop::skew(const std::set<int> &stmt_nums, int level,
                 int cur_dep_dim = get_dep_dim_of(*i, kk + 1);
                 if (skew_amount[kk] > 0) {
                   if (lb != -posInfinity
-                      && stmt[*i].loop_level[kk].type
-                      == LoopLevelOriginal
-                      && dv.lbounds[cur_dep_dim]
-                      != -posInfinity)
-                    lb += skew_amount[kk]
-                      * dv.lbounds[cur_dep_dim];
+                      && stmt[*i].loop_level[kk].type == LoopLevelOriginal
+                      && dv.lbounds[cur_dep_dim] != -posInfinity)
+                    lb += skew_amount[kk] * dv.lbounds[cur_dep_dim];
                   else {
                     if (cur_dep_dim != -1
-                        && !(dv.lbounds[cur_dep_dim]
-                             == 0
-                             && dv.ubounds[cur_dep_dim]
-                             == 0))
+                        && !(dv.lbounds[cur_dep_dim] == 0
+                             && dv.ubounds[cur_dep_dim]== 0))
                       lb = -posInfinity;
                   }
                   if (ub != posInfinity
-                      && stmt[*i].loop_level[kk].type
-                      == LoopLevelOriginal
-                      && dv.ubounds[cur_dep_dim]
-                      != posInfinity)
-                    ub += skew_amount[kk]
-                      * dv.ubounds[cur_dep_dim];
+                      && stmt[*i].loop_level[kk].type == LoopLevelOriginal
+                      && dv.ubounds[cur_dep_dim] != posInfinity)
+                    ub += skew_amount[kk] * dv.ubounds[cur_dep_dim];
                   else {
                     if (cur_dep_dim != -1
-                        && !(dv.lbounds[cur_dep_dim]
-                             == 0
-                             && dv.ubounds[cur_dep_dim]
-                             == 0))
+                        && !(dv.lbounds[cur_dep_dim] == 0
+                             && dv.ubounds[cur_dep_dim] == 0))
                       ub = posInfinity;
                   }
                 } else if (skew_amount[kk] < 0) {
                   if (lb != -posInfinity
-                      && stmt[*i].loop_level[kk].type
-                      == LoopLevelOriginal
-                      && dv.ubounds[cur_dep_dim]
-                      != posInfinity)
-                    lb += skew_amount[kk]
-                      * dv.ubounds[cur_dep_dim];
+                      && stmt[*i].loop_level[kk].type == LoopLevelOriginal
+                      && dv.ubounds[cur_dep_dim] != posInfinity)
+                    lb += skew_amount[kk] * dv.ubounds[cur_dep_dim];
                   else {
                     if (cur_dep_dim != -1
-                        && !(dv.lbounds[cur_dep_dim]
-                             == 0
-                             && dv.ubounds[cur_dep_dim]
-                             == 0))
+                        && !(dv.lbounds[cur_dep_dim] == 0
+                             && dv.ubounds[cur_dep_dim] == 0))
                       lb = -posInfinity;
                   }
                   if (ub != posInfinity
-                      && stmt[*i].loop_level[kk].type
-                      == LoopLevelOriginal
-                      && dv.lbounds[cur_dep_dim]
-                      != -posInfinity)
-                    ub += skew_amount[kk]
-                      * dv.lbounds[cur_dep_dim];
+                      && stmt[*i].loop_level[kk].type == LoopLevelOriginal
+                      && dv.lbounds[cur_dep_dim] != -posInfinity)
+                    ub += skew_amount[kk] * dv.lbounds[cur_dep_dim];
                   else {
                     if (cur_dep_dim != -1
-                        && !(dv.lbounds[cur_dep_dim]
-                             == 0
-                             && dv.ubounds[cur_dep_dim]
-                             == 0))
+                        && !(dv.lbounds[cur_dep_dim] == 0
+                             && dv.ubounds[cur_dep_dim] == 0))
                       ub = posInfinity;
                   }
                 }
               }
               dv.lbounds[dep_dim] = lb;
               dv.ubounds[dep_dim] = ub;
-              if ((dv.isCarried(dep_dim)
-                   && dv.hasPositive(dep_dim)) && dv.quasi)
+              if ((dv.isCarried(dep_dim) && dv.hasPositive(dep_dim)) 
+                  && dv.quasi)
                 dv.quasi = false;
               
-              if ((dv.isCarried(dep_dim)
-                   && dv.hasNegative(dep_dim)) && !dv.quasi)
+              if ((dv.isCarried(dep_dim) && dv.hasNegative(dep_dim)) 
+                  && !dv.quasi)
                 throw loop_error(
                   "loop error: Skewing is illegal, dependence violation!");
               dv.lbounds[dep_dim] = lb;
@@ -1224,6 +1192,7 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   // check for sanity of parameters
   std::vector<int> ref_lex;
   int ref_stmt_num;
+  apply_xform(); 
   for (std::set<int>::const_iterator i = stmt_nums.begin();
        i != stmt_nums.end(); i++) {
     if (*i < 0 || *i >= stmt.size())
@@ -1297,11 +1266,63 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   
   std::vector<std::set<int> > s = sort_by_same_loops(same_loop, level);
   
-  std::set<int> s1;
-  std::set<int> s2;
-  std::set<int> s4;
-  std::vector<std::set<int> > s3;
+  std::vector<bool> s2;
+
+  for (int i = 0; i < s.size(); i++) {
+    s2.push_back(false);
+  }
+
   for (std::set<int>::iterator kk = stmt_nums.begin(); kk != stmt_nums.end();
+       kk++)
+    for (int i = 0; i < s.size(); i++)
+      if (s[i].find(*kk) != s[i].end()) {
+        
+        s2[i] = true;
+      }
+  
+  try {
+    
+    //Dependence Check for Ordering Constraint
+    //Graph<std::set<int>, bool> dummy = construct_induced_graph_at_level(s5,
+    //    dep, dep_dim);
+    
+    Graph<std::set<int>, bool> g = construct_induced_graph_at_level(s, dep,
+                                                                    dep_dim);
+    std::cout << g;
+    s = typed_fusion(g, s2);
+  } catch (const loop_error &e) {
+    
+    throw loop_error(
+      "statements cannot be fused together due to negative dependence");
+    
+  }
+  
+  int order = 0;
+  for (int i = 0; i < s.size(); i++) {
+    for (std::set<int>::iterator it = s[i].begin(); it != s[i].end(); it++) {
+      assign_const(stmt[*it].xform, 2 * level - 2, order);
+    }
+    order++;
+  }
+
+
+  //plan for selective typed fusion
+  
+  /*
+    1. sort the lex values of the statements
+    2. construct induced graph on sorted statements
+    3. pick a node from the graph, check if it is before/after from the candidate set for fusion
+    equal-> set the max fused node of this node to be the start/target node for fusion
+    before -> augment and continue
+    
+    4. once target node identified and is on work queue update successors and other nodes to start node
+    5. augment and continue
+    6. if all candidate nodes dont end up in start node throw error
+    7. Get nodes and update lexical values
+    
+  */
+
+  /* for (std::set<int>::iterator kk = stmt_nums.begin(); kk != stmt_nums.end();
        kk++)
     for (int i = 0; i < s.size(); i++)
       if (s[i].find(*kk) != s[i].end()) {
@@ -1326,7 +1347,7 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
     
     Graph<std::set<int>, bool> g = construct_induced_graph_at_level(s3, dep,
                                                                     dep_dim);
-    
+    std::cout<< g;
     s = typed_fusion(g);
   } catch (const loop_error &e) {
     
@@ -1387,7 +1408,7 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
     
   } else
     throw loop_error("Typed Fusion Error");
-  
+  */
 }
 
 
@@ -1395,7 +1416,9 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
 void Loop::distribute(const std::set<int> &stmt_nums, int level) {
   if (stmt_nums.size() == 0 || stmt_nums.size() == 1)
     return;
-  
+  fprintf(stderr, "Loop::distribute()\n");
+
+
   // invalidate saved codegen computation
   delete last_compute_cgr_;
   last_compute_cgr_ = NULL;
@@ -1410,6 +1433,7 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
     if (*i < 0 || *i >= stmt.size())
       throw std::invalid_argument(
         "invalid statement number " + to_string(*i));
+    
     if (level < 1
         || (level > (stmt[*i].xform.n_out() - 1) / 2
             || level > stmt[*i].loop_level.size()))
@@ -1427,6 +1451,7 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
             + to_string(level) + " subloop");
     }
   }
+
   // find SCC in the to-be-distributed loop
   int dep_dim = get_dep_dim_of(ref_stmt_num, level);
   std::set<int> same_loop = getStatements(ref_lex, dim - 1);
@@ -1532,7 +1557,1121 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
     order++;
   }
   // no need to update dependence graph
-  ;
+  
   return;
+}
+
+
+
+#if 0
+std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
+                                              std::vector<IR_ArrayRef *> &arr_refs) {
+    std::vector<IR_ArrayRef *> to_return;
+  for (int i = 0; i < arr_refs.size(); i++)
+    if (!ir->parent_is_array(arr_refs[i])) {
+      int j;
+      for (j = 0; j < to_return.size(); j++)
+        if (*to_return[j] == *arr_refs[i])
+          break;
+      if (j == to_return.size())
+        to_return.push_back(arr_refs[i]);
+    }
+  return to_return;
+}
+#endif
+
+
+
+#if 0
+std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
+                                                                   std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
+  
+  std::vector<std::vector<std::string> > to_return;
+  
+  for (std::set<IR_ArrayRef *>::iterator i = arr.begin(); i != arr.end();
+       i++) {
+    
+    std::vector<std::string> per_index;
+    
+    CG_outputRepr *subscript = (*i)->index(0);
+    
+    if ((*i)->n_dim() > 1)
+      throw ir_error(
+        "multi-dimensional array support non-existent for flattening currently");
+    
+    while (ir->QueryExpOperation(subscript) == IR_OP_ARRAY_VARIABLE) {
+      
+      std::vector<CG_outputRepr *> v = ir->QueryExpOperand(subscript);
+      
+      IR_ArrayRef *ref = static_cast<IR_ArrayRef *>(ir->Repr2Ref(v[0]));
+      //per_index.push_back(ref->name());
+      
+      subscript = ref->index(0);
+      
+    }
+    
+    if (ir->QueryExpOperation(subscript) == IR_OP_VARIABLE) {
+      std::vector<CG_outputRepr *> v = ir->QueryExpOperand(subscript);
+      IR_ScalarRef *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v[0]));
+      per_index.push_back(ref->name());
+      int j;
+      for (j = 0; j < index.size(); j++)
+        if (index[j] == ref->name())
+          break;
+      
+      if (j == index.size())
+        throw ir_error("Non index variable in array expression");
+      
+      int k;
+      for (k = 0; k < to_return.size(); k++)
+        if (to_return[k][0] == ref->name())
+          break;
+      if (k == to_return.size())
+        to_return.push_back(per_index);
+      
+    }
+    
+  }
+  
+  return to_return;
+  
+}
+#endif
+
+/*std::vector<CG_outputRepr *> constructInspectorData(IR_Code *ir, std::vector<std::vector<std::string> >  &indices){
+  
+  std::vector<CG_outputRepr *> to_return;
+  
+  for(int i =0; i < indices.size(); i++)
+  ir->CreateVariaebleDeclaration(indices[i][0]);
+  return to_return;
+  }
+  
+  
+  CG_outputRepr* constructInspectorFunction(IR_Code* ir, std::vector<std::vector<std::string> >  &indices){
+  
+  CG_outputRepr *to_return;
+  
+  
+  
+  return to_return;
+  }
+  
+*/
+#if 0
+CG_outputRepr * checkAndGenerateIndirectMappings(CG_outputBuilder * ocg,
+                                                 std::vector<std::vector<std::string> > &indices,
+                                                 CG_outputRepr * instance, CG_outputRepr * class_def,
+                                                 CG_outputRepr * count_var) {
+  
+  CG_outputRepr *to_return = NULL;
+  
+  for (int i = 0; i < indices.size(); i++)
+    if (indices[i].size() > 1) {
+      std::string index = indices[i][indices[i].size() - 1];
+      CG_outputRepr *rep = ocg->CreateArrayRefExpression(
+        ocg->CreateDotExpression(instance,
+                                 ocg->lookup_member_data(class_def, index, instance)),
+        count_var);
+      for (int j = indices[i].size() - 2; j >= 0; j--)
+        rep = ocg->CreateArrayRefExpression(indices[i][j], rep);
+      
+      CG_outputRepr *lhs = ocg->CreateArrayRefExpression(
+        ocg->CreateDotExpression(instance,
+                                 ocg->lookup_member_data(class_def, indices[i][0], instance)),
+        count_var);
+      
+      to_return = ocg->StmtListAppend(to_return,
+                                      ocg->CreateAssignment(0, lhs, rep));
+      
+    }
+  
+  return to_return;
+  
+}
+#endif
+
+#if 0
+CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
+                                          std::string prefix_name,
+                                          std::vector<std::vector<std::string> > &indices,
+                                          CG_outputRepr *instance, 
+                                          CG_outputRepr *class_def) {
+  
+  fprintf(stderr, "generatePointerAssignments()\n");
+  CG_outputRepr *list = NULL;
+
+  fprintf(stderr, "prefix '%s',   %d indices\n",  prefix_name.c_str(), indices.size()); 
+  for (int i = 0; i < indices.size(); i++) {
+    
+    std::string s = prefix_name + "_" + indices[i][0];
+
+    fprintf(stderr, "s %s\n", s.c_str()); 
+    
+    // create a variable definition for a pointer to int with this name
+    // that seems to be the only actual result of this routine ... 
+    //chillAST_VarDecl *vd = new chillAST_VarDecl( "int",  prefix_name.c_str(), "*", NULL);
+    //vd->print(); printf("\n"); fflush(stdout); 
+    //vd->dump(); printf("\n"); fflush(stdout); 
+    
+    CG_outputRepr *ptr_exp = ocg->CreatePointer(s); // but dropped on the floor. unused 
+    //fprintf(stderr, "ptr_exp created\n"); 
+    
+    //CG_outputRepr *rhs = ocg->CreateDotExpression(instance,
+    //                                              ocg->lookup_member_data(class_def, indices[i][0], instance));
+    
+    //CG_outputRepr *ptr_assignment = ocg->CreateAssignment(0, ptr_exp, rhs);
+    
+    //list = ocg->StmtListAppend(list, ptr_assignment);
+    
+  }
+  
+  fprintf(stderr, "generatePointerAssignments() DONE\n\n");
+  return list;
+}
+#endif
+
+
+#if 0
+void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_levels,
+                   std::string inspector_name) {
+  fprintf(stderr, "Loop::flatten( stmt_num %d )\n", stmt_num); 
+     
+  //  apply_xform();
+  
+  if (stmt_num < 0 || stmt_num >= stmt.size())
+    throw std::invalid_argument(
+      
+      "invalid statement number " + to_string(stmt_num));
+  
+  std::sort(loop_levels.begin(), loop_levels.end());
+  std::vector<int>::iterator set_it = loop_levels.begin();
+  
+  int current = *(loop_levels.begin());
+  set_it++;
+  
+  if (current <= 0)
+    throw std::invalid_argument("invalid loop level " + to_string(current));
+  if (current > stmt[stmt_num].loop_level.size())
+    throw std::invalid_argument(
+      "there is no loop level " + to_string(current)
+      + " for statement " + to_string(stmt_num));
+  
+  for (; set_it != loop_levels.end(); set_it++) {
+    
+    //if (*set_it - current != 1)
+    //  throw std::invalid_argument(
+    
+    //  "loop levels for flattening must be continuous!");
+    
+    current = *set_it;
+    
+    if (current <= 0)
+      throw std::invalid_argument(
+        "invalid loop level " + to_string(current));
+    if (current > stmt[stmt_num].loop_level.size())
+      throw std::invalid_argument(
+        "there is no loop level " + to_string(current)
+        + " for statement " + to_string(stmt_num));
+    
+  }
+  
+  if (loop_levels[loop_levels.size() - 1] != stmt[stmt_num].loop_level.size())
+    throw std::invalid_argument(
+      "invalid loop level: currrently flattened loop levels must extend to last dimension");
+  
+  //apply_xform(stmt_num);
+  
+  //a). Look up array references in stmt[stmt_num].code
+  
+  std::vector<IR_ArrayRef *> arr_refs = ir->FindArrayRef(stmt[stmt_num].code);
+  
+  std::vector<IR_ArrayRef *> outer_arr_refs = FindOuterArrayRefs(ir,
+                                                                 arr_refs);
+  
+  std::vector<std::vector<std::string> > indices;
+  
+  std::vector<std::string> loop_indices;
+  
+  for (std::vector<int>::iterator i = loop_levels.begin();
+       i != loop_levels.end(); i++){
+    
+    
+    
+    loop_indices.push_back(stmt[stmt_num].IS.set_var(*i)->name());
+  }
+  std::set<IR_ArrayRef *> set_refs;
+  
+  for (int i = 0; i < outer_arr_refs.size(); i++) {
+    bool found = false;
+    for (std::set<IR_ArrayRef*>::iterator j = set_refs.begin();
+         j != set_refs.end(); j++) {
+      if ((*j)->name() == outer_arr_refs[i]->name()) {
+        found = true;
+        break;
+      }
+      
+    }
+    if (!found)
+      set_refs.insert(outer_arr_refs[i]);
+    
+  }
+  
+  indices = constructInspectorVariables(ir, set_refs, loop_indices);
+  
+  /////////////////////////////////////////////////////////////////////////////
+  //Collect Inspector data arrays, types, & sizes to make a typedef of a struct 
+  /////////////////////////////////////////////////////////////////////////////
+  std::vector<CG_outputRepr *> class_data_types;
+  std::vector<std::string> class_data;
+
+  //indices to be passed to inspector function as parameters
+  std::vector<std::string> function_param;
+  for (int i = 0; i < indices.size(); i++) {
+    class_data.push_back(indices[i][0]);
+    int j;
+    for (j = 0; j < loop_indices.size(); j++)
+      if (loop_indices[j] == indices[i][0])
+        break;
+    if (j != loop_indices.size())
+      function_param.push_back(indices[i][0]);
+    
+    for (j = 0; j < arr_refs.size(); j++) {
+      
+      std::string comp;
+      if (ir->QueryExpOperation(arr_refs[j]->index(0))
+          == IR_OP_VARIABLE) {
+        std::vector<CG_outputRepr *> v = ir->QueryExpOperand(
+          arr_refs[j]->index(0));
+        
+        IR_ScalarRef *index = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v[0]));
+        comp = index->name();
+      } else if (ir->QueryExpOperation(arr_refs[j]->index(0))
+                 == IR_OP_ARRAY_VARIABLE) {
+        std::vector<CG_outputRepr *> v = ir->QueryExpOperand(
+          arr_refs[j]->index(0));
+        
+        IR_ArrayRef *index = static_cast<IR_ArrayRef *>(ir->Repr2Ref(v[0]));
+        comp = index->name();
+      }
+      
+      if (comp == indices[i][0]) {
+        fprintf(stderr, "making a pointer to int type for %s\n", comp.c_str()); 
+        CG_outputRepr *arr_type = ir->CreatePointerType(IR_CONSTANT_INT);
+        
+        //ir->CreateArrayType(IR_CONSTANT_INT,
+        //arr_refs[j]->symbol()->size(0));
+        class_data_types.push_back(arr_type);
+        break;
+      }
+      
+    }
+    if (j == arr_refs.size())
+      throw ir_error("unable to find index for inspector");
+    
+  }
+  
+  std::vector<std::string> inspector_member_functions;
+  
+  inspector_member_functions.push_back("inspector"); // a constructor, if it were actually a class and not a struct
+
+  class_data.push_back("count"); // but no type !! TODO 
+  class_data_types.push_back( ir->CreatePointerType(IR_CONSTANT_INT)); // explicitly make count an int
+  
+//  std::vector<std::vector<std::string> > function_param_in;
+  
+//  function_param_in.push_back(function_param);
+//--Construct Inspector Class + data
+  
+
+  ////////////////////////////////////////////////////
+  // build the typedef for the inspector struct    - WHAT IS THE SCOPE? global? 
+  ////////////////////////////////////////////////////
+  CG_outputBuilder *ocg = ir->builder(); 
+  CG_outputRepr *class_def = ocg->CreateStruct("inspector", 
+                                              class_data,
+                                              class_data_types);
+  
+  // TODO how do you tell what scope to create the class in?
+  // so far, no scope, so it does not really exist and is not printed
+
+  //  CG_outputRepr *func_def_constructor = ocg->lookup_member_function(class_def,
+  //      "inspector");
+  //CG_outputRepr *func_def_method = ocg->lookup_member_function(class_def,
+  //    "nnz");
+  
+  //  CG_outputRepr *constructor_body = ocg->CreateAssignment(0, constructor_data->clone(),
+  //      ocg->CreateInt(0));
+  //ocg->setFunctionBody(func_def_constructor, constructor_body);
+  
+  CG_outputRepr *list = NULL;
+
+  // make a declaration of the newly-defined struct  - WHAT IS THE SCOPE? function?  TODO 
+  fprintf(stderr, "loop_basic.cc L1941 creating an instance of the inspector named %s\n", inspector_name.c_str()); 
+  CG_outputRepr *instance = ocg->CreateClassInstance(inspector_name,   // instance is a VARDECL seems wrong
+                                                     class_def);
+  CG_outputRepr *constructor_data = ocg->lookup_member_data(class_def,
+                                                            "count", instance);
+  for (int i = 0; i < function_param.size(); i++) {
+    fprintf(stderr, "making assignment for class data %d %s\n", i, class_data[i].c_str());  
+    
+    // what is this? 
+    CG_outputRepr *func_mem_data = ocg->lookup_member_data(class_def,     // scope 
+                                                           class_data[i], // variable name 
+                                                           instance); 
+    //std::vector<CG_outputRepr *> args; // never used !! 
+    //args.push_back(ocg->CreateInt(4)); // never used !! 
+    
+    
+    // c.j[c.count] = t4;
+    // c.i[c.count] = t2;
+    fprintf(stderr, "\nloop_basic.cc L1958  calling CreateDotExpression with CLONE  (c.j)\n"); 
+    // clone is because CreateDotetc DELETES the args (why?) 
+    CG_outputRepr *array = ocg->CreateDotExpression(instance, // ->clone(),                   //clone is WRONG?
+                                                    func_mem_data ); // ->clone()); // c.j
+    fprintf(stderr, "\nloop_basic.cc L1962  calling CreateDotExpression with CLONE  (c.count)\n"); 
+    CG_outputRepr *index = ocg->CreateDotExpression(instance, // ->clone(), // c.count
+                                                    ocg->lookup_member_data(class_def, "count", instance));
+    
+    fprintf(stderr, "\nloop_basic.cc L1967  calling CreateAssignment()\n"); 
+    CG_outputRepr *func_mem_body = ocg->CreateAssignment(0,
+                                                         ocg->CreateArrayRefExpression(array, 
+                                                                                       index), 
+                                                         ocg->CreateIdent(function_param[i]));
+    
+   
+    list = ocg->StmtListAppend(list, func_mem_body);
+    
+  }
+  
+  //ocg->setFunctionBody(func_def_method, list);
+  
+  //CG_outputRepr *count = ocg->CreateIdent("count");
+  //CG_outputRepr *count_init = ocg->CreateAssignment(0, count->clone(),
+  //    ocg->CreateInt(0));
+  
+  //init_code = ocg->StmtListAppend(init_code, count_init);
+
+
+  CG_outputRepr *count_plusplus = ocg->CreateAssignment(0,
+                                                        ocg->CreateDotExpression(instance->clone(),
+                                                                                 constructor_data->clone()),
+                                                        ocg->CreatePlus(
+                                                                        ocg->CreateDotExpression(instance->clone(),
+                                                                                                 constructor_data->clone()), ocg->CreateInt(1)));
+
+  //  CG_outputRepr *stmts_to_append = checkAndGenerateIndirectMappings(ocg,
+  //      indices, instance, class_def, count->clone());
+
+  fprintf(stderr, "CALLING unused code generatePointerAssignments();\n"); 
+  // unused  ?? but seems to have needed side effects   
+  CG_outputRepr *initializations = generatePointerAssignments(ocg, // never used !! TODO 
+                                                              inspector_name, indices, instance, class_def);
+  
+
+
+  /*
+   * Generate
+   * Substitution Mappings here
+   *
+   */
+  
+  fprintf(stderr, "*** BLAAT\n");
+  init_code = ocg->StmtListAppend(init_code,
+                                  ocg->CreateAssignment(0,
+                                                        ocg->CreateDotExpression(instance->clone(),
+                                                                                 constructor_data->clone()), ocg->CreateInt(0)));
+  
+//--end Construct Inspector Class + data
+  
+//Attach function as data member to class;
+  
+//b). Generate mappings and store mappings in global data structure
+//    eg. y[i] += a[j]*x[col[j]]
+//    y: i-> i  a: j->j x:j-> col[j]
+  
+//c). Generate the Inspector code corresponding to the mapping
+//    using NNZ.nnz(t2,t4);
+  
+//d) generate pointers for each of the array references
+//Eg.  float *nnz_i = NNZ.i;
+  
+//e) Replace the expressions within col[j]
+//eg.  j->col[nnz.j] and  you have x[col[nnz.j]] for x then replace with nnz.x
+  
+//f) replace nnz(i,j) with *count;
+  
+//1. Create Omega Relation for Inspector Iteration Space
+//   using uninterpreted function symbols
+  
+//1.a) Create Mapping from i->[i,k,j]
+  
+  int n = stmt[stmt_num].IS.n_set();
+  /*
+  //1.b) Modify xform
+  
+  int m = stmt[stmt_num].xform.n_out();
+  
+  Relation r(m, m + 2);
+  F_And *f_root = r.add_and();
+  
+  for (int j = 1; j <= m; j++) {
+  EQ_Handle e = f_root->add_EQ();
+  e.update_coef(r.input_var(j), 1);
+  e.update_coef(r.output_var(j), -1);
+  }
+  
+  for (int j = m + 2; j <= m + 2; j += 2) {
+  EQ_Handle e = f_root->add_EQ();
+  e.update_coef(r.output_var(j), 1);
+  
+  }
+  
+  // a = NNZ(i,j)
+  Free_Var_Decl *nnz = new Free_Var_Decl(inspector_name, loop_levels.size());
+  
+  Variable_ID nnz_in = r.get_local(nnz, Input_Tuple);
+  EQ_Handle e2 = f_root->add_EQ();
+  e2.update_coef(r.output_var(m + 1), 1);
+  e2.update_coef(nnz_in, -1);
+  
+  */
+  
+//2. Create Omega Relation for Flattened Iteration Space
+//   using uninterpreted function symbolsstd::vector<IR_ArrayRef *> arr_refs = ir->FindArrayRef(stmt[stmt_num].code);
+  
+  
+// Relation flattened_IS = copy(stmt[stmt_num].IS);
+  //IeGenlib relation construction
+  //1. Create a map from array reference names to outputReprs to pass into CreateSubstituted statement
+  std::map<std::string, std::string> array_name_to_relation;
+  
+  for (std::set<IR_ArrayRef *>::iterator it = set_refs.begin();
+       it != set_refs.end(); it++) {
+    std::string s;
+    if ((*it)->n_dim() > 1)
+      throw loop_error(
+        "only statements with single dimensional arrays are handled for flattening currently");
+    
+    CG_outputRepr *index = (*it)->index(0);
+    if (ir->QueryExpOperation(index) != IR_OP_ARRAY_VARIABLE) {
+      Relation r(stmt[stmt_num].IS.n_set(), 1);
+      //std::cout << (*it)->name() << std::endl;
+      F_And *f_root = r.add_and();
+      
+      for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)          // all the iteration space indeces enclosing this
+        r.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
+      Variable_ID v = r.output_var(1);
+      exp2formula(ir, r, f_root, freevar, index, v, 'w', IR_COND_EQ,
+                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num]);
+      r.setup_names();
+      r.simplify(2, 4);
+      s = r.print_with_subs_to_string();
+      //std::cout << s << std::endl;
+      
+    } else {
+      
+      std::vector<IR_ArrayRef *> inner_refs = ir->FindArrayRef(index);
+      
+      CG_outputRepr *index2 = inner_refs[0]->index(0);
+      if (inner_refs.size() > 1)
+        throw loop_error(
+          "more than one level of indirection in arrays not supported currently");
+      
+      std::string function_name = inner_refs[0]->name();
+      
+      if (ir->QueryExpOperation(index2) == IR_OP_ARRAY_VARIABLE)
+        throw loop_error(
+          "more than one level of indirection in arrays not supported currently");
+      
+      Relation r(stmt[stmt_num].IS.n_set(), 1);
+      std::cout << (*it)->name() << std::endl;
+      F_And *f_root = r.add_and();
+      
+      for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)
+        r.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
+      Variable_ID v = r.output_var(1);
+      exp2formula(ir, r, f_root, freevar, index2, v, 'w', IR_COND_EQ,
+                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num]);
+      r.setup_names();
+      r.simplify(2, 4);
+      std::string output_var = r.print_outputs_with_subs_to_string();
+      
+      s = "{[";
+      s += stmt[stmt_num].IS.set_var(1)->name();
+      for (int j = 2; j <= stmt[stmt_num].IS.n_set(); j++)
+        s = s + "," + stmt[stmt_num].IS.set_var(j)->name();
+      
+      s += "]->[r2] : r2 = " + function_name + "(" + output_var + ")}";
+      
+    }
+    array_name_to_relation.insert(
+      std::pair<std::string, std::string>((*it)->name(), s));
+    std::cout << "check" << std::endl;
+    std::cout << s << std::endl;
+  }
+  
+  // from CHILL, Anand declares the uninterpreted function
+  // that performs coalescing and defines the coalescing
+  // transformation.
+  iegenlib::setCurrEnv(); // Clears out the environment
+  
+  Relation IS_for_iegen = copy(stmt[stmt_num].IS);
+  printf("IS_for_iegen   ");   IS_for_iegen.print(); printf("\n"); fflush(stdout); 
+
+  std::string set_string = "{[";
+  for (int j = 1; j <= IS_for_iegen.n_set(); j++) {
+    if (j != 1)
+      set_string += ",";
+    set_string += stmt[stmt_num].IS.set_var(j)->name();
+  }
+  
+  set_string += "] ";
+  std::string iegen_is = print_to_iegen_string(IS_for_iegen);
+  iegen_is = set_string + " : " + iegen_is + "}";
+  std::cout << iegen_is << std::endl;
+  
+  Relation flattened_index(1);
+  flattened_index.name_set_var(1, index_name);
+  F_And *f_root_iegen = flattened_index.add_and();
+  
+  GEQ_Handle iegen1 = f_root_iegen->add_GEQ();
+  iegen1.update_coef(flattened_index.set_var(1), 1);
+  
+  GEQ_Handle iegen2 = f_root_iegen->add_GEQ();
+  iegen2.update_coef(flattened_index.set_var(1), -1);
+  Free_Var_Decl *t = new Free_Var_Decl("nnz");
+  Variable_ID e = flattened_index.get_local(t);
+  iegen2.update_coef(e, 1);
+  iegen2.update_const(-1);
+  flattened_index.setup_names();
+  flattened_index.simplify();
+  printf("\n*** flattened_index   ");   flattened_index.print(); printf("\n"); fflush(stdout); 
+
+ 
+  std::string set_string2 = "{[" + flattened_index.set_var(1)->name()
+    + "] : ";
+  
+  std::string iegen_flattened = print_to_iegen_string(flattened_index);
+  iegen_flattened = set_string2 + iegen_flattened + "}";
+  std::cout << iegen_flattened << std::endl;
+  
+  Relation r1(stmt[stmt_num].IS.n_set(), 1);
+  
+  std::vector<std::string> index_names;
+  for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++) {
+    r1.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
+    index_names.push_back(stmt[stmt_num].IS.set_var(j)->name());
+  }
+  r1.name_output_var(1, index_name);
+  
+  Free_Var_Decl *nnz_iegen = new Free_Var_Decl(inspector_name,
+                                               loop_levels.size());
+  Variable_ID iegen_nnz = r1.get_local(nnz_iegen, Input_Tuple);
+  
+  F_And *f_root_coalesce = r1.add_and();
+  
+  EQ_Handle e_iegen1 = f_root_coalesce->add_EQ();
+  e_iegen1.update_coef(iegen_nnz, 1);
+  e_iegen1.update_coef(r1.output_var(1), -1);
+  
+  /*EQ_Handle e_iegen2 = f_root_coalesce->add_EQ();
+    e_iegen2.update_coef(r1.input_var(r1.n_inp()), 1);
+    e_iegen2.update_coef(r1.output_var(1), -1);
+  */
+  //r1.simplify(0,0);
+
+  printf("\n*** r1   ");   r1.print(); printf("\n"); fflush(stdout); 
+
+  std::string r1_coalesce = print_to_iegen_string(r1);
+  std::string set_string3 = set_string + " -> [" + r1.output_var(1)->name()
+    + "] : ";
+  r1_coalesce = set_string3 + r1_coalesce + "&&" + r1.output_var(1)->name()
+    + "=" + r1.input_var(r1.n_inp())->name() + "}";
+  std::cout << r1_coalesce << std::endl;
+  
+//  std::string cpy_inspector_name = std::string("c");//inspector_name;
+//  std::string cpy_iegen_is = std::string("{[i,j] : index_(i) <= j && j < index__(i) && 0 <= i && i < n}");//iegen_is;
+//  std::string cpy_iegen_flattened = std::string("{[coalesced_index] : 0 <= coalesced_index && coalesced_index < nnz}");
+
+  fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str()); 
+
+  fprintf(stderr, "\ndomain\n"); 
+  iegenlib::Set *domain   = new iegenlib::Set(iegen_is);
+  fprintf(stderr, "\nrange\n"); 
+  iegenlib::Set *range = new iegenlib::Set(iegen_flattened); 
+
+
+  fprintf(stderr, "Loop::flatten(), line 2202, calling iegenlib::appendCurrEnv()\n"); 
+  iegenlib::appendCurrEnv(inspector_name, // UF name
+                          // UF domain
+                          domain, // new iegenlib::Set(iegen_is),
+                          // UF range
+                          range, // new iegenlib::Set(iegen_flattened),
+                          // c function is bijective
+                          true);
+  fprintf(stderr, "FINISHED iegenlib::appendCurrEnv()\n\n"); 
+
+
+  iegenlib::Relation* T_coalesce = new iegenlib::Relation(r1_coalesce); 
+  fprintf(stderr, "T_coalesce\n"); 
+
+  // then applies the transformation to each of the access relation
+  iegenlib::Relation* T_coalesce_inv = T_coalesce->Inverse();
+  //EXPECT_EQ("{ [k] -> [i, j] : k - j = 0 && k - c(i, j) = 0 }",
+  std::cout << T_coalesce_inv->prettyPrintString() << std::endl;
+  
+  Relation flattened_IS(stmt[stmt_num].IS.n_set() + 1);
+  F_And *f_and = flattened_IS.add_and();
+  
+  for (int j = 1; j <= flattened_IS.n_set() - 1; j++) {
+    EQ_Handle e = f_and->add_EQ();
+    e.update_coef(flattened_IS.set_var(j), 1);
+    
+  }
+  
+  flattened_IS.copy_names(stmt[stmt_num].IS);
+  //flattened_IS.setup_names();
+  flattened_IS.name_set_var(flattened_IS.n_set(), index_name);
+  
+  Free_Var_Decl *nnz = new Free_Var_Decl(inspector_name, loop_levels.size());
+  Variable_ID nnz_in_ = flattened_IS.get_local(nnz, Input_Tuple);
+  
+  GEQ_Handle g3_ = f_and->add_GEQ();
+  
+  g3_.update_coef(nnz_in_, 1);
+  g3_.update_coef(flattened_IS.set_var(flattened_IS.n_set()), -1);
+  g3_.update_const(-1);
+  
+  GEQ_Handle g4_ = f_and->add_GEQ();
+  g4_.update_coef(flattened_IS.set_var(flattened_IS.n_set()), 1);
+  
+  flattened_IS.simplify();
+  printf("\n*** flattened_IS   ");   flattened_IS.print(); printf("\n"); fflush(stdout); 
+
+
+  Relation flattened_xform(flattened_IS.n_set(),
+                           2 * flattened_IS.n_set() + 1);
+  
+  F_And *fr = flattened_xform.add_and();
+  
+  for (int j = 1; j <= flattened_IS.n_set(); j++) {
+    EQ_Handle e = fr->add_EQ();
+    
+    if (j != flattened_IS.n_set()) {
+      e.update_coef(flattened_xform.output_var(2 * j), 1);
+      e.update_const(-1);
+    } else {
+      e.update_coef(flattened_xform.input_var(j), -1);
+      e.update_coef(flattened_xform.output_var(2 * j), 1);
+      
+    }
+    
+  }
+  
+  for (int j = 1; j <= 2 * (flattened_IS.n_set()) + 1; j += 2) {
+    EQ_Handle e = fr->add_EQ();
+    
+    e.update_coef(flattened_xform.output_var(j), 1);
+    e.update_const(-1);
+    
+  }
+  flattened_IS.setup_names();
+  copy(flattened_IS).print();
+  copy(flattened_xform).print();
+  
+  flattened_IS.simplify();
+  flattened_xform.simplify();
+  printf("\n*** flattened_xform   ");   flattened_xform.print(); printf("\n"); fflush(stdout); 
+
+
+  /*  stmt[stmt_num].xform = Composition(r, stmt[stmt_num].xform);
+      stmt[stmt_num].xform.simplify();
+      stmt[stmt_num].IS.simplify();
+  */
+  Statement new_stmt;
+  new_stmt.IS = flattened_IS;
+  new_stmt.xform = flattened_xform;
+  new_stmt.loop_level = stmt[stmt_num].loop_level;
+  new_stmt.reduction = stmt[stmt_num].reduction;
+  new_stmt.reductionOp = stmt[stmt_num].reductionOp;
+  LoopLevel ll;
+  ll.type = LoopLevelOriginal;
+  ll.payload = n + 1;
+  ll.parallel_level = 0;
+  if (new_stmt.reduction > 0) {
+    ll.segreducible = true;
+    ll.segment_descriptor = inspector_name + "."
+      + new_stmt.IS.set_var(1)->name();
+  } else
+    ll.segreducible = false;
+  
+  new_stmt.loop_level.push_back(ll);
+  
+//Anand: extra redundant loop_level
+  /*  LoopLevel ll2;
+      ll2.type = LoopLevelOriginal;
+      ll2.payload = n + 2;
+      ll2.parallel_level = 0;
+      new_stmt.loop_level.push_back(ll2);
+  */
+  new_stmt.ir_stmt_node = NULL;
+  new_stmt.has_inspector = false;
+  
+  fprintf(stderr, "BEFORE CLONE\n"); 
+  new_stmt.code = stmt[stmt_num].code->clone();
+  fprintf(stderr, "AFTER CLONE\n"); 
+  
+  delete stmt[stmt_num].code;
+  stmt[stmt_num].code = ocg->StmtListAppend(list, count_plusplus);
+  stmt[stmt_num].has_inspector = true;
+  //stmt[stmt_num].code = ocg->CreateNullStatement();
+  ocg->CreateIdent(index_name);
+
+  // create  #define c(i,j) c.count
+  fprintf(stderr, "*** create  #define c(i,j) c.count\n");
+
+  std::vector< std::string> args;
+  args.push_back( std::string("i") );
+  args.push_back( std::string("j") );
+
+  fprintf(stderr, "loop_basic.cc calling CreateDefineMacro( %s, i,j, count)\n", inspector_name.c_str()); 
+  ir->CreateDefineMacro(inspector_name, 
+                        args, // "(i,j)", // (i,j) hardcoded ???  TODO 
+                        ocg->ObtainInspectorRange(inspector_name, "count"));  // ?? 
+  fprintf(stderr, "*** create  #define c(i,j) c.count DONE\n");
+
+
+  stmt.push_back(new_stmt);
+  
+  uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
+  uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
+  int new_stmt_num = stmt.size() - 1;
+  //Anand adding dependence graph update :
+  
+  dep.insert();
+  
+  DependenceVector dv;
+  dv.type = DEP_W2R;
+  dv.lbounds.push_back(0);
+  dv.ubounds.push_back(posInfinity);
+  
+  for (int i = 1; i < loop_levels.size(); i++) {
+    
+    dv.lbounds.push_back(0);
+    dv.ubounds.push_back(0);
+    
+  }
+  
+  //Connect original statement and flattened statement with unknown dependence
+  dep.connect(stmt_num, stmt.size() - 1, dv);
+// Update known relation
+  int known_dim = (this->known).n_set();
+  
+  Relation known = Extend_Set(copy(this->known),
+                              stmt[stmt_num].xform.n_out() - this->known.n_set());
+  
+  Variable_ID nnz_in__ = known.get_local(nnz, Input_Tuple);
+  F_And *f_and_ = known.and_with_and();
+  GEQ_Handle g5_ = f_and_->add_GEQ();
+  g5_.update_coef(nnz_in__, 1);
+  g5_.update_const(-4096);
+  //this->known = known;
+  
+  int n_ = stmt[new_stmt_num].loop_level.size();
+  
+  std::vector<int> lex = getLexicalOrder(new_stmt_num);
+  
+  Relation mapping(2 * n_ + 1, n_);
+  F_And *f_root = mapping.add_and();
+  for (int j = 1; j <= n_; j++) {
+    EQ_Handle h = f_root->add_EQ();
+    h.update_coef(mapping.output_var(j), 1);
+    h.update_coef(mapping.input_var(2 * j), -1);
+    
+  }
+  mapping = Composition(mapping, stmt[new_stmt_num].xform);
+  
+  F_And *f_and__ = mapping.and_with_and();
+  
+  GEQ_Handle g6_ = f_and__->add_GEQ();
+  g6_.update_coef(mapping.input_var(n_), -1);
+  
+  Variable_ID nnz_in___ = mapping.get_local(nnz, Input_Tuple);
+  g6_.update_coef(nnz_in___, 1);
+  
+  mapping.simplify();
+  printf("\n*** mapping1   ");   mapping.print(); printf("\n"); fflush(stdout); 
+
+  
+  // match omega input/output variables to variable names in the code
+  for (int j = 1; j <= stmt[new_stmt_num].IS.n_set(); j++)
+    mapping.name_input_var(j, stmt[new_stmt_num].IS.set_var(j)->name());
+  for (int j = 1; j <= n_; j++)
+    mapping.name_output_var(j,
+                            tmp_loop_var_name_prefix
+                            + to_string(tmp_loop_var_name_counter + j - 1));
+  
+  mapping.setup_names();
+  printf("\n*** mapping2   ");   mapping.print(); printf("\n"); fflush(stdout); 
+
+  //stmt[*i].code = outputStatement(ocg, stmt[*i].code, 0, mapping, known, std::vector<CG_outputRepr *>(mapping.n_out(), NULL));
+  std::vector<std::string> loop_vars;
+  for (int j = 1; j <= stmt[new_stmt_num].IS.n_set(); j++)
+    loop_vars.push_back(stmt[new_stmt_num].IS.set_var(j)->name());
+  
+/*  std::vector<CG_outputRepr *> subs = output_substitutions(ocg,
+    Inverse(copy(mapping)),
+    std::vector<std::pair<CG_outputRepr *, int> >(mapping.n_out(),
+    std::make_pair(static_cast<CG_outputRepr *>(NULL), 0)),
+    uninterpreted_symbols);
+    stmt[new_stmt_num].code = ocg->CreateSubstitutedStmt(0,
+    stmt[new_stmt_num].code, loop_vars, subs);
+    
+*/
+  
+  
+  
+  //2. For each array reference get the index and initialize the string relation
+  
+  std::vector<IR_ArrayRef *> arr_refs_ = ir->FindArrayRef(stmt[new_stmt_num].code);
+  
+  std::vector<IR_ArrayRef *> outer_arr_refs_ = FindOuterArrayRefs(ir,
+                                                                  arr_refs_);
+  
+  
+  std::set<IR_ArrayRef *> set_refs_;
+  
+  for (int i = 0; i < outer_arr_refs_.size(); i++) {
+    bool found = false;
+    for (std::set<IR_ArrayRef*>::iterator j = set_refs_.begin();
+         j != set_refs_.end(); j++) {
+      if ((*j)->name() == outer_arr_refs_[i]->name()) {
+        found = true;
+        break;
+      }
+      
+    }
+    if (!found)
+      set_refs_.insert(outer_arr_refs_[i]);
+    
+  }
+  
+  
+  for (std::map<std::string, std::string>::iterator it =
+         array_name_to_relation.begin(); it != array_name_to_relation.end();
+       it++) {
+    
+    std::string array_name = it->first;
+    std::string array_exp = it->second;
+    std::cout<<array_exp<<std::endl;
+    iegenlib::Relation* r0_v0 = new iegenlib::Relation(array_exp);
+    
+    //3. double indirection introduce the uninterpreted function
+    
+    //4. Create the coalesce relation by reading the IS and the  flattening relation levels names
+    // Also do the computation for updating the access mappings
+    
+    iegenlib::Relation* r0_v1 = r0_v0->Compose(T_coalesce_inv);
+    
+    ////// To get the updated access relation do the following:
+    // Find tuple variable 1 as a function of tuple variables 0 through 0
+    iegenlib::Exp* r0_v1_exp = r0_v1->findFunction(1, 0, 0);
+    
+    std::string s = r0_v1_exp->prettyPrintString(r0_v1->getTupleDecl());
+    fprintf(stderr, "*** s %s\n", s.c_str()); 
+
+    CG_outputRepr * subscript = iegen_parser(s, index_names);
+    
+    //6. Pass in  the mappings to CreateSubstitutedStmt
+    CG_outputRepr *new_array_exp = ir->builder()->CreateArrayRefExpression( ir->builder()->CreateIdent(array_name), subscript);
+    
+    IR_ArrayRef *to_replace;
+    std::set<IR_ArrayRef *>::iterator it2;
+    for( it2 = set_refs_.begin(); it2 != set_refs_.end(); it2++)
+      if((*it2)->name() == array_name)
+      {
+        to_replace = *it2;
+        
+        break;
+        
+      }
+    
+    
+    set_refs_.erase(it2);
+    ir->ReplaceExpression(to_replace, new_array_exp);
+    
+    
+    delete r0_v0;
+    delete r0_v1;
+    delete r0_v1_exp;
+    
+  }
+  
+  std::vector<CG_outputRepr *> subs = output_substitutions(ocg,
+                                                           Inverse(copy(mapping)),
+                                                           std::vector<std::pair<CG_outputRepr *, int> >(mapping.n_out(),
+                                                                                                         std::make_pair(static_cast<CG_outputRepr *>(NULL), 0)),
+                                                           uninterpreted_symbols[stmt_num]);
+  stmt[new_stmt_num].code = ocg->CreateSubstitutedStmt(0,
+                                                       stmt[new_stmt_num].code, loop_vars, subs, true);
+  
+
+  fprintf(stderr, "BEFORE changing stmt[%d].IS\n", new_stmt_num); 
+  //debugRelations(); 
+
+  Relation buh = Restrict_Domain(mapping, stmt[new_stmt_num].IS);
+  fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
+  stmt[new_stmt_num].IS = omega::Range( buh ); 
+  fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
+ 
+  printf("\n*** mapping3   ");   mapping.print(); printf("\n"); fflush(stdout); 
+
+  // above breaks the following into parts 
+  //stmt[new_stmt_num].IS = omega::Range(Restrict_Domain(mapping, stmt[new_stmt_num].IS));
+
+  fprintf(stderr, "AFTER changing stmt[%d].IS\n", new_stmt_num); 
+  //debugRelations(); 
+
+  stmt[new_stmt_num].IS.simplify();
+  
+  fprintf(stderr, "AFTER simplify\n"); 
+  //debugRelations(); 
+
+  // replace original transformation relation with straight 1-1 mapping
+  mapping = Relation(n_, 2 * n_ + 1);
+  f_root = mapping.add_and();
+  for (int j = 1; j <= n_; j++) {
+    EQ_Handle h = f_root->add_EQ();
+    h.update_coef(mapping.output_var(2 * j), 1);
+    h.update_coef(mapping.input_var(j), -1);
+  }
+  for (int j = 1; j <= 2 * n_ + 1; j += 2) {
+    EQ_Handle h = f_root->add_EQ();
+    h.update_coef(mapping.output_var(j), 1);
+    h.update_const(-lex[j - 1]);
+  }
+  stmt[new_stmt_num].xform = mapping;
+  tmp_loop_var_name_counter += n_;
+  this->known = known;
+
+
+  printf("\n*** mapping   ");   mapping.print(); printf("\n"); fflush(stdout); 
+  printf("\n*** known     ");   known.print(); printf("\n"); fflush(stdout); 
+
+
+  delete T_coalesce;
+  delete T_coalesce_inv;
+  
+  fprintf(stderr, "Loop::flatten() END\n"); 
+  //debugRelations(); 
+}
+#endif
+
+
+
+
+
+
+
+
+
+void Loop::normalize(int stmt_num, int loop_level) {
+  
+  if (stmt_num < 0 || stmt_num >= stmt.size())
+    throw std::invalid_argument(
+      
+      "invalid statement number " + to_string(stmt_num));
+  
+  if (loop_level <= 0)
+    throw std::invalid_argument(
+      "invalid loop level " + to_string(loop_level));
+  if (loop_level > stmt[stmt_num].loop_level.size())
+    throw std::invalid_argument(
+      "there is no loop level " + to_string(loop_level)
+      + " for statement " + to_string(stmt_num));
+  
+  apply_xform(stmt_num);
+  
+  Relation r = copy(stmt[stmt_num].IS);
+  
+  Relation bound = get_loop_bound(r, loop_level, this->known);
+  if (!bound.has_single_conjunct() || !bound.is_satisfiable()
+      || bound.is_tautology())
+    throw loop_error("unable to extract loop bound for normalize");
+  
+  // extract the loop stride
+  coef_t stride;
+  std::pair<EQ_Handle, Variable_ID> result = find_simplest_stride(bound,
+                                                                  bound.set_var(loop_level));
+  if (result.second == NULL)
+    stride = 1;
+  else
+    stride = abs(result.first.get_coef(result.second))
+      / gcd(abs(result.first.get_coef(result.second)),
+            abs(result.first.get_coef(bound.set_var(loop_level))));
+  
+  if (stride != 1)
+    throw loop_error(
+      "normalize currently only handles unit stride, non unit stride present in loop bounds");
+  
+  GEQ_Handle lb;
+  
+  Conjunct *c = bound.query_DNF()->single_conjunct();
+  for (GEQ_Iterator gi(c->GEQs()); gi; gi++) {
+    int coef = (*gi).get_coef(bound.set_var(loop_level));
+    if (coef > 0)
+      lb = *gi;
+  }
+  
+  //Loop bound already zero
+  //Nothing to do.
+  if (lb.is_const(bound.set_var(loop_level)) && lb.get_const() == 0)
+    return;
+  
+  if (lb.is_const_except_for_global(bound.set_var(loop_level))) {
+    
+    int n = stmt[stmt_num].xform.n_out();
+    
+    Relation r(n, n);
+    F_And *f_root = r.add_and();
+    for (int j = 1; j <= n; j++)
+      if (j != 2 * loop_level) {
+        EQ_Handle h = f_root->add_EQ();
+        h.update_coef(r.input_var(j), 1);
+        h.update_coef(r.output_var(j), -1);
+      }
+    
+    stmt[stmt_num].xform = Composition(r, stmt[stmt_num].xform);
+    stmt[stmt_num].xform.simplify();
+    
+    for (Constr_Vars_Iter ci(lb); ci; ci++) {
+      if ((*ci).var->kind() == Global_Var) {
+        Global_Var_ID g = (*ci).var->get_global_var();
+        Variable_ID v;
+        if (g->arity() == 0)
+          v = stmt[stmt_num].xform.get_local(g);
+        else
+          v = stmt[stmt_num].xform.get_local(g,
+                                             (*ci).var->function_of());
+        
+        F_And *f_super_root = stmt[stmt_num].xform.and_with_and();
+        F_Exists *f_exists = f_super_root->add_exists();
+        F_And *f_root = f_exists->add_and();
+        
+        EQ_Handle h = f_root->add_EQ();
+        h.update_coef(stmt[stmt_num].xform.output_var(2 * loop_level),
+                      1);
+        h.update_coef(stmt[stmt_num].xform.input_var(loop_level), -1);
+        h.update_coef(v, 1);
+        
+        stmt[stmt_num].xform.simplify();
+      }
+      
+    }
+    
+  } else
+    throw loop_error("loop bounds too complex for normalize!");
+  
 }
 

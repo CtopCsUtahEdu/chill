@@ -14,8 +14,9 @@ simap_vec_t* make_prog(simap_vec_t* cond) {
 
 simap_vec_t* make_cond_gt(simap_t* lhs, simap_t* rhs) {
   simap_vec_t* nvec = new simap_vec_t();
-  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++)
+  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++) {
     (*lhs)[it->first] -= it->second;
+  }
   (*lhs)[to_string(0)] -= 1;
   nvec->push_back(*lhs);
   delete rhs;
@@ -29,8 +30,9 @@ simap_vec_t* make_cond_lt(simap_t* lhs, simap_t* rhs) {
 
 simap_vec_t* make_cond_ge(simap_t* lhs, simap_t* rhs) {
   simap_vec_t* nvec = new simap_vec_t();
-  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++)
+  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++) {
     (*lhs)[it->first] -= it->second;
+  }
   nvec->push_back(*lhs);
   delete rhs;
   delete lhs;
@@ -43,11 +45,13 @@ simap_vec_t* make_cond_le(simap_t* lhs, simap_t* rhs) {
 
 simap_vec_t* make_cond_eq(simap_t* lhs, simap_t* rhs) {
   simap_vec_t* nvec = new simap_vec_t();
-  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++)
+  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++) {
     (*rhs)[it->first] -= it->second;
+  }
   nvec->push_back(*rhs);
-  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++)
+  for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++) {
     it->second = -it->second;
+  }
   nvec->push_back(*rhs);
   delete rhs;
   delete lhs;
@@ -55,15 +59,17 @@ simap_vec_t* make_cond_eq(simap_t* lhs, simap_t* rhs) {
 }
 
 simap_t* make_cond_item_add(simap_t* lhs, simap_t* rhs) {
-  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++)
+  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++) {
     (*rhs)[it->first] += it->second;
+  }
   delete lhs;
   return rhs;
 }
 
 simap_t* make_cond_item_sub(simap_t* lhs, simap_t* rhs) {
-  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++)
+  for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++) {
     (*rhs)[it->first] -= it->second;
+  }
   delete lhs;
   return rhs;
 }
@@ -73,15 +79,17 @@ simap_t* make_cond_item_mul(simap_t* lhs, simap_t* rhs) {
   (*rhs)[to_string(0)] += 0;
   if(rhs->size() == 1) {
     int t = (*rhs)[to_string(0)];
-    for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++)
+    for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++) {
       it->second *= t;
+    }
     delete rhs;
     return lhs;
   }
   else if(rhs->size() == 1) {
     int t = (*lhs)[to_string(0)];
-    for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++)
+    for(simap_t::iterator it = rhs->begin(); it != rhs->end(); it++) {
       it->second *= t;
+    }
     delete lhs;
     return rhs;
   }
@@ -89,7 +97,7 @@ simap_t* make_cond_item_mul(simap_t* lhs, simap_t* rhs) {
     fprintf(stderr, "require Presburger formula");
     delete lhs;
     delete rhs;
-    // exit(2); <-- this may be a boost feature
+    // exit(2);
   }
 }
 
@@ -118,12 +126,3 @@ simap_t* make_cond_item_level(int n) {
   return nmap;
 }
 
-/*simap_t* make_cond_item_variable(const char* varname) {
-  simap_t* nmap = new simap_t();
-#ifdef PYTHON
-  PyObject* globals = PyEval_GetGlobals();
-  PyObject* itemval = PyDict_GetItemString(globals, varname);
-  
-#elif LUA
-#endif
-}*/

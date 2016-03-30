@@ -4,7 +4,7 @@
  All Rights Reserved.
 
  Purpose:
-   abstract base class of comiler IR code builder
+   abstract base class of compiler IR code builder
 
  Notes:
    All "CG_outputRepr *" parameters are consumed inside the the function
@@ -30,28 +30,50 @@
 namespace omega {
 
 class CG_outputBuilder {
+private:
+
 public:
+
   CG_outputBuilder() {}
   virtual ~CG_outputBuilder() {}
+
+
+  virtual CG_outputRepr *CreateStruct(const std::string class_name,
+                                      std::vector<std::string> class_data_members,  // why not just vector< CG_outputRepr> subparts;
+                                      std::vector<CG_outputRepr *> class_data_types )=0;
+  virtual CG_outputRepr *CreateClassInstance(std::string name , CG_outputRepr *class_def)=0;
+	virtual CG_outputRepr *lookup_member_data(CG_outputRepr* scope, std::string varName, CG_outputRepr *instance)=0;
+  virtual CG_outputRepr* CreatePointer(std::string  &name) const = 0;
+	virtual CG_outputRepr* ObtainInspectorRange(const std::string &_s, const std::string &_name) const=0;
+
+
 
   //---------------------------------------------------------------------------
   // substitute variables in stmt
   //---------------------------------------------------------------------------
-  virtual CG_outputRepr *CreateSubstitutedStmt(int indent, CG_outputRepr *stmt,
+  virtual CG_outputRepr *CreateSubstitutedStmt(int indent, 
+                                               CG_outputRepr *stmt,
                                                const std::vector<std::string> &vars,
-                                               std::vector<CG_outputRepr *> &subs) const = 0;
+                                               std::vector<CG_outputRepr *> &subs, 
+                                               bool actuallyPrint =true) const = 0;
 
   //---------------------------------------------------------------------------
   // assignment stmt generation
   //---------------------------------------------------------------------------
-  virtual CG_outputRepr *CreateAssignment(int indent, CG_outputRepr *lhs,
+  virtual CG_outputRepr *CreateAssignment(int indent, 
+                                          CG_outputRepr *lhs,
                                           CG_outputRepr *rhs) const = 0;
+
+  virtual CG_outputRepr *CreatePlusAssignment(int indent, 
+                                              CG_outputRepr *lhs,
+                                              CG_outputRepr *rhs) const = 0;
 
   //---------------------------------------------------------------------------
   // function invocation generation
   //---------------------------------------------------------------------------
   virtual CG_outputRepr *CreateInvoke(const std::string &funcName,
-                                      std::vector<CG_outputRepr *> &argList) const = 0;
+                                      std::vector<CG_outputRepr *> &argList,
+                                      bool is_array=false) const = 0;
 
   //---------------------------------------------------------------------------
   // comment generation
@@ -110,13 +132,24 @@ public:
   // basic integer number creation
   //---------------------------------------------------------------------------
   virtual CG_outputRepr *CreateInt(int num) const = 0;
-  virtual bool isInteger(CG_outputRepr *op) const = 0;
+  virtual CG_outputRepr *CreateFloat(float num) const = 0;
+  virtual CG_outputRepr *CreateDouble(double num) const = 0;
 
+  virtual bool isInteger(CG_outputRepr *op) const = 0;
+  virtual bool QueryInspectorType(const std::string &varName) const = 0;
 
   //---------------------------------------------------------------------------
   // basic identity/variable creation
   //---------------------------------------------------------------------------
   virtual CG_outputRepr *CreateIdent(const std::string &varName) const = 0;
+  virtual CG_outputRepr* CreateDotExpression(CG_outputRepr *lop,
+  		CG_outputRepr *rop) const =0;
+  virtual CG_outputRepr* CreateArrayRefExpression(const std::string &_s,
+  		CG_outputRepr *rop) const =0;
+  virtual CG_outputRepr* CreateArrayRefExpression(CG_outputRepr *lop,
+  		CG_outputRepr *rop) const=0;
+  virtual CG_outputRepr* ObtainInspectorData(const std::string &_s, const std::string &member_name) const=0;
+  virtual CG_outputRepr* CreateNullStatement() const=0;
 
   //---------------------------------------------------------------------------
   // binary arithmetic operations, NULL parameter means 0,
@@ -165,11 +198,17 @@ public:
   } 
   virtual CG_outputRepr *CreateLE(CG_outputRepr *lop, CG_outputRepr *rop) const = 0;
   virtual CG_outputRepr *CreateEQ(CG_outputRepr *lop, CG_outputRepr *rop) const = 0;
+  virtual CG_outputRepr *CreateNEQ(CG_outputRepr *lop, CG_outputRepr *rop) const = 0;
+  virtual CG_outputRepr *CreateAddressOf(CG_outputRepr *op) const = 0;
+  virtual CG_outputRepr *CreateBreakStatement(void) const = 0;
  
   //---------------------------------------------------------------------------
   // join stmts together, NULL parameter allowed
   //---------------------------------------------------------------------------
   virtual CG_outputRepr *StmtListAppend(CG_outputRepr *list1, CG_outputRepr *list2) const = 0;
+  virtual CG_outputRepr *CreateStatementFromExpression(CG_outputRepr *exp) const = 0;
+
+  virtual const char *ClassName() { return "UNKNOWN"; } 
 };
 
 }

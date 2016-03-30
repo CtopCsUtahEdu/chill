@@ -10,6 +10,7 @@
  History:
    02/01/06 - Chun Chen - created
 *****************************************************************************/
+#ifdef FRONTEND_ROSE 
 
 #include <code_gen/CG_roseRepr.h>
 #include <code_gen/rose_attributes.h>
@@ -174,3 +175,5 @@ return copyOfNode;
 }
 */
 } // namespace
+
+#endif  // FRONTEND_ROSE 
