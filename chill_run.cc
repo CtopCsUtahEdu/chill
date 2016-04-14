@@ -26,31 +26,32 @@
 #ifdef CUDACHILL
 
 #ifdef FRONTEND_ROSE
-//#include "loop_cuda_rose.hh"
 #include "loop_cuda_chill.hh"
 #include "ir_cudarose.hh"
 #endif
 
-#else
+typedef LoopCuda loop_t;
+#else // not defined(CUDACHILL)
 
 #ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
 #endif
 
-#endif
+typedef Loop loop_t;
+#endif // not defined(CUDACHILL)
 
 #ifdef LUA
 #define lua_c //Get the configuration defines for doing an interactive shell
 #include <lua.hpp> //All lua includes wrapped in extern "C"
 #include "chill_env.hh" // Lua wrapper functions for CHiLL
-#elif PYTHON
+#elif defined(PYTHON)
 #include "chillmodule.hh" // Python wrapper functions for CHiLL
 #endif
 
 //---
-// CHiLL globals
+// CHiLL globals 
 //---
-Loop *myloop = NULL;
+loop_t *myloop = NULL;  // was Loop !! 
 IR_Code *ir_code = NULL;
 bool repl_stop = false;
 bool is_interactive = false;
@@ -363,8 +364,9 @@ int main( int argc, char* argv[] )
     printf("CUDA-CHiLL v0.2.0 (built on %s)\n", CHILL_BUILD_DATE);
     printf("Copyright (C) 2008 University of Southern California\n");
     printf("Copyright (C) 2009-2012 University of Utah\n");
-    is_interactive = true; // let the lua interpreter know.
     fflush(stdout);
+
+    is_interactive = true; // let the lua interpreter know.
     dotty(L);
     //Not sure if we should set fail from interactive mode
     printf("CUDA-CHiLL ending...\n");
@@ -374,8 +376,6 @@ int main( int argc, char* argv[] )
   
   fprintf(stderr, "BIG IF\n"); 
   fprintf(stderr, "fail %d\n", fail);
-  fprintf(stderr, "ir_code %p\n", ir_code);
-  fprintf(stderr, "myloop %p\n", myloop);
   
   if (!fail && ir_code != NULL && myloop != NULL && myloop->stmt.size() != 0 && !myloop->stmt[0].xform.is_null()) {
     fprintf(stderr, "big if true\n"); 

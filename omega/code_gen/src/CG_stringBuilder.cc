@@ -184,9 +184,9 @@ namespace omega {
   CG_stringRepr *CG_stringBuilder::CreateInvoke(const std::string &funcName,
                                                 std::vector<CG_outputRepr *> &list,
                                                 bool is_array) const {
-    //fprintf(stderr, "CG_stringBuilder::CreateInvoke( %s, ..., is_array  ", funcName.c_str());
-    //if (is_array) fprintf(stderr, " true )\n"); 
-    //else fprintf(stderr, " false )\n"); 
+    fprintf(stderr, "CG_stringBuilder::CreateInvoke( %s, ..., is_array  ", funcName.c_str());
+    if (is_array) fprintf(stderr, " true )\n"); 
+    else fprintf(stderr, " false )\n"); 
 
 
     std::string listStr = "";

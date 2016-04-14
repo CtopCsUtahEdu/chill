@@ -13,6 +13,16 @@
 *****************************************************************************/
 
 %{
+/* Substitute the variable and function names.  */
+#define yyparse         zzparse
+#define yylex           zzlex
+#define yyerror         zzerror
+#define yylval          zzlval
+#define yychar          zzchar
+#define yydebug         zzdebug
+#define yynerrs         zznerrs
+
+
 #include <stdio.h>
 #include <math.h>
 #include <iostream>
@@ -21,18 +31,26 @@
 #include <map>
 #include <set>
 #include <string>
-#include <FlexLexer.h>
+#include "parser.hh"
+
+
 #include "parser.tab.hh"
 
 #include <omega.h>
 #include "ir_code.hh"
 #include "loop.hh"
 
-#ifdef BUILD_ROSE
+// should these be mutually exclusive?
+#ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
-#elif BUILD_SUIF
-#include "ir_suif.hh"
 #endif
+
+#ifdef FRONTEND_CLANG
+#include "ir_clang.hh"
+#endif 
+
+
+
 
 
 using namespace omega;
@@ -41,20 +59,22 @@ extern int yydebug;
 
 void yyerror(const char *);
 int yylex();  
-yyFlexLexer lexer;
+extern int yylex();   // ?? 
+// ?? yyFlexLexer lexer;
 
 namespace {
-  enum COMPILER_IR_TYPE {CIT_NULL, CIT_SUIF, CIT_ROSE};
+  enum COMPILER_FRONT_END {FE_NULL, FE_SUIF, FE_ROSE, FE_CLANG, FE_GNU}; // a historical summary. SUIF is NO LONGER VALID
+  COMPILER_FRONT_END frontend_compiler = FE_NULL;
+
   char *source_filename = NULL;
-  COMPILER_IR_TYPE cit_name = CIT_NULL;
-  #ifdef BUILD_ROSE
-  char* procedure_name = NULL;
-  #elif BUILD_SUIF
-  int procedure_number = -1;
+  char *dest_filename = NULL;
+
+  #if defined(FRONTEND_ROSE) || defined(FRONTEND_CLANG) 
+  char* procedure_name = NULL; // used by Rose and Clang
   #endif
-   
+
   int loop_num_start, loop_num_end;
-  Loop *myloop = NULL;
+  Loop *myloop = NULL;          // the one loop we're currently modifying
 }
 
 #define PRINT_ERR_LINENO {if (is_interactive) fprintf(stderr, "\n"); else fprintf(stderr, " at line %d\n", lexer.lineno()-1);}
@@ -74,6 +94,7 @@ std::vector<int> loops;
   bool bool_val;
   char *name;
   std::vector<int> *vec;
+  std::vector<std::string> *string_vec;
   std::vector<std::vector<int> > *mat;
   std::map<std::string, int> *tab;
   std::vector<std::map<std::string, int> > *tab_lst;
@@ -83,14 +104,20 @@ std::vector<int> loops;
 %token <val> NUMBER LEVEL
 %token <bool_val> TRUEORFALSE
 %token <name> FILENAME PROCEDURENAME VARIABLE FREEVAR STRING
-%token SOURCE PROCEDURE FORMAT LOOP PERMUTE ORIGINAL TILE UNROLL SPLIT UNROLL_EXTRA PRAGMA PREFETCH
+%token SOURCE DEST PROCEDURE FORMAT LOOP PERMUTE ORIGINAL TILE UNROLL 
+%token FIND_STENCIL_SHAPE STENCIL_TEMP
+%token SPLIT UNROLL_EXTRA REDUCE SPLIT_WITH_ALIGNMENT
+%token PRAGMA PREFETCH 
 %token DATACOPY DATACOPY_PRIVATIZED
-%token NONSINGULAR EXIT KNOWN SKEW SHIFT SHIFT_TO FUSE DISTRIBUTE REMOVE_DEP SCALE REVERSE PEEL
+%token FLATTEN SCALAR_EXPAND NORMALIZE ELLIFY COMPACT MAKE_DENSE SET_ARRAY_SIZE
+%token NONSINGULAR EXIT KNOWN SKEW SHIFT SHIFT_TO 
+%token FUSE DISTRIBUTE REMOVE_DEP SCALE REVERSE PEEL
 %token STRIDED COUNTED NUM_STATEMENT CEIL FLOOR
-%token PRINT PRINT_CODE PRINT_DEP PRINT_IS PRINT_STRUCTURE
+%token PRINT PRINT_CODE PRINT_DEP PRINT_IS PRINT_STRUCTURE ADD_GHOSTS
 %token NE LE GE EQ
 
 %type <vec> vector vector_number
+%type <string_vec> vector_string string_vector
 /* TODO: %type <eq_term_pair> cond_term cond */
 %type <tab> cond_term
 %type <tab_lst> cond
@@ -120,6 +147,14 @@ vector : '[' vector_number ']' {$$ = $2;}
 vector_number : {$$ = new std::vector<int>();}
               | expr {$$ = new std::vector<int>(); $$->push_back($1);}
               | vector_number ',' expr {$$ = $1; $$->push_back($3);}
+;
+
+vector_string : '[' string_vector ']' {$$ = $2;}
+;
+
+string_vector : {$$ = new std::vector<std::string>();}
+              | VARIABLE {$$ = new std::vector<std::string>(); $$->push_back($1);}
+              | string_vector ',' VARIABLE {$$ = $1; $$->push_back($3);}
 ;
 
 matrix: '[' matrix_part ']' {$$ = $2;}
@@ -313,18 +348,31 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
         | error '\n' { if (!is_interactive) exit(2); else printf("%s ", PROMPT_STRING); }
         | SOURCE ':' FILENAME '\n' {
           if (source_filename != NULL) {
-            fprintf(stderr, "only one file can be handle in a script");
+            fprintf(stderr, "only one file can be handled in a script");
             PRINT_ERR_LINENO;
             if (!is_interactive)
               exit(2);
           }
+          //fprintf(stderr, "source: %s\n", std::string($3).c_str()); 
           source_filename = $3;
+          if (is_interactive)
+            printf("%s ", PROMPT_STRING);
+        }
+        | DEST ':' FILENAME '\n' {
+          if (dest_filename != NULL) {
+            fprintf(stderr, "only one destination file can be handled in a script");
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          //fprintf(stderr, "dest: %s\n", std::string($3).c_str()); 
+          dest_filename = $3;
           if (is_interactive)
             printf("%s ", PROMPT_STRING);
         }
         | PROCEDURE ':' VARIABLE '\n' {
 
-          #ifdef BUILD_ROSE
+          #if defined(FRONTEND_ROSE) || defined(FRONTEND_CLANG)
 
           if (procedure_name != NULL) {
             fprintf(stderr, "only one procedure can be handled in a script");
@@ -333,47 +381,39 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
               exit(2);
           }
           procedure_name = $3;
+          //fprintf(stderr, "procedure is %s\n", procedure_name); 
+
           if (is_interactive)
             printf("%s ", PROMPT_STRING);
-          #elif BUILD_SUIF
-            fprintf(stderr, "Please specify procedure number and not name!!");
-            PRINT_ERR_LINENO;
-            if (!is_interactive)
-              exit(2);
           #else
-            fprintf(stderr, "Please configure IR type to ROSE or SUIF!!: Procedure number for SUIF and procedure name for ROSE");
+            fprintf(stderr, "Please configure IR type to ROSE or CLANG!!: procedure name for ROSE or CLANG/LLVM");
             PRINT_ERR_LINENO;
             if (!is_interactive)
               exit(2);   
           #endif         
         }
-        | PROCEDURE ':' NUMBER '\n' {
 
-        #ifdef BUILD_ROSE
+
+        | PROCEDURE ':' NUMBER '\n' { //  this works only for SUIF (no longer supported)
+
+        #if defined(FRONTEND_ROSE) || defined(FRONTEND_CLANG) 
             fprintf(stderr, "Please specify procedure's name and not number!!");
             PRINT_ERR_LINENO;
             if (!is_interactive)
               exit(2);
-        
-        #elif BUILD_SUIF      
-          if (procedure_number != -1) {
-            fprintf(stderr, "only one procedure can be handled in a script");
-            PRINT_ERR_LINENO;
-            if (!is_interactive)
-              exit(2);
-          }
-          procedure_number = $3;
-          if (is_interactive)
-            printf("%s ", PROMPT_STRING);
-          #else
-            fprintf(stderr, "Please configure IR type to ROSE or SUIF: Procedure number for suif and procedure name for rose!!");
+        #else
+            fprintf(stderr, "Please configure FRONTEND to ROSE or CLANG!!");
             PRINT_ERR_LINENO;
             if (!is_interactive)
               exit(2);   
         #endif
         }
-        | FORMAT ':' FILENAME '\n' {
-          if (cit_name != CIT_NULL) {
+
+
+
+        | FORMAT ':' FILENAME '\n' {  // TODO  this is really front end, not IR format
+           fprintf(stderr, "format: %s\n",  std::string($3).c_str());
+         if (frontend_compiler != FE_NULL) {
             fprintf(stderr, "compiler intermediate format already specified");
             PRINT_ERR_LINENO;
             delete []$3;
@@ -381,17 +421,17 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
               exit(2);
           }
           else {
-            
-            if (std::string($3) == "suif" || std::string($3) == "SUIF") {
-              cit_name = CIT_SUIF;
+            //fprintf(stderr, "format %s\n", std::string($3).c_str()); 
+            if(std::string($3) == "rose" || std::string($3) == "ROSE") {
+              frontend_compiler = FE_ROSE;
               delete []$3;
-            }
-            else if(std::string($3) == "rose" || std::string($3) == "ROSE") {
-              cit_name = CIT_ROSE;
+            }   
+            else if(std::string($3) == "clang" || std::string($3) == "CLANG") {
+              frontend_compiler = FE_CLANG;
               delete []$3;
             }   
             else {
-              fprintf(stderr, "unrecognized IR format");
+              fprintf(stderr, "unrecognized front end compiler. pick rose or clang\n");
               PRINT_ERR_LINENO;
               delete []$3;
               if (!is_interactive)
@@ -401,6 +441,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           if (is_interactive)
             printf("%s ", PROMPT_STRING);
         }
+
         | LOOP ':' NUMBER '\n' {
           if (source_filename == NULL) {
             fprintf(stderr, "source file not set when initializing the loop");
@@ -410,30 +451,38 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           }
           else {
           if (ir_code == NULL) {
-           #ifdef BUILD_ROSE  
-            if (procedure_name == NULL)
-              procedure_name = "main";
-           #elif BUILD_SUIF   
-            if (procedure_number == -1)
-              procedure_number = 0;   
-            #endif       
-           
-              switch (cit_name) {
-              #ifndef BUILD_ROSE
-              case CIT_SUIF:
-              #ifdef BUILD_SUIF
-                ir_code = new IR_suifCode(source_filename, procedure_number);
+            //fprintf(stderr, "LOOP ':' NUMBER   parse the file because we haven't yet\n"); 
+            /* parse the file because we haven't yet */
+            #if defined(FRONTEND_ROSE) || defined(FRONTEND_CLANG) 
+              if (procedure_name == NULL)
+                procedure_name = "main";
+            #else
+              fprintf(stderr, "Please configure FRONTEND to ROSE or CLANG!!");
+              PRINT_ERR_LINENO;
+              if (!is_interactive)
+                exit(2);   
+            #endif
+
+            switch (frontend_compiler) {
+              case FE_CLANG:
+              #ifdef FRONTEND_CLANG 
+                 fprintf(stderr, "clang parsing the file\n"); 
+                ir_code = new IR_clangCode(source_filename, procedure_name);
               #else
-                fprintf(stderr, "SUIF IR not installed");
+                fprintf(stderr, "CLANG front end not installed");
                 PRINT_ERR_LINENO;
                 if (!is_interactive)
                   exit(2);
-              #endif
+              #endif 
                 break;
-              #endif
-              case CIT_ROSE:
-              #ifdef BUILD_ROSE
-                 ir_code = new IR_roseCode(source_filename, procedure_name);
+
+              case FE_ROSE:
+              //fprintf(stderr, "FE_ROSE\n"); 
+              #ifdef FRONTEND_ROSE
+                 //fprintf(stderr, "LOOP  ir_code = new IR_roseCode(source_filename, procedure_name);\n"); 
+                 ir_code = new IR_roseCode(source_filename, procedure_name, dest_filename);
+                 //fprintf(stderr, "LOOP RETURN ir_code = new IR_roseCode(source_filename, procedure_name);\n"); 
+
               #else
                 fprintf(stderr, "ROSE IR not installed");
                 PRINT_ERR_LINENO;
@@ -441,7 +490,8 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                   exit(2);
               #endif
                 break; 
-              case CIT_NULL:
+
+              case FE_NULL:
                 fprintf(stderr, "compiler IR format not specified");
                 PRINT_ERR_LINENO;
                 if (!is_interactive)
@@ -449,19 +499,37 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                 break;
               }
             
-            IR_Block *block = ir_code->GetCode();
-            ir_controls = ir_code->FindOneLevelControlStructure(block);
-            for (int i = 0; i < ir_controls.size(); i++)
+            /* get the code associated with the procedure */
+            //fprintf(stderr, "parser.yy L504  yyparse  block = ir_code->GetCode();\n"); 
+            IR_Block *irblock = ir_code->GetCode();  // block that is / enclosing the FUNCTION DEFINITION ??
+            //fprintf(stderr, "parser.yy L506 irblock from getcode is %p\n", irblock);
+            //IR_roseblock *rb = (IR_roseblock *)irblock;
+            //fprintf(stderr, "cheating ast is %p\n", rb->chillAST); 
+
+            ir_controls = ir_code->FindOneLevelControlStructure(irblock);
+            for (int i = 0; i < ir_controls.size(); i++) { 
               if (ir_controls[i]->type() == IR_CONTROL_LOOP)
                 loops.push_back(i);
-            delete block;
             }
+            delete irblock;
+            }
+            //fprintf(stderr, "(parser.yy) I found %ld loops in the procedure\n",  loops.size()); 
+
             if (myloop != NULL && myloop->isInitialized()) {
+              //fprintf(stderr, "there is already a myloop and it is initialized\n"); 
+              fprintf(stderr, "have to update <clang/rose/gcc> Intermediate Representation before changing the next loop\n"); 
+              /* we are processing multiple loops. replace the <clang/rose/gcc> IR
+                 for loops we've already changed (?) */
+
               if (loop_num_start == loop_num_end) {
+                /* we changed one loop before (?) */
+                //fprintf(stderr, "replacing code for a single loop in <clang/rose/gcc> IR\n"); 
                 ir_code->ReplaceCode(ir_controls[loops[loop_num_start]], myloop->getCode());
                 ir_controls[loops[loop_num_start]] = NULL;
               }
               else {
+                /* we changed multiple loops before (?) */
+                //fprintf(stderr, "replacing code for multiple loops in <clang/rose/gcc> IR\n"); 
                 std::vector<IR_Control *> parm;
                 for (int i = loops[loop_num_start]; i <= loops[loop_num_end]; i++)
                   parm.push_back(ir_controls[i]);
@@ -472,7 +540,9 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                   ir_controls[i] = NULL;
                 }
               } 
+              //fprintf(stderr, "deleting old myloop\n"); 
               delete myloop;
+              myloop = NULL; 
             }
             loop_num_start = loop_num_end = $3;
             if (loop_num_start >= loops.size()) {
@@ -482,16 +552,32 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                 exit(2);
             }
             if (ir_controls[loops[loop_num_start]] == NULL) {
-              fprintf(stderr, "loop %d has already be transformed", loop_num_start);
+              fprintf(stderr, "loop %d has already been transformed", loop_num_start);
               PRINT_ERR_LINENO;
               if (!is_interactive)
                 exit(2);
             }
+
+            //fprintf(stderr, "\nparse.yy  L 505 making a new myloop loop num start %d\n",loop_num_start ) ;
+            //fprintf(stderr, "\n***                                                   ROSE (parser.yy) making a new myloop\n"); 
             myloop = new Loop(ir_controls[loops[loop_num_start]]);
+            //fprintf(stderr, "\nparse.yy  L 559, made a new loop\n"); 
+
+            //fprintf(stderr, "\n(start dump of loop I'm about to change )\n"); 
+            // myloop->dump(); fflush(stdout); fprintf(stderr, "(end dump)\n\n(start printcode)\n");
+            //// this dies TODO myloop->printCode(); fflush(stdout);
+            //fprintf(stderr, "(end printcode)\n\n(internal loop strucuure)\n");
+            //myloop->print_internal_loop_structure(); fflush(stdout);
+            //fprintf(stderr, "\n(iteration space)\n"); 
+            //myloop->printIterationSpace();  fflush(stdout);
+            //fprintf(stderr, "\n"); 
           }
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
         | LOOP ':' NUMBER '-' NUMBER '\n' {
+          /* modify a range of loops */
+          //fprintf(stderr, "loop: a-b\n");
+
           if (source_filename == NULL) {
             fprintf(stderr, "source file not set when initializing the loop");
             PRINT_ERR_LINENO;
@@ -500,30 +586,14 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           }
           else {
             if (ir_code == NULL) { 
-            #ifdef BUILD_ROSE
+
             if (procedure_name == NULL)
               procedure_name = "main";
-            #elif BUILD_SUIF
-            if (procedure_number == -1)
-              procedure_number = 0;
-            #endif            
         
-              switch (cit_name) {
-              #ifndef BUILD_ROSE
-              case CIT_SUIF:
-              #ifdef BUILD_SUIF
-                ir_code = new IR_suifCode(source_filename, procedure_number);
-              #else
-                fprintf(stderr, "SUIF IR not installed");
-                PRINT_ERR_LINENO;
-                if (!is_interactive)
-                  exit(2);
-              #endif
-                break;
-              #endif
-              case CIT_ROSE:
-              #ifdef BUILD_ROSE
-                 ir_code = new IR_roseCode(source_filename, procedure_name);
+            switch (frontend_compiler) {
+              case FE_ROSE:
+              #ifdef FRONTEND_ROSE
+                 ir_code = new IR_roseCode(source_filename, procedure_name, dest_filename);
               #else
                 fprintf(stderr, "ROSE IR not installed");
                 PRINT_ERR_LINENO;
@@ -531,7 +601,10 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                   exit(2);
               #endif
                 break;
-              case CIT_NULL:
+
+              // todo case FE_CLANG
+
+              case FE_NULL:
                 fprintf(stderr, "compiler IR format not specified");
                 PRINT_ERR_LINENO;
                 if (!is_interactive)
@@ -542,6 +615,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
            
  
               IR_Block *block = ir_code->GetCode();
+              //fprintf(stderr, "calling FindOneLevelControlStructure  for loop: a-b\n"); 
               ir_controls = ir_code->FindOneLevelControlStructure(block);
               for (int i = 0; i < ir_controls.size(); i++)
                 if (ir_controls[i]->type() == IR_CONTROL_LOOP)
@@ -598,6 +672,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
         | PRINT '\n' {
+          //printf("\n*** parser: print\n"); fflush(stdout); 
           if (myloop == NULL) {
             fprintf(stderr, "loop not initialized");
             PRINT_ERR_LINENO;
@@ -629,7 +704,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           }
           if (is_interactive) printf("%s ", PROMPT_STRING); else printf("\n");
         }
- 		| PRINT PRINT_DEP '\n' {
+        | PRINT PRINT_DEP '\n' {
           if (myloop == NULL) {
             fprintf(stderr, "loop not initialized");
             PRINT_ERR_LINENO;
@@ -683,12 +758,17 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           delete []$1;
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
+
+
         | KNOWN '(' cond ')' '\n' {
           try {
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
             
+            //fprintf(stderr, "KNOWN\n"); 
             int num_dim = myloop->known.n_set();
+            //fprintf(stderr, "num_dim %d\n", num_dim); 
+
             Relation rel(num_dim);
             F_And *f_root = rel.add_and();
             for (int j = 0; j < $3->size(); j++) {
@@ -710,8 +790,10 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
                       break;
                     }
                   }
-                  if (g == NULL)
+                  if (g == NULL) { 
+                    fprintf(stderr, "parser,  g NULL\n"); 
                     throw std::invalid_argument("symbolic variable " + it->first + " not found");
+                    }
                   else
                     h.update_coef(rel.get_local(g), it->second);
                 }
@@ -761,6 +843,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
         | PERMUTE '(' vector ')' '\n' {
+         //fprintf(stderr, "\n\n\n*** PERMUTE\n"); 
           try {
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
@@ -827,6 +910,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
          myloop->prefetch($3, $5, $7, $9);
         }
         | TILE '(' expr ',' NUMBER ',' expr ')' '\n' {
+          //fprintf(stderr, "TILE (3)\n"); 
           try {
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
@@ -841,6 +925,148 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           }
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
+
+
+        | FIND_STENCIL_SHAPE '(' NUMBER ')' { 
+          printf("\n*** parser: find stencil shape\n"); fflush(stdout); 
+          myloop->find_stencil_shape( $3 ); 
+        }
+
+
+        | STENCIL_TEMP '(' NUMBER ')' { 
+          printf("\n*** parser: protonu's stencil\n"); fflush(stdout); 
+          myloop->stencilASEPadded( $3 ); 
+          printf("\n*** parser: protonu's stencil DONE\n"); fflush(stdout); 
+        }
+
+
+        | FLATTEN '(' NUMBER  ',' VARIABLE ',' vector ',' VARIABLE ')'  '\n' {
+          #if 0
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+             std::vector<int> loop_levels;
+            for (int i = 0; i < (*$7).size(); i++)
+              loop_levels.push_back((*$7)[i]);
+
+            const char* index= $5; 
+            std::string str1(index);
+            const char* inspector= $9; 
+            std::string str2(inspector);
+            myloop->flatten($3,str1, loop_levels,str2);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+          #endif
+        }
+
+        | COMPACT '(' NUMBER  ',' NUMBER ',' VARIABLE ',' NUMBER ',' VARIABLE')'  '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+              
+            myloop->compact($3,$5, $7, $9,$11);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+        | MAKE_DENSE '(' NUMBER  ',' NUMBER ',' VARIABLE')'  '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+
+            printf("parser: make_dense(number, number, variable)\n"); fflush(stdout); 
+            myloop->make_dense($3,$5,$7);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+
+        | SET_ARRAY_SIZE '(' VARIABLE  ',' NUMBER ')'  '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+
+            myloop->set_array_size($3,$5);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+
+/*
+        | ELLIFY '(' NUMBER  ',' vector_string ',' NUMBER')'  '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+            std::vector<std::string> arrays;
+            for (int i = 0; i < (*$5).size(); i++)
+              arrays.push_back((*$5)[i]);
+
+            myloop->ELLify($3, arrays,$7);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+
+        | ELLIFY '(' NUMBER  ',' vector_string ',' NUMBER ',' TRUEORFALSE ',' VARIABLE')'  '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+            std::vector<std::string> arrays;
+            for (int i = 0; i < (*$5).size(); i++)
+              arrays.push_back((*$5)[i]);
+
+            myloop->ELLify($3, arrays,$7,$9,$11);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+*/
+        | NORMALIZE '(' NUMBER  ',' NUMBER ')' '\n' {
+          try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+            myloop->normalize($3, $5);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+        }
+
         | TILE '(' expr',' NUMBER ',' expr ',' NUMBER ')' '\n' {
           try {
             if (myloop == NULL)
@@ -1113,6 +1339,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }
         | DATACOPY '(' expr ',' NUMBER ',' VARIABLE ',' TRUEORFALSE ',' expr ')' '\n' {
+          //fprintf(stderr, "\n\n\nDATACOPY (5)\n"); 
           try {
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
@@ -1214,7 +1441,35 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
           delete $9;
           if (is_interactive) printf("%s ", PROMPT_STRING);
         }        
+
+
+	| ADD_GHOSTS '(' vector ',' NUMBER ',' NUMBER ',' NUMBER ')' '\n'{
+
+       	  try {
+            if (myloop == NULL)
+              throw std::runtime_error("loop not initialized");
+      	   std::vector<int> stmt_nums;
+            for (int i = 0; i < (*$3).size(); i++)
+              stmt_nums.push_back((*$3)[i]);
+
+            //myloop->generate_ghostcells($3,$5,$7);
+            myloop->generate_ghostcells_v2(stmt_nums,$5,$7, $9);
+          }
+          catch (const std::exception &e) {
+            fprintf(stderr, e.what());
+            PRINT_ERR_LINENO;
+            if (!is_interactive)
+              exit(2);
+          }
+          if (is_interactive) printf("%s ", PROMPT_STRING);
+
+	}
+
+
+
+
         | UNROLL '(' expr ',' NUMBER ',' expr ')' '\n' {
+          //fprintf(stderr, "\n\n                             parser 1          unroll( a,b,c )\n"); 
           try {
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
@@ -1234,6 +1489,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
 
+          //fprintf(stderr, "\n\n                                 parser 2      unroll( a,b,c )\n"); 
             myloop->unroll($3,$5,$7,std::vector< std::vector<std::string> >(),  $9);
           }
           catch (const std::exception &e) {
@@ -1249,6 +1505,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
 
+          //fprintf(stderr, "\n\n                                 parser 3      unroll( a,b,c )\n"); 
             myloop->unroll_extra($3,$5,$7);
           }
           catch (const std::exception &e) {
@@ -1264,6 +1521,7 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
             if (myloop == NULL)
               throw std::runtime_error("loop not initialized");
 
+          //fprintf(stderr, "\n\n                                 parser 4      unroll( a,b,c )\n"); 
             myloop->unroll_extra($3,$5,$7,$9);
           }
           catch (const std::exception &e) {
@@ -1526,7 +1784,6 @@ command : '\n' { if (is_interactive) printf("%s ", PROMPT_STRING); }
 
 %%
 
-inline int yylex() { return lexer.yylex();}
 
 void yyerror(const char *str) {
   int err_lineno = lexer.lineno();
@@ -1575,15 +1832,27 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "script success!\n");
     else
       printf("\n");
+
+      
     if (ir_code != NULL && myloop != NULL && myloop->isInitialized()) {
+      fprintf(stderr, "\nparser.yy almost done\n"); 
       if (loop_num_start == loop_num_end) {
-        ir_code->ReplaceCode(ir_controls[loops[loop_num_start]], myloop->getCode());
+        fprintf(stderr, "1 loop?   (loop_num_start == loop_num_end)\n"); 
+
+        fprintf(stderr, "oldrepr = myloop->getCode()\n");
+        omega::CG_outputRepr *oldrepr = myloop->getCode();
+
+        fprintf(stderr, "ir_code->ReplaceCode()\n"); 
+        ir_code->ReplaceCode(ir_controls[loops[loop_num_start]], oldrepr);
         ir_controls[loops[loop_num_start]] = NULL;
       }
       else {
+        fprintf(stderr, "multiple loops?   (loop_num_start != loop_num_end)\n"); 
         std::vector<IR_Control *> parm;
         for (int i = loops[loop_num_start]; i <= loops[loop_num_end]; i++)
           parm.push_back(ir_controls[i]);
+
+        fprintf(stderr, "ir_code->MergeNeighboringControlStructures(parm)\n"); 
         IR_Block *block = ir_code->MergeNeighboringControlStructures(parm);
         ir_code->ReplaceCode(block, myloop->getCode());
         for (int i = loops[loop_num_start]; i <= loops[loop_num_end]; i++) {
@@ -1597,9 +1866,13 @@ int main(int argc, char *argv[]) {
   delete myloop;
   for (int i = 0; i < ir_controls.size(); i++)
     delete ir_controls[i];
-  #ifdef BUILD_ROSE
+
+  #ifdef FRONTEND_ROSE
   ((IR_roseCode*)(ir_code))->finalizeRose();
   #endif
+
+  fprintf(stderr, "parser.yy  delete ir_code;\n"); 
   delete ir_code;
   delete []source_filename;
+  delete []dest_filename;
 }

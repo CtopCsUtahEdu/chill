@@ -385,7 +385,7 @@ namespace omega {
 //-----------------------------------------------------------------------------
   CG_outputRepr* CG_roseBuilder::CreateInvoke(const std::string &fname,
                                               std::vector<CG_outputRepr *> &list, bool is_array ) const {
-    
+    fprintf(stderr, "REALLY CG_roseBuilder::CreateInvoke( fname %s, ...)\n", fname.c_str()); 
     if (fname == std::string("max") || fname == std::string("min")) {
       if (list.size() == 0) {
         return NULL;

@@ -1,8 +1,11 @@
 SUBDIRS = omega/omega_lib/obj omega/code_gen/obj
 build_date = "\"`date +%m/%d/%Y`\""
 
+AM_CFLAGS=-g
+AM_CXXFLAGS=-g
+
 ## Core Libraries ##
-core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl -lisl
+core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl
 core_libs    += -lboost_date_time -lboost_filesystem -lboost_program_options
 core_libs    += -lboost_regex -lboost_system -lboost_wave -lboost_iostreams
 #core_libs    += -liegenlib
@@ -63,7 +66,7 @@ chill_script_runner_src     =
 chill_python_runner_src     = chill_run.cc chill_run_util.cc chillmodule.cc
 chill_lua_runner_src        = chill_run.cc chill_run_util.cc chill_env.cc
 #  yacc
-chill_script_yacc_src       = lex.yy.cc parser.tab.cc
+chill_script_yacc_src       = lex.zz.cc parser.tab.cc
 chill_lua_yacc_src          = parse_expr.yy.cc parse_expr.tab.cc
 chill_python_yacc_src       = parse_expr.yy.cc parse_expr.tab.cc
 
@@ -93,6 +96,7 @@ runner_flags          = -DCHILL_BUILD_DATE=$(build_date)
 runner_flags         += -DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION)
 runner_flags         += -DLUA
 else
+if SCRIPT_OPT
 runner_libs           =
 runner_libdirs        =
 runner_includes       =
@@ -100,6 +104,7 @@ chill_runner_src      = $(chill_script_runner_src) $(chill_script_yacc_src)
 yacc_src              = $(chill_script_yacc_src)
 runner_flags          = -DCHILL_BUILD_DATE=$(build_date)
 runner_flags         += -DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION)
+endif
 endif
 endif
 
@@ -111,11 +116,11 @@ BUILT_SOURCES=$(yacc_src)
 AM_YFLAGS=-d -t
 
 # rules
-lex.yy.cc: parser.ll parser.tab.cc
+lex.zz.cc: parser.ll parser.tab.cc
 	flex++ parser.ll
 
 parser.tab.cc: parser.yy
-	bison -t -d $<
+	bison -p zz -t -d $<
 
 parse_expr.yy.cc: parse_expr.tab.cc parse_expr.ll
 	flex -o parse_expr.yy.cc parse_expr.ll

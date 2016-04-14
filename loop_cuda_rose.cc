@@ -1,3 +1,4 @@
+
 /*****************************************************************************
  Copyright (C) 2009 University of Utah
  All Rights Reserved.
@@ -19,7 +20,6 @@
 //#define TRANSFORMATION_FILE_INFO Sg_File_Info::generateDefaultFileInfoForTransformationNode()
 
 // these are very similar (the same?) 
-//#include "loop_cuda_rose.hh"
 #include "loop_cuda_chill.hh"
 
 
@@ -82,10 +82,10 @@ LoopCuda::~LoopCuda() {
 }
 
 bool LoopCuda::symbolExists(std::string s) {
-  fprintf(stderr, "LoopCuda::symbolExists( %s )  TODO loop_cuda_clang.cc L89\n", s.c_str()); 
+  fprintf(stderr, "LoopCuda::symbolExists( %s )  TODO loop_cuda_rose.cc L89\nDIE\n", s.c_str()); 
   exit(-1);   // DFL 
   /*  
-  if (body_symtab->find_variable(SgName(s.c_str()))
+  if (body_symtab->find_variable(SgName(s.c_str()))  commented OUT
       || parameter_symtab->find_variable(SgName(s.c_str())))
     return true;
   if (globals->lookup_variable_symbol(SgName(s.c_str())))
@@ -211,77 +211,6 @@ void findReplacePreferedIdxs(chillAST_node *newkernelcode,
 
 
 
-/* 
-std::vector<SgForStatement*> findCommentedFors(const char* index, SgNode* tnl) {
-  std::vector<SgForStatement *> result;
-  bool next_loop_ok = false;
-  
-  if (isSgBasicBlock(tnl)) {
-    
-    SgStatementPtrList& list = isSgBasicBlock(tnl)->get_statements();
-    
-    for (SgStatementPtrList::iterator it = list.begin(); it != list.end();
-         it++) {
-      std::vector<SgForStatement*> t = findCommentedFors(index,
-                                                         isSgNode(*it));
-      std::copy(t.begin(), t.end(), back_inserter(result));
-    }
-  } else if (isSgForStatement(tnl)) {
-    
-    AstTextAttribute* att =
-      (AstTextAttribute*) (isSgNode(tnl)->getAttribute(
-                             "omega_comment"));
-    std::string comment = att->toString();
-    
-    if (comment.find("~cuda~") != std::string::npos
-        && comment.find("preferredIdx: ") != std::string::npos) {
-      std::string idx = comment.substr(
-        comment.find("preferredIdx: ") + 14, std::string::npos);
-      if (idx.find(" ") != std::string::npos)
-        idx = idx.substr(0, idx.find(" "));
-      if (strcmp(idx.c_str(), index) == 0)
-        next_loop_ok = true;
-    }
-    
-    if (next_loop_ok) {
-      //printf("found loop %s\n", static_cast<tree_for *>(tn)->index()->name());
-      result.push_back(isSgForStatement(tnl));
-    } else {
-      //printf("looking down for loop %s\n", static_cast<tree_for *>(tn)->index()->name());
-      std::vector<SgForStatement*> t = findCommentedFors(index,
-                                                         isSgForStatement(tnl)->get_loop_body());
-      std::copy(t.begin(), t.end(), back_inserter(result));
-    }
-    next_loop_ok = false;
-  } else if (isSgIfStmt(tnl)) {
-    //printf("looking down if\n");
-    SgIfStmt *tni = isSgIfStmt(tnl);
-    std::vector<SgForStatement*> t = findCommentedFors(index,
-                                                       tni->get_true_body());
-    std::copy(t.begin(), t.end(), back_inserter(result));
-  }
-  
-  return result;
-}
-*/
-
-/* SgNode* forReduce(SgForStatement* loop, SgVariableSymbol* reduceIndex,
-                  SgScopeStatement* body_syms) {
-  //We did the replacements all at once with recursiveFindPreferedIdxs
-  //replacements r;
-  //r.oldsyms.append(loop->index());
-  //r.newsyms.append(reduceIndex);
-  //tree_for* new_loop = (tree_for*)loop->clone_helper(&r, true);
-  SgForStatement* new_loop = loop;
-  
-  //return body one loops in
-  SgNode* tnl = loop_body_at_level(new_loop, 1);
-  //wrap in conditional if necessary
-  tnl = wrapInIfFromMinBound(tnl, new_loop, body_syms, reduceIndex);
-  return tnl;
-}
-*/ 
-
 void recursiveFindRefs(SgNode* code, std::set<const SgVariableSymbol *>& syms,
                        SgFunctionDefinition* def) {
   
@@ -316,102 +245,6 @@ void recursiveFindRefs(SgNode* code, std::set<const SgVariableSymbol *>& syms,
   set_intersection(diff_U_L.begin(), diff_U_L.end(), Q.begin(), Q.end(),
                    inserter(syms, syms.begin()));
   
-  /* std::vector<SgVariableSymbol *> scalars;
-  //SgNode  *tnl = static_cast<const omega::CG_roseRepr *>(repr)->GetCode();
-  SgStatement* stmt;
-  SgExpression* exp;
-  if (tnl != NULL) {
-  if(stmt = isSgStatement(tnl)){
-  if(isSgBasicBlock(stmt)){
-  SgStatementPtrList& stmts = isSgBasicBlock(stmt)->get_statements();
-  for(int i =0; i < stmts.size(); i++){
-  //omega::CG_roseRepr *r = new omega::CG_roseRepr(isSgNode(stmts[i]));
-  std::vector<SgVariableSymbol *> a = recursiveFindRefs(isSgNode(stmts[i]));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  }
-  
-  }
-  else if(isSgForStatement(stmt)){
-  
-  SgForStatement *tnf =  isSgForStatement(stmt);
-  //omega::CG_roseRepr *r = new omega::CG_roseRepr(isSgStatement(tnf->get_loop_body()));
-  std::vector<SgVariableSymbol *> a = recursiveFindRefs(isSgNode(tnf->get_loop_body()));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  }
-  else if(isSgFortranDo(stmt)){
-  SgFortranDo *tfortran =  isSgFortranDo(stmt);
-  omega::CG_roseRepr *r = new omega::CG_roseRepr(isSgStatement(tfortran->get_body()));
-  std::vector<SgVariableSymbol *> a = recursiveFindRefs(r);
-  delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  }
-  
-  else if(isSgIfStmt(stmt) ){
-  SgIfStmt* tni = isSgIfStmt(stmt);
-  //omega::CG_roseRepr *r = new omega::CG_roseRepr(isSgNode(tni->get_conditional()));
-  std::vector<SgVariableSymbol *> a = recursiveFindRefs(isSgNode(tni->get_conditional()));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  //r = new omega::CG_roseRepr(isSgNode(tni->get_true_body()));
-  a = recursiveFindRefs(isSgNode(tni->get_true_body()));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  //r = new omega::CG_roseRepr(isSgNode(tni->get_false_body()));
-  a = recursiveFindRefs(isSgNode(tni->get_false_body()));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  }
-  else if(isSgExprStatement(stmt)) {
-  //omega::CG_roseRepr *r = new omega::CG_roseRepr(isSgExpression(isSgExprStatement(stmt)->get_expression()));
-  std::vector<SgVariableSymbol *> a = recursiveFindRefs(isSgNode(isSgExprStatement(stmt)->get_expression()));
-  //delete r;
-  std::copy(a.begin(), a.end(), back_inserter(scalars));
-  
-  }
-  }
-  }
-  else{
-  SgExpression* op = isSgExpression(tnl);
-  if(isSgVarRefExp(op)){
-  
-  scalars.push_back(isSgVarRefExp(op)->get_symbol());
-  
-  }
-  else if( isSgAssignOp(op)){
-  //omega::CG_roseRepr *r1 = new omega::CG_roseRepr(isSgAssignOp(op)->get_lhs_operand());
-  std::vector<SgVariableSymbol *> a1 = recursiveFindRefs(isSgNode(isSgAssignOp(op)->get_lhs_operand()));
-  //delete r1;
-  std::copy(a1.begin(), a1.end(), back_inserter(scalars));
-  //omega::CG_roseRepr *r2 = new omega::CG_roseRepr(isSgAssignOp(op)->get_rhs_operand());
-  std::vector<SgVariableSymbol *> a2 = recursiveFindRefs(isSgNode(isSgAssignOp(op)->get_rhs_operand()));
-  //delete r2;
-  std::copy(a2.begin(), a2.end(), back_inserter(scalars));
-  
-  }
-  else if(isSgBinaryOp(op)){
-  // omega::CG_roseRepr *r1 = new omega::CG_roseRepr(isSgBinaryOp(op)->get_lhs_operand());
-  std::vector<SgVariableSymbol *> a1 = recursiveFindRefs(isSgNode(isSgBinaryOp(op)->get_lhs_operand()));
-  //delete r1;
-  std::copy(a1.begin(), a1.end(), back_inserter(scalars));
-  //omega::CG_roseRepr *r2 = new omega::CG_roseRepr(isSgBinaryOp(op)->get_rhs_operand());
-  std::vector<SgVariableSymbol *> a2 = recursiveFindRefs((isSgBinaryOp(op)->get_rhs_operand()));
-  //delete r2;
-  std::copy(a2.begin(), a2.end(), back_inserter(scalars));
-  }
-  else if(isSgUnaryOp(op)){
-  //omega::CG_roseRepr *r1 = new omega::CG_roseRepr(isSgUnaryOp(op)->get_operand());
-  std::vector<SgVariableSymbol *> a1 = recursiveFindRefs(isSgNode(isSgUnaryOp(op)->get_operand()));
-  //delete r1;
-  std::copy(a1.begin(), a1.end(), back_inserter(scalars));
-  }
-  
-  }
-  return scalars;
-  
-  
-  */
   
 }
 
@@ -880,51 +713,6 @@ SgNode* recursiveFindReplacePreferedIdxs(SgNode* code, SgSymbolTable* body_syms,
     
   }
   
-  /*    if (!isSgBasicBlock(
-        recursiveFindReplacePreferedIdxs(isSgNode(*it), body_syms,
-        param_syms, body, loop_idxs, globalscope))) {
-        SgStatement *to_push = isSgStatement(
-        recursiveFindReplacePreferedIdxs(isSgNode(*it),
-        body_syms, param_syms, body, loop_idxs,
-        globalscope, sync));
-        clone->append_statement(to_push);
-        
-        if ((sync_found) && isSgForStatement(to_push)) {
-        SgName name_syncthreads("__syncthreads");
-        SgFunctionSymbol * syncthreads_symbol =
-        globalscope->lookup_function_symbol(
-        name_syncthreads);
-        
-        // Create a call to __syncthreads():
-        SgFunctionCallExp * syncthreads_call = buildFunctionCallExp(
-        syncthreads_symbol, buildExprListExp());
-        
-        SgExprStatement* stmt = buildExprStatement(
-        syncthreads_call);
-        
-        clone->append_statement(isSgStatement(stmt));
-        }
-        //  std::cout<<isSgNode(*it)->unparseToString()<<"\n\n";
-        } else {
-        
-        SgStatementPtrList& tnl2 = isSgBasicBlock(
-        recursiveFindReplacePreferedIdxs(isSgNode(*it),
-        body_syms, param_syms, body, loop_idxs,
-        globalscope))->get_statements();
-        for (SgStatementPtrList::const_iterator it2 = tnl2.begin();
-        it2 != tnl2.end(); it2++) {
-        clone->append_statement(*it2);
-        
-        sync_found = true;
-        //  std::cout<<isSgNode(*it2)->unparseToString()<<"\n\n";
-        }
-        }
-        
-        }
-        return isSgNode(clone);
-        }
-  */
-//  return tnl;
 }
 
 // loop_vars -> array references
@@ -976,7 +764,14 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
                           std::map<std::string, int> array_dims,
                           std::vector<std::string> blockIdxs,
                           std::vector<std::string> threadIdxs) {
-  fprintf(stderr, "BEFORE ir->builder()\n"); 
+  fprintf(stderr, " LoopCuda::cudaize_v2() ROSE\n");
+  for(std::map<std::string, int>::iterator it = array_dims->begin(); it != array_dims->end(); it++)  {
+    fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
+  }
+
+  this->array_dims = array_dims;
+
+  fprintf(stderr, "\nBEFORE ir->builder()\n"); 
   CG_outputBuilder *ocg = ir->builder();
   fprintf(stderr, "AFTER  ir->builder()\n"); 
   int stmt_num = 0;
@@ -1176,7 +971,8 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
   }
   
   if (cudaDebug) {
-    printf("cudaize_v2: current names: ");
+    printf("cudaize_vman svn 
+2: current names: ");
     printVS(idxNames[stmt_num]);
   }
   //Set codegen flag
@@ -1457,7 +1253,10 @@ static void texmapArrayRefs(texture_memory_mapping* texture, std::vector<IR_Arra
 
 chillAST_node* LoopCuda::cudaize_codegen_v2() {
   fprintf(stderr, "cudaize codegen V2 (ROSE)\n");
-  
+  for(std::map<std::string, int>::iterator it = array_dims->begin(); it != array_dims->end(); it++)  {
+    fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
+  }
+
   //protonu--adding an annote to track texture memory type
   //ANNOTE(k_cuda_texture_memory, "cuda texture memory", TRUE);
   //ANNOTE(k_cuda_constant_memory, "cuda constant memory", TRUE);
@@ -1665,7 +1464,7 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
     // find the variable declaration in original 
     chillAST_VarDecl *param = origfunction->findParameterNamed( tmpname ); 
     if (!param) { 
-      fprintf(stderr, "loop_cuda_clang.cc can't find wo parameter named %s in function %s\n",tmpname,fname);
+      fprintf(stderr, "loop_cuda_ROSE.cc can't find wo parameter named %s in function %s\n",tmpname,fname);
       exit(-1); 
     }
     //param->print(); printf("\n"); fflush(stdout); 
@@ -1695,8 +1494,13 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
         param->arraysizes == NULL) { 
       //Lookup in array_dims (the cudaize call has this info for some variables?) 
       std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
-      fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
-      numitems = (*it).second; 
+      if (it == array_dims.end()) { fprintf(stderr, "Can't find %s in array_dims\n", name.c_str()); 
+        numitems = 123456;
+      }
+      else { 
+        fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
+        numitems = (*it).second; 
+      }
     }
     else { 
       fprintf(stderr, "numdimensions = %d\n", param->numdimensions);
@@ -1751,7 +1555,7 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
     // find the variable declaration 
     chillAST_VarDecl *param = origfunction->findParameterNamed( tmpname ); 
     if (!param) { 
-      fprintf(stderr, "loop_cuda_clang.cc can't find ro parameter named %s in function %s\n",tmpname,fname);
+      fprintf(stderr, "loop_cuda_ROSE2.cc can't find ro parameter named %s in function %s\n",tmpname,fname);
       exit(-1);
     }
     
@@ -2092,13 +1896,13 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
 
   //Extract out kernel loop  (somewhat misnamed. This is NOT the body of the GPUKernel YET) 
   chillAST_node *kernelloop = getCode(  ); 
-  fprintf(stderr, "loop_cuda_clang.cc L1669 returned from getCode()\n");
+  fprintf(stderr, "loop_cuda_rose.cc L1669 returned from getCode()\n");
 
-  //fprintf(stderr, "loop_cuda_clang.cc L1685  kernelloop =\n");
+  //fprintf(stderr, "loop_cuda_chill.cc L1685  kernelloop =\n");
   //GPUKernel->getBody()->print(); fflush(stdout);
   //fprintf(stderr, "\n\n"); 
          
-  fprintf(stderr, "loop_cuda_clang.cc L1685   kernelloop = \n");
+  fprintf(stderr, "loop_cuda_rose.cc L1685   kernelloop = \n");
   kernelloop->print(); 
   fprintf(stderr, "\n\n"); 
 
@@ -2421,9 +2225,14 @@ bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
   if (stmt_num >= stmt.size() || stmt_num < 0)
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
   const int n = stmt[stmt_num].xform.n_out();
-  if (pi.size() > (n - 1) / 2)
+
+  if (pi.size() > (n - 1) / 2) { 
+    fprintf(stderr, "loop_cuda_rose.cc L 2213, pi.size() %d    n %d   (n+1)/2 %d\n", pi.size(), n, (n+1)/2);
+    for (int i=0; i<pi.size(); i++) fprintf(stderr, "pi[%d] = %d\n", i, pi[i]);
+    
     throw std::invalid_argument(
       "iteration space dimensionality does not match permute dimensionality");
+  }
   int first_level = 0;
   int last_level = 0;
   for (int i = 0; i < pi.size(); i++) {

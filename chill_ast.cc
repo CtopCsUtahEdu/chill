@@ -1,6 +1,6 @@
 
 
-#include "chilldebug.h"
+
 #include "chill_ast.hh"
 
 int chillAST_node::chill_scalar_counter = 0;
@@ -98,10 +98,98 @@ bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name 
 
 chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ){  // fwd decl TODO too many similar named functions
   if (!table) return NULL; // ?? 
+
+  // see if name has a dot or arrow (->) indicating that it is a structure/class
+  const char *cdot = strstr( name, "." );
+  const char *carrow = strstr(name, "->");  // initial 'c' for const - can't change those
+
+  char *varname;
+  char *subpart = NULL;
+
+  if (cdot || carrow) { 
+    fprintf(stderr, "symbolTableFindVariableNamed(), name '%s' looks like a struct\n", name); 
+
+    // so, look for the first part in the symbol table.
+    // warning, this could be looking for a->b.c.d->e.f->g
+    varname = strdup( name );
+
+    char *dot   = strstr(varname, "." );
+    char *arrow = strstr( varname, "->" );
+    if (dot != NULL && arrow != NULL ) { // dot AND arrow, 
+      fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), name '%s' has both dot and arrow? TODO\n");
+      exit(-1); 
+    }
+    else if (dot != NULL && !arrow) { // just dot(s).  dot points to the first one 
+      //fprintf(stderr, "name '%s' has dot(s)\n", varname);
+      *dot = '\0'; // end string at the dot
+      subpart = &(dot[1]);
+      fprintf(stderr, "will now look for a struct/class named %s that has member %s\n", varname, subpart);
+
+    }
+    else if (arrow != NULL && !dot) { // just arrow(s)  arrow points to the first one
+      //fprintf(stderr, "name '%s' has arrow(s)\n", varname);
+      *arrow = '\0'; // end string at the arrow
+      subpart = &(arrow[2]); 
+      fprintf(stderr, "will now look for a struct/class named %s that has member %s\n", varname, subpart);
+    }
+    else { // impossible 
+      fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), varname '%s', looks like a struct,  but I can't figure it out\n", varname);
+      exit(-1); 
+    }
+  }
+  else { 
+    varname = strdup(name); 
+  }
+
   int numvars = table->size();
   for (int i=0; i<numvars; i++) { 
     chillAST_VarDecl *vd = (*table)[i];
-    if (!strcmp(name, vd->varname)) return vd;  // need to check type? 
+    if (!strcmp(varname, vd->varname)) { 
+      fprintf(stderr, "found variable named %s\n", varname);
+
+      if (!subpart) return vd;  // need to check type? 
+
+      // OK, we have a variable, which looks like a struct/class, and a subpart that is some member names
+      //fprintf(stderr, "but I don't know how to check if it has member %s\n", subpart); 
+      
+      char *dot   = strstr(subpart, "." );
+      char *arrow = strstr(subpart, "->" );
+      
+      if (!dot && !arrow) { // whew, only one level of struct
+        //fprintf(stderr, "whew, only one level of struct\n"); 
+        
+        // make sure this variable definition is a struct
+        if (vd->isAStruct()) { 
+          //fprintf(stderr, "%s is a struct of type %s\n", varname, vd->getTypeString()); 
+          if (vd->isVarDecl()) { 
+            chillAST_RecordDecl  *rd = vd->getStructDef(); 
+            if (rd) { 
+              //fprintf(stderr, "has a recordDecl\n"); 
+              
+              chillAST_VarDecl *sp = rd->findSubpart( subpart );
+              if (sp) fprintf(stderr, "found a struct member named %s\n", subpart);
+              else fprintf(stderr, "DIDN'T FIND a struct member named %s\n", subpart);
+              return sp;  // return the subpart?? 
+            }
+            else { 
+              fprintf(stderr, "no recordDecl\n"); 
+              exit(-1); 
+            }
+          }
+          else { 
+            fprintf(stderr, "NOT a VarDecl???\n"); // impossible
+          }
+        }
+        else { 
+          fprintf(stderr, "false alarm. %s is a variable, but doesn't have subparts\n", varname); 
+          return NULL; // false alarm. a variable of the correct name exists, but is not a struct 
+        }
+      }
+      
+      fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), name '%s'  can't figure out multiple levels of struct yet!\n"); 
+
+      exit(-1); 
+    }
   }
   return NULL;
 }
@@ -222,11 +310,28 @@ void chillindent( int howfar, FILE *fp ) { for (int i=0; i<howfar; i++) fprintf(
 
 
 
+chillAST_VarDecl * chillAST_node::findVariableNamed( const char *name ) { // recursive
+  if (hasSymbolTable()) { // look in my symbol table if I have one
+    chillAST_VarDecl *vd = symbolTableFindVariableNamed( getSymbolTable(), name);
+    if (vd) return vd; // found locally
+  }
+  if (!parent) return NULL; // no more recursion available
+  // recurse upwards
+  return parent->findVariableNamed( name ); 
+}
+
   void chillAST_node::printPreprocBEFORE( int indent, FILE *fp ) { 
-    for (int i=0; i< preprocessinginfo.size(); i++) { 
+    int numstmts = preprocessinginfo.size(); 
+    //if (0 != numstmts) { 
+    //  fprintf(fp, "chillAST_node::printPreprocBEFORE()  %d statements\n", numstmts); 
+    //} 
+
+
+    for (int i=0; i< numstmts; i++) { 
+      //fprintf(fp, "stmt %d   %d\n", i, preprocessinginfo[i]->position); 
       if (preprocessinginfo[i]->position == CHILL_PREPROCESSING_LINEBEFORE || 
           preprocessinginfo[i]->position == CHILL_PREPROCESSING_IMMEDIATELYBEFORE) {
-        fprintf(stderr, "before %d\n", preprocessinginfo[i]->position); 
+        //fprintf(stderr, "before %d\n", preprocessinginfo[i]->position); 
         preprocessinginfo[i]->print(indent, fp); 
       }
     }
@@ -236,7 +341,7 @@ void chillindent( int howfar, FILE *fp ) { for (int i=0; i<howfar; i++) fprintf(
     for (int i=0; i< preprocessinginfo.size(); i++) { 
       if (preprocessinginfo[i]->position == CHILL_PREPROCESSING_LINEAFTER || 
           preprocessinginfo[i]->position ==  CHILL_PREPROCESSING_TOTHERIGHT) { 
-        fprintf(stderr, "after %d\n", preprocessinginfo[i]->position); 
+        //fprintf(stderr, "after %d\n", preprocessinginfo[i]->position); 
         preprocessinginfo[i]->print(indent, fp); 
       }
     }
@@ -270,7 +375,7 @@ chillAST_SourceFile::chillAST_SourceFile(const char *filename ) {
 };
 
 void chillAST_SourceFile::print( int indent, FILE *fp ) { 
-
+  fprintf(stderr, "chillAST_SourceFile::print()\n"); 
   fflush(fp);
   fprintf(fp, "\n// this source derived from CHILL AST originally from file '%s' as parsed by frontend compiler %s\n\n", SourceFileName, frontend); 
   std::vector< char * > includedfiles; 
@@ -290,14 +395,19 @@ void chillAST_SourceFile::print( int indent, FILE *fp ) {
   } 
 
   for (int i=0; i<numchildren; i++) {
-    //fprintf(fp, "\n// child %d of type %s:\n", i, children[i]->getTypeString()); 
+    //fprintf(fp,  "\n// child %d of type %s:\n", i, children[i]->getTypeString());
+    if (children[i]->isFunctionDecl()) { 
+      fprintf(stderr, "\nchild %d function %s\n",i,((chillAST_FunctionDecl *)children[i])->functionName); 
+    } 
+ 
     if (children[i]->isFromSourceFile) { 
+      fprintf(stderr, "child %d IS from source file\n", i); 
       if (children[i]->isMacroDefinition()) fprintf(fp, "\n"); fflush(fp);
       children[i]->print( indent, fp );
       if (children[i]->isVarDecl()) fprintf(fp, ";\n"); fflush(fp);  // top level vardecl\n"); 
     }
     else { 
-
+      fprintf(stderr, "child %d is not from source file\n", i); 
       // this should all go away 
 
 #ifdef NOPE 
@@ -641,6 +751,7 @@ chillAST_SymbolTable * chillAST_RecordDecl::addVariableToSymbolTable( chillAST_V
 }
 
 void chillAST_RecordDecl::printStructure( int indent,  FILE *fp ) {
+  //fprintf(stderr, "chillAST_RecordDecl::printStructure()\n"); 
   chillindent(indent, fp);  
   if (isStruct) { 
     fprintf(fp, "struct { ", name);
@@ -673,7 +784,7 @@ chillAST_FunctionDecl::chillAST_FunctionDecl() {
   this->setFunctionCPU(); 
   parent = NULL;
   metacomment = NULL;
-  symbol_table = NULL;   // eventually, pointing to body's symbol table
+  //symbol_table = NULL;   // eventually, pointing to body's symbol table
   typedef_table = NULL;
   body = new chillAST_CompoundStmt();
   isFromSourceFile = true; // default 
@@ -692,7 +803,7 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, 
   parent = par;
   metacomment = NULL;
   if (par) par->getSourceFile()->addFunc( this );
-  symbol_table = NULL;
+  // symbol_table = NULL; //use body's instead
   typedef_table = NULL;
   body = new chillAST_CompoundStmt();
   isFromSourceFile = true; // default 
@@ -707,13 +818,13 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, 
   //fprintf(stderr, "functionName %s\n", functionName); 
   forwarddecl = externfunc = builtin = false; 
 
-  body = NULL;
+  body = new chillAST_CompoundStmt();
   asttype = CHILLAST_NODETYPE_FUNCTIONDECL; 
   uniquePtr = unique; // a quick way to check equivalence. DO NOT ACCESS THROUGH THIS 
   parent = par;
   metacomment = NULL;
   if (par) par->getSourceFile()->addFunc( this );
-  symbol_table = NULL;
+  //symbol_table = NULL; // use body's 
   typedef_table = NULL;
   isFromSourceFile = true; // default 
   filename = NULL; 
@@ -721,10 +832,10 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, 
 
 
 void chillAST_FunctionDecl::addParameter( chillAST_VarDecl *p) {
-  //fprintf(stderr, "%s chillAST_FunctionDecl::addParameter( 0x%x  param %s)   total of %d parameters\n", functionName, p, p->varname, 1+parameters.size()); 
+  fprintf(stderr, "%s chillAST_FunctionDecl::addParameter( 0x%x  param %s)   total of %d parameters\n", functionName, p, p->varname, 1+parameters.size()); 
 
-  if (symbolTableHasVariableNamed( &parameters, p->varname)) {
-    fprintf(stderr, "chillAST_FunctionDecl::addParameter( %s ), parameter already exists?\n");
+  if (symbolTableHasVariableNamed( &parameters, p->varname)) { // NOT recursive. just in FunctionDecl
+    fprintf(stderr, "chillAST_FunctionDecl::addParameter( %s ), parameter already exists?\n", p->varname);
     // exit(-1); // ?? 
     return; // error? 
   }
@@ -737,19 +848,22 @@ void chillAST_FunctionDecl::addParameter( chillAST_VarDecl *p) {
   //p->dump(); printf("\naddparameter done\n\n"); fflush(stdout); 
 }
 
+
+
 void chillAST_FunctionDecl::addDecl( chillAST_VarDecl *vd) { // to symbol table ONLY 
-  //fprintf(stderr, "chillAST_FunctionDecl::addDecl( %s )\n", vd->varname);
+  fprintf(stderr, "chillAST_FunctionDecl::addDecl( %s )\n", vd->varname);
   if (!body) {  
     //fprintf(stderr, "had no body\n"); 
     body = new chillAST_CompoundStmt();
-    body->symbol_table = symbol_table;   // probably wrong if this ever does something
+    
+    //body->symbol_table = symbol_table;   // probably wrong if this ever does something
   }
 
   //fprintf(stderr, "before body->addvar(), func symbol table had %d entries\n", symbol_table->size()); 
   //fprintf(stderr, "before body->addvar(), body symbol table was %p\n", body->symbol_table); 
   //fprintf(stderr, "before body->addvar(), body symbol table had %d entries\n", body->symbol_table->size()); 
   //adds to body symbol table, and makes sure function has a copy. probably dumb
-  symbol_table = body->addVariableToSymbolTable( vd ); 
+  body->symbol_table = body->addVariableToSymbolTable( vd ); 
   //fprintf(stderr, "after body->addvar(), func symbol table had %d entries\n", symbol_table->size()); 
 }
 
@@ -763,8 +877,8 @@ chillAST_VarDecl *chillAST_FunctionDecl::hasParameterNamed( const char *name ) {
 
 
 // similar to symbolTableHasVariableNamed() but returns the variable definition
-chillAST_VarDecl *chillAST_FunctionDecl::hasVariableNamed( const char *name ) {
-  //fprintf(stderr, "chillAST_FunctionDecl::hasVariableNamed( %s )\n", name );
+chillAST_VarDecl *chillAST_FunctionDecl::funcHasVariableNamed( const char *name ) { // NOT recursive
+  //fprintf(stderr, "chillAST_FunctionDecl::funcHasVariableNamed( %s )\n", name );
 
   // first check the parameters
   int numparams = parameters.size();
@@ -777,21 +891,25 @@ chillAST_VarDecl *chillAST_FunctionDecl::hasVariableNamed( const char *name ) {
   }
   //fprintf(stderr, "no parameter named %s\n", name); 
 
-  if (!symbol_table) {
-    //fprintf(stderr,"and no symbol_table, so no variable named %s\n", name);
+  chillAST_SymbolTable *st = getSymbolTable(); 
+  if (!st) {
+    fprintf(stderr,"and no symbol_table, so no variable named %s\n", name);
     return NULL; // no symbol table so no variable by that name 
   }
 
-  int numvars = symbol_table->size();
+  
+  int numvars =  st->size();
   //fprintf(stderr, "checking against %d variables\n", numvars); 
   for (int i=0; i<numvars; i++) { 
-    chillAST_VarDecl *vd = (*symbol_table)[i];
+    chillAST_VarDecl *vd = (*st)[i];
+    //fprintf(stderr, "comparing '%s' to '%s'\n", name, vd->varname); 
     if (!strcmp(name, vd->varname)) {
       //fprintf(stderr, "yep, it's variable %d\n", i); 
+      fprintf(stderr, "%s was already defined in the function body\n", vd->varname); 
       return vd;  // need to check type? 
     }
   }
-  //fprintf(stderr, "not a parameter or variable named %s\n", name); 
+  fprintf(stderr, "not a parameter or variable named %s\n", name); 
   return NULL; 
 }
 
@@ -805,23 +923,45 @@ void chillAST_FunctionDecl::setBody( chillAST_node * bod ) {
     body = new chillAST_CompoundStmt();
     body->addChild( bod ); 
   }
-  symbol_table = body->getSymbolTable(); 
+  //symbol_table = body->getSymbolTable(); 
   //addChild(bod);
   bod->setParent( this );  // well, ... 
 }
 
 
 void chillAST_FunctionDecl::insertChild(int i, chillAST_node* node) { 
+  fprintf(stderr, "chillAST_FunctionDecl::insertChild()  "); node->print(0,stderr); fprintf(stderr, "\n\n"); 
   body->insertChild( i, node ); 
+
+  if (node->isVarDecl()) { 
+    chillAST_VarDecl *vd = ((chillAST_VarDecl *) node);
+    fprintf(stderr, "functiondecl %s inserting a VarDecl named %s\n", functionName, vd->varname);
+    chillAST_SymbolTable *st = getSymbolTable();
+    if (!st) { 
+      fprintf(stderr, "symbol table is NULL!\n"); 
+    }
+    else { 
+      fprintf(stderr, "%d entries in the symbol table\n", st->size()); 
+      printSymbolTable( getSymbolTable() );
+    }
+    fprintf(stderr, "\n\n"); 
+  }
 }
 
 void chillAST_FunctionDecl::addChild(chillAST_node* node) { 
+  fprintf(stderr, "chillAST_FunctionDecl::addChild( )  "); node->print(0,stderr); fprintf(stderr, "\n\n"); 
+  if (node->isVarDecl()) { 
+    chillAST_VarDecl *vd = ((chillAST_VarDecl *) node);
+    fprintf(stderr, "functiondecl %s adding a VarDecl named %s\n", functionName, vd->varname);
+  }
+
   body->addChild( node ); 
   node->parent = this; // this, or body?? 
 }
 
 
 void  chillAST_FunctionDecl::printParameterTypes( FILE *fp ) {  // also prints names
+  //fprintf(stderr, "\n\n%s chillAST_FunctionDecl::printParameterTypes()\n", functionName); 
   fprintf(fp, "( "); 
   int numparameters = parameters.size(); 
   for (int i=0; i<numparameters; i++) {
@@ -891,7 +1031,7 @@ void chillAST_FunctionDecl::print(  int indent,  FILE *fp ) {
 
 void chillAST_FunctionDecl::dump(  int indent,  FILE *fp ) {
   fprintf(fp, "\n"); 
-  fprintf(fp, "// Function isFromSourceFile ");
+  fprintf(fp, "// isFromSourceFile ");
   if (filename) fprintf(fp, "%s  ", filename); 
   if (isFromSourceFile) fprintf(fp, "true\n"); 
   else fprintf(fp, "false\n"); 
@@ -906,7 +1046,6 @@ void chillAST_FunctionDecl::dump(  int indent,  FILE *fp ) {
     p->print(0, fp); // note: no indent, as this is in the function parens, ALSO print, not dump
   }
   fprintf(fp, ")\n"); // end of input parameters
-  fflush(fp);
   
   // now the body - 
   if (body) body->dump( indent+1 , fp); 
@@ -962,7 +1101,7 @@ chillAST_VarDecl *chillAST_FunctionDecl::findArrayDecl( const char *name ) {
   //if (p) fprintf(stderr, "function %s has parameter named %s\n", functionName, name );
   if (p && p->isArray()) return p;
 
-  chillAST_VarDecl *v = hasVariableNamed ( name ); 
+  chillAST_VarDecl *v = funcHasVariableNamed ( name ); 
   //if (v) fprintf(stderr, "function %s has symbol table variable named %s\n", functionName, name );
   if (v && v->isArray()) return v;
 
@@ -1091,6 +1230,7 @@ bool chillAST_FunctionDecl::findLoopIndexesToReplace(  chillAST_SymbolTable *sym
 
 chillAST_MacroDefinition::chillAST_MacroDefinition() { 
   macroName = strdup("UNDEFINEDMACRO");
+  rhsString = NULL;
   asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
   parent  = NULL;
   metacomment = NULL;
@@ -1103,11 +1243,30 @@ chillAST_MacroDefinition::chillAST_MacroDefinition() {
 
 chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, chillAST_node *par) { 
   macroName = strdup(mname);
+  rhsString = NULL;
   asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
   parent = par;
   metacomment = NULL;
   symbol_table = NULL;
   //rhsideString = NULL;
+
+  if (par) par->getSourceFile()->addMacro( this );
+
+  //fprintf(stderr, "chillAST_MacroDefinition::chillAST_MacroDefinition( %s, ", mname); 
+  //if (par) fprintf(stderr, " parent NOT NULL);\n");
+  //else fprintf(stderr, " parent NULL);\n");
+  isFromSourceFile = true; // default 
+  filename = NULL; 
+};
+
+
+chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, const char *rhs, chillAST_node *par) { 
+  macroName = strdup(mname);
+  rhsString = strdup(rhs);
+  asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
+  parent = par;
+  metacomment = NULL;
+  symbol_table = NULL;
 
   if (par) par->getSourceFile()->addMacro( this );
 
@@ -1136,8 +1295,10 @@ chillAST_node* chillAST_MacroDefinition::clone() {
 
 
 void chillAST_MacroDefinition::setBody( chillAST_node * bod ) {
-  //fprintf(stderr, "%s chillAST_MacroDefinition::setBody( 0x%x )   total of %d children\n", functionName, bod, 1+children.size()); 
+  fprintf(stderr, "%s chillAST_MacroDefinition::setBody( 0x%x )\n", macroName, bod); 
   body = bod;
+  fprintf(stderr, "body is:\n"); body->print(0,stderr); fprintf(stderr, "\n\n");
+  rhsString = body->stringRep(); 
   bod->setParent( this );  // well, ... 
 }
 
@@ -1182,6 +1343,7 @@ void chillAST_MacroDefinition::dump(  int indent,  FILE *fp ) {
   }
   fprintf(fp, ")\n"); 
   body->dump( indent+1, fp);
+  if (rhsString) fprintf(fp, " (aka %s)"); 
   fprintf(fp, "\n"); 
   fflush(fp);
 }
@@ -1211,7 +1373,9 @@ void chillAST_MacroDefinition::print(  int indent,  FILE *fp ) {  // UHOH   TODO
 
 
 chillAST_ForStmt::chillAST_ForStmt() {
-  init = cond = incr = body = NULL;
+  init = cond = incr = NULL;
+  body = new chillAST_CompoundStmt();
+
   asttype = CHILLAST_NODETYPE_LOOP;  // breaking with tradition, this was CHILL_AST_FORSTMT
   conditionoperator = IR_COND_UNKNOWN;
   parent = NULL;
@@ -1637,21 +1801,47 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
     // RIGHT NOW, change all the references that this loop wants swapped out 
     // find vardecl for named preferred index.  it has to already exist
     fprintf(stderr, "RIGHT NOW, change all the references that this loop wants swapped out \n"); 
-    int numsym = symtab->size(); 
-    chillAST_VarDecl *newguy = NULL;
-    fprintf(stderr, "%d symbols\n", numsym);
-    for (int i=0; i<numsym; i++) { 
-      fprintf(stderr, "sym %d is '%s'\n", i, (*symtab)[i]->varname);
-      if (!strcmp(vname,  (*symtab)[i]->varname)) { 
-        newguy = (*symtab)[i];
-      }
-    }
+
+    chillAST_VarDecl *newguy = findVariableNamed( vname ); // recursive
     if (!newguy) { 
-      fprintf(stderr, "there is no defined variable %s\n", vname); 
+      fprintf(stderr, "there was no variable named %s anywhere I could find\n", vname);
+    }
+
+    // wrong - this only looks at variables defined in the forstmt, not 
+    // in parents of the forstmt
+    //int numsym = symtab->size(); 
+    //fprintf(stderr, "%d symbols\n", numsym);
+    //for (int i=0; i<numsym; i++) { 
+    //  fprintf(stderr, "sym %d is '%s'\n", i, (*symtab)[i]->varname);
+    //  if (!strcmp(vname,  (*symtab)[i]->varname)) { 
+    //    newguy = (*symtab)[i];
+    // }
+    //}
+    if (!newguy) { 
+      fprintf(stderr, "chillAST_ForStmt::findLoopIndexesToReplace() there is no defined variable %s\n", vname); 
 
       // make one ??  seems like this should never happen 
       newguy = new chillAST_VarDecl( olddecl->vartype, vname, ""/*?*/, NULL );
       // insert actual declaration in code location?   how?
+
+      // find parent of the ForStmt?
+      // find parent^n of the ForStmt that is not a Forstmt?
+      // find parent^n of the Forstmt that is a FunctionDecl?
+      chillAST_node *contain = findContainingNonLoop();
+      if (contain == NULL) { 
+        fprintf(stderr, "nothing but loops all the way up?\n");
+        exit(0);
+      }
+      fprintf(stderr, "containing non-loop is a %s\n", contain->getTypeString()); 
+
+      contain->print(0,stderr);
+      contain->insertChild( 0, newguy ); // ugly order TODO
+      contain->addVariableToSymbolTable( newguy ); // adds to first enclosing symbolTable
+      
+      if (!  symbolTableHasVariableNamed( contain->getSymbolTable(), vname )) { 
+        fprintf(stderr, "container doesn't have a var names %s afterwards???\n", vname); 
+        exit(-1); 
+      }
     }
 
 
@@ -1679,10 +1869,10 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       incr->print(0, stderr);
       fprintf(stderr, ")\n\n");
 
-      fprintf(stderr,"recursing to body of type %s\n", body->getTypeString()); 
+      fprintf(stderr,"recursing to ForStmt body of type %s\n", body->getTypeString()); 
       body->replaceVarDecls( olddecl, newguy ); 
 
-      fprintf(stderr, "\nafter recursing to body, this loop is   there should be no %s\n", olddecl->varname);
+      fprintf(stderr, "\nafter recursing to body, this loop is   (there should be no %s)\n", olddecl->varname);
       print(0, stderr); fprintf(stderr, "\n"); 
       
     }
@@ -1874,6 +2064,7 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
 
 
 chillAST_BinaryOperator::chillAST_BinaryOperator() {
+  //fprintf(stderr, "chillAST_BinaryOperator::chillAST_BinaryOperator()  %p\n", this);
   lhs = rhs = NULL;
   op = NULL;
   asttype = CHILLAST_NODETYPE_BINARYOPERATOR; 
@@ -1883,7 +2074,11 @@ chillAST_BinaryOperator::chillAST_BinaryOperator() {
 
 
 chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *oper, chillAST_node *r, chillAST_node *par) { 
-  //fprintf(stderr, "chillAST_BinaryOperator::chillAST_BinaryOperator( l %p  %s  r %p  par %p)\n", l, oper, r, par); 
+  //fprintf(stderr, "chillAST_BinaryOperator::chillAST_BinaryOperator( l %p  %s  r %p  par %p)  %p\n", l, oper, r, par, this); 
+
+  //if (l && r ) { 
+  //  fprintf(stderr, "("); l->print(0,stderr); fprintf(stderr, ") %s (", oper); r->print(0,stderr); fprintf(stderr, ")\n\n"); 
+  //} 
 
   lhs = l;
   rhs = r;
@@ -1986,7 +2181,6 @@ void chillAST_BinaryOperator::print( int indent, FILE *fp ) {   // TODO this nee
   if (needparens) fprintf(fp, ")"); 
 
   fprintf( fp, " %s ", op);
-  //fprintf(fp, "\n"); // TMP DELETEME DFL
 
   needparens = false;
   //fprintf(stderr, "binop rhs is of type %s\n", rhs->getTypeString()); 
@@ -2014,6 +2208,14 @@ void chillAST_BinaryOperator::print( int indent, FILE *fp ) {   // TODO this nee
   printPreprocAFTER(indent, fp); 
 
 }
+
+
+char *chillAST_BinaryOperator::stringRep(int indent ) { 
+  std::string s = string( lhs->stringRep() ) + " " + op + " " +  string(lhs->stringRep() );
+  return strdup( s.c_str() ); 
+}
+
+
 
 void chillAST_BinaryOperator::printonly( int indent, FILE *fp ) {
 
@@ -2457,22 +2659,25 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() {
   //fprintf(stderr, "chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr()  NEED TO FAKE A LOCATION\n");
   isFromSourceFile = true; // default 
   filename = NULL;
-  
+  //fprintf(stderr, "\nASE %p is empty\n", this); 
 }
 
 
 
 chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, chillAST_node *par, void *unique ) { 
 
-  //fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 1\n"); 
+  //fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 1\n");
+  //fprintf(stderr, "ASE index %p ", indx); indx->print(0,stderr); fprintf(stderr, "\n"); 
   asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
   bas->setParent( this );
   if (bas->isImplicitCastExpr()) base = ((chillAST_ImplicitCastExpr*)bas)->subexpr; // probably wrong
   else   base = bas;
   if (indx->isImplicitCastExpr()) index = ((chillAST_ImplicitCastExpr*)indx)->subexpr; // probably wrong
   else index = indx;
+
   base->setParent( this );
   index->setParent( this );
+
   imwrittento = false; // ?? 
   imreadfrom  = false; // ?? 
   uniquePtr = (void *) unique;
@@ -2484,21 +2689,29 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   //fprintf(stderr, "basedecl varname %s\n", basedecl->varname); 
   isFromSourceFile = true; // default 
   filename = NULL;
+
+  //fprintf(stderr, "\nASE %p   parent %p  ", this, parent); print(0,stderr); fprintf(stderr, "\n\n"); 
 }
 
 
 
 chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, chillAST_node *par, void  *unique ) {
-  //fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 2\n"); 
-
+  //fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 2  parent %p\n", par ); 
+  //fprintf(stderr, "ASE %p   index %p ", this, indx); indx->print(0,stderr); fprintf(stderr, "\n"); 
+  
   asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
   bas->setParent( this );
   if (bas->isImplicitCastExpr()) base = ((chillAST_ImplicitCastExpr*)bas)->subexpr; // probably wrong
   else base = bas;
-    if (indx->isImplicitCastExpr()) index = ((chillAST_ImplicitCastExpr*)indx)->subexpr; // probably wrong
+
+  if (indx->isImplicitCastExpr()) index = ((chillAST_ImplicitCastExpr*)indx)->subexpr; // probably wrong
   else index = indx;
+  
+  //fprintf(stderr, "setting parent of base  %p to %p\n", base, this);
+  //fprintf(stderr, "setting parent of index %p to %p\n", index, this);
   base->setParent( this );
-  index->setParent( this );
+  index->setParent( this ); 
+  
   imwrittento = writtento; // ?? 
   //fprintf(stderr, "ASE %p   imwrittento %d\n", this, imwrittento);
   imreadfrom  = false; // ??  
@@ -2514,20 +2727,31 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   //fprintf(stderr, "basedecl varname %s\n", basedecl->varname); 
   isFromSourceFile = true; // default 
   filename = NULL;
+
+  //fprintf(stderr, "chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 2 DONE\n");
+  //print(0,stderr); fprintf(stderr, "\n\n"); 
+  //fprintf(stderr, "\nASE %p   parent %p  ", this, parent); print(0,stderr); fprintf(stderr, "\n\n"); 
  }
 
 
 
-chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces) {
+chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces,  chillAST_node *par) {
   //fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 4\n"); 
   //fprintf(stderr,"chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<int> indeces)\n");
   asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
+  parent = par;
+  //if (parent == NULL) { 
+  //  fprintf(stderr, "dammit.  ASE %p has no parent\n", this); 
+  //} 
+
+
   int numindeces = indeces.size();
-  //for (int i=0; i<numindeces; i++) { 
+  for (int i=0; i<numindeces; i++) { 
+    fprintf(stderr, "ASE index %d  ", i); indeces[i]->print(0,stderr); fprintf(stderr, "\n"); 
   //  printf("[");
   //  indeces[i]->print();
   //  printf("]");
-  //} 
+  } 
   //fflush(stdout); 
   //fprintf(stderr, "\n");
   
@@ -2545,6 +2769,9 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, s
   base = (chillAST_node *) DRE;
   index = indeces[ numindeces-1];
 
+  base->setParent( this );
+  index->setParent(this); 
+
   for (int i=numindeces-2; i>=0; i--) {
     
     chillAST_ArraySubscriptExpr *ASE = new  chillAST_ArraySubscriptExpr( DRE, indeces[i], rent, 0); 
@@ -2557,6 +2784,8 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, s
   //fprintf(stderr, "ASE is "); print(); printf("\n\n"); fflush(stdout); 
   isFromSourceFile = true; // default 
   filename = NULL;
+
+  //fprintf(stderr, "\nASE %p   parent %p  ", this, parent); print(0,stderr); fprintf(stderr, "\n\n"); 
 }
 
 
@@ -2650,6 +2879,22 @@ void chillAST_ArraySubscriptExpr::print( int indent, FILE *fp ) {
   fprintf(fp, "]");
   fflush(fp); 
 }
+
+char *chillAST_ArraySubscriptExpr::stringRep(int indent ) { 
+  fprintf(stderr, "chillAST_ArraySubscriptExpr::stringRep\n"); 
+
+  char *blurb;
+  char *b = base->stringRep(0); 
+  char *i = index->stringRep(0); 
+  // combine.  shoudl be using strings. much cleaner  TODO
+  std::string s = string(b) + "[" + string(i) + "]";
+  fprintf(stderr, "ASE stringrep %s\n", s.c_str()); 
+  return strdup( s.c_str()); 
+  
+
+}
+
+
 void chillAST_ArraySubscriptExpr::printonly( int indent, FILE *fp ) {
   base->printonly( indent, fp );
   fprintf(fp, "[");
@@ -2830,8 +3075,10 @@ class chillAST_node* chillAST_ArraySubscriptExpr::constantFold() {
 }
 
 class chillAST_node* chillAST_ArraySubscriptExpr::clone() { 
-  //fprintf(stderr, "chillAST_ArraySubscriptExpr::clone() old imwrittento %d\n", imwrittento);
-  //fprintf(stderr, "cloning "); print(); printf("\n"); fflush(stdout);
+  //fprintf(stderr,"chillAST_ArraySubscriptExpr::clone() old imwrittento %d\n", imwrittento);
+  //fprintf(stderr, "cloning ASE %p ", this); print(0,stderr); printf(" with parent %p\n", parent); fflush(stdout);
+  //fprintf(stderr, "base %p  base->parent %p     index %p  index->parent %p\n", base, base->parent, index, index->parent);  
+
   //fprintf(stderr, "old base   "); base->print();  printf("\n"); fflush(stdout);
   //fprintf(stderr, "old base   "); base->dump();  printf("\n"); fflush(stdout);
   if (base->isDeclRefExpr()) { 
@@ -2842,8 +3089,18 @@ class chillAST_node* chillAST_ArraySubscriptExpr::clone() {
   chillAST_node *b =  base->clone();
   //fprintf(stderr, "new base   "); b->print();  printf("\n"); fflush(stdout);
   //fprintf(stderr, "new base   "); b->dump();  printf("\n"); fflush(stdout);
+
   chillAST_node *i = index->clone();
+  //fprintf(stderr, "new index  "); i->print();  printf("\n"); fflush(stdout);
+
+  
+  //if (!index->parent) { 
+  //  fprintf(stderr, "ASE %p SOURCE OF CLONE INDEX %p of type %s HAS NO PARENT\n", this, index, index->getTypeString());
+  //  fprintf(stderr, "ASE SOURCE IS  "); print(0,stderr); fprintf(stderr, "\n\n");
+  //} 
+  //fprintf(stderr, "cloning AST %p, after cloning base and index, creating a new ASE\n", this); 
   chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( b, i, imwrittento, parent, uniquePtr /* ?? */ ); 
+  //fprintf(stderr, "cloned AST will be %p with parent %p and base %p  index %p\n", ASE, parent, b, i); 
 
   ASE->imreadfrom = false; // don't know this yet
   //ASE->imreadfrom = imreadfrom; // ?? 
@@ -2860,16 +3117,20 @@ class chillAST_node* chillAST_ArraySubscriptExpr::clone() {
 }
 
 void chillAST_ArraySubscriptExpr::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {
-  //fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento %d for ", writtento); base->print(); printf("\n"); fflush(stdout); 
+  //fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento %d for ", writtento); 
+//fprintf(stderr, "%s ", base->getTypeString()); 
+//base->print(); printf("\n"); fflush(stdout); 
 
   //fprintf(stderr, "found an array subscript. &refs 0x%x   ", refs);
   if (!imwrittento) imwrittento = writtento;   // may be both written and not for += 
   fflush(stdout); 
-  //fprintf(stderr, "refs[%d] = 0x%x  = ", refs.size(), this); print(); fflush(stdout);   printf("\n"); fflush(stdout); 
 
-
+  //fprintf(stderr, "recursing on index ");  index->print(0,stderr); fprintf(stderr, "\n");
   index->gatherArrayRefs( refs, 0 ); // recurse first
+  //fprintf(stderr, "adding this "); print(0,stderr); fprintf(stderr, "\n"); 
+  //fprintf(stderr, "refs[%d] = 0x%x  = ", refs.size(), this); print(); fflush(stdout);   
   refs.push_back( this );
+
   //fprintf(stderr, " size now %d\n", refs.size()); 
 
 }
@@ -2921,20 +3182,22 @@ void chillAST_ArraySubscriptExpr::replaceVarDecls( chillAST_VarDecl *olddecl, ch
 
 
 void chillAST_ArraySubscriptExpr::replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
-  fprintf(stderr,"chillAST_ArraySubscriptExpr::replaceChild()\n"); 
+  //fprintf(stderr,"chillAST_ArraySubscriptExpr::replaceChild()\n"); 
 
   // arraysubscriptexpression doesn t really have children (should it?)
   // try index ???
   if (old == index) { 
-    fprintf(stderr, "old is index\n");
+    //fprintf(stderr, "old is index\n");
     index = newchild;
+    index->parent = this;
     return;
   }
   
   // try base ??? unclear if this makes sense  TODO 
   if (old == base) { 
-    fprintf(stderr, "old is base\n");
+    //fprintf(stderr, "old is base\n");
     base = newchild;
+    base->parent = this;
     return;
   }
   
@@ -3048,7 +3311,8 @@ void chillAST_MemberExpr::printonly( int indent, FILE *fp ) {
   fflush(fp); 
 }
 
-char *chillAST_MemberExpr::getStringRep() { // char pointer to what we'd print
+char *chillAST_MemberExpr::stringRep( int indent ) { // char pointer to what we'd print
+  fprintf(stderr, "*chillAST_MemberExpr::stringRep()\n"); 
   if (base->isDeclRefExpr()) { // 
     chillAST_VarDecl *vd =  (chillAST_VarDecl *) ((chillAST_DeclRefExpr *)base)->decl;
     char *leak = (char *)malloc(128);
@@ -3081,7 +3345,10 @@ class chillAST_node* chillAST_MemberExpr::clone() {
 }
 
 void chillAST_MemberExpr::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {
-  base->gatherArrayRefs( refs, writtento );
+  fprintf(stderr, "chillAST_MemberExpr::gatherArrayRefs()   "); print(0,stderr); fprintf(stderr, "\n"); 
+  fprintf(stderr, "base of of type %s\n", base->getTypeString()); 
+  base->gatherArrayRefs( refs, writtento ); // 
+  
 }
 
 void chillAST_MemberExpr::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
@@ -3279,6 +3546,12 @@ void chillAST_DeclRefExpr::print( int indent, FILE *fp) {
   fflush(fp); 
 }
 
+
+char *chillAST_DeclRefExpr::stringRep( int indent ) { 
+  return strdup( declarationName ); 
+}
+
+
 void chillAST_DeclRefExpr::dump( int indent, FILE *fp) {
   chillindent(indent, fp);
   fprintf(fp, "(DeclRefExpr '%s' ", declarationType);  
@@ -3471,14 +3744,17 @@ chillAST_node* chillAST_VarDecl::clone() {
   //if (isAParameter) fprintf(stderr, "old vardecl IS a parameter\n");
   //else  fprintf(stderr, "old vardecl IS NOT a parameter\n");
 
-  chillAST_VarDecl *vd  = new chillAST_VarDecl( vartype, strdup(varname), arraypart, parent); 
+  chillAST_VarDecl *vd  = new chillAST_VarDecl( vartype, strdup(varname), arraypart, NULL);  // NULL so we don't add the variable AGAIN to the (presumably) function 
+  
   vd->typedefinition = typedefinition;
-  vd->vardef = vardef;
+  vd->vardef = vardef; // perhaps should not do this     TODO 
 
   vd->underlyingtype = strdup(underlyingtype); 
 
   vd->arraysizes = NULL;
+  vd->knownArraySizes = knownArraySizes; 
   vd->numdimensions = numdimensions;
+  vd->arraypointerpart = NULL;
 
   if (arraypart != NULL && NULL!=arraysizes) {  // !strcmp(arraypart, "")) { 
     //fprintf(stderr, "in chillAST_VarDecl::clone(), cloning the array info\n");
@@ -3493,6 +3769,18 @@ chillAST_node* chillAST_VarDecl::clone() {
       }
     }
   }
+
+  if ( arraypointerpart ) { 
+    //fprintf(stderr, "copying arraypointerpart\n"); 
+    vd->arraypointerpart = strdup( arraypointerpart);
+  }
+
+  vd->isStruct = this->isStruct; 
+  //vd->insideAStruct =  this->insideAStruct; 
+
+  //if (vd->isStruct)  fprintf(stderr, "vardecl::clone()  %s is a struct\n", varname); 
+  //else fprintf(stderr, "vardecl::clone()  %s is NOT a struct\n", varname); 
+
 
   vd->knownArraySizes = this->knownArraySizes; 
   vd->isFromSourceFile = isFromSourceFile;
@@ -4774,6 +5062,7 @@ chillAST_VarDecl::chillAST_VarDecl() {
 
   vardef  = NULL;
   isStruct = false; 
+  //insideAStruct = false; 
   isAParameter = false; 
   byreference = false;
   isABuiltin = false; 
@@ -4815,13 +5104,14 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
   
   vardef  = NULL;
   isStruct = false; 
+  //insideAStruct = false; 
   isAParameter = false; 
   byreference = false;
   isABuiltin = false; 
   isRestrict = isDevice = isShared = false; // fprintf(stderr, "RDS = false\n"); 
 
   if (parent) { 
-    //fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl(), adding to symbol table???\n"); 
+    //fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl( %s ), adding to symbol table???\n", varname); 
     parent->addVariableToSymbolTable( this ); // should percolate up until something has a symbol table 
     
   }
@@ -4841,6 +5131,7 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *na
   // these always go together  ?? 
   vardef  = astruct;// pointer to the thing that says what is inside the struct
   isStruct = true;  // ?? wrong if it's a union  ?? TODO 
+  //insideAStruct = false; 
   //fprintf(stderr, "setting vardef of %s to %p\n", nam, vardef); 
   
   underlyingtype = parseUnderlyingType( vartype ); 
@@ -4910,6 +5201,7 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_TypedefDecl *tdd,  const char *n, c
   }
 
   isStruct = tdd->isAStruct();
+  //insideAStruct = false; 
   
   vardef  = NULL;
   isAParameter = false; 
@@ -5049,6 +5341,7 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
   
   isAParameter = false; 
   isStruct = false;
+  //insideAStruct = false; 
   byreference = false;
   isABuiltin = false; 
   isRestrict = isDevice = isShared = false; // fprintf(stderr, "RDS = false\n"); 
@@ -5086,8 +5379,15 @@ void chillAST_VarDecl::print( int indent, FILE *fp ) {
   //else  fprintf(fp, "/* NOT vardef */  "); 
 
 
+  //fprintf(stderr, "chillAST_VarDecl::print()  %s\n", varname ); 
+  //if (isParmVarDecl()) fprintf(stderr, "%s is a parameter\n", varname); 
+  //if (isAStruct()) fprintf(stderr, "%s is a struct\n", varname); 
+  //else fprintf(stderr, "%s is NOT a struct\n", varname); 
+  //if (!parent) fprintf(stderr, "VARDECL HAS NO PARENT\n");
+  //else fprintf(stderr, "parent of %s is type %s\n", varname, parent->getTypeString()); 
+
   // this logic is probably wrong (what about pointer to struct? )
-  if (isAStruct() && vardef) { // an unnamed  struct used only here ?? 
+  if ((!isAParameter) && isAStruct() && vardef) { // an unnamed  struct used only here ?? 
     //fprintf(stderr, "isAStruct() && vardef ?? \n");
     // print the internals of the struct and then the name 
     vardef->printStructure( 0, fp );
@@ -5095,11 +5395,11 @@ void chillAST_VarDecl::print( int indent, FILE *fp ) {
     return;
   }
   
-  
+  // ugly logic TODO 
   if (typedefinition && typedefinition->isAStruct()) fprintf(fp, "struct "); 
 
-
   if (isAParameter) { 
+    //if (isAStruct())  fprintf(fp, "struct "); 
     //fprintf(fp, "(param) nd %d", numdimensions ); 
     //dump(); 
     if (numdimensions > 0) {
@@ -5205,7 +5505,7 @@ chillAST_CompoundStmt::chillAST_CompoundStmt() {
   //fprintf(stderr, "chillAST_CompoundStmt::chillAST_CompoundStmt() %p\n", this); 
   asttype = CHILLAST_NODETYPE_COMPOUNDSTMT; 
   parent = NULL; 
-  symbol_table = NULL;
+  symbol_table = new chillAST_SymbolTable;
   typedef_table = NULL;
   isFromSourceFile = true; // default 
   filename = NULL;
@@ -5913,11 +6213,18 @@ void findFunctionDeclRecursive( chillAST_node *node, const char *procname, vecto
   // and then its children is needed. 
 
   int numc = node->children.size();  
-  //fprintf(stderr, "%d children\n", numc);
+  fprintf(stderr, "(top)node has %d children\n", numc);
 
   for (int i=0; i<numc; i++) {
-    //fprintf(stderr, "node of type %s is recursing to child %d\n",  node->getTypeString(), i); 
+    if (node->isSourceFile()) { 
+      fprintf(stderr, "node of type %s is recursing to child %d of type %s\n",  node->getTypeString(), i,  node->children[i]->getTypeString()); 
+      if (node->children[i]->isFunctionDecl()) { 
+        chillAST_FunctionDecl *fd = (chillAST_FunctionDecl*) node->children[i];
+        fprintf(stderr, "child %d is functiondecl %s\n", i, fd->functionName); 
+      }
+    }
     findFunctionDeclRecursive( node->children[i], procname, funcs );
+    
   }
   return; 
 }
@@ -5936,6 +6243,10 @@ chillAST_FunctionDecl *findFunctionDecl( chillAST_node *node, const char *procna
   if ( functions.size() > 1 ) { 
     fprintf(stderr, "oddly, found %d functions named '%s'\n", functions.size(), procname);
     fprintf(stderr, "I am unsure what to do\n"); 
+
+    for (int f = 0; f < functions.size(); f++) { 
+      fprintf(stderr, "function %d  %p   %s\n", f, functions[f], functions[f]->functionName); 
+    }
     exit(-1);
   }
   

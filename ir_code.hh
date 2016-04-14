@@ -43,13 +43,20 @@ class IR_Code; // forward declaration
 // holder for related declaration in IR code.
 struct IR_Symbol {
   const IR_Code *ir_;
-  
+
   virtual ~IR_Symbol() {/* ir_ is not the responsibility of this object */}
   virtual int n_dim() const = 0; // IR_Symbol
   virtual std::string name() const = 0;
   virtual bool operator==(const IR_Symbol &that) const = 0;
   virtual bool operator!=(const IR_Symbol &that) const {return !(*this == that);}
   virtual IR_Symbol *clone() const = 0;  /* shallow copy */
+
+  virtual bool isScalar()  const { return false; } // default
+  virtual bool isArray()   const { return false; } // default
+  virtual bool isPointer() const { return false; } // default
+
+  //IR_SYMBOL_TYPE symtype; // base type: int, float, double, struct, .... typedef'd something
+  //IR_SYMBOL_TYPE getDatatype() ; 
 };
 
 
@@ -57,6 +64,7 @@ struct IR_ScalarSymbol: public IR_Symbol {
   virtual ~IR_ScalarSymbol() {}
   int n_dim() const {return 0;} // IR_ScalarSymbol
   virtual int size() const = 0;
+  bool isScalar() const { return true; }
 };
 
 
@@ -66,6 +74,7 @@ struct IR_ArraySymbol: public IR_Symbol {
   virtual omega::CG_outputRepr *size(int dim) const = 0;
   virtual IR_ARRAY_LAYOUT_TYPE layout_type() const = 0;
   virtual IR_CONSTANT_TYPE elem_type() const = 0;
+  bool isArray() const { return true; }
 };
 
 
@@ -74,6 +83,7 @@ struct IR_PointerSymbol: public IR_Symbol {
   virtual omega::CG_outputRepr *size(int dim) const = 0;
   virtual void set_size(int dim, omega::CG_outputRepr*) = 0;
   virtual IR_CONSTANT_TYPE elem_type() const = 0;
+  bool isPointer() const { return true; }
 };
 
 // Base abstract class for scalar and array references.  This is a
@@ -110,7 +120,7 @@ struct IR_ScalarRef: public IR_Ref {
   int n_dim() const {return 0;} // IR_ScalarRef
   virtual IR_ScalarSymbol *symbol() const = 0;
   std::string name() const {
-    IR_ScalarSymbol *sym = symbol();
+    IR_ScalarSymbol *sym = symbol(); // really inefficient. MAKE a symbol, just to get a name
     std::string s = sym->name();
     delete sym;
     return s;
@@ -157,6 +167,9 @@ struct IR_ArrayRef: public IR_Ref {
 };
 
 struct IR_PointerArrayRef: public IR_Ref {
+
+  const IR_Code *ir_;
+
   virtual ~IR_PointerArrayRef() {}
   int n_dim() const {  // IR_PointerArrayRef returns size of the ... symbol?
     IR_PointerSymbol *sym = symbol();
@@ -243,15 +256,17 @@ protected:
   omega::CG_outputRepr *cleanup_code_;
 
   // OK, I lied
-  int ir_pointer_counter;
-  int ir_array_counter;
+  static int ir_pointer_counter;
+  static int ir_array_counter;
 
 public:
 
   int getPointerCounter() { return ir_pointer_counter; }
   int getArrayCounter()   { return ir_array_counter; }
-  int getAndIncrementPointerCounter() {  ir_pointer_counter+= 1;  return ir_pointer_counter-1; }
-  int getAndIncrementArrayCounter()   {  ir_array_counter += 1;   return ir_array_counter-1; }
+
+  // TODO can't get the initialize of counters to work !! 
+  int getAndIncrementPointerCounter() { if (ir_pointer_counter == 0) ir_pointer_counter= 1; ir_pointer_counter++;  return ir_pointer_counter-1; }
+  int getAndIncrementArrayCounter()   { if (ir_array_counter == 0) ir_array_counter= 1; ir_array_counter += 1;   return ir_array_counter-1; }
 
   // if all flavors of ir_code use chillAST internally ... 
   chillAST_FunctionDecl * func_defn;     // the function we're modifying
@@ -278,6 +293,7 @@ public:
   virtual IR_PointerSymbol *CreatePointerSymbol(const IR_CONSTANT_TYPE type,
                                                 std::vector<omega::CG_outputRepr *> &size_repr, 
                                                 std::string name="") =0;
+
   virtual IR_PointerSymbol *CreatePointerSymbol(omega::CG_outputRepr *type,
                                                 std::vector<omega::CG_outputRepr *> &size_repr) =0;
 

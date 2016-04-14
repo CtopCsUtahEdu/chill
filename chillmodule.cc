@@ -6,7 +6,6 @@
 #ifdef CUDACHILL
 
 #include "rose.h"                              // ?? 
-//#include "loop_cuda_rose.hh"
 #include "loop_cuda_chill.hh"
 #include "ir_rose.hh"
 #include "ir_cudarose.hh"
@@ -177,135 +176,106 @@ static void init_loop(int loop_num_start, int loop_num_end) {
 
 // -- CHiLL support -- //
 static void strict_arg_num(PyObject* args, int arg_num, const char* fname = NULL) {
-    int arg_given = PyTuple_Size(args);
-    char msg[128];
-    if(arg_num != arg_given) {
-        if(fname) {
-            sprintf(msg, "%s: expected %i arguments, was given %i.", fname, arg_num, arg_given);
-        }
-        else {
-            sprintf(msg, "Expected %i argumets, was given %i.", arg_num, arg_given);
-        }
-        throw std::runtime_error(msg);
-    }
+  int arg_given = PyTuple_Size(args);
+  char msg[128];
+  if(arg_num != arg_given) {
+    if(fname)
+      sprintf(msg, "%s: expected %i arguments, was given %i.", fname, arg_num, arg_given);
+    else
+      sprintf(msg, "Expected %i argumets, was given %i.", arg_num, arg_given);
+    throw std::runtime_error(msg);
+  }
 }
 
 static int strict_arg_range(PyObject* args, int arg_min, int arg_max, const char* fname = NULL) {
-    int arg_given = PyTuple_Size(args);
-    char msg[128];
-    if(arg_given < arg_min || arg_given > arg_max) {
-        if(fname) {
-            sprintf(msg, "%s: expected %i to %i arguments, was given %i.", fname, arg_min, arg_max, arg_given);
-        }    
-        else {
-            sprintf(msg, "Expected %i to %i, argumets, was given %i.", arg_min, arg_max, arg_given);
-        }
-        throw std::runtime_error(msg);
-    }
-    return arg_given;
+  int arg_given = PyTuple_Size(args);
+  char msg[128];
+  if(arg_given < arg_min || arg_given > arg_max) {
+    if(fname)
+      sprintf(msg, "%s: expected %i to %i arguments, was given %i.", fname, arg_min, arg_max, arg_given);
+    else
+      sprintf(msg, "Expected %i to %i, argumets, was given %i.", arg_min, arg_max, arg_given);
+    throw std::runtime_error(msg);
+  }
+  return arg_given;
 }
 
 static int intArg(PyObject* args, int index, int dval = 0) {
-    if(PyTuple_Size(args) <= index) {
-        return dval;
-    }
-    int ival;
-    PyObject *item = PyTuple_GetItem(args, index); 
-    Py_INCREF(item);
-    if (PyInt_Check(item)) {
-        ival = PyInt_AsLong(item);
-    }
-    else {
-        fprintf(stderr, "argument at index %i is not an int\n", index);
-        exit(-1);
-    }
-    return ival;
+  if(PyTuple_Size(args) <= index)
+    return dval; 
+  int ival;
+  PyObject *item = PyTuple_GetItem(args, index); 
+  Py_INCREF(item);
+  if (PyInt_Check(item)) ival = PyInt_AsLong(item);
+  else {
+    fprintf(stderr, "argument at index %i is not an int\n", index);
+    exit(-1);
+  }
+  return ival;
 }
 
 static std::string strArg(PyObject* args, int index, const char* dval = NULL) {
-    if(PyTuple_Size(args) <= index) {
-        return dval;
-    }
-    std::string strval;
-    PyObject *item = PyTuple_GetItem(args, index); 
-    Py_INCREF(item);
-    if (PyString_Check(item)) {
-        strval = strdup(PyString_AsString(item));
-    }
-    else {
-        fprintf(stderr, "argument at index %i is not an string\n", index);
-        exit(-1);
-    }
-    return strval;
+  if(PyTuple_Size(args) <= index)
+    return dval;
+  std::string strval;
+  PyObject *item = PyTuple_GetItem(args, index); 
+  Py_INCREF(item);
+  if (PyString_Check(item)) strval = strdup(PyString_AsString(item));
+  else {
+    fprintf(stderr, "argument at index %i is not an string\n", index);
+    exit(-1);
+  }
+  return strval;
 }
 
 static bool boolArg(PyObject* args, int index, bool dval = false) {
-    if(PyTuple_Size(args) <= index) {
-        return dval;
-    }
-    bool bval;
-    PyObject* item = PyTuple_GetItem(args, index);
-    Py_INCREF(item);
-    return (bool)PyObject_IsTrue(item);
+  if(PyTuple_Size(args) <= index)
+    return dval;
+  bool bval;
+  PyObject* item = PyTuple_GetItem(args, index);
+  Py_INCREF(item);
+  return (bool)PyObject_IsTrue(item);
 }
 
 static bool tostringintmapvector(PyObject* args, int index, std::vector<std::map<std::string,int> >& vec) {
-    if(PyTuple_Size(args) <= index) {
-        return false;
-    }
-    PyObject* seq = PyTuple_GetItem(args, index);
+  if(PyTuple_Size(args) <= index)
+    return false;
+  PyObject* seq = PyTuple_GetItem(args, index);
+  //TODO: Typecheck
+  int seq_len = PyList_Size(seq);
+  for(int i = 0; i < seq_len; i++) {
+    std::map<std::string,int> map;
+    PyObject* dict = PyList_GetItem(seq, i);
+    PyObject* keys = PyDict_Keys(dict);
     //TODO: Typecheck
-    int seq_len = PyList_Size(seq);
-    for(int i = 0; i < seq_len; i++) {
-        std::map<std::string,int> map;
-        PyObject* dict = PyList_GetItem(seq, i);
-        PyObject* keys = PyDict_Keys(dict);
-        //TODO: Typecheck
-        int dict_len = PyList_Size(keys);
-        for(int j = 0; j < dict_len; j++) {
-            PyObject* key = PyList_GetItem(keys, j);
-            PyObject* value = PyDict_GetItem(dict, key);
-            std::string str_key = strdup(PyString_AsString(key));
-            int int_value = PyInt_AsLong(value);
-            map[str_key] = int_value;
-        }
-        vec.push_back(map);
+    int dict_len = PyList_Size(keys);
+    for(int j = 0; j < dict_len; j++) {
+      PyObject* key = PyList_GetItem(keys, j);
+      PyObject* value = PyDict_GetItem(dict, key);
+      std::string str_key = strdup(PyString_AsString(key));
+      int int_value = PyInt_AsLong(value);
+      map[str_key] = int_value;
     }
-    return true;
+    vec.push_back(map);
+  }
+  return true;
 }
 
 static bool tointvector(PyObject* seq, std::vector<int>& vec) {
-    //TODO: Typecheck
-    int seq_len = PyList_Size(seq);
-    for(int i = 0; i < seq_len; i++) {
-        PyObject* item = PyList_GetItem(seq, i);
-        vec.push_back(PyInt_AsLong(item));
-    }
-    return true;
+  //TODO: Typecheck
+  int seq_len = PyList_Size(seq);
+  for(int i = 0; i < seq_len; i++) {
+    PyObject* item = PyList_GetItem(seq, i);
+    vec.push_back(PyInt_AsLong(item));
+  }
+  return true;
 }
 
 static bool tointvector(PyObject* args, int index, std::vector<int>& vec) {
-    if(PyTuple_Size(args) <= index) {
-        return false;
-    }
-    PyObject* seq = PyTuple_GetItem(args, index);
-    return tointvector(seq, vec);
-}
-
-static std::vector<int> intVectorArg(PyObject* args, int index, bool* exists = NULL) {
-    std::vector<int> result;    
-    if(PyTuple_Size(args) <= index) {
-        if(exists != NULL) {
-            *exists = false;
-            return result;
-        }
-        else {
-            fprintf(stderr, "argument at index %i is not an int vector\n", index);
-            exit(-1);
-        }
-    }
-    tointvector(args, index, result);
-    return result;
+  if(PyTuple_Size(args) <= index)
+    return false;
+  PyObject* seq = PyTuple_GetItem(args, index);
+  return tointvector(seq, vec);
 }
 
 static bool tointset(PyObject* args, int index, std::set<int>& set) {
@@ -604,7 +574,7 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
   //DEBUG_PRINT("calling myloop->tile_cuda( %d, %d, %d, %d, %s, %s, method)\n", 
   // sstmt, level, tile_size, outer_level, index_name, control_name); 
   
-  // BUH   level+1?
+  // level+1?
   myloop->tile_cuda(sstmt, level, tile_size, outer_level, index_name, control_name, method); 
   Py_RETURN_NONE; 
 }
@@ -1338,7 +1308,6 @@ static PyObject* chill_source(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_procedure(PyObject* self, PyObject* args) {
   if(!procedure_name.empty()) {
     fprintf(stderr, "only one procedure can be handled in a script");
@@ -1348,7 +1317,6 @@ static PyObject* chill_procedure(PyObject* self, PyObject* args) {
   procedure_name = strArg(args, 0);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_loop(PyObject* self, PyObject* args) {
   // loop (n)
@@ -1376,7 +1344,6 @@ static PyObject* chill_loop(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_print_code(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "print_code");
   myloop->printCode();
@@ -1384,13 +1351,11 @@ static PyObject* chill_print_code(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_print_dep(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "print_dep");
   myloop->printDependenceGraph();
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_print_space(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "print_space");
@@ -1398,13 +1363,11 @@ static PyObject* chill_print_space(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_exit(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "exit");
   repl_stop = true;
   Py_RETURN_NONE;
 }
-
 
 static void add_known(std::string cond_expr) {
   int num_dim = myloop->known.n_set();
@@ -1442,7 +1405,6 @@ static void add_known(std::string cond_expr) {
   myloop->addKnown(rel);
 }
 
-
 static PyObject* chill_known(PyObject* self, PyObject* args) {
   strict_arg_num(args, 1, "known");
   if (PyList_Check(PyTuple_GetItem(args, 0))) {
@@ -1457,7 +1419,6 @@ static PyObject* chill_known(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_remove_dep(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "remove_dep");
   int from = intArg(args, 0);
@@ -1466,13 +1427,11 @@ static PyObject* chill_remove_dep(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_original(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "original");
   myloop->original();
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_permute(PyObject* self, PyObject* args) {
   int nargs = strict_arg_range(args, 1, 3, "permute");
@@ -1506,7 +1465,6 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_pragma(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3, "pragma");
   int stmt_num = intArg(args, 1);
@@ -1515,7 +1473,6 @@ static PyObject* chill_pragma(PyObject* self, PyObject* args) {
   myloop->pragma(stmt_num, level, pragmaText);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_prefetch(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3, "prefetch");
@@ -1526,7 +1483,6 @@ static PyObject* chill_prefetch(PyObject* self, PyObject* args) {
   myloop->prefetch(stmt_num, level, prefetchText, hint);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_tile(PyObject* self, PyObject* args) {
   int nargs = strict_arg_range(args, 3, 7, "tile");
@@ -1565,7 +1521,6 @@ static PyObject* chill_tile(PyObject* self, PyObject* args) {
   }
   Py_RETURN_NONE;
 }
-
 
 static void chill_datacopy_vec(PyObject* args) {
   // Overload 1: bool datacopy(
@@ -1612,7 +1567,6 @@ static void chill_datacopy_vec(PyObject* args) {
   myloop->datacopy(array_ref_nums, level, allow_extra_read, fastest_changing_dimension, padding_stride, padding_alignment, memory_type);
 }
 
-
 static void chill_datacopy_int(PyObject* args) {
   int stmt_num = intArg(args, 0);
   int level = intArg(args, 1);
@@ -1625,7 +1579,6 @@ static void chill_datacopy_int(PyObject* args) {
   myloop->datacopy(stmt_num, level, array_name, allow_extra_read, fastest_changing_dimension, padding_stride, padding_alignment, memory_type);
 }
 
-
 static PyObject* chill_datacopy(PyObject* self, PyObject* args) {
   // Overload 2: bool datacopy(int stmt_num, int level, const std::string &array_name, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, int memory_type = 0);
   int nargs = strict_arg_range(args, 3, 7, "datacopy");
@@ -1637,7 +1590,6 @@ static PyObject* chill_datacopy(PyObject* self, PyObject* args) {
   }
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_datacopy_privatized(PyObject* self, PyObject* args) {
   //  bool datacopy_privatized(int stmt_num, int level, const std::string &array_name, const std::vector<int> &privatized_levels, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 1, int memory_type = 0);
@@ -1656,7 +1608,6 @@ static PyObject* chill_datacopy_privatized(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_unroll(PyObject* self, PyObject* args) {
   int nargs = strict_arg_range(args, 3, 4, "unroll");
   //std::set<int> unroll(int stmt_num, int level, int unroll_amount, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >(), int cleanup_split_level = 0);
@@ -1668,7 +1619,6 @@ static PyObject* chill_unroll(PyObject* self, PyObject* args) {
   myloop->unroll(stmt_num, level, unroll_amount, idxNames, cleanup_split_level);
   Py_RETURN_NONE;
 }
-
   
 static PyObject* chill_unroll_extra(PyObject* self, PyObject* args) {
   int nargs = strict_arg_range(args, 3, 4, "unroll_extra");
@@ -1679,7 +1629,6 @@ static PyObject* chill_unroll_extra(PyObject* self, PyObject* args) {
   myloop->unroll_extra(stmt_num, level, unroll_amount, cleanup_split_level); 
   Py_RETURN_NONE;
 }
-
   
 static PyObject* chill_split(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3, "split");
@@ -1725,7 +1674,6 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_nonsingular(PyObject* self, PyObject* args) {
   std::vector< std::vector<int> > mat;
   tointmatrix(args, 0, mat);
@@ -1733,9 +1681,7 @@ static PyObject* chill_nonsingular(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_skew(PyObject* self, PyObject* args) {
-  strict_arg_num(args, 3);
   std::set<int> stmt_nums;
   std::vector<int> skew_amounts;
   int level = intArg(args, 1);
@@ -1744,7 +1690,6 @@ static PyObject* chill_skew(PyObject* self, PyObject* args) {
   myloop->skew(stmt_nums, level, skew_amounts);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_scale(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3);
@@ -1756,7 +1701,6 @@ static PyObject* chill_scale(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_reverse(PyObject* self, PyObject* args) {
   strict_arg_num(args, 2);
   std::set<int> stmt_nums;
@@ -1765,7 +1709,6 @@ static PyObject* chill_reverse(PyObject* self, PyObject* args) {
   myloop->reverse(stmt_nums, level);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_shift(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3);
@@ -1777,7 +1720,6 @@ static PyObject* chill_shift(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_shift_to(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3);
   int stmt_num = intArg(args, 0);
@@ -1786,7 +1728,6 @@ static PyObject* chill_shift_to(PyObject* self, PyObject* args) {
   myloop->shift_to(stmt_num, level, absolute_pos);
   Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_peel(PyObject* self, PyObject* args) {
     strict_arg_range(args, 2, 3);
@@ -1798,7 +1739,6 @@ static PyObject* chill_peel(PyObject* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
-
 static PyObject* chill_fuse(PyObject* self, PyObject* args) {
     strict_arg_num(args, 2);
     std::set<int> stmt_nums;
@@ -1807,7 +1747,6 @@ static PyObject* chill_fuse(PyObject* self, PyObject* args) {
     myloop->fuse(stmt_nums, level);
     Py_RETURN_NONE;
 }
-
 
 static PyObject* chill_distribute(PyObject* self, PyObject* args) {
     strict_arg_num(args, 2);

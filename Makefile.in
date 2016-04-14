@@ -81,8 +81,8 @@ POST_UNINSTALL = :
 subdir = .
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
-	$(top_srcdir)/include/config.h.in depcomp README compile \
-	install-sh missing
+	$(top_srcdir)/include/config.h.in depcomp README ar-lib \
+	compile install-sh missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -98,7 +98,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am__chill_SOURCES_DIST = calculator_eval.cc chill_ast.cc dep.cc \
 	irtools.cc loop.cc loop_basic.cc loop_datacopy.cc \
 	loop_extra.cc loop_ghostcells.cc loop_stencil.cc loop_tile.cc \
-	loop_unroll.cc omegatools.cc stencil.cc lex.yy.cc \
+	loop_unroll.cc omegatools.cc stencil.cc lex.zz.cc \
 	parser.tab.cc chill_run.cc chill_run_util.cc chill_env.cc \
 	parse_expr.yy.cc parse_expr.tab.cc chillmodule.cc ir_chill.cc \
 	ir_rose.cc ir_rose_utils.cc
@@ -111,15 +111,15 @@ am__objects_1 = chill-calculator_eval.$(OBJEXT) \
 	chill-loop_unroll.$(OBJEXT) chill-omegatools.$(OBJEXT) \
 	chill-stencil.$(OBJEXT)
 am__objects_2 =
-am__objects_3 = chill-lex.yy.$(OBJEXT) chill-parser.tab.$(OBJEXT)
+am__objects_3 = chill-lex.zz.$(OBJEXT) chill-parser.tab.$(OBJEXT)
 am__objects_4 = chill-chill_run.$(OBJEXT) \
 	chill-chill_run_util.$(OBJEXT) chill-chill_env.$(OBJEXT)
 am__objects_5 = chill-parse_expr.yy.$(OBJEXT) \
 	chill-parse_expr.tab.$(OBJEXT)
 am__objects_6 = chill-chill_run.$(OBJEXT) \
 	chill-chill_run_util.$(OBJEXT) chill-chillmodule.$(OBJEXT)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@am__objects_7 = $(am__objects_2) \
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@	$(am__objects_3)
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@am__objects_7 = $(am__objects_2) \
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@	$(am__objects_3)
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@am__objects_7 = $(am__objects_4) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@	$(am__objects_5)
 @PYTHON_OPT_TRUE@am__objects_7 = $(am__objects_6) $(am__objects_5)
@@ -296,6 +296,7 @@ distcleancheck_listfiles = find . -type f -print
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
+AR = @AR@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -361,6 +362,7 @@ abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
 am__include = @am__include@
@@ -410,10 +412,14 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 use_lua = @use_lua@
+use_lue = @use_lue@
 use_python = @use_python@
+use_script = @use_script@
 SUBDIRS = omega/omega_lib/obj omega/code_gen/obj
 build_date = "\"`date +%m/%d/%Y`\""
-core_libs = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl -lisl \
+AM_CFLAGS = -g
+AM_CXXFLAGS = -g
+core_libs = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl \
 	-lboost_date_time -lboost_filesystem -lboost_program_options \
 	-lboost_regex -lboost_system -lboost_wave -lboost_iostreams
 #core_libs    += -liegenlib
@@ -449,30 +455,30 @@ chill_script_runner_src =
 chill_python_runner_src = chill_run.cc chill_run_util.cc chillmodule.cc
 chill_lua_runner_src = chill_run.cc chill_run_util.cc chill_env.cc
 #  yacc
-chill_script_yacc_src = lex.yy.cc parser.tab.cc
+chill_script_yacc_src = lex.zz.cc parser.tab.cc
 chill_lua_yacc_src = parse_expr.yy.cc parse_expr.tab.cc
 chill_python_yacc_src = parse_expr.yy.cc parse_expr.tab.cc
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@runner_libs = 
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@runner_libs = 
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@runner_libs = -llua -lreadline -lhistory -lpthread -ldl
 
 # Libs/Source/Flags #
 @PYTHON_OPT_TRUE@runner_libs = -lpython$(PYTHON_VERSION)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@runner_libdirs = 
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@runner_libdirs = 
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@runner_libdirs = -L$(LUAHOME)/lib
 @PYTHON_OPT_TRUE@runner_libdirs = -L$(PYTHON_LIBDIR)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@runner_includes = 
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@runner_includes = 
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@runner_includes = -I$(LUAHOME)/include
 @PYTHON_OPT_TRUE@runner_includes = -I$(PYTHON_INCDIR)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@chill_runner_src = $(chill_script_runner_src) $(chill_script_yacc_src)
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@chill_runner_src = $(chill_script_runner_src) $(chill_script_yacc_src)
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@chill_runner_src = $(chill_lua_runner_src) $(chill_lua_yacc_src)
 @PYTHON_OPT_TRUE@chill_runner_src = $(chill_python_runner_src) $(chill_python_yacc_src)
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@cudachill_runner_src = $(chill_lua_runner_src) $(chill_lua_yacc_src)
 @PYTHON_OPT_TRUE@cudachill_runner_src = $(chill_python_runner_src) $(chill_python_yacc_src)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@yacc_src = $(chill_script_yacc_src)
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@yacc_src = $(chill_script_yacc_src)
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@yacc_src = $(chill_lua_yacc_src)
 @PYTHON_OPT_TRUE@yacc_src = $(chill_python_yacc_src)
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@runner_flags = -DCHILL_BUILD_DATE=$(build_date) \
-@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@	-DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION)
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@runner_flags = -DCHILL_BUILD_DATE=$(build_date) \
+@LUA_OPT_FALSE@@PYTHON_OPT_FALSE@@SCRIPT_OPT_TRUE@	-DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION)
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@runner_flags = -DCHILL_BUILD_DATE=$(build_date) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@	-DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION) \
 @LUA_OPT_TRUE@@PYTHON_OPT_FALSE@	-DLUA
@@ -617,7 +623,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-ir_rose.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-ir_rose_utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-irtools.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-lex.yy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-lex.zz.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chill-loop_datacopy.Po@am__quote@
@@ -872,19 +878,19 @@ chill-stencil.obj: stencil.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-stencil.obj `if test -f 'stencil.cc'; then $(CYGPATH_W) 'stencil.cc'; else $(CYGPATH_W) '$(srcdir)/stencil.cc'; fi`
 
-chill-lex.yy.o: lex.yy.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-lex.yy.o -MD -MP -MF $(DEPDIR)/chill-lex.yy.Tpo -c -o chill-lex.yy.o `test -f 'lex.yy.cc' || echo '$(srcdir)/'`lex.yy.cc
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-lex.yy.Tpo $(DEPDIR)/chill-lex.yy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='lex.yy.cc' object='chill-lex.yy.o' libtool=no @AMDEPBACKSLASH@
+chill-lex.zz.o: lex.zz.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-lex.zz.o -MD -MP -MF $(DEPDIR)/chill-lex.zz.Tpo -c -o chill-lex.zz.o `test -f 'lex.zz.cc' || echo '$(srcdir)/'`lex.zz.cc
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-lex.zz.Tpo $(DEPDIR)/chill-lex.zz.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='lex.zz.cc' object='chill-lex.zz.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-lex.yy.o `test -f 'lex.yy.cc' || echo '$(srcdir)/'`lex.yy.cc
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-lex.zz.o `test -f 'lex.zz.cc' || echo '$(srcdir)/'`lex.zz.cc
 
-chill-lex.yy.obj: lex.yy.cc
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-lex.yy.obj -MD -MP -MF $(DEPDIR)/chill-lex.yy.Tpo -c -o chill-lex.yy.obj `if test -f 'lex.yy.cc'; then $(CYGPATH_W) 'lex.yy.cc'; else $(CYGPATH_W) '$(srcdir)/lex.yy.cc'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-lex.yy.Tpo $(DEPDIR)/chill-lex.yy.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='lex.yy.cc' object='chill-lex.yy.obj' libtool=no @AMDEPBACKSLASH@
+chill-lex.zz.obj: lex.zz.cc
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-lex.zz.obj -MD -MP -MF $(DEPDIR)/chill-lex.zz.Tpo -c -o chill-lex.zz.obj `if test -f 'lex.zz.cc'; then $(CYGPATH_W) 'lex.zz.cc'; else $(CYGPATH_W) '$(srcdir)/lex.zz.cc'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/chill-lex.zz.Tpo $(DEPDIR)/chill-lex.zz.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='lex.zz.cc' object='chill-lex.zz.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-lex.yy.obj `if test -f 'lex.yy.cc'; then $(CYGPATH_W) 'lex.yy.cc'; else $(CYGPATH_W) '$(srcdir)/lex.yy.cc'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o chill-lex.zz.obj `if test -f 'lex.zz.cc'; then $(CYGPATH_W) 'lex.zz.cc'; else $(CYGPATH_W) '$(srcdir)/lex.zz.cc'; fi`
 
 chill-parser.tab.o: parser.tab.cc
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(chill_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT chill-parser.tab.o -MD -MP -MF $(DEPDIR)/chill-parser.tab.Tpo -c -o chill-parser.tab.o `test -f 'parser.tab.cc' || echo '$(srcdir)/'`parser.tab.cc
@@ -1848,11 +1854,11 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 # rules
-lex.yy.cc: parser.ll parser.tab.cc
+lex.zz.cc: parser.ll parser.tab.cc
 	flex++ parser.ll
 
 parser.tab.cc: parser.yy
-	bison -t -d $<
+	bison -p zz -t -d $<
 
 parse_expr.yy.cc: parse_expr.tab.cc parse_expr.ll
 	flex -o parse_expr.yy.cc parse_expr.ll

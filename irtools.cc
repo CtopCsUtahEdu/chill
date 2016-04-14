@@ -22,7 +22,8 @@ using namespace omega;
 // Build Chill IR tree from the source code (from the front end compiler's AST). 
 // Block type node can only be a leaf, i.e., there are no further structures 
 // inside a block allowed.
-std::vector<ir_tree_node *> build_ir_tree(IR_Control *control, ir_tree_node *parent) {
+std::vector<ir_tree_node *> build_ir_tree(IR_Control *control, 
+                                          ir_tree_node *parent) {
   std::vector<ir_tree_node *> result;
   
   fprintf(stderr, "irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree \n");
@@ -32,7 +33,8 @@ std::vector<ir_tree_node *> build_ir_tree(IR_Control *control, ir_tree_node *par
     fprintf(stderr, "irtools.cc L31   case IR_CONTROL_BLOCK\n"); 
     IR_Block *IRCB = static_cast<IR_Block *>(control); 
     std::vector<IR_Control *> controls = control->ir_->FindOneLevelControlStructure(IRCB);
-    //fprintf(stderr, "irtools.cc BACK FROM FindOneLevelControlStructure()  %d controls\n", controls.size()); 
+
+    fprintf(stderr, "irtools.cc BACK FROM FindOneLevelControlStructure()  %d controls\n", controls.size()); 
 
     if (controls.size() == 0) {
       fprintf(stderr, "controls.size() == 0\n"); 
@@ -83,7 +85,7 @@ std::vector<ir_tree_node *> build_ir_tree(IR_Control *control, ir_tree_node *par
           
           block = theif->else_body();
           if (block != NULL) { 
-            //fprintf(stderr, "IF_CONTROL has an else\n"); 
+            fprintf(stderr, "IF_CONTROL has an else\n"); 
             ir_tree_node *node = new ir_tree_node;
             node->content = controls[i]->clone();
             node->parent = parent;
@@ -115,7 +117,7 @@ std::vector<ir_tree_node *> build_ir_tree(IR_Control *control, ir_tree_node *par
       static_cast<const IR_Loop *>(control)->body(), node);
     node->payload = -1;
     result.push_back(node);
-    //fprintf(stderr, "recursing. build_ir_tree() of CONTROL_LOOP creating children DONE\n");
+    fprintf(stderr, "recursing. build_ir_tree() of CONTROL_LOOP creating children DONE\n");
     break;
   }
   default:
@@ -281,13 +283,13 @@ test_data_dependences(IR_Code *ir,
                       std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
                       std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr) {
 
-  //fprintf(stderr, "\nirtools.cc test_data_dependences()  %d freevars\n", freevar.size()); 
-  //fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout); 
-  //fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout); 
+  fprintf(stderr, "\nirtools.cc test_data_dependences()  %d freevars\n", freevar.size()); 
+  fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout); 
+  fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout); 
 
-  //for (int i=0; i<index.size(); i++) fprintf(stderr, "index %d %s\n", i, index[i].c_str()); 
-  //Relation *helper = new Relation(IS1); fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
-  //helper = new Relation(IS2); fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
+  for (int i=0; i<index.size(); i++) fprintf(stderr, "index %d %s\n", i, index[i].c_str()); 
+  Relation *helper = new Relation(IS1); fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
+  helper = new Relation(IS2); fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
 
 
   //for (int i=0; i<freevar.size(); i++) {
@@ -299,23 +301,23 @@ test_data_dependences(IR_Code *ir,
   std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > result;
   
   if (repr1 == repr2) {
-    //fprintf(stderr, "repr1 == repr2\nrepr1->dump()\n"); 
-    //repr1->dump(); 
-    //fflush(stdout);
+    fprintf(stderr, "repr1 == repr2\nrepr1->dump()\n"); 
+    repr1->dump(); 
+    fflush(stdout);
 
     std::vector<IR_ArrayRef *> access = ir->FindArrayRef(repr1);
-    //fprintf(stderr, "access of size %d\n", access.size()); 
-    //for (int i = 0; i < access.size(); i++) {
-    //  IR_ArrayRef *a = access[i];
+    fprintf(stderr, "access of size %d\n", access.size()); 
+    for (int i = 0; i < access.size(); i++) {
+      IR_ArrayRef *a = access[i];
       
-      //if (a->is_write()) { 
-      //  fprintf(stderr, "WRITE  array access %d = %s\n", i, a->name().c_str()); 
-      //} 
-      //else { 
-      //  fprintf(stderr, "       array access %d = %s\n", i, a->name().c_str()); 
-      //} 
-      //} 
-    //fprintf(stderr, "that was the list\n\n"); 
+      if (a->is_write()) { 
+        fprintf(stderr, "WRITE  array access %d = %s\n", i, a->name().c_str()); 
+      } 
+      else { 
+        fprintf(stderr, "       array access %d = %s\n", i, a->name().c_str()); 
+      } 
+    } 
+    fprintf(stderr, "that was the list\n\n"); 
 
     // Manu:: variables/structures added to identify dependence vectors related to reduction operation
     tempResultMap trMap;
@@ -333,9 +335,9 @@ test_data_dependences(IR_Code *ir,
     
     // Manu -- changes for identifying possible reduction operation
     // The below loop nest is used to classify array references into different statements
-    //fprintf(stderr, "\nbefore mapRefstoStatements()\n"); 
+    fprintf(stderr, "\nbefore mapRefstoStatements()\n"); 
     mapRefstoStatements(ir,access,ref2Stmt,rMap,tnrStmts,nrStmts);
-    //fprintf(stderr, "after mapRefstoStatements()\n\n"); 
+    fprintf(stderr, "after mapRefstoStatements()\n\n"); 
 
     //-------------------------------------------------------------
     omega::coef_t lbound[3], ubound[3];   // for each  kind of dependence. We can potentially have reduction only if all
@@ -345,44 +347,44 @@ test_data_dependences(IR_Code *ir,
     //-------------------------------------------------------------
     
     for (int i = 0; i < access.size(); i++) {
-      //fprintf(stderr, "i %d\n", i); 
+      fprintf(stderr, "i %d\n", i); 
       IR_ArrayRef *a = access[i];
       IR_ArraySymbol *sym_a = a->symbol();
-      //fprintf(stderr, "sym_a = %s\n", a->name().c_str()); 
+      fprintf(stderr, "sym_a = %s\n", a->name().c_str()); 
       for (int j = i; j < access.size(); j++) {
-        //fprintf(stderr, "irtools.cc j %d\n", j); 
+        fprintf(stderr, "irtools.cc j %d\n", j); 
         IR_ArrayRef *b = access[j];
         IR_ArraySymbol *sym_b = b->symbol();
-        //fprintf(stderr, "sym_b = %s\n", b->name().c_str()); 
+        fprintf(stderr, "sym_b = %s\n", b->name().c_str()); 
         
-        //fprintf(stderr, "irtools.cc ij %d %d\n", i, j); 
+        fprintf(stderr, "irtools.cc ij %d %d\n", i, j); 
         
-        //if  (*sym_a == *sym_b) fprintf(stderr, "*sym_a == *sym_b\n");
-        //else fprintf(stderr, "*sym_a NOT == *sym_b\n");
+        if  (*sym_a == *sym_b) fprintf(stderr, "*sym_a == *sym_b\n");
+        else fprintf(stderr, "*sym_a NOT == *sym_b\n");
 
-        //if ( a->is_write()) fprintf(stderr, "%d a->is_write()\n", i); 
-        //else fprintf(stderr, "%d a->is_NOT_write()\n", i); 
-        //if ( b->is_write()) fprintf(stderr, "%d b->is_write()\n", j); 
-        //else fprintf(stderr, "%d b->is_NOT_write()\n", j); 
+        if ( a->is_write()) fprintf(stderr, "%d a->is_write()\n", i); 
+        else fprintf(stderr, "%d a->is_NOT_write()\n", i); 
+        if ( b->is_write()) fprintf(stderr, "%d b->is_write()\n", j); 
+        else fprintf(stderr, "%d b->is_NOT_write()\n", j); 
 
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
-          //fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
+          fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
           Relation r = arrays2relation(ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr);
-          //helper = new Relation(r); fprintf(stderr, "r    "); helper->print(); fflush(stdout); 
+          helper = new Relation(r); fprintf(stderr, "r    "); helper->print(); fflush(stdout); 
 
 
-          //fprintf(stderr, "1\n"); 
+          fprintf(stderr, "1\n"); 
           std::pair<std::vector<DependenceVector>,
             std::vector<DependenceVector> > dv =
             relation2dependences(a, b, r);
-          //fprintf(stderr, "\nirtools.cc ij %d %d dv.first %d   dv.second %d\n", i, j, dv.first.size(), dv.second.size()); 
-          //fprintf(stderr, "2"); 
+          fprintf(stderr, "\nirtools.cc ij %d %d dv.first %d   dv.second %d\n", i, j, dv.first.size(), dv.second.size()); 
+          fprintf(stderr, "2"); 
           result.first.insert(result.first.end(), dv.first.begin(), 
                               dv.first.end());
-          //fprintf(stderr, "3"); 
+          fprintf(stderr, "3"); 
           result.second.insert(result.second.end(), dv.second.begin(),
                                dv.second.end());
-          //fprintf(stderr, "4"); 
+          fprintf(stderr, "4"); 
 
           // Manu:: check if the array references belong to the same statement
           // If yes, set the flag in the dependence vector
@@ -453,13 +455,13 @@ test_data_dependences(IR_Code *ir,
     for (int i = 0; i < access.size(); i++)
       delete access[i];
   } else {
-    //fprintf(stderr, "\nrepr1 != repr2\n"); 
+    fprintf(stderr, "\nrepr1 != repr2\n"); 
 
     std::vector<IR_ArrayRef *> access1 = ir->FindArrayRef(repr1);
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(repr2);
     
     for (int i = 0; i < access1.size(); i++) {
-      //fprintf(stderr, "i %d\n", i); 
+      fprintf(stderr, "i %d\n", i); 
       IR_ArrayRef *a = access1[i];
       IR_ArraySymbol *sym_a = a->symbol();
       
@@ -502,7 +504,7 @@ test_data_dependences(IR_Code *ir,
     dv.second.end());
   */
   
-  //fprintf(stderr, "LEAVING test_data_dependences()  first size %d    second size %d\n\n",  result.first.size(), result.second.size()); 
+  fprintf(stderr, "LEAVING test_data_dependences()  first size %d    second size %d\n\n",  result.first.size(), result.second.size()); 
   return result;
 }
 

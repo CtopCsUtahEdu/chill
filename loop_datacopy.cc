@@ -1067,7 +1067,10 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
     
     
     shiftLexicalOrder(lex, dim-1, 1);
+
+    fprintf(stderr, "loop_datacopy.cc L1071 adding stmt %d\n", stmt.size()); 
     stmt.push_back(copy_stmt_read);
+
     uninterpreted_symbols.push_back(uninterpreted_symbols[*(active.begin())]);
     uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[*(active.begin())]);
     ro_copy_stmt_num = stmt.size() - 1;
@@ -1140,7 +1143,10 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
     }
     lex[dim-1]++;
     shiftLexicalOrder(lex, dim-1, -2);
+
+    fprintf(stderr, "loop_datacopy.cc L1147 adding stmt %d\n", stmt.size()); 
     stmt.push_back(copy_stmt_write);
+
     uninterpreted_symbols.push_back(uninterpreted_symbols[*(active.begin())]);
     uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[*(active.begin())]);
     wo_copy_stmt_num = stmt.size() - 1;

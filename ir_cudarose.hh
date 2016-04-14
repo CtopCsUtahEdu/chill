@@ -7,7 +7,6 @@
 #include "loop.hh"
 
 // these are DAMNED close now 
-// #include "loop_cuda_rose.hh"
 #include "loop_cuda_chill.hh"
 
 #include "ir_rose_utils.hh"

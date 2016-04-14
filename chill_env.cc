@@ -31,8 +31,6 @@
 
 // I think the LoopCuda definitions in loop_cuda_(frontend).hh collide 
 #ifdef FRONTEND_ROSE
-//#include "loop_cuda_rose.hh"
-//#include "ir_rose.hh"
 #include "ir_cudarose.hh"
 #endif
 
@@ -237,6 +235,9 @@ static int init(lua_State *L) {
   //mtrace(); fprintf(stderr, "malloc debugging ENABLED\n");  // turn on malloc debugging
   
   int n = lua_gettop(L); //Number of arguments
+  
+  fprintf(stderr, "chill_env.cc init()  n %d\n", n); 
+
   if (n > 0) {
     //Expect one of the following forms
     //l1 = init("mm4.sp2",0,0) --input file, procedure 0, loop 0
@@ -254,6 +255,7 @@ static int init(lua_State *L) {
       const char* dest_lang = lua_tostring(L,-1);
       lua_pop(L, 1);
 #ifdef FRONTEND_ROSE
+      fprintf(stderr, "chill_env.cc  L178   calling new IR_cudaroseCode\n"); 
       ir_code = new IR_cudaroseCode(source_filename, procedure_name);
 #elif defined( FRONTEND_CLANG) 
       ir_code = new IR_cudaclangCode(source_filename, procedure_name);      
@@ -264,7 +266,6 @@ static int init(lua_State *L) {
       fprintf(stderr, "%d controls\n\n", ir_controls.size()); 
       
 #ifdef FRONTEND_ROSE
-
       int loop_count = 0;
       for (int i = 0; i < ir_controls.size(); i++) {
         if (ir_controls[i]->type() == IR_CONTROL_LOOP) {
@@ -283,10 +284,10 @@ static int init(lua_State *L) {
       fprintf(stderr, "parm %d\n", parm.size()); 
       
       block = ir_code->MergeNeighboringControlStructures(parm);
-      IR_roseBlock *RB = (IR_roseBlock *)block;
       fprintf(stderr, "block is now from merged\n"); 
-      
-     
+
+      // TODO remove rose version 
+      IR_roseBlock *RB = (IR_roseBlock *)block;
       fprintf(stderr, "block %d statements, AST %p\n\n", RB->statements.size(), RB->chillAST);
 
 #elif FRONTEND_CLANG
@@ -339,9 +340,9 @@ static int init(lua_State *L) {
     myloop->original();
     myloop->useIdxNames = true;           //Use idxName in code_gen
     register_v2(L);
+
     //TODO: return a reference to the intial array if that makes sense
-    //still
-    fprintf(stderr, "chill_env.cc init()  returning EARLY   BUH\n"); 
+    fprintf(stderr, "chill_env.cc init()  returning EARLY\n"); 
     return 0;
   }
   
@@ -365,7 +366,9 @@ static int init(lua_State *L) {
   lua_pop(L, 1);
   
 #ifdef FRONTEND_ROSE
+  fprintf(stderr, "chill_env.cc L237 init()   calling new IR_cudaroseCode\n"); 
   ir_code = new IR_cudaroseCode(source_filename, procedure_name);
+  fprintf(stderr, "chill_env.cc L239 init()   calling new IR_cudaroseCode DONE\n"); 
 #elif FRONTEND_CLANG
   ir_code = new IR_cudaclangCode(source_filename, procedure_name);
 #endif
@@ -373,7 +376,6 @@ static int init(lua_State *L) {
   IR_Block *block = ir_code->GetCode();
   ir_controls = ir_code->FindOneLevelControlStructure(block);
   
-  fprintf(stderr, "YET ANOTHER IFDEF\n"); // ??????????? exit(-1);  // TODO 
   
 #ifdef FRONTEND_ROSE
   
@@ -610,7 +612,7 @@ static int print_space(lua_State *L) {
   strict_arg_num(L, 0);
   for (int i = 0; i < myloop->stmt.size(); i++) {
     printf("s%d: ", i + 1);
-    Relation r;
+    omega::Relation r;
     if (!myloop->stmt[i].xform.is_null())
       r = Composition(copy(myloop->stmt[i].xform), copy(myloop->stmt[i].IS));
     else
@@ -667,6 +669,8 @@ static int permute_v2(lua_State *L) {
   if (!tostringvector(L, 2, order)) {
     throw std::runtime_error("second arg must be a string vector");
   }
+  fprintf(stderr, "in permute_v2, order has %d elements\n", order.size()); 
+
   myloop->permute_cuda(stmt, order);
   END_REQUIRE_LOOP;
   return 0;
@@ -677,7 +681,7 @@ static int tile_v2(lua_State *L) {
   
   REQUIRE_LOOP;
   int n = lua_gettop(L); //Number of arguments
-  if (n != 3 && n != 7)
+  if (n != 3 && n != 7 && n != 4)
     throw std::runtime_error("incorrect number of arguments");
   int stmt_num = luaL_optint(L, 1, 0);
   int level = luaL_optint(L, 2, 0);
@@ -686,7 +690,19 @@ static int tile_v2(lua_State *L) {
   if (n == 3) {
     int outer_level = luaL_optint(L, 3, 1);
     myloop->tile_cuda(stmt_num, level, outer_level);
-  } else {
+   } else if (n == 4) {
+    
+    int outer_level = luaL_optint(L, 3, 1);
+    int imethod = luaL_optint(L, 4, 2);
+    TilingMethodType method;
+    
+    if (imethod == 0)
+      method = StridedTile;
+    else
+      method = CountedTile;
+    myloop->tile_cuda(stmt_num, level, outer_level, method);
+    
+  } else { // n == 7
     fprintf(stderr, "hey 6 or 7 args!\n"); 
     int tile_size = luaL_optint(L, 3, 0);
     int outer_level = luaL_optint(L, 4, 1);
@@ -741,9 +757,10 @@ static int cur_indices(lua_State *L) {
 }
 
 static int block_indices(lua_State *L) {
-  fprintf(stderr, "\n\n\n*** chill_env.cc block_indices probably an error with cu_bx vs Vcu_bx\n");
-  
   REQUIRE_LOOP;
+  fprintf(stderr, "\n\n\n*** chill_env.cc block_indices probably an error with cu_bx vs Vcu_bx\n");
+  exit(-1);
+  
   strict_arg_num(L, 0);
   lua_newtable(L);
   if (myloop->cu_bx > 1) {
@@ -762,6 +779,8 @@ static int block_indices(lua_State *L) {
 static int thread_indices(lua_State *L) {
   REQUIRE_LOOP;
   fprintf(stderr, "\n\n\n*** chill_env.cc thread_indices probably an error with cu_bx vs Vcu_bx\n");
+  exit(-1);
+
   strict_arg_num(L, 0);
   lua_newtable(L);
   if (myloop->cu_tx > 1) {
@@ -783,8 +802,10 @@ static int thread_indices(lua_State *L) {
 }
 
 static int block_dims(lua_State *L) {
-  fprintf(stderr, "\n\n\n*** chill_env.cc block_dims probably an error with cu_bx vs Vcu_bx\n");    
   REQUIRE_LOOP;
+  fprintf(stderr, "\n\n\n*** chill_env.cc block_dims probably an error with cu_bx vs Vcu_bx\n");    
+  exit(-1);
+
   strict_arg_num(L, 0);
   lua_pushinteger(L, myloop->cu_bx);
   lua_pushinteger(L, myloop->cu_by);
@@ -793,8 +814,10 @@ static int block_dims(lua_State *L) {
 }
 
 static int thread_dims(lua_State *L) {
-  fprintf(stderr, "\n\n\n*** chill_env.cc thread_dims probably an error with cu_bx vs Vcu_bx\n");    
   REQUIRE_LOOP;
+  fprintf(stderr, "\n\n\n*** chill_env.cc thread_dims probably an error with cu_bx vs Vcu_bx\n");    
+  exit(-1);
+
   strict_arg_num(L, 0);
   lua_pushinteger(L, myloop->cu_tx);
   lua_pushinteger(L, myloop->cu_ty);
@@ -1009,6 +1032,8 @@ static int peel_v2(lua_State *L) {
 
 static int scalar_expand_v2(lua_State *L) {
   REQUIRE_LOOP;
+  fprintf(stderr, "chill_env.cc scalar_expand_v2()\n"); 
+
   int n = lua_gettop(L); //Number of arguments
   //strict_arg_num(L, 3);
   if (n != 3 && n != 4 && n != 5 && n != 6)
@@ -1023,15 +1048,17 @@ static int scalar_expand_v2(lua_State *L) {
   
   int cuda_shared = luaL_optint(L, 4, 0);
   int padding = luaL_optint(L, 5, 0);
-  if (n != 6)
-    myloop->scalar_expand_cuda(stmt_num, level, arrName, cuda_shared,
-                               padding);
+  if (n != 6) { 
+    myloop->scalar_expand_cuda(stmt_num, level, arrName, cuda_shared, padding);
+  }
   else {
     int assign_then_accumulate = luaL_optint(L, 6, 0);
     myloop->scalar_expand_cuda(stmt_num, level, arrName, cuda_shared,
                                padding, assign_then_accumulate);
   }
   END_REQUIRE_LOOP;
+
+  fprintf(stderr, "chill_env.cc scalar_expand_v2() DONE\n"); 
   return 1;
 }
 
@@ -1187,7 +1214,7 @@ static int reduce_v2(lua_State *L) {
 static int cudaize_v2(lua_State *L) {
   REQUIRE_LOOP;
   int n = lua_gettop(L); //Number of arguments
-  fprintf(stderr, "\n\ncudaize_v2(), %d arguments\n", n); 
+  fprintf(stderr, "\n\nchillenv.cc cudaize_v2(), %d arguments\n", n); 
   strict_arg_num(L, 3);
   
   std::string kernel_name = luaL_optstring(L, 1, 0);
@@ -1226,13 +1253,13 @@ static int cudaize_v2(lua_State *L) {
 }
 
 
-
+//lua(?) should call _v3 here, which is _v2 in anand's 
 static int cudaize_v3(lua_State *L) {   // requires 5 args, starting with stmt num
   int n = lua_gettop(L); //Number of arguments
-  fprintf(stderr, "\n\ncudaize_v3(), %d arguments\n", n); 
+  fprintf(stderr, "\n\ncudaize_v3()  (Anand's _v2), %d arguments\n", n); 
   REQUIRE_LOOP;
-  //int n = lua_gettop(L); //Number of arguments
   strict_arg_num(L, 5);
+
   int stmt_num = luaL_optint(L, 1, 0);
   std::string kernel_name = luaL_optstring(L, 2, 0);
   
@@ -1240,8 +1267,9 @@ static int cudaize_v3(lua_State *L) {   // requires 5 args, starting with stmt n
   std::vector<std::string> threadIdxs;
   std::vector<std::string> kernel_params;
   std::map<std::string, int> array_sizes;
+
   if (!tostringintmap(L, 3, array_sizes))
-    throw std::runtime_error("second argument must be an map[string->int]");
+    throw std::runtime_error("second argument must be a map[string->int]");
   
   if (lua_istable(L, 4)) {
     //Iterate through array (table)
@@ -1789,8 +1817,8 @@ void register_functions(lua_State *L) {
 }
 
 void register_v2(lua_State *L) {
-  lua_register(L, "cudaize5arg", cudaize_v3);
-  lua_register(L, "cudaize", cudaize_v2);
+  lua_register(L, "cudaize", cudaize_v3);
+  //lua_register(L, "cudaize", cudaize_v2);
   lua_register(L, "tile", tile_v2);
   lua_register(L, "permute", permute_v2);
   lua_register(L, "datacopy_privatized", datacopy_privatized_v2);

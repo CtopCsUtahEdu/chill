@@ -825,7 +825,9 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
         else
           assign_const(new_stmt.xform, dim - 1, cur_lex - 1);
         
+        fprintf(stderr, "loop_basic.cc L828 adding stmt %d\n", stmt.size()); 
         stmt.push_back(new_stmt);
+
         uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
         uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
         dep.insert();
@@ -1586,6 +1588,8 @@ std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
 std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
                                                                    std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
   
+  fprintf(stderr, "constructInspectorVariables()\n"); 
+
   std::vector<std::vector<std::string> > to_return;
   
   for (std::set<IR_ArrayRef *>::iterator i = arr.begin(); i != arr.end();
@@ -1626,8 +1630,10 @@ std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
       for (k = 0; k < to_return.size(); k++)
         if (to_return[k][0] == ref->name())
           break;
-      if (k == to_return.size())
+      if (k == to_return.size()) { 
         to_return.push_back(per_index);
+        fprintf(stderr, "adding index %s\n", ref->name().c_str()); 
+      }
       
     }
     
@@ -1643,7 +1649,7 @@ std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
   std::vector<CG_outputRepr *> to_return;
   
   for(int i =0; i < indices.size(); i++)
-  ir->CreateVariaebleDeclaration(indices[i][0]);
+  ir->CreateVariableDeclaration(indices[i][0]);
   return to_return;
   }
   
@@ -1861,7 +1867,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
         
         //ir->CreateArrayType(IR_CONSTANT_INT,
         //arr_refs[j]->symbol()->size(0));
-        class_data_types.push_back(arr_type);
+        class_data_types.push_back(arr_type); 
         break;
       }
       
@@ -1876,7 +1882,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   inspector_member_functions.push_back("inspector"); // a constructor, if it were actually a class and not a struct
 
   class_data.push_back("count"); // but no type !! TODO 
-  class_data_types.push_back( ir->CreatePointerType(IR_CONSTANT_INT)); // explicitly make count an int
+
+  class_data_types.push_back( ir->CreateScalarType(IR_CONSTANT_INT)); // explicitly make count an int
   
 //  std::vector<std::vector<std::string> > function_param_in;
   
@@ -1907,9 +1914,10 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   CG_outputRepr *list = NULL;
 
   // make a declaration of the newly-defined struct  - WHAT IS THE SCOPE? function?  TODO 
-  fprintf(stderr, "loop_basic.cc L1941 creating an instance of the inspector named %s\n", inspector_name.c_str()); 
+  fprintf(stderr, "loop_basic.cc L1910 creating an instance of the inspector named %s\n", inspector_name.c_str()); 
   CG_outputRepr *instance = ocg->CreateClassInstance(inspector_name,   // instance is a VARDECL seems wrong
                                                      class_def);
+
   CG_outputRepr *constructor_data = ocg->lookup_member_data(class_def,
                                                             "count", instance);
   for (int i = 0; i < function_param.size(); i++) {
@@ -2318,9 +2326,9 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   new_stmt.ir_stmt_node = NULL;
   new_stmt.has_inspector = false;
   
-  fprintf(stderr, "BEFORE CLONE\n"); 
+  //fprintf(stderr, "BEFORE CLONE\n"); 
   new_stmt.code = stmt[stmt_num].code->clone();
-  fprintf(stderr, "AFTER CLONE\n"); 
+  //fprintf(stderr, "AFTER CLONE\n"); 
   
   delete stmt[stmt_num].code;
   stmt[stmt_num].code = ocg->StmtListAppend(list, count_plusplus);
@@ -2329,19 +2337,24 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   ocg->CreateIdent(index_name);
 
   // create  #define c(i,j) c.count
-  fprintf(stderr, "*** create  #define c(i,j) c.count\n");
+  fprintf(stderr, "*** create  #define c(i,j) (*c_count)\n");
 
   std::vector< std::string> args;
   args.push_back( std::string("i") );
   args.push_back( std::string("j") );
 
-  fprintf(stderr, "loop_basic.cc calling CreateDefineMacro( %s, i,j, count)\n", inspector_name.c_str()); 
+  fprintf(stderr, "\nloop_basic.cc in loop_flatten(), calling CreateDefineMacro( %s, i,j, count)\n", inspector_name.c_str()); 
   ir->CreateDefineMacro(inspector_name, 
                         args, // "(i,j)", // (i,j) hardcoded ???  TODO 
                         ocg->ObtainInspectorRange(inspector_name, "count"));  // ?? 
-  fprintf(stderr, "*** create  #define c(i,j) c.count DONE\n");
-
-
+  fprintf(stderr, "*** create  #define c(i,j) (*c_count) DONE\n");
+  
+  // add macro to sourceFile  ( should be in CreateDefineMacro ?? ) 
+  //IR_rosecode *irrose = (IR_rosecode *)ir_; 
+  //ChillAST_SourceFile *sf = irrose->entire_file_AST;
+  //sf->addMacro( 
+  
+  fprintf(stderr, "loop_basic.cc L2353 adding stmt %d\n", stmt.size()); 
   stmt.push_back(new_stmt);
   
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);

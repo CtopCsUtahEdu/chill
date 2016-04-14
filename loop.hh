@@ -115,7 +115,7 @@ protected:
 public:
   Loop() { ir = NULL; tmp_loop_var_name_counter = 1; init_code = NULL; }
   Loop(const IR_Control *control);
-  virtual ~Loop();
+  ~Loop();
   
   omega::CG_outputRepr *getCode(int effort = 3) const; // TODO was 1 
   //chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const;

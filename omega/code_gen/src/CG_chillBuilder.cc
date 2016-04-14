@@ -585,7 +585,7 @@ namespace omega {
   CG_outputRepr* CG_chillBuilder::CreateInvoke(const std::string &fname,
                                                std::vector<CG_outputRepr*> &list,
                                                bool is_array) const { // WHAT is an array?
-    //fprintf(stderr, "CG_roseBuilder::CreateInvoke( fname %s, ...)\n", fname.c_str()); 
+    fprintf(stderr, "CG_roseBuilder::CreateInvoke( fname %s, ...)\n", fname.c_str()); 
     //fprintf(stderr, "%d things in list\n", list.size()); 
     
     // debugging output.  print the "call"
@@ -668,7 +668,7 @@ namespace omega {
     //} 
     else {
       //do a simple function call 
-      //fprintf(stderr, "building a function call expression\n"); 
+      fprintf(stderr, "building a function call expression\n"); 
 
       // try to find the function name, for a function in this file
       const char *name = fname.c_str(); 
@@ -954,7 +954,7 @@ namespace omega {
   CG_outputRepr* CG_chillBuilder::CreateLoop(int indent, 
                                              CG_outputRepr *control,
                                              CG_outputRepr *stmtList) const {
-    fprintf(stderr, "CG_chillBuilder::CreateLoop( indent %d)\n", indent); 
+    //fprintf(stderr, "CG_chillBuilder::CreateLoop( indent %d)\n", indent); 
     
     if (stmtList == NULL) {
       delete control;
@@ -1063,7 +1063,7 @@ namespace omega {
     // variable was already defined as either a parameter or internal variable to the function.
 
     // NOW WHAT??  gotta return something
-    chillAST_VarDecl *vd = currentfunction->hasVariableNamed( _s.c_str() );
+    chillAST_VarDecl *vd = currentfunction->funcHasVariableNamed( _s.c_str() );
     //fprintf(stderr, "vd %p\n", vd); 
 
     chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd, NULL ); // parent not available
@@ -1172,14 +1172,15 @@ namespace omega {
     chillAST_node *lAST = clop->chillnodes[0]; // always just one?
     chillAST_node *rAST = crop->chillnodes[0]; // always just one?
     
-    //fprintf(stderr, "building "); 
-    //lAST->print(0, stderr); 
-    //fprintf(stderr, " * ");
-    //rAST->print(0, stderr);
-    //fprintf(stderr, "  ??\n"); 
+    fprintf(stderr, "building "); 
+    lAST->print(0, stderr); 
+    fprintf(stderr, " * ");
+    rAST->print(0, stderr);
+    fprintf(stderr, "\n"); 
     
     chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "*", rAST, NULL);
     delete lop; delete rop; // ?? 
+    //fprintf(stderr, "CG_chillBuilder::CreateTimes() returning a CG_chillRepr with a binop inside\n");
     return new CG_chillRepr( binop );
   }
   
@@ -1569,7 +1570,8 @@ namespace omega {
   
   
   CG_outputRepr* CG_chillBuilder::ObtainInspectorData(const std::string &_s, const std::string &member_name) const{
-    //fprintf(stderr, "CG_chillBuilder::ObtainInspectorData( %s, %s)\n", _s.c_str(), member_name.c_str());
+    fprintf(stderr, "CG_chillBuilder::ObtainInspectorData( %s, %s)\n", 
+            _s.c_str(), member_name.c_str());
     
     //WTF 
 
@@ -1594,12 +1596,14 @@ namespace omega {
   }
   
   
+
+
   CG_outputRepr *CG_chillBuilder::CreateStruct(const std::string struct_name,
                                                std::vector<std::string> data_members,
                                                std::vector<CG_outputRepr *> data_types)
   { 
     
-    //fprintf(stderr, "\nCG_chillBuilder::CreateStruct( %s )\n", struct_name.c_str()); 
+    fprintf(stderr, "\nCG_chillBuilder::CreateStruct( %s )\n", struct_name.c_str()); 
     
 /* WRONG - a typedef 
     // NEED TO ADD TYPEDEF TO ... SOMETHING 
@@ -1647,25 +1651,34 @@ namespace omega {
     // note: parent at top level so far   TODO 
     //toplevel->print(); printf("\n\n");  fflush(stdout); 
 
-    rd->setStruct(true);
-    int n_memb = data_members.size();
+    int n_memb       = data_members.size();
     int n_data_types = data_types.size();
     // add struct members
     for (int i=0; i<n_memb; i++) { 
-      chillAST_VarDecl *vd;
+      chillAST_VarDecl *vd = NULL;
       //fprintf(stderr, "%d member %s type ", i, data_members[i].c_str()); 
       if (i < n_data_types) { 
         // this should always happen, formerly, if no data type was 
         // specified, it was an int. bad idea
         vd = (chillAST_VarDecl *) ((CG_chillRepr *)data_types[i])->GetCode(); 
+
+        // vd did not have a name before 
         vd->varname = strdup(  data_members[i].c_str() ); 
-        //printf("adsdfafa "); vd->print(); printf("\n"); fflush(stdout); 
+
+        vd->parent = rd;  // ??
+
         bool simplepointer = (vd->numdimensions == 1 && !vd->knownArraySizes);
         if (simplepointer) {  
-          //fprintf(stderr, "pointer to "); 
-          
+          fprintf(stderr, "struct member %s is pointer to %s\n", vd->varname, vd->vartype);
           vd->arraypointerpart = strdup("*"); // ?? 
         }
+        else { 
+          //fprintf(stderr, "struct member %s is not a pointer TODO!\n", vd->varname); 
+          fprintf(stderr, "struct member %s is %s\n", vd->varname, vd->vartype); 
+          
+          // it should be good to go ??? 
+        }
+        //vd->print(); printf("\n"); fflush(stdout); 
         //fprintf(stderr, "%s\n", vd->vartype );
         //if (vd->numdimensions > 0 && vd->knownArraySizes) {
         //  for (int k=0; k<vd->numdimensions; k++) fprintf(stderr, "[%d]", vd->arraysizes[k]);
@@ -1678,7 +1691,7 @@ namespace omega {
       rd->addSubpart( vd );
       //fprintf(stderr, "\n"); 
     }
-    //fprintf(stderr, "\n"); 
+    fprintf(stderr, "\n"); 
     return new CG_chillRepr( rd ); 
   }
   
@@ -1686,7 +1699,7 @@ namespace omega {
   
   CG_outputRepr *CG_chillBuilder::CreateClassInstance(std::string name ,  // TODO can't make array
                                                       CG_outputRepr *class_def){
-    //fprintf(stderr, "CG_chillBuilder::CreateClassInstance( %s )\n", name.c_str()); 
+    fprintf(stderr, "CG_chillBuilder::CreateClassInstance( %s )\n", name.c_str()); 
     
     CG_chillRepr *CD = (CG_chillRepr *)class_def; 
     chillAST_node *n = CD->GetCode();
@@ -1711,9 +1724,11 @@ namespace omega {
       return new CG_chillRepr( vd ); 
     }
     if  (n->isRecordDecl()) { 
+      fprintf(stderr, "a RecordDecl\n"); 
+
       chillAST_RecordDecl *rd = (chillAST_RecordDecl *) n;
-      //rd->print(); printf("\n"); fflush(stdout);
-      //rd->dump(); printf("\n"); fflush(stdout);
+      rd->print(); printf("\n"); fflush(stdout);
+      rd->dump(); printf("\n");  fflush(stdout);
       
       chillAST_VarDecl *vd = new chillAST_VarDecl( rd, name.c_str(), "", NULL);
 

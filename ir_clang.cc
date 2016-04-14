@@ -1850,7 +1850,7 @@ omega::CG_outputRepr *IR_chillBlock::extract() const {
 
   omega::CG_chillRepr *OR; 
   if (0 == statements.size()) { 
-    OR = new omega::CG_chillRepr(code); // presumably a comnpound statement ??
+    OR = new omega::CG_chillRepr(code); // presumably a compound statement ??
   }
   else { 
     fprintf(stderr, "adding a statement from IR_chillBlock::extract()\n"); 

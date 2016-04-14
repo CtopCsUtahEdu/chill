@@ -19,8 +19,46 @@
 // IR_roseCode is built on IR_chillCode
 #include "ir_chill.hh" 
 
-// fwd decl
-chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename ); 
+// forward declarations 
+chillAST_node * ConvertRoseFile(  SgGlobal *sg, const char *filename ); // the entire file 
+chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D , chillAST_node *parent);
+chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl, chillAST_node *p );
+chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl, chillAST_node *p );
+chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_node *p ); // stupid name TODO 
+chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement, chillAST_node *p );
+chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement, chillAST_node *p );
+chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *binaryop, chillAST_node *p );
+chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *binaryop, chillAST_node *); // binop! a.b
+chillAST_node * ConvertRoseArrowExp  ( SgBinaryOp *binaryop, chillAST_node *); // binop! a->b
+char *          ConvertRoseMember( SgVarRefExp* memb, chillAST_node *base ); // TODO 
+chillAST_node * ConvertRoseUnaryOp( SgUnaryOp *unaryop, chillAST_node *p ); 
+chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *varrefexp, chillAST_node *p );
+chillAST_node * ConvertRoseIntVal( SgIntVal *riseintval, chillAST_node *p );
+chillAST_node * ConvertRoseFloatVal( SgFloatVal *rosefloatval, chillAST_node *p );
+chillAST_node * ConvertRoseDoubleVal( SgDoubleVal *rosecdoubleval, chillAST_node *p );
+chillAST_node * ConvertRoseBasicBlock( SgBasicBlock *bb, chillAST_node *p );
+chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp*, chillAST_node *p);
+chillAST_node * ConvertRoseReturnStmt( SgReturnStmt *rs, chillAST_node *p );
+chillAST_node * ConvertRoseArrayRefExp( SgPntrArrRefExp *roseARE, chillAST_node *p ); 
+chillAST_node * ConvertRoseCastExp( SgCastExp *roseCE, chillAST_node *p );
+chillAST_node * ConvertRoseAssignInitializer( SgAssignInitializer *roseAI, chillAST_node *p );
+// TODO 
+chillAST_node * ConvertRoseStructDefinition( SgClassDefinition *def, chillAST_node *p );
+chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *dec, chillAST_node *p );
+
+
+chillAST_node * ConvertRoseIfStmt( SgIfStmt *ifstatement, chillAST_node *p); 
+
+chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node * );
+
+//chillAST_node * ConvertRoseRecordDecl( clang::RecordDecl *D, chillAST_node * );
+//chillAST_node * ConvertRoseDeclStmt( clang::DeclStmt *clangDS, chillAST_node * );
+//chillAST_node * ConvertRoseCompoundStmt( clang::CompoundStmt *clangCS, chillAST_node * );
+
+//chillAST_node * ConvertRoseDeclRefExpr( clang::DeclRefExpr * clangDRE, chillAST_node * );
+//chillAST_node * ConvertRoseCStyleCastExpr( clang::CStyleCastExpr *clangICE, chillAST_node * );
+//chillAST_node * ConvertRoseIfStmt( clang::IfStmt *clangIS , chillAST_node *);
+chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent );
 
 
 extern vector<chillAST_VarDecl *> VariableDeclarations; 
@@ -57,16 +95,31 @@ struct IR_roseScalarSymbol: public IR_ScalarSymbol {
 
 
 struct IR_roseArraySymbol: public IR_ArraySymbol {
+ 
+  chillAST_node  *base;  // usually a vardecl but can be a member expression 
   chillAST_VarDecl *chillvd; 
   
   IR_roseArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
     //fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
     ir_     = ir;
-    chillvd = vd; 
+    base = (chillAST_node *)vd; 
+    chillvd = vd;
     //fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
     //offset_ = offset;
   }
-  virtual ~IR_roseArraySymbol() { /* fprintf(stderr, "deleting  IR_roseArraySymbol %p\n", this);*/ } 
+
+  
+  IR_roseArraySymbol(const IR_Code *ir, chillAST_node *n, int offset = 0) {
+    //fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
+    ir_     = ir;
+    base = n;
+    chillvd = n ->multibase();
+    //fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
+    //offset_ = offset;
+  }
+
+  
+  ~IR_roseArraySymbol() { /* fprintf(stderr, "deleting  IR_roseArraySymbol %p\n", this);*/ } 
   
   std::string name() const;  // IR_roseArraySymbol
   int elem_size() const;
@@ -86,7 +139,7 @@ struct IR_rosePointerSymbol: public IR_PointerSymbol {
   int dim_;
   std::vector<omega::CG_outputRepr *> dims; // ??? 
 
-  IR_rosePointerSymbol(const IR_Code *ir, chillAST_VarDecl *v ) {
+ 	IR_rosePointerSymbol(const IR_Code *ir, chillAST_VarDecl *v ) {
     ir_ = ir;
     chillvd = v;
     
@@ -95,7 +148,6 @@ struct IR_rosePointerSymbol: public IR_PointerSymbol {
     dims.resize(dim_);
     // TODO set sizes 
   };
-  virtual ~IR_rosePointerSymbol() { }
 
   std::string name() const;
   int n_dim() const;
@@ -172,9 +224,9 @@ struct IR_roseScalarRef: public IR_ScalarRef {
 
 struct IR_roseArrayRef: public IR_ArrayRef {
   chillAST_ArraySubscriptExpr* chillASE; 
-  int iswrite; 
+  bool iswrite; 
   
-  IR_roseArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, int write ) { 
+  IR_roseArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) { 
     //fprintf(stderr, "IR_XXXXArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
     ir_ = ir;
     chillASE = ase; 
@@ -193,6 +245,33 @@ struct IR_roseArrayRef: public IR_ArrayRef {
   IR_Ref *clone() const;
   virtual void Dump() const;
 };
+
+struct IR_rosePointerArrayRef: public IR_PointerArrayRef { // exactly the same as arrayref ??? 
+  chillAST_ArraySubscriptExpr* chillASE; 
+  int iswrite; 
+  
+  IR_rosePointerArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) { 
+    //fprintf(stderr, "IR_XXXXPointerArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
+    ir_ = ir;
+    chillASE = ase; 
+    // dies? ase->dump(); fflush(stdout); 
+    
+    iswrite = write;  // ase->imwrittento;
+  }
+  
+  
+  bool is_write() const  { return iswrite; };
+  omega::CG_outputRepr *index(int dim) const;
+  IR_PointerSymbol *symbol() const;
+  bool operator==(const IR_Ref &that) const;
+  bool operator!=(const IR_Ref &that) const; // not the opposite logic to ==     TODO 
+  omega::CG_outputRepr *convert();
+  IR_Ref *clone() const;
+  virtual void Dump() const;
+};
+
+
+
 
 struct IR_roseLoop: public IR_Loop {
   int step_size_;
@@ -240,8 +319,8 @@ struct IR_roseBlock: public IR_chillBlock {
     fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir );  NO AST\n"); 
     chillAST = NULL;
     ir_ = ir;
-    //fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
-    //fprintf(stderr, "this roseBlock is %p\n", this); 
+    fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
+    fprintf(stderr, "this roseBlock is %p\n", this); 
   }
   
   
@@ -266,8 +345,6 @@ struct IR_roseBlock: public IR_chillBlock {
     chillAST = CB->chillAST; 
   }
   
-  virtual ~IR_roseBlock() { }
-  
   
   
   omega::CG_outputRepr *extract() const;
@@ -284,7 +361,7 @@ struct IR_roseBlock: public IR_chillBlock {
   int numstatements() const { return statements.size(); } 
   
   void setChillAst( chillAST_node *ast ) { chillAST = ast; } ;
-  chillAST_node *getChillAST() const { return chillAST; } 
+  chillAST_node *getChillAST() const {  fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );return chillAST; } 
 };
 
 
@@ -345,7 +422,7 @@ struct IR_roseIf: public IR_If {
   }
   
   
-  virtual ~IR_roseIf() {
+  ~IR_roseIf() {
   }
   
   omega::CG_outputRepr *condition() const;
@@ -393,7 +470,7 @@ public:
   void print() { chillfunc->print(); printf("\n"); fflush(stdout); }; 
   
   IR_roseCode(const char *filename, const char* proc_name, const char* dest_name = NULL );
-  virtual ~IR_roseCode();
+  ~IR_roseCode();
   
   IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int memory_type=0);
   IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
@@ -499,6 +576,7 @@ public:
   IR_Control *  FromForStmt(const omega::CG_outputRepr *repr);
   
   // Manu:: Added functions for scalar expansion
+  // TODO   
   IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
                                             std::vector<omega::CG_outputRepr *> &index); 
   void CreateDefineMacro(std::string s,std::string args,  omega::CG_outputRepr *repr);

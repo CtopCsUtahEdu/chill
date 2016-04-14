@@ -231,7 +231,7 @@ struct IR_chillLoop: public IR_Loop {
 
   IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *forstmt);
 
-  virtual ~IR_chillLoop() {}
+  ~IR_chillLoop() {}
   IR_ScalarSymbol *index() const { return new IR_chillScalarSymbol(ir_, chillindex->getVarDecl()); }
   omega::CG_outputRepr *lower_bound() const;
   omega::CG_outputRepr *upper_bound() const;
@@ -284,7 +284,7 @@ public:
   }
 
 
-  virtual ~IR_chillBlock() {} // leaves AST and statements intact
+  ~IR_chillBlock() {} // leaves AST and statements intact
 
   omega::CG_outputRepr *extract() const;
   omega::CG_outputRepr *original() const;
@@ -296,7 +296,10 @@ public:
 
   void dump() const; 
   
-  virtual chillAST_node *getChillAST() const { return chillAST; } 
+  virtual chillAST_node *getChillAST() const { 
+    fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
+    return chillAST;
+  } 
   virtual void setChillAST( chillAST_node *n) { chillAST = n; }; 
 };
 
@@ -331,7 +334,7 @@ struct IR_chillIf: public IR_If {
   }
 
 
-  virtual ~IR_chillIf() { // leave ast alone
+  ~IR_chillIf() { // leave ast alone
   }
 
 
@@ -366,7 +369,7 @@ public:
   IR_chillCode(); 
   IR_chillCode(const char *filename, char *proc_name);
   IR_chillCode(const char *filename, char *proc_name, char *script_name);
-  virtual ~IR_chillCode();
+  ~IR_chillCode();
 
   void setOutputName( const char *name ) { outputname = strdup(name); } 
 

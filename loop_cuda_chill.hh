@@ -75,7 +75,7 @@ struct VarDefs {
 
 chillAST_VarDecl *addBuiltin( char *nameofbuiltin, char *typeOfBuiltin, chillAST_node *somecode); // fwd decl 
 
-class LoopCuda: public Loop{
+class LoopCuda: public Loop{  // chill version 
   
 public:
   //std::vector<proc_sym*> new_procs; //Need adding to a fse
@@ -189,8 +189,10 @@ public:
   //protonu-writing a wrapper for the Chun's new permute function
   bool permute(int stmt_num, const std::vector<int> &pi);
   //end--protonu.
-  void tile_cuda(int stmt, int level, int outer_level);
+	void tile_cuda(int stmt, int level, int outer_level, TilingMethodType method = CountedTile);
+  //void tile_cuda(int stmt, int level, int outer_level);
   void tile_cuda(int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
+
   void tile_cuda(int stmt, int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
   bool datacopy_privatized_cuda(int stmt_num, int level, const std::string &array_name, const std::vector<int> &privatized_levels, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 1, bool cuda_shared=false);
   bool datacopy_cuda(int stmt_num, int level, const std::string &array_name, std::vector<std::string> new_idxs, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, bool cuda_shared=false);
@@ -249,7 +251,7 @@ int findCurLevel(int stmt, std::string idx);
   LoopCuda();
   //LoopCuda(IR_Code *ir, tree_for *tf, global_symtab* gsym);
   LoopCuda(IR_Control *ir_c, int loop_num); 
-  virtual ~LoopCuda();
+  ~LoopCuda();
   
 };
 

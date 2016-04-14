@@ -1546,7 +1546,7 @@ namespace omega {
                 repr = ocg->CreateTimes(ocg->CreateInt(-coef_),
                                         repr);
                 
-                fprintf(stderr, "returning a TIMES %p\n", repr); 
+                fprintf(stderr, "returning a TIMES\n"); 
                 return repr;
                 
               }
@@ -1868,7 +1868,7 @@ namespace omega {
     
     CG_outputRepr *lbRepr = NULL;
     if (lbList.size() > 1) {
-      //fprintf(stderr, "CG_utils.cc output_loop() createInvoke( max )\n"); 
+      fprintf(stderr, "CG_utils.cc output_loop() createInvoke( max )\n"); 
       lbRepr = ocg->CreateInvoke("max", lbList);
     }
     else { // (lbList.size() == 1)
@@ -1877,7 +1877,7 @@ namespace omega {
 
     CG_outputRepr *ubRepr = NULL;
     if (ubList.size() > 1) {
-      //fprintf(stderr, "CG_utils.cc output_loop() createInvoke( min )\n"); 
+      fprintf(stderr, "CG_utils.cc output_loop() createInvoke( min )\n"); 
       ubRepr = ocg->CreateInvoke("min", ubList);
     }
     else { // (ubList.size() == 1)
@@ -2251,7 +2251,7 @@ namespace omega {
       if (guard_repr == NULL)
         return stmt_list;
       else {
-        //fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf()\n"); 
+        fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf()\n"); 
         return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
       }
     }
@@ -2345,7 +2345,7 @@ namespace omega {
         if (guard_repr == NULL)
           return stmt_list;
         else {
-          //fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 2\n"); 
+          fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 2\n"); 
           return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
         }
       }
@@ -2376,7 +2376,7 @@ namespace omega {
                                                         assigned_on_the_fly,
                                                         unin);
 
-        //fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 3\n"); 
+        fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 3\n"); 
         stmt_list = ocg->CreateIf(new_indent, 
                                   new_guard_repr, 
                                   then_stmt_list, 
@@ -2399,7 +2399,7 @@ namespace omega {
         if (guard_repr == NULL)
           return stmt_list;
         else {
-          //fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 4\n"); 
+          fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 4\n"); 
           return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
         }
       }
@@ -2604,9 +2604,9 @@ namespace omega {
                                  const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,
                                  std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin) {
 
-    //fprintf(stderr, "loop_print_repr()  guard_repr "); 
-    //if (guard_repr == NULL) fprintf(stderr, "NULL\n");
-    //else fprintf(stderr, "NOT NULL\n");
+    fprintf(stderr, "loop_print_repr()  guard_repr "); 
+    if (guard_repr == NULL) fprintf(stderr, "NULL\n");
+    else fprintf(stderr, "NOT NULL\n");
     
     if (start >= end)
       return NULL;
@@ -2629,7 +2629,7 @@ namespace omega {
                                                             assigned_on_the_fly,
                                                             unin));
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive\n"); 
       stmt_list = ocg->StmtListAppend(stmt_list, 
                                       loop_print_repr(active,
                                                       loops, 
@@ -2649,13 +2649,13 @@ namespace omega {
       if (guard_repr == NULL)
         return stmt_list;
       else {
-        //fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf()\n"); 
+        fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf()\n"); 
         return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
       }
     }
     
     Relation then_cond = find_best_guard(R, loops, start, end);
-    //fprintf(stderr, "then_cond  "); then_cond.print(stderr); 
+    fprintf(stderr, "then_cond  "); then_cond.print(stderr); 
     assert(!then_cond.is_obvious_tautology());
     Relation else_cond = Complement(copy(then_cond));
     else_cond.simplify();
@@ -2682,7 +2682,7 @@ namespace omega {
       guard_repr = ocg->CreateAnd(guard_repr, new_guard_repr);
       Relation new_guard = Intersection(copy(guard), copy(then_cond));
       new_guard.simplify();
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 2\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 2\n"); 
       return loop_print_repr(active, loops, start, end, new_guard, guard_repr, 
                              indent,  remap, xforms, ocg, stmts, aotf, unin);
     }
@@ -2695,7 +2695,7 @@ namespace omega {
       new_guard.print(stderr); 
       new_guard.print_with_subs(stderr); 
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 3\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 3\n"); 
       CG_outputRepr *stmt_list = loop_print_repr(active, 
                                                  loops, 
                                                  start, 
@@ -2710,7 +2710,7 @@ namespace omega {
                                                  aotf,
                                                  unin);
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 4\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 4\n"); 
       stmt_list = ocg->StmtListAppend(stmt_list, 
                                       loop_print_repr(active,
                                                       loops, 
@@ -2729,7 +2729,7 @@ namespace omega {
       if (guard_repr == NULL)
         return stmt_list;
       else {
-        //fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 2\n"); 
+        fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 2\n"); 
         return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
       }
     }
@@ -2738,7 +2738,7 @@ namespace omega {
       Relation then_new_guard = Intersection(copy(guard), copy(then_cond));
       then_new_guard.simplify();
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 5\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 5\n"); 
       CG_outputRepr *then_stmt_list = loop_print_repr(active,
                                                       loops, 
                                                       start, 
@@ -2756,7 +2756,7 @@ namespace omega {
       Relation else_new_guard = Intersection(copy(guard), copy(else_cond));
       else_new_guard.simplify();
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 6\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 6\n"); 
       CG_outputRepr *else_stmt_list = loop_print_repr(active,
                                                       loops, 
                                                       i, 
@@ -2771,13 +2771,13 @@ namespace omega {
                                                       aotf,
                                                       unin);
       
-      //fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 3\n"); 
+      fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 3\n"); 
       CG_outputRepr *stmt_list = ocg->CreateIf(new_indent, 
                                                new_guard_repr, 
                                                then_stmt_list, 
                                                else_stmt_list);
 
-      //fprintf(stderr,"CG_utils.cc loop_print_repr recursive 7\n"); 
+      fprintf(stderr,"CG_utils.cc loop_print_repr recursive 7\n"); 
       stmt_list = ocg->StmtListAppend(stmt_list, 
                                       loop_print_repr(active,
                                                       loops, 
@@ -2797,7 +2797,7 @@ namespace omega {
       if (guard_repr == NULL)
         return stmt_list;
       else {
-        //fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 4\n"); 
+        fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 4\n"); 
         return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
       }
     }

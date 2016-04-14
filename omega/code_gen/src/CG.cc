@@ -168,8 +168,7 @@ namespace omega {
 #endif
 
     fprintf(stderr, "\n\n\n\nprintRepr recursing ??? return printRepr( ... )\n"); 
-    return printRepr(1, ocg, stmts, 
-                     aotf, uninterpreted_symbols, printString);
+    return printRepr(1, ocg, stmts, aotf, uninterpreted_symbols, printString);
   }
   
 
@@ -177,11 +176,11 @@ namespace omega {
   std::string CG_result::printString(
     std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > uninterpreted_symbols) const {
 
-    //fprintf(stderr, "CG.cc line 164, CG_result::printString()\n"); 
+    fprintf(stderr, "CG.cc line 164, CG_result::printString()\n"); 
     CG_stringBuilder ocg;
     std::vector<CG_outputRepr *> stmts(codegen_->xforms_.size());
 
-    //fprintf(stderr, "stmts.size() %d\n", stmts.size()); 
+    fprintf(stderr, "stmts.size() %d\n", stmts.size()); 
     for (int i = 0; i < stmts.size(); i++)
       stmts[i] = new CG_stringRepr("s" + to_string(i));
 
@@ -195,7 +194,7 @@ namespace omega {
     
     if (repr != NULL) {
       std::string s = repr->GetString();
-        fprintf(stderr, "repr->GetString() = '%s'\n", s.c_str()); 
+      fprintf(stderr, "repr->GetString() = '%s'\n", s.c_str()); 
       delete repr;
       return s;
     } else
@@ -1131,7 +1130,7 @@ namespace omega {
     
     // debugging output 
     int numfly =  assigned_on_the_fly.size();
-    fprintf(stderr, "assigned on the fly  %d\n", numfly/2 ); // Anand makes twice as many
+    fprintf(stderr, "assigned on the fly  %d\n", numfly ); // Anand makes twice as many
     for (int i=0; i<numfly; i++) { 
       //fprintf(stderr, "i %d\n", i); 
       std::pair<CG_outputRepr *, int>p = assigned_on_the_fly[i];
@@ -1158,7 +1157,7 @@ namespace omega {
     else
       guardRepr = NULL;
     
-    fprintf(stderr, "after guard assigned on the fly  %d\n", numfly/2 );
+    fprintf(stderr, "after guard assigned on the fly  %d\n", numfly );
     for (int i=0; i<numfly; i++) { 
       //fprintf(stderr, "i %d\n", i); 
       std::pair<CG_outputRepr *, int>p = assigned_on_the_fly[i];
@@ -1238,19 +1237,18 @@ namespace omega {
           threadLoop = false;
         }
         std::string preferredIdx;
-        //fprintf(stderr, "loopIdxNames.size() %d\n", loopIdxNames.size());
 
-        // ??? 
-        //for (int i=0; i<loopIdxNames.size(); i++) { 
-        //  fprintf(stderr, "\n"); 
-        //  for (int j=0; j<loopIdxNames[i].size(); j++) { 
-        //    fprintf(stderr, "i %d   j %d %s\n", i, j,loopIdxNames[i][j].c_str() ); 
-        //  }
-        //} 
+        fprintf(stderr, "loopIdxNames.size() %d\n", loopIdxNames.size());
+        for (int i=0; i<loopIdxNames.size(); i++) { 
+          fprintf(stderr, "\n"); 
+          for (int j=0; j<loopIdxNames[i].size(); j++) { 
+            fprintf(stderr, "i %d   j %d %s\n", i, j,loopIdxNames[i][j].c_str() ); 
+          }
+        } 
 
         fprintf(stderr, "firstActiveStmt %d\n", firstActiveStmt);
-        //fprintf(stderr, "loopIdxNames[firstActiveStmt].size() %d\n", loopIdxNames[firstActiveStmt].size()); 
-        //fprintf(stderr, "level_ %d   /2 %d\n", level_, level_/2); 
+        fprintf(stderr, "loopIdxNames[firstActiveStmt].size() %d\n", loopIdxNames[firstActiveStmt].size()); 
+        fprintf(stderr, "level_ %d   /2 %d\n", level_, level_/2); 
 
         if (loopIdxNames.size()
             && (level_ / 2) - 1 < loopIdxNames[firstActiveStmt].size()) {
@@ -1269,8 +1267,8 @@ namespace omega {
               
             }
           }
-          
         }
+
         if ( preferredIdx.length() != 0) {
           fprintf(stderr, "CG.cc  preferredIdx %s\n", preferredIdx.c_str()); 
         } 
@@ -1282,6 +1280,7 @@ namespace omega {
             loop = "blockLoop ";
           if (threadLoop)
             loop = "threadLoop ";
+
           if ( preferredIdx.length() != 0) {
             fprintf(stderr, "CG.cc adding comment with preferredIdx %s\n", preferredIdx.c_str());
           } 
@@ -1305,12 +1304,12 @@ namespace omega {
         return loopRepr;
       else
         return ocg->CreateIf(indent, guardRepr, loopRepr, NULL);
-    } else {
+    } 
+    else {
       fprintf(stderr, "NOT needloop_\n");
       
       std::pair<CG_outputRepr *, std::pair<CG_outputRepr *, int> > result =
-        output_assignment(ocg, bounds_, level_, cur_known, 
-                          aotf, unin[stmt_num]);
+        output_assignment(ocg, bounds_, level_, cur_known, aotf, unin[stmt_num]);
       
       //fprintf(stderr, "RESULT  0x%x  0x%x  %d\n", result.first, result.second.first, result.second.second ); 
       
@@ -1319,14 +1318,14 @@ namespace omega {
       //fprintf(stderr, "RESULT  0x%x  0x%x  %d\n", result.first, result.second.first, result.second.second ); 
       
       //fprintf(stderr, "after guardRepr assigned on the fly  %d\n", numfly );
-      //for (int i=0; i<numfly; i++) { 
-      //  fprintf(stderr, "i %d\n", i); 
-      //  std::pair<CG_outputRepr *, int>p = assigned_on_the_fly[i];
-      //  CG_outputRepr *tr = NULL;
-      //  if (p.first != NULL) tr = p.first->clone();
-      //  int val = p.second;
-      //  fprintf(stderr, "0x%x   %d\n", tr, val);
-      //} 
+      for (int i=0; i<numfly; i++) { 
+        //fprintf(stderr, "i %d\n", i); 
+        std::pair<CG_outputRepr *, int>p = assigned_on_the_fly[i];
+        CG_outputRepr *tr = NULL;
+        if (p.first != NULL) tr = p.first->clone();
+        int val = p.second;
+        //fprintf(stderr, "0x%x   %d\n", tr, val);
+      } 
       
       
       if (result.second.second < CodeGen::var_substitution_threshold) {
@@ -1395,6 +1394,102 @@ namespace omega {
         else
           return ocg->CreateIf(indent, guardRepr,
                                ocg->StmtListAppend(assignRepr, bodyRepr), NULL);
+
+        /*  DEAD CODE
+            std::pair<EQ_Handle, int> result_ = find_simplest_assignment(
+            copy(bounds_), copy(bounds_).set_var(level_),
+            assigned_on_the_fly);
+            bool found_func = false;
+            Variable_ID v2;
+            int arity;
+            for (Constr_Vars_Iter cvi(result_.first); cvi; cvi++)
+            if (cvi.curr_var()->kind() == Global_Var) {
+            Global_Var_ID g = cvi.curr_var()->get_global_var();
+            if ((g->arity() > 0)) {
+            
+            found_func = true;
+            arity = g->arity();
+            //copy(R).print();
+            v2 = copy(bounds_).get_local(g,
+            cvi.curr_var()->function_of());
+            
+            break;
+            }
+            }
+            
+            bool is_array = false;
+            if (found_func) {
+            
+            is_array = ocg->QueryInspectorType(
+            v2->get_global_var()->base_name());
+            
+            }
+            if (!found_func || !is_array) {
+            
+            CG_outputRepr *assignRepr = ocg->CreateAssignment(
+            (guardRepr == NULL) ? indent : indent + 1,
+            output_ident(ocg, bounds_,
+            const_cast<CG_loop *>(this)->bounds_.set_var(
+            level_), assigned_on_the_fly),
+            result.second.first);
+            
+            CG_outputRepr *bodyRepr = body_->printRepr(
+            (guardRepr == NULL) ? indent : indent + 1, ocg, stmts,
+            assigned_on_the_fly);
+            if (guardRepr == NULL)
+            return ocg->StmtListAppend(assignRepr, bodyRepr);
+            else
+            return ocg->CreateIf(indent, guardRepr,
+            ocg->StmtListAppend(assignRepr, bodyRepr), NULL);
+            
+            } else {
+            
+            std::vector<CG_outputRepr *> index_expr;
+            
+            CG_outputRepr* lb = ocg->CreateArrayRefExpression(
+            v2->get_global_var()->base_name(),
+            output_ident(ocg, bounds_,
+            const_cast<CG_loop *>(this)->bounds_.set_var(2),
+            assigned_on_the_fly));
+            
+            for (int i = arity; i > 1; i--) {
+            
+            index_expr.push_back(
+            ocg->CreateArrayRefExpression(
+            v2->get_global_var()->base_name(),
+            output_ident(ocg, bounds_,
+            const_cast<CG_loop *>(this)->bounds_.set_var(
+            2 * i),
+            assigned_on_the_fly)));
+            
+            //}
+            
+            }
+            
+            CG_outputRepr *ub;
+            if (index_expr.size() > 1)
+            ub = ocg->CreateInvoke("max", index_expr);
+            else
+            ub = index_expr[0];
+            CG_outputRepr *le = ocg->CreateMinus(ub, ocg->CreateInt(1));
+            CG_outputRepr *inductive = ocg->CreateInductive(
+            output_ident(ocg, bounds_,
+            const_cast<CG_loop *>(this)->bounds_.set_var(
+            level_), assigned_on_the_fly), lb, le,
+            NULL);
+            
+            CG_outputRepr *bodyRepr = body_->printRepr(
+            (guardRepr == NULL) ? indent : indent + 1, ocg, stmts,
+            assigned_on_the_fly);
+            
+            if (guardRepr == NULL) {
+            return ocg->CreateLoop(indent, inductive, bodyRepr);
+            } else
+            return ocg->CreateIf(indent, guardRepr,
+            ocg->CreateLoop(indent + 1, inductive, bodyRepr),
+            NULL);
+            }
+        */      
       }
     }
   }
@@ -1594,7 +1689,7 @@ namespace omega {
       prefix += "  ";
     std::cout << prefix << "LEAF: " << active_ << std::endl;
     std::cout << prefix << "known: ";
-    fflush(stdout);
+    std::cout.flush();
     const_cast<CG_leaf *>(this)->known_.print();
     for (std::map<int, Relation>::const_iterator i = guards_.begin();
          i != guards_.end(); i++) {

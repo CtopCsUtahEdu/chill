@@ -155,7 +155,7 @@ public:
   LoopCuda();
   //LoopCuda(IR_Code *ir, tree_for *tf, global_symtab* gsym);
   LoopCuda(IR_Control *ir_c, int loop_num);//protonu-added so as to not change ir_suif
-  virtual ~LoopCuda();
+  ~LoopCuda();
   
 };
 

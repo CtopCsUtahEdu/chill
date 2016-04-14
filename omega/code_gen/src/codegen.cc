@@ -371,7 +371,7 @@ CG_result *CodeGen::buildAST(int level, const BoolSet<> &active, bool split_on_c
 
 
 CG_result *CodeGen::buildAST(int effort) {
-  fprintf(stderr, "CodeGen::buildAST( effort %d\n", effort); 
+  fprintf(stderr, "CodeGen::buildAST( effort %d )\n", effort); 
   if (remap_.size() == 0)
     return NULL;
 

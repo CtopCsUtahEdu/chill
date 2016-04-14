@@ -236,17 +236,15 @@ public:
   virtual bool hasSymbolTable() { return false; } ; // most nodes do NOT have a symbol table
   virtual bool hasTypedefTable() { return false; } ; // most nodes do NOT have a typedef table
   virtual chillAST_SymbolTable *getSymbolTable() { return NULL; } // most nodes do NOT have a symbol table
+  chillAST_VarDecl *findVariableNamed( const char *name ); // recursive 
+  // void addDecl( chillAST_VarDecl *vd); // recursive, adds to first  symbol table it can find 
 
   // TODO decide how to hide some data
   chillAST_node *parent; 
   bool isFromSourceFile;  // false = #included 
   char *filename;  // file this node is from
 
-  #if 0
   void segfault() { fprintf(stderr, "segfaulting on purpose\n"); int *i=0; int j = i[0]; }; // seg fault
-  #else
-  void segfault() { }
-  #endif
   int getNumChildren() { return children.size(); }; 
   vector<chillAST_node*> children; 
   vector<chillAST_node*> getChildren() { return children; } ;  // not usually useful
@@ -259,7 +257,19 @@ public:
 
   vector<chillAST_Preprocessing*> preprocessinginfo; 
 
-  virtual void addChild( chillAST_node* c) { children.push_back(c); c->parent = this; } ;  // not usually useful
+  virtual void addChild( chillAST_node* c) {
+    //if (c->isFunctionDecl()) fprintf(stderr, "addchild FunctionDecl\n"); 
+    c->parent = this;
+    // check to see if it's already there
+    for (int i=0; i<children.size(); i++) { 
+      if (c == children[i]) {
+        //fprintf(stderr, "addchild ALREADY THERE\n"); 
+        return; // already there
+      }
+    }
+    children.push_back(c);
+  } ;  // not usually useful
+
   virtual void insertChild(int i, chillAST_node* node) { 
     //fprintf(stderr, "%s inserting child of type %s at location %d\n", getTypeString(), node->getTypeString(), i); 
     node->parent = this; 
@@ -290,10 +300,10 @@ public:
     fprintf(stderr, "%s %p generic replaceChild called with oldchild that was not a child\n", 
             getTypeString(), this) ;
     fprintf(stderr, "printing\n"); 
-    print(0,stderr); fprintf(stderr, "\nchild: ");
+    print(); fprintf(stderr, "\nchild: ");
     if (!old) fprintf(stderr, "oldchild NULL!\n");
-    old->print(0,stderr); fprintf(stderr, "\nnew: "); 
-    newchild->print(0,stderr); fprintf(stderr, "\n"); 
+    old->print(); fprintf(stderr, "\nnew: "); 
+    newchild->print(); fprintf(stderr, "\n"); 
     segfault(); // make easier for gdb
   };
   
@@ -320,7 +330,7 @@ public:
 
   virtual int evalAsInt() { 
     fprintf(stderr,"(%s) can't be evaluated as an integer??\n", Chill_AST_Node_Names[asttype]);
-    print(0,stderr); fprintf(stderr, "\n"); 
+    print(); fprintf(stderr, "\n"); 
     segfault(); 
   }
 
@@ -396,6 +406,17 @@ public:
     return parent->findContainingLoop(); // recurse upwards
   }
 
+  chillAST_node* findContainingNonLoop() { // recursive walk parent links, avoiding loops
+    fprintf(stderr, "%s::findContainingNonLoop()   ", getTypeString()); 
+    //if (parent) fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
+    //else fprintf(stderr, "no parent\n"); 
+    // do not check SELF type, as we may want to find the loop containing a loop
+    if (!parent) return NULL;
+    if (parent->isCompoundStmt() && parent->getParent()->isForStmt()) return parent->getParent()->findContainingNonLoop(); // keep recursing
+    if (parent->isForStmt()) return parent->findContainingNonLoop(); // keep recursing
+    return (chillAST_node*)parent; // return non-loop 
+  }
+
   // TODO gather loop init and cond (and if cond) like gatherloopindeces
 
   virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){  // both scalar and arrays
@@ -457,10 +478,12 @@ public:
     fprintf(stderr,"(%s) forgot to implement clone()\n" ,Chill_AST_Node_Names[asttype]); 
     exit(-1); ; 
   };
-  virtual void dump(  int indent=0,  FILE *fp = stdout ) { 
+  virtual void dump(  int indent=0,  FILE *fp = stderr ) { 
+    fflush(stdout); 
     fprintf(fp,"(%s) forgot to implement dump()\n" ,Chill_AST_Node_Names[asttype]); };// print ast
   
-  virtual void print( int indent=0,  FILE *fp = stdout ) { 
+  virtual void print( int indent=0,  FILE *fp = stderr ) { 
+    fflush(stdout); 
     //fprintf(stderr, "generic chillAST_node::print() called!\n"); 
     //fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
@@ -468,16 +491,24 @@ public:
     fprintf(fp,"(%s) forgot to implement print()\n" ,Chill_AST_Node_Names[asttype]); 
   };// print CODE 
   
-  virtual void printName( int indent=0,  FILE *fp = stdout ) { 
-    //fprintf(stderr, "generic chillAST_node::print() called!\n"); 
+  virtual void printName( int indent=0,  FILE *fp = stderr ) { 
+    fflush(stdout); 
+    //fprintf(stderr, "generic chillAST_node::printName() called!\n"); 
     //fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
     chillindent(indent, fp); 
     fprintf(fp,"(%s) forgot to implement printName()\n" ,Chill_AST_Node_Names[asttype]); 
   };// print CODE 
 
+  virtual char *stringRep(int indent=0 ) {  // the ast's print version
+    fflush(stdout);
+    // chillindent(indent, fp);  TODO 
+    fprintf(stderr,"(%s) forgot to implement stringRep()\n" ,Chill_AST_Node_Names[asttype]);
+    segfault(); 
+  }
 
-  virtual void printonly( int indent=0,  FILE *fp = stdout ) { print( indent, fp); }; 
+
+  virtual void printonly( int indent=0,  FILE *fp = stderr ) { print( indent, fp); }; 
 
   //virtual void printString( std::string &s ) { 
   //  fprintf(stderr,"(%s) forgot to implement printString()\n" ,Chill_AST_Node_Names[asttype]);
@@ -507,7 +538,9 @@ public:
     }
   }
 
-  virtual void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // should ForStmt children include its body? or gdl for forstmt?
+
+
+  virtual void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // this is probably broken - returns ALL loops under it
     int n = children.size(); 
     //fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
@@ -516,6 +549,36 @@ public:
     }
     //fprintf(stderr, "found %d deep loops\n", loops.size()); 
   }
+
+
+  // generic for chillAST_node with children
+  virtual void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) { // returns DEEPEST nesting of loops 
+    std::vector<chillAST_ForStmt *>deepest; // deepest below here 
+    
+    int n = children.size(); 
+    //fprintf(stderr, "find_deepest_loops of a %s with %d children\n", getTypeString(), n); 
+    for (int i=0; i<n; i++) { 
+      std::vector<chillAST_ForStmt *> subloops;  // loops below here among a child of mine 
+      
+      //fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
+      children[i]->find_deepest_loops( subloops );
+      
+      if (subloops.size() > deepest.size()) { 
+        deepest = subloops;
+      }
+    }
+    
+    // append deepest we see at this level to loops 
+    for ( int i=0; i<deepest.size(); i++) { 
+      loops.push_back( deepest[i] );
+    }
+
+    //fprintf(stderr, "found %d deep loops\n", loops.size()); 
+    
+  }
+
+
+
 
   const char *getTypeString() { return Chill_AST_Node_Names[asttype]; } ; 
   int  getType() { return asttype; }; 
@@ -574,7 +637,7 @@ public:
   virtual void gatherStatements( std::vector<chillAST_node*> &statements ) { 
     fprintf(stderr,"(%s) forgot to implement gatherStatements()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();fflush(stdout); 
-    print(0,stderr);
+    print();
     fprintf(stderr, "\n\n"); 
   }
 
@@ -582,7 +645,7 @@ public:
   virtual bool isSameAs( chillAST_node *other ){  // for tree comparison 
     fprintf(stderr,"(%s) forgot to implement isSameAs()\n" ,Chill_AST_Node_Names[asttype]); 
     dump(); fflush(stdout); 
-    print(0,stderr);
+    print();
     fprintf(stderr, "\n\n");   }
 
   void printPreprocBEFORE( int indent, FILE *fp );
@@ -664,7 +727,10 @@ public:
 
   chillAST_RecordDecl  *vardef;// the thing that says what the struct looks like
   chillAST_TypedefDecl *typedefinition; // NULL for float, int, etc.
+  chillAST_RecordDecl * getStructDef(); // TODO make vardef private?
 
+  //bool insideAStruct;  // this variable is itself part of a struct
+  
   char *underlyingtype;
   char *varname;
   char *arraypart;           // [ 12 ] [ 34 ] if that is how it was defined
@@ -681,7 +747,6 @@ public:
   bool isShared; // CUDA  __shared__
   bool isDevice; // CUDA  __device__
   bool isStruct; 
-  chillAST_RecordDecl * getStructDef();
   
   int isAParameter; 
   bool byreference;
@@ -692,7 +757,7 @@ public:
   bool isArray() { return (numdimensions != 0); }; 
   bool isAStruct() { return (isStruct || (typedefinition && typedefinition->isAStruct())); }
   void setStruct( bool b ) {isStruct = b;/*fprintf(stderr,"vardecl %s IS A STRUCT\n",varname);*/ };
-
+  bool isPointer() { return isArray() && !knownArraySizes; }  // 
 
   bool knowAllDimensions() { return knownArraySizes; } ; 
 
@@ -767,8 +832,10 @@ public:
   }; 
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stdout );  // print CODE  
+  void dump(  int indent=0,  FILE *fp = stdout );  // print ast   
+  char *stringRep(int indent=0 );
+
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {}; // do nothing
@@ -799,6 +866,250 @@ public:
 
 
 
+
+class chillAST_CompoundStmt: public chillAST_node { 
+public:
+  // variables that are special for this type of node
+  chillAST_SymbolTable  *symbol_table;  // symbols defined inside this compound statement 
+  chillAST_TypedefTable *typedef_table;
+
+  bool hasSymbolTable()  { return true; } ;
+  bool hasTypeDefTable() { return true; } ;
+  chillAST_node *findDatatype( char *t ) { 
+    if (typedef_table) { 
+      for (int i=0; i< typedef_table->size(); i++)  {
+        chillAST_TypedefDecl *tdd = (*typedef_table)[i];
+        if (tdd->nameis( t )) return tdd;
+      }
+    }
+    if (parent) return parent->findDatatype(t);
+    return NULL; // should not happen 
+  }
+
+  chillAST_SymbolTable *getSymbolTable() { return symbol_table; }
+
+  chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {   // chillAST_CompoundStmt method
+    //fprintf(stderr, "\nchillAST_CompoundStmt addVariableToSymbolTable( %s )\n", vd->varname);
+    symbol_table = addSymbolToTable( symbol_table, vd ); 
+    //printSymbolTable(  symbol_table );
+    return symbol_table;
+  }
+
+  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
+    typedef_table = addTypedefToTable( typedef_table, tdd );
+  }
+
+  // constructors
+  chillAST_CompoundStmt(); // never has any args ???
+  
+  // other methods particular to this type of node
+  
+  
+  // required methods 
+  void replaceChild( chillAST_node *old, chillAST_node *newchild );
+  void dump(  int indent=0,  FILE *fp = stdout );
+  void print( int indent=0,  FILE *fp = stdout );
+  chillAST_node* constantFold();
+  chillAST_node* clone(); 
+
+  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
+  void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
+
+  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
+  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
+  void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
+
+  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
+  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
+  void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
+  void loseLoopWithLoopVar( char *var ); // special case this for not for debugging
+
+  void gatherStatements( std::vector<chillAST_node*> &statements );
+}; 
+
+
+
+
+class chillAST_RecordDecl: public chillAST_node {  // declaration of the shape of a struct or union 
+private:
+  char *name;  // could be NULL? for unnamed structs?
+  char *originalname; 
+  bool isStruct;
+  bool isUnion;
+  vector<chillAST_VarDecl *> subparts;
+  
+public:
+  chillAST_RecordDecl();
+  chillAST_RecordDecl( const char *nam, chillAST_node *p ); 
+  chillAST_RecordDecl( const char *nam, const char *orig, chillAST_node *p ); 
+
+  void  setName( const char *newname) { name = strdup(newname); }; 
+  char *getName( ) { return name; }; 
+  
+  bool isAStruct() { return isStruct; }; 
+  bool isAUnion()  { return isUnion;  };
+
+  void setStruct(bool tf) { isStruct = tf; }; 
+  //fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
+  void setUnion( bool tf) { isUnion  = tf; };
+
+  chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ); // does NOTHING
+  
+  int numSubparts() { return subparts.size(); }; 
+  void addSubpart( chillAST_VarDecl *s ) { subparts.push_back(s); }; 
+  chillAST_VarDecl *findSubpart( const char *name );
+  chillAST_VarDecl *findSubpartByType( const char *typ );
+
+  void dump(  int indent=0,  FILE *fp = stdout );
+  void print( int indent=0,  FILE *fp = stdout ) ;
+  void printStructure( int indent=0,  FILE *fp = stdout ) ;
+};
+
+
+
+
+class chillAST_FunctionDecl: public chillAST_node { 
+private:
+  chillAST_CompoundStmt *body; // always a compound statement? 
+  CHILL_FUNCTION_TYPE function_type;  // CHILL_FUNCTION_CPU or  CHILL_FUNCTION_GPU
+  bool externfunc;   // function is external 
+  bool builtin;      // function is a builtin
+  bool forwarddecl; 
+
+public:
+  char *returnType;
+  char *functionName;
+
+  // parameters
+  int numParameters() { return parameters.size(); } ; 
+  chillAST_SymbolTable parameters;
+
+  // this is probably a mistake, but symbol_table here is pointing to BODY'S symbol table
+  //chillAST_SymbolTable  *symbol_table;  // symbols defined inside this function. REALLY the body's symbol table?
+
+  chillAST_TypedefTable *typedef_table; // function typedef table
+
+
+  bool hasSymbolTable() { return true; } ; // COULD HAVE
+  bool hasTypeDefTable(){ return true; } ; // COULD HAVE 
+
+
+  //char *parametertypes; // a single string?? 
+  void printParameterTypes( FILE *fp ); 
+  void setName( char *n ) { functionName = strdup(n); /* probable memory leak */ }; 
+
+  void setBuiltin() { builtin = true; } ; // designate function as a builtin
+  bool isBuiltin()  { return builtin; } ; // report whether is a builtin 
+
+  void setExtern() { externfunc = true; }; // designate function as external 
+  bool isExtern()  { return externfunc; }; // report whether function is external
+
+  void setForward() { forwarddecl = true; }; // designate function as fwd declaration
+  bool isForward()  { return forwarddecl; }; // report whether function is external
+
+  bool isFunctionCPU() { return( function_type == CHILL_FUNCTION_CPU ); };
+  bool isFunctionGPU() { return( function_type == CHILL_FUNCTION_GPU ); };
+  void setFunctionCPU() { function_type = CHILL_FUNCTION_CPU; };
+  void setFunctionGPU() { function_type = CHILL_FUNCTION_GPU; };
+
+  void *uniquePtr;  // DO NOT REFERENCE THROUGH THIS! USED AS A UNIQUE ID
+
+  
+  
+
+  chillAST_FunctionDecl(); //  { asttype = CHILLAST_NODETYPE_FUNCTIONDECL; numparameters = 0;}; 
+  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p=NULL ) ;
+  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p, void *unique ) ;
+  
+  void addParameter( chillAST_VarDecl *p); 
+  chillAST_VarDecl *hasParameterNamed( const char *name ); 
+  chillAST_VarDecl *findParameterNamed( const char *name ) { return hasParameterNamed( name ); }; 
+
+  void addDecl( chillAST_VarDecl *vd);  // just adds to symbol table?? TODO 
+
+  chillAST_VarDecl *funcHasVariableNamed( const char *name );  // functiondecl::hasVariableNamed
+  //chillAST_VarDecl *findVariableNamed( const char *name ) { return hasVariableNamed( name ); }; 
+
+  void addChild(chillAST_node* node); // special because inserts into BODY
+  void insertChild(int i, chillAST_node* node); // special because inserts into BODY
+
+  void setBody( chillAST_node * bod );  
+  chillAST_CompoundStmt *getBody() { return( body); }
+  
+  void print( int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
+
+  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
+  void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
+
+  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
+  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
+  chillAST_VarDecl *findArrayDecl( const char *name ); 
+  //void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
+  //void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) 
+
+  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
+  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
+  void cleanUpVarDecls();   
+
+  //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
+
+  chillAST_node* constantFold();
+
+  chillAST_node *findDatatype( char *t ) { 
+    //fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
+    if (!typedef_table) { // not here
+      if (parent) return parent->findDatatype(t); // not here, check parents
+      else return NULL; // not defined here and no parent 
+    }
+    
+    //fprintf(stderr, "%d typedefs\n", typedef_table->size());
+    for (int i=0; i< typedef_table->size(); i++)  {
+      chillAST_TypedefDecl *tdd = (*typedef_table)[i];
+      if ( tdd->nameis( t )) return tdd;
+    }
+    if (parent) return parent->findDatatype(t);
+    return NULL; // should not happen 
+  }
+
+  chillAST_SymbolTable *getParameterSymbolTable() { return &parameters; }
+  chillAST_SymbolTable *getSymbolTable() { return body->getSymbolTable(); }  //symbol_table; } // 
+  void setSymbolTable( chillAST_SymbolTable *tab ) { 
+    // no longer keeping a local ?? symbol_table = tab;
+    if (!body) { // can never happen now 
+      body = new chillAST_CompoundStmt(); 
+    } // only if func is empty!
+    body->symbol_table = tab; 
+  }
+
+  chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_FunctionDecl method 
+    //fprintf(stderr, "\nchillAST_FunctionDecl addVariableToSymbolTable( %s )\n", vd->varname);
+    
+    // this is all dealing with the body's symbol table
+    // the function has a symbol table called "parameters" but that is a special case
+
+    addSymbolToTable( getSymbolTable(), vd ); 
+    if (!vd->parent) { 
+      //fprintf(stderr, "setting parent of vardecl to be the function whose symbol table it is going into\n"); // ?? 
+      vd->setParent( this );
+      insertChild(0,vd);  
+    }
+    //printSymbolTable( getSymbolTable() ); 
+    return getSymbolTable();
+  }
+
+
+  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
+    typedef_table = addTypedefToTable( typedef_table, tdd );
+  }
+
+  void replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
+    body->replaceChild( old, newchild ); 
+  }
+};  // end FunctionDecl 
 
 
 
@@ -868,9 +1179,21 @@ public:
     macrodefinitions.push_back(md);
     //fprintf(stderr, "addMacro(), now %d macros\n", macrodefinitions.size()); 
   }
-  void addFunc(chillAST_FunctionDecl* fd) {functions.push_back(fd);}
+  void addFunc(chillAST_FunctionDecl* fd) { 
+    //fprintf(stderr, "chillAST_SourceFile::addFunc( %s %p)\n", fd->functionName, fd);
 
-  // chillAST_VarDecl *findArrayDecl( const char *name );  TODO
+    bool already = false; 
+    for (int i=0; i<functions.size(); i++) { 
+      //fprintf(stderr, "function %d is %s %p\n", i, functions[i]->functionName, functions[i]); 
+      if (functions[i] == fd) { 
+        //fprintf(stderr, "function %s was already in source functions\n", fd->functionName); 
+        already = true;
+      }
+    }
+    if (!already) functions.push_back(fd);
+
+    // PROBABLY fd was created with sourcefile as its parent. Don't add it twice
+    addChild( (chillAST_node *)fd); }
 
 };
 
@@ -912,270 +1235,26 @@ public:
 */
 
 
-class chillAST_CompoundStmt: public chillAST_node { 
-public:
-  // variables that are special for this type of node
-  chillAST_SymbolTable  *symbol_table;  // symbols defined inside this compound statement 
-  chillAST_TypedefTable *typedef_table;
-
-  bool hasSymbolTable()  { return true; } ;
-  bool hasTypeDefTable() { return true; } ;
-  chillAST_node *findDatatype( char *t ) { 
-    if (typedef_table) { 
-      for (int i=0; i< typedef_table->size(); i++)  {
-        chillAST_TypedefDecl *tdd = (*typedef_table)[i];
-        if (tdd->nameis( t )) return tdd;
-      }
-    }
-    if (parent) return parent->findDatatype(t);
-    return NULL; // should not happen 
-  }
-
-  chillAST_SymbolTable *getSymbolTable() { return symbol_table; }
-
-  chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {   // chillAST_CompoundStmt method
-    //fprintf(stderr, "\nchillAST_CompoundStmt addVariableToSymbolTable( %s )\n", vd->varname);
-    symbol_table = addSymbolToTable( symbol_table, vd ); 
-    //printSymbolTable(  symbol_table );
-    return symbol_table;
-  }
-
-  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
-    typedef_table = addTypedefToTable( typedef_table, tdd );
-  }
-
-  // constructors
-  chillAST_CompoundStmt(); // never has any args ???
-  
-  // other methods particular to this type of node
-  
-  
-  // required methods 
-  void replaceChild( chillAST_node *old, chillAST_node *newchild );
-  void dump(  int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout );
-  chillAST_node* constantFold();
-  chillAST_node* clone(); 
-
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
-  void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
-
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
-  void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
-  void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
-  void loseLoopWithLoopVar( char *var ); // special case this for not for debugging
-
-  void gatherStatements( std::vector<chillAST_node*> &statements );
-}; 
-
-
-
-class chillAST_FunctionDecl: public chillAST_node { 
-private:
-  chillAST_CompoundStmt *body; // always a compound statement? 
-  CHILL_FUNCTION_TYPE function_type;  // CHILL_FUNCTION_CPU or  CHILL_FUNCTION_GPU
-  bool externfunc;   // function is external 
-  bool builtin;      // function is a builtin
-  bool forwarddecl; 
-
-public:
-  char *returnType;
-  char *functionName;
-
-  // parameters
-  int numParameters() { return parameters.size(); } ; 
-  chillAST_SymbolTable parameters;
-
-  // this is probably a mistake, but symbol_table here is pointing to BODY'S symbol table
-  chillAST_SymbolTable  *symbol_table;  // symbols defined inside this function. REALLY the body's symbol table?
-
-  chillAST_TypedefTable *typedef_table; // function typedef table
-
-
-  bool hasSymbolTable() { return true; } ; // COULD HAVE
-  bool hasTypeDefTable(){ return true; } ; // COULD HAVE 
-
-
-  //char *parametertypes; // a single string?? 
-  void printParameterTypes( FILE *fp ); 
-  void setName( char *n ) { functionName = strdup(n); /* probable memory leak */ }; 
-
-  void setBuiltin() { builtin = true; } ; // designate function as a builtin
-  bool isBuiltin()  { return builtin; } ; // report whether is a builtin 
-
-  void setExtern() { externfunc = true; }; // designate function as external 
-  bool isExtern()  { return externfunc; }; // report whether function is external
-
-  void setForward() { forwarddecl = true; }; // designate function as fwd declaration
-  bool isForward()  { return forwarddecl; }; // report whether function is external
-
-  bool isFunctionCPU() { return( function_type == CHILL_FUNCTION_CPU ); };
-  bool isFunctionGPU() { return( function_type == CHILL_FUNCTION_GPU ); };
-  void setFunctionCPU() { function_type = CHILL_FUNCTION_CPU; };
-  void setFunctionGPU() { function_type = CHILL_FUNCTION_GPU; };
-
-  void *uniquePtr;  // DO NOT REFERENCE THROUGH THIS! USED AS A UNIQUE ID
-
-  
-  
-
-  chillAST_FunctionDecl(); //  { asttype = CHILLAST_NODETYPE_FUNCTIONDECL; numparameters = 0;}; 
-  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p=NULL ) ;
-  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p, void *unique ) ;
-  
-  void addParameter( chillAST_VarDecl *p); 
-  chillAST_VarDecl *hasParameterNamed( const char *name ); 
-  chillAST_VarDecl *findParameterNamed( const char *name ) { return hasParameterNamed( name ); }; 
-
-  void addDecl( chillAST_VarDecl *vd);  // just adds to symbol table?? TODO 
-
-  chillAST_VarDecl *hasVariableNamed( const char *name ); 
-  chillAST_VarDecl *findVariableNamed( const char *name ) { return hasVariableNamed( name ); }; 
-
-  void addChild(chillAST_node* node); // special because inserts into BODY
-  void insertChild(int i, chillAST_node* node); // special because inserts into BODY
-
-  void setBody( chillAST_node * bod );  
-  chillAST_CompoundStmt *getBody() { return( body); }
-  
-  void print( int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
-
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
-  void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
-
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-  chillAST_VarDecl *findArrayDecl( const char *name ); 
-  //void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
-  //void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) 
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
-  void cleanUpVarDecls();   
-
-  //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
-
-  chillAST_node* constantFold();
-
-  chillAST_node *findDatatype( char *t ) { 
-    //fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
-    if (!typedef_table) { // not here
-      if (parent) return parent->findDatatype(t); // not here, check parents
-      else return NULL; // not defined here and no parent 
-    }
-    
-    //fprintf(stderr, "%d typedefs\n", typedef_table->size());
-    for (int i=0; i< typedef_table->size(); i++)  {
-      chillAST_TypedefDecl *tdd = (*typedef_table)[i];
-      if ( tdd->nameis( t )) return tdd;
-    }
-    if (parent) return parent->findDatatype(t);
-    return NULL; // should not happen 
-  }
-
-  //const std::vector<chillAST_VarDecl *> getSymbolTable() { return symbol_table; }
-
-  
-  chillAST_SymbolTable *getParameterSymbolTable() { return &parameters; }
-  chillAST_SymbolTable *getSymbolTable() { return symbol_table; }
-  void setSymbolTable( chillAST_SymbolTable *tab ) { 
-    symbol_table = tab;
-    if (!body) { // can never happen now 
-      body = new chillAST_CompoundStmt(); 
-    } // only if func is empty!
-    body->symbol_table = tab; 
-  }
-
-  chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_FunctionDecl method 
-    //fprintf(stderr, "\nchillAST_FunctionDecl addVariableToSymbolTable( %s )\n", vd->varname);
-    
-    // this is all dealing with the body's symbol table
-    // the function has a symbol table called "parameters" but that is a special case
-
-    symbol_table = addSymbolToTable( symbol_table, vd ); 
-    if (!vd->parent) { 
-      //fprintf(stderr, "setting parent of vardecl to be the function whose symbol table it is going into\n"); // ?? 
-      vd->setParent( this );
-      insertChild(0,vd);  
-    }
-    //printSymbolTable(  symbol_table );
-    return symbol_table;
-  }
-
-
-  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
-    typedef_table = addTypedefToTable( typedef_table, tdd );
-  }
-
-  void replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
-    body->replaceChild( old, newchild ); 
-  }
-};  // end FunctionDecl 
-
-
-
-
-class chillAST_RecordDecl: public chillAST_node {  // declaration of the shape of a struct or union 
-private:
-  char *name;  // could be NULL? for unnamed structs?
-  char *originalname; 
-  bool isStruct;
-  bool isUnion;
-  vector<chillAST_VarDecl *> subparts;
-  
-public:
-  chillAST_RecordDecl();
-  chillAST_RecordDecl( const char *nam, chillAST_node *p ); 
-  chillAST_RecordDecl( const char *nam, const char *orig, chillAST_node *p ); 
-
-  void  setName( const char *newname) { name = strdup(newname); }; 
-  char *getName( ) { return name; }; 
-  
-  bool isAStruct() { return isStruct; }; 
-  bool isAUnion()  { return isUnion;  };
-
-  void setStruct(bool tf) { isStruct = tf; }; 
-  //fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
-  void setUnion( bool tf) { isUnion  = tf; };
-
-  chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ); // does NOTHING
-  
-  int numSubparts() { return subparts.size(); }; 
-  void addSubpart( chillAST_VarDecl *s ) { subparts.push_back(s); }; 
-  chillAST_VarDecl *findSubpart( const char *name );
-  chillAST_VarDecl *findSubpartByType( const char *typ );
-
-  void dump(  int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout ) ;
-  void printStructure( int indent=0,  FILE *fp = stdout ) ;
-};
-
-
 
 class chillAST_MacroDefinition: public chillAST_node { 
 private:
   chillAST_node *body; // rhs      always a compound statement? 
   chillAST_SymbolTable *symbol_table;
-  //char *rhsideString; 
 public:
   char *macroName;
-  
+  char *rhsString; 
+
   // parameters - these will be odd, in that they HAVE NO TYPE
   int numParameters() { return parameters.size(); } ; 
   std::vector<chillAST_VarDecl *>parameters;
   
   void setName( char *n ) { macroName = strdup(n); /* probable memory leak */ }; 
-  
+  void setRhsString( char *n ) { rhsString = strdup(n); /* probable memory leak */ }; 
+  char *getRhsString() { return rhsString; }
+
   chillAST_MacroDefinition();
   chillAST_MacroDefinition( const char *name, chillAST_node *par);
+  chillAST_MacroDefinition( const char *name, const char *rhs, chillAST_node *par);
   
   void addParameter( chillAST_VarDecl *p);  // parameters have no TYPE ??
   chillAST_VarDecl *hasParameterNamed( const char *name ); 
@@ -1276,7 +1355,7 @@ public:
   void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces );
   void gatherLoopVars(  std::vector<std::string> &loopvars );  // gather as strings ??
 
-  void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) {
+  void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // chillAST_ForStmt version 
     // ADD MYSELF!
     loops.push_back( this );
 
@@ -1288,6 +1367,25 @@ public:
     }
     //fprintf(stderr, "found %d deep loops\n", loops.size()); 
   }
+
+
+  void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) { 
+    std::vector<chillAST_ForStmt *> b; // deepest loops below me
+
+    int n = body->children.size(); 
+    for (int i=0; i<n; i++) { 
+      std::vector<chillAST_ForStmt *> l; // deepest loops below one child
+      body->children[i]->find_deepest_loops( l ); 
+      if ( l.size() > b.size() ) { // a deeper nesting than we've seen
+        b = l;
+      }
+    }
+
+    loops.push_back( this ); // add myself
+    for (int i=0; i<b.size(); i++) loops.push_back(b[i]);
+  }
+
+
   void loseLoopWithLoopVar( char *var ); // chillAST_ForStmt
   void replaceChild( chillAST_node *old, chillAST_node *newchild ) ; 
 
@@ -1373,8 +1471,7 @@ public:
   
   // constructors
   chillAST_BinaryOperator();
-  chillAST_BinaryOperator(chillAST_node *lhs, const char *op, chillAST_node *rhs, chillAST_node *p=NULL);
-  virtual ~chillAST_BinaryOperator() { } 
+  chillAST_BinaryOperator(chillAST_node *lhs, const char *op, chillAST_node *rhs, chillAST_node *p=NULL); 
   
   // other methods particular to this type of node
   int evalAsInt();
@@ -1423,6 +1520,7 @@ public:
   void dump(  int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
   void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
   void printonly( int indent=0,  FILE *fp = stdout );
+  char *stringRep(int indent=0 );
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
@@ -1471,7 +1569,7 @@ public:
   chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, chillAST_node *p, void *unique);
   chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, chillAST_node *p, void *unique);
   
-  chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces); 
+  chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces, chillAST_node *p); 
   
   // other methods particular to this type of node
   bool operator!=( const chillAST_ArraySubscriptExpr& ) ; 
@@ -1489,6 +1587,7 @@ public:
   void printonly( int indent=0,  FILE *fp = stdout );
   void print( int indent=0,  FILE *fp = stdout ) const;  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  char *stringRep(int indent=0 );
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
@@ -1543,7 +1642,7 @@ public:
   void printonly( int indent=0,  FILE *fp = stdout );
   void print( int indent=0,  FILE *fp = stdout ) const;  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
-  char *getStringRep();
+  char *stringRep( int indent = 0);
  
   chillAST_node* constantFold();
   chillAST_node* clone(); 

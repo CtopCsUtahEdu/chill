@@ -7,8 +7,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
 AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.1\\\""])
+AC_SUBST([CXXFLAGS],[-g])
 
-AM_PROG_AC
+AM_PROG_AR
 AM_PROG_LEX
 AC_PROG_CC
 AC_PROG_CXX
@@ -74,44 +75,53 @@ AC_ARG_WITH([omega],[
     AC_SUBST([OMEGAHOME], [$withval])],[
     AC_SUBST([OMEGAHOME], ["$(pwd)/omega"])])
 
-AC_ARG_WITH([python],[
-    AS_HELP_STRING([--with-python],[set python as the interface languge])
-    ],[
-    AC_SUBST([interface_lang],[python])
-    ],[
-    AC_SUBST([interface_lang],[default])])
+AC_ARG_WITH([python],
+   [AS_HELP_STRING([--with-python],[set python as the interface languge])],
+   [AC_SUBST([interface_lang],[python])],
+   [AC_SUBST([interface_lang],[default])])
 
-AC_ARG_WITH([lua],[
-    AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],[
-    AC_SUBST([LUAHOME], ["${LUAHOME}"])
-    AC_SUBST([interface_lang], [lua])
-    ],[
-    AC_SUBST([LUAHOME], ["${LUAHOME}"])])
+AC_ARG_WITH([lua],
+   [AS_HELP_STRING([--with-lua],[set lua as the interface langauge.])],
+   [AC_SUBST([LUAHOME], ["${LUAHOME}"])
+    AC_SUBST([interface_lang], [lua])],
+   [AC_SUBST([LUAHOME], ["${LUAHOME}"])])
+
+AC_ARG_WITH([script],
+   [AS_HELP_STRING([--with-script],[use the legacy script interface language.])],
+   [AC_SUBST([interface_lang], [script])],
+   [])
 
 #AC_ARG_WITH([interface],[
 #    AS_HELP_STRING([--with-interface],[select interface language])],[
 #    AC_SUBST([interface_lang],[$withval])],[
 #    AC_SUBST([interface_lang],[default])])
 
-AS_IF([test "x$interface_lang" == xdefault],[
-    AS_IF([test "x$enable_cuda" == xyes],[
-        AC_SUBST([use_python],[yes])
+AS_IF([test "x$interface_lang" == xdefault],
+   [AS_IF([test "x$enable_cuda" == xyes],
+       [AC_SUBST([use_python],[yes])
         AC_SUBST([use_lua],[no])
-        AC_SUBST([interface_lang],[python])
-        ],[
-        AC_SUBST([use_python],[yes])
+        AC_SUBST([interface_lang],[python])],
+       [AC_SUBST([use_python],[yes])
         AC_SUBST([use_lua],[no])
-        AC_SUBST([interface_lang],[python])])],[])
+        AC_SUBST([interface_lang],[python])])],
+       [])
 
-AS_IF([test "x$interface_lang" == xlua],[
-    AC_SUBST([use_python],[no])
-    AC_SUBST([use_lua],[yes])],[])
-AS_IF([test "x$interface_lang" == xpython],[
-    AC_SUBST([use_python],[yes])
-    AC_SUBST([use_lua],[no])],[])
+AS_IF([test "x$interface_lang" == xlua],
+   [AC_SUBST([use_python],[no])
+    AC_SUBST([use_lua],[yes])
+    AC_SUBST([use_script],[no])],[])
+AS_IF([test "x$interface_lang" == xpython],
+   [AC_SUBST([use_python],[yes])
+    AC_SUBST([use_lua],[no])
+    AC_SUBST([use_script],[no])],[])
+AS_IF([test "x$interface_lang" == xscript],
+   [AC_SUBST([use_python],[no])
+    AC_SUBST([use_lue],[no])
+    AC_SUBST([use_script],[yes])],[])
 
 AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
+AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
