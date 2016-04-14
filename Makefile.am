@@ -3,6 +3,7 @@ build_date = "\"`date +%m/%d/%Y`\""
 
 AM_CFLAGS=-g
 AM_CXXFLAGS=-g
+EXTRA_DIST=
 
 ## Core Libraries ##
 core_libs     = -lm -lrose -lrt -lutil -lomega -lcodegen -ldl
@@ -116,17 +117,21 @@ BUILT_SOURCES=$(yacc_src)
 AM_YFLAGS=-d -t
 
 # rules
-lex.zz.cc: parser.ll parser.tab.cc
+EXTRA_DIST+=parser.ll
+lex.zz.cc: $(srcdir)/parser.ll parser.tab.cc
 	flex++ parser.ll
 
-parser.tab.cc: parser.yy
+EXTRA_DIST+=parser.yy
+parser.tab.cc: $(srcdir)/parser.yy
 	bison -p zz -t -d $<
 
-parse_expr.yy.cc: parse_expr.tab.cc parse_expr.ll
-	flex -o parse_expr.yy.cc parse_expr.ll
+EXTRA_DIST+=parse_expr.ll
+parse_expr.yy.cc: parse_expr.tab.cc $(srcdir)/parse_expr.ll
+	flex -o parse_expr.yy.cc $(srcdir)parse_expr.ll
 
-parse_expr.tab.cc: parse_expr.yy
-	bison -t -d parse_expr.yy
+EXTRA_DIST+=parse_expr.yy
+parse_expr.tab.cc: $(srcdir)/parse_expr.yy
+	bison -t -d $(srcdir)/parse_expr.yy
 
 
 
