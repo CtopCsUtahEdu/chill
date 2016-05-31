@@ -28,7 +28,7 @@ using namespace SageInterface;
 IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name) :
   IR_roseCode(filename, proc_name, NULL) {
   
-  fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n"); 
+  debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n"); 
   //std::string file_suffix = StringUtility::fileNameSuffix(filename);
 
 
@@ -46,7 +46,7 @@ IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name) :
   //body = symtab3_;
   //defn = func->get_definition()->get_body();
   func_defn = chillfunc;  // func->get_definition();
-  fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()  func_defn=%p\n", func_defn); 
+  debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()  func_defn=%p\n", func_defn); 
 }
 
 
@@ -55,27 +55,27 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
                                                    std::vector<omega::CG_outputRepr *> &size, 
                                                    int sharedAnnotation) {
 
-  fprintf(stderr, "\nCUDAROSECODE IR_cudaXXXXCode::CreateArraySymbol( sym = %s )\n", sym->name().c_str());
-  fprintf(stderr, "size.size() %d\n", size.size()); 
+  debug_fprintf(stderr, "\nCUDAROSECODE IR_cudaXXXXCode::CreateArraySymbol( sym = %s )\n", sym->name().c_str());
+  debug_fprintf(stderr, "size.size() %d\n", size.size()); 
 
   static int rose_array_counter = 1;
   std::string s = std::string("_P") + omega::to_string(rose_array_counter++);
-  fprintf(stderr, "new array name is %s\n", s.c_str()); 
+  debug_fprintf(stderr, "new array name is %s\n", s.c_str()); 
   
   if (typeid(*sym)  == typeid(IR_roseArraySymbol)) {
-    fprintf(stderr, "%s is an array\n",  sym->name().c_str());
+    debug_fprintf(stderr, "%s is an array\n",  sym->name().c_str());
     IR_roseArraySymbol *asym = (IR_roseArraySymbol *) sym;
 
     if (asym->base->isMemberExpr()) {
-      fprintf(stderr, "arraySymbol is a MemberExpr  "); asym->base->print(0,stderr); fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "arraySymbol is a MemberExpr  "); asym->base->print(0,stderr); debug_fprintf(stderr, "\n"); 
     }
 
     chillAST_VarDecl *vd = asym->chillvd;  // ((const IR_roseArraySymbol *)sym)->chillvd;
-    fprintf(stderr, "vd is a %s\n", vd->getTypeString()); 
+    debug_fprintf(stderr, "vd is a %s\n", vd->getTypeString()); 
     vd->print(); printf("\n"); fflush(stdout); 
 
 
-    fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart); 
+    debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart); 
 
     chillAST_VarDecl *newarray =  (chillAST_VarDecl *)vd->clone();
     newarray->varname = strdup( s.c_str() ); // 
@@ -92,11 +92,11 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
     for (int i=0; i<size.size(); i++) { 
       omega::CG_chillRepr *CR = (omega::CG_chillRepr *) size[i];
       chillAST_node *n = (CR->getChillCode()) [0];
-      fprintf(stderr, "size[%d] is a %s\n", i, n->getTypeString()); 
-      n->print(0,stderr); fprintf(stderr, "\n");
+      debug_fprintf(stderr, "size[%d] is a %s\n", i, n->getTypeString()); 
+      n->print(0,stderr); debug_fprintf(stderr, "\n");
 
       int value = n->evalAsInt(); 
-      fprintf(stderr, "value is %d\n", value); 
+      debug_fprintf(stderr, "value is %d\n", value); 
 
 
       //chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral*) ((CR->getChillCode()) [0]);
@@ -107,53 +107,53 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
       sprintf(aptr, "[%d]",  value); 
       aptr += strlen(aptr);
     }
-    fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring); 
+    debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring); 
     newarray->arraypart = strdup(arraystring);
     newarray->numdimensions =  size.size(); 
 
 
-    fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions); 
+    debug_fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions); 
     newarray->varname = strdup(s.c_str()); 
     IR_roseArraySymbol *newsym = new IR_roseArraySymbol( asym->ir_, newarray );
     if (sharedAnnotation == 1) { 
-      fprintf(stderr, "%s is SHARED\n", newarray->varname );
+      debug_fprintf(stderr, "%s is SHARED\n", newarray->varname );
       newarray->isShared = true; 
     }
-    fprintf(stderr, "done making a new array symbol\n"); 
+    debug_fprintf(stderr, "done making a new array symbol\n"); 
     return newsym; 
   }
-  fprintf(stderr, "IR_cudaroseCode::CreateArraySymbol() but old symbol is not an array???\n"); 
+  debug_fprintf(stderr, "IR_cudaroseCode::CreateArraySymbol() but old symbol is not an array???\n"); 
   exit(-1);
 
   return NULL; // can't get to here 
 }
 
 bool IR_cudaroseCode::commit_loop(Loop *loop, int loop_num) {
-  fprintf(stderr, "IR_cudaROSECode::commit_loop()\n");
+  debug_fprintf(stderr, "IR_cudaROSECode::commit_loop()\n");
 
   if (loop == NULL)
     return true;
  
   //loop->printCode(); 
-  //fprintf(stderr, "loop->printCode done\n\n"); 
+  //debug_fprintf(stderr, "loop->printCode done\n\n"); 
  
   LoopCuda *cu_loop = (LoopCuda *) loop;
 
-  fprintf(stderr, "IR_cudaxxxxCode::commit_loop() calling cu_loop->codegen()\n"); 
+  debug_fprintf(stderr, "IR_cudaxxxxCode::commit_loop() calling cu_loop->codegen()\n"); 
   chillAST_node * loopcode = cu_loop->codegen();
-  fprintf(stderr, "IR_cudaxxxxCode::commit_loop()   codegen DONE\n");
+  debug_fprintf(stderr, "IR_cudaxxxxCode::commit_loop()   codegen DONE\n");
 
   if (!loopcode)
     return false;
   
-  fprintf(stderr, "loopcode is\n");
+  debug_fprintf(stderr, "loopcode is\n");
   loopcode->print(); fflush(stdout);
-  fprintf(stderr, "(END LOOPCODE)\n\n\n"); 
+  debug_fprintf(stderr, "(END LOOPCODE)\n\n\n"); 
   
 
   // put "loopcode" into GPUside ?? easier in codegen
   if (NULL == entire_file_AST) { 
-    fprintf(stderr, "IR_cudaroseCode::commit_loop(),  entire_file_AST == NULL!\n");
+    debug_fprintf(stderr, "IR_cudaroseCode::commit_loop(),  entire_file_AST == NULL!\n");
     exit(-1); 
   }
   entire_file_AST->print();

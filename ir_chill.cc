@@ -66,7 +66,7 @@ static string unops[] = {
 void printsourceline( const char *filename, int line  );
 
 void Indent( int level ) {
-  for (int i=0; i<level; i++) fprintf(stderr, "    ");
+  for (int i=0; i<level; i++) debug_fprintf(stderr, "    ");
 }
 
 
@@ -83,13 +83,13 @@ string IR_chillScalarSymbol::name() const {
 
 // Return size in bytes
 int IR_chillScalarSymbol::size() const {
-  fprintf(stderr, "IR_chillScalarSymbol::size()  probably WRONG\n"); 
+  debug_fprintf(stderr, "IR_chillScalarSymbol::size()  probably WRONG\n"); 
   return (8); // bytes?? 
 }
 
 
 bool IR_chillScalarSymbol::operator==(const IR_Symbol &that) const {
-  //fprintf(stderr, "IR_chillScalarSymbol::operator==  probably WRONG\n"); 
+  //debug_fprintf(stderr, "IR_chillScalarSymbol::operator==  probably WRONG\n"); 
   if (typeid(*this) != typeid(that))
     return false;
   
@@ -111,16 +111,16 @@ string IR_chillArraySymbol::name() const {
 
 
 int IR_chillArraySymbol::elem_size() const {
-  fprintf(stderr, "IR_chillArraySymbol::elem_size()  TODO\n");  exit(-1); 
+  debug_fprintf(stderr, "IR_chillArraySymbol::elem_size()  TODO\n");  exit(-1); 
   return 8;  // TODO 
 }
 
 
 int IR_chillArraySymbol::n_dim() const {
-  //fprintf(stderr, "IR_chillArraySymbol::n_dim()\n");
-  //fprintf(stderr, "variable %s %s %s\n", chillvd->vartype, chillvd->varname, chillvd->arraypart);
-  //fprintf(stderr, "IR_chillArraySymbol::n_dim() %d\n", chillvd->numdimensions); 
-  //fprintf(stderr, "IR_chillArraySymbol::n_dim()  TODO \n"); exit(-1); 
+  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()\n");
+  //debug_fprintf(stderr, "variable %s %s %s\n", chillvd->vartype, chillvd->varname, chillvd->arraypart);
+  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim() %d\n", chillvd->numdimensions); 
+  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()  TODO \n"); exit(-1); 
   return chillvd->numdimensions; 
 }
 
@@ -133,19 +133,19 @@ IR_CONSTANT_TYPE IR_chillArraySymbol::elem_type() const {
 
 // TODO
 CG_outputRepr *IR_chillArraySymbol::size(int dim) const {
-  fprintf(stderr, "IR_chillArraySymbol::n_size()  TODO \n"); exit(-1); 
+  debug_fprintf(stderr, "IR_chillArraySymbol::n_size()  TODO \n"); exit(-1); 
   return NULL;
 }
 
 
 bool IR_chillArraySymbol::operator!=(const IR_Symbol &that) const {
-  //fprintf(stderr, "IR_chillArraySymbol::operator!=   NOT EQUAL\n"); 
+  //debug_fprintf(stderr, "IR_chillArraySymbol::operator!=   NOT EQUAL\n"); 
   //chillAST_VarDecl *chillvd;
   return chillvd != ((IR_chillArraySymbol*)&that)->chillvd ; 
 }
 
 bool IR_chillArraySymbol::operator==(const IR_Symbol &that) const {
-  //fprintf(stderr, "IR_chillArraySymbol::operator==   EQUAL\n"); 
+  //debug_fprintf(stderr, "IR_chillArraySymbol::operator==   EQUAL\n"); 
   //chillAST_VarDecl *chillvd;
   return chillvd == ((IR_chillArraySymbol*)&that)->chillvd ; 
   /*
@@ -185,7 +185,7 @@ bool IR_chillConstantRef::operator==(const IR_Ref &that) const {
 CG_outputRepr *IR_chillConstantRef::convert() {
   if (type_ == IR_CONSTANT_INT) {
 
-    fprintf(stderr, "IR_chillConstantRef::convert() unimplemented\n");  exit(-1); 
+    debug_fprintf(stderr, "IR_chillConstantRef::convert() unimplemented\n");  exit(-1); 
     
     // TODO 
     /*
@@ -237,7 +237,7 @@ bool IR_chillScalarRef::operator==(const IR_Ref &that) const {
 
 
 CG_outputRepr *IR_chillScalarRef::convert() {
-  if (!dre) fprintf(stderr, "IR_chillScalarRef::convert()   CHILL SCALAR REF has no dre\n"); 
+  if (!dre) debug_fprintf(stderr, "IR_chillScalarRef::convert()   CHILL SCALAR REF has no dre\n"); 
   CG_chillRepr *result = new CG_chillRepr(dre);
   delete this;
   return result;
@@ -255,7 +255,7 @@ IR_Ref * IR_chillScalarRef::clone() const {
 
 string IR_chillArrayRef::name() const {
   if (!printable) { 
-    //fprintf(stderr, "IR_chillArrayRef::name(), bailing\n");
+    //debug_fprintf(stderr, "IR_chillArrayRef::name(), bailing\n");
     return IR_ArrayRef::name(); 
   }
   return string(printable);  // CHILL 
@@ -270,7 +270,7 @@ bool IR_chillArrayRef::is_write() const {
 
 // TODO
 CG_outputRepr *IR_chillArrayRef::index(int dim) const {
-  //fprintf(stderr, "IR_chillArrayRef::index( %d )  \n", dim); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::index( %d )  \n", dim); 
   //chillASE->print(); printf("\n"); fflush(stdout); 
   //chillASE->getIndex(dim)->print(); printf("\n"); fflush(stdout); 
   return new CG_chillRepr( chillASE->getIndex(dim) );
@@ -278,32 +278,32 @@ CG_outputRepr *IR_chillArrayRef::index(int dim) const {
 
 
 IR_ArraySymbol *IR_chillArrayRef::symbol() const {
-  //fprintf(stderr, "IR_chillArrayRef::symbol()\n"); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::symbol()\n"); 
   //chillASE->print(); printf("\n"); fflush(stdout); 
-  //fprintf(stderr, "base:  ");  chillASE->base->print();  printf("\n"); fflush(stdout); 
+  //debug_fprintf(stderr, "base:  ");  chillASE->base->print();  printf("\n"); fflush(stdout); 
 
   
   chillAST_node *mb = chillASE->multibase(); 
   chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
-  //fprintf(stderr, "symbol: '%s'\n", vd->varname);
+  //debug_fprintf(stderr, "symbol: '%s'\n", vd->varname);
 
-  //fprintf(stderr, "IR_chillArrayRef symbol: '%s%s'\n", vd->varname, vd->arraypart); 
-  //fprintf(stderr, "numdimensions %d\n", vd->numdimensions); 
+  //debug_fprintf(stderr, "IR_chillArrayRef symbol: '%s%s'\n", vd->varname, vd->arraypart); 
+  //debug_fprintf(stderr, "numdimensions %d\n", vd->numdimensions); 
   IR_ArraySymbol *AS =  new IR_chillArraySymbol(ir_, vd); 
-  //fprintf(stderr, "ir_chill.cc returning IR_chillArraySymbol 0x%x\n", AS); 
+  //debug_fprintf(stderr, "ir_chill.cc returning IR_chillArraySymbol 0x%x\n", AS); 
   return  AS;
 /*
   chillAST_node *b = chillASE->base;
-  fprintf(stderr, "base of type %s\n", b->getTypeString()); 
+  debug_fprintf(stderr, "base of type %s\n", b->getTypeString()); 
   //b->print(); printf("\n"); fflush(stdout); 
   if (b->asttype == CHILLAST_NODETYPE_IMPLICITCASTEXPR) {
     b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
-    fprintf(stderr, "base of type %s\n", b->getTypeString()); 
+    debug_fprintf(stderr, "base of type %s\n", b->getTypeString()); 
   }
   
   if (b->asttype == CHILLAST_NODETYPE_DECLREFEXPR)  {
     if (NULL == ((chillAST_DeclRefExpr*)b)->decl) { 
-      fprintf(stderr, "IR_chillArrayRef::symbol()  var decl = 0x%x\n", ((chillAST_DeclRefExpr*)b)->decl); 
+      debug_fprintf(stderr, "IR_chillArrayRef::symbol()  var decl = 0x%x\n", ((chillAST_DeclRefExpr*)b)->decl); 
       exit(-1); 
     }
     return new IR_chillArraySymbol(ir_, ((chillAST_DeclRefExpr*)b)->decl); // -> decl?
@@ -311,8 +311,8 @@ IR_ArraySymbol *IR_chillArrayRef::symbol() const {
   if (b->asttype ==  CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR)  { // multidimensional array
     return (
   }
-  fprintf(stderr, "IR_chillArrayRef::symbol() can't handle\n");
-  fprintf(stderr, "base of type %s\n", b->getTypeString()); 
+  debug_fprintf(stderr, "IR_chillArrayRef::symbol() can't handle\n");
+  debug_fprintf(stderr, "base of type %s\n", b->getTypeString()); 
   exit(-1); 
   return NULL; 
 */
@@ -320,24 +320,24 @@ IR_ArraySymbol *IR_chillArrayRef::symbol() const {
 
 
 bool IR_chillArrayRef::operator!=(const IR_Ref &that) const {
-  //fprintf(stderr, "IR_chillArrayRef::operator!=\n"); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::operator!=\n"); 
   bool op = (*this) == that; // opposite
   return !op;
 }
   
 void IR_chillArrayRef::Dump() const { 
-  //fprintf(stderr, "IR_chillArrayRef::Dump()  this 0x%x  chillASE 0x%x\n", this, chillASE); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::Dump()  this 0x%x  chillASE 0x%x\n", this, chillASE); 
   chillASE->print(); printf("\n");fflush(stdout);
 }
 
 
 bool IR_chillArrayRef::operator==(const IR_Ref &that) const {
-  //fprintf(stderr, "IR_chillArrayRef::operator==\n"); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::operator==\n"); 
   //printf("I am\n"); chillASE->print(); printf("\n"); 
   const IR_chillArrayRef *l_that = static_cast<const IR_chillArrayRef *>(&that);
   const chillAST_ArraySubscriptExpr* thatASE = l_that->chillASE;
   //printf("other is:\n");  thatASE->print(); printf("\n"); fflush(stdout);
-  //fprintf(stderr, "addresses are 0x%x  0x%x\n", chillASE, thatASE ); 
+  //debug_fprintf(stderr, "addresses are 0x%x  0x%x\n", chillASE, thatASE ); 
   return (*chillASE) == (*thatASE);
   /*
 
@@ -352,7 +352,7 @@ bool IR_chillArrayRef::operator==(const IR_Ref &that) const {
 
 
 CG_outputRepr *IR_chillArrayRef::convert() {
-  //fprintf(stderr, "IR_chillArrayRef::convert()\n"); 
+  //debug_fprintf(stderr, "IR_chillArrayRef::convert()\n"); 
   CG_chillRepr *result = new  CG_chillRepr( chillASE->clone() ); 
 //  CG_chillRepr *temp = new CG_chillRepr(static_cast<Expr*>(this->as_));
 //  CG_outputRepr *result = temp->clone();
@@ -370,8 +370,8 @@ IR_Ref *IR_chillArrayRef::clone() const {
 // Class: IR_chillLoop
 // ----------------------------------------------------------------------------
 IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) { 
-  //fprintf(stderr, "IR_chillLoop::IR_chillLoop()\n"); 
-  //fprintf(stderr, "loop is:\n");   achillforstmt->print(); 
+  //debug_fprintf(stderr, "IR_chillLoop::IR_chillLoop()\n"); 
+  //debug_fprintf(stderr, "loop is:\n");   achillforstmt->print(); 
 
   ir_ = ir; 
   chillforstmt = achillforstmt;
@@ -380,7 +380,7 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
   chillAST_BinaryOperator *cond = (chillAST_BinaryOperator *)chillforstmt->getCond();
   // check to be sure  (assert) 
   if (!init->isAssignmentOp() || !cond->isComparisonOp() ) {
-    fprintf(stderr, "ir_chill.cc, malformed loop init or cond:\n");
+    debug_fprintf(stderr, "ir_chill.cc, malformed loop init or cond:\n");
     achillforstmt->print(); 
     exit(-1); 
   }
@@ -391,7 +391,7 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
   
   chillAST_node *inc  = chillforstmt->getInc();
   // check the increment
-  //fprintf(stderr, "increment is of type %s\n", inc->getTypeString()); 
+  //debug_fprintf(stderr, "increment is of type %s\n", inc->getTypeString()); 
   //inc->print(); printf("\n"); fflush(stdout);
 
   if (inc->asttype == CHILLAST_NODETYPE_UNARYOPERATOR) { 
@@ -406,10 +406,10 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
       // TODO looks like this will fail for I=1+I or I=J+1 etc. do more checking
       
       char *assop =  bop->getOp(); 
-      //fprintf(stderr, "'%s' is an assignment op\n", bop->getOp()); 
+      //debug_fprintf(stderr, "'%s' is an assignment op\n", bop->getOp()); 
       if (streq(assop, "+=") || streq(assop, "-=")) {
         chillAST_node *stride = rhs;
-        //fprintf(stderr, "stride is of type %s\n", stride->getTypeString());
+        //debug_fprintf(stderr, "stride is of type %s\n", stride->getTypeString());
         if  (stride->isIntegerLiteral()) {
           int val = ((chillAST_IntegerLiteral *)stride)->value;
           if      (streq( assop, "+=")) step_size_ =  val;
@@ -434,76 +434,76 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
     else beets = true;
 
     if (beets) {
-      fprintf(stderr, "malformed loop increment (or more likely unhandled case)\n");
+      debug_fprintf(stderr, "malformed loop increment (or more likely unhandled case)\n");
       inc->print(); 
       exit(-1); 
     }
   } // binary operator 
   else { 
-    fprintf(stderr, "IR_chillLoop constructor, unhandled loop increment\n");
+    debug_fprintf(stderr, "IR_chillLoop constructor, unhandled loop increment\n");
       inc->print(); 
       exit(-1); 
   }
-  //inc->print(0, stderr);fprintf(stderr, "\n"); 
+  //inc->print(0, stderr);debug_fprintf(stderr, "\n"); 
 
   chillAST_DeclRefExpr *dre = (chillAST_DeclRefExpr *)init->getLHS();
   if (!dre->isDeclRefExpr()) { 
-    fprintf(stderr, "malformed loop init.\n"); 
+    debug_fprintf(stderr, "malformed loop init.\n"); 
     init->print(); 
   }
 
   chillindex = dre; // the loop index variable
 
-  //fprintf(stderr, "\n\nindex is ");  dre->print(0, stderr);  fprintf(stderr, "\n"); 
-  //fprintf(stderr, "init is   "); 
-  //chilllowerbound->print(0, stderr);  fprintf(stderr, "\n");
-  //fprintf(stderr, "condition is  %s ", "<"); 
-  //chillupperbound->print(0, stderr);  fprintf(stderr, "\n");
-  //fprintf(stderr, "step size is %d\n\n", step_size_) ; 
+  //debug_fprintf(stderr, "\n\nindex is ");  dre->print(0, stderr);  debug_fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "init is   "); 
+  //chilllowerbound->print(0, stderr);  debug_fprintf(stderr, "\n");
+  //debug_fprintf(stderr, "condition is  %s ", "<"); 
+  //chillupperbound->print(0, stderr);  debug_fprintf(stderr, "\n");
+  //debug_fprintf(stderr, "step size is %d\n\n", step_size_) ; 
 
   chillbody = achillforstmt->getBody(); 
 
-  //fprintf(stderr, "IR_chillLoop::IR_chillLoop() DONE\n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::IR_chillLoop() DONE\n"); 
 }
 
 
 CG_outputRepr *IR_chillLoop::lower_bound() const {
-  //fprintf(stderr, "IR_chillLoop::lower_bound()\n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::lower_bound()\n"); 
   return new CG_chillRepr(chilllowerbound);
 }
 
 CG_outputRepr *IR_chillLoop::upper_bound() const {
-  //fprintf(stderr, "IR_chillLoop::upper_bound()\n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::upper_bound()\n"); 
   return new CG_chillRepr(chillupperbound);
 }
 
 IR_Block *IR_chillLoop::body() const {
-  //fprintf(stderr, "IR_chillLoop::body()\n");
+  //debug_fprintf(stderr, "IR_chillLoop::body()\n");
   //assert(isa<CompoundStmt>(tf_->getBody()));
-  //fprintf(stderr, "returning a chillBLOCK corresponding to the body of the loop\n"); 
-  //fprintf(stderr, "body type %s\n", chillbody->getTypeString()); 
+  //debug_fprintf(stderr, "returning a chillBLOCK corresponding to the body of the loop\n"); 
+  //debug_fprintf(stderr, "body type %s\n", chillbody->getTypeString()); 
   return new IR_chillBlock(ir_, chillbody ) ; // static_cast<CompoundStmt *>(tf_->getBody()));
 }
 
 IR_Control *IR_chillLoop::clone() const {
-  //fprintf(stderr, "IR_chillLoop::clone()\n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::clone()\n"); 
   //chillforstmt->print(); fflush(stdout); 
   return new IR_chillLoop(ir_, chillforstmt);
 }
 
 IR_CONDITION_TYPE IR_chillLoop::stop_cond() const {
   chillAST_BinaryOperator *loopcondition = (chillAST_BinaryOperator*) chillupperbound;
-  //fprintf(stderr, "IR_chillLoop::stop_cond()\n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::stop_cond()\n"); 
   return conditionoperator; 
 }
 
 IR_Block *IR_chillLoop::convert() { // convert the loop to a block 
-  //fprintf(stderr, "IR_chillLoop::convert()   maybe \n"); 
+  //debug_fprintf(stderr, "IR_chillLoop::convert()   maybe \n"); 
   return new IR_chillBlock( ir_, chillbody ); // ?? 
 }
 
 void IR_chillLoop::dump() const { 
-  fprintf(stderr, "TODO:  IR_chillLoop::dump()\n"); exit(-1); 
+  debug_fprintf(stderr, "TODO:  IR_chillLoop::dump()\n"); exit(-1); 
 }
 
 
@@ -511,7 +511,7 @@ void IR_chillLoop::dump() const {
 // Class: IR_chillBlock
 // ----------------------------------------------------------------------------
 CG_outputRepr *IR_chillBlock::original() const {
-  fprintf(stderr, "IR_chillBlock::original()  TODO \n"); 
+  debug_fprintf(stderr, "IR_chillBlock::original()  TODO \n"); 
   exit(-1); 
   return NULL;
 }
@@ -520,52 +520,52 @@ CG_outputRepr *IR_chillBlock::original() const {
 
 CG_outputRepr *IR_chillBlock::extract() const {
   fflush(stdout); 
-  //fprintf(stderr, "IR_chillBlock::extract()\n"); 
+  //debug_fprintf(stderr, "IR_chillBlock::extract()\n"); 
   //CG_chillRepr *tnl =  new CG_chillRepr(getStmtList());
 
   // if the block refers to a compound statement, return the next level
   // of statements ;  otherwise just return a repr of the statements
 
   chillAST_node *code = chillAST;
-  //if (chillAST != NULL) fprintf(stderr, "block has chillAST of type %s\n",code->getTypeString()); 
-  //fprintf(stderr, "block has %d exploded statements\n", statements.size()); 
+  //if (chillAST != NULL) debug_fprintf(stderr, "block has chillAST of type %s\n",code->getTypeString()); 
+  //debug_fprintf(stderr, "block has %d exploded statements\n", statements.size()); 
 
   CG_chillRepr *OR; 
   if (0 == statements.size()) { 
     OR = new CG_chillRepr(code); // presumably a compound statement ??
   }
   else { 
-    //fprintf(stderr, "adding a statement from IR_chillBlock::extract()\n"); 
+    //debug_fprintf(stderr, "adding a statement from IR_chillBlock::extract()\n"); 
     OR = new CG_chillRepr(); // empty of statements
     for (int i=0; i<statements.size(); i++) OR->addStatement( statements[i] ); 
   }
 
   fflush(stdout); 
-  //fprintf(stderr, "IR_chillBlock::extract() LEAVING\n"); 
+  //debug_fprintf(stderr, "IR_chillBlock::extract() LEAVING\n"); 
   return OR;
 }
 
 IR_Control *IR_chillBlock::clone() const {
-  //fprintf(stderr, "IR_chillBlock::clone()\n"); 
-  //fprintf(stderr, "IR_chillBlock::clone()  %d statements\n", statements.size());
+  //debug_fprintf(stderr, "IR_chillBlock::clone()\n"); 
+  //debug_fprintf(stderr, "IR_chillBlock::clone()  %d statements\n", statements.size());
   return new IR_chillBlock( this );  // shallow copy ? 
 }
 
 void IR_chillBlock::dump() const { 
-  fprintf(stderr, "IR_chillBlock::dump()  TODO\n");  return;
+  debug_fprintf(stderr, "IR_chillBlock::dump()  TODO\n");  return;
 }
 
 
 vector<chillAST_node*> IR_chillBlock::getStmtList() const {
-  //fprintf(stderr, "IR_chillBlock::getStmtList()\n");
+  //debug_fprintf(stderr, "IR_chillBlock::getStmtList()\n");
   return statements; // ?? 
 }
 
 
 void IR_chillBlock::addStatement( chillAST_node* s ) {
   statements.push_back( s );
-  //fprintf(stderr, "IR_chillBlock::addStatement()  added statement of type %s\n", s->getTypeString());
-  //fprintf(stderr, "IR_chillBlock::addStatement()  now have %d statements\n", statements.size()); 
+  //debug_fprintf(stderr, "IR_chillBlock::addStatement()  added statement of type %s\n", s->getTypeString());
+  //debug_fprintf(stderr, "IR_chillBlock::addStatement()  now have %d statements\n", statements.size()); 
 }
 
 
@@ -573,21 +573,21 @@ void IR_chillBlock::addStatement( chillAST_node* s ) {
 
 
 void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ) {
-  //fprintf(stderr, "findmanually()                CHILL AST node of type %s\n", node->getTypeString()); 
+  //debug_fprintf(stderr, "findmanually()                CHILL AST node of type %s\n", node->getTypeString()); 
   
   if (node->asttype == CHILLAST_NODETYPE_FUNCTIONDECL ) { 
     char *name = ((chillAST_FunctionDecl *) node)->functionName;
-    //fprintf(stderr, "node name 0x%x  ", name);
-    //fprintf(stderr, "%s     procname ", name); 
-    //fprintf(stderr, "0x%x  ", procname);
-    //fprintf(stderr, "%s\n", procname); 
+    //debug_fprintf(stderr, "node name 0x%x  ", name);
+    //debug_fprintf(stderr, "%s     procname ", name); 
+    //debug_fprintf(stderr, "0x%x  ", procname);
+    //debug_fprintf(stderr, "%s\n", procname); 
     if (!strcmp( name, procname)) {
-      //fprintf(stderr, "found procedure %s\n", procname ); 
+      //debug_fprintf(stderr, "found procedure %s\n", procname ); 
       procs.push_back( node ); 
       // quit recursing. probably not correct in some horrible case
       return; 
     }
-    //else fprintf(stderr, "this is not the function we're looking for\n"); 
+    //else debug_fprintf(stderr, "this is not the function we're looking for\n"); 
   }
 
 
@@ -596,10 +596,10 @@ void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& 
   // and then its children is needed. 
 
   int numc = node->children.size();  
-  //fprintf(stderr, "%d children\n", numc);
+  //debug_fprintf(stderr, "%d children\n", numc);
 
   for (int i=0; i<numc; i++) {
-    //fprintf(stderr, "node of type %s is recursing to child %d\n",  node->getTypeString(), i); 
+    //debug_fprintf(stderr, "node of type %s is recursing to child %d\n",  node->getTypeString(), i); 
     findmanually( node->children[i], procname, procs );
   }
   return; 
@@ -614,8 +614,8 @@ CG_outputRepr *IR_chillIf::condition() const {
 }
 
 IR_Block *IR_chillIf::then_body() const {
-  fprintf(stderr, "IR_chillIf::then_body() making a block with then part\n");
-  chillif->thenpart->print(0, stderr); fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "IR_chillIf::then_body() making a block with then part\n");
+  chillif->thenpart->print(0, stderr); debug_fprintf(stderr, "\n"); 
   return new IR_chillBlock(ir_, chillif->thenpart); 
 }
 
@@ -644,7 +644,7 @@ IR_Control *IR_chillIf::clone() const {
 // ----------------------------------------------------------------------------
 
 IR_chillCode::IR_chillCode() { 
-  //fprintf(stderr, "IR_chillCode::IR_chillCode() NO PARAMETERS\n"); 
+  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode() NO PARAMETERS\n"); 
   filename = NULL; 
   procedurename = strdup("hellifiknow"); // NULL; 
   //scriptname = NULL; 
@@ -656,8 +656,8 @@ IR_chillCode::IR_chillCode() {
 }
 
 IR_chillCode::IR_chillCode(const char *fname, char *proc_name): IR_Code() {
-  //fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
-  //fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s )\n", filename, proc_name);
+  //debug_fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
+  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s )\n", filename, proc_name);
   
   filename = strdup(fname); // filename is internal to IR_chillCode
   procedurename = strdup(proc_name);
@@ -668,8 +668,8 @@ IR_chillCode::IR_chillCode(const char *fname, char *proc_name): IR_Code() {
 }
 
 IR_chillCode::IR_chillCode(const char *fname, char *proc_name, char *script_name): IR_Code() {
-  //fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
-  //fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s, script %s )\n", fname, proc_name, script_name);
+  //debug_fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
+  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s, script %s )\n", fname, proc_name, script_name);
   
   filename = strdup(fname); // filename is internal to IR_chillCode
   procedurename = strdup(proc_name);
@@ -682,19 +682,19 @@ IR_chillCode::IR_chillCode(const char *fname, char *proc_name, char *script_name
 
 IR_chillCode::~IR_chillCode() {
   //func_->print(llvm::outs(), 4); // printing as part of the destructor !! 
-  //fprintf(stderr, "IR_chillCode::~IR_chillCode()\noutput happening as part of the destructor !!\n");
+  //debug_fprintf(stderr, "IR_chillCode::~IR_chillCode()\noutput happening as part of the destructor !!\n");
   
   if (!chillfunc) { 
-    //fprintf(stderr, "in IR_chillCode::~IR_chillCode(), chillfunc is NULL?\n"); 
+    //debug_fprintf(stderr, "in IR_chillCode::~IR_chillCode(), chillfunc is NULL?\n"); 
     return;
   }
   //chillfunc->dump(); 
   //chillfunc->print(); 
 
-  //fprintf(stderr, "Constant Folding before\n"); 
+  //debug_fprintf(stderr, "Constant Folding before\n"); 
   //chillfunc->print(); 
   //chillfunc->constantFold(); 
-  //fprintf(stderr, "\nConstant Folding after\n"); 
+  //debug_fprintf(stderr, "\nConstant Folding after\n"); 
   //chillfunc->print(); 
 
   chillfunc->cleanUpVarDecls(); 
@@ -713,10 +713,10 @@ IR_chillCode::~IR_chillCode() {
 
 //TODO
 IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
-  //fprintf(stderr, "IR_chillCode::CreateScalarSymbol()\n");  
+  //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol()\n");  
   if (typeid(*sym) == typeid( IR_chillScalarSymbol ) ) {  // should be the case ??? 
-    //fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from a scalar symbol\n"); 
-    //fprintf(stderr, "(typeid(*sym) == typeid( IR_chillScalarSymbol )\n"); 
+    //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from a scalar symbol\n"); 
+    //debug_fprintf(stderr, "(typeid(*sym) == typeid( IR_chillScalarSymbol )\n"); 
     const IR_chillScalarSymbol *CSS = (IR_chillScalarSymbol*) sym;
     chillAST_VarDecl *vd = CSS->chillvd;
     
@@ -724,40 +724,40 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
      VariableDeclarations.push_back(vd);
      chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ?? 
      bod->insertChild(0, vd);
-     //fprintf(stderr, "returning ... really\n"); 
+     //debug_fprintf(stderr, "returning ... really\n"); 
     return new IR_chillScalarSymbol( this, CSS->chillvd); // CSS->clone(); 
   }
 
   // ?? 
   if (typeid(*sym) == typeid( IR_chillArraySymbol ) ) {  
-    //fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from an array symbol?\n"); 
+    //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from an array symbol?\n"); 
     const IR_chillArraySymbol *CAS = (IR_chillArraySymbol*) sym;
-    //fprintf(stderr, "CAS 0x%x   chillvd = 0x%x\n", CAS, CAS->chillvd);
-    //fprintf(stderr, "\nthis is the SYMBOL?: \n"); 
+    //debug_fprintf(stderr, "CAS 0x%x   chillvd = 0x%x\n", CAS, CAS->chillvd);
+    //debug_fprintf(stderr, "\nthis is the SYMBOL?: \n"); 
     //CAS->print();
     //CAS->dump();
 
     chillAST_VarDecl *vd = CAS->chillvd; 
-    //fprintf(stderr, "\nthis is the var decl?: "); 
+    //debug_fprintf(stderr, "\nthis is the var decl?: "); 
     //vd->print(); printf("\n"); 
     //vd->dump(); printf("\n\n");
     fflush(stdout);  
     
     // figure out the base type (probably float) of the array
     char *basetype = vd->underlyingtype;
-    //fprintf(stderr, "scalar will be of type SgType%s\n", basetype);   
+    //debug_fprintf(stderr, "scalar will be of type SgType%s\n", basetype);   
 
     char tmpname[128];
     sprintf(tmpname, "newVariable%i\0", vd->chill_scalar_counter++); 
     chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, tmpname,  "",  NULL);  // TODO parent
     //scalarvd->print(); printf("\n"); fflush(stdout); 
 
-    //fprintf(stderr, "VarDecl has parent that is a NULL\n"); 
+    //debug_fprintf(stderr, "VarDecl has parent that is a NULL\n"); 
 
     return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd)); // CSS->clone(); 
   }
   
-  fprintf(stderr, "IR_chillCode::CreateScalarSymbol(), passed a sym that is not a chill scalar symbol OR an array symbol???\n"); 
+  debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol(), passed a sym that is not a chill scalar symbol OR an array symbol???\n"); 
   int *n = NULL;
   n[0] = 1;
   exit(-1); 
@@ -766,13 +766,13 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
 
 
 IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_outputRepr *> &size, int i) {
-  fprintf(stderr, "IR_chillCode::CreateArraySymbol()\n");  
+  debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol()\n");  
 
   // build a new array name 
   char namestring[128];
 
   sprintf(namestring, "_P%d\0", entire_file_AST->chill_array_counter++);
-  fprintf(stderr, "creating Array %s\n", namestring); 
+  debug_fprintf(stderr, "creating Array %s\n", namestring); 
     
   char arraypart[100];
   char *s = &arraypart[0];
@@ -780,12 +780,12 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
   for (int i=0; i<size.size(); i++) { 
     CG_outputRepr *OR = size[i];
     CG_chillRepr * CR = (CG_chillRepr * ) OR;
-    //fprintf(stderr, "%d chillnodes\n", CR->chillnodes.size()); 
+    //debug_fprintf(stderr, "%d chillnodes\n", CR->chillnodes.size()); 
     
     // this SHOULD be 1 chillnode of type IntegerLiteral (per dimension)
     int numnodes = CR->chillnodes.size();
     if (1 != numnodes) { 
-      fprintf(stderr, 
+      debug_fprintf(stderr, 
               "IR_chillCode::CreateArraySymbol() array dimension %d has %d chillnodes\n", 
               i, numnodes );
       exit(-1);
@@ -793,7 +793,7 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
 
     chillAST_node *nodezero = CR->chillnodes[0];
     if (!nodezero->isIntegerLiteral())  {
-      fprintf(stderr, "IR_chillCode::CreateArraySymbol() array dimension %d not an IntegerLiteral\n", i);
+      debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol() array dimension %d not an IntegerLiteral\n", i);
       exit(-1);
     }
 
@@ -802,7 +802,7 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
     sprintf(s, "[%d]\0", val); 
     s = &arraypart[ strlen(arraypart) ];
   }
-  //fprintf(stderr, "arraypart '%s'\n", arraypart); 
+  //debug_fprintf(stderr, "arraypart '%s'\n", arraypart); 
 
   chillAST_VarDecl *vd = new chillAST_VarDecl( "float",  namestring, arraypart, NULL); // todo type from sym
 
@@ -818,19 +818,19 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
 // TODO 
 vector<IR_ScalarRef *> IR_chillCode::FindScalarRef(const CG_outputRepr *repr) const {
   vector<IR_ScalarRef *> scalars;
-  fprintf(stderr, "IR_chillCode::FindScalarRef() DIE\n");  exit(-1); 
+  debug_fprintf(stderr, "IR_chillCode::FindScalarRef() DIE\n");  exit(-1); 
   return scalars;
 }
 
 
 
 IR_ScalarRef *IR_chillCode::CreateScalarRef(const IR_ScalarSymbol *sym) {
-  //fprintf(stderr, "\n***** ir_chill.cc IR_chillCode::CreateScalarRef( sym %s )\n", sym->name().c_str()); 
+  //debug_fprintf(stderr, "\n***** ir_chill.cc IR_chillCode::CreateScalarRef( sym %s )\n", sym->name().c_str()); 
   //DeclRefExpr *de = new (vd->getASTContext())DeclRefExpr(static_cast<ValueDecl*>(vd), vd->getType(), SourceLocation());
-  //fprintf(stderr, "sym 0x%x\n", sym); 
+  //debug_fprintf(stderr, "sym 0x%x\n", sym); 
 
   IR_chillScalarRef *sr = new IR_chillScalarRef(this, buildDeclRefExpr(((IR_chillScalarSymbol*)sym)->chillvd)); // uses VarDecl to mak a declrefexpr
-  //fprintf(stderr, "returning ScalarRef with dre 0x%x\n", sr->dre); 
+  //debug_fprintf(stderr, "returning ScalarRef with dre 0x%x\n", sr->dre); 
   return sr; 
   //return (IR_ScalarRef *)NULL;
 }
@@ -838,8 +838,8 @@ IR_ScalarRef *IR_chillCode::CreateScalarRef(const IR_ScalarSymbol *sym) {
 
 
 IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_outputRepr *> &index) {
-  //fprintf(stderr, "IR_chillCode::CreateArrayRef()   ir_chill.cc\n"); 
-  //fprintf(stderr, "sym->n_dim() %d   index.size() %d\n", sym->n_dim(), index.size()); 
+  //debug_fprintf(stderr, "IR_chillCode::CreateArrayRef()   ir_chill.cc\n"); 
+  //debug_fprintf(stderr, "sym->n_dim() %d   index.size() %d\n", sym->n_dim(), index.size()); 
 
   int t;
   if(sym->n_dim() != index.size()) {
@@ -850,13 +850,13 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
   chillAST_VarDecl *vd = c_sym->chillvd;
   vector<chillAST_node *> inds;
 
-  //fprintf(stderr, "%d array indeces\n", sym->n_dim()); 
+  //debug_fprintf(stderr, "%d array indeces\n", sym->n_dim()); 
   for (int i=0; i< index.size(); i++) { 
     CG_chillRepr *CR = (CG_chillRepr *)index[i];
    
     int numnodes = CR->chillnodes.size();
     if (1 != numnodes) { 
-      fprintf(stderr, 
+      debug_fprintf(stderr, 
               "IR_chillCode::CreateArrayRef() array dimension %d has %d chillnodes\n", 
               i, numnodes );
       exit(-1);
@@ -867,8 +867,8 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
     /* 
        chillAST_node *nodezero = CR->chillnodes[0];
     if (!nodezero->isIntegerLiteral())  {
-      fprintf(stderr,"IR_chillCode::CreateArrayRef() array dimension %d not an IntegerLiteral\n",i);
-      fprintf(stderr, "it is a %s\n", nodezero->getTypeString()); 
+      debug_fprintf(stderr,"IR_chillCode::CreateArrayRef() array dimension %d not an IntegerLiteral\n",i);
+      debug_fprintf(stderr, "it is a %s\n", nodezero->getTypeString()); 
       nodezero->print(); printf("\n"); fflush(stdout); 
       exit(-1);
     }
@@ -889,22 +889,22 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
 
 // find all array references ANYWHERE in this block of code  ?? 
 vector<IR_ArrayRef *> IR_chillCode::FindArrayRef(const CG_outputRepr *repr) const {
-  //fprintf(stderr, "FindArrayRef()  ir_chill.cc\n"); 
+  //debug_fprintf(stderr, "FindArrayRef()  ir_chill.cc\n"); 
   vector<IR_ArrayRef *> arrays;
   const CG_chillRepr *crepr = static_cast<const CG_chillRepr *>(repr); 
   vector<chillAST_node*> chillstmts = crepr->getChillCode();
 
-  //fprintf(stderr, "there are %d chill statements in this repr\n", chillstmts.size()); 
+  //debug_fprintf(stderr, "there are %d chill statements in this repr\n", chillstmts.size()); 
 
   vector<chillAST_ArraySubscriptExpr*> refs; 
   for (int i=0; i<chillstmts.size(); i++) { 
-    //fprintf(stderr, "\nchillstatement %d = ", i); chillstmts[i]->print(0, stderr); fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\nchillstatement %d = ", i); chillstmts[i]->print(0, stderr); debug_fprintf(stderr, "\n"); 
     chillstmts[i]->gatherArrayRefs( refs, false );
   }
-  //fprintf(stderr, "%d total refs\n", refs.size());
+  //debug_fprintf(stderr, "%d total refs\n", refs.size());
   for (int i=0; i<refs.size(); i++) { 
     if (refs[i]->imreadfrom) { 
-      //fprintf(stderr, "ref[%d] going to be put in TWICE, as both read and write\n", i); 
+      //debug_fprintf(stderr, "ref[%d] going to be put in TWICE, as both read and write\n", i); 
       arrays.push_back( new IR_chillArrayRef( this, refs[i], 0 ) );  // UGLY TODO dual usage of a ref in "+="
     }
     arrays.push_back( new IR_chillArrayRef( this, refs[i], refs[i]->imwrittento ) ); // this is wrong
@@ -985,9 +985,9 @@ vector<IR_ArrayRef *> IR_chillCode::FindArrayRef(const CG_outputRepr *repr) cons
 
 vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRepr *repr) const
 {
-  fprintf(stderr, "IR_chillCode::FindPointerArrayRef()\n");
+  debug_fprintf(stderr, "IR_chillCode::FindPointerArrayRef()\n");
   
-  fprintf(stderr, "here is the code I'm look for a pointerarrayref in, though:\n");
+  debug_fprintf(stderr, "here is the code I'm look for a pointerarrayref in, though:\n");
   CG_chillRepr * CR = (CG_chillRepr * ) repr;
   CR-> printChillNodes(); printf("\n"); fflush(stdout); 
 
@@ -998,21 +998,21 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
     CR->chillnodes[i]->gatherArrayRefs( refs, false );
     printf("\n");
   } 
-  fprintf(stderr, "%d array refs\n", refs.size()); 
+  debug_fprintf(stderr, "%d array refs\n", refs.size()); 
 
   // now look for ones where the base is an array with unknowns sizes  int *i;
   vector<IR_PointerArrayRef *> IRPAR;
   int numrefs = refs.size();
   for (int i=0; i<numrefs; i++) { 
-    refs[i]->print(0,stderr); fprintf(stderr, "\n"); 
+    refs[i]->print(0,stderr); debug_fprintf(stderr, "\n"); 
     chillAST_VarDecl *vd = refs[i]->multibase(); 
-    vd->print(0,stderr); fprintf(stderr, "\n"); 
+    vd->print(0,stderr); debug_fprintf(stderr, "\n"); 
     vd->dump(); fflush(stdout); 
     if (vd->isPointer()) { 
       IRPAR.push_back( new IR_rosePointerArrayRef( this, refs[i], refs[i]->imwrittento ) ); 
     }
   }
-  fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
+  debug_fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
 
   return IRPAR; 
 
@@ -1022,7 +1022,7 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
 
 
 vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *block) const {
-  fprintf(stderr, "\nIR_chillCode::FindOneLevelControlStructure() yep CHILLcode\n"); 
+  debug_fprintf(stderr, "\nIR_chillCode::FindOneLevelControlStructure() yep CHILLcode\n"); 
   
   vector<IR_Control *> controls;
   IR_chillBlock *CB = (IR_chillBlock *) block; 
@@ -1030,54 +1030,54 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
   const IR_chillBlock *R_IR_CB = (const IR_chillBlock *) block;
   vector<chillAST_node*> statements = R_IR_CB->getStmtList(); 
   int ns = statements.size();  // number of statements if block has a vec of statements instead of a single AST
-  fprintf(stderr, "%d statements\n", ns);
+  debug_fprintf(stderr, "%d statements\n", ns);
   
   vector<chillAST_node *> children; // we will populate this. IR_Block has multiple ways of storing its contents, for undoubtedly historical reasons.  it can be an AST node, or a vector of them.
   
   // if IR_Block has statements, those are them. otherwise the code is in an AST
   if (0 < ns) {
-    //fprintf(stderr, "load children with %d statements\n", ns); 
+    //debug_fprintf(stderr, "load children with %d statements\n", ns); 
     
     for (int i=0; i<ns; i++) { 
-      //fprintf(stderr, "statement %d (%p):   ", i, statements[i]); statements[i]->print(); printf("\n"); fflush(stdout); 
+      //debug_fprintf(stderr, "statement %d (%p):   ", i, statements[i]); statements[i]->print(); printf("\n"); fflush(stdout); 
       children.push_back( statements[i] ); 
     }
     exit(-1);  // ?? 
   }
   else { 
-    //fprintf(stderr, "there is a single AST ?\n"); 
+    //debug_fprintf(stderr, "there is a single AST ?\n"); 
     // we will look at the AST 
     chillAST_node *blockast = R_IR_CB->getChillAST();
-    //fprintf(stderr, "basic block %p %p is:\n", blockast, R_IR_CB->chillAST ); 
+    //debug_fprintf(stderr, "basic block %p %p is:\n", blockast, R_IR_CB->chillAST ); 
     if (!blockast) { 
-      fprintf(stderr, "blockast is NULL\n"); 
+      debug_fprintf(stderr, "blockast is NULL\n"); 
       // this should never happen. we have an IR_Block with no statements and no AST
-      fprintf(stderr, "THIS SHOULD NEVER HAPPEN ir_chill.cc\n"); 
+      debug_fprintf(stderr, "THIS SHOULD NEVER HAPPEN ir_chill.cc\n"); 
       return controls; // ?? 
     }
     
     // we know we have an AST.  see what the top node is
-    //fprintf(stderr, "block ast of type %s\n", blockast->getTypeString()); blockast->print(); printf("\n\n");  fflush(stdout);
+    //debug_fprintf(stderr, "block ast of type %s\n", blockast->getTypeString()); blockast->print(); printf("\n\n");  fflush(stdout);
     
     if (blockast->isIfStmt()) { 
-      //fprintf(stderr, "found a top level Basic Block If Statement.  this will be the only control structure\n"); 
+      //debug_fprintf(stderr, "found a top level Basic Block If Statement.  this will be the only control structure\n"); 
       controls.push_back(new IR_roseIf(this, blockast));
       return controls;
     }
     
     if (blockast->isForStmt()) { 
-      //fprintf(stderr, "found a top level Basic Block For Statement.  this will be the only control structure\n"); 
+      //debug_fprintf(stderr, "found a top level Basic Block For Statement.  this will be the only control structure\n"); 
       controls.push_back(new IR_roseLoop(this, (chillAST_ForStmt *)blockast));
       return controls;
     }
     
     
     if  (blockast->isCompoundStmt()) { 
-      //fprintf(stderr, "found a top level Basic Block Compound Statement\n"); 
+      //debug_fprintf(stderr, "found a top level Basic Block Compound Statement\n"); 
       children = blockast->getChildren();
     }
     else  if (blockast->isFunctionDecl()) { // why did I do this? It is not in the rose version 
-      //fprintf(stderr, "blockast is a Functiondecl\n"); 
+      //debug_fprintf(stderr, "blockast is a Functiondecl\n"); 
       chillAST_FunctionDecl *FD =  (chillAST_FunctionDecl *)blockast;
       chillAST_node *bod = FD->getBody(); 
       children = bod->getChildren(); 
@@ -1087,7 +1087,7 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
       // so, no control statements underneath the block.
       return controls; // controls is empty, and this is checked in the caller
       
-      //fprintf(stderr, "ir_rose.cc UNHANDLED blockast type %s\n", blockast->getTypeString()); 
+      //debug_fprintf(stderr, "ir_rose.cc UNHANDLED blockast type %s\n", blockast->getTypeString()); 
       //int *i=0; int j=i[0]; 
       //exit(-1); 
     }
@@ -1097,35 +1097,35 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
   // we don't care any more what the top thing is
   
   int numchildren = children.size(); 
-  fprintf(stderr, "basic block has %d statements\n", numchildren);
-  fprintf(stderr, "basic block is:\n");
-  fprintf(stderr, "{\n");
+  debug_fprintf(stderr, "basic block has %d statements\n", numchildren);
+  debug_fprintf(stderr, "basic block is:\n");
+  debug_fprintf(stderr, "{\n");
   for (int n =0; n<numchildren; n++) { 
-    children[n]->print(0,stderr); fprintf(stderr, ";\n"); 
+    children[n]->print(0,stderr); debug_fprintf(stderr, ";\n"); 
   }
-  fprintf(stderr, "}\n");
+  debug_fprintf(stderr, "}\n");
   
   int startofrun = -1;
   
   for (int i=0; i<numchildren; i++) { 
-    fprintf(stderr, "child %d/%d  is of type %s\n", i, numchildren, children[i]->getTypeString());
+    debug_fprintf(stderr, "child %d/%d  is of type %s\n", i, numchildren, children[i]->getTypeString());
 
     CHILL_ASTNODE_TYPE typ = children[i]->asttype;
     if (typ == CHILLAST_NODETYPE_LOOP) {
-      fprintf(stderr, "loop\n"); 
+      debug_fprintf(stderr, "loop\n"); 
       // we will add the loop as a control, but before we can do that, 
       // add any group of non-special
       if (startofrun != -1) {
-        fprintf(stderr, "there was a run of statements %d to %d before the Loop\n", startofrun, i); 
+        debug_fprintf(stderr, "there was a run of statements %d to %d before the Loop\n", startofrun, i); 
         IR_roseBlock *rb = new IR_roseBlock(this); // empty
-        //fprintf(stderr, "rb %p   startofrun %d   i %d\n", rb, startofrun, i); 
+        //debug_fprintf(stderr, "rb %p   startofrun %d   i %d\n", rb, startofrun, i); 
         int count = 0; 
         for (int j=startofrun; j<i; j++) { 
-          fprintf(stderr, "j %d   ", j); children[j]->print(); printf("\n"); fflush(stdout); 
+          debug_fprintf(stderr, "j %d   ", j); children[j]->print(); printf("\n"); fflush(stdout); 
           rb->addStatement( children[j] ); 
           count++;
         }
-        fprintf(stderr, "added %d statements to the formerly empty Block %p\n", count, rb);
+        debug_fprintf(stderr, "added %d statements to the formerly empty Block %p\n", count, rb);
         if (count == 0) { 
           int *k = 0;
           int l = k[0]; 
@@ -1135,29 +1135,29 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
       }
       // then add the loop itself 
       controls.push_back(new IR_roseLoop(this, children[i]));
-      //fprintf(stderr, "roseLoop %p\n", controls[ -1+controls.size()] ); 
+      //debug_fprintf(stderr, "roseLoop %p\n", controls[ -1+controls.size()] ); 
     }
     else if (typ == CHILLAST_NODETYPE_IFSTMT ) {
-        //fprintf(stderr, "if\n"); 
+        //debug_fprintf(stderr, "if\n"); 
         // we will add the if as a control, but before we can do that, 
         // add any group of non-special
         if (startofrun != -1) {
-          //fprintf(stderr, "there was a run of statements before the IF\n"); 
+          //debug_fprintf(stderr, "there was a run of statements before the IF\n"); 
           IR_roseBlock *rb = new IR_roseBlock(this); // empty
-          //fprintf(stderr, "rb %p\n", rb); 
+          //debug_fprintf(stderr, "rb %p\n", rb); 
           for (int j=startofrun; j<i; j++) rb->addStatement( children[j] ); 
           controls.push_back( rb );
           startofrun = -1;
         }
-        //else fprintf(stderr, "there was no run of statements before the IF\n"); 
+        //else debug_fprintf(stderr, "there was no run of statements before the IF\n"); 
         // then add the if itself 
-        //fprintf(stderr, "adding the IF to controls\n"); 
+        //debug_fprintf(stderr, "adding the IF to controls\n"); 
         controls.push_back(new IR_roseIf(this, children[i])); 
-        //fprintf(stderr, "roseIf %p\n", controls[ -1+controls.size()] ); 
+        //debug_fprintf(stderr, "roseIf %p\n", controls[ -1+controls.size()] ); 
     }
     
     else if (startofrun == -1) { // straight line code, starting a new run of statements
-      //fprintf(stderr, "starting a run at %d\n", i); 
+      //debug_fprintf(stderr, "starting a run at %d\n", i); 
       startofrun = i;
     }
   } // for i (children statements) 
@@ -1166,7 +1166,7 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
   // if so, add that run as a control. 
   if (startofrun != -1) {
     int num = numchildren-startofrun;
-    //fprintf(stderr, "adding final run of %d statements starting with %d\n", num, startofrun); 
+    //debug_fprintf(stderr, "adding final run of %d statements starting with %d\n", num, startofrun); 
     IR_roseBlock *rb = new IR_roseBlock(this); // empty
     if (num == 1) rb->setChillAst( children[0] ); 
     else {
@@ -1175,16 +1175,16 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
     controls.push_back( rb );
   }
   
-  fprintf(stderr, "ir_chill.cc returning vector of %d controls\n", controls.size() );
+  debug_fprintf(stderr, "ir_chill.cc returning vector of %d controls\n", controls.size() );
   for (int i=0; i<controls.size(); i++) { 
-    fprintf(stderr, "%2d   an ", i);
-    if (controls[i]->type() == IR_CONTROL_BLOCK) fprintf(stderr, "IR_CONTROL_BLOCK\n");
-    if (controls[i]->type() == IR_CONTROL_WHILE) fprintf(stderr, "IR_CONTROL_WHILE\n");
-    if (controls[i]->type() == IR_CONTROL_LOOP)  fprintf(stderr, "IR_CONTROL_LOOP\n");
-    if (controls[i]->type() == IR_CONTROL_IF)    fprintf(stderr, "IR_CONTROL_IF\n");
+    debug_fprintf(stderr, "%2d   an ", i);
+    if (controls[i]->type() == IR_CONTROL_BLOCK) debug_fprintf(stderr, "IR_CONTROL_BLOCK\n");
+    if (controls[i]->type() == IR_CONTROL_WHILE) debug_fprintf(stderr, "IR_CONTROL_WHILE\n");
+    if (controls[i]->type() == IR_CONTROL_LOOP)  debug_fprintf(stderr, "IR_CONTROL_LOOP\n");
+    if (controls[i]->type() == IR_CONTROL_IF)    debug_fprintf(stderr, "IR_CONTROL_IF\n");
     
   }
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
   return controls;
 }
 
@@ -1192,7 +1192,7 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
 
 
 IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Control *> &controls) const {
-  fprintf(stderr, "IR_chillCode::MergeNeighboringControlStructures  %d controls\n", controls.size());
+  debug_fprintf(stderr, "IR_chillCode::MergeNeighboringControlStructures  %d controls\n", controls.size());
 
   if (controls.size() == 0)
     return NULL;
@@ -1204,7 +1204,7 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
    for (int i = 0; i < controls.size(); i++) {
     switch (controls[i]->type()) {
     case IR_CONTROL_LOOP: {
-      fprintf(stderr, "control %d is IR_CONTROL_LOOP\n", i); 
+      debug_fprintf(stderr, "control %d is IR_CONTROL_LOOP\n", i); 
       chillAST_ForStmt *loop =  static_cast<IR_chillLoop *>(controls[i])->chillforstmt;
       if (parent == NULL) {
         parent = loop->parent;
@@ -1217,7 +1217,7 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
       break;
      }
     case IR_CONTROL_BLOCK: {
-      fprintf(stderr, "control %d is IR_CONTROL_BLOCK\n", i); 
+      debug_fprintf(stderr, "control %d is IR_CONTROL_BLOCK\n", i); 
       IR_chillBlock *CB =  static_cast<IR_chillBlock*>(controls[i]);
       vector<chillAST_node*> blockstmts = CB->statements;
       if (statements.size() != 0) { 
@@ -1236,8 +1236,8 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
       else {
         if (CB->getChillAST())  CBlock->addStatement(CBlock->getChillAST()); // if this is a block, add theblock's statements? 
         else { // should never happen
-          fprintf(stderr, "WARNING: ir_chill.cc  IR_chillCode::MergeNeighboringControlStructures");
-          fprintf(stderr, "    empty IR_CONTROL_BLOCK \n");
+          debug_fprintf(stderr, "WARNING: ir_chill.cc  IR_chillCode::MergeNeighboringControlStructures");
+          debug_fprintf(stderr, "    empty IR_CONTROL_BLOCK \n");
         }
       }
       break;
@@ -1252,16 +1252,16 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
 
 
 IR_Block *IR_chillCode::GetCode() const {    // return IR_Block corresponding to current function?
-  //fprintf(stderr, "IR_chillCode::GetCode()\n"); 
+  //debug_fprintf(stderr, "IR_chillCode::GetCode()\n"); 
   //Stmt *s = func_->getBody();  // chill statement, and chill getBody
-  //fprintf(stderr, "chillfunc 0x%x\n", chillfunc);
+  //debug_fprintf(stderr, "chillfunc 0x%x\n", chillfunc);
 
   chillAST_node *bod = chillfunc->getBody();  // chillAST 
 
-  //fprintf(stderr, "got the function body??\n");
+  //debug_fprintf(stderr, "got the function body??\n");
 
-  //fprintf(stderr, "printing the function getBody()\n"); 
-  //fprintf(stderr, "sourceManager 0x%x\n", sourceManager); 
+  //debug_fprintf(stderr, "printing the function getBody()\n"); 
+  //debug_fprintf(stderr, "sourceManager 0x%x\n", sourceManager); 
   //bod->print(); 
 
   return new IR_chillBlock(this, chillfunc ) ; 
@@ -1270,67 +1270,67 @@ IR_Block *IR_chillCode::GetCode() const {    // return IR_Block corresponding to
 
 void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
   fflush(stdout); 
-  fprintf(stderr, "IR_chillCode::ReplaceCode( old, *repr)\n"); 
+  debug_fprintf(stderr, "IR_chillCode::ReplaceCode( old, *repr)\n"); 
 
   CG_chillRepr *chillrepr = (CG_chillRepr *) repr;
   vector<chillAST_node*>  newcode = chillrepr->getChillCode();
   int numnew = newcode.size();
 
-  //fprintf(stderr, "new code (%d) is\n", numnew); 
+  //debug_fprintf(stderr, "new code (%d) is\n", numnew); 
   //for (int i=0; i<numnew; i++) { 
   //  newcode[i]->print(0, stderr);
-  //  fprintf(stderr, "\n"); 
+  //  debug_fprintf(stderr, "\n"); 
   //} 
 
   struct IR_chillLoop* cloop;
 
   vector<chillAST_VarDecl*> olddecls;
   chillfunc->gatherVarDecls( olddecls );
-  //fprintf(stderr, "\n%d old decls   they are:\n", olddecls.size()); 
+  //debug_fprintf(stderr, "\n%d old decls   they are:\n", olddecls.size()); 
   //for (int i=0; i<olddecls.size(); i++) {
-  //  fprintf(stderr, "olddecl[%d]  ox%x  ",i, olddecls[i]); 
+  //  debug_fprintf(stderr, "olddecl[%d]  ox%x  ",i, olddecls[i]); 
   //  olddecls[i]->print(); printf("\n"); fflush(stdout); 
   //} 
 
 
-  //fprintf(stderr, "num new stmts %d\n", numnew); 
-  //fprintf(stderr, "new code we're look for decls in:\n"); 
+  //debug_fprintf(stderr, "num new stmts %d\n", numnew); 
+  //debug_fprintf(stderr, "new code we're look for decls in:\n"); 
   vector<chillAST_VarDecl*> decls;
   for (int i=0; i<numnew; i++)  {
     //newcode[i]->print(0,stderr);
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
     newcode[i]->gatherVarUsage( decls );
   }
 
-  //fprintf(stderr, "\n%d new vars used  they are:\n", decls.size()); 
+  //debug_fprintf(stderr, "\n%d new vars used  they are:\n", decls.size()); 
   //for (int i=0; i<decls.size(); i++) {
-  //  fprintf(stderr, "decl[%d]  ox%x  ",i, decls[i]); 
+  //  debug_fprintf(stderr, "decl[%d]  ox%x  ",i, decls[i]); 
   //  decls[i]->print(); printf("\n"); fflush(stdout); 
   //} 
 
 
   for (int i=0; i<decls.size(); i++) {
-    //fprintf(stderr, "\nchecking "); decls[i]->print(); printf("\n"); fflush(stdout); 
+    //debug_fprintf(stderr, "\nchecking "); decls[i]->print(); printf("\n"); fflush(stdout); 
     int inthere = 0; 
     for (int j=0; j<VariableDeclarations.size(); j++) { 
       if (VariableDeclarations[j] == decls[i]) { 
-        //fprintf(stderr, "it's in the Variable Declarations()\n");
+        //debug_fprintf(stderr, "it's in the Variable Declarations()\n");
       }
     }
     for (int j=0; j<olddecls.size(); j++) { 
       if (decls[i] == olddecls[j]) { 
-        //fprintf(stderr, "it's in the olddecls (exactly)\n");
+        //debug_fprintf(stderr, "it's in the olddecls (exactly)\n");
         inthere = 1;
       }
       if (streq(decls[i]->varname, olddecls[j]->varname)) { 
         if (streq(decls[i]->arraypart, olddecls[j]->arraypart)) { 
-          //fprintf(stderr, "it's in the olddecls (INEXACTLY)\n");
+          //debug_fprintf(stderr, "it's in the olddecls (INEXACTLY)\n");
           inthere = 1;
         }
       }
     }
     if (!inthere) {
-      //fprintf(stderr, "inserting decl[%d] for ",i); decls[i]->print(); printf("\n");fflush(stdout); 
+      //debug_fprintf(stderr, "inserting decl[%d] for ",i); decls[i]->print(); printf("\n");fflush(stdout); 
       chillfunc->getBody()->insertChild(0, decls[i]); 
       olddecls.push_back( decls[i] ); 
     }
@@ -1340,47 +1340,47 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
   switch (old->type()) {
   case IR_CONTROL_LOOP: 
     {
-      //fprintf(stderr, "old is IR_CONTROL_LOOP\n"); 
+      //debug_fprintf(stderr, "old is IR_CONTROL_LOOP\n"); 
       cloop = (struct IR_chillLoop* )old;
       chillAST_ForStmt *forstmt = cloop->chillforstmt;
 
-      fprintf(stderr, "old was\n");
+      debug_fprintf(stderr, "old was\n");
       forstmt->print(); printf("\n"); fflush(stdout);
 
-      //fprintf(stderr, "\nnew code is\n");
+      //debug_fprintf(stderr, "\nnew code is\n");
       //for (int i=0; i<numnew; i++) { newcode[i]->print(); printf("\n"); } 
       //fflush(stdout);
       
 
       par = forstmt->parent;
       if (!par) {
-        fprintf(stderr, "old parent was NULL\n"); 
-        fprintf(stderr, "ir_chill.cc that will not work very well.\n");
+        debug_fprintf(stderr, "old parent was NULL\n"); 
+        debug_fprintf(stderr, "ir_chill.cc that will not work very well.\n");
         exit(-1); 
       }
 
       
 
-      fprintf(stderr, "\nold parent was\n\n{\n"); 
+      debug_fprintf(stderr, "\nold parent was\n\n{\n"); 
       par->print(); printf("\n"); fflush(stdout);
-      fprintf(stderr, "\n}\n"); 
+      debug_fprintf(stderr, "\n}\n"); 
 
       vector<chillAST_node*>  oldparentcode = par->getChildren(); // probably only works for compoundstmts
-      //fprintf(stderr, "ir_chill.cc oldparentcode\n"); 
+      //debug_fprintf(stderr, "ir_chill.cc oldparentcode\n"); 
 
       // find loop in the parent
       int index = -1;
       int numstatements = oldparentcode.size();
       for (int i=0; i<numstatements; i++) if (oldparentcode[i] == forstmt) { index = i; }
       if (index == -1) { 
-        fprintf(stderr, "ir_chill.cc can't find the loop in its parent\n"); 
+        debug_fprintf(stderr, "ir_chill.cc can't find the loop in its parent\n"); 
         exit(-1); 
       }
-      //fprintf(stderr, "loop is index %d\n", index); 
+      //debug_fprintf(stderr, "loop is index %d\n", index); 
 
       // insert the new code
       par->setChild(index, newcode[0]);    // overwrite old stmt
-      //fprintf(stderr, "inserting %s 0x%x as index %d of 0x%x\n", newcode[0]->getTypeString(), newcode[0], index, par); 
+      //debug_fprintf(stderr, "inserting %s 0x%x as index %d of 0x%x\n", newcode[0]->getTypeString(), newcode[0], index, par); 
       // do we need to update the IR_cloop? 
       cloop->chillforstmt = (chillAST_ForStmt*) newcode[0]; // ?? DFL 
 
@@ -1404,8 +1404,8 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
     }
     break; 
   case IR_CONTROL_BLOCK:
-    fprintf(stderr, "old is IR_CONTROL_BLOCK\n"); 
-    fprintf(stderr, "IR_chillCode::ReplaceCode() stubbed out\n"); 
+    debug_fprintf(stderr, "old is IR_CONTROL_BLOCK\n"); 
+    debug_fprintf(stderr, "IR_chillCode::ReplaceCode() stubbed out\n"); 
     exit(-1); 
     //tf_old = static_cast<IR_chillBlock *>(old)->getStmtList()[0];
     break; 
@@ -1415,18 +1415,18 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
   }
   
   fflush(stdout); 
-  //fprintf(stderr, "\nafter inserting %d statements into the Chill IR,", numnew);
-  fprintf(stderr, "\nnew parent2 is\n\n{\n");
+  //debug_fprintf(stderr, "\nafter inserting %d statements into the Chill IR,", numnew);
+  debug_fprintf(stderr, "\nnew parent2 is\n\n{\n");
   vector<chillAST_node*>  newparentcode = par->getChildren();
   for (int i=0; i<newparentcode.size(); i++) { 
     fflush(stdout); 
-    //fprintf(stderr, "%d ", i); 
+    //debug_fprintf(stderr, "%d ", i); 
     newparentcode[i]->print(); printf(";\n"); fflush(stdout); 
   }
 
 
 
-  fprintf(stderr, "}\n"); 
+  debug_fprintf(stderr, "}\n"); 
 
 }
 
@@ -1434,29 +1434,29 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
 
 
 void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
-  fprintf(stderr, "IR_chillCode::ReplaceExpression()\n");
+  debug_fprintf(stderr, "IR_chillCode::ReplaceExpression()\n");
 
   if (typeid(*old) == typeid(IR_chillArrayRef)) {
-    //fprintf(stderr, "expressions is IR_chillArrayRef\n"); 
+    //debug_fprintf(stderr, "expressions is IR_chillArrayRef\n"); 
     IR_chillArrayRef *CAR = (IR_chillArrayRef *)old;
     chillAST_ArraySubscriptExpr* CASE = CAR->chillASE;
     printf("\nreplacing old ASE %p   ", CASE); CASE->print(); printf("\n"); fflush(stdout);
 
     CG_chillRepr *crepr = (CG_chillRepr *)repr;
     if (crepr->chillnodes.size() != 1) { 
-      fprintf(stderr, "IR_chillCode::ReplaceExpression(), replacing with %d chillnodes???\n"); 
+      debug_fprintf(stderr, "IR_chillCode::ReplaceExpression(), replacing with %d chillnodes???\n"); 
       //exit(-1);
     }
     
     chillAST_node *newthing = crepr->chillnodes[0]; 
-    fprintf(stderr, "with new "); newthing->print(); printf("\n\n"); fflush(stdout);
+    debug_fprintf(stderr, "with new "); newthing->print(); printf("\n\n"); fflush(stdout);
 
     if (!CASE->parent) { 
-      fprintf(stderr, "IR_chillCode::ReplaceExpression()  old has no parent ??\n"); 
+      debug_fprintf(stderr, "IR_chillCode::ReplaceExpression()  old has no parent ??\n"); 
       exit(-1); 
     }
 
-    fprintf(stderr, "OLD parent = "); // of type %s\n", CASE->parent->getTypeString()); 
+    debug_fprintf(stderr, "OLD parent = "); // of type %s\n", CASE->parent->getTypeString()); 
     if (CASE->parent->isImplicitCastExpr()) CASE->parent->parent->print(); 
     else CASE->parent->print(); 
     printf("\n"); fflush(stdout); 
@@ -1468,7 +1468,7 @@ void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
 
     CASE->parent->replaceChild( CASE, newthing ); 
 
-    fprintf(stderr, "after (chill) replace parent is "); // of type %s\n", CASE->parent->getTypeString()); 
+    debug_fprintf(stderr, "after (chill) replace parent is "); // of type %s\n", CASE->parent->getTypeString()); 
     if (CASE->parent->isImplicitCastExpr()) CASE->parent->parent->print(); 
     else CASE->parent->print(); 
     printf("\n\n"); fflush(stdout); 
@@ -1483,10 +1483,10 @@ void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
 
   }
   else  if (typeid(*old) == typeid(IR_chillScalarRef)) {
-    fprintf(stderr, "IR_chillCode::ReplaceExpression()  IR_chillScalarRef unhandled\n"); 
+    debug_fprintf(stderr, "IR_chillCode::ReplaceExpression()  IR_chillScalarRef unhandled\n"); 
   }
   else { 
-    fprintf(stderr, "UNKNOWN KIND OF REF\n"); exit(-1); 
+    debug_fprintf(stderr, "UNKNOWN KIND OF REF\n"); exit(-1); 
   }
 
   delete old;
@@ -1501,11 +1501,11 @@ IR_CONDITION_TYPE IR_chillCode::QueryBooleanExpOperation(const CG_outputRepr *re
 
 
 IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) const {
-  //fprintf(stderr, "IR_chillCode::QueryExpOperation()\n");
+  //debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()\n");
 
   CG_chillRepr *crepr = (CG_chillRepr *) repr; 
   chillAST_node *node = crepr->chillnodes[0];
-  //fprintf(stderr, "chillAST node type %s\n", node->getTypeString());
+  //debug_fprintf(stderr, "chillAST node type %s\n", node->getTypeString());
 
   // really need to be more rigorous than this hack  // TODO 
   if (node->isImplicitCastExpr()) node = ((chillAST_ImplicitCastExpr*)node)->subexpr;
@@ -1526,13 +1526,13 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
     if (!strcmp(opstring, "/")) return IR_OP_DIVIDE;
     if (!strcmp(opstring, "=")) return IR_OP_ASSIGNMENT;
 
-    fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperation() UNHANDLED Binary(or Unary)Operator op type (%s)\n", opstring); 
+    debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperation() UNHANDLED Binary(or Unary)Operator op type (%s)\n", opstring); 
     exit(-1);
   }
   else if (node->isDeclRefExpr() ) return  IR_OP_VARIABLE; // ?? 
   //else if (node->is ) return  something;
   else { 
-    fprintf(stderr, "IR_chillCode::QueryExpOperation()  UNHANDLED NODE TYPE %s\n", node->getTypeString());
+    debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()  UNHANDLED NODE TYPE %s\n", node->getTypeString());
     exit(-1); 
   }
 
@@ -1572,7 +1572,7 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
 
 
 vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr) const { 
-  //fprintf(stderr, "IR_chillCode::QueryExpOperand() chill\n"); 
+  //debug_fprintf(stderr, "IR_chillCode::QueryExpOperand() chill\n"); 
   vector<CG_outputRepr *> v;
   
   CG_chillRepr *crepr = (CG_chillRepr *) repr; 
@@ -1588,12 +1588,12 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
 
   //if(isa<IntegerLiteral>(e) || isa<FloatingLiteral>(e) || isa<DeclRefExpr>(e)) {
   if (e->isIntegerLiteral() || e->isFloatingLiteral() || e->isDeclRefExpr() ) { 
-    //fprintf(stderr, "it's a constant\n"); 
+    //debug_fprintf(stderr, "it's a constant\n"); 
     CG_chillRepr *repr = new CG_chillRepr(e);
     v.push_back(repr);
     //} else if(BinaryOperator *bop = dyn_cast<BinaryOperator>(e)) {
   } else if (e->isBinaryOperator()) { 
-    //fprintf(stderr, "ir_chill.cc BOP TODO\n"); exit(-1); // 
+    //debug_fprintf(stderr, "ir_chill.cc BOP TODO\n"); exit(-1); // 
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator*)e;
     char *op = bop->op;  // TODO enum for operator types
     if (streq(op, "=")) { 
@@ -1604,7 +1604,7 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
       v.push_back(new CG_chillRepr( bop->rhs )); 
     }
     else { 
-      fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Binary Operator  UNHANDLED op (%s)\n", op); 
+      debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Binary Operator  UNHANDLED op (%s)\n", op); 
       exit(-1);
     }
   } // BinaryOperator
@@ -1616,12 +1616,12 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
       v.push_back( new CG_chillRepr( uop->subexpr ));
     }
     else { 
-      fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Unary Operator  UNHANDLED op (%s)\n", op); 
+      debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Unary Operator  UNHANDLED op (%s)\n", op); 
       exit(-1);
     }
   } // unaryoperator
   else { 
-    fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString()); 
+    debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString()); 
     exit(-1); 
   }
     
@@ -1688,10 +1688,10 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
     float val = ((chillAST_FloatingLiteral*)node)->value; 
     return new IR_chillConstantRef(this, val );
   } else if(node->isDeclRefExpr()) { 
-    //fprintf(stderr, "ir_chill.cc  IR_chillCode::Repr2Ref()  declrefexpr TODO\n"); exit(-1); 
+    //debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::Repr2Ref()  declrefexpr TODO\n"); exit(-1); 
     return new IR_chillScalarRef(this, (chillAST_DeclRefExpr*)node);  // uses DRE
   } else  { 
-    fprintf(stderr, "ir_chill.cc IR_chillCode::Repr2Ref() UNHANDLED node type %s\n", node->getTypeString()); 
+    debug_fprintf(stderr, "ir_chill.cc IR_chillCode::Repr2Ref() UNHANDLED node type %s\n", node->getTypeString()); 
     exit(-1); 
     //assert(0);
   }

@@ -10,10 +10,10 @@ using namespace omega;
 
 void Loop::stencilASEPadded(int stmt_num)   {
   
-  fprintf(stderr, "\nLoop::stencilASEPadded( stmt_num %d )   loop_stencil.cc\n", stmt_num); 
-  //fprintf(stderr, "stmt.size()  %d\n", stmt.size()); 
-  //fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols.size()); 
-  //for(int i=0; i<stmt_num; i++) fprintf(stderr, "stmt %d  UNIN SYM map size %d\n", i,  uninterpreted_symbols[i].size()); 
+  debug_fprintf(stderr, "\nLoop::stencilASEPadded( stmt_num %d )   loop_stencil.cc\n", stmt_num); 
+  //debug_fprintf(stderr, "stmt.size()  %d\n", stmt.size()); 
+  //debug_fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols.size()); 
+  //for(int i=0; i<stmt_num; i++) debug_fprintf(stderr, "stmt %d  UNIN SYM map size %d\n", i,  uninterpreted_symbols[i].size()); 
   
   //First things first
   delete last_compute_cgr_;
@@ -23,7 +23,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   // find the stencil shape  
   find_stencil_shape( stmt_num ); 
-  fprintf(stderr, "found stencil shape\n\n"); 
+  debug_fprintf(stderr, "found stencil shape\n\n"); 
   
   // this was a test, making the stencil NOT symmetric 
   //std::vector< chillAST_node* > acoeff;
@@ -39,10 +39,10 @@ void Loop::stencilASEPadded(int stmt_num)   {
   // get chill_ast?  or do we keep Loop pure ?
   omega::CG_chillRepr *CR = (omega::CG_chillRepr *) stmt[stmt_num].code;
   chillAST_node *chillcode = CR->GetCode();
-  //fprintf(stderr, "chillcode (%s):\n", chillcode->getTypeString()); chillcode->print(); printf("\n(END)\n\n"); fflush(stdout);
+  //debug_fprintf(stderr, "chillcode (%s):\n", chillcode->getTypeString()); chillcode->print(); printf("\n(END)\n\n"); fflush(stdout);
   
   int depth = stmt[stmt_num].loop_level.size();
-  //fprintf(stderr, "depth %d\n", depth);
+  //debug_fprintf(stderr, "depth %d\n", depth);
   
   LoopLevel _loop= stmt[stmt_num].loop_level[depth-1]; // innermost?
   
@@ -53,14 +53,14 @@ void Loop::stencilASEPadded(int stmt_num)   {
   // use Omega to get loop index names ?? 
   std::vector<std::string> loop_idxs_names;
   
-  //fprintf(stderr, "gathering loop indeces\n");
+  //debug_fprintf(stderr, "gathering loop indeces\n");
   std::vector<chillAST_VarDecl*> indeces; 
   chillcode->gatherLoopIndeces( indeces ); 
-  //fprintf(stderr, "\nchill version of loop indeces (%d of them):\n", indeces.size() ); 
+  //debug_fprintf(stderr, "\nchill version of loop indeces (%d of them):\n", indeces.size() ); 
   //for (int i=0; i<indeces.size(); i++) {
   //  indeces[i]->print(); printf(" %p\n", indeces[i]); fflush(stdout); 
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
   
   
   
@@ -76,21 +76,21 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   chillAST_ForStmt *innermost = chillcode->findContainingLoop();
   if (!innermost) { 
-    fprintf(stderr, "stencil code is not in any loops?\n");
+    debug_fprintf(stderr, "stencil code is not in any loops?\n");
     exit(-1);
   }
   
 
-  //fprintf(stderr, "\ninnermost loop is "); innermost->printControl(); printf("\n\n"); fflush(stdout); 
+  //debug_fprintf(stderr, "\ninnermost loop is "); innermost->printControl(); printf("\n\n"); fflush(stdout); 
   
   int upper, lower;
   bool worked = innermost->upperBound( upper );
   if (!worked) { 
-    fprintf(stderr, "could not find upper bound\n"); 
+    debug_fprintf(stderr, "could not find upper bound\n"); 
   }
   worked = innermost->lowerBound( lower );
   if (!worked) { 
-    fprintf(stderr, "could not find lower bound bound\n"); 
+    debug_fprintf(stderr, "could not find lower bound bound\n"); 
   }
   
   //Dbg...
@@ -99,16 +99,16 @@ void Loop::stencilASEPadded(int stmt_num)   {
   fflush(stdout); 
   
   int radius = stmt[stmt_num].statementStencil->radius();
-  fprintf(stderr, "radius of stencil is %d\n", radius); 
+  debug_fprintf(stderr, "radius of stencil is %d\n", radius); 
   
   int numbuffers = 1 + 2*radius;
-  //fprintf(stderr, "we'll allocate %d linear buffers\n", numbuffers);
+  //debug_fprintf(stderr, "we'll allocate %d linear buffers\n", numbuffers);
   
   //Relation original_IS = copy(stmt[stmt_num].IS); // not used 
   
   int paddingSize = 2 * radius;
   int stencilBufferSize = 1 + paddingSize + upper - lower;
-  //fprintf(stderr, "padding %d    stencilBufferSize %d\n\n", paddingSize, stencilBufferSize); 
+  //debug_fprintf(stderr, "padding %d    stencilBufferSize %d\n\n", paddingSize, stencilBufferSize); 
   char arraypart[32];
   sprintf(arraypart, "[%d]", stencilBufferSize );  // variable arraypart
   
@@ -126,7 +126,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     sprintf(vname, "buffer_%d", i); // variable name 
     
     chillAST_VarDecl *vd = new chillAST_VarDecl( "double", vname, arraypart, NULL); 
-    //vd->print(0, stderr); fprintf(stderr, ";\n");
+    //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying
     fd->insertChild(i, vd); // adds decl as the first staement in the function body
@@ -136,20 +136,20 @@ void Loop::stencilASEPadded(int stmt_num)   {
   }
   
   // define the temps  (treg_1, treg_2, etc) 
-  fprintf(stderr, "Adding temporary registers\n");
+  debug_fprintf(stderr, "Adding temporary registers\n");
   std::vector<chillAST_VarDecl *> treg_syms; 
   int num_temp_registers = (radius+1) * (radius+2) / 2;
-  fprintf(stderr, "\n%d temp registers\n", num_temp_registers );
+  debug_fprintf(stderr, "\n%d temp registers\n", num_temp_registers );
 
   for (int i=0; i<num_temp_registers; i++) {     
     char vname[128];
     sprintf(vname, "treg_%d", i); // variable name 
     
-    fprintf(stderr, "%s\n", vname);
+    debug_fprintf(stderr, "%s\n", vname);
       
 
     chillAST_VarDecl *vd = new chillAST_VarDecl( "double", vname, "", NULL); 
-    //vd->print(0, stderr); fprintf(stderr, ";\n");
+    //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying
     fd->insertChild(i, vd); // adds decl as the first staement in the function body
@@ -159,12 +159,12 @@ void Loop::stencilASEPadded(int stmt_num)   {
   }
   
   
-  //fprintf(stderr, "\ndoing init (rampup?)\n");
+  //debug_fprintf(stderr, "\ndoing init (rampup?)\n");
   stencilInfo *SI = stmt[stmt_num].statementStencil;
   chillAST_VarDecl *src = SI->srcArrayVariable;
   chillAST_VarDecl *dst = SI->dstArrayVariable;
-  //fprintf(stderr, "from stencilinfo, src %s   dst %s\n", src->varname, dst->varname); 
-  SI->print( stderr ); fprintf(stderr, "\n\n");
+  //debug_fprintf(stderr, "from stencilinfo, src %s   dst %s\n", src->varname, dst->varname); 
+  SI->print( stderr ); debug_fprintf(stderr, "\n\n");
 
   //Make a new Statement
   //Set its iteration space correctly                  // here 
@@ -213,7 +213,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   CG_outputRepr *read_ref;
   std::vector<CG_outputRepr *> read_idxs(depth);
   for(int i=1; i<=depth; i++){
-    //fprintf(stderr, "variable(?) %s\n", init_pipeline.IS.set_var(i)->name().c_str());
+    //debug_fprintf(stderr, "variable(?) %s\n", init_pipeline.IS.set_var(i)->name().c_str());
     read_idxs[i-1] = ir->builder()->CreateIdent(init_pipeline.IS.set_var(i)->name());
   }
   
@@ -249,7 +249,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   //Let's get the skeleton up for setting up the initialization code
   for (int r = -radius; r<radius; r++){
     
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
     _ofst = 0;
     int _x =r;
     
@@ -260,12 +260,12 @@ void Loop::stencilASEPadded(int stmt_num)   {
     int _ctr =0;
     for (int z=0; z<=radius; z++){
       for (int y=0; y<=z; y++){
-        //fprintf(stderr, "z %d   y %d\n", z, y); 
+        //debug_fprintf(stderr, "z %d   y %d\n", z, y); 
 
-        fprintf(stderr, "r %d   z %d   y %d\n", r, z, y); 
+        debug_fprintf(stderr, "r %d   z %d   y %d\n", r, z, y); 
         
         if(z==0 && y==0){  
-          fprintf(stderr, "\ncenter point\n"); 
+          debug_fprintf(stderr, "\ncenter point\n"); 
           CG_outputRepr *k_idx = read_idxs[depth-3]->clone();//k
           CG_outputRepr *j_idx = read_idxs[depth-2]->clone();//j
           CG_outputRepr *i_idx = ocg->CreatePlus(read_idxs[depth-1]->clone(), ocg->CreateInt(_x)); // i+x
@@ -281,17 +281,17 @@ void Loop::stencilASEPadded(int stmt_num)   {
           reg_assignments = ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(), read_var->clone());
           
           if (r<0) 
-            fprintf(stderr, "%s = %s[k][j][i-%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
+            debug_fprintf(stderr, "%s = %s[k][j][i-%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
           else if (r == 0) 
-            fprintf(stderr, "%s = %s[k][j][i]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
+            debug_fprintf(stderr, "%s = %s[k][j][i]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
           else if (r>0) 
-            fprintf(stderr, "%s = %s[k][j][i+%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
+            debug_fprintf(stderr, "%s = %s[k][j][i+%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
           
           _ctr++;
         }
         else if(y==0 && z!=0)
           {
-            fprintf(stderr, "\nabove center\n"); 
+            debug_fprintf(stderr, "\nabove center\n"); 
             CG_outputRepr *k_idx = read_idxs[depth-3]->clone();//k
             CG_outputRepr *j_idx = read_idxs[depth-2]->clone();//j
             CG_outputRepr *i_idx = ocg->CreatePlus(read_idxs[depth-1]->clone(), ocg->CreateInt(_x));
@@ -346,18 +346,18 @@ void Loop::stencilASEPadded(int stmt_num)   {
                                                   ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
             
             //if (r<0) 
-            //  fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
+            //  debug_fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
             //else if (r == 0) 
-            //  fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
+            //  debug_fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
             //else if (r>0) 
-            //  fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
+            //  debug_fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
             
             _ctr++;
             
           }
         else if (z==y && z!=0)  //  && y!=0) //points on the diagonal
           {
-            fprintf(stderr, "\non diagonal\n");
+            debug_fprintf(stderr, "\non diagonal\n");
             CG_outputRepr *k_idx = read_idxs[depth-3]->clone();//k
             CG_outputRepr *j_idx = read_idxs[depth-2]->clone();//j
             CG_outputRepr *i_idx = ocg->CreatePlus(read_idxs[depth-1]->clone(), ocg->CreateInt(_x));
@@ -405,16 +405,16 @@ void Loop::stencilASEPadded(int stmt_num)   {
                                                   ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
             
             if (r<0) 
-              fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
+              debug_fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
             else if (r == 0) 
-              fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
+              debug_fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
             else if (r>0) 
-              fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
+              debug_fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
             
             _ctr++;
           } // diagonal
         else if (z!=y && z!=0 && y!=0)        {
-          fprintf(stderr, "SHOULD NOT GET HERE\n"); 
+          debug_fprintf(stderr, "SHOULD NOT GET HERE\n"); 
           CG_outputRepr *k_idx = read_idxs[depth-3]->clone();//k
           CG_outputRepr *j_idx = read_idxs[depth-2]->clone();//j
           CG_outputRepr *i_idx = ocg->CreatePlus(read_idxs[depth-1]->clone(), ocg->CreateInt(_x));
@@ -512,13 +512,13 @@ void Loop::stencilASEPadded(int stmt_num)   {
     
     // create linear buffer terms  buffer_0, buffer_1, etc  
     
-    fprintf(stderr, "warmup_pipeline\n"); 
+    debug_fprintf(stderr, "warmup_pipeline\n"); 
     if(warmup_pipeline == NULL) warmup_pipeline = reg_assignments->clone();
     else warmup_pipeline = ocg->StmtListAppend( warmup_pipeline->clone(),reg_assignments->clone());
     
-    fprintf(stderr, "\ncreating buffer_?[ X ] lines\n"); 
+    debug_fprintf(stderr, "\ncreating buffer_?[ X ] lines\n"); 
     for(int n = r; n >= -radius ; n--){
-      fprintf(stderr, "n %d\n", n); 
+      debug_fprintf(stderr, "n %d\n", n); 
 
       //The plane we are working on is _in[K][J][r]
       //The plane of coefficients we use: coeff[K][J][n] 
@@ -526,7 +526,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
       
       sum_products_regs =NULL;
       
-      //fprintf(stderr, "%s = ...\n", buff_syms[n+radius]->varname); 
+      //debug_fprintf(stderr, "%s = ...\n", buff_syms[n+radius]->varname); 
       
       _ctr =0;
       
@@ -537,15 +537,15 @@ void Loop::stencilASEPadded(int stmt_num)   {
       
       for (int z=0; z<=radius; z++){
         for (int y=0; y<=z; y++){
-          fprintf(stderr, "z %d   y %d\n", z, y); 
+          debug_fprintf(stderr, "z %d   y %d\n", z, y); 
 
-          //fprintf(stderr, "n %d   z %d   y %d\n", n, z, y ); 
+          //debug_fprintf(stderr, "n %d   z %d   y %d\n", n, z, y ); 
           
           // get the coefficient ??  (as a chillAST_node)
           chillAST_node *coeff = SI->find_coefficient(n, y, z ); // wrong
           if (coeff) { 
             
-            //coeff->print(0, stderr); fprintf(stderr, "\n"); 
+            //coeff->print(0, stderr); debug_fprintf(stderr, "\n"); 
             //coeff->dump(); printf("\n\n"); fflush(stdout);
             
             rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
@@ -564,7 +564,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
               sum_products_regs = ocg->CreatePlus(sum_products_regs, read_var);
             
           }
-          else fprintf(stderr, "there was no coeff for  n %d   z %d   y %d\n", n, z, y ); 
+          else debug_fprintf(stderr, "there was no coeff for  n %d   z %d   y %d\n", n, z, y ); 
           
           _ctr++;
         }
@@ -744,7 +744,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   for (int z=0; z<=radius; z++){
     for (int y=0; y<=z; y++){
       
-      fprintf(stderr, "z %d   y %d\n", z, y); 
+      debug_fprintf(stderr, "z %d   y %d\n", z, y); 
       if(z==0 && y==0){
         
         CG_outputRepr *k_idx = read_idxs[depth-3]->clone();//k
@@ -970,7 +970,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   r=radius;
   for(int n= r; n >= -radius ; n--){
-    fprintf(stderr, "n %d\n", n); 
+    debug_fprintf(stderr, "n %d\n", n); 
 
     //The plane we are working on is _in[K][J][r]
     //The plane of coefficients we use: coeff[K][J][n] 
@@ -988,13 +988,13 @@ void Loop::stencilASEPadded(int stmt_num)   {
     
     for (int z=0; z<=radius; z++){
       for (int y=0; y<=z; y++){
-        fprintf(stderr, "z %d   y %d\n", z, y); 
+        debug_fprintf(stderr, "z %d   y %d\n", z, y); 
 
         // get the coefficient ??  (as a chillAST_node)
         chillAST_node *coeff = SI->find_coefficient( n, y, z );
         if (coeff) { 
           
-          //coeff->print(0, stderr); fprintf(stderr, "\n"); 
+          //coeff->print(0, stderr); debug_fprintf(stderr, "\n"); 
           //coeff->dump(); printf("\n\n"); fflush(stdout);
           
           
@@ -1017,7 +1017,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           else  
             sum_products_regs = ocg->CreatePlus(sum_products_regs->clone(), read_var);
         }
-        else fprintf(stderr, "there was no coeff for  n %d   z %d   y %d\n", n, z, y ); 
+        else debug_fprintf(stderr, "there was no coeff for  n %d   z %d   y %d\n", n, z, y ); 
         _ctr++;
         
         
@@ -1055,9 +1055,9 @@ void Loop::stencilASEPadded(int stmt_num)   {
    **********************************************/
   
   std::vector<Statement> temp_statement_buffer;
-  //fprintf(stderr, "init_pipeline is temp_statement_buffer[%d]\n", temp_statement_buffer.size()); 
+  //debug_fprintf(stderr, "init_pipeline is temp_statement_buffer[%d]\n", temp_statement_buffer.size()); 
   temp_statement_buffer.push_back(init_pipeline);
-  //fprintf(stderr, "stmt[%d] is temp_statement_buffer[%d]\n", stmt_num, temp_statement_buffer.size()); 
+  //debug_fprintf(stderr, "stmt[%d] is temp_statement_buffer[%d]\n", stmt_num, temp_statement_buffer.size()); 
   temp_statement_buffer.push_back(stmt[stmt_num]);
   
   //Statement _swap = stmt[stmt_num];
@@ -1118,7 +1118,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   CG_outputRepr* write_var = ir->CreateArrayRefRepr(stencil_output->symbol(),temp_idxs);
   sum_buffers.code = ocg->CreateAssignment(0, write_var->clone(),init_rhs);
   
-  //fprintf(stderr, "sum_buffers is temp_statement_buffer[%d]\n", temp_statement_buffer.size()); 
+  //debug_fprintf(stderr, "sum_buffers is temp_statement_buffer[%d]\n", temp_statement_buffer.size()); 
   temp_statement_buffer.push_back(sum_buffers);
   
   //############################################################################
@@ -1141,18 +1141,18 @@ void Loop::stencilASEPadded(int stmt_num)   {
   //ugly manipulation of vector of statments, this should be improved
   // insert new statements in place of stmt[stmt_num]
   
-  //fprintf(stderr, "\nincreasing number of statements\ninitially, %d statements\n", stmt.size()); 
+  //debug_fprintf(stderr, "\nincreasing number of statements\ninitially, %d statements\n", stmt.size()); 
   std::vector<Statement> tp_stmt;
   // copy initial (stmt_num) statements
-  //fprintf(stderr, "copying initial %d statements\n", stmt_num); 
+  //debug_fprintf(stderr, "copying initial %d statements\n", stmt_num); 
   for(int i=0; i<stmt_num; i++) {
-    //fprintf(stderr, "adding stmt[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
+    //debug_fprintf(stderr, "adding stmt[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
     tp_stmt.push_back(stmt[i]);  
   }
   // insert statements in place of previous stmt[stmt_num]
-  //fprintf(stderr, "copying %d new statements\n", temp_statement_buffer.size()); 
+  //debug_fprintf(stderr, "copying %d new statements\n", temp_statement_buffer.size()); 
   for(int i=0; i<temp_statement_buffer.size(); i++) {
-    //fprintf(stderr, "adding temp_statement_buffer[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
+    //debug_fprintf(stderr, "adding temp_statement_buffer[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
     tp_stmt.push_back(temp_statement_buffer[i]);
   }
   
@@ -1167,9 +1167,9 @@ void Loop::stencilASEPadded(int stmt_num)   {
   }
   
   // copy remaining statements 
-  //fprintf(stderr, "copying %d remaining statements\n", stmt.size() - stmt_num); // ?? 
+  //debug_fprintf(stderr, "copying %d remaining statements\n", stmt.size() - stmt_num); // ?? 
   for(int i=stmt_num+1; i<stmt.size();i++) {
-    //fprintf(stderr, "adding stmt[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
+    //debug_fprintf(stderr, "adding stmt[%d] as tp_stmt %d\n", i, tp_stmt.size()); 
     tp_stmt.push_back(stmt[i]);
   }
   stmt = tp_stmt;
@@ -1184,15 +1184,15 @@ void Loop::stencilASEPadded(int stmt_num)   {
   for(int i=0; i<stmt.size(); i++) 
     g.insert();
   
-  //fprintf(stderr, "\n\nstmt.size()  %d\n", stmt.size()); 
-  //fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols.size()); 
-  //fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols_stringrepr.size()); 
-  //fprintf(stderr, "nesting_level  %d\n\n", stmt_nesting_level_.size()); 
-  //for (int i = 0; i < stmt_nesting_level_.size(); i++) fprintf(stderr, "nesting %d\n", stmt_nesting_level_[i]); 
+  //debug_fprintf(stderr, "\n\nstmt.size()  %d\n", stmt.size()); 
+  //debug_fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols.size()); 
+  //debug_fprintf(stderr, "uninterpreted  %d\n", uninterpreted_symbols_stringrepr.size()); 
+  //debug_fprintf(stderr, "nesting_level  %d\n\n", stmt_nesting_level_.size()); 
+  //for (int i = 0; i < stmt_nesting_level_.size(); i++) debug_fprintf(stderr, "nesting %d\n", stmt_nesting_level_[i]); 
   
   for (int i = 0; i < stmt.size(); i++) { 
     for (int j = i; j < stmt.size(); j++) {
-      //fprintf(stderr, "i %d  j %d\n", i, j ); 
+      //debug_fprintf(stderr, "i %d  j %d\n", i, j ); 
       
       
       std::pair<std::vector<DependenceVector>,

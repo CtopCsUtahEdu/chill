@@ -1,6 +1,7 @@
 #ifndef IR_CUDA_CLANG_HH
 #define IR_CUDA_CLANG_HH
 
+#include "chill_io.hh"
 #include "ir_clang.hh"
 #include "loop.hh"
 #include "loop_cuda_clang.hh"

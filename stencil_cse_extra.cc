@@ -53,7 +53,7 @@ extern void BuildStencilCoefficient(int dim_x, int dim_y, int dim_z);
 void Loop::Stencil_ASE_padded(int stmt_num) // enclosing loop outermost
 {
   
-  fprintf(stderr, "\nLoop::Stencil_ASE_padded(stmt_num %d)\n", stmt_num); 
+  debug_fprintf(stderr, "\nLoop::Stencil_ASE_padded(stmt_num %d)\n", stmt_num); 
   //First things first
   //Find the loop bounds of the inner-loop
   

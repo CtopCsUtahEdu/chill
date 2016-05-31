@@ -65,9 +65,9 @@ void exp2formula(IR_Code *ir,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr
                  ) {
   
-  fprintf(stderr, "\n*** exp2formula()\n");
+  debug_fprintf(stderr, "\n*** exp2formula()\n");
   //repr->dump();  /* printf("\n"); */fflush(stdout); 
-  fprintf(stderr, "repr  "); r.print(); printf("\n"); fflush(stdout); 
+  debug_fprintf(stderr, "repr  "); r.print(); printf("\n"); fflush(stdout); 
   
   
   IR_OPERATION_TYPE optype = ir->QueryExpOperation(repr);
@@ -79,7 +79,7 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_CONSTANT:
     {
-      fprintf(stderr, "IR_OP_CONSTANT\n");
+      debug_fprintf(stderr, "IR_OP_CONSTANT\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       IR_ConstantRef *ref = static_cast<IR_ConstantRef *>(ir->Repr2Ref(v[0]));
       if (!ref->is_integer())
@@ -120,16 +120,16 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_VARIABLE:
     {
-      fprintf(stderr, "IR_OP_VARIABLE\n");
-      //fprintf(stderr, "repr  "); repr->dump(); fflush(stdout); 
+      debug_fprintf(stderr, "IR_OP_VARIABLE\n");
+      //debug_fprintf(stderr, "repr  "); repr->dump(); fflush(stdout); 
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
-      //fprintf(stderr, "v     "); v[0]->dump(); fflush(stdout); 
+      //debug_fprintf(stderr, "v     "); v[0]->dump(); fflush(stdout); 
       IR_ScalarRef *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v[0]));
       
-      //fprintf(stderr, "omegatools.cc calling ref->name()\n"); 
+      //debug_fprintf(stderr, "omegatools.cc calling ref->name()\n"); 
       std::string s = ref->name();
       Variable_ID e = find_index(r, s, side);
-      //fprintf(stderr, "s %s\n", s.c_str()); 
+      //debug_fprintf(stderr, "s %s\n", s.c_str()); 
       
       
       if (e == NULL) { // must be free variable
@@ -181,7 +181,7 @@ void exp2formula(IR_Code *ir,
 
   case IR_OP_ASSIGNMENT:
     {
-      fprintf(stderr, "IR_OP_ASSIGNMENT\n");
+      debug_fprintf(stderr, "IR_OP_ASSIGNMENT\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       exp2formula(ir, r, f_root, freevars, v[0], lhs, side, rel, true,
                   uninterpreted_symbols, uninterpreted_symbols_stringrepr);
@@ -192,7 +192,7 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_PLUS:
     {
-      fprintf(stderr, "IR_OP_PLUS\n");
+      debug_fprintf(stderr, "IR_OP_PLUS\n");
       F_Exists *f_exists = f_root->add_exists();
       Variable_ID e1 = f_exists->declare(tmp_e());
       Variable_ID e2 = f_exists->declare(tmp_e());
@@ -234,7 +234,7 @@ void exp2formula(IR_Code *ir,
     }
   case IR_OP_MINUS:
     {
-      fprintf(stderr, "IR_OP_MINUS\n");
+      debug_fprintf(stderr, "IR_OP_MINUS\n");
       F_Exists *f_exists = f_root->add_exists();
       Variable_ID e1 = f_exists->declare(tmp_e());
       Variable_ID e2 = f_exists->declare(tmp_e());
@@ -266,13 +266,13 @@ void exp2formula(IR_Code *ir,
         throw std::invalid_argument("unsupported condition type");
       
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
-      fprintf(stderr, "IR_OP_MINUS v has %d parts\n", (int)v.size()); 
-      fprintf(stderr, "IR_OP_MINUS recursing 1\n"); 
+      debug_fprintf(stderr, "IR_OP_MINUS v has %d parts\n", (int)v.size()); 
+      debug_fprintf(stderr, "IR_OP_MINUS recursing 1\n"); 
       exp2formula(ir, r, f_and, freevars, v[0], e1, side, IR_COND_EQ, true,
                   uninterpreted_symbols, uninterpreted_symbols_stringrepr);
       
       if (v.size() > 1) { 
-        fprintf(stderr, "IR_OP_MINUS recursing 2\n");  // dies here because it's unary minus? 
+        debug_fprintf(stderr, "IR_OP_MINUS recursing 2\n");  // dies here because it's unary minus? 
         exp2formula(ir, r, f_and, freevars, v[1], e2, side, IR_COND_EQ, true,
                     uninterpreted_symbols, uninterpreted_symbols_stringrepr);
       }  
@@ -286,7 +286,7 @@ void exp2formula(IR_Code *ir,
 
   case IR_OP_MULTIPLY:
     {    
-      fprintf(stderr, "IR_OP_MULTIPLY\n");
+      debug_fprintf(stderr, "IR_OP_MULTIPLY\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       coef_t coef;
@@ -343,7 +343,7 @@ void exp2formula(IR_Code *ir,
 
   case IR_OP_DIVIDE:
     {
-      fprintf(stderr, "IR_OP_DIVIDE\n");
+      debug_fprintf(stderr, "IR_OP_DIVIDE\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       assert(ir->QueryExpOperation(v[1]) == IR_OP_CONSTANT);
@@ -387,7 +387,7 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_MOD:
     {
-      fprintf(stderr, "IR_OP_MOD\n");
+      debug_fprintf(stderr, "IR_OP_MOD\n");
       /* the left hand of a mod can be a var but the right must be a const */
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
@@ -447,7 +447,7 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_POSITIVE:
     {
-      fprintf(stderr, "IR_OP_POSITIVE\n");
+      debug_fprintf(stderr, "IR_OP_POSITIVE\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       exp2formula(ir, r, f_root, freevars, v[0], lhs, side, rel, true,
@@ -461,7 +461,7 @@ void exp2formula(IR_Code *ir,
     
   case IR_OP_NEGATIVE:
     {
-      fprintf(stderr, "IR_OP_NEGATIVE\n");
+      debug_fprintf(stderr, "IR_OP_NEGATIVE\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       F_Exists *f_exists = f_root->add_exists();
@@ -500,7 +500,7 @@ void exp2formula(IR_Code *ir,
 
   case IR_OP_MIN:
     {
-      fprintf(stderr, "IR_OP_MIN\n");
+      debug_fprintf(stderr, "IR_OP_MIN\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       F_Exists *f_exists = f_root->add_exists();
@@ -573,7 +573,7 @@ void exp2formula(IR_Code *ir,
 
   case IR_OP_MAX:
     {
-      fprintf(stderr, "IR_OP_MAX\n");
+      debug_fprintf(stderr, "IR_OP_MAX\n");
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       
       F_Exists *f_exists = f_root->add_exists();
@@ -645,39 +645,39 @@ void exp2formula(IR_Code *ir,
     }
     
   case IR_OP_ARRAY_VARIABLE: {                      //                                  *****
-    fprintf(stderr, "\nomegatools.cc IR_OP_ARRAY_VARIABLE     ARRAY! \n");
+    debug_fprintf(stderr, "\nomegatools.cc IR_OP_ARRAY_VARIABLE     ARRAY! \n");
     
     // temp for printing 
     //CG_chillRepr *CR = (CG_chillRepr *)repr;
-    //fprintf(stderr, "repr  "); CR->dump(); fflush(stdout); 
+    //debug_fprintf(stderr, "repr  "); CR->dump(); fflush(stdout); 
     
-    //fprintf(stderr, "repr  "); repr->dump();  /* printf("\n"); */fflush(stdout); 
+    //debug_fprintf(stderr, "repr  "); repr->dump();  /* printf("\n"); */fflush(stdout); 
     
     std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
     IR_Ref *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v[0]));
     
     
     CG_chillRepr *CR = (CG_chillRepr *)v[0]; // cheat for now.  we should not know this is a chillRepr  
-    //fprintf(stderr, "v     "); CR->dump(); fflush(stdout); 
-    //fprintf(stderr, "v     "); v[0]->dump(); /* printf("\n"); */ fflush(stdout); 
+    //debug_fprintf(stderr, "v     "); CR->dump(); fflush(stdout); 
+    //debug_fprintf(stderr, "v     "); v[0]->dump(); /* printf("\n"); */ fflush(stdout); 
     chillAST_node* node = CR->GetCode(); 
     
     
-    //fprintf(stderr, "\n**** walking parents!\n"); 
+    //debug_fprintf(stderr, "\n**** walking parents!\n"); 
     //std::vector<chillAST_VarDecl*> loopvars;
     //node->gatherLoopIndeces( loopvars ); 
-    //fprintf(stderr, "in omegatools, %d loop vars\n", (int)loopvars.size()); 
+    //debug_fprintf(stderr, "in omegatools, %d loop vars\n", (int)loopvars.size()); 
     
     
     std::string s = ref->name();
-    //fprintf(stderr, "array variable s is %s\n", s.c_str()); 
+    //debug_fprintf(stderr, "array variable s is %s\n", s.c_str()); 
     
     int max_dim = 0;
     bool need_new_fsymbol = false;
     std::set<std::string> vars;
-    //fprintf(stderr, "ref->n_dim %d\n", ref->n_dim()); 
+    //debug_fprintf(stderr, "ref->n_dim %d\n", ref->n_dim()); 
     for (int i = 0; i < ref->n_dim(); i++) {
-      //fprintf(stderr, "dimension %d\n", i); 
+      //debug_fprintf(stderr, "dimension %d\n", i); 
       Relation temp(r.n_inp());
       
       // r is enclosing relation, we build another that will include this 
@@ -704,11 +704,11 @@ void exp2formula(IR_Code *ir,
       Variable_ID e = temp.get_local(t);
       freevars.insert(freevars.end(), t);
       
-      fprintf(stderr, "exp2formula recursing? \n"); 
+      debug_fprintf(stderr, "exp2formula recursing? \n"); 
       exp2formula(ir, temp, temp_root, freevars, repr, e, side,
                   IR_COND_EQ, false, uninterpreted_symbols,
                   uninterpreted_symbols_stringrepr);
-      fprintf(stderr, "BACK FROM exp2formula recursing? \n"); 
+      debug_fprintf(stderr, "BACK FROM exp2formula recursing? \n"); 
       
       // temp is relation for the index of the array ?? 
       for (DNF_Iterator di(temp.query_DNF()); di; di++) {
@@ -732,12 +732,12 @@ void exp2formula(IR_Code *ir,
         need_new_fsymbol = true;
     }    
     
-    //fprintf(stderr, "%d vars: ", (int)vars.size());
-    //for (int i=0; i<vars.size(); i++) fprintf(stderr, "%s", vars[i].c_str()); 
+    //debug_fprintf(stderr, "%d vars: ", (int)vars.size());
+    //for (int i=0; i<vars.size(); i++) debug_fprintf(stderr, "%s", vars[i].c_str()); 
     //for (std::set<std::string>::iterator it = vars.begin(); it != vars.end(); it++) {
-    //  fprintf(stderr, "%s ", (*it).c_str()); 
+    //  debug_fprintf(stderr, "%s ", (*it).c_str()); 
     //} 
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
     
     // r is enclosing relation, we build another that will include 
     Variable_ID e = find_index(r, s, side); // s is the array named "index"
@@ -751,19 +751,19 @@ void exp2formula(IR_Code *ir,
       internals[i]->gatherScalarVarDecls(sdecls);   // vardecls for scalars
     }
     
-    //fprintf(stderr, "%d scalar var decls()\n", sdecls.size()); 
+    //debug_fprintf(stderr, "%d scalar var decls()\n", sdecls.size()); 
     //for (int i=0; i<sdecls.size(); i++) { 
-    //  fprintf(stderr, "vardecl %2d: ", i);  
+    //  debug_fprintf(stderr, "vardecl %2d: ", i);  
     //  sdecls[i]->print(); printf("\n"); fflush(stdout); 
     //} 
     
     
-    //fprintf(stderr, "omegatools.cc, exp2formula()   NOW WHAT\n"); 
+    //debug_fprintf(stderr, "omegatools.cc, exp2formula()   NOW WHAT\n"); 
     //exit(0); 
     
     if (e == NULL) { // s must be a free variable         
-      //fprintf(stderr, "'%s' must be free variable\n\n", s.c_str()); 
-      //fprintf(stderr, "SO WE WILL CREATE A MACRO ???\n");
+      //debug_fprintf(stderr, "'%s' must be free variable\n\n", s.c_str()); 
+      //debug_fprintf(stderr, "SO WE WILL CREATE A MACRO ???\n");
       
       Free_Var_Decl *t = NULL;
       
@@ -799,19 +799,19 @@ void exp2formula(IR_Code *ir,
         else 
           args += ",";
         args += *it;
-        //fprintf(stderr, "an argument to the macro: %s\n", it->c_str()); 
+        //debug_fprintf(stderr, "an argument to the macro: %s\n", it->c_str()); 
         Vargs.push_back( (*it) );
         reprs.push_back(ir->builder()->CreateIdent(*it));
         reprs2.push_back(ir->builder()->CreateIdent(*it));
       }
       args += ")";
       
-      //fprintf(stderr, "args '%s'\n", args.c_str()); 
-      //fprintf(stderr, "Vargs ");
-      //for (int i=0; i<Vargs.size(); i++) fprintf(stderr, "%s ",Vargs[i].c_str());
-      //fprintf(stderr, "\n"); 
+      //debug_fprintf(stderr, "args '%s'\n", args.c_str()); 
+      //debug_fprintf(stderr, "Vargs ");
+      //for (int i=0; i<Vargs.size(); i++) debug_fprintf(stderr, "%s ",Vargs[i].c_str());
+      //debug_fprintf(stderr, "\n"); 
       
-      //fprintf(stderr, "omegatools.cc ir->CreateDefineMacro( s (%s), args(%s), repr)\n", s.c_str(), args.c_str()); 
+      //debug_fprintf(stderr, "omegatools.cc ir->CreateDefineMacro( s (%s), args(%s), repr)\n", s.c_str(), args.c_str()); 
       
       // TODO repr, the rhs of the macro, needs to NOT refer to an actual variable ???
       
@@ -821,7 +821,7 @@ void exp2formula(IR_Code *ir,
       
       
       // index_(i)   uses i outputrepr 
-      //fprintf(stderr,"omegatools.cc making uninterpreted symbol %s\n",s.c_str());
+      //debug_fprintf(stderr,"omegatools.cc making uninterpreted symbol %s\n",s.c_str());
       uninterpreted_symbols.insert(                                           // adding to uninterpreted_symbols
                                    std::pair<std::string, std::vector<omega::CG_outputRepr *> >(
                                                                                                 s, reprs));
@@ -854,13 +854,13 @@ void exp2formula(IR_Code *ir,
     delete ref;
     if (destroy) delete repr;
     
-    //fprintf(stderr, "FINALLY DONE with IR_OP_ARRAY_VARIABLE\n\n"); 
+    //debug_fprintf(stderr, "FINALLY DONE with IR_OP_ARRAY_VARIABLE\n\n"); 
     break;
   }
 
 
   case IR_OP_NULL: 
-    fprintf(stderr, "IR_OP_NULL\n");
+    debug_fprintf(stderr, "IR_OP_NULL\n");
     break;
 
 
@@ -881,20 +881,20 @@ Relation arrays2relation(IR_Code *ir, std::vector<Free_Var_Decl*> &freevars,
                          std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                          std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr) {
   
-  //fprintf(stderr, "arrays2relation()\n"); 
-  //fprintf(stderr, "%d freevars\n", freevars.size()); 
-  //for (int i=0; i<freevars.size(); i++) fprintf(stderr, "freevar %d %s\n", i, (const char *)(freevars[i]->base_name())); 
+  //debug_fprintf(stderr, "arrays2relation()\n"); 
+  //debug_fprintf(stderr, "%d freevars\n", freevars.size()); 
+  //for (int i=0; i<freevars.size(); i++) debug_fprintf(stderr, "freevar %d %s\n", i, (const char *)(freevars[i]->base_name())); 
   
   
   Relation &IS1 = const_cast<Relation &>(IS_w);
   Relation &IS2 = const_cast<Relation &>(IS_r);
   
   //Relation *helper;
-  //helper = new Relation(IS1); fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
-  //helper = new Relation(IS2); fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
+  //helper = new Relation(IS1); debug_fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
+  //helper = new Relation(IS2); debug_fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
   
   Relation r(IS1.n_set(), IS2.n_set());
-  //helper = new Relation(r); fprintf(stderr, "r    "); helper->print(); fflush(stdout);
+  //helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);
   
   for (int i = 1; i <= IS1.n_set(); i++)
     r.name_input_var(i, IS1.set_var(i)->name());
@@ -902,25 +902,25 @@ Relation arrays2relation(IR_Code *ir, std::vector<Free_Var_Decl*> &freevars,
   for (int i = 1; i <= IS2.n_set(); i++)
     r.name_output_var(i, IS2.set_var(i)->name()+"'");
   
-  //fprintf(stderr, "omegatools.cc sym_src\n"); 
+  //debug_fprintf(stderr, "omegatools.cc sym_src\n"); 
   IR_Symbol *sym_src = ref_src->symbol();
   IR_Symbol *sym_dst = ref_dst->symbol();
-  //fprintf(stderr, "omegatools.cc going to do IR_Symbol operator==\n"); 
-  //fprintf(stderr, "omegatools.cc comparing symbol 0x%x to symbol 0x%x\n", sym_src, sym_dst); 
+  //debug_fprintf(stderr, "omegatools.cc going to do IR_Symbol operator==\n"); 
+  //debug_fprintf(stderr, "omegatools.cc comparing symbol 0x%x to symbol 0x%x\n", sym_src, sym_dst); 
   
-  //if (!(*sym_src == *sym_dst))  fprintf(stderr, "!(*sym_src == *sym_dst)\n"); 
+  //if (!(*sym_src == *sym_dst))  debug_fprintf(stderr, "!(*sym_src == *sym_dst)\n"); 
   
-  //fprintf(stderr, "calling !=\n"); 
-  //if (*sym_src != *sym_dst)  fprintf(stderr, "omegatools.cc  (*sym_src != *sym_dst) TRUE\n"); 
-  //else fprintf(stderr, "omegatools.cc  (*sym_src != *sym_dst) FALSE\n"); 
+  //debug_fprintf(stderr, "calling !=\n"); 
+  //if (*sym_src != *sym_dst)  debug_fprintf(stderr, "omegatools.cc  (*sym_src != *sym_dst) TRUE\n"); 
+  //else debug_fprintf(stderr, "omegatools.cc  (*sym_src != *sym_dst) FALSE\n"); 
   
-  //fprintf(stderr, "calling ==\n"); 
-  //if ((*sym_src == *sym_dst))  fprintf(stderr, "(*sym_src == *sym_dst))  TRUE \n"); 
-  //else fprintf(stderr, "(*sym_src == *sym_dst) FALSE \n"); 
+  //debug_fprintf(stderr, "calling ==\n"); 
+  //if ((*sym_src == *sym_dst))  debug_fprintf(stderr, "(*sym_src == *sym_dst))  TRUE \n"); 
+  //else debug_fprintf(stderr, "(*sym_src == *sym_dst) FALSE \n"); 
   
   if (*sym_src != *sym_dst) {
     //if (!(*sym_src == *sym_dst)) {
-    //fprintf(stderr, "False Relation\n"); 
+    //debug_fprintf(stderr, "False Relation\n"); 
     r.add_or(); // False Relation
     delete sym_src;
     delete sym_dst;
@@ -931,12 +931,12 @@ Relation arrays2relation(IR_Code *ir, std::vector<Free_Var_Decl*> &freevars,
     delete sym_dst;
   }
   
-  //fprintf(stderr, "f_root\n"); 
+  //debug_fprintf(stderr, "f_root\n"); 
   F_And *f_root = r.add_and();
   
-  //fprintf(stderr, "omegatools.cc ref_src->n_dim() %d\n", ref_src->n_dim()); 
+  //debug_fprintf(stderr, "omegatools.cc ref_src->n_dim() %d\n", ref_src->n_dim()); 
   for (int i = 0; i < ref_src->n_dim(); i++) {
-    //fprintf(stderr, "arrays2 i %d\n", i); 
+    //debug_fprintf(stderr, "arrays2 i %d\n", i); 
     
     F_Exists *f_exists = f_root->add_exists();
     Variable_ID e1 = f_exists->declare(tmp_e());
@@ -984,8 +984,8 @@ Relation arrays2relation(IR_Code *ir, std::vector<Free_Var_Decl*> &freevars,
   for (int i = 1; i <= IS2.n_set(); i++)
     r.name_output_var(i, IS2.set_var(i)->name()+"'");
   
-  //helper = new Relation(r); fprintf(stderr, "r    "); helper->print(); fflush(stdout);  
-  //fprintf(stderr, "leaving arrays2relation\n"); 
+  //helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);  
+  //debug_fprintf(stderr, "leaving arrays2relation\n"); 
   return r;
 }
 
@@ -998,7 +998,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
                                                                                                const IR_ArrayRef *ref_src, 
                                                                                                const IR_ArrayRef *ref_dst, 
                                                                                                const Relation &r) {
-  //fprintf(stderr, "relation2dependences()\n"); 
+  //debug_fprintf(stderr, "relation2dependences()\n"); 
   assert(r.n_inp() == r.n_out());
   
   std::vector<DependenceVector> dependences1, dependences2;  
@@ -1007,36 +1007,36 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
   working.push(DependenceLevel(r, r.n_inp()));
   
   while (!working.empty()) {
-    //fprintf(stderr, "!empty  size %d\n", working.size()); 
+    //debug_fprintf(stderr, "!empty  size %d\n", working.size()); 
     
     DependenceLevel dep = working.top();
     working.pop();
     
-    //if (!dep.r.is_satisfiable()) fprintf(stderr, "NOT dep.r.is_satisfiable()\n"); 
-    //else                         fprintf(stderr, "    dep.r.is_satisfiable()\n"); 
+    //if (!dep.r.is_satisfiable()) debug_fprintf(stderr, "NOT dep.r.is_satisfiable()\n"); 
+    //else                         debug_fprintf(stderr, "    dep.r.is_satisfiable()\n"); 
     
     // No dependence exists, move on.
     if (!dep.r.is_satisfiable()) { 
-      //fprintf(stderr, "No dependence exists, move on.\n"); 
+      //debug_fprintf(stderr, "No dependence exists, move on.\n"); 
       continue;
     }
     
-    //fprintf(stderr, "satisfiable\n"); 
-    //fprintf(stderr, "dep.level %d   r.n_inp() %d\n", dep.level, r.n_inp()); 
+    //debug_fprintf(stderr, "satisfiable\n"); 
+    //debug_fprintf(stderr, "dep.level %d   r.n_inp() %d\n", dep.level, r.n_inp()); 
     if (dep.level == r.n_inp()) {
-      //fprintf(stderr, "dep.level == r.n_inp()\n"); 
+      //debug_fprintf(stderr, "dep.level == r.n_inp()\n"); 
       DependenceVector dv;
       
-      //fprintf(stderr, "\ndv created in if                                         ***\n"); 
+      //debug_fprintf(stderr, "\ndv created in if                                         ***\n"); 
       //DependenceVector *dv2 = new DependenceVector; 
       
-      //fprintf(stderr, "for loop independent dependence  dep.dir %d\n", dep.dir); 
+      //debug_fprintf(stderr, "for loop independent dependence  dep.dir %d\n", dep.dir); 
       // for loop independent dependence, use lexical order to
       // determine the correct source and destination
       if (dep.dir == 0) {
-        //fprintf(stderr, "dep.dir == 0\n"); 
+        //debug_fprintf(stderr, "dep.dir == 0\n"); 
         if (*ref_src == *ref_dst) {                             // c == c
-          //fprintf(stderr, "trivial\n"); 
+          //debug_fprintf(stderr, "trivial\n"); 
           continue; // trivial self zero-dependence
         }
         
@@ -1055,7 +1055,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
         
       }
       else if (dep.dir == 1) {
-        //fprintf(stderr, "dep.dir == 1\n"); 
+        //debug_fprintf(stderr, "dep.dir == 1\n"); 
         if (ref_src->is_write()) {
           if (ref_dst->is_write())
             dv.type = DEP_W2W;
@@ -1070,7 +1070,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
         }
       }
       else { // dep.dir == -1
-        //fprintf(stderr, "dep.dir == -1\n"); 
+        //debug_fprintf(stderr, "dep.dir == -1\n"); 
         if (ref_dst->is_write()) {
           if (ref_src->is_write())
             dv.type = DEP_W2W;
@@ -1088,73 +1088,73 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
       dv.lbounds = dep.lbounds;
       dv.ubounds = dep.ubounds;
       
-      //fprintf(stderr, "omegatools.cc calling ref_src->symbol();\n"); 
+      //debug_fprintf(stderr, "omegatools.cc calling ref_src->symbol();\n"); 
       dv.sym = ref_src->symbol();
-      //fprintf(stderr, "dv.sym = %p\n", dv.sym); 
+      //debug_fprintf(stderr, "dv.sym = %p\n", dv.sym); 
       
-      //fprintf(stderr, "symbol %s  ADDING A DEPENDENCE OF TYPE ", dv.sym->name().c_str()); 
+      //debug_fprintf(stderr, "symbol %s  ADDING A DEPENDENCE OF TYPE ", dv.sym->name().c_str()); 
       //switch (dv.type) { 
-      //case DEP_W2W: fprintf(stderr, "DEP_W2W to "); break; 
-      //case DEP_W2R: fprintf(stderr, "DEP_W2R to "); break; 
-      //case DEP_R2W: fprintf(stderr, "DEP_R2W to "); break; 
-      //case DEP_R2R: fprintf(stderr, "DEP_R2R to "); break; 
-      //default: fprintf(stderr, "DEP_UNKNOWN to "); break;
+      //case DEP_W2W: debug_fprintf(stderr, "DEP_W2W to "); break; 
+      //case DEP_W2R: debug_fprintf(stderr, "DEP_W2R to "); break; 
+      //case DEP_R2W: debug_fprintf(stderr, "DEP_R2W to "); break; 
+      //case DEP_R2R: debug_fprintf(stderr, "DEP_R2R to "); break; 
+      //default: debug_fprintf(stderr, "DEP_UNKNOWN to "); break;
       //} 
-      //if (dep.dir == 0 || dep.dir == 1) fprintf(stderr, "dependences1\n"); 
-      //else fprintf(stderr, "dependences2\n"); 
+      //if (dep.dir == 0 || dep.dir == 1) debug_fprintf(stderr, "dependences1\n"); 
+      //else debug_fprintf(stderr, "dependences2\n"); 
       
       if (dep.dir == 0 || dep.dir == 1) {
-        //fprintf(stderr, "pushing dv\n"); 
+        //debug_fprintf(stderr, "pushing dv\n"); 
         dependences1.push_back(dv);
-        //fprintf(stderr, "DONE pushing dv\n"); 
+        //debug_fprintf(stderr, "DONE pushing dv\n"); 
         
-        //fprintf(stderr, "now %d dependences1\n", dependences1.size() ); 
+        //debug_fprintf(stderr, "now %d dependences1\n", dependences1.size() ); 
         //for (int i=0; i<dependences1.size(); i++) {
-        //  fprintf(stderr, "dependences1[%d]: ", i ); 
-        //  //fprintf(stderr, "symbol %p ", dependences1[i].sym);
-        //  fprintf(stderr, "symbol ");
-        //  fprintf(stderr, "%s\n", dependences1[i].sym->name().c_str()); 
+        //  debug_fprintf(stderr, "dependences1[%d]: ", i ); 
+        //  //debug_fprintf(stderr, "symbol %p ", dependences1[i].sym);
+        //  debug_fprintf(stderr, "symbol ");
+        //  debug_fprintf(stderr, "%s\n", dependences1[i].sym->name().c_str()); 
         //} 
-        //fprintf(stderr, "\n"); 
+        //debug_fprintf(stderr, "\n"); 
       }
       else { 
-        //fprintf(stderr, "pushing dv\n"); 
+        //debug_fprintf(stderr, "pushing dv\n"); 
         dependences2.push_back(dv);
-        //fprintf(stderr, "DONE pushing dv\n"); 
+        //debug_fprintf(stderr, "DONE pushing dv\n"); 
         
-        //fprintf(stderr, "now %d dependences2\n", dependences2.size() ); 
+        //debug_fprintf(stderr, "now %d dependences2\n", dependences2.size() ); 
         //for (int i=0; i<dependences2.size(); i++) {
-        //  fprintf(stderr, "dependences2[%d]: ", i); 
-        //  //fprintf(stderr, "symbol %p ", dependences2[i].sym);
-        //  fprintf(stderr, "symbol "); 
-        //  fprintf(stderr, "%s\n", dependences2[i].sym->name().c_str()); 
+        //  debug_fprintf(stderr, "dependences2[%d]: ", i); 
+        //  //debug_fprintf(stderr, "symbol %p ", dependences2[i].sym);
+        //  debug_fprintf(stderr, "symbol "); 
+        //  debug_fprintf(stderr, "%s\n", dependences2[i].sym->name().c_str()); 
         //} 
-        //fprintf(stderr, "\n"); 
+        //debug_fprintf(stderr, "\n"); 
       }
       
-      //fprintf(stderr, "dv goes out of scope                                      ***\n"); 
+      //debug_fprintf(stderr, "dv goes out of scope                                      ***\n"); 
     }
     else {
-      //fprintf(stderr, "now work on the next dimension level\n"); 
+      //debug_fprintf(stderr, "now work on the next dimension level\n"); 
       // now work on the next dimension level
       int level = ++dep.level;
-      //fprintf(stderr, "level %d\n", level); 
+      //debug_fprintf(stderr, "level %d\n", level); 
       
       coef_t lbound, ubound;
       Relation delta = Deltas(copy(dep.r));
       //delta.print(); fflush(stdout); 
       delta.query_variable_bounds(delta.set_var(level), lbound, ubound);
-      //fprintf(stderr, "delta   lb " coef_fmt " 0x%llx    ub " coef_fmt " 0x%llx\n", lbound,lbound,ubound,ubound);
+      //debug_fprintf(stderr, "delta   lb " coef_fmt " 0x%llx    ub " coef_fmt " 0x%llx\n", lbound,lbound,ubound,ubound);
       
       
       if (dep.dir == 0) {
-        //fprintf(stderr, "dep.dir == 0\n"); 
+        //debug_fprintf(stderr, "dep.dir == 0\n"); 
         if (lbound > 0) {
           dep.dir = 1;
           dep.lbounds[level-1] = lbound;
           dep.ubounds[level-1] = ubound;
           
-          //fprintf(stderr, "push 1\n"); 
+          //debug_fprintf(stderr, "push 1\n"); 
           working.push(dep);
         }
         else if (ubound < 0) {
@@ -1162,7 +1162,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
           dep.lbounds[level-1] = -ubound;
           dep.ubounds[level-1] = -lbound;
           
-          //fprintf(stderr, "push 2\n"); 
+          //debug_fprintf(stderr, "push 2\n"); 
           working.push(dep);
         }
         else {
@@ -1180,14 +1180,14 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
             h.update_coef(dep2.r.input_var(level), 1);
             h.update_coef(dep2.r.output_var(level), -1);
             
-            //fprintf(stderr, "push 3\n"); 
+            //debug_fprintf(stderr, "push 3\n"); 
             working.push(dep2);
           }
           
-          //fprintf(stderr, "lbound %lld 0x%llx\n", lbound, lbound); 
-          //if (lbound < 0LL) fprintf(stderr, "lbound < 0LL\n"); 
-          //if (*ref_src != *ref_dst) fprintf(stderr, "(*ref_src != *ref_dst)\n"); 
-          //else fprintf(stderr, "(*ref_src EQUAL *ref_dst)\n"); 
+          //debug_fprintf(stderr, "lbound %lld 0x%llx\n", lbound, lbound); 
+          //if (lbound < 0LL) debug_fprintf(stderr, "lbound < 0LL\n"); 
+          //if (*ref_src != *ref_dst) debug_fprintf(stderr, "(*ref_src != *ref_dst)\n"); 
+          //else debug_fprintf(stderr, "(*ref_src EQUAL *ref_dst)\n"); 
           
           if (lbound < 0LL && (*ref_src != *ref_dst)) {                // c == c
             DependenceLevel dep2 = dep;
@@ -1208,11 +1208,11 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
             dep2.lbounds[level-1] = std::max(-ubound,static_cast<coef_t>(1)); // use max() to avoid Omega retardedness
             dep2.ubounds[level-1] = -lbound;
             
-            //fprintf(stderr, "push 4\n"); 
+            //debug_fprintf(stderr, "push 4\n"); 
             working.push(dep2);
           }
           
-          //fprintf(stderr, "ubound %d\n", ubound); 
+          //debug_fprintf(stderr, "ubound %d\n", ubound); 
           if (ubound > 0) {
             DependenceLevel dep2 = dep;
             
@@ -1231,7 +1231,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
             dep2.lbounds[level-1] = std::max(lbound,static_cast<coef_t>(1)); // use max() to avoid Omega retardness
             dep2.ubounds[level-1] = ubound;
             
-            //fprintf(stderr, "push 5\n"); 
+            //debug_fprintf(stderr, "push 5\n"); 
             working.push(dep2);
           }
         }
@@ -1239,7 +1239,7 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
       // now deal with dependence vector with known direction
       // determined at previous levels
       else {
-        //fprintf(stderr, "else messy\n"); 
+        //debug_fprintf(stderr, "else messy\n"); 
         // For messy bounds, further test to see if the dependence distance
         // can be reduced to positive/negative.  This is an omega hack.
         if (lbound == negInfinity && ubound == posInfinity) {
@@ -1295,41 +1295,41 @@ std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relatio
           dep.ubounds[level-1] = ubound;
         }
         
-        //fprintf(stderr, "push 6\n"); 
+        //debug_fprintf(stderr, "push 6\n"); 
         working.push(dep);
       }
     }
-    //fprintf(stderr, "at bottom, size %d\n", working.size()); 
+    //debug_fprintf(stderr, "at bottom, size %d\n", working.size()); 
     
   }
   
-  //fprintf(stderr, "leaving relation2dependences, %d and %d dependences\n", dependences1.size(), dependences2.size()); 
+  //debug_fprintf(stderr, "leaving relation2dependences, %d and %d dependences\n", dependences1.size(), dependences2.size()); 
   
   
   //for (int i=0; i<dependences1.size(); i++) {
-  //fprintf(stderr, "dependences1[%d]: ", i); 
-  //fprintf(stderr, "symbol %s\n", dependences1[i].sym->name().c_str()); 
+  //debug_fprintf(stderr, "dependences1[%d]: ", i); 
+  //debug_fprintf(stderr, "symbol %s\n", dependences1[i].sym->name().c_str()); 
   
-  //fprintf(stderr, "symbol %s  HAS A left  DEPENDENCE OF TYPE ", dependences1[i].sym->name().c_str()); 
+  //debug_fprintf(stderr, "symbol %s  HAS A left  DEPENDENCE OF TYPE ", dependences1[i].sym->name().c_str()); 
   //switch (dependences1[i].type) { 
-  //case DEP_W2W: fprintf(stderr, "DEP_W2W\n");     break; 
-  //case DEP_W2R: fprintf(stderr, "DEP_W2R\n");     break; 
-  //case DEP_R2W: fprintf(stderr, "DEP_R2W\n");     break; 
-  //case DEP_R2R: fprintf(stderr, "DEP_R2R\n");     break; 
-  //default:      fprintf(stderr, "DEP_UNKNOWN\n"); break;
+  //case DEP_W2W: debug_fprintf(stderr, "DEP_W2W\n");     break; 
+  //case DEP_W2R: debug_fprintf(stderr, "DEP_W2R\n");     break; 
+  //case DEP_R2W: debug_fprintf(stderr, "DEP_R2W\n");     break; 
+  //case DEP_R2R: debug_fprintf(stderr, "DEP_R2R\n");     break; 
+  //default:      debug_fprintf(stderr, "DEP_UNKNOWN\n"); break;
   //} 
   //} 
   
   
   //for (int i=0; i<dependences2.size(); i++) {
   
-  //fprintf(stderr, "symbol %s  HAS A right DEPENDENCE OF TYPE ", dependences2[i].sym->name().c_str()); 
+  //debug_fprintf(stderr, "symbol %s  HAS A right DEPENDENCE OF TYPE ", dependences2[i].sym->name().c_str()); 
   //switch (dependences2[i].type) { 
-  //case DEP_W2W: fprintf(stderr, "DEP_W2W\n");     break; 
-  //case DEP_W2R: fprintf(stderr, "DEP_W2R\n");     break; 
-  //case DEP_R2W: fprintf(stderr, "DEP_R2W\n");     break; 
-  //case DEP_R2R: fprintf(stderr, "DEP_R2R\n");     break; 
-  //default:      fprintf(stderr, "DEP_UNKNOWN\n"); break;
+  //case DEP_W2W: debug_fprintf(stderr, "DEP_W2W\n");     break; 
+  //case DEP_W2R: debug_fprintf(stderr, "DEP_W2R\n");     break; 
+  //case DEP_R2W: debug_fprintf(stderr, "DEP_R2W\n");     break; 
+  //case DEP_R2R: debug_fprintf(stderr, "DEP_R2R\n");     break; 
+  //default:      debug_fprintf(stderr, "DEP_UNKNOWN\n"); break;
   //} 
   //} 
   

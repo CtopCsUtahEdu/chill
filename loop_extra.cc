@@ -66,7 +66,7 @@ std::set<int> Loop::unroll_extra(int stmt_num, int level, int unroll_amount, int
 }
 
 void Loop::peel(int stmt_num, int level, int peel_amount) {
-  fprintf(stderr, "Loop::peel( stmt_num %d, level %d, amount %d)\n", stmt_num, level, peel_amount); 
+  debug_fprintf(stderr, "Loop::peel( stmt_num %d, level %d, amount %d)\n", stmt_num, level, peel_amount); 
   
   // check for sanity of parameters
   if (stmt_num < 0 || stmt_num >= stmt.size())

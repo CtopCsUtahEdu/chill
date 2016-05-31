@@ -39,13 +39,17 @@ AC_ARG_ENABLE([cuda],[
 AM_CONDITIONAL([CUDACHILL_OPT],[test "x$enable_cuda" == xyes])
 
 
-AC_ARG_ENABLE([coverage],[
-    AS_HELP_STRING([--enable-coverage],[enables coverage testing])
-    ],[
-    AS_IF(["x$enableval" != xno],[
-        AC_SUBST([enable_coverage],[yes])
+AC_ARG_ENABLE([coverage],
+   [AS_HELP_STRING([--enable-coverage],[enables coverage testing])],
+   [AS_IF(["x$enableval" != xno],
+       [AC_SUBST([enable_coverage],[yes])
         AC_SUBST([CFLAGS],["-g -fprofile-arcs -ftest-coverage"])
         AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
+
+AC_ARG_ENABLE([debug],
+   [AS_HELP_STRING([--enable-debug],[enable debug info])],
+   [AS_IF(["x$enableval" != xno],
+       [AC_SUBST([enable_debug_info],[yes])],[])])
 
 AC_ARG_WITH([rose],[
     AS_HELP_STRING([--with-rose],[set rose home])
@@ -119,6 +123,7 @@ AS_IF([test "x$interface_lang" == xscript],
     AC_SUBST([use_lue],[no])
     AC_SUBST([use_script],[yes])],[])
 
+AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug_info" = xyes])
 AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])

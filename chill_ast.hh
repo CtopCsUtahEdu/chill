@@ -6,6 +6,8 @@
 
 #define CHILL_INDENT_AMOUNT 2
 
+#include "chill_io.hh"
+
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
@@ -244,7 +246,7 @@ public:
   bool isFromSourceFile;  // false = #included 
   char *filename;  // file this node is from
 
-  void segfault() { fprintf(stderr, "segfaulting on purpose\n"); int *i=0; int j = i[0]; }; // seg fault
+  void segfault() { debug_fprintf(stderr, "segfaulting on purpose\n"); int *i=0; int j = i[0]; }; // seg fault
   int getNumChildren() { return children.size(); }; 
   vector<chillAST_node*> children; 
   vector<chillAST_node*> getChildren() { return children; } ;  // not usually useful
@@ -258,12 +260,12 @@ public:
   vector<chillAST_Preprocessing*> preprocessinginfo; 
 
   virtual void addChild( chillAST_node* c) {
-    //if (c->isFunctionDecl()) fprintf(stderr, "addchild FunctionDecl\n"); 
+    //if (c->isFunctionDecl()) debug_fprintf(stderr, "addchild FunctionDecl\n"); 
     c->parent = this;
     // check to see if it's already there
     for (int i=0; i<children.size(); i++) { 
       if (c == children[i]) {
-        //fprintf(stderr, "addchild ALREADY THERE\n"); 
+        //debug_fprintf(stderr, "addchild ALREADY THERE\n"); 
         return; // already there
       }
     }
@@ -271,7 +273,7 @@ public:
   } ;  // not usually useful
 
   virtual void insertChild(int i, chillAST_node* node) { 
-    //fprintf(stderr, "%s inserting child of type %s at location %d\n", getTypeString(), node->getTypeString(), i); 
+    //debug_fprintf(stderr, "%s inserting child of type %s at location %d\n", getTypeString(), node->getTypeString(), i); 
     node->parent = this; 
     children.insert( children.begin()+i, node );
   };
@@ -288,8 +290,8 @@ public:
   }
 
   virtual void replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
-    fprintf(stderr,"(%s) forgot to implement replaceChild() ... using generic\n" ,Chill_AST_Node_Names[asttype]); 
-    fprintf(stderr, "%d children\n", children.size()); 
+    debug_fprintf(stderr,"(%s) forgot to implement replaceChild() ... using generic\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr, "%d children\n", children.size()); 
     for (int i=0; i<children.size(); i++) { 
       if (children[i] == old) { 
         children[i] = newchild;
@@ -297,13 +299,13 @@ public:
         return; 
       }
     }
-    fprintf(stderr, "%s %p generic replaceChild called with oldchild that was not a child\n", 
+    debug_fprintf(stderr, "%s %p generic replaceChild called with oldchild that was not a child\n", 
             getTypeString(), this) ;
-    fprintf(stderr, "printing\n"); 
-    print(); fprintf(stderr, "\nchild: ");
-    if (!old) fprintf(stderr, "oldchild NULL!\n");
-    old->print(); fprintf(stderr, "\nnew: "); 
-    newchild->print(); fprintf(stderr, "\n"); 
+    debug_fprintf(stderr, "printing\n"); 
+    print(); debug_fprintf(stderr, "\nchild: ");
+    if (!old) debug_fprintf(stderr, "oldchild NULL!\n");
+    old->print(); debug_fprintf(stderr, "\nnew: "); 
+    newchild->print(); debug_fprintf(stderr, "\n"); 
     segfault(); // make easier for gdb
   };
   
@@ -321,85 +323,85 @@ public:
     // so you have to make a copy of the vector to traverse
     
     vector<chillAST_node*> dupe = children; // simple enough?
-    //fprintf(stderr, "node XXX has %d children\n", dupe.size()); 
-    //fprintf(stderr, "generic node %s has %d children\n", getTypeString(), dupe.size()); 
+    //debug_fprintf(stderr, "node XXX has %d children\n", dupe.size()); 
+    //debug_fprintf(stderr, "generic node %s has %d children\n", getTypeString(), dupe.size()); 
     for (int i=0; i<dupe.size(); i++) {  // recurse on all children
       dupe[i]->loseLoopWithLoopVar( var );
     }
   }
 
   virtual int evalAsInt() { 
-    fprintf(stderr,"(%s) can't be evaluated as an integer??\n", Chill_AST_Node_Names[asttype]);
-    print(); fprintf(stderr, "\n"); 
+    debug_fprintf(stderr,"(%s) can't be evaluated as an integer??\n", Chill_AST_Node_Names[asttype]);
+    print(); debug_fprintf(stderr, "\n"); 
     segfault(); 
   }
 
   virtual const char* getUnderlyingType() { 
-    fprintf(stderr,"(%s) forgot to implement getUnderlyingType()\n", Chill_AST_Node_Names[asttype]);
+    debug_fprintf(stderr,"(%s) forgot to implement getUnderlyingType()\n", Chill_AST_Node_Names[asttype]);
     dump();
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
     segfault(); 
   }; 
 
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { 
-    fprintf(stderr,"(%s) forgot to implement getUnderlyingVarDecl()\n", Chill_AST_Node_Names[asttype]);
+    debug_fprintf(stderr,"(%s) forgot to implement getUnderlyingVarDecl()\n", Chill_AST_Node_Names[asttype]);
     dump();
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
     segfault();
   }; 
 
 
   virtual chillAST_node *findref(){// find the SINGLE constant or data reference at this node or below
-    fprintf(stderr,"(%s) forgot to implement findref()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement findref()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
     segfault();
   };
 
   virtual void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {
-    fprintf(stderr,"(%s) forgot to implement gatherArrayRefs()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherArrayRefs()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
   };
  
   // TODO we MIGHT want the VarDecl // NOTHING IMPLEMENTS THIS? ??? 
   virtual void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
-    fprintf(stderr,"(%s) forgot to implement gatherScalarRefs()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherScalarRefs()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
   };
  
   virtual void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces ) { // recursive walk parent links, looking for loops, and grabbing the declRefExpr in the loop init and cond. 
     // you can quit when you get to certain nodes
 
-    //fprintf(stderr, "%s::gatherLoopIndeces()\n", getTypeString()); 
+    //debug_fprintf(stderr, "%s::gatherLoopIndeces()\n", getTypeString()); 
     
     if (isSourceFile() || isFunctionDecl() ) return; // end of the line
 
     // just for debugging 
     //if (parent) {
-    //  fprintf(stderr, "%s has parent of type %s\n", getTypeString(), parent->getTypeString()); 
+    //  debug_fprintf(stderr, "%s has parent of type %s\n", getTypeString(), parent->getTypeString()); 
     //} 
-    //else fprintf(stderr, "this %s %p has no parent???\n", getTypeString(), this);
+    //else debug_fprintf(stderr, "this %s %p has no parent???\n", getTypeString(), this);
 
 
     if (!parent) return; // should not happen, but be careful
 
     // for most nodes, this just recurses upwards
-    //fprintf(stderr, "%s::gatherLoopIndeces() %p recursing up\n", this); 
+    //debug_fprintf(stderr, "%s::gatherLoopIndeces() %p recursing up\n", this); 
     parent->gatherLoopIndeces( indeces );
   }
 
 
   chillAST_ForStmt* findContainingLoop() { // recursive walk parent links, looking for loops
-    //fprintf(stderr, "%s::findContainingLoop()   ", getTypeString()); 
-    //if (parent) fprintf(stderr, "parents is a %s\n", parent->getTypeString()); 
-    //else fprintf(stderr, "no parent\n"); 
+    //debug_fprintf(stderr, "%s::findContainingLoop()   ", getTypeString()); 
+    //if (parent) debug_fprintf(stderr, "parents is a %s\n", parent->getTypeString()); 
+    //else debug_fprintf(stderr, "no parent\n"); 
     // do not check SELF type, as we may want to find the loop containing a loop
     if (!parent) return NULL;
     if (parent->isForStmt()) return (chillAST_ForStmt*)parent;
@@ -407,9 +409,9 @@ public:
   }
 
   chillAST_node* findContainingNonLoop() { // recursive walk parent links, avoiding loops
-    fprintf(stderr, "%s::findContainingNonLoop()   ", getTypeString()); 
-    //if (parent) fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
-    //else fprintf(stderr, "no parent\n"); 
+    debug_fprintf(stderr, "%s::findContainingNonLoop()   ", getTypeString()); 
+    //if (parent) debug_fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
+    //else debug_fprintf(stderr, "no parent\n"); 
     // do not check SELF type, as we may want to find the loop containing a loop
     if (!parent) return NULL;
     if (parent->isCompoundStmt() && parent->getParent()->isForStmt()) return parent->getParent()->findContainingNonLoop(); // keep recursing
@@ -420,62 +422,62 @@ public:
   // TODO gather loop init and cond (and if cond) like gatherloopindeces
 
   virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){  // both scalar and arrays
-    fprintf(stderr,"(%s) forgot to implement gatherDeclRefExpr()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherDeclRefExpr()\n" ,Chill_AST_Node_Names[asttype]); 
   };
 
 
 
   virtual void gatherVarUsage( vector<chillAST_VarDecl*> &decls ) { 
-    fprintf(stderr,"(%s) forgot to implement gatherVarUsage()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherVarUsage()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   virtual void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) { 
-    fprintf(stderr,"(%s) forgot to implement gatherVarLHSUsage()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherVarLHSUsage()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
 
   virtual void gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
-    fprintf(stderr,"(%s) forgot to implement gatherVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   
   virtual void gatherVarDeclsMore( vector<chillAST_VarDecl*> &decls ) {  // even if the decl itself is not in the ast. 
-    fprintf(stderr,"(%s) forgot to implement gatherVarDeclsMore()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherVarDeclsMore()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   virtual void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
-    fprintf(stderr,"(%s) forgot to implement gatherScalarVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherScalarVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   virtual void gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
-    fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   virtual chillAST_VarDecl *findArrayDecl( const char *name ) { // scoping TODO 
     if (!hasSymbolTable()) return parent->findArrayDecl( name ); // most things
     else
-      fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[asttype]);
+      debug_fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[asttype]);
   }
 
 
   virtual void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl) { 
-    fprintf(stderr,"(%s) forgot to implement replaceVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement replaceVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
   virtual bool findLoopIndexesToReplace( chillAST_SymbolTable *symtab, bool forcesync=false ) { 
     // this just looks for ForStmts with preferred index metacomment attached 
-    fprintf(stderr,"(%s) forgot to implement findLoopIndexesToReplace()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement findLoopIndexesToReplace()\n" ,Chill_AST_Node_Names[asttype]); 
     return false; 
   }
 
   
   virtual chillAST_node* constantFold() {  // hacky. TODO. make nice
-    fprintf(stderr,"(%s) forgot to implement constantFold()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement constantFold()\n" ,Chill_AST_Node_Names[asttype]); 
     exit(-1); ; 
   };
 
   virtual chillAST_node* clone() {   // makes a deep COPY (?)
-    fprintf(stderr,"(%s) forgot to implement clone()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement clone()\n" ,Chill_AST_Node_Names[asttype]); 
     exit(-1); ; 
   };
   virtual void dump(  int indent=0,  FILE *fp = stderr ) { 
@@ -484,8 +486,8 @@ public:
   
   virtual void print( int indent=0,  FILE *fp = stderr ) { 
     fflush(stdout); 
-    //fprintf(stderr, "generic chillAST_node::print() called!\n"); 
-    //fprintf(stderr, "asttype is %d\n", asttype); 
+    //debug_fprintf(stderr, "generic chillAST_node::print() called!\n"); 
+    //debug_fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
     chillindent(indent, fp); 
     fprintf(fp,"(%s) forgot to implement print()\n" ,Chill_AST_Node_Names[asttype]); 
@@ -493,8 +495,8 @@ public:
   
   virtual void printName( int indent=0,  FILE *fp = stderr ) { 
     fflush(stdout); 
-    //fprintf(stderr, "generic chillAST_node::printName() called!\n"); 
-    //fprintf(stderr, "asttype is %d\n", asttype); 
+    //debug_fprintf(stderr, "generic chillAST_node::printName() called!\n"); 
+    //debug_fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
     chillindent(indent, fp); 
     fprintf(fp,"(%s) forgot to implement printName()\n" ,Chill_AST_Node_Names[asttype]); 
@@ -503,7 +505,7 @@ public:
   virtual char *stringRep(int indent=0 ) {  // the ast's print version
     fflush(stdout);
     // chillindent(indent, fp);  TODO 
-    fprintf(stderr,"(%s) forgot to implement stringRep()\n" ,Chill_AST_Node_Names[asttype]);
+    debug_fprintf(stderr,"(%s) forgot to implement stringRep()\n" ,Chill_AST_Node_Names[asttype]);
     segfault(); 
   }
 
@@ -511,20 +513,20 @@ public:
   virtual void printonly( int indent=0,  FILE *fp = stderr ) { print( indent, fp); }; 
 
   //virtual void printString( std::string &s ) { 
-  //  fprintf(stderr,"(%s) forgot to implement printString()\n" ,Chill_AST_Node_Names[asttype]);
+  //  debug_fprintf(stderr,"(%s) forgot to implement printString()\n" ,Chill_AST_Node_Names[asttype]);
   //}
 
 
   virtual void get_top_level_loops( std::vector<chillAST_ForStmt *> &loops) {
     int n = children.size(); 
-    //fprintf(stderr, "get_top_level_loops of a %s with %d children\n", getTypeString(), n); 
+    //debug_fprintf(stderr, "get_top_level_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
-      //fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
+      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
       if (children[i]->isForStmt()) {
         loops.push_back( ((chillAST_ForStmt *)(children[i])) );
       }
     }
-    //fprintf(stderr, "found %d top level loops\n", loops.size()); 
+    //debug_fprintf(stderr, "found %d top level loops\n", loops.size()); 
   }
 
 
@@ -532,7 +534,7 @@ public:
     int n = children.size(); 
     for (int i=0; i<n; i++) { 
       if (children[i]->parent != this) { 
-        fprintf(stderr, "fixing child %s that didn't know its parent\n", children[i]->getTypeString()); 
+        debug_fprintf(stderr, "fixing child %s that didn't know its parent\n", children[i]->getTypeString()); 
         children[i]->parent = this; 
       }
     }
@@ -542,12 +544,12 @@ public:
 
   virtual void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // this is probably broken - returns ALL loops under it
     int n = children.size(); 
-    //fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
+    //debug_fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
-      //fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
+      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
       children[i]->get_deep_loops( loops ); 
     }
-    //fprintf(stderr, "found %d deep loops\n", loops.size()); 
+    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
   }
 
 
@@ -556,11 +558,11 @@ public:
     std::vector<chillAST_ForStmt *>deepest; // deepest below here 
     
     int n = children.size(); 
-    //fprintf(stderr, "find_deepest_loops of a %s with %d children\n", getTypeString(), n); 
+    //debug_fprintf(stderr, "find_deepest_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
       std::vector<chillAST_ForStmt *> subloops;  // loops below here among a child of mine 
       
-      //fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
+      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
       children[i]->find_deepest_loops( subloops );
       
       if (subloops.size() > deepest.size()) { 
@@ -573,7 +575,7 @@ public:
       loops.push_back( deepest[i] );
     }
 
-    //fprintf(stderr, "found %d deep loops\n", loops.size()); 
+    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
     
   }
 
@@ -588,13 +590,13 @@ public:
   chillAST_SourceFile *getSourceFile() { 
     if (isSourceFile()) return ((chillAST_SourceFile *)this);
     if (parent != NULL) return parent->getSourceFile(); 
-    fprintf(stderr, "UHOH, getSourceFile() called on node %p %s that does not have a parent and is not a source file\n", this, this->getTypeString());
+    debug_fprintf(stderr, "UHOH, getSourceFile() called on node %p %s that does not have a parent and is not a source file\n", this, this->getTypeString());
     this->print(); printf("\n\n"); fflush(stdout); 
     exit(-1);
   }
   
   virtual chillAST_node *findDatatype( char *t ) { 
-    //fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
+    //debug_fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
     if (parent != NULL) return parent->findDatatype(t); // most nodes do this
     return NULL; 
   }
@@ -602,10 +604,10 @@ public:
 
   virtual chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ) { 
     if (!parent) { 
-      fprintf(stderr, "%s with no parent addVariableToSymbolTable()\n", getTypeString()); 
+      debug_fprintf(stderr, "%s with no parent addVariableToSymbolTable()\n", getTypeString()); 
       exit(-1);
     }
-    //fprintf(stderr, "%s::addVariableToSymbolTable() (default) headed up\n",  getTypeString()); 
+    //debug_fprintf(stderr, "%s::addVariableToSymbolTable() (default) headed up\n",  getTypeString()); 
     return parent->addVariableToSymbolTable( vd ); // default, defer to parent 
   }
 
@@ -614,39 +616,39 @@ public:
   }
 
   void walk_parents() { 
-    fprintf(stderr, "wp: (%s)  ", getTypeString()); 
+    debug_fprintf(stderr, "wp: (%s)  ", getTypeString()); 
     print(); printf("\n");  fflush(stdout); 
-    if (isSourceFile()) { fprintf(stderr, "(top sourcefile)\n\n"); return;}
+    if (isSourceFile()) { debug_fprintf(stderr, "(top sourcefile)\n\n"); return;}
 
     if (parent) parent->walk_parents();
-    else fprintf(stderr, "UHOH, %s has no parent??\n", getTypeString());
+    else debug_fprintf(stderr, "UHOH, %s has no parent??\n", getTypeString());
     return; 
   }
 
   virtual chillAST_node *getEnclosingStatement( int level = 0 );
   virtual chillAST_VarDecl *multibase() { 
-    fprintf(stderr,"(%s) forgot to implement multibase()\n", Chill_AST_Node_Names[asttype]);
+    debug_fprintf(stderr,"(%s) forgot to implement multibase()\n", Chill_AST_Node_Names[asttype]);
     exit(-1);
   }
   virtual chillAST_node *multibase2() {  
-    fprintf(stderr,"(%s) forgot to implement multibase2()\n", Chill_AST_Node_Names[asttype]);
+    debug_fprintf(stderr,"(%s) forgot to implement multibase2()\n", Chill_AST_Node_Names[asttype]);
     exit(-1);
   }
 
   
   virtual void gatherStatements( std::vector<chillAST_node*> &statements ) { 
-    fprintf(stderr,"(%s) forgot to implement gatherStatements()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement gatherStatements()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();fflush(stdout); 
     print();
-    fprintf(stderr, "\n\n"); 
+    debug_fprintf(stderr, "\n\n"); 
   }
 
 
   virtual bool isSameAs( chillAST_node *other ){  // for tree comparison 
-    fprintf(stderr,"(%s) forgot to implement isSameAs()\n" ,Chill_AST_Node_Names[asttype]); 
+    debug_fprintf(stderr,"(%s) forgot to implement isSameAs()\n" ,Chill_AST_Node_Names[asttype]); 
     dump(); fflush(stdout); 
     print();
-    fprintf(stderr, "\n\n");   }
+    debug_fprintf(stderr, "\n\n");   }
 
   void printPreprocBEFORE( int indent, FILE *fp );
   void printPreprocAFTER( int indent, FILE *fp );
@@ -695,7 +697,7 @@ public:
 
   bool isAStruct() { return isStruct; }; 
   bool isAUnion()  { return isUnion;  };
-  void setStruct(bool tf) { isStruct = tf; fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
+  void setStruct(bool tf) { isStruct = tf; debug_fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
   void setUnion( bool tf) { isUnion  = tf; };
   void setStructName( const char *newname) { structname = strdup(newname); }; 
   char *getStructName( ) { return structname; }; 
@@ -710,7 +712,7 @@ public:
   chillAST_TypedefDecl(char *t, char *nt, chillAST_node *p);
   chillAST_TypedefDecl(char *t, char *nt, char *a, chillAST_node *par); 
   
-  const char* getUnderlyingType() { fprintf(stderr, "TypedefDecl getUnderLyingType()\n"); return underlyingtype; }; 
+  const char* getUnderlyingType() { debug_fprintf(stderr, "TypedefDecl getUnderLyingType()\n"); return underlyingtype; }; 
   //virtual chillAST_VarDecl* getUnderlyingVarDecl() { return this; }; // ?? 
 
   void dump(  int indent=0,  FILE *fp = stdout ) { 
@@ -750,13 +752,13 @@ public:
   
   int isAParameter; 
   bool byreference;
-  void setByReference( bool tf ) { byreference = tf; fprintf(stderr, "byref %d\n", tf); };
+  void setByReference( bool tf ) { byreference = tf; debug_fprintf(stderr, "byref %d\n", tf); };
 
   bool isABuiltin; // if variable is builtin, we don't need to declare it
   void *uniquePtr;  // DO NOT REFERENCE THROUGH THIS! just used to differentiate declarations 
   bool isArray() { return (numdimensions != 0); }; 
   bool isAStruct() { return (isStruct || (typedefinition && typedefinition->isAStruct())); }
-  void setStruct( bool b ) {isStruct = b;/*fprintf(stderr,"vardecl %s IS A STRUCT\n",varname);*/ };
+  void setStruct( bool b ) {isStruct = b;/*debug_fprintf(stderr,"vardecl %s IS A STRUCT\n",varname);*/ };
   bool isPointer() { return isArray() && !knownArraySizes; }  // 
 
   bool knowAllDimensions() { return knownArraySizes; } ; 
@@ -788,7 +790,7 @@ public:
   void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {}; // does nothing
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl) {}; 
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
-  const char* getUnderlyingType() {  /* fprintf(stderr, "VarDecl getUnderLyingType()\n"); */return underlyingtype; }; 
+  const char* getUnderlyingType() {  /* debug_fprintf(stderr, "VarDecl getUnderLyingType()\n"); */return underlyingtype; }; 
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { return this; }; 
 
   chillAST_node* constantFold();
@@ -855,7 +857,7 @@ public:
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
   chillAST_node *findref(){return this;}// find the SINGLE constant or data reference at this node or below
   
-  const char* getUnderlyingType() {fprintf(stderr, "DeclRefExpr getUnderLyingType()\n"); return decl->getUnderlyingType();}; 
+  const char* getUnderlyingType() {debug_fprintf(stderr, "DeclRefExpr getUnderLyingType()\n"); return decl->getUnderlyingType();}; 
 
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { return decl->getUnderlyingVarDecl(); } // functions?? TODO 
 
@@ -889,7 +891,7 @@ public:
   chillAST_SymbolTable *getSymbolTable() { return symbol_table; }
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {   // chillAST_CompoundStmt method
-    //fprintf(stderr, "\nchillAST_CompoundStmt addVariableToSymbolTable( %s )\n", vd->varname);
+    //debug_fprintf(stderr, "\nchillAST_CompoundStmt addVariableToSymbolTable( %s )\n", vd->varname);
     symbol_table = addSymbolToTable( symbol_table, vd ); 
     //printSymbolTable(  symbol_table );
     return symbol_table;
@@ -952,7 +954,7 @@ public:
   bool isAUnion()  { return isUnion;  };
 
   void setStruct(bool tf) { isStruct = tf; }; 
-  //fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
+  //debug_fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
   void setUnion( bool tf) { isUnion  = tf; };
 
   chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ); // does NOTHING
@@ -1060,13 +1062,13 @@ public:
   chillAST_node* constantFold();
 
   chillAST_node *findDatatype( char *t ) { 
-    //fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
+    //debug_fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
     if (!typedef_table) { // not here
       if (parent) return parent->findDatatype(t); // not here, check parents
       else return NULL; // not defined here and no parent 
     }
     
-    //fprintf(stderr, "%d typedefs\n", typedef_table->size());
+    //debug_fprintf(stderr, "%d typedefs\n", typedef_table->size());
     for (int i=0; i< typedef_table->size(); i++)  {
       chillAST_TypedefDecl *tdd = (*typedef_table)[i];
       if ( tdd->nameis( t )) return tdd;
@@ -1086,14 +1088,14 @@ public:
   }
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_FunctionDecl method 
-    //fprintf(stderr, "\nchillAST_FunctionDecl addVariableToSymbolTable( %s )\n", vd->varname);
+    //debug_fprintf(stderr, "\nchillAST_FunctionDecl addVariableToSymbolTable( %s )\n", vd->varname);
     
     // this is all dealing with the body's symbol table
     // the function has a symbol table called "parameters" but that is a special case
 
     addSymbolToTable( getSymbolTable(), vd ); 
     if (!vd->parent) { 
-      //fprintf(stderr, "setting parent of vardecl to be the function whose symbol table it is going into\n"); // ?? 
+      //debug_fprintf(stderr, "setting parent of vardecl to be the function whose symbol table it is going into\n"); // ?? 
       vd->setParent( this );
       insertChild(0,vd);  
     }
@@ -1142,27 +1144,27 @@ public:
   bool hasTypeDefTable() { return true; } ;
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_SourceFile method
-    //fprintf(stderr, "\nchillAST_SourceFile addVariableToSymbolTable( %s )\n", vd->varname);
+    //debug_fprintf(stderr, "\nchillAST_SourceFile addVariableToSymbolTable( %s )\n", vd->varname);
     global_symbol_table = addSymbolToTable( global_symbol_table, vd );
     //printSymbolTable(  global_symbol_table );
     return global_symbol_table;
   }
 
   void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
-    //fprintf(stderr, "SOURCEFILE adding typedef %s to typedeftable\n", tdd->getStructName()); 
+    //debug_fprintf(stderr, "SOURCEFILE adding typedef %s to typedeftable\n", tdd->getStructName()); 
     global_typedef_table = addTypedefToTable( global_typedef_table, tdd );
-    //fprintf(stderr, "now global typedef table has %d entries\n", global_typedef_table->size());
+    //debug_fprintf(stderr, "now global typedef table has %d entries\n", global_typedef_table->size());
   }
 
   chillAST_node *findDatatype( char *t ) { 
-    //fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
-    //fprintf(stderr, "%d global typedefs\n", global_typedef_table->size());
+    //debug_fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
+    //debug_fprintf(stderr, "%d global typedefs\n", global_typedef_table->size());
     for (int i=0; i< global_typedef_table->size(); i++)  {
       
       chillAST_TypedefDecl *tdd = (*global_typedef_table)[i];
-      //fprintf(stderr, "comparing to %s\n", tdd->getStructName()); 
+      //debug_fprintf(stderr, "comparing to %s\n", tdd->getStructName()); 
       if (tdd->nameis( t )) { 
-        //fprintf(stderr, "found it\n"); 
+        //debug_fprintf(stderr, "found it\n"); 
         return (chillAST_node *)tdd;
       }
     }
@@ -1177,16 +1179,16 @@ public:
   chillAST_node *findCall( const char *name ); 
   void addMacro(chillAST_MacroDefinition* md) {
     macrodefinitions.push_back(md);
-    //fprintf(stderr, "addMacro(), now %d macros\n", macrodefinitions.size()); 
+    //debug_fprintf(stderr, "addMacro(), now %d macros\n", macrodefinitions.size()); 
   }
   void addFunc(chillAST_FunctionDecl* fd) { 
-    //fprintf(stderr, "chillAST_SourceFile::addFunc( %s %p)\n", fd->functionName, fd);
+    //debug_fprintf(stderr, "chillAST_SourceFile::addFunc( %s %p)\n", fd->functionName, fd);
 
     bool already = false; 
     for (int i=0; i<functions.size(); i++) { 
-      //fprintf(stderr, "function %d is %s %p\n", i, functions[i]->functionName, functions[i]); 
+      //debug_fprintf(stderr, "function %d is %s %p\n", i, functions[i]->functionName, functions[i]); 
       if (functions[i] == fd) { 
-        //fprintf(stderr, "function %s was already in source functions\n", fd->functionName); 
+        //debug_fprintf(stderr, "function %s was already in source functions\n", fd->functionName); 
         already = true;
       }
     }
@@ -1273,7 +1275,7 @@ public:
   //const std::vector<chillAST_VarDecl *> getSymbolTable() { return symbol_table; }
   chillAST_SymbolTable *getSymbolTable() { return symbol_table; }
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_MacroDefinition method  ??
-    //fprintf(stderr, "\nchillAST_MacroDefinition addVariableToSymbolTable( %s )\n", vd->varname);
+    //debug_fprintf(stderr, "\nchillAST_MacroDefinition addVariableToSymbolTable( %s )\n", vd->varname);
     symbol_table = addSymbolToTable( symbol_table, vd ); 
     //printSymbolTable(  symbol_table );
     return symbol_table;
@@ -1323,7 +1325,7 @@ public:
   chillAST_node *getInit() { return init; };
   chillAST_node *getCond() { return cond; };
   chillAST_node *getInc()  { return incr; };
-  chillAST_node *getBody() { //fprintf(stderr, "chillAST_ForStmt::getBody(), returning a chillAST_node of type %s\n", body->getTypeString()); 
+  chillAST_node *getBody() { //debug_fprintf(stderr, "chillAST_ForStmt::getBody(), returning a chillAST_node of type %s\n", body->getTypeString()); 
     return body; }; 
   void setBody( chillAST_node *b ) { body = b;  b->parent = this; };
   
@@ -1360,12 +1362,12 @@ public:
     loops.push_back( this );
 
     int n = body->children.size(); 
-    //fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
+    //debug_fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
-      //fprintf(stderr, "child %d is a %s\n", i, body->children[i]->getTypeString()); 
+      //debug_fprintf(stderr, "child %d is a %s\n", i, body->children[i]->getTypeString()); 
       body->children[i]->get_deep_loops( loops ); 
     }
-    //fprintf(stderr, "found %d deep loops\n", loops.size()); 
+    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
   }
 
 
@@ -1390,7 +1392,7 @@ public:
   void replaceChild( chillAST_node *old, chillAST_node *newchild ) ; 
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {   // chillAST_ForStmt method 
-    //fprintf(stderr, "\nchillAST_ForStmt addVariableToSymbolTable( %s )\n", vd->varname);
+    //debug_fprintf(stderr, "\nchillAST_ForStmt addVariableToSymbolTable( %s )\n", vd->varname);
     symbol_table = addSymbolToTable( symbol_table, vd ); 
     //printSymbolTable(  symbol_table );
     return symbol_table;
@@ -1607,7 +1609,7 @@ public:
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
   const char* getUnderlyingType() { 
-    //fprintf(stderr, "ASE getUnderlyingType() base of type %s\n", base->getTypeString()); base->print(); printf("\n"); fflush(stdout); 
+    //debug_fprintf(stderr, "ASE getUnderlyingType() base of type %s\n", base->getTypeString()); base->print(); printf("\n"); fflush(stdout); 
     return base->getUnderlyingType(); }; 
 
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { return base->getUnderlyingVarDecl(); };

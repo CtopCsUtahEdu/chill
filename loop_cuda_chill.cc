@@ -107,7 +107,7 @@ LoopCuda::~LoopCuda() {
 }
 
 bool LoopCuda::symbolExists(std::string s) {
-  fprintf(stderr, "LoopCuda::symbolExists( %s )  TODO loop_cuda_chill.cc L89\nDIE\n", s.c_str()); 
+  debug_fprintf(stderr, "LoopCuda::symbolExists( %s )  TODO loop_cuda_chill.cc L89\nDIE\n", s.c_str()); 
   exit(-1);   // DFL 
   /*
   if (body_symtab->find_variable(SgName(s.c_str()))  commented OUT 
@@ -126,13 +126,13 @@ bool LoopCuda::symbolExists(std::string s) {
 void LoopCuda::printSyncs() {
   int numsyncs = syncs.size();
   for (int i=0; i<numsyncs; i++) { 
-    fprintf(stderr, "%d %d %s\n", i, syncs[i].first, syncs[i].second.c_str());
+    debug_fprintf(stderr, "%d %d %s\n", i, syncs[i].first, syncs[i].second.c_str());
   }
 }
 
 
 void LoopCuda::addSync(int stmt_num, std::string idxName) {
-  fprintf(stderr, "addsync\n"); 
+  debug_fprintf(stderr, "addsync\n"); 
   //we store these and code-gen inserts sync to omega comments where stmt
   //in loop that has idxName being generated
   syncs.push_back(make_pair(stmt_num, idxName));
@@ -142,7 +142,7 @@ void LoopCuda::renameIndex(int stmt_num, std::string idx, std::string newName) {
   int level = findCurLevel(stmt_num, idx);
   if (idxNames.size() <= stmt_num || idxNames[stmt_num].size() < level)
     throw std::runtime_error("Invalid statment number of index");
-  fprintf(stderr, "renaming inxname[%d][%d] to %s\n", stmt_num, level - 1,  newName.c_str());
+  debug_fprintf(stderr, "renaming inxname[%d][%d] to %s\n", stmt_num, level - 1,  newName.c_str());
   idxNames[stmt_num][level - 1] = newName.c_str();
   
 }
@@ -156,7 +156,7 @@ int wrapInIfFromMinBound(chillAST_node* then_part,
                          chillAST_ForStmt* loop,
                          chillAST_node *symtab,    
                          chillAST_node* bound_sym) {
-  fprintf(stderr, "wrapInIfFromMinBound()\n"); exit(-1);    // DFL 
+  debug_fprintf(stderr, "wrapInIfFromMinBound()\n"); exit(-1);    // DFL 
 
   return 0; 
   /*
@@ -237,10 +237,10 @@ int wrapInIfFromMinBound(chillAST_node* then_part,
 
 void findReplacePreferedIdxs(chillAST_node *newkernelcode,
                              chillAST_FunctionDecl *kernel ) { 
-  fprintf(stderr, "\nrecursiveFindReplacePreferedIdxs( sync 0 )    perhaps adding syncthreads\n"); 
+  debug_fprintf(stderr, "\nrecursiveFindReplacePreferedIdxs( sync 0 )    perhaps adding syncthreads\n"); 
 
   chillAST_SymbolTable *symtab = kernel->getSymbolTable();
-  fprintf(stderr, "this is the symbol table (things defined in the kernel)\n"); 
+  debug_fprintf(stderr, "this is the symbol table (things defined in the kernel)\n"); 
   printSymbolTableMoreInfo( symtab); 
 
   //newkernelcode->findLoopIndexesToReplace( symtab, false ); 
@@ -277,9 +277,9 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
   cudaDebug = true; 
 
-  fprintf(stderr, "\n(chill) LoopCuda::cudaize_v3( stmt_num %d, kernel_name %s )    ANAND'S\n", stmt_num, kernel_name.c_str());
+  debug_fprintf(stderr, "\n(chill) LoopCuda::cudaize_v3( stmt_num %d, kernel_name %s )    ANAND'S\n", stmt_num, kernel_name.c_str());
   
-  fprintf(stderr, "blocks= ");
+  debug_fprintf(stderr, "blocks= ");
   printVs(blockIdxs);
   printf("thread= ");
   printVs(threadIdxs);
@@ -287,13 +287,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   fflush(stdout); 
   
   
-  fprintf(stderr, "%d kernel_params:\n", kernel_params.size() ); 
+  debug_fprintf(stderr, "%d kernel_params:\n", kernel_params.size() ); 
   for (int i = 0; i < kernel_params.size(); i++) { 
-    fprintf(stderr, "kernel_parameter: %s\n", kernel_params[i].c_str()); // input to this routine
+    debug_fprintf(stderr, "kernel_parameter: %s\n", kernel_params[i].c_str()); // input to this routine
     // loop_cuda member, a set   std::set<std::string> kernel_parameters;
     kernel_parameters.insert(kernel_params[i]);  
   }
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
 
 
   CG_outputBuilder *ocg = ir->builder();
@@ -331,9 +331,9 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   //Now, we will determine the actual size (if possible, otherwise
   //complain) for the block dimensions and thread dimensions based on our
   //indexes and the relations for our stmt;
-  fprintf(stderr, "loopCuda::cudaize_vX() blockIdxs.size() %d\n", blockIdxs.size()); 
+  debug_fprintf(stderr, "loopCuda::cudaize_vX() blockIdxs.size() %d\n", blockIdxs.size()); 
   for (int i = 0; i < blockIdxs.size(); i++) {
-    fprintf(stderr, "blockIdxs i %d\n", i); 
+    debug_fprintf(stderr, "blockIdxs i %d\n", i); 
     int level = findCurLevel(stmt_num, blockIdxs[i]);
 
     // integer (constant) and non-constant versions of upper bound
@@ -343,7 +343,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
     ub = -1;
     lb = 9999;
-    fprintf(stderr, "loopCuda::cudaize_vX() extractCudaUB( stmt %d, level %d, ub %d, lb %d)\n", stmt_num, level, ub, lb);
+    debug_fprintf(stderr, "loopCuda::cudaize_vX() extractCudaUB( stmt %d, level %d, ub %d, lb %d)\n", stmt_num, level, ub, lb);
     ubrepr = extractCudaUB(stmt_num, level, ub, lb);
 
     if (lb != 0) {
@@ -361,8 +361,8 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
     if (ubrepr) {
       ubcode = ((CG_chillRepr *)ubrepr)->GetCode(); 
-      fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound:\n");
-      ubcode->print(0, stderr); fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound:\n");
+      ubcode->print(0, stderr); debug_fprintf(stderr, "\n"); 
     }
     
     if (lb != 0) {
@@ -389,7 +389,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
     fflush(stdout);
 
     if (i == 0) {                                          // bx
-      fprintf(stderr, "blockIdxs i == 0, therefore bx?\n"); 
+      debug_fprintf(stderr, "blockIdxs i == 0, therefore bx?\n"); 
       block_level = level;
       if (ubrepr == NULL) {
         Vcu_bx.push_back(ub + 1); // a constant int ub + 1
@@ -400,16 +400,16 @@ bool LoopCuda::cudaize_v3(int stmt_num,
         Vcu_bx_repr.push_back( // NON constant ub + 1 
                               (omega::CG_chillRepr*)ocg->CreatePlus(ubrepr, ocg->CreateInt(1)));
 
-        fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound bx :\n");
+        debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound bx :\n");
         chillAST_BinaryOperator *UBP1; // ub + 1
         UBP1 = new chillAST_BinaryOperator( ubcode, "+", new chillAST_IntegerLiteral(1) ); 
-        UBP1->print(0, stderr); fprintf(stderr, "\n"); 
+        UBP1->print(0, stderr); debug_fprintf(stderr, "\n"); 
         VbxAst.push_back( UBP1 ); // 
       }
-      fprintf(stderr, "setting idxNames[%d][%d] to bx\n", stmt_num, level-1); 
+      debug_fprintf(stderr, "setting idxNames[%d][%d] to bx\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "bx";
     } else if (i == 1) {                                // by
-      fprintf(stderr, "blockIdxs i == 1, therefore by?\n"); 
+      debug_fprintf(stderr, "blockIdxs i == 1, therefore by?\n"); 
       if (ubrepr == NULL) {
         Vcu_by.push_back(ub + 1); // constant 
         Vcu_by_repr.push_back(NULL);
@@ -419,13 +419,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
         Vcu_by_repr.push_back( // NON constant ub + 1
                               (omega::CG_chillRepr*)ocg->CreatePlus(ubrepr, ocg->CreateInt(1)));
 
-        fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound bx :\n");
+        debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound bx :\n");
         chillAST_BinaryOperator *UBP1; // ub + 1
         UBP1 = new chillAST_BinaryOperator( ubcode, "+", new chillAST_IntegerLiteral(1) ); 
-        UBP1->print(0, stderr); fprintf(stderr, "\n"); 
+        UBP1->print(0, stderr); debug_fprintf(stderr, "\n"); 
         VbxAst.push_back( UBP1 ); // 
       }
-      fprintf(stderr, "setting idxNames[%d][%d] to by\n", stmt_num, level-1); 
+      debug_fprintf(stderr, "setting idxNames[%d][%d] to by\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "by";
     }
     
@@ -435,7 +435,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   
   if (VbyAst.size() == 0) {  // TODO probably wrong 
     block_level = 0; // ?? no by ?? 
-    fprintf(stderr, "THERE IS NO BY (??) \n"); 
+    debug_fprintf(stderr, "THERE IS NO BY (??) \n"); 
     VbyAst.push_back( new chillAST_IntegerLiteral( 1 ));  
   }
   
@@ -446,7 +446,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
            && Vcu_by_repr.size() > 0 // there are non-constant 
            && !Vcu_by_repr[Vcu_by_repr.size() - 1]) // the last one doesn't exist 
     {
-       fprintf(stderr, "I think this is impossible\n"); 
+       debug_fprintf(stderr, "I think this is impossible\n"); 
        block_level = 0;
     }
   
@@ -482,8 +482,8 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
     if (ubrepr) {
       ubcode = ((CG_chillRepr *)ubrepr)->GetCode(); 
-      fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound:\n");
-      ubcode->print(0, stderr); fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound:\n");
+      ubcode->print(0, stderr); debug_fprintf(stderr, "\n"); 
     }
     
     
@@ -521,13 +521,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
         Vcu_tx_repr.push_back(// NON constant ub + 1 
                              ocg->CreatePlus(ubrepr, ocg->CreateInt(1)));
 
-        fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound tx :\n");
+        debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound tx :\n");
         chillAST_BinaryOperator *UBP1; // ub + 1
         UBP1 = new chillAST_BinaryOperator( ubcode, "+", new chillAST_IntegerLiteral(1) ); 
-        UBP1->print(0, stderr); fprintf(stderr, "\n"); 
+        UBP1->print(0, stderr); debug_fprintf(stderr, "\n"); 
         VtxAst.push_back( UBP1 ); // 
       }
-      fprintf(stderr, "setting idxNames[%d][%d] to tx\n", stmt_num, level-1); 
+      debug_fprintf(stderr, "setting idxNames[%d][%d] to tx\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "tx";
       
     } else if (i == 1) {                                               // ty
@@ -541,13 +541,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
         Vcu_ty_repr.push_back(
                              ocg->CreatePlus(ubrepr, ocg->CreateInt(1)));
 
-        fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound ty :\n");
+        debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound ty :\n");
         chillAST_BinaryOperator *UBP1; // ub + 1
         UBP1 = new chillAST_BinaryOperator( ubcode, "+", new chillAST_IntegerLiteral(1) ); 
-        UBP1->print(0, stderr); fprintf(stderr, "\n"); 
+        UBP1->print(0, stderr); debug_fprintf(stderr, "\n"); 
         VtyAst.push_back( UBP1 ); // 
       }
-      fprintf(stderr, "setting idxNames[%d][%d] to ty\n", stmt_num, level-1); 
+      debug_fprintf(stderr, "setting idxNames[%d][%d] to ty\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "ty";
       
     } else if (i == 2) {                                               // tz
@@ -560,14 +560,14 @@ bool LoopCuda::cudaize_v3(int stmt_num,
         Vcu_tz_repr.push_back( // NON constant ub + 1
                              ocg->CreatePlus(ubrepr, ocg->CreateInt(1)));
 
-        fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound tz :\n");
+        debug_fprintf(stderr, "loop_cuda_chill.cc non-constant upper bound tz :\n");
         chillAST_BinaryOperator *UBP1; // ub + 1
         UBP1 = new chillAST_BinaryOperator( ubcode, "+", new chillAST_IntegerLiteral(1) ); 
-        UBP1->print(0, stderr); fprintf(stderr, "\n"); 
+        UBP1->print(0, stderr); debug_fprintf(stderr, "\n"); 
         VtzAst.push_back( UBP1 ); // 
 
       }
-      fprintf(stderr, "setting idxNames[%d][%d] to tz\n", stmt_num, level-1); 
+      debug_fprintf(stderr, "setting idxNames[%d][%d] to tz\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "tz";
       
     }
@@ -583,13 +583,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   
   if (Vcu_ty.size() > 0 && !Vcu_ty[Vcu_ty.size() - 1] && Vcu_ty_repr.size() > 0
       && !Vcu_ty_repr[Vcu_ty_repr.size() - 1]) { 
-    fprintf(stderr, "I think this is impossible ty\n");
+    debug_fprintf(stderr, "I think this is impossible ty\n");
     thread_level1 = 0;
   }
 
   if (Vcu_tz.size() > 0 && !Vcu_tz[Vcu_tz.size() - 1] && Vcu_tz_repr.size() > 0
       && !Vcu_tz_repr[Vcu_tz_repr.size() - 1]) {
-    fprintf(stderr, "I think this is impossible tz\n");
+    debug_fprintf(stderr, "I think this is impossible tz\n");
     thread_level2 = 0;
   }
   
@@ -611,7 +611,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   
   //cudaized = getStatements(lex, 0);
   
-  fprintf(stderr, "ADDING TO CUDAIZED\n"); 
+  debug_fprintf(stderr, "ADDING TO CUDAIZED\n"); 
   cudaized.push_back(getStatements(lex, 0));
   
   for (std::set<int>::iterator i = cudaized[cudaized.size() - 1].begin();
@@ -638,20 +638,20 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   }
   //Set codegen flag
   code_gen_flags |= GenCudaizeV2;
-  fprintf(stderr, "\n(chill) ANAND'S LoopCuda::cudaize_v3() Set codegen flag\n"); 
+  debug_fprintf(stderr, "\n(chill) ANAND'S LoopCuda::cudaize_v3() Set codegen flag\n"); 
 
   //Save array dimension sizes
   this->Varray_dims.push_back(array_dims);
-  Vcu_kernel_name.push_back(kernel_name.c_str()); fprintf(stderr, "Vcu_kernel_name.push_back(%s)\n", kernel_name.c_str()); 
+  Vcu_kernel_name.push_back(kernel_name.c_str()); debug_fprintf(stderr, "Vcu_kernel_name.push_back(%s)\n", kernel_name.c_str()); 
 
   block_and_thread_levels.insert(
                                  std::pair<int, std::vector<int> >(stmt_num,
                                                                    thread_and_block_levels));
 
   cu_kernel_name = kernel_name.c_str();
-  fprintf(stderr, "cu_kernel_name WILL BE %s\n", cu_kernel_name.c_str()); 
+  debug_fprintf(stderr, "cu_kernel_name WILL BE %s\n", cu_kernel_name.c_str()); 
 
-  fprintf(stderr, "\n(chill) ANAND'S LoopCuda::cudaize_v3( stmt_num %d ) DONE\n", stmt_num);
+  debug_fprintf(stderr, "\n(chill) ANAND'S LoopCuda::cudaize_v3( stmt_num %d ) DONE\n", stmt_num);
 
 }
 
@@ -665,15 +665,15 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 //#include "cudaize_codegen_v2.cc"
 
 chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW    ANAND'S  ??  
-  fprintf(stderr, "\nLoopCuda::cudaize codegen V2 (CHILL)\n");
+  debug_fprintf(stderr, "\nLoopCuda::cudaize codegen V2 (CHILL)\n");
   for(std::map<std::string, int>::iterator it = array_dims.begin(); it != array_dims.end(); it++)  {
-    fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second);
+    debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second);
   }
-  fprintf(stderr, "that is the list\n"); 
+  debug_fprintf(stderr, "that is the list\n"); 
 
   CG_chillBuilder *ocg = dynamic_cast<CG_chillBuilder*>(ir->builder());
   if (!ocg) { 
-    fprintf(stderr, "no ocg?\n"); 
+    debug_fprintf(stderr, "no ocg?\n"); 
     return NULL;
   }
   
@@ -690,7 +690,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // make a new function that will be the CPU side cuda code
   // it will take the name and parameters from the original C code 
-  fprintf(stderr, "creating CPUsidefunc named %s\n", fname); 
+  debug_fprintf(stderr, "creating CPUsidefunc named %s\n", fname); 
   chillAST_FunctionDecl *CPUsidefunc = new chillAST_FunctionDecl(origfunction->returnType, fname, NULL); 
 
   for (int i=0; i<numparams; i++) { 
@@ -700,9 +700,9 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
   // copy the preprocessing statements from the original (??)
   int numpreproc =  origfunction->preprocessinginfo.size();
-  fprintf(stderr, "preprocessinginfo %d\n", numpreproc); 
+  debug_fprintf(stderr, "preprocessinginfo %d\n", numpreproc); 
   if (numpreproc != 0) { 
-    fprintf(stderr, "copying %d preprocessing statements from original %s to the new one that calls the GPU\n", numpreproc, fname); 
+    debug_fprintf(stderr, "copying %d preprocessing statements from original %s to the new one that calls the GPU\n", numpreproc, fname); 
     for (int i=0; i<numpreproc; i++) { 
       CPUsidefunc->preprocessinginfo.push_back( origfunction->preprocessinginfo[i] );
     }
@@ -722,22 +722,22 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // remove original function  from the source   (bad idea ??) 
   which = p->findChild( origfunction ); 
-  fprintf(stderr, "original function  is now child %d of srcfile\n", which);
+  debug_fprintf(stderr, "original function  is now child %d of srcfile\n", which);
   p->removeChild( which );  // TODO do this last, because we look for it later
   
-  origfunction->print(0,stderr); fprintf(stderr, "\n\n"); 
+  origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
 
-  fprintf(stderr, "OK, made new (empty) CPU side function %s, removed original function\n",origfunction->functionName );
+  debug_fprintf(stderr, "OK, made new (empty) CPU side function %s, removed original function\n",origfunction->functionName );
   p->print(); printf("\n\n\n"); fflush(stdout);
   
-  fprintf(stderr, "\nCPUSIDE func:\n"); 
+  debug_fprintf(stderr, "\nCPUSIDE func:\n"); 
   CPUsidefunc->print(); printf("\n\n"); fflush(stdout); 
   
   
-  fprintf(stderr, "this loop is in function %s\n", fname); 
-  fprintf(stderr, "function %s has %d parameters:\n",  fname, numparams ); 
+  debug_fprintf(stderr, "this loop is in function %s\n", fname); 
+  debug_fprintf(stderr, "function %s has %d parameters:\n",  fname, numparams ); 
   for (int i=0; i< function_that_contains_this_loop->parameters.size(); i++) { 
-    fprintf(stderr, "%d/%d  %s\n", i, numparams,  function_that_contains_this_loop->parameters[i]->varname); 
+    debug_fprintf(stderr, "%d/%d  %s\n", i, numparams,  function_that_contains_this_loop->parameters[i]->varname); 
   }
   
   // create a builtin dim3() function    TODO do we need to check if it's already been created?
@@ -746,9 +746,9 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   //sort cudaized according to lexical order into ordered cudaized statements
-  fprintf(stderr, "sort cudaized according to lexical order into ordered cudaized statements\n"); 
+  debug_fprintf(stderr, "sort cudaized according to lexical order into ordered cudaized statements\n"); 
   
-  fprintf(stderr, "\n%d cudaized statements to be run on the GPU\n",cudaized.size()); 
+  debug_fprintf(stderr, "\n%d cudaized statements to be run on the GPU\n",cudaized.size()); 
   std::vector<int> sort_aid;
   std::set<int> all_cudaized_statements;
   
@@ -759,7 +759,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     sort_aid.push_back( what ); 
     all_cudaized_statements.insert(cudaized[i].begin(), cudaized[i].end());
   }
-  fprintf(stderr, "%d in all_cudaized_statements\n\n", all_cudaized_statements.size()); 
+  debug_fprintf(stderr, "%d in all_cudaized_statements\n\n", all_cudaized_statements.size()); 
   
   for (int i = 0; i < stmt.size(); i++) {
     
@@ -780,7 +780,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     }
   }
   
-  fprintf(stderr, "sorting ...\n"); 
+  debug_fprintf(stderr, "sorting ...\n"); 
   std::sort(sort_aid.begin(), sort_aid.end());
   
   for (int i = 0; i < sort_aid.size(); i++) {
@@ -816,27 +816,27 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     }
   }
   
-  fprintf(stderr, "code after\n"); 
+  debug_fprintf(stderr, "code after\n"); 
   
   
   ////////////////////////////////////////////////////////////////////////////
   
   
-  fprintf(stderr, "%d ordered_cudaized_stmts\n", ordered_cudaized_stmts.size() );
+  debug_fprintf(stderr, "%d ordered_cudaized_stmts\n", ordered_cudaized_stmts.size() );
   for (int i=0; i<ordered_cudaized_stmts.size(); i++) { 
-    fprintf(stderr, "( ");
+    debug_fprintf(stderr, "( ");
     for (std::set<int>::iterator j = ordered_cudaized_stmts[i].first.begin(); 
          j != ordered_cudaized_stmts[i].first.end(); j++) {
-      fprintf(stderr, "%d ", (*j) );
+      debug_fprintf(stderr, "%d ", (*j) );
     } 
-    fprintf(stderr, ")     %d\n\n", ordered_cudaized_stmts[i].second); 
+    debug_fprintf(stderr, ")     %d\n\n", ordered_cudaized_stmts[i].second); 
   }
 
   // find pointer-to-int, pointer-to-float? 
-  fprintf(stderr, "looking for pointer-to-int, pointer-to-float\n"); 
+  debug_fprintf(stderr, "looking for pointer-to-int, pointer-to-float\n"); 
   std::set<int> ptrs;
   for (int iter = 0; iter < ordered_cudaized_stmts.size(); iter++) {
-    fprintf(stderr, "iter %d\n", iter); 
+    debug_fprintf(stderr, "iter %d\n", iter); 
     for (std::set<int>::iterator it =
            ordered_cudaized_stmts[iter].first.begin();
          it != ordered_cudaized_stmts[iter].first.end(); it++) {
@@ -844,27 +844,27 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       std::vector<IR_PointerArrayRef *> ptrRefs = ir->FindPointerArrayRef(
                                                                          stmt[*it].code);
       
-      fprintf(stderr, "loop_cuda_XXXX.cc   *it %d,  %d pointer arrayrefs\n", *it, ptrRefs.size()); 
+      debug_fprintf(stderr, "loop_cuda_XXXX.cc   *it %d,  %d pointer arrayrefs\n", *it, ptrRefs.size()); 
       for (int j = 0; j < ptrRefs.size(); j++)
         for (int k = 0; k < ptr_variables.size(); k++)
           if (ptrRefs[j]->name() == ptr_variables[k]->name())
             ptrs.insert(k);
     }
   }
-  fprintf(stderr, "found %d pointers to do mallocs for\n\n", ptrs.size()); 
+  debug_fprintf(stderr, "found %d pointers to do mallocs for\n\n", ptrs.size()); 
   
   
   // for each pointer, build malloc( sizeof( int/float ) ) ??
   for (std::set<int>::iterator it = ptrs.begin(); it != ptrs.end(); it++) {
     if (ptr_variables[*it]->elem_type() == IR_CONSTANT_FLOAT)
-      fprintf(stderr, "pointer to float\n"); 
+      debug_fprintf(stderr, "pointer to float\n"); 
     else if (ptr_variables[*it]->elem_type() == IR_CONSTANT_INT)
-      fprintf(stderr, "pointer to INT\n"); 
+      debug_fprintf(stderr, "pointer to INT\n"); 
     else
       throw loop_error("Pointer type unidentified in cudaize_codegen_v2!");
-    fprintf(stderr, "TODO - DIDN'T ACTUALLY DO THE MALLOC\n");
+    debug_fprintf(stderr, "TODO - DIDN'T ACTUALLY DO THE MALLOC\n");
   } 
-  fprintf(stderr, "done making mallocs?\n");
+  debug_fprintf(stderr, "done making mallocs?\n");
   
   
   
@@ -877,13 +877,13 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   int tex_mem_on  = 0;
   int cons_mem_on = 0;
   
-  fprintf(stderr, "here goes nothing\n"); 
-  fprintf(stderr, "%d ordered cudaized stmts\n", ordered_cudaized_stmts.size()); 
+  debug_fprintf(stderr, "here goes nothing\n"); 
+  debug_fprintf(stderr, "%d ordered cudaized stmts\n", ordered_cudaized_stmts.size()); 
   
   std::vector< chillAST_VarDecl * > inspectorargs; // call from main to cpuside inspector has these arguments
   
   for (int iter = 0; iter < ordered_cudaized_stmts.size(); iter++) {
-    fprintf(stderr, "HGN iter %d\n", iter);
+    debug_fprintf(stderr, "HGN iter %d\n", iter);
     
     CG_outputRepr* repr;
     std::vector<VarDefs> arrayVars;
@@ -904,17 +904,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
     if (code_temp != NULL) {
       
-      fprintf(stderr, "\nHGN %d code_temp was NOT NULL\n", iter); 
+      debug_fprintf(stderr, "\nHGN %d code_temp was NOT NULL\n", iter); 
       printf("\nloop_cuda_chill.cc L903 code_temp:\n"); code_temp->print(); printf("\n\n"); fflush(stdout);
       
       
-      fprintf(stderr, "set %d has size %d\n", iter,  ordered_cudaized_stmts[iter].first.size()); 
+      debug_fprintf(stderr, "set %d has size %d\n", iter,  ordered_cudaized_stmts[iter].first.size()); 
       
       // find first statement that HAS an inspector?
       std::set<int>::iterator i =
         ordered_cudaized_stmts[iter].first.begin();
       
-      fprintf(stderr, "first stmt i is %d\n", *i);
+      debug_fprintf(stderr, "first stmt i is %d\n", *i);
       
       for (; i != ordered_cudaized_stmts[iter].first.end(); i++) {
         if (stmt[*i].has_inspector) { 
@@ -924,17 +924,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         else fprintf (stderr, "stmt %d DOES NOT HAVE an inspector\n", *i); 
       }
       
-      fprintf(stderr, "i is %d   last is %d\n", *i, *ordered_cudaized_stmts[iter].first.end());
+      debug_fprintf(stderr, "i is %d   last is %d\n", *i, *ordered_cudaized_stmts[iter].first.end());
       
       if (i == ordered_cudaized_stmts[iter].first.end()) {  // there was no statement with an inspector
-        fprintf(stderr, "no statement had an inspector\n"); 
+        debug_fprintf(stderr, "no statement had an inspector\n"); 
         if ( NOTRUNONGPU ) { 
           setup_code = ocg->StmtListAppend(setup_code,  // becomes part of setup (after init)
                                            new CG_chillRepr(code_temp));
         }
       } 
       else { // there was an inspector 
-        fprintf(stderr, "there was an inspector\n"); 
+        debug_fprintf(stderr, "there was an inspector\n"); 
         
         // create a function that becomes spmv_inspector(  )
         std::set<IR_ArrayRef *> outer_refs;
@@ -946,10 +946,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
             
             
             // find all loop/if init/cond/iteration in loops this is contained in
-            fprintf(stderr, "find all loop/if init/cond/iteration in loops this is contained in\n");
+            debug_fprintf(stderr, "find all loop/if init/cond/iteration in loops this is contained in\n");
             std::vector<CG_outputRepr *> loop_refs =
               collect_loop_inductive_and_conditionals(stmt[*j].ir_stmt_node);
-            fprintf(stderr, "%d loop_refs\n\n", loop_refs.size()); 
+            debug_fprintf(stderr, "%d loop_refs\n\n", loop_refs.size()); 
             
             // find the array references in  the loop/if 
             for (int i = 0; i < loop_refs.size(); i++) {
@@ -963,15 +963,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
                   if ((*k)->name() == refs[l]->name())
                     break;
                 if (k == outer_refs.end()) { 
-                  fprintf(stderr, "a new array ref\n");
+                  debug_fprintf(stderr, "a new array ref\n");
                   outer_refs.insert(refs[l]);
                 }
               }
               
             }
-            fprintf(stderr, "\n%d non-repeated array name refs\nthey are:\n", outer_refs.size()); 
+            debug_fprintf(stderr, "\n%d non-repeated array name refs\nthey are:\n", outer_refs.size()); 
             for (std::set<IR_ArrayRef *>::iterator k =outer_refs.begin(); k != outer_refs.end(); k++) {
-              fprintf(stderr, "%s\n", (*k)->name().c_str());               
+              debug_fprintf(stderr, "%s\n", (*k)->name().c_str());               
             }
             
           }
@@ -984,17 +984,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //std::string functionname = string(dynamic_cast<IR_chillCode*>(ir)->procedurename) + "_inspector";
         
         // all these are declared above as well??? 
-        fprintf(stderr, "\n\n*** building %s() AST   iter %d\n", fname, iter);
+        debug_fprintf(stderr, "\n\n*** building %s() AST   iter %d\n", fname, iter);
         //chillAST_FunctionDecl *origfunction = function_that_contains_this_loop;
         //chillAST_SourceFile   *srcfile = origfunction->getSourceFile();
         chillAST_FunctionDecl *inspectorFunc = new chillAST_FunctionDecl(strdup("void"), fname,  srcfile ); // this adds inspectorfunc to children of srcfile
  
-        fprintf(stderr, "original function was:\n");
+        debug_fprintf(stderr, "original function was:\n");
         origfunction->print(); printf("\n\n"); fflush(stdout); 
         
         // create a compound statement function body, so we can add vardecls as needed
 
-        fprintf(stderr, "loop_cuda_chill.cc L991  code_temp %s\n", code_temp->getTypeString()); 
+        debug_fprintf(stderr, "loop_cuda_chill.cc L991  code_temp %s\n", code_temp->getTypeString()); 
         //int *k = 0; int die = k[0];
         
 
@@ -1017,7 +1017,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         vector<chillAST_VarDecl*>  decls;
         code_temp->gatherVarUsage( decls );
-        fprintf(stderr, "%d vars used in code_temp\n\n", decls.size());
+        debug_fprintf(stderr, "%d vars used in code_temp\n\n", decls.size());
         for (int i=0; i<decls.size(); i++) { 
           printf("sym "); decls[i]->print(); printf(" \n"); fflush(stdout); 
         }
@@ -1036,16 +1036,16 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           // refer to the original vardecl (should it?)
           
           char *name = decls[i]->varname;
-          fprintf(stderr, "\nchecking for a parameter %d named %s in origfunction\n", i, name); 
+          debug_fprintf(stderr, "\nchecking for a parameter %d named %s in origfunction\n", i, name); 
           
           
           if (origfunction->hasParameterNamed( name )) { 
-            fprintf(stderr, "%s was a parameter in the original. adding it to inspectorFunc parameters\n", name);
+            debug_fprintf(stderr, "%s was a parameter in the original. adding it to inspectorFunc parameters\n", name);
             
             // this decl should have no parent ??
             // see chill_ast.cc addParameter. 
             //if (decls[i]->parent) { 
-            //  fprintf(stderr, "UHOH, this vardecl for %s I'm about to make a parameter of %s already had a parent??\n", name, fname); 
+            //  debug_fprintf(stderr, "UHOH, this vardecl for %s I'm about to make a parameter of %s already had a parent??\n", name, fname); 
             //  exit(-1); 
             //} 
             
@@ -1056,11 +1056,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
             code_temp->replaceVarDecls( decls[i], param ); 
           }
           else { 
-            fprintf(stderr, "there was no parameter named %s in origfunction\n", name);  
+            debug_fprintf(stderr, "there was no parameter named %s in origfunction\n", name);  
             decls[i]->dump(); fflush(stdout);
             decls[i]->print(); printf("\n"); fflush(stdout);
             if (decls[i]->isAStruct()) { 
-              fprintf(stderr, "%s it's a struct\n", name); 
+              debug_fprintf(stderr, "%s it's a struct\n", name); 
               
               // somehow, this is enough to mean that we need to pass it 
               //   in as a parameter?  TODO 
@@ -1079,7 +1079,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
             else { 
               // this will not be a parameter, we need to make the vardecl 
               // be inside the body of the function
-              fprintf(stderr, "adding VarDecl for %s inside inspectorbody\n", decls[i]->varname); 
+              debug_fprintf(stderr, "adding VarDecl for %s inside inspectorbody\n", decls[i]->varname); 
               chillAST_VarDecl *vd = (chillAST_VarDecl *)decls[i]->clone();
               inspectorbody->insertChild( numdefs++, vd );
             }
@@ -1092,17 +1092,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         
         
-        fprintf(stderr, "\n\n*** processing %d outer_refs into parameters\n",outer_refs.size()); 
+        debug_fprintf(stderr, "\n\n*** processing %d outer_refs into parameters\n",outer_refs.size()); 
         for (std::set<IR_ArrayRef *>::iterator l = outer_refs.begin();
              l != outer_refs.end(); l++) {
           
           chillAST_ArraySubscriptExpr *ASE =((IR_chillArrayRef *)(*l))->chillASE;
           chillAST_VarDecl *vd = ASE->multibase();
           char *vname = vd->varname; 
-          fprintf(stderr, "vname %s\n", vname); 
+          debug_fprintf(stderr, "vname %s\n", vname); 
           
           if ( chillAST_VarDecl *p = origfunction->hasParameterNamed( vname )) { 
-            fprintf(stderr, "%s was a parameter in the original. adding it\n", vname); 
+            debug_fprintf(stderr, "%s was a parameter in the original. adding it\n", vname); 
             // we need to make a new version of this parameter. The old 
             // one had a size. this will just be a pointer. (??) TODO
             // for example, int index[494]  in the original becomes 
@@ -1129,16 +1129,16 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         
         // TODO make sure vardecls are included ?
-        fprintf(stderr, "\nTHIS IS inspectorFunc\n");
+        debug_fprintf(stderr, "\nTHIS IS inspectorFunc\n");
         if (inspectorFunc->parent) {
-          fprintf(stderr, "IT HAS A PARENT of type %s\n", inspectorFunc->parent->getTypeString());
+          debug_fprintf(stderr, "IT HAS A PARENT of type %s\n", inspectorFunc->parent->getTypeString());
         }
         inspectorFunc->print(); printf("\n\n"); fflush(stdout); 
         
-        fprintf(stderr, "building call to %s\n", inspectorFunc->functionName); 
+        debug_fprintf(stderr, "building call to %s\n", inspectorFunc->functionName); 
         chillAST_CallExpr *CE = new chillAST_CallExpr( inspectorFunc, NULL );
         
-        fprintf(stderr, "parameters will be\n");
+        debug_fprintf(stderr, "parameters will be\n");
         for (int i=0; i<inspectorargs.size(); i++) { 
           inspectorargs[i]->print(); printf("\n"); fflush(stdout); 
           CE->addArg( new chillAST_DeclRefExpr( inspectorargs[i], NULL ));
@@ -1146,10 +1146,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         printf("\n"); fflush(stdout);
         
         
-        fprintf(stderr, "call to %s is:\n",inspectorFunc->functionName ); 
+        debug_fprintf(stderr, "call to %s is:\n",inspectorFunc->functionName ); 
         CE->print(); printf(""); fflush(stdout);
         
-        fprintf(stderr, "adding inspectorfunc call to setup_code\n"); 
+        debug_fprintf(stderr, "adding inspectorfunc call to setup_code\n"); 
         setup_code = ocg->StmtListAppend(setup_code,
                                          new CG_chillRepr(CE));
         
@@ -1158,14 +1158,14 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
     } // code_temp not NULL
     else { 
-      fprintf(stderr, "HGN %d code_temp WAS NULL\n", iter); 
+      debug_fprintf(stderr, "HGN %d code_temp WAS NULL\n", iter); 
       exit(-1);
     }
     
 
     
     // still in int iter loop 
-    fprintf(stderr, "\n\n\n\n\n*** dimgrid dimblock\n");
+    debug_fprintf(stderr, "\n\n\n\n\n*** dimgrid dimblock\n");
     char gridName[20];
     char blockName[20];
     sprintf(gridName,  "dimGrid%i\0",  iter);
@@ -1176,19 +1176,19 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     chillAST_FunctionDecl *GPUKernel = NULL;  // kernel for replacing ONE STATEMENT 
 
     if ( RUNONGPU ) { 
-      fprintf(stderr, "\ncreating the kernel function\n"); 
+      debug_fprintf(stderr, "\ncreating the kernel function\n"); 
       
       chillAST_FunctionDecl *origfunction =  function_that_contains_this_loop; 
       const char *fname = origfunction->functionName;
       int numparams = origfunction->parameters.size();
-      fprintf(stderr, "\n\noriginal func has name %s  %d parameters\n", fname, numparams); 
+      debug_fprintf(stderr, "\n\noriginal func has name %s  %d parameters\n", fname, numparams); 
       
       chillAST_node *p = origfunction->getParent();
-      //fprintf(stderr, "parent of func is a %s with %d children\n", p->getTypeString(), p->getNumChildren()); 
+      //debug_fprintf(stderr, "parent of func is a %s with %d children\n", p->getTypeString(), p->getNumChildren()); 
       // defined above (twice!) chillAST_SourceFile *srcfile = origfunction->getSourceFile();
-      //fprintf(stderr, "srcfile of func is %s\n", srcfile->SourceFileName );
+      //debug_fprintf(stderr, "srcfile of func is %s\n", srcfile->SourceFileName );
       
-      fprintf(stderr, "\n\nkernel named %s\n", 
+      debug_fprintf(stderr, "\n\nkernel named %s\n", 
               //cu_kernel_name.c_str()
               Vcu_kernel_name[iter].c_str());
 
@@ -1201,30 +1201,30 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
       std::vector< chillAST_VarDecl*>  GPUKernelParams; // 
 
-      fprintf(stderr, "ordered_cudaized_stmts[iter %d] WILL become a cuda kernel\n", iter); 
+      debug_fprintf(stderr, "ordered_cudaized_stmts[iter %d] WILL become a cuda kernel\n", iter); 
       
       // find the array refs in code_temp 
       //std::vector<IR_ArrayRef *> refs = ir->FindArrayRef(code_temp); 
-      //fprintf(stderr, "%d array refs in CPUfunc\n", refs.size()); 
+      //debug_fprintf(stderr, "%d array refs in CPUfunc\n", refs.size()); 
       //chillAST_node *code_temp
       std::vector<chillAST_ArraySubscriptExpr*> refs;  
       code_temp->gatherArrayRefs( refs, 0 );
       
-      fprintf(stderr, "%d array refs in CPUfunc\n", refs.size());
+      debug_fprintf(stderr, "%d array refs in CPUfunc\n", refs.size());
       //for (int i=0; i<refs.size(); i++) { 
       //  refs[i]->print(); printf("\n"); fflush(stdout); 
       //} 
-      fprintf(stderr, "code is:\n");
-      //if (NULL == code_temp->parent) fprintf(stderr, "code temp HAS NO PARENT\n");
+      debug_fprintf(stderr, "code is:\n");
+      //if (NULL == code_temp->parent) debug_fprintf(stderr, "code temp HAS NO PARENT\n");
       //code_temp->print(); printf("\n"); fflush(stdout);
       
       
-      fprintf(stderr, "\nchecking if var refs are a parameter\n"); 
-      fprintf(stderr, "\nthere are %d refs\n", refs.size()); 
+      debug_fprintf(stderr, "\nchecking if var refs are a parameter\n"); 
+      debug_fprintf(stderr, "\nthere are %d refs\n", refs.size()); 
       for (int i = 0; i < refs.size(); i++) {
         refs[i]->print(); printf("\n"); fflush(stdout); 
-        fprintf(stderr, "\nvar %d  ref\n", i);
-        fprintf(stderr, "ref %d   %s wo UNK\n", i, refs[i]->basedecl->varname); // , refs[i]->is_write());
+        debug_fprintf(stderr, "\nvar %d  ref\n", i);
+        debug_fprintf(stderr, "ref %d   %s wo UNK\n", i, refs[i]->basedecl->varname); // , refs[i]->is_write());
       }
       
       fflush(stdout); 
@@ -1248,11 +1248,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       std::vector< char * >  uniqueRefs;
       
       for (int i = 0; i < refs.size(); i++) {
-        fprintf(stderr, "\nvar %d  ref  in iter %d\n", i, iter); 
+        debug_fprintf(stderr, "\nvar %d  ref  in iter %d\n", i, iter); 
         
         //chillAST_VarDecl *vd = refs[i]->multibase(); // this returns a reference to i for c.i n
         chillAST_node *node = refs[i]->multibase2(); // this returns a reference to c.i 
-        //fprintf(stderr, "\nnode is a %s\n", node->getTypeString()); 
+        //debug_fprintf(stderr, "\nnode is a %s\n", node->getTypeString()); 
         
         string stringvar;
         if (node->isVarDecl()) { 
@@ -1267,13 +1267,13 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         const char *lookingfor = strdup( stringvar.c_str() ); 
         printf("%s wo \n", lookingfor); fflush(stdout); 
         
-        //fprintf(stderr, "\nL1205, CPUparamSymtab now has %d entries\nCPUparamSymtab\n", CPUparamSymtab->size());
+        //debug_fprintf(stderr, "\nL1205, CPUparamSymtab now has %d entries\nCPUparamSymtab\n", CPUparamSymtab->size());
         //printSymbolTable(CPUparamSymtab);
-        //fprintf(stderr, "L 1207, CPUbodySymtab now has %d entries\nCPUbodySymtab\n", CPUbodySymtab->size());
+        //debug_fprintf(stderr, "L 1207, CPUbodySymtab now has %d entries\nCPUbodySymtab\n", CPUbodySymtab->size());
         //printSymbolTable(CPUbodySymtab);
         
         //for (int i = 0; i < kernel_parameters.size(); i++) { 
-        //  fprintf(stderr, "kernel parameter: %s\n", kernel_parameters[i].c_str()); 
+        //  debug_fprintf(stderr, "kernel parameter: %s\n", kernel_parameters[i].c_str()); 
         //} 
         
         
@@ -1281,78 +1281,78 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         chillAST_VarDecl *p  = symbolTableFindVariableNamed( CPUparamSymtab, lookingfor );
         
         if (vd != NULL) { 
-          fprintf(stderr, "varname %s IS in CPUbodySymtab\n", lookingfor); 
+          debug_fprintf(stderr, "varname %s IS in CPUbodySymtab\n", lookingfor); 
           printSymbolTable(CPUbodySymtab);
           printSymbolTable(CPUparamSymtab);
           
 
-          fprintf(stderr, "ONLY check kernel_parameters for '%s' if varname is in CPUbodySymtab\n", lookingfor); 
+          debug_fprintf(stderr, "ONLY check kernel_parameters for '%s' if varname is in CPUbodySymtab\n", lookingfor); 
           
           std::set<std::string>::iterator it;
           it = kernel_parameters.find(stringvar); 
           if ( it == kernel_parameters.end())  { 
-            fprintf(stderr, "varname %s is NOT in kernel_parameters. skipping\n", lookingfor); 
+            debug_fprintf(stderr, "varname %s is NOT in kernel_parameters. skipping\n", lookingfor); 
             
             continue;
           }
           else { 
             
-            fprintf(stderr, "umwut found '%s', which IS a kernel parameter\n", (*it).c_str()); 
+            debug_fprintf(stderr, "umwut found '%s', which IS a kernel parameter\n", (*it).c_str()); 
             
             int numkp = kernel_parameters.size(); // WARNING, also kernel_params exists. different name!
-            fprintf(stderr, "%d in SET kernel_parameters\n", numkp); 
+            debug_fprintf(stderr, "%d in SET kernel_parameters\n", numkp); 
             for (std::set<std::string>::iterator k = kernel_parameters.begin(); k != kernel_parameters.end(); k++) {
-              fprintf(stderr, "'%s'\n", (*k).c_str());               
+              debug_fprintf(stderr, "'%s'\n", (*k).c_str());               
             }
             
           }
         }
         else {
-          fprintf(stderr, "\nvarname %s is NOT in CPUbodySymtab\n", lookingfor); 
-          fprintf(stderr, "\nbody Symtab is :\n"); printSymbolTable(CPUbodySymtab);
-          fprintf(stderr, "\nparam Symtab is :\n"); printSymbolTable(CPUparamSymtab);
-          fprintf(stderr, "\nCPUSide func is:\n"); CPUsidefunc->print(0,stderr); 
-          fprintf(stderr, "\nCPUfuncbody is:\n"); CPUfuncbody->print(0,stderr); 
+          debug_fprintf(stderr, "\nvarname %s is NOT in CPUbodySymtab\n", lookingfor); 
+          debug_fprintf(stderr, "\nbody Symtab is :\n"); printSymbolTable(CPUbodySymtab);
+          debug_fprintf(stderr, "\nparam Symtab is :\n"); printSymbolTable(CPUparamSymtab);
+          debug_fprintf(stderr, "\nCPUSide func is:\n"); CPUsidefunc->print(0,stderr); 
+          debug_fprintf(stderr, "\nCPUfuncbody is:\n"); CPUfuncbody->print(0,stderr); 
 
-          fprintf(stderr, "\nDAMMIT\n\n"); 
+          debug_fprintf(stderr, "\nDAMMIT\n\n"); 
 
         }
         
         
-        fprintf(stderr, "\nvar %d   %s\nwill be a GPU kernel parameter??\n", i, lookingfor);
+        debug_fprintf(stderr, "\nvar %d   %s\nwill be a GPU kernel parameter??\n", i, lookingfor);
         if (!vd) vd = p;
 
         if (!vd) { 
-          fprintf(stderr, "... but I can't find the decl to copy???\nloop_cuda_chill.cc  L1250\n");
+          debug_fprintf(stderr, "... but I can't find the decl to copy???\nloop_cuda_chill.cc  L1250\n");
           int *i=0;  int j = i[0]; 
           exit(-1); 
         }
-        fprintf(stderr, "need to copy/mimic "); vd->print(0, stderr); fprintf(stderr, "\n");
+        debug_fprintf(stderr, "need to copy/mimic "); vd->print(0, stderr); debug_fprintf(stderr, "\n");
         chillAST_VarDecl *newparam = (chillAST_VarDecl *) vd->clone() ; // copy 
 
         vd->print(0,stderr);
 
-        fprintf(stderr,"after cloning\n"); 
+        debug_fprintf(stderr,"after cloning\n"); 
           printSymbolTable(CPUbodySymtab);
 
 
-        //fprintf(stderr, "newparam numdimensions %d\n", newparam->numdimensions );
+        //debug_fprintf(stderr, "newparam numdimensions %d\n", newparam->numdimensions );
         // TODO need to remove topmost size? 
         if (newparam->arraysizes) { 
           newparam->arraysizes[0] = 0;  // first size now unknown 
           newparam->knownArraySizes = false; 
-          fprintf(stderr, "[]");
+          debug_fprintf(stderr, "[]");
           for (int i=1; i<newparam->numdimensions; i++) { 
-            fprintf(stderr, "[%d]", newparam->arraysizes[i]); 
+            debug_fprintf(stderr, "[%d]", newparam->arraysizes[i]); 
           }
-          fprintf(stderr, "\n"); 
+          debug_fprintf(stderr, "\n"); 
         }
-        newparam->print(0,stderr); fprintf(stderr, "\n"); 
+        newparam->print(0,stderr); debug_fprintf(stderr, "\n"); 
 
         printSymbolTable(CPUbodySymtab);
         printSymbolTable(CPUparamSymtab);
         
-        fprintf(stderr, "GPUKernel addparameter( %s )\n", newparam->varname); 
+        debug_fprintf(stderr, "GPUKernel addparameter( %s )\n", newparam->varname); 
         GPUKernel->addParameter( newparam );  // TODO this parameter LOOKS like but it not the vardecl that the declrefexpr points to 
 
         printSymbolTable(CPUbodySymtab);
@@ -1364,18 +1364,18 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //vd->print(); printf("\n"); fflush(stdout); 
         //vd->dump(); printf("\n"); fflush(stdout); 
         //if (vd->isParmVarDecl()) { 
-        //  fprintf(stderr, "IS a parameter?\n");
+        //  debug_fprintf(stderr, "IS a parameter?\n");
         //  vd->dump(); printf("\n\n"); fflush(stdout); 
         //} 
         //if (!vd->isParmVarDecl()) { 
-        //  fprintf(stderr, "local array - kernel stack variable\n"); 
+        //  debug_fprintf(stderr, "local array - kernel stack variable\n"); 
         
         
-        //fprintf(stderr, "looking for %s in %d uniqueRefs\n",  stringvar.c_str(), uniqueRefs.size()); 
+        //debug_fprintf(stderr, "looking for %s in %d uniqueRefs\n",  stringvar.c_str(), uniqueRefs.size()); 
         int offset = charstarvectorindex(  stringvar.c_str(), uniqueRefs );
         if ( offset == -1 )  { // != -1uniqueRefs.find( stringvar.c_str() )  == uniqueRefs.end()) {
           // wasn't there 
-          fprintf(stderr, "adding variable %s to uniqueRefs\n",  stringvar.c_str()); 
+          debug_fprintf(stderr, "adding variable %s to uniqueRefs\n",  stringvar.c_str()); 
           // if not, add it
           //uniqueRefs.insert(  stringvar.c_str() );
           uniqueRefs.push_back(  strdup( stringvar.c_str()) );  // leak 
@@ -1383,24 +1383,24 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           // remember, refs WAS  std::vector<chillAST_ArraySubscriptExpr*> refs;   WAS 
           //  std::vector<IR_chillArrayRef *> wo_refs;
           if (refs[i]-> imwrittento) { 
-            fprintf(stderr, "adding variable %s to unique Write Only Refs\n", stringvar.c_str() );
+            debug_fprintf(stderr, "adding variable %s to unique Write Only Refs\n", stringvar.c_str() );
             wo_refs.push_back( new IR_chillArrayRef( ir, refs[i], refs[i]-> imwrittento /* true */ ) ); 
             
             // later logic in this routine removes reads if it's also a write ... 
             // so let's just not add it.  ??  
             //if (refs[i]->imreadfrom) { // warning ONLY valid if also written to! TODO bad logic
             //  ro_refs.push_back( new IR_chillArrayRef( ir, refs[i], false ) ); 
-            //  fprintf(stderr, "adding variable %s to unique Read Only Refs TOO\n", vd->varname);
+            //  debug_fprintf(stderr, "adding variable %s to unique Read Only Refs TOO\n", vd->varname);
             //} 
             
           }
           else { // JUST read from 
-            fprintf(stderr, "adding variable %s to unique Read Only Refs\n", stringvar.c_str() ); // this is c.i
-            fprintf(stderr, "actually, adding "); refs[i]->print(); printf("\n"); fflush(stdout); 
+            debug_fprintf(stderr, "adding variable %s to unique Read Only Refs\n", stringvar.c_str() ); // this is c.i
+            debug_fprintf(stderr, "actually, adding "); refs[i]->print(); printf("\n"); fflush(stdout); 
             ro_refs.push_back( new IR_chillArrayRef( ir, refs[i], stringvar.c_str(), false )); // this is i
           }
         } // this is a new  reference 
-        else fprintf(stderr, "%s was already there?\n", stringvar.c_str()); 
+        else debug_fprintf(stderr, "%s was already there?\n", stringvar.c_str()); 
         
         // NOT a parameter 
       } // for each ref  i 
@@ -1419,39 +1419,39 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       fflush(stdout); 
       
       
-      fprintf(stderr, "NOW WE MAKE THE GPU SIDE CODE\n\n"); 
+      debug_fprintf(stderr, "NOW WE MAKE THE GPU SIDE CODE\n\n"); 
       // the original function has been removed, so the following fails 
       // int which = p->findChild( origfunction ); 
-      // fprintf(stderr, "func is child %d of srcfile\n", which);
+      // debug_fprintf(stderr, "func is child %d of srcfile\n", which);
 
       // GPUKernel was created with parent p, so it is already there
       //p->insertChild(originalfunctionlocation,  GPUKernel );
-      fprintf(stderr, "\n\nkernel named %s\n", GPUKernel->functionName); 
+      debug_fprintf(stderr, "\n\nkernel named %s\n", GPUKernel->functionName); 
       
       
       
       
       
       // COMMENT NEEDED 
-      fprintf(stderr, "loop_cuda_chill.cc COMMENT NEEDED printing kernel parameters\n"); 
+      debug_fprintf(stderr, "loop_cuda_chill.cc COMMENT NEEDED printing kernel parameters\n"); 
       for (std::set<std::string>::iterator i = kernel_parameters.begin();   
            i != kernel_parameters.end(); i++) {
-        fprintf(stderr, "kernel parameter %s\n", (*i).c_str()); 
+        debug_fprintf(stderr, "kernel parameter %s\n", (*i).c_str()); 
       }
 
       // PRINT RO REFS 
       for (int j = 0; j < ro_refs.size(); j++)
-        fprintf(stderr, "ro_ref %d %s\n", j, ro_refs[j]->name().c_str());  // ro_refs is  std::vector<IR_chillArrayRef *>
-      fprintf(stderr, "\n\n"); 
+        debug_fprintf(stderr, "ro_ref %d %s\n", j, ro_refs[j]->name().c_str());  // ro_refs is  std::vector<IR_chillArrayRef *>
+      debug_fprintf(stderr, "\n\n"); 
       
       
       // COMMENT NEEDED 
-      fprintf(stderr, "COMMENT NEEDED FOR EACH KERNEL PARAMETER\n"); 
+      debug_fprintf(stderr, "COMMENT NEEDED FOR EACH KERNEL PARAMETER\n"); 
       for (std::set<std::string>::iterator i = kernel_parameters.begin();
            i != kernel_parameters.end(); i++) {
         
         std::string kp(*i); // TODO name below is exactly this
-        fprintf(stderr, "walking through kernel_parameters %s\n", kp.c_str()); 
+        debug_fprintf(stderr, "walking through kernel_parameters %s\n", kp.c_str()); 
         
         int j;
         for (j = 0; j < ro_refs.size(); j++)
@@ -1463,23 +1463,23 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           continue;
         
         std::string name = *i;
-        fprintf(stderr, "perhaps adding parameter %s to GPU kernel parameters??? \n", name.c_str()); 
+        debug_fprintf(stderr, "perhaps adding parameter %s to GPU kernel parameters??? \n", name.c_str()); 
         
         // HERE  stmt_code code_temp
-        fprintf(stderr, "\n***find all scalar refs in code_temp\n"); 
+        debug_fprintf(stderr, "\n***find all scalar refs in code_temp\n"); 
         std::vector<chillAST_DeclRefExpr*> scalar_refs;
         code_temp->gatherScalarRefs( scalar_refs, 0 );
         
-        fprintf(stderr, "SCALAR REFS (not printed)\n"); 
+        debug_fprintf(stderr, "SCALAR REFS (not printed)\n"); 
         //for (int k = 0; k < scalar_refs.size(); k++) { 
-        //  fprintf(stderr, "scalar ref %d ", k);
+        //  debug_fprintf(stderr, "scalar ref %d ", k);
         //  scalar_refs[k]->print(); printf("\n"); fflush(stdout);
         //} 
 
         bool found = false;
         chillAST_node *ref = NULL; 
 
-        fprintf(stderr, "looking for %s in scalar refs\n", name.c_str()); 
+        debug_fprintf(stderr, "looking for %s in scalar refs\n", name.c_str()); 
         chillAST_DeclRefExpr *dre = NULL;
         for (int k = 0; k < scalar_refs.size() && !found; k++) { 
           if ( name == scalar_refs[k]->declarationName ) { 
@@ -1491,59 +1491,59 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         }      
 
         if (!found)  { 
-          fprintf(stderr, "we did NOT find the parameter %s in the scalar refs.  look for it in macros?\n", name.c_str()); 
+          debug_fprintf(stderr, "we did NOT find the parameter %s in the scalar refs.  look for it in macros?\n", name.c_str()); 
           
           //file we're working on holds the macro definitions 
           int numMacros = srcfile->macrodefinitions.size();
-          fprintf(stderr, "there are %d macros\n", numMacros); 
+          debug_fprintf(stderr, "there are %d macros\n", numMacros); 
 
           for (int i=0; i<numMacros && !found; i++) { 
             chillAST_MacroDefinition *macro =  srcfile->macrodefinitions[i];
-            fprintf(stderr, "macro %d, name '%s'   ", i, macro->macroName);
+            debug_fprintf(stderr, "macro %d, name '%s'   ", i, macro->macroName);
             macro->print();  printf("\n"); fflush(stdout); 
 
             char *blurb = macro->getRhsString();
-            if (blurb == NULL) fprintf(stderr, "macro rhs NULL\n"); 
+            if (blurb == NULL) debug_fprintf(stderr, "macro rhs NULL\n"); 
             else 
             {
-              //fprintf(stderr, "macro rhs "); macro->getBody()->print(); fprintf(stderr, "\n");
-              //fprintf(stderr, "%p\n", blurb); 
-              //fprintf(stderr, "%s\n", blurb); 
+              //debug_fprintf(stderr, "macro rhs "); macro->getBody()->print(); debug_fprintf(stderr, "\n");
+              //debug_fprintf(stderr, "%p\n", blurb); 
+              //debug_fprintf(stderr, "%s\n", blurb); 
               // TODO this will not work in most cases. 
               // It is comparing the RESULT of the macro with the parameter name
               // that will only work if the result does not depend on any macro parameter. 
               if (!strcmp(blurb, name.c_str())) { 
                 found = true;
-                fprintf(stderr, "macro RHS matches????\n"); 
-                fprintf(stderr, "rhs is of type %s\n", macro->getBody()->getTypeString()); 
+                debug_fprintf(stderr, "macro RHS matches????\n"); 
+                debug_fprintf(stderr, "rhs is of type %s\n", macro->getBody()->getTypeString()); 
                 // get decl ref expression?  (why?)
                 ref = macro->getBody(); // rhs  TODO function name 
               }
             }
             
           } 
-          fprintf(stderr, "\n\n"); 
+          debug_fprintf(stderr, "\n\n"); 
 
         }
         
-        if (!found)  fprintf(stderr, "var_sym == NULL\n"); 
-        else fprintf(stderr, "var_sym NOT == NULL\n"); 
+        if (!found)  debug_fprintf(stderr, "var_sym == NULL\n"); 
+        else debug_fprintf(stderr, "var_sym NOT == NULL\n"); 
       
 
         // UMWUT 
         if (found) {
-          fprintf(stderr, "checking name '%s' to see if it contains a dot  (TODO) \n", name.c_str()); 
+          debug_fprintf(stderr, "checking name '%s' to see if it contains a dot  (TODO) \n", name.c_str()); 
           
 
-        fprintf(stderr, "make sure a symbol with this name is in the symbol table\n"); 
+        debug_fprintf(stderr, "make sure a symbol with this name is in the symbol table\n"); 
 
 
-        fprintf(stderr, "creating parameter that is address of value we want to pass to the GPU\n");
-        fprintf(stderr, "eg c_count = &c.count;\n");
+        debug_fprintf(stderr, "creating parameter that is address of value we want to pass to the GPU\n");
+        debug_fprintf(stderr, "eg c_count = &c.count;\n");
         exit(-1); 
         } // end of UMWUT 
         else { 
-          fprintf(stderr, "var_sym was NULL, no clue what this is doing  %s\n", name.c_str()); 
+          debug_fprintf(stderr, "var_sym was NULL, no clue what this is doing  %s\n", name.c_str()); 
 
 
 
@@ -1554,32 +1554,32 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       
       // unclear where this came from. older version, I assume 
-      fprintf(stderr, "OK, first the %d OUTPUTS of the GPU code\n",  wo_refs.size() ); 
+      debug_fprintf(stderr, "OK, first the %d OUTPUTS of the GPU code\n",  wo_refs.size() ); 
       for (int i = 0; i < wo_refs.size(); i++) {
         std::string name = wo_refs[i]->name(); // creates a symbol. ...
-        fprintf(stderr, "write only ref (output?) %s\n", name.c_str()); 
+        debug_fprintf(stderr, "write only ref (output?) %s\n", name.c_str()); 
       }
-      fprintf(stderr, "\n");
-      fprintf(stderr, "original function  parameters are:\n");
+      debug_fprintf(stderr, "\n");
+      debug_fprintf(stderr, "original function  parameters are:\n");
       printSymbolTable( &(origfunction->parameters )); 
       
       
       
       for (int i = 0; i < wo_refs.size(); i++) {
         std::string name = wo_refs[i]->name();
-        fprintf(stderr, "output %s\n", name.c_str()); 
+        debug_fprintf(stderr, "output %s\n", name.c_str()); 
         
         char *tmpname = strdup( name.c_str() ); 
         // find the variable declaration in original
         // this seems to have no analog in Anand's code.  ????"
         chillAST_VarDecl *param = origfunction->findParameterNamed( tmpname ); 
         if (!param) { 
-          fprintf(stderr, "cudaize_codegen_v2.cc can't find wo parameter named %s in function %s\n",tmpname,fname);
+          debug_fprintf(stderr, "cudaize_codegen_v2.cc can't find wo parameter named %s in function %s\n",tmpname,fname);
           
-          fprintf(stderr, "the parameters are:\n");
+          debug_fprintf(stderr, "the parameters are:\n");
           printSymbolTable( &(origfunction->parameters )); 
 
-          origfunction->print(0,stderr); fprintf(stderr, "\n\n"); 
+          origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
           exit(-1); 
         }
         //param->print(); printf("\n"); fflush(stdout); 
@@ -1590,45 +1590,45 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         snprintf(buf, 32, "devO%dPtr", i + 1);
         v.name = buf;
         v.original_name = name; 
-        fprintf(stderr, "we'll have an output variable called %s\n", buf);
+        debug_fprintf(stderr, "we'll have an output variable called %s\n", buf);
         
         v.tex_mapped  = false;
         v.cons_mapped = false;
         
         // find the underlying type of the array
-        //fprintf(stderr, "finding underlying type of %s to make variable %s match\n",name.c_str(),buf);
+        //debug_fprintf(stderr, "finding underlying type of %s to make variable %s match\n",name.c_str(),buf);
         v.type = strdup(param->underlyingtype); // memory leak 
-        //fprintf(stderr, "v.type is %s\n", param->underlyingtype); 
+        //debug_fprintf(stderr, "v.type is %s\n", param->underlyingtype); 
         
         chillAST_node *so = new chillAST_Sizeof( v.type ); 
         //CG_chillRepr *thingsize = new omega::CG_chillRepr(  so );
         
-        fprintf(stderr, "\nloop_cuda_xxxx.cc  calculating size of output %s\n", buf ); 
+        debug_fprintf(stderr, "\nloop_cuda_xxxx.cc  calculating size of output %s\n", buf ); 
         
         int numitems = 1;
         if (param->numdimensions < 1 || 
             param->arraysizes == NULL) {
-          fprintf(stderr, "looking in array_dims numdimensions = %d\n", param->numdimensions);
+          debug_fprintf(stderr, "looking in array_dims numdimensions = %d\n", param->numdimensions);
 
           //Lookup in array_dims (the cudaize call has this info for some variables?) 
           std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
-          fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
+          debug_fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
           numitems = (*it).second; 
         }
         else { 
-          fprintf(stderr, "numdimensions = %d\n", param->numdimensions);
+          debug_fprintf(stderr, "numdimensions = %d\n", param->numdimensions);
           for (int i=0; i<param->numdimensions; i++) { 
             numitems *= param->arraysizes[i]; 
           }
-          fprintf(stderr, "Detected Multi-dimensional array size of %d for %s \n", numitems, tmpname); 
+          debug_fprintf(stderr, "Detected Multi-dimensional array size of %d for %s \n", numitems, tmpname); 
         } 
         
         
         chillAST_IntegerLiteral *numthings = new chillAST_IntegerLiteral( numitems ); 
         
-        fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
+        debug_fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
         
-        fprintf(stderr, "OK, finally figured out the size expression for the output array ...\n"); 
+        debug_fprintf(stderr, "OK, finally figured out the size expression for the output array ...\n"); 
         
         // create a mult  
         v.size_expr = new chillAST_BinaryOperator( numthings, "*", so, NULL); 
@@ -1642,7 +1642,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         std::vector<IR_chillArrayRef *>::iterator it_;
         for (it_ = ro_refs.begin(); it_ != ro_refs.end(); it_++) {
           if ((*it_)->chillASE->multibase()->varname == wo_refs[i]->name()) {
-            fprintf(stderr, "found array ref for %s in ro, removing it from writes\n", (*it_)->name().c_str()); 
+            debug_fprintf(stderr, "found array ref for %s in ro, removing it from writes\n", (*it_)->name().c_str()); 
             break;
           }
         }
@@ -1651,37 +1651,37 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           ro_refs.erase(it_);
         }
         
-        fprintf(stderr, "adding written v to arrayVars\n\n"); 
+        debug_fprintf(stderr, "adding written v to arrayVars\n\n"); 
         v.print(); 
         arrayVars.push_back(v);
       } //  wo_refs 
       
       
       // then READ ONLY refs 
-      fprintf(stderr, "\n*** OK, then  the %d INPUTS of the GPU code\n",  ro_refs.size() ); 
+      debug_fprintf(stderr, "\n*** OK, then  the %d INPUTS of the GPU code\n",  ro_refs.size() ); 
       for (int i = 0; i < ro_refs.size(); i++) {
-        fprintf(stderr, "read only parameter %d %s \n", i,  ro_refs[i]->name().c_str()); 
+        debug_fprintf(stderr, "read only parameter %d %s \n", i,  ro_refs[i]->name().c_str()); 
       }
-      fprintf(stderr, "\n");
+      debug_fprintf(stderr, "\n");
       
       for (std::set<std::string>::iterator i = kernel_parameters.begin();
            i != kernel_parameters.end(); i++) {
         std::string kp(*i);
-        fprintf(stderr, "kernel_parameter %s\n", kp.c_str()); 
+        debug_fprintf(stderr, "kernel_parameter %s\n", kp.c_str()); 
       }
-      fprintf(stderr, "\n");
+      debug_fprintf(stderr, "\n");
       
       
       
       for (int i = 0; i < ro_refs.size(); i++) {
         std::string name = ro_refs[i]->name();
         char *tmpname = strdup( name.c_str() ); 
-        fprintf(stderr, "\nread only parameter %d %s \n", i, name.c_str()); 
+        debug_fprintf(stderr, "\nread only parameter %d %s \n", i, name.c_str()); 
         
         //chillAST_VarDecl *param = origfunction->findParameterNamed( tmpname ); 
         //if (!param) { 
-        //  fprintf(stderr, "loop_cuda_chill.cc can't find ro parameter named %s in function %s\n",tmpname,fname);
-        //  fprintf(stderr, "the parameters are:\n");
+        //  debug_fprintf(stderr, "loop_cuda_chill.cc can't find ro parameter named %s in function %s\n",tmpname,fname);
+        //  debug_fprintf(stderr, "the parameters are:\n");
         //  printSymbolTable( &(origfunction->parameters )); 
         //  exit(-1);
         //} 
@@ -1696,17 +1696,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         v.cons_mapped = false;
         
         bool isNOTAParameter = (kernel_parameters.find(name) == kernel_parameters.end());
-        if (isNOTAParameter) fprintf(stderr, "%s is NOT a kernel parameter\n", name.c_str() );
-        else fprintf(stderr, "%s IS a parameter\n", name.c_str()); 
+        if (isNOTAParameter) debug_fprintf(stderr, "%s is NOT a kernel parameter\n", name.c_str() );
+        else debug_fprintf(stderr, "%s IS a parameter\n", name.c_str()); 
         
         
         // find the underlying type of the array
-        fprintf(stderr, "finding underlying type of %s to make variable %s match\n",name.c_str(),buf);
+        debug_fprintf(stderr, "finding underlying type of %s to make variable %s match\n",name.c_str(),buf);
         // find the variable declaration
         chillAST_ArraySubscriptExpr* ASE = ro_refs[i]->chillASE;
         chillAST_VarDecl *base = ASE->basedecl; 
         v.type = strdup(base->underlyingtype); // memory leak 
-        //fprintf(stderr, "v.type is %s\n", base->underlyingtype); 
+        //debug_fprintf(stderr, "v.type is %s\n", base->underlyingtype); 
         chillAST_node *so = new chillAST_Sizeof( v.type ); 
         
 #ifdef NOTYET
@@ -1726,14 +1726,14 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         }
 #endif        
         
-        //fprintf(stderr, "\ncalculating size of input %s\n", buf );    
+        //debug_fprintf(stderr, "\ncalculating size of input %s\n", buf );    
         //Size of the array = dim1 * dim2 * num bytes of our array type
         //If our input array is 2D (non-linearized), we want the actual
         //dimensions of the array (as it might be less than cu_n
         //CG_outputRepr* size;
         
         int numitems = 1;
-        base->print(0, stderr); fprintf(stderr, "\n");
+        base->print(0, stderr); debug_fprintf(stderr, "\n");
         
         
         if (base->numdimensions < 1 || 
@@ -1741,20 +1741,20 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           //Lookup in array_dims (the cudaize call has this info for some variables?) 
           std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
           if (it == array_dims.end()) { 
-            fprintf(stderr, "Can't find %s in array_dims\n", name.c_str()); 
+            debug_fprintf(stderr, "Can't find %s in array_dims\n", name.c_str()); 
             numitems = 123456;
           }
           else { 
-            fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
+            debug_fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
             numitems = (*it).second; 
           }
-          //fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
-          fprintf(stderr, "LUA command says this variable %s should be size %d\n",  (*it).first.c_str(), (*it).second); 
+          //debug_fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
+          debug_fprintf(stderr, "LUA command says this variable %s should be size %d\n",  (*it).first.c_str(), (*it).second); 
           numitems = (*it).second; 
           
         }
         else { 
-          fprintf(stderr, "numdimensions = %d\n", base->numdimensions);
+          debug_fprintf(stderr, "numdimensions = %d\n", base->numdimensions);
           for (int i=0; i<base->numdimensions; i++) { 
             numitems *= base->arraysizes[i]; 
           }
@@ -1765,8 +1765,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         chillAST_IntegerLiteral *numthings = new chillAST_IntegerLiteral( numitems ); 
         
-        //fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
-        fprintf(stderr, "OK, finally figured out the size expression for the input array ...\n"); 
+        //debug_fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
+        debug_fprintf(stderr, "OK, finally figured out the size expression for the input array ...\n"); 
         
         
         // create a mult  
@@ -1777,27 +1777,27 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         v.out_data = 0;
         
         
-        fprintf(stderr, "adding input v to arrayVars\n\n"); 
+        debug_fprintf(stderr, "adding input v to arrayVars\n\n"); 
         v.print(); 
         arrayVars.push_back(v);   
       } // end of READ refs
-      fprintf(stderr, "done with READ ONLY\n\n"); 
+      debug_fprintf(stderr, "done with READ ONLY\n\n"); 
       
       
       
-      fprintf(stderr, "done with ORDERED STATEMENTS\n"); 
-      fprintf(stderr, "WHAT IS THIS TEST\n"); 
+      debug_fprintf(stderr, "done with ORDERED STATEMENTS\n"); 
+      debug_fprintf(stderr, "WHAT IS THIS TEST\n"); 
       
-      fprintf(stderr, "body_symtab now has %d entries\n\nbody_symtab\n", CPUbodySymtab->size());
+      debug_fprintf(stderr, "body_symtab now has %d entries\n\nbody_symtab\n", CPUbodySymtab->size());
       printSymbolTable(CPUbodySymtab);
       
-      fprintf(stderr, "adding mallocs and array memcpys\n"); 
-      fprintf(stderr, "%d arrayVars\n", arrayVars.size()); 
+      debug_fprintf(stderr, "adding mallocs and array memcpys\n"); 
+      debug_fprintf(stderr, "%d arrayVars\n", arrayVars.size()); 
       
       for (int i = 0; i < arrayVars.size(); i++) {
         chillAST_VarDecl *var = arrayVars[i].vardecl;
         char *aname = strdup(arrayVars[i].name.c_str() ); 
-        fprintf(stderr, "\narrayVar %d   %s\n", i, aname); 
+        debug_fprintf(stderr, "\narrayVar %d   %s\n", i, aname); 
         arrayVars[i].print();
         
         // there is no way these created arrays (pointers) could be in the CPU function, but check anyway?
@@ -1806,7 +1806,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
                   
         if ( !var )  { // didn't have an actual vardecl. probably always the case
           // make one 
-          //fprintf(stderr, "buildVariableDeclaration %s\n", arrayVars[i].name.c_str()); 
+          //debug_fprintf(stderr, "buildVariableDeclaration %s\n", arrayVars[i].name.c_str()); 
           // create a CHILL variable declaration and put it in the CPU side function
           
           char typ[128];
@@ -1817,33 +1817,33 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
                                       "", // TODO
                                       NULL);
 
-        fprintf(stderr, "adding decl for %s to CPUsidefunc %s\n", var->varname, CPUsidefunc->functionName); 
+        debug_fprintf(stderr, "adding decl for %s to CPUsidefunc %s\n", var->varname, CPUsidefunc->functionName); 
           CPUsidefunc->insertChild(0, var ); // adds the decl to body code
           CPUsidefunc->addDecl( var ); // also adds to and CHANGES symbol table 
         }
       
         
         // store variable decl where we can get it easily later
-        fprintf(stderr, "body_symtab ADDING %s L2952\n", var->varname); 
+        debug_fprintf(stderr, "body_symtab ADDING %s L2952\n", var->varname); 
         arrayVars[i].vardecl = var;
         
-        //fprintf(stderr, "body_symtab had %d entries\n", CPUbodySymtab->size()); 
-        //fprintf(stderr, "func        had %d entries\n", CPUsidefunc->getSymbolTable()->size()); 
+        //debug_fprintf(stderr, "body_symtab had %d entries\n", CPUbodySymtab->size()); 
+        //debug_fprintf(stderr, "func        had %d entries\n", CPUsidefunc->getSymbolTable()->size()); 
         
 
-        //fprintf(stderr, "func        had %d entries after addDecl()\n", CPUsidefunc->getSymbolTable()->size()); 
+        //debug_fprintf(stderr, "func        had %d entries after addDecl()\n", CPUsidefunc->getSymbolTable()->size()); 
         
         
         CPUbodySymtab = CPUsidefunc->getSymbolTable(); // needed ot bodysym is not up to date TODO
         
-        //fprintf(stderr, "body_symtab now has %d entries\n", CPUbodySymtab->size()); 
-        fprintf(stderr, "body_symtab now has %d entries\n", CPUsidefunc->getSymbolTable()->size()); 
+        //debug_fprintf(stderr, "body_symtab now has %d entries\n", CPUbodySymtab->size()); 
+        debug_fprintf(stderr, "body_symtab now has %d entries\n", CPUsidefunc->getSymbolTable()->size()); 
         
         
         
         // do the CPU side cudaMalloc 
-        fprintf(stderr, "building CUDAmalloc using %s\n", aname); 
-        arrayVars[i].size_expr->print(0,stderr); fprintf(stderr, "\n"); 
+        debug_fprintf(stderr, "building CUDAmalloc using %s\n", aname); 
+        arrayVars[i].size_expr->print(0,stderr); debug_fprintf(stderr, "\n"); 
 
         // wait, malloc?
         chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
@@ -1851,18 +1851,18 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         chillAST_CStyleCastExpr *casttovoidptrptr = new chillAST_CStyleCastExpr( "void **", AO, NULL ); 
         chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr, NULL); 
         
-        fprintf(stderr, "adding cudamalloc to 'setup code' for the loop\n"); 
+        debug_fprintf(stderr, "adding cudamalloc to 'setup code' for the loop\n"); 
         CPUfuncbody->addChild( cmalloc ); // TODO setup_code ?? 
         setup_code = ocg->StmtListAppend(setup_code,
                                          new CG_chillRepr(cmalloc));
         
-        //fprintf(stderr, "\ncudamalloc is:\n");
+        //debug_fprintf(stderr, "\ncudamalloc is:\n");
         //cmalloc->print(); printf("\n"); fflush(stdout); 
         
         if (arrayVars[i].in_data) {  
-          //fprintf(stderr, "\nnow the memcpy (for input variables only????)\n"); 
+          //debug_fprintf(stderr, "\nnow the memcpy (for input variables only????)\n"); 
           // if it's input to the calculation, and we need to copy the data to the GPU
-          fprintf(stderr, "it's an input to the calculation, so we need to copy the data to the GPU\n"); 
+          debug_fprintf(stderr, "it's an input to the calculation, so we need to copy the data to the GPU\n"); 
           
           // do the CPU side cudaMemcpy, CPU to GPU("device")
           //DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
@@ -1870,10 +1870,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
                                                                   (chillAST_VarDecl*)(arrayVars[i].in_data), 
                                                                   arrayVars[i].size_expr, "cudaMemcpyHostToDevice"); 
           
-          fprintf(stderr, "cudamemcpy is:\n");
-          cmemcpy->print(0, stderr); fprintf(stderr, "\n");
+          debug_fprintf(stderr, "cudamemcpy is:\n");
+          cmemcpy->print(0, stderr); debug_fprintf(stderr, "\n");
           
-          fprintf(stderr, "adding cudamemcpy to 'setup code' for the loop\n"); 
+          debug_fprintf(stderr, "adding cudamemcpy to 'setup code' for the loop\n"); 
           CPUfuncbody->addChild( cmemcpy ); // TODO setup_code ?? 
           setup_code = ocg->StmtListAppend(setup_code,
                                            new CG_chillRepr(cmemcpy));
@@ -1882,15 +1882,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
       }  // for each arrayVar
       
-      //fprintf(stderr, "perhaps passing scalars to the kernel function\n"); 
+      //debug_fprintf(stderr, "perhaps passing scalars to the kernel function\n"); 
       // seemingly not ?
       
-      fprintf(stderr, "\nBuild dimGrid dim3 variables based on loop dimensions and ti/tj\n"); 
+      debug_fprintf(stderr, "\nBuild dimGrid dim3 variables based on loop dimensions and ti/tj\n"); 
       //Build dimGrid dim3 variables based on loop dimensions and ti/tj
-      fprintf(stderr, "dim3 variables will be dimGrid%d and dimBlock%d ??\n", iter, iter); 
+      debug_fprintf(stderr, "dim3 variables will be dimGrid%d and dimBlock%d ??\n", iter, iter); 
       
       
-      fprintf(stderr, "create ARGS for dim3 %s\n", gridName);     
+      debug_fprintf(stderr, "create ARGS for dim3 %s\n", gridName);     
       
       int what = ordered_cudaized_stmts[iter].second;
       
@@ -1899,16 +1899,16 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       }
 
       if ( what >=  VbxAst.size() || what >=  VbyAst.size()) { 
-        fprintf(stderr, "what %d\n", what); 
-        fprintf(stderr, "Vbx size %d   Vby size %d\n", VbxAst.size(), VbyAst.size()); 
+        debug_fprintf(stderr, "what %d\n", what); 
+        debug_fprintf(stderr, "Vbx size %d   Vby size %d\n", VbxAst.size(), VbyAst.size()); 
         
-        fprintf(stderr, "time to die\n"); 
+        debug_fprintf(stderr, "time to die\n"); 
         exit(-1); 
       }
-      fprintf(stderr, "creating dim3 decl of %s( ", gridName );
-      VbxAst[what]->print(0,stderr); fprintf(stderr, ", "); 
+      debug_fprintf(stderr, "creating dim3 decl of %s( ", gridName );
+      VbxAst[what]->print(0,stderr); debug_fprintf(stderr, ", "); 
       
-      VbyAst[what]->print(0,stderr); fprintf(stderr, " )\n"); 
+      VbyAst[what]->print(0,stderr); debug_fprintf(stderr, " )\n"); 
       
       chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin, NULL );
       CE1->addArg(VbxAst[what]);
@@ -1917,18 +1917,18 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       dimgriddecl->setInit(CE1);
       
       CPUfuncbody->addChild( dimgriddecl );  // TODO remove ?  setup_code ?? 
-      fprintf(stderr, "adding dim3 dimGrid to setup code for the statement\n\n");
+      debug_fprintf(stderr, "adding dim3 dimGrid to setup code for the statement\n\n");
       setup_code = ocg->StmtListAppend(setup_code,  new CG_chillRepr( dimgriddecl ) ); 
       
       
       
-      fprintf(stderr, "\nOK, now %s\n", blockName); 
+      debug_fprintf(stderr, "\nOK, now %s\n", blockName); 
       chillAST_VarDecl *dimblockdecl = NULL; 
       if (VtzAst.size() > what &&  // there is one
           VtzAst[what]) {          // it is not null 
         
         // there is a 3rd tz to be used
-        fprintf(stderr, "tz exists\n"); 
+        debug_fprintf(stderr, "tz exists\n"); 
         chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin, NULL );
         CE2->addArg(VtxAst[what]);
         CE2->addArg(VtyAst[what]);
@@ -1938,71 +1938,71 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
       }
       else { // no tz 
-        fprintf(stderr, "no tz\n"); 
+        debug_fprintf(stderr, "no tz\n"); 
         chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin, NULL );
         CE2->addArg(VtxAst[what]);
         CE2->addArg(VtyAst[what]);
         dimblockdecl = new chillAST_VarDecl( "dim3", blockName, "", NULL );
         dimblockdecl->setInit(CE2);
-        dimblockdecl->print(0,stderr); fprintf(stderr, "\n"); 
+        dimblockdecl->print(0,stderr); debug_fprintf(stderr, "\n"); 
       }
       
       // Anand code has test for NULL dimblockdecl ... 
       CPUfuncbody->addChild( dimblockdecl );  // TODO remove ?  setup_code ?? 
-      fprintf(stderr, "adding dim3 %s to setup code for the statement\n\n", blockName);
+      debug_fprintf(stderr, "adding dim3 %s to setup code for the statement\n\n", blockName);
       setup_code = ocg->StmtListAppend(setup_code,  new CG_chillRepr( dimblockdecl ) ); 
       
       
-      fprintf(stderr, "\nconfig?  ( the kernel call?? )\n"); 
+      debug_fprintf(stderr, "\nconfig?  ( the kernel call?? )\n"); 
       
-      //fprintf(stderr, "\nkernel named\n");GPUKernel->print(0,stderr); fprintf(stderr, "\n"); 
+      //debug_fprintf(stderr, "\nkernel named\n");GPUKernel->print(0,stderr); debug_fprintf(stderr, "\n"); 
       
       chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel,  CPUfuncbody);
       kcall->grid = dimgriddecl; 
       kcall->block =  dimblockdecl; 
-      fprintf(stderr, "kernel function parameters\n"); 
+      debug_fprintf(stderr, "kernel function parameters\n"); 
       for (int i = 0; i < arrayVars.size(); i++) { 
         //Throw in a type cast if our kernel takes 2D array notation
         //like (float(*) [1024])
         
         if (arrayVars[i].tex_mapped || arrayVars[i].cons_mapped) { 
-          if (arrayVars[i].tex_mapped) fprintf(stderr, "arrayVars[i].tex_mapped\n"); 
-          if (arrayVars[i].cons_mapped) fprintf(stderr, "arrayVars[i].cons_mapped\n"); 
+          if (arrayVars[i].tex_mapped) debug_fprintf(stderr, "arrayVars[i].tex_mapped\n"); 
+          if (arrayVars[i].cons_mapped) debug_fprintf(stderr, "arrayVars[i].cons_mapped\n"); 
           continue;
         }
         
         chillAST_VarDecl *v = arrayVars[i].vardecl;
         chillAST_VarDecl *param = arrayVars[i].CPUside_param;
         
-        fprintf(stderr, "param i %d,  numdimensions %d\n", i, param->numdimensions); 
+        debug_fprintf(stderr, "param i %d,  numdimensions %d\n", i, param->numdimensions); 
         
         if (param->numdimensions > 1) { 
-          fprintf(stderr, "array Var %d %s is multidimensional\n",i, v->varname);
-          fprintf(stderr, "underlying type %s   arraypart '%s'\n", v->underlyingtype, v->arraypart);
-          //v->print(0, stderr); fprintf(stderr, "\n"); 
-          param->print(0, stderr); fprintf(stderr, "\n\n"); 
+          debug_fprintf(stderr, "array Var %d %s is multidimensional\n",i, v->varname);
+          debug_fprintf(stderr, "underlying type %s   arraypart '%s'\n", v->underlyingtype, v->arraypart);
+          //v->print(0, stderr); debug_fprintf(stderr, "\n"); 
+          param->print(0, stderr); debug_fprintf(stderr, "\n\n"); 
 
           char line[128];
           sprintf(line, "%s (*)", v->underlyingtype ); 
-          //fprintf(stderr, "line '%s'\n", line);
+          //debug_fprintf(stderr, "line '%s'\n", line);
           // we'll pass in a cast of the variable instead of just the variable.
           for (int i=1; i<param->numdimensions; i++) { 
             int l = strlen(line);
-            //fprintf(stderr, "l %d\n", l); 
+            //debug_fprintf(stderr, "l %d\n", l); 
             char *ptr = &line[l];
-            //fprintf(stderr, "[%d]", param->arraysizes[i]); 
+            //debug_fprintf(stderr, "[%d]", param->arraysizes[i]); 
             sprintf(ptr, "[%d]", param->arraysizes[i]); 
-            //fprintf(stderr, "i %d line '%s'\n", i, line);
+            //debug_fprintf(stderr, "i %d line '%s'\n", i, line);
             chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( line, v, NULL );
             kcall->addArg( CE );
           }
           //int l = strlen(line);
           //char *ptr = line + l;
           //sprintf(ptr, ")");
-          //fprintf(stderr, "line '%s'\n", line); 
+          //debug_fprintf(stderr, "line '%s'\n", line); 
         }
         else { 
-          fprintf(stderr, "array Var %d %s is NOT multidimensional\n",i, v->varname);
+          debug_fprintf(stderr, "array Var %d %s is NOT multidimensional\n",i, v->varname);
           
           // we just need a decl ref expr inserted as the parameter/argument
           // when it prints, it will print just the array name
@@ -2013,17 +2013,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
  
 
      
-      fprintf(stderr, "kernel call is "); kcall->print(0,stderr); fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "kernel call is "); kcall->print(0,stderr); debug_fprintf(stderr, "\n"); 
       CPUfuncbody->addChild( kcall );           
       
-      fprintf(stderr, "\nfreeing %d Cuda variables\n", arrayVars.size()); 
+      debug_fprintf(stderr, "\nfreeing %d Cuda variables\n", arrayVars.size()); 
       //cuda free variables
       for (int i = 0; i < arrayVars.size(); i++) {
-        fprintf(stderr, "arrayVar %d\n", i); 
+        debug_fprintf(stderr, "arrayVar %d\n", i); 
         
         // Memcopy back if we have an output 
         if (arrayVars[i].out_data) {
-          fprintf(stderr, "Memcopy back if we have an output\n"); 
+          debug_fprintf(stderr, "Memcopy back if we have an output\n"); 
           chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl, CPUfuncbody ); 
           chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( (chillAST_VarDecl*)arrayVars[i].out_data, // wrong info
                                                                   arrayVars[i].vardecl, 
@@ -2037,28 +2037,28 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         CPUfuncbody->addChild( cfree );
         
       } 
-      fprintf(stderr, "\nDONE freeing %d Cuda variables\n", arrayVars.size()); 
+      debug_fprintf(stderr, "\nDONE freeing %d Cuda variables\n", arrayVars.size()); 
       
       
       
-      fprintf(stderr, "loop_cuda_chill.cc BUILD THE KERNEL\n"); 
+      debug_fprintf(stderr, "loop_cuda_chill.cc BUILD THE KERNEL\n"); 
       chillAST_node *kernelbody = code_temp;  // wrong 
       GPUKernel->setBody( kernelbody ); 
       
       
       //Extract out the CPU loop.  (part of) this will become the GPU side code
       chillAST_node *CPUsideloop = getCode(  );  // CG_chillRepr getCode
-      fprintf(stderr, "loop_cuda_chill.cc L1669 returned from getCode()\n");
+      debug_fprintf(stderr, "loop_cuda_chill.cc L1669 returned from getCode()\n");
       
-      fprintf(stderr, "\n\n\nloop_cuda_chill.cc L1685   CPUsideloop = \n");
+      debug_fprintf(stderr, "\n\n\nloop_cuda_chill.cc L1685   CPUsideloop = \n");
       CPUsideloop->print(); 
-      fprintf(stderr, "\n\n"); 
+      debug_fprintf(stderr, "\n\n"); 
       
-      fprintf(stderr, "\nGPUKernel:\n"); 
-      GPUKernel->print(0, stderr); fprintf(stderr, "\n\n"); 
+      debug_fprintf(stderr, "\nGPUKernel:\n"); 
+      GPUKernel->print(0, stderr); debug_fprintf(stderr, "\n\n"); 
       
-      fprintf(stderr, "\ncode_temp:\n"); 
-      code_temp->print(0, stderr); fprintf(stderr, "\n\n"); 
+      debug_fprintf(stderr, "\ncode_temp:\n"); 
+      code_temp->print(0, stderr); debug_fprintf(stderr, "\n\n"); 
       
       
       // At this point, we have the CPU-side code, in CPUsideloop
@@ -2073,30 +2073,30 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       if (!st) st = new chillAST_SymbolTable;
       GPUKernel->findLoopIndexesToReplace( st, false );
 
-      fprintf(stderr, "\nfind variables used in the kernel (?)\n"); 
+      debug_fprintf(stderr, "\nfind variables used in the kernel (?)\n"); 
       // find all variables used in the function
       vector<chillAST_VarDecl*> decls;
       GPUKernel->gatherVarUsage( decls );  // finds decls even if the actual decl is not in the ast but the reference to it is
       
       // attempt to get xxdiff to sync
-      fprintf(stderr, "\n                                                      ****** recursiveFindRefs()\n");
+      debug_fprintf(stderr, "\n                                                      ****** recursiveFindRefs()\n");
       
-      fprintf(stderr, "%d vars in syms USED in code_temp that need to be added to func_d \n\n", (int)decls.size()); 
+      debug_fprintf(stderr, "%d vars in syms USED in code_temp that need to be added to func_d \n\n", (int)decls.size()); 
       for (int i=0; i<decls.size(); i++) { 
-        fprintf(stderr, "%d   %s \n", i, decls[i]->varname); 
-        decls[i]->print(0,stderr); fprintf(stderr, "\n"); 
+        debug_fprintf(stderr, "%d   %s \n", i, decls[i]->varname); 
+        decls[i]->print(0,stderr); debug_fprintf(stderr, "\n"); 
       }
-      fprintf(stderr, "\n\n"); 
+      debug_fprintf(stderr, "\n\n"); 
       
       //int nump = GPUKernel->parameters.size();
-      //fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
-      //for (int i=0; i<nump; i++) fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
-      //fprintf(stderr, "\n"); 
+      //debug_fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
+      //for (int i=0; i<nump; i++) debug_fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
+      //debug_fprintf(stderr, "\n"); 
       
       
       
       //Figure out which loop variables will be our thread and block dimension variables
-      fprintf(stderr, "\nFigure out which loop variables will be our thread and block dimension variables\n"); 
+      debug_fprintf(stderr, "\nFigure out which loop variables will be our thread and block dimension variables\n"); 
       
       int beforecode = 0; // offset for var decls
       
@@ -2107,7 +2107,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       //  we need to note that the thing they replace will NOT be needed. 
         
       if (VbxAst[what])  { // Vcu_bx[what] > 1 || cu_bx_repr[what]) {
-        fprintf(stderr, "adding bx to indexes\n"); 
+        debug_fprintf(stderr, "adding bx to indexes\n"); 
         indexes.push_back("bx");
         
         // add definition of bx, and blockIdx.x to it in GPUKernel
@@ -2118,14 +2118,14 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         // see if bx is already defined in the Kernel
         bxdecl = GPUKernel->funcHasVariableNamed( "bx" );
         if (!bxdecl) { 
-          fprintf(stderr, "bx was NOT defined in GPUKernel before\n"); 
-          GPUKernel->print(0,stderr); fprintf(stderr, "\n\n"); 
+          debug_fprintf(stderr, "bx was NOT defined in GPUKernel before\n"); 
+          GPUKernel->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
           bxdecl= new chillAST_VarDecl( "int", "bx", "",GPUKernel);
           GPUKernel->addDecl( bxdecl ); // to symbol table
           // if it was there, we shouldn't do this? 
           GPUKernel->insertChild(beforecode++, bxdecl); 
         }
-        else fprintf(stderr, "bx WAS defined in GPUKernel before\n"); 
+        else debug_fprintf(stderr, "bx WAS defined in GPUKernel before\n"); 
         bxdecl->setInit( bid );  // add init
 
         //GPUKernel->addVariableToSymbolTable( bxdecl ); 
@@ -2134,7 +2134,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         // separate assign statement (if not using the vardecl init )
         //chillAST_DeclRefExpr *bx = new chillAST_DeclRefExpr( bxdecl ); 
         //chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( bx, "=",bid); 
-        //assign->print(0,stderr); fprintf(stderr, "\n"); 
+        //assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
         //GPUKernel->addChild(assign); 
 
         // remove the 
@@ -2142,7 +2142,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       
       if (VbyAst.size() > 0 && VbyAst[what]) { 
-        fprintf(stderr, "adding by to indexes\n");  // TODO wrong test 
+        debug_fprintf(stderr, "adding by to indexes\n");  // TODO wrong test 
         indexes.push_back("by");
         
         // add definition of by, and blockIdx.y to it in GPUKernel
@@ -2153,23 +2153,23 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         // see if by is already defined in the Kernel
         bydecl = GPUKernel->funcHasVariableNamed( "by" ); 
         if (!bydecl) { 
-          fprintf(stderr, "by was NOT defined in GPUKernel before\n"); 
+          debug_fprintf(stderr, "by was NOT defined in GPUKernel before\n"); 
           bydecl= new chillAST_VarDecl( "int", "by", "", GPUKernel);
           GPUKernel->addDecl( bydecl ); // to symbol table
           GPUKernel->insertChild(beforecode++, bydecl);
         }
-        else fprintf(stderr, "by WAS defined in GPUKernel before\n"); 
+        else debug_fprintf(stderr, "by WAS defined in GPUKernel before\n"); 
         bydecl->setInit( bid ); // add init
         
         // separate assign statement (if not using the vardecl init )
         //chillAST_DeclRefExpr *by = new chillAST_DeclRefExpr( bydecl ); 
         //chillAST_BinaryOperator *assign = new chillAST_BinaryOperator(by,"=",bid); 
-        //assign->print(0,stderr); fprintf(stderr, "\n"); 
+        //assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
         //GPUKernel->addChild(assign); 
       }
       
       if (VtxAst.size() > 0 && VtxAst[what]) { 
-        fprintf(stderr, "adding tx to indexes\n"); 
+        debug_fprintf(stderr, "adding tx to indexes\n"); 
         indexes.push_back("tx");
         chillAST_VarDecl *tiddecl = addBuiltin( "threadIdx.x", "int", GPUKernel);
         chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( tiddecl ); 
@@ -2180,18 +2180,18 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         if (!txdecl) { 
           GPUKernel->print(0,stderr); 
 
-          fprintf(stderr, "tx was NOT defined in GPUKernel before\n"); 
+          debug_fprintf(stderr, "tx was NOT defined in GPUKernel before\n"); 
           txdecl= new chillAST_VarDecl( "int", "tx", "", GPUKernel);
           GPUKernel->addDecl( txdecl ); // to symbol table
           GPUKernel->insertChild(beforecode++, txdecl);
         }
-        else fprintf(stderr, "tx WAS defined in GPUKernel before\n"); 
+        else debug_fprintf(stderr, "tx WAS defined in GPUKernel before\n"); 
         txdecl->setInit( tid ); // add init
 
       }
       
       if (VtyAst.size() > 0 && VtyAst[what]) { 
-        fprintf(stderr, "adding ty to indexes\n"); 
+        debug_fprintf(stderr, "adding ty to indexes\n"); 
         indexes.push_back("ty");
         chillAST_VarDecl *tiddecl = addBuiltin( "threadIdx.y", "int", GPUKernel);
         chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( tiddecl ); 
@@ -2200,19 +2200,19 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         // see if ty is already defined in the Kernel
         tydecl = GPUKernel->funcHasVariableNamed( "ty" ); 
         if (!tydecl) { 
-          fprintf(stderr, "ty was NOT defined in GPUKernel before\n"); 
+          debug_fprintf(stderr, "ty was NOT defined in GPUKernel before\n"); 
           GPUKernel->print(0, stderr); 
 
           tydecl= new chillAST_VarDecl( "int", "ty", "", GPUKernel);
           GPUKernel->addDecl( tydecl ); // to symbol table
           GPUKernel->insertChild(beforecode++, tydecl);
         }
-        else fprintf(stderr, "ty WAS defined in GPUKernel before\n"); 
+        else debug_fprintf(stderr, "ty WAS defined in GPUKernel before\n"); 
         tydecl->setInit( tid ); // add init
       }
       
       if (VtzAst.size() > 0 && VtzAst[what]) { 
-        fprintf(stderr, "adding tz to indexes\n"); 
+        debug_fprintf(stderr, "adding tz to indexes\n"); 
         indexes.push_back("tz");
         chillAST_VarDecl *tiddecl = addBuiltin( "threadIdx.z", "int", GPUKernel);
         chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( tiddecl ); 
@@ -2221,102 +2221,102 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         // see if tz is already defined in the Kernel
         tzdecl = GPUKernel->funcHasVariableNamed( "tz" ); 
         if (!tzdecl) { 
-          fprintf(stderr, "tz was NOT defined in GPUKernel before\n"); 
+          debug_fprintf(stderr, "tz was NOT defined in GPUKernel before\n"); 
           tzdecl= new chillAST_VarDecl( "int", "tz", "", GPUKernel);
           GPUKernel->addDecl( tzdecl ); // to symbol table
           GPUKernel->insertChild(beforecode++, tzdecl);
         }
-        else fprintf(stderr, "tz WAS defined in GPUKernel before\n"); 
+        else debug_fprintf(stderr, "tz WAS defined in GPUKernel before\n"); 
         tzdecl->setInit( tid ); // add init
 
       }
       
       
       
-      fprintf(stderr, "\n%d indexes\n", (int) indexes.size()); 
+      debug_fprintf(stderr, "\n%d indexes\n", (int) indexes.size()); 
       for (int i = 0; i < indexes.size(); i++) {
-        fprintf(stderr, "indexes[%i] = '%s'\n", i, indexes[i] ); 
+        debug_fprintf(stderr, "indexes[%i] = '%s'\n", i, indexes[i] ); 
       }
-      fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "\n"); 
       
       
       std::vector<chillAST_ArraySubscriptExpr*> kernelArrayRefs;
       code_temp->gatherArrayRefs( kernelArrayRefs, false );
-      //fprintf(stderr, "%d array refs in kernel\n",  kernelArrayRefs.size()); 
+      //debug_fprintf(stderr, "%d array refs in kernel\n",  kernelArrayRefs.size()); 
       
 
       // Look for arrayrefs used in kernel, to see if they are parameters to the GPU kernel (?)
       // and if it IS, check to see if it's a member of a struct accessed by a dot, and if it IS,
       // change it to a non-member expression  ??? 
       //
-      fprintf(stderr, "\nloop_cuda_chill.cc L2072  looking for %d arrayRefs\n", (int) kernelArrayRefs.size()); 
+      debug_fprintf(stderr, "\nloop_cuda_chill.cc L2072  looking for %d arrayRefs\n", (int) kernelArrayRefs.size()); 
       for (int i = 0; i < kernelArrayRefs.size(); i++) { 
         //chillAST_node *vd = kernelArrayRefs[i]->multibase2(); 
         
-        fprintf(stderr, "ref %d = '", i);
-        kernelArrayRefs[i]->basedecl->print(0,stderr); fprintf(stderr, "'\n");
-        //kernelArrayRefs[i]->print(0,stderr); fprintf(stderr, "'\n");
-        //kernelArrayRefs[i]->base->print(0,stderr); fprintf(stderr, "'\n");
+        debug_fprintf(stderr, "ref %d = '", i);
+        kernelArrayRefs[i]->basedecl->print(0,stderr); debug_fprintf(stderr, "'\n");
+        //kernelArrayRefs[i]->print(0,stderr); debug_fprintf(stderr, "'\n");
+        //kernelArrayRefs[i]->base->print(0,stderr); debug_fprintf(stderr, "'\n");
       }
-      fprintf(stderr, "in %d kernel_parameters\n", (int)kernel_parameters.size()); 
+      debug_fprintf(stderr, "in %d kernel_parameters\n", (int)kernel_parameters.size()); 
       for (std::set<std::string>::iterator i = kernel_parameters.begin();
            i != kernel_parameters.end(); i++) {
-        fprintf(stderr, "kernel parameter '%s'\n", (*i).c_str()); 
+        debug_fprintf(stderr, "kernel parameter '%s'\n", (*i).c_str()); 
       }
-      fprintf(stderr, "\n"); 
+      debug_fprintf(stderr, "\n"); 
       
       // 
       
       // TODO ... stuff comment above
       
       
-      //fprintf(stderr, "\nbefore swapVarReferences(), code is\n{\n"); 
+      //debug_fprintf(stderr, "\nbefore swapVarReferences(), code is\n{\n"); 
       //kernelbody->print();
-      //fprintf(stderr, "}\n\nswapVarReferences()\n"); 
+      //debug_fprintf(stderr, "}\n\nswapVarReferences()\n"); 
       //swapVarReferences( CPUsideloop, GPUKernel );
-      //fprintf(stderr, "\nafter swapVarReferences(), ");
+      //debug_fprintf(stderr, "\nafter swapVarReferences(), ");
       
-      fprintf(stderr, "kernel code is\n"); 
+      debug_fprintf(stderr, "kernel code is\n"); 
       GPUKernel->print();
-      fprintf(stderr, "\n\n");
+      debug_fprintf(stderr, "\n\n");
       
-      fprintf(stderr, "now replace indexes ... (and add syncs)\n");
+      debug_fprintf(stderr, "now replace indexes ... (and add syncs)\n");
       findReplacePreferedIdxs( CPUsideloop, GPUKernel );
-      fprintf(stderr, "DONE WITH replace indexes ... (and add syncs)\n"); 
+      debug_fprintf(stderr, "DONE WITH replace indexes ... (and add syncs)\n"); 
       
-      fprintf(stderr, "\nswapped 2\nshould have syncs\nshould have indexes replaced by bx, tx, etc \n"); 
+      debug_fprintf(stderr, "\nswapped 2\nshould have syncs\nshould have indexes replaced by bx, tx, etc \n"); 
       GPUKernel->print();
       
       
       
       
-      //CPUsidefunc->print(0, stderr); fprintf(stderr, "\n\n\n"); 
+      //CPUsidefunc->print(0, stderr); debug_fprintf(stderr, "\n\n\n"); 
       
-      GPUKernel->print(0, stderr); fprintf(stderr, "\n\n\n");
+      GPUKernel->print(0, stderr); debug_fprintf(stderr, "\n\n\n");
       
       // now remove loops that will be done by spreading the loop count across cores
       // these are loops that have our indeces gathered above as loop variables
-      fprintf(stderr, "removing loops for variables that will be determined by core index\n"); 
+      debug_fprintf(stderr, "removing loops for variables that will be determined by core index\n"); 
       for (int i = 0; i < indexes.size(); i++) {
-        fprintf(stderr, "\nindexes[%i] = '%s'\n", i, indexes[i] ); 
-        fprintf(stderr, "forReduce()\n");
+        debug_fprintf(stderr, "\nindexes[%i] = '%s'\n", i, indexes[i] ); 
+        debug_fprintf(stderr, "forReduce()\n");
         
         GPUKernel->getBody()->loseLoopWithLoopVar( strdup(indexes[i]) ); 
       }
       
       
-      GPUKernel->print(0, stderr); fprintf(stderr, "\n\n\n");
+      GPUKernel->print(0, stderr); debug_fprintf(stderr, "\n\n\n");
     
     } // if THIS statement will become a kernel
     else 
     {
-      fprintf(stderr, "statement %d will NOT run on GPU\n", iter); 
+      debug_fprintf(stderr, "statement %d will NOT run on GPU\n", iter); 
     }
 
 
   } // for int iter  (each statement that COULD  become a kernel )
   
-  //fprintf(stderr, "loop_cuda_chill.cc L 1546, exiting\n"); 
+  //debug_fprintf(stderr, "loop_cuda_chill.cc L 1546, exiting\n"); 
   
 
   
@@ -2331,29 +2331,29 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   if  (dot) { 
     *dot = '\0';
   }
-  fprintf(stderr, "part '%s'\n", part);
+  debug_fprintf(stderr, "part '%s'\n", part);
   
   
   
   
   
   
-  fprintf(stderr, "%d statements\n", stmt.size()); 
+  debug_fprintf(stderr, "%d statements\n", stmt.size()); 
   for (int j = 0; j < stmt.size(); j++) {
-    fprintf(stderr, "\nstmt j %d\n", j); 
+    debug_fprintf(stderr, "\nstmt j %d\n", j); 
     std::vector<IR_ArrayRef *> refs = ir->FindArrayRef(stmt[j].code);
-    fprintf(stderr, "%d array references in stmt j %d\n", refs.size(), j); 
+    debug_fprintf(stderr, "%d array references in stmt j %d\n", refs.size(), j); 
     
-    fprintf(stderr, "\nabout to dump statement j %d\n", j); 
+    debug_fprintf(stderr, "\nabout to dump statement j %d\n", j); 
     CG_chillRepr * repr = (CG_chillRepr *) stmt[j].code;
     repr->dump(); 
-    fflush(stdout); fprintf(stderr, "\n\n\n\n");
+    fflush(stdout); debug_fprintf(stderr, "\n\n\n\n");
     
   } // for each stmt 
   
   
 #ifdef VERYWORDY
-  fprintf(stderr, "we read from %d parameter arrays, and write to %d parameter arrays\n", ro_refs.size(), wo_refs.size()); 
+  debug_fprintf(stderr, "we read from %d parameter arrays, and write to %d parameter arrays\n", ro_refs.size(), wo_refs.size()); 
   printf("reading from array parameters ");
   for (int i = 0; i < ro_refs.size(); i++)
     printf("'%s' ", ro_refs[i]->name().c_str());
@@ -2368,7 +2368,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "POWERTHRU  bailing\n"); 
+  debug_fprintf(stderr, "POWERTHRU  bailing\n"); 
   //exit(0); 
   
 #ifdef POWERTHRU  
@@ -2376,12 +2376,12 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "\n\nAdd our mallocs (and input array memcpys) %d arrayVars\n", arrayVars.size());
+  debug_fprintf(stderr, "\n\nAdd our mallocs (and input array memcpys) %d arrayVars\n", arrayVars.size());
   //Add our mallocs (and input array memcpys)
   for (int i = 0; i < arrayVars.size(); i++) {
     
-    //fprintf(stderr, "0x%x\n", arrayVars[i].vardecl); 
-    fprintf(stderr, "arrayVar %d\nC side: %s    Kernel side %s\n", i, arrayVars[i].name.c_str(), arrayVars[i].original_name.c_str() ); 
+    //debug_fprintf(stderr, "0x%x\n", arrayVars[i].vardecl); 
+    debug_fprintf(stderr, "arrayVar %d\nC side: %s    Kernel side %s\n", i, arrayVars[i].name.c_str(), arrayVars[i].original_name.c_str() ); 
     
     
     const char *kernelparamname = arrayVars[i].original_name.c_str(); 
@@ -2397,17 +2397,17 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       chillAST_VarDecl *param =  (chillAST_VarDecl *)parameterSymbols[pdsymoffset]->clone(); 
       param->knownArraySizes = false; // ?? 
       
-      //fprintf(stderr, "adding %s to GPUKernel parameters\n", kernelparamname);
+      //debug_fprintf(stderr, "adding %s to GPUKernel parameters\n", kernelparamname);
       GPUKernel->addParameter( param );
       
     }
     
     if(arrayVars[i].cons_mapped) {
-      fprintf(stderr, "arrayVar %d is cons mapped  (TODO) \n", i); 
+      debug_fprintf(stderr, "arrayVar %d is cons mapped  (TODO) \n", i); 
       exit(-1); 
     }
     else { 
-      fprintf(stderr, "buildVariableDeclaration %s\n", arrayVars[i].name.c_str()); 
+      debug_fprintf(stderr, "buildVariableDeclaration %s\n", arrayVars[i].name.c_str()); 
       // create a CHILL variable declaration and put it in the CPU side function
       
       char typ[128];
@@ -2430,12 +2430,12 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr, NULL); 
       CPUfuncbody->addChild( cmalloc );
       
-      fprintf(stderr, "\ncudamalloc is:\n"); 
+      debug_fprintf(stderr, "\ncudamalloc is:\n"); 
       cmalloc->print(); printf("\n"); fflush(stdout); 
       
-      fprintf(stderr, "\nnow the memcpy (for input variables only????)\n"); 
+      debug_fprintf(stderr, "\nnow the memcpy (for input variables only????)\n"); 
       if (arrayVars[i].in_data) {  // if it's input to the calculation, and we need to copy the data to the GPU
-        //fprintf(stderr, "it's an input to the calculation, so we need to copy the data to the GPU\n"); 
+        //debug_fprintf(stderr, "it's an input to the calculation, so we need to copy the data to the GPU\n"); 
         
         // do the CPU side cudaMemcpy, CPU to GPU("device")
         //DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
@@ -2447,36 +2447,36 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //printf("\n"); cmemcpy->print(); printf("\n");fflush(stdout); 
       } // for input variables only (must be copied to GPU before the kernel call) 
       //else { 
-      //  fprintf(stderr, "it's not an input to the calculation, so no memcpy over to the GPU\n"); 
+      //  debug_fprintf(stderr, "it's not an input to the calculation, so no memcpy over to the GPU\n"); 
       //} 
     }  // not cons mapped 
   }   // for all arrayvars 
   
   
-  fprintf(stderr, "\nBuild dimGrid and dimBlock dim3 variables based on loop dimensions and ti/tj\n"); 
+  debug_fprintf(stderr, "\nBuild dimGrid and dimBlock dim3 variables based on loop dimensions and ti/tj\n"); 
   //Build dimGrid dim3 variables based on loop dimensions and ti/tj
   
   
   chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin, NULL );
   
   // create ARGS to dim3. 
-  fprintf(stderr, "create ARGS for dim3 dimGrid\n"); 
-  fprintf(stderr, "ordered_cudaized_stmts[iter].second %d\n", ordered_cudaized_stmts[iter].second);
+  debug_fprintf(stderr, "create ARGS for dim3 dimGrid\n"); 
+  debug_fprintf(stderr, "ordered_cudaized_stmts[iter].second %d\n", ordered_cudaized_stmts[iter].second);
   
   if (cu_bx && cu_by) {                                      // 2 constants
-    fprintf(stderr, "dim3 dimGrid %d %d\n", cu_bx, cu_by); 
+    debug_fprintf(stderr, "dim3 dimGrid %d %d\n", cu_bx, cu_by); 
     CE1->addArg( new chillAST_IntegerLiteral( cu_bx ));
     CE1->addArg( new chillAST_IntegerLiteral( cu_by ));
   }
   else if (cu_bx_repr && cu_by_repr) {                        // 2 expressions? 
-    fprintf(stderr, "dim3 dimGrid cu_bx_repr  cu_by_repr\n" ); 
+    debug_fprintf(stderr, "dim3 dimGrid cu_bx_repr  cu_by_repr\n" ); 
     chillAST_node *code1  = cu_bx_repr-> GetCode();
     chillAST_node *code2  = cu_bx_repr-> GetCode();
     CE1->addArg( code1 ); 
     CE1->addArg( code2 ); 
   }
   else if (cu_bx_repr) {
-    fprintf(stderr, "dim3 dimGrid  cu_bx_repr 1\n");            // one expression, and a constant?
+    debug_fprintf(stderr, "dim3 dimGrid  cu_bx_repr 1\n");            // one expression, and a constant?
     cu_bx_repr->dump(); fflush(stdout); 
     chillAST_node *code  = cu_bx_repr-> GetCode();
     
@@ -2488,27 +2488,27 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "dimGrid", "", NULL );
   dimgriddecl->setInit(CE1);
   CPUfuncbody->addChild( dimgriddecl ); 
-  fprintf(stderr, "appending DIMGRID repr to setup code\n\n");
+  debug_fprintf(stderr, "appending DIMGRID repr to setup code\n\n");
   
   
-  fprintf(stderr, "\nDIMBLOCK\n"); 
+  debug_fprintf(stderr, "\nDIMBLOCK\n"); 
   // DIMBLOCK 
   int bs1 = 32;
   int bs2 = 1;
   if (cu_tz > 1) { //  || cu_tz_repr) {
-    fprintf(stderr, "cu_tz\n"); 
+    debug_fprintf(stderr, "cu_tz\n"); 
     exit(-1); 
     
   }
   else { 
-    fprintf(stderr, "NOT cu_tz\n"); 
+    debug_fprintf(stderr, "NOT cu_tz\n"); 
     if (cu_tx && cu_ty) { 
-      fprintf(stderr, "cu_tx && cu_ty\n"); 
+      debug_fprintf(stderr, "cu_tx && cu_ty\n"); 
       bs1 = cu_tx;
       bs2 = cu_ty; 
     }
     else if (cu_tx_repr && cu_ty_repr) { 
-      fprintf(stderr, "cu_tx && cu_ty REPR\n"); 
+      debug_fprintf(stderr, "cu_tx && cu_ty REPR\n"); 
       exit(-1); 
     }
     
@@ -2526,11 +2526,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   // kernel call 
-  fprintf(stderr, "KERNEL CALL\n"); 
+  debug_fprintf(stderr, "KERNEL CALL\n"); 
   chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel,  CPUfuncbody);
   kcall->grid = dimgriddecl; 
   kcall->block =  dimblockdecl; 
-  fprintf(stderr, "kernel function parameters\n"); 
+  debug_fprintf(stderr, "kernel function parameters\n"); 
   for (int i = 0; i < arrayVars.size(); i++) { 
     //Throw in a type cast if our kernel takes 2D array notation
     //like (float(*) [1024])
@@ -2540,34 +2540,34 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     chillAST_VarDecl *v = arrayVars[i].vardecl;
     chillAST_VarDecl *param = arrayVars[i].CPUside_param;
     
-    //fprintf(stderr, "numdimensions %d\n", param->numdimensions); 
+    //debug_fprintf(stderr, "numdimensions %d\n", param->numdimensions); 
     
     if (param->numdimensions > 1) { 
-      fprintf(stderr, "array Var %d %s is multidimensional  SECOND\n",i, v->varname);
-      fprintf(stderr, "underlying type %s\narraypart %s\n", v->underlyingtype, v->arraypart); 
+      debug_fprintf(stderr, "array Var %d %s is multidimensional  SECOND\n",i, v->varname);
+      debug_fprintf(stderr, "underlying type %s\narraypart %s\n", v->underlyingtype, v->arraypart); 
       char line[128];
       sprintf(line, "%s (*)", v->underlyingtype ); 
-      fprintf(stderr, "line '%s'\n", line);
+      debug_fprintf(stderr, "line '%s'\n", line);
       // we'll pass in a cast of the variable instead of just the variable.
       for (int i=1; i<param->numdimensions; i++) { 
         int l = strlen(line);
-        //fprintf(stderr, "l %d\n", l); 
+        //debug_fprintf(stderr, "l %d\n", l); 
         char *ptr = &line[l];
-        //fprintf(stderr, "[%d]", param->arraysizes[i]); 
+        //debug_fprintf(stderr, "[%d]", param->arraysizes[i]); 
         sprintf(ptr, "[%d]", param->arraysizes[i]); 
-        //fprintf(stderr, "i %d line '%s'\n", i, line);
+        //debug_fprintf(stderr, "i %d line '%s'\n", i, line);
         chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( line, v, NULL );
         kcall->addArg( CE );
-        fprintf("CastExpr is "); CE->print(0,stderr); fprintf(stderr, "\n\n"); 
+        fprintf("CastExpr is "); CE->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
       }
       //int l = strlen(line);
       //char *ptr = line + l;
       //sprintf(ptr, ")");
-      //fprintf(stderr, "line '%s'\n", line); 
+      //debug_fprintf(stderr, "line '%s'\n", line); 
       
     }
     else { 
-      fprintf(stderr, "array Var %d %s is NOT multidimensional\n",i, v->varname);
+      debug_fprintf(stderr, "array Var %d %s is NOT multidimensional\n",i, v->varname);
       
       // we just need a decl ref expr inserted as the parameter/argument
       // when it prints, it will print just the array name
@@ -2580,10 +2580,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "\nfreeing Cuda variables\n"); 
+  debug_fprintf(stderr, "\nfreeing Cuda variables\n"); 
   //cuda free variables
   for (int i = 0; i < arrayVars.size(); i++) {
-    fprintf(stderr, "arrayVar %d\n", i); 
+    debug_fprintf(stderr, "arrayVar %d\n", i); 
     
     // Memcopy back if we have an output 
     if (arrayVars[i].out_data) {
@@ -2606,57 +2606,57 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "BUILD THE KERNEL\n"); 
+  debug_fprintf(stderr, "BUILD THE KERNEL\n"); 
   
   //Extract out kernel loop  (somewhat misnamed. This is NOT the body of the GPUKernel YET) 
   chillAST_node *CPUsideloop = getCode(  );  // chill based getCode
   
-  fprintf(stderr, "loop_cuda_chill.cc L1669 returned from getCode()\n");
+  debug_fprintf(stderr, "loop_cuda_chill.cc L1669 returned from getCode()\n");
   
-  //fprintf(stderr, "loop_cuda_chill.cc L1685  CPUsideloop =\n");
+  //debug_fprintf(stderr, "loop_cuda_chill.cc L1685  CPUsideloop =\n");
   //GPUKernel->getBody()->print(); fflush(stdout);
-  //fprintf(stderr, "\n\n"); 
+  //debug_fprintf(stderr, "\n\n"); 
   
-  fprintf(stderr, "loop_cuda_chill.cc L1685   CPUsideloop = \n");
+  debug_fprintf(stderr, "loop_cuda_chill.cc L1685   CPUsideloop = \n");
   CPUsideloop->print(); 
-  fprintf(stderr, "\n\n"); 
+  debug_fprintf(stderr, "\n\n"); 
   
-  fprintf(stderr, "%d arrayvars\n", arrayVars.size());  
+  debug_fprintf(stderr, "%d arrayvars\n", arrayVars.size());  
   
   // this should just be sitting in a member of arrayVars
   std::map<std::string, chillAST_VarDecl*> loop_vars;
   for (int i = 0; i < arrayVars.size(); i++) {
-    fprintf(stderr, "arrayVars[%d]  name %s\n", i, arrayVars[i].original_name.c_str()); 
-    //if (arrayVars[i].in_data)  fprintf(stderr, "input ");
-    //if (arrayVars[i].out_data)  fprintf(stderr, "output ");
-    //fprintf(stderr, "\n");
+    debug_fprintf(stderr, "arrayVars[%d]  name %s\n", i, arrayVars[i].original_name.c_str()); 
+    //if (arrayVars[i].in_data)  debug_fprintf(stderr, "input ");
+    //if (arrayVars[i].out_data)  debug_fprintf(stderr, "output ");
+    //debug_fprintf(stderr, "\n");
     
     chillAST_VarDecl *d = GPUKernel->hasParameterNamed( arrayVars[i].original_name.c_str() ); 
     if (d) { 
-      fprintf(stderr, "inserting %s into loop_vars\n", arrayVars[i].original_name.c_str()); 
+      debug_fprintf(stderr, "inserting %s into loop_vars\n", arrayVars[i].original_name.c_str()); 
       loop_vars.insert(std::pair<std::string, chillAST_VarDecl*>(std::string(arrayVars[i].original_name), d));
     }
   }
   
-  fprintf(stderr, "\nfind variables used in the kernel (?)\n"); 
+  debug_fprintf(stderr, "\nfind variables used in the kernel (?)\n"); 
   
   // find all variables used in the function
   vector<chillAST_VarDecl*> decls;
   CPUsideloop->gatherVarDecls( decls );
-  fprintf(stderr, "%d variables in kernel\n", decls.size()); 
+  debug_fprintf(stderr, "%d variables in kernel\n", decls.size()); 
   for (int i=0; i<decls.size(); i++) { 
-    fprintf(stderr, "%s\n", decls[i]->varname); 
+    debug_fprintf(stderr, "%s\n", decls[i]->varname); 
   }
   
   int nump = GPUKernel->parameters.size();
-  fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
-  for (int i=0; i<nump; i++) fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
+  for (int i=0; i<nump; i++) debug_fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
+  debug_fprintf(stderr, "\n"); 
   
   
   
   //Figure out which loop variables will be our thread and block dimension variables
-  fprintf(stderr, "Figure out which loop variables will be our thread and block dimension variables\n"); 
+  debug_fprintf(stderr, "Figure out which loop variables will be our thread and block dimension variables\n"); 
   
   //Get our indexes  (threadIdx and blockIdx will replace some loops) 
   std::vector<const char*> indexes;
@@ -2671,7 +2671,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     
     chillAST_DeclRefExpr *bx = new chillAST_DeclRefExpr( bxdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( bx, "=",bid); 
-    assign->print(0,stderr); fprintf(stderr, "\n"); 
+    assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
     
     GPUKernel->addChild(assign); 
   }
@@ -2684,7 +2684,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     GPUKernel->addDecl( bydecl );
     chillAST_DeclRefExpr *by = new chillAST_DeclRefExpr( bydecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( by, "=",bid); 
-    assign->print(0,stderr); fprintf(stderr, "\n"); 
+    assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
     
     GPUKernel->addChild(bydecl); 
     GPUKernel->addChild(assign); 
@@ -2698,7 +2698,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     GPUKernel->addDecl( txdecl );
     chillAST_DeclRefExpr *tx = new chillAST_DeclRefExpr( txdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( tx, "=",tid);
-    assign->print(0, stderr); fprintf(stderr, "\n"); 
+    assign->print(0, stderr); debug_fprintf(stderr, "\n"); 
     
     GPUKernel->addChild(txdecl); 
     GPUKernel->addChild(assign); 
@@ -2708,12 +2708,12 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     chillAST_VarDecl *biddecl = addBuiltin( "threadIdx.y", "int", GPUKernel );
     chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( biddecl ); 
     chillAST_VarDecl *tydecl = new chillAST_VarDecl( "int", "ty", "", GPUKernel);
-    fprintf(stderr, "loop_cuda_chill.cc L 2598, adding ty to kernelbody??   ty was \n"); 
+    debug_fprintf(stderr, "loop_cuda_chill.cc L 2598, adding ty to kernelbody??   ty was \n"); 
 
     GPUKernel->addDecl( tydecl );
     chillAST_DeclRefExpr *ty = new chillAST_DeclRefExpr( tydecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( ty, "=",tid); 
-    assign->print(0,stderr); fprintf(stderr, "\n"); 
+    assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
     
     kernelbody->addChild(tydecl); 
     kernelbody->addChild(assign); 
@@ -2726,7 +2726,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     GPUKernel->addDecl( tzdecl );
     chillAST_DeclRefExpr *tz = new chillAST_DeclRefExpr( tzdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( tz, "=",tid);
-    assign->print(0,stderr); fprintf(stderr, "\n"); 
+    assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
     
     kernelbody->addChild(tzdecl); 
     kernelbody->addChild(assign); 
@@ -2734,39 +2734,39 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // multistatement version is up to here 
   
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
   for (int i = 0; i < indexes.size(); i++) {
-    fprintf(stderr, "indexes[%i] = '%s'\n", i, indexes[i] ); 
+    debug_fprintf(stderr, "indexes[%i] = '%s'\n", i, indexes[i] ); 
   }
   
-  fprintf(stderr, "\nbefore swapVarReferences(), code is\n{\n"); 
+  debug_fprintf(stderr, "\nbefore swapVarReferences(), code is\n{\n"); 
   kernelbody->print();
   
-  fprintf(stderr, "}\n\nswapVarReferences()\n"); 
+  debug_fprintf(stderr, "}\n\nswapVarReferences()\n"); 
   //swapVarReferences( CPUsideloop, GPUKernel );
   
-  fprintf(stderr, "\nafter swapVarReferences(), code is\n"); 
+  debug_fprintf(stderr, "\nafter swapVarReferences(), code is\n"); 
   kernelbody->print();
-  fprintf(stderr, "\n\n");
+  debug_fprintf(stderr, "\n\n");
   
   
-  fprintf(stderr, "now replace indexes ... (and add syncs)\n"); 
+  debug_fprintf(stderr, "now replace indexes ... (and add syncs)\n"); 
   findReplacePreferedIdxs( CPUsideloop, GPUKernel );
-  fprintf(stderr, "DONE WITH replace indexes ... (and add syncs)\n"); 
+  debug_fprintf(stderr, "DONE WITH replace indexes ... (and add syncs)\n"); 
   
-  fprintf(stderr, "\nswapped 2\nshould have syncs\nshould have indexes replaced by bx, tx, etc \n\n"); 
+  debug_fprintf(stderr, "\nswapped 2\nshould have syncs\nshould have indexes replaced by bx, tx, etc \n\n"); 
   CPUsideloop->print();
   
   // now remove loops that will be done by spreading the loop count across cores
   // these are loops that have our indeces gathered above as loop variables
-  fprintf(stderr, "removing loops for variables that will be determined by core index\n"); 
+  debug_fprintf(stderr, "removing loops for variables that will be determined by core index\n"); 
   chillAST_CompoundStmt *CS = new chillAST_CompoundStmt();
   
   CS->addChild( CPUsideloop ); // in case top level loop will go away
-  //fprintf(stderr, "arbitrary compoundstmt 0x%x to hold child CPUsideloop  0x%x\n", CS, CPUsideloop); 
+  //debug_fprintf(stderr, "arbitrary compoundstmt 0x%x to hold child CPUsideloop  0x%x\n", CS, CPUsideloop); 
   for (int i = 0; i < indexes.size(); i++) {
-    fprintf(stderr, "\nindexes[%i] = '%s'\n", i, indexes[i] ); 
-    fprintf(stderr, "forReduce()\n");
+    debug_fprintf(stderr, "\nindexes[%i] = '%s'\n", i, indexes[i] ); 
+    debug_fprintf(stderr, "forReduce()\n");
     
     CPUsideloop->loseLoopWithLoopVar( strdup(indexes[i]) ); 
   }
@@ -2775,8 +2775,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "END cudaize codegen V2 (CHILL)\n\n\n");
-  fprintf(stderr, "\nat end of cudaize_codegen_v2(), returning\n");
+  debug_fprintf(stderr, "END cudaize codegen V2 (CHILL)\n\n\n");
+  debug_fprintf(stderr, "\nat end of cudaize_codegen_v2(), returning\n");
   CS->print(); 
   
   
@@ -2790,7 +2790,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  fprintf(stderr, "kernel defines %d variables\n", kerneldecls.size()); 
+  debug_fprintf(stderr, "kernel defines %d variables\n", kerneldecls.size()); 
   for (int i=0; i<kerneldecls.size(); i++) { 
     chillAST_VarDecl *vd = kerneldecls[i]; 
     if (vd->isParmVarDecl()) { 
@@ -2817,12 +2817,12 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   printf("\n"); fflush(stdout); 
   
   
-  fprintf(stderr, "kernel uses    %d variables\n", kerneldeclsused.size()); 
+  debug_fprintf(stderr, "kernel uses    %d variables\n", kerneldeclsused.size()); 
   for (int i=0; i<kerneldeclsused.size(); i++) { 
     chillAST_VarDecl *vd = kerneldeclsused[i];
-    fprintf(stderr, "%2d %s\n", i, vd->varname); 
+    debug_fprintf(stderr, "%2d %s\n", i, vd->varname); 
   }
-  fprintf(stderr, "\n\n");  
+  debug_fprintf(stderr, "\n\n");  
   
   
   
@@ -2830,24 +2830,24 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   for (int i=0; i<kerneldeclsused.size(); i++) { 
     chillAST_VarDecl *vd = kerneldeclsused[i];
     bool isdeclared = false;
-    fprintf(stderr, "%2d %s ", i, vd->varname); 
+    debug_fprintf(stderr, "%2d %s ", i, vd->varname); 
     if (vd->isBuiltin())     isdeclared = true;
-    if (isdeclared) fprintf(stderr, " (builtin)");
+    if (isdeclared) debug_fprintf(stderr, " (builtin)");
     else { 
       if (vd->isParmVarDecl()) isdeclared = true;
-      if (isdeclared) fprintf(stderr, " (param)");
+      if (isdeclared) debug_fprintf(stderr, " (param)");
     }
     for (int j=0; j<numdeclared; j++) { 
       if (kerneldeclsused[i] == kerneldecls[j] ) {
         isdeclared = true; 
-        fprintf(stderr, " (used %d is decl %d)", i, j); 
+        debug_fprintf(stderr, " (used %d is decl %d)", i, j); 
         break;
       }
     }
-    fprintf(stderr, "\n"); 
+    debug_fprintf(stderr, "\n"); 
     
     if (!isdeclared) { 
-      fprintf(stderr, "declaration for %s needs to be added\n", vd->varname);
+      debug_fprintf(stderr, "declaration for %s needs to be added\n", vd->varname);
       GPUKernel->addChild( vd ); 
     }
   }  
@@ -2857,7 +2857,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   // take contents of CS and stuff it into GPUKernel, at the end after the declarations we might have just added 
   GPUKernel->addChild( CS ) ; // ?? could do each statement
   
-  //fprintf(stderr, "\nGPU side func is \n");
+  //debug_fprintf(stderr, "\nGPU side func is \n");
   //GPUKernel->print();
   
   
@@ -2866,7 +2866,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
 #endif  // POWERTHRU 
   
-  fprintf(stderr, "returning from cudaize_codegen_v2()\n"); 
+  debug_fprintf(stderr, "returning from cudaize_codegen_v2()\n"); 
   return NULL; 
 }
 
@@ -2921,7 +2921,7 @@ int LoopCuda::findCurLevel(int stmt, std::string idx) {
 
 void LoopCuda::permute_cuda(int stmt,
                             const std::vector<std::string>& curOrder) {
-  fprintf(stderr, "LoopCuda::permute_cuda()\n"); 
+  debug_fprintf(stderr, "LoopCuda::permute_cuda()\n"); 
   printf("curOrder: ");
   printVs(curOrder);
   printf("idxNames: ");
@@ -2934,7 +2934,7 @@ void LoopCuda::permute_cuda(int stmt,
     bool found = false;
     for (int j = 0; j < cIdxNames.size(); j++) {
       if (strcmp(cIdxNames[j].c_str(), curOrder[i].c_str()) == 0) {
-        fprintf(stderr, "pushing pi for j+1=%d\n", j+1); 
+        debug_fprintf(stderr, "pushing pi for j+1=%d\n", j+1); 
 
         pi.push_back(j + 1);  
         found = true;
@@ -2949,7 +2949,7 @@ void LoopCuda::permute_cuda(int stmt,
     }
   }
   for (int i = curOrder.size(); i < cIdxNames.size(); i++) {
-    fprintf(stderr, "pushing pi for i=%d\n", i); 
+    debug_fprintf(stderr, "pushing pi for i=%d\n", i); 
     pi.push_back(i);
   }
   if (same)
@@ -2967,8 +2967,8 @@ bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
   const int n = stmt[stmt_num].xform.n_out();
   if (pi.size() > (n - 1) / 2) { 
- fprintf(stderr, "\n\nloop_cuda_CHILL.cc L 761, pi.size() %d  > ((n=%d)-1)/2 =  %d\n", pi.size(), n, (n-1)/2);
-    for (int i=0; i<pi.size(); i++) fprintf(stderr, "pi[%d] = %d\n", i, pi[i]);
+ debug_fprintf(stderr, "\n\nloop_cuda_CHILL.cc L 761, pi.size() %d  > ((n=%d)-1)/2 =  %d\n", pi.size(), n, (n-1)/2);
+    for (int i=0; i<pi.size(); i++) debug_fprintf(stderr, "pi[%d] = %d\n", i, pi[i]);
     
     throw std::invalid_argument(
                                 "iteration space dimensionality does not match permute dimensionality");
@@ -2999,7 +2999,7 @@ bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
 
 
 //void LoopCuda::tile_cuda(int stmt, int level, int outer_level) {  // 3 params
-//  fprintf(stderr, "LoopCuda::tile_cuda(stmt %d, level %d, outer_level %d)\n",  
+//  debug_fprintf(stderr, "LoopCuda::tile_cuda(stmt %d, level %d, outer_level %d)\n",  
 //          stmt, level, outer_level);
 //  tile_cuda(stmt, level, 1, outer_level, "", "", CountedTile);
 //} 
@@ -3007,21 +3007,21 @@ bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
 
 void LoopCuda::tile_cuda(int stmt_num, int level, int outer_level,// 3 numbers, and a method 
                          TilingMethodType method  /* defaults to CountedTile */ ) {
-  fprintf(stderr, "LoopCuda::tile_cuda(stmt_num %d, level %d, outer_level %d, TilingMethodType method)\n", stmt_num, level, outer_level); 
+  debug_fprintf(stderr, "LoopCuda::tile_cuda(stmt_num %d, level %d, outer_level %d, TilingMethodType method)\n", stmt_num, level, outer_level); 
   printsyms(); 
 
-  fprintf(stderr, "before tile()\n");
+  debug_fprintf(stderr, "before tile()\n");
   tile_cuda(stmt_num, level, 1, outer_level, "", "", method);  // calls  version with 4 numbers, 2 strings, and a method 
 
-  fprintf(stderr, "after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
+  debug_fprintf(stderr, "after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
   printsyms(); 
-  fprintf(stderr, "LoopCuda::tile_cuda() DONE\n"); 
+  debug_fprintf(stderr, "LoopCuda::tile_cuda() DONE\n"); 
 }
 
 
 void LoopCuda::tile_cuda(int level, int tile_size, int outer_level,
                          std::string idxName, std::string ctrlName, TilingMethodType method) {
-  fprintf(stderr, "LoopCuda::tile_cuda( level %d, tile_size %d, outer_level %d, idxName %s, ctrlName %s, method)\n",
+  debug_fprintf(stderr, "LoopCuda::tile_cuda( level %d, tile_size %d, outer_level %d, idxName %s, ctrlName %s, method)\n",
           level, tile_size, outer_level, idxName.c_str(), ctrlName.c_str() ); 
   printsyms(); 
   tile_cuda(0, level, tile_size, outer_level, idxName, ctrlName, method);
@@ -3033,15 +3033,15 @@ void LoopCuda::tile_cuda(int level, int tile_size, int outer_level,
 void LoopCuda::tile_cuda(int stmt_num, int level, int tile_size, int outer_level,
                          std::string idxName, std::string ctrlName, TilingMethodType method) {
   fflush(stdout); 
-  fprintf(stderr, "\nLoopCuda::tile_cuda 1234 name name method\n"); 
+  debug_fprintf(stderr, "\nLoopCuda::tile_cuda 1234 name name method\n"); 
   printsyms(); 
-  //fprintf(stderr, "after printsyms\n"); 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "after printsyms\n"); 
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   //Do regular tile but then update the index and control loop variable
   //names as well as the idxName to reflect the current state of things.
@@ -3050,18 +3050,18 @@ void LoopCuda::tile_cuda(int stmt_num, int level, int tile_size, int outer_level
   //printVS(idxNames[stmt_num]);
   
   fflush(stdout); 
-  fprintf(stderr, "loop_cuda_chill.cc, tile_cuda(), before tile()\n"); 
+  debug_fprintf(stderr, "loop_cuda_chill.cc, tile_cuda(), before tile()\n"); 
   tile(stmt_num, level, tile_size, outer_level, method);
-  fprintf(stderr, "loop_cuda_chill.cc, tile_cuda(), after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
+  debug_fprintf(stderr, "loop_cuda_chill.cc, tile_cuda(), after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
   
-  fprintf(stderr, "after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
+  debug_fprintf(stderr, "after tile, before getLexicalOrder(stmt_num %d)\n", stmt_num); 
   std::vector<int> lex = getLexicalOrder(stmt_num);
   int dim = 2 * level - 1;
   std::set<int> same_loop = getStatements(lex, dim - 1);
   
   for (std::set<int>::iterator j = same_loop.begin(); j != same_loop.end();
        j++) {
-    fprintf(stderr, "*j = %d\n", *j); 
+    debug_fprintf(stderr, "*j = %d\n", *j); 
     if (idxName.size())
       idxNames[*j][level - 1] = idxName.c_str();
     
@@ -3089,7 +3089,7 @@ void LoopCuda::tile_cuda(int stmt_num, int level, int tile_size, int outer_level
   //printf("idxNames after: ");
   //printVS(idxNames[stmt_num]);
   printsyms(); 
-  fprintf(stderr, "LoopCuda::tile_cuda 1234 name name method DONE\n\n\n"); 
+  debug_fprintf(stderr, "LoopCuda::tile_cuda 1234 name name method DONE\n\n\n"); 
 }
 
 
@@ -3099,7 +3099,7 @@ bool LoopCuda::datacopy_privatized_cuda(int stmt_num, int level,
                                         const std::vector<int> &privatized_levels, bool allow_extra_read,
                                         int fastest_changing_dimension, int padding_stride,
                                         int padding_alignment, bool cuda_shared) {
-  fprintf(stderr, "LoopCuda::datacopy_privatized_cuda()\n"); 
+  debug_fprintf(stderr, "LoopCuda::datacopy_privatized_cuda()\n"); 
   int old_stmts = stmt.size();
   printf("before datacopy_privatized:\n");
   printIS(); fflush(stdout); 
@@ -3220,7 +3220,7 @@ void LoopCuda::ELLify_cuda(int stmt_num, std::vector<std::string> arrays_to_pad,
 
 bool LoopCuda::unroll_cuda(int stmt_num, int level, int unroll_amount) {
   fflush(stdout); 
-  fprintf(stderr, "\nLoopCuda::unroll_cuda( stmt_num %d,  level %d,  unroll_amount %d )\n",stmt_num, level, unroll_amount); 
+  debug_fprintf(stderr, "\nLoopCuda::unroll_cuda( stmt_num %d,  level %d,  unroll_amount %d )\n",stmt_num, level, unroll_amount); 
   
   int old_stmts = stmt.size();
   //bool b= unroll(stmt_num, , unroll_amount);
@@ -3267,22 +3267,22 @@ bool LoopCuda::unroll_cuda(int stmt_num, int level, int unroll_amount) {
   int new_stmts = stmt.size();
   
   int size = syncs.size();
-  //fprintf(stderr, "BEFORE LOOP syncs size %d\n", size); 
+  //debug_fprintf(stderr, "BEFORE LOOP syncs size %d\n", size); 
   //printSyncs(); 
   
   for (int i = old_stmts; i < new_stmts; i++) {
     info = mallinfo();
-    fprintf(stderr, "i=%d/%d\n", i, new_stmts-1); 
-    fprintf(stderr, "total allocated space:  %llu bytes\n", info.uordblks);
+    debug_fprintf(stderr, "i=%d/%d\n", i, new_stmts-1); 
+    debug_fprintf(stderr, "total allocated space:  %llu bytes\n", info.uordblks);
     //Check whether we had a sync for the statement we are unrolling, if
     //so, propogate that to newly created statements so that if they are
     //in a different loop structure, they will also get a syncthreads
     size = syncs.size();
-    //fprintf(stderr, "syncs size %d\n", size); 
+    //debug_fprintf(stderr, "syncs size %d\n", size); 
     
     for (int j = 0; j < size; j++) {
       if (syncs[j].first == stmt_num) { 
-        //fprintf(stderr, "ADDING A SYNCTHREADS, for stmt unrolling  j %d/%d\n", j, size-1); 
+        //debug_fprintf(stderr, "ADDING A SYNCTHREADS, for stmt unrolling  j %d/%d\n", j, size-1); 
         //syncs.push_back(make_pair(i, syncs[j].second));
         addSync( i, syncs[j].second ); 
       }
@@ -3383,11 +3383,11 @@ void LoopCuda::copy_to_constant(const char *array_name) {
 
 //protonu--moving this from Loop
 chillAST_node* LoopCuda::codegen() {
-  fprintf(stderr, "LoopCuda::codegen()\n"); 
+  debug_fprintf(stderr, "LoopCuda::codegen()\n"); 
   if (code_gen_flags & GenCudaizeV2) { 
-    fprintf(stderr, "LoopCuda::codegen() calling cudaize_codegen_v2()\n"); 
+    debug_fprintf(stderr, "LoopCuda::codegen() calling cudaize_codegen_v2()\n"); 
     chillAST_node* n = cudaize_codegen_v2();
-    //fprintf(stderr, "back from cudaize_codegen_v2()\n"); 
+    //debug_fprintf(stderr, "back from cudaize_codegen_v2()\n"); 
     //n->print(); 
     return n;
   }
@@ -3504,19 +3504,19 @@ CG_outputRepr* LoopCuda::extractCudaUB(int stmt_num,
   
   //Use code generation system to build tell us our bound information. We
   //need a hard upper bound a 0 lower bound.
-  fprintf(stderr, "Use code generation system to build tell us our bound information. (umwut)\n"); 
+  debug_fprintf(stderr, "Use code generation system to build tell us our bound information. (umwut)\n"); 
   checkLoopLevel = level * 2;
   stmtForLoopCheck = 0; 
   upperBoundForLevel = -1;
   lowerBoundForLevel = -1;
-  fprintf(stderr, "before printcode(stmt_num, 1,false)\n"); 
+  debug_fprintf(stderr, "before printcode(stmt_num, 1,false)\n"); 
   printCode(stmt_num, 3, false);
-  fprintf(stderr, "after printcode(stmt_num, 1,false)\n"); 
+  debug_fprintf(stderr, "after printcode(stmt_num, 1,false)\n"); 
   checkLoopLevel = 0;
   
   outUpperBound = upperBoundForLevel;
   outLowerBound = lowerBoundForLevel;
-  fprintf(stderr, "UL bounds %d %d\n", outUpperBound,  outLowerBound); 
+  debug_fprintf(stderr, "UL bounds %d %d\n", outUpperBound,  outLowerBound); 
   
   if (outUpperBound == -1) {
     CG_result* temp = last_compute_cgr_;
@@ -3601,7 +3601,7 @@ CG_outputRepr* LoopCuda::extractCudaUB(int stmt_num,
      e; e++) {
      if ((*e).get_coef(v) < 0
      && (*e).is_const_except_for_global(v)) {
-     fprintf(stderr, "LoopCuda::extractCudaUB returning complicated\n"); 
+     debug_fprintf(stderr, "LoopCuda::extractCudaUB returning complicated\n"); 
      return output_upper_bound_repr(ir->builder(), *e, v,
      bound,
      std::vector<std::pair<CG_outputRepr *, int> >(
@@ -3630,19 +3630,19 @@ CG_outputRepr* LoopCuda::extractCudaUB(int stmt_num,
 
 
 void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
-  fprintf(stderr, "\n\nLoopCuda::printCode( stmt_num %d, effort %d ) CHILL\n",stmt_num, effort ); 
+  debug_fprintf(stderr, "\n\nLoopCuda::printCode( stmt_num %d, effort %d ) CHILL\n",stmt_num, effort ); 
   
   std::set<int> stmts = getStatements(getLexicalOrder(stmt_num), 0);
   for (std::set<int>::iterator it = stmts.begin(); it != stmts.end(); it++) {
-    fprintf(stderr, "stmt %d\n", *it); 
+    debug_fprintf(stderr, "stmt %d\n", *it); 
   }
   
   const int m = stmts.size(); // was stmt.size()
-  fprintf(stderr, "m %d statements\n", m); 
+  debug_fprintf(stderr, "m %d statements\n", m); 
   if (m == 0)
     return;
   const int n = stmt[stmt_num].xform.n_out();
-  fprintf(stderr, "xforms? in stmt %d   n %d\n", stmt_num, n); 
+  debug_fprintf(stderr, "xforms? in stmt %d   n %d\n", stmt_num, n); 
   
   /*or (int i = 0; i < m; i++) {
     IS[i + 1] = stmt[i].IS;
@@ -3684,15 +3684,15 @@ void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
   std::vector<std::vector<int> > nonSplitLevels;
   int count = 0;
   
-  fprintf(stderr, "\nBUILDING loopIdxNames_\n"); 
+  debug_fprintf(stderr, "\nBUILDING loopIdxNames_\n"); 
   for (std::set<int>::iterator i = stmts.begin(); i != stmts.end(); i++) {
     IS.push_back(stmt[*i].IS);
     xforms.push_back(stmt[*i].xform);
-    fprintf(stderr, "xforms.push( stmt[%d].xform);\n", *i ); 
+    debug_fprintf(stderr, "xforms.push( stmt[%d].xform);\n", *i ); 
     if (stmt_nonSplitLevels.size() > *i)
       nonSplitLevels.push_back(stmt_nonSplitLevels[*i]);
 
-    fprintf(stderr, "adding loopIdxNames_[%d]\n", loopIdxNames_.size()); 
+    debug_fprintf(stderr, "adding loopIdxNames_[%d]\n", loopIdxNames_.size()); 
     printVS(idxNames[*i]);
     loopIdxNames_.push_back(idxNames[*i]);
     for (int j = 0; j < syncs.size(); j++) {
@@ -3708,14 +3708,14 @@ void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
     count++;
   }
 
-  fprintf(stderr, "\nloopIdxNames.size() %d\n", loopIdxNames_.size());
+  debug_fprintf(stderr, "\nloopIdxNames.size() %d\n", loopIdxNames_.size());
   for (int i=0; i<loopIdxNames_.size(); i++) { 
     for (int j=0; j<loopIdxNames_[i].size(); j++) { 
-      fprintf(stderr, "loopIdxNames_[i %d][j %d]  %s\n", i, j,loopIdxNames_[i][j].c_str() ); 
+      debug_fprintf(stderr, "loopIdxNames_[i %d][j %d]  %s\n", i, j,loopIdxNames_[i][j].c_str() ); 
     }
-    fprintf(stderr, "\n"); 
+    debug_fprintf(stderr, "\n"); 
   }
-  //fprintf(stderr, "\n");
+  //debug_fprintf(stderr, "\n");
   
   // anand removed 
   //for (int i = 0; i < m; i++) {
@@ -3727,11 +3727,11 @@ void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
   
   Relation known = Extend_Set(copy(this->known), n - this->known.n_set());
   
-  fprintf(stderr, "in LoopCuda::printCode, last_compute_cg_ = new CodeGen()\n");
-  fprintf(stderr, "IS %d  xforms %d\n", IS.size(), xforms.size()); 
+  debug_fprintf(stderr, "in LoopCuda::printCode, last_compute_cg_ = new CodeGen()\n");
+  debug_fprintf(stderr, "IS %d  xforms %d\n", IS.size(), xforms.size()); 
   last_compute_cg_ = new CodeGen(xforms, IS, known, nonSplitLevels, 
                                  loopIdxNames_, syncs);
-  fprintf(stderr, "in LoopCuda::printCode, back from CodeGen()\n\n"); 
+  debug_fprintf(stderr, "in LoopCuda::printCode, back from CodeGen()\n\n"); 
   
   delete last_compute_cgr_;  // this was just done  above? 
   last_compute_cgr_ = NULL;
@@ -3750,17 +3750,17 @@ void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
   // -- end replacing MMGenerateCode
   fflush(stdout); 
   
-  fprintf(stderr, "loop_cuda_chill.c line 2086, calling CG_result printString()\n");
+  debug_fprintf(stderr, "loop_cuda_chill.c line 2086, calling CG_result printString()\n");
   std::string repr = last_compute_cgr_->printString( uninterpreted_symbols_stringrepr );
   fflush(stdout); 
-  fprintf(stderr, "loop_cuda_chill.c line 2088, BACK FROM calling CG_result printString()\n");
+  debug_fprintf(stderr, "loop_cuda_chill.c line 2088, BACK FROM calling CG_result printString()\n");
   
   //if (1 || actuallyPrint) { 
-  //fprintf(stderr, "actuallyPrint\n"); 
+  //debug_fprintf(stderr, "actuallyPrint\n"); 
   std::cout << repr << std::endl;
   std::cout.flush();
   //}
-  //else fprintf(stderr, "NOT actuallyPrint\n"); 
+  //else debug_fprintf(stderr, "NOT actuallyPrint\n"); 
   fflush(stdout); 
   //std::cout << static_cast<CG_stringRepr*>(repr)->GetString();
   /*
@@ -3768,7 +3768,7 @@ void LoopCuda::printCode(int stmt_num, int effort, bool actuallyPrint) const {
     delete nameInfo[i];
   */
   
-  fprintf(stderr, "LoopCuda::printCode() CHILL DONE\n"); 
+  debug_fprintf(stderr, "LoopCuda::printCode() CHILL DONE\n"); 
   
 }
 
@@ -3805,16 +3805,16 @@ void LoopCuda::printIndexes() const {
 
 
 chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
-  fprintf(stderr, "loop_cuda_chill.cc LoopCuda::getCode( effort %d, set of ints )\n", effort ); 
+  debug_fprintf(stderr, "loop_cuda_chill.cc LoopCuda::getCode( effort %d, set of ints )\n", effort ); 
   
   const int m = stmts.size();
-  fprintf(stderr, "%d stmts\n", m);
+  debug_fprintf(stderr, "%d stmts\n", m);
   if (m == 0) return NULL;
   
   int ref_stmt = *(stmts.begin());
   
   const int n = stmt[ref_stmt].xform.n_out();
-  fprintf(stderr, "n %d\n", n); 
+  debug_fprintf(stderr, "n %d\n", n); 
   
   if (last_compute_cgr_ != NULL) {
     delete last_compute_cgr_;
@@ -3827,7 +3827,7 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
   }
   
   CG_outputBuilder *ocg = ir->builder();
-  fprintf(stderr, "in LoopCuda::getCode(), replacing MMGenerateCode (only not really)\n"); 
+  debug_fprintf(stderr, "in LoopCuda::getCode(), replacing MMGenerateCode (only not really)\n"); 
   std::vector<std::vector<std::string> > loopIdxNames_;
   std::vector<std::pair<int, std::string> > syncs_;
   
@@ -3855,7 +3855,7 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
   }
   
   
-  fprintf(stderr, "known\n"); 
+  debug_fprintf(stderr, "known\n"); 
   Relation known = Extend_Set(copy(this->known), n - this->known.n_set());
   
   last_compute_cg_ = new CodeGen(xforms, IS, known, nonSplitLevels,
@@ -3868,7 +3868,7 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
-  fprintf(stderr, "AST built?\n"); 
+  debug_fprintf(stderr, "AST built?\n"); 
   
   std::vector<CG_outputRepr *> stmts_(m);
   int count = 0;
@@ -3877,7 +3877,7 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
   CG_outputRepr* repr = last_compute_cgr_->printRepr(ocg, stmts_,
                                                      uninterpreted_symbols);
   // -- end replacing MMGenerateCode
-  fprintf(stderr, "end replacing MMGenerateCode\n"); 
+  debug_fprintf(stderr, "end replacing MMGenerateCode\n"); 
   
   
   CG_outputRepr *overflow_initialization = ocg->StmtListAppend(NULL, NULL);
@@ -3895,23 +3895,23 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
   
   repr = ocg->StmtListAppend(overflow_initialization, repr);
   
-  fprintf(stderr, "OK, now what?\n"); 
+  debug_fprintf(stderr, "OK, now what?\n"); 
   
   // return the code block we just created
   //((CG_chillRepr *)repr)->printChillNodes();
   vector<chillAST_node*> cnodes = ((CG_chillRepr *)repr)->chillnodes;  // is this doing somethine incredibly expensive?
   int numnodes = cnodes.size();
-  //fprintf(stderr, "%d chillAST nodes in the vector\n", numnodes);
+  //debug_fprintf(stderr, "%d chillAST nodes in the vector\n", numnodes);
   
   if (numnodes == 0) return NULL; // ??
   if (numnodes == 1) { 
     // this seems to be the exit path that is actually used
-    fprintf(stderr, "the one node is of type %s\nexiting LoopCuda::getCode()\n", cnodes[0]->getTypeString()); 
+    debug_fprintf(stderr, "the one node is of type %s\nexiting LoopCuda::getCode()\n", cnodes[0]->getTypeString()); 
     
     return cnodes[0];
   }
   
-  fprintf(stderr, "more than one chillAST_node.  I'll put them all in a compound statement  UNTESTED\n" ); 
+  debug_fprintf(stderr, "more than one chillAST_node.  I'll put them all in a compound statement  UNTESTED\n" ); 
   chillAST_CompoundStmt *CS = new chillAST_CompoundStmt( );
   for (int i=0; i<numnodes; i++) { 
     CS->addChild( cnodes[i] );
@@ -3923,18 +3923,18 @@ chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const {
 
 
 chillAST_node* LoopCuda::getCode(int effort) const {
-  fprintf(stderr, "loop_cuda_chill.cc L3527 LoopCuda::getCode( effort %d )\n", effort);
+  debug_fprintf(stderr, "loop_cuda_chill.cc L3527 LoopCuda::getCode( effort %d )\n", effort);
   const int m = stmt.size();
-  fprintf(stderr, "%d statements\n", m);
+  debug_fprintf(stderr, "%d statements\n", m);
   if (m == 0)
     return NULL;
   
   const int n = stmt[0].xform.n_out();
-  fprintf(stderr, "n %d\n", n); 
+  debug_fprintf(stderr, "n %d\n", n); 
   
-  //fprintf(stderr, "stmt[0] "); 
+  //debug_fprintf(stderr, "stmt[0] "); 
   //stmt[0].code->dump(); 
-  //fprintf(stderr, "\n\n"); 
+  //debug_fprintf(stderr, "\n\n"); 
   
   if (last_compute_cgr_ != NULL) {
     delete last_compute_cgr_;
@@ -3947,7 +3947,7 @@ chillAST_node* LoopCuda::getCode(int effort) const {
   }
   
   CG_outputBuilder *ocg = ir->builder();
-  fprintf(stderr, "replacing MMGenerateCode (only not really)\n"); 
+  debug_fprintf(stderr, "replacing MMGenerateCode (only not really)\n"); 
   
   std::vector<Relation> IS(m);
   std::vector<Relation> xforms(m);
@@ -3958,7 +3958,7 @@ chillAST_node* LoopCuda::getCode(int effort) const {
     nonSplitLevels[i] = stmt_nonSplitLevels[i];
   }
   
-  fprintf(stderr, "known\n"); 
+  debug_fprintf(stderr, "known\n"); 
   Relation known = Extend_Set(copy(this->known), n - this->known.n_set());
   last_compute_cg_ = new CodeGen(xforms, IS, known, nonSplitLevels, idxNames,
                                  syncs);
@@ -3970,7 +3970,7 @@ chillAST_node* LoopCuda::getCode(int effort) const {
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
-  fprintf(stderr, "AST built?\n"); 
+  debug_fprintf(stderr, "AST built?\n"); 
   
   std::vector<CG_outputRepr *> stmts(m);
   for (int i = 0; i < m; i++)
@@ -3978,7 +3978,7 @@ chillAST_node* LoopCuda::getCode(int effort) const {
   
   CG_outputRepr* repr = last_compute_cgr_->printRepr(ocg, stmts,uninterpreted_symbols);
   // -- end replacing MMGenerateCode
-  fprintf(stderr, "end replacing MMGenerateCode\n"); 
+  debug_fprintf(stderr, "end replacing MMGenerateCode\n"); 
   
   
   //CG_outputRepr *overflow_initialization = ocg->CreateStmtList();
@@ -3998,23 +3998,23 @@ chillAST_node* LoopCuda::getCode(int effort) const {
   repr = ocg->StmtListAppend(overflow_initialization, repr);
   
   
-  fprintf(stderr, "OK, now what?\n"); 
+  debug_fprintf(stderr, "OK, now what?\n"); 
   
   // return the code block we just created
   //((CG_chillRepr *)repr)->printChillNodes();
   vector<chillAST_node*> cnodes = ((CG_chillRepr *)repr)->chillnodes;  // is this doing somethine incredibly expensive?
   int numnodes = cnodes.size();
-  //fprintf(stderr, "%d chillAST nodes in the vector\n", numnodes);
+  //debug_fprintf(stderr, "%d chillAST nodes in the vector\n", numnodes);
   
   if (numnodes == 0) return NULL; // ??
   if (numnodes == 1) { 
     // this seems to be the exit path that is actually used
-    //fprintf(stderr, "the one node is of type %s\nexiting LoopCuda::getCode()\n", cnodes[0]->getTypeString()); 
+    //debug_fprintf(stderr, "the one node is of type %s\nexiting LoopCuda::getCode()\n", cnodes[0]->getTypeString()); 
     
     return cnodes[0];
   }
   
-  fprintf(stderr, "more than one chillAST_node.  I'll put them all in a compound statement  UNTESTED\n" ); 
+  debug_fprintf(stderr, "more than one chillAST_node.  I'll put them all in a compound statement  UNTESTED\n" ); 
   chillAST_CompoundStmt *CS = new chillAST_CompoundStmt( );
   for (int i=0; i<numnodes; i++) { 
     CS->addChild( cnodes[i] );
@@ -4029,7 +4029,7 @@ chillAST_node* LoopCuda::getCode(int effort) const {
 //protonu--adding constructors for the new derived class
 LoopCuda::LoopCuda() :
   Loop(), code_gen_flags(GenInit) {
-  fprintf(stderr, "making EMPTY LoopCuda CHILL variety\n"); 
+  debug_fprintf(stderr, "making EMPTY LoopCuda CHILL variety\n"); 
 }
 
 
@@ -4037,8 +4037,8 @@ LoopCuda::LoopCuda() :
 
 LoopCuda::LoopCuda(IR_Control *irc, int loop_num) :
   Loop(irc) { // <-- this does a LOT
-  fprintf(stderr, "making LoopCuda CHILL variety\n"); 
-  fprintf(stderr, "loop_cuda_chill.cc   LoopCuda::LoopCuda()\n"); 
+  debug_fprintf(stderr, "making LoopCuda CHILL variety\n"); 
+  debug_fprintf(stderr, "loop_cuda_chill.cc   LoopCuda::LoopCuda()\n"); 
   
   setup_code = NULL;
   teardown_code = NULL;
@@ -4056,7 +4056,7 @@ LoopCuda::LoopCuda(IR_Control *irc, int loop_num) :
   texture = NULL;  // depends on ROSE 
 #endif 
   int m = stmt.size();
-  fprintf(stderr, "\nLoopCuda the size of stmt(initially) is: %d\n", stmt.size());
+  debug_fprintf(stderr, "\nLoopCuda the size of stmt(initially) is: %d\n", stmt.size());
   for (int i = 0; i < m; i++)
     stmt_nonSplitLevels.push_back(std::vector<int>());
   
@@ -4064,7 +4064,7 @@ LoopCuda::LoopCuda(IR_Control *irc, int loop_num) :
   function_that_contains_this_loop = FD;  // keep around for later 
   
   chillAST_node *  func_body = FD->getBody(); 
-  // fprintf(stderr, "got body\n"); 
+  // debug_fprintf(stderr, "got body\n"); 
   
   CPUparamSymtab = &( FD->parameters ); 
   
@@ -4073,34 +4073,34 @@ LoopCuda::LoopCuda(IR_Control *irc, int loop_num) :
   
   printsyms(); 
   
-  //fprintf(stderr, "param symbol table has %d entries\n", CPUparamSymtab->size()); 
+  //debug_fprintf(stderr, "param symbol table has %d entries\n", CPUparamSymtab->size()); 
   //printSymbolTable( CPUparamSymtab ); 
-  //fprintf(stderr, "body symbol table has %d entries\n", CPUbodySymtab->size()); 
+  //debug_fprintf(stderr, "body symbol table has %d entries\n", CPUbodySymtab->size()); 
   //printSymbolTable( CPUbodySymta ); 
   
   
   
   std::vector<chillAST_ForStmt *> loops;
   func_body->get_top_level_loops( loops); 
-  fprintf(stderr, "%d loops    loop_num %d\n", loops.size(), loop_num); 
+  debug_fprintf(stderr, "%d loops    loop_num %d\n", loops.size(), loop_num); 
   
   std::vector<chillAST_ForStmt *> deeploops;
   //loops[loop_num]->get_deep_loops( deeploops); 
   loops[loop_num]->find_deepest_loops( deeploops);  // loops[loop_num]  is chillAST_ForStmt *
 
-  fprintf(stderr, "%d deepest\n", deeploops.size()); 
+  debug_fprintf(stderr, "%d deepest\n", deeploops.size()); 
   
   std::vector<std::string> loopvars;
   for (int i=0; i<deeploops.size(); i++) { 
     deeploops[i]->gatherLoopVars( loopvars );
   }
   
-  fprintf(stderr, "\nloopCuda::loopCuda() %d loop variables\n", loopvars.size());
+  debug_fprintf(stderr, "\nloopCuda::loopCuda() %d loop variables\n", loopvars.size());
   for (int i=0; i<loopvars.size(); i++) { 
-    fprintf(stderr, "index[%d] = '%s'\n", i, loopvars[i].c_str());
+    debug_fprintf(stderr, "index[%d] = '%s'\n", i, loopvars[i].c_str());
   }
   
-  fprintf(stderr, "\nin LoopCuda::LoopCuda   adding IDXNAMES  %d stmts\n", stmt.size()); 
+  debug_fprintf(stderr, "\nin LoopCuda::LoopCuda   adding IDXNAMES  %d stmts\n", stmt.size()); 
   for (int i = 0; i < stmt.size(); i++){
     idxNames.push_back(loopvars); //refects prefered index names (used as handles in cudaize v2)
     //pushes the entire array of loop vars for each stmt? 
@@ -4125,20 +4125,20 @@ void LoopCuda::printIS() {
 #if 0
 void LoopCuda::flatten_cuda(int stmt_num, std::string idxs,
                             std::vector<int> &loop_levels, std::string inspector_name) {
-  fprintf(stderr, "LoopCuda::flatten_cuda()\n"); 
+  debug_fprintf(stderr, "LoopCuda::flatten_cuda()\n"); 
   printsyms(); 
 
-  fprintf(stderr, "\n%d statements\n", stmt.size());
+  debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   for (int i=0; i<stmt.size(); i++) { 
-    fprintf(stderr, "%2d   ", i); 
+    debug_fprintf(stderr, "%2d   ", i); 
     ((CG_chillRepr *)stmt[i].code)->Dump();
   }
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
 
 
 
   flatten(stmt_num, idxs, loop_levels, inspector_name);
-  fprintf(stderr, "LoopCuda::flatten_cuda() back from flatten()\n"); 
+  debug_fprintf(stderr, "LoopCuda::flatten_cuda() back from flatten()\n"); 
   printsyms(); 
   
   for (std::vector<int>::iterator i = loop_levels.begin();
@@ -4156,7 +4156,7 @@ void LoopCuda::flatten_cuda(int stmt_num, std::string idxs,
   //syncs.push_back()
   
   printsyms(); 
-  fprintf(stderr, "LoopCuda::flatten_cuda() DONE\n");   
+  debug_fprintf(stderr, "LoopCuda::flatten_cuda() DONE\n");   
 }
 #endif
 
@@ -4198,15 +4198,15 @@ void LoopCuda::scalar_expand_cuda(int stmt_num, std::vector<int> level,
                                   std::string arrName, int memory_type, int padding,
                                   int assign_then_accumulate) {
 
-  fprintf(stderr, "\nLoopCuda::scalar_expand_cuda( )\n"); 
+  debug_fprintf(stderr, "\nLoopCuda::scalar_expand_cuda( )\n"); 
 
   int oldsize = stmt.size();
-  fprintf(stderr, "\nSEC %d statements\n", oldsize);
+  debug_fprintf(stderr, "\nSEC %d statements\n", oldsize);
   for (int i=0; i<stmt.size(); i++) { 
-    fprintf(stderr, "%2d   ", i); 
+    debug_fprintf(stderr, "%2d   ", i); 
     ((CG_chillRepr *)stmt[i].code)->Dump();
   } 
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
 
   int old_num_stmts = num_statement();
   scalar_expand(stmt_num, level, arrName, memory_type, padding,  // Loop::scalar_expand - generic. no chill
@@ -4214,9 +4214,9 @@ void LoopCuda::scalar_expand_cuda(int stmt_num, std::vector<int> level,
   int new_num_stmts = num_statement();
   
   std::vector<std::string> namez = idxNames[stmt_num];
-  fprintf(stderr, "pushing ALL %d of THESE repeatedly (%d times)???\n", namez.size(), new_num_stmts - old_num_stmts); 
-  for (int i = 0; i < namez.size(); i++) fprintf(stderr, "%d %s\n", i, namez[i].c_str()); 
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "pushing ALL %d of THESE repeatedly (%d times)???\n", namez.size(), new_num_stmts - old_num_stmts); 
+  for (int i = 0; i < namez.size(); i++) debug_fprintf(stderr, "%d %s\n", i, namez[i].c_str()); 
+  debug_fprintf(stderr, "\n"); 
 
   for (int i = 0; i < new_num_stmts - old_num_stmts; i++) {  // ??? 
     idxNames.push_back(idxNames[stmt_num]);
@@ -4227,18 +4227,18 @@ void LoopCuda::scalar_expand_cuda(int stmt_num, std::vector<int> level,
   // find them? 
 
 
-  fprintf(stderr, "\nSEC %d (was %d) statements\n", stmt.size(), oldsize);
+  debug_fprintf(stderr, "\nSEC %d (was %d) statements\n", stmt.size(), oldsize);
   for (int i=0; i<stmt.size(); i++) { 
-    fprintf(stderr, "%2d   ", i); 
+    debug_fprintf(stderr, "%2d   ", i); 
     CG_chillRepr *CR = ((CG_chillRepr *)stmt[i].code);
     CR->Dump();
     chillAST_node *n = CR->GetCode();
     std::vector<chillAST_ArraySubscriptExpr*> arefs;
     n->gatherArrayRefs(arefs, false); 
-    fprintf(stderr, "%d array refs\n", arefs.size()); 
+    debug_fprintf(stderr, "%d array refs\n", arefs.size()); 
     for (int j=0; j<arefs.size(); j++){ 
-        arefs[j]->print(0,stderr); fprintf(stderr, "\n"); 
-        fprintf(stderr, "base is ");
+        arefs[j]->print(0,stderr); debug_fprintf(stderr, "\n"); 
+        debug_fprintf(stderr, "base is ");
         chillAST_VarDecl *b = arefs[j]->multibase();
         b->print(0,stderr);
         
@@ -4249,10 +4249,10 @@ void LoopCuda::scalar_expand_cuda(int stmt_num, std::vector<int> level,
   
   // print func ???
   printsyms(); 
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
 
   // 
-  fprintf(stderr, "func\n"); 
+  debug_fprintf(stderr, "func\n"); 
  chillAST_FunctionDecl *fd = ir->GetChillFuncDefinition();
   fd->print(0,stderr); 
 
@@ -4355,21 +4355,21 @@ void LoopCuda::skew_cuda(std::vector<int> stmt_num, int level,
 void LoopCuda::reduce_cuda(int stmt_num, std::vector<int> level, int param,
                            std::string func_name, std::vector<int> seq_level, int bound_level) {
   
-  fprintf(stderr, "LoopCuda::reduce_cuda()\n"); 
-  fprintf(stderr, "LoopCuda::reduce_cuda( stmt_num %d, level (",stmt_num ); 
+  debug_fprintf(stderr, "LoopCuda::reduce_cuda()\n"); 
+  debug_fprintf(stderr, "LoopCuda::reduce_cuda( stmt_num %d, level (",stmt_num ); 
   for (int i=0; i<level.size(); i++) {
-    fprintf(stderr, "%d, ", level[i]);
+    debug_fprintf(stderr, "%d, ", level[i]);
   }
-  fprintf(stderr, "), param %d, ", param ); 
-  fprintf(stderr, "func_name %s, seq_level (", func_name.c_str()); 
+  debug_fprintf(stderr, "), param %d, ", param ); 
+  debug_fprintf(stderr, "func_name %s, seq_level (", func_name.c_str()); 
   for (int i=0; i<seq_level.size(); i++) {
-    fprintf(stderr, "%d, ", seq_level[i]);
+    debug_fprintf(stderr, "%d, ", seq_level[i]);
   }
-  fprintf(stderr, "), bound_level %d)\n", bound_level);
+  debug_fprintf(stderr, "), bound_level %d)\n", bound_level);
 
   std::vector<int> cudaized_levels =
     block_and_thread_levels.find(stmt_num)->second;
-  fprintf(stderr, "%d cudaized_levels\n", cudaized_levels.size()); 
+  debug_fprintf(stderr, "%d cudaized_levels\n", cudaized_levels.size()); 
 
   reduce(stmt_num, level, param, func_name, seq_level, cudaized_levels,
          bound_level);
@@ -4379,13 +4379,13 @@ void LoopCuda::reduce_cuda(int stmt_num, std::vector<int> level, int param,
 
 
 void LoopCuda::peel_cuda(int stmt_num, int level, int amount) {
-  fprintf(stderr, "LoopCuda::peel_cuda( stmt_num %d, level %d, amount %d)\n", stmt_num, level, amount); 
-  fprintf(stderr, "\n%d statements\n", stmt.size());
+  debug_fprintf(stderr, "LoopCuda::peel_cuda( stmt_num %d, level %d, amount %d)\n", stmt_num, level, amount); 
+  debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   for (int i=0; i<stmt.size(); i++) { 
-    fprintf(stderr, "%2d   ", i); 
+    debug_fprintf(stderr, "%2d   ", i); 
     ((CG_chillRepr *)stmt[i].code)->Dump();
   }
-  fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "\n"); 
 
 
 
@@ -4407,16 +4407,16 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
                           std::map<std::string, int> array_dims,
                           std::vector<std::string> blockIdxs,
                           std::vector<std::string> threadIdxs) {
-  fprintf(stderr, "\n(chill) LoopCuda::cudaize_v2( NO stmt_num  )    WHY IS THiS GETTING CALLED?\n");
+  debug_fprintf(stderr, "\n(chill) LoopCuda::cudaize_v2( NO stmt_num  )    WHY IS THiS GETTING CALLED?\n");
   
   /* 
   int *i=0; 
   int j = i[0]; 
   
-  fprintf(stderr, "BEFORE ir->builder()\n"); 
+  debug_fprintf(stderr, "BEFORE ir->builder()\n"); 
   CG_outputBuilder *ocg = ir->builder();
   
-  fprintf(stderr, "AFTER  ir->builder()\n"); 
+  debug_fprintf(stderr, "AFTER  ir->builder()\n"); 
   int stmt_num = 0;
   //if (cudaDebug) {
   printf("cudaize_v2(%s, {", kernel_name.c_str());
@@ -4450,9 +4450,9 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
     int ub, lb;
     CG_outputRepr* ubrepr = extractCudaUB(stmt_num, level, ub, lb);
     fflush(stdout); 
-    fprintf(stderr, "lb %ldL\n", lb); 
+    debug_fprintf(stderr, "lb %ldL\n", lb); 
     if (lb != 0) {
-      fprintf(stderr, "lb != 0?\n");
+      debug_fprintf(stderr, "lb != 0?\n");
       //attempt to "normalize" the loop with an in-place tile and then re-check our bounds
       if (cudaDebug) { 
         printf(
@@ -4460,24 +4460,24 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
                level, lb);
         fflush(stdout); 
       }
-      fprintf(stderr, "calling tile()\n"); 
+      debug_fprintf(stderr, "calling tile()\n"); 
       tile(stmt_num, level, 1, level, CountedTile);
       idxNames[stmt_num].insert(idxNames[stmt_num].begin() + (level), ""); //TODO: possibly handle this for all sibling stmts
       ubrepr = extractCudaUB(stmt_num, level, ub, lb);
     }
-    else fprintf(stderr, "lb == 0?\n");
+    else debug_fprintf(stderr, "lb == 0?\n");
     
     fflush(stdout); 
-    fprintf(stderr, "lb2 %ldL\n", lb); 
+    debug_fprintf(stderr, "lb2 %ldL\n", lb); 
     if (lb != 0) {
-      fprintf(stderr, "lb2 != 0?\n");
+      debug_fprintf(stderr, "lb2 != 0?\n");
       char buf[1024];
       sprintf(buf,
               "Cudaize: Loop at level %d does not have 0 as its lower bound",
               level);
       throw std::runtime_error(buf);
     }
-    else fprintf(stderr, "lb2 == 0?\n");
+    else debug_fprintf(stderr, "lb2 == 0?\n");
     
     if (ub < 0) {
       char buf[1024];
@@ -4492,24 +4492,24 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
              level, lb, ub); 
       fflush(stdout); 
     }
-    else  fprintf(stderr, "NO CUDADEBUG\n");
+    else  debug_fprintf(stderr, "NO CUDADEBUG\n");
     
     if (i == 0) {
       block_level = level;
       if (ubrepr == NULL) {
-        cu_bx = ub + 1;  //fprintf(stderr, "cu_bx = %d\n", cu_bx); 
+        cu_bx = ub + 1;  //debug_fprintf(stderr, "cu_bx = %d\n", cu_bx); 
         cu_bx_repr = NULL;
       } else {
-        cu_bx = 0;  //fprintf(stderr, "cu_bx = %d\n", cu_bx); 
+        cu_bx = 0;  //debug_fprintf(stderr, "cu_bx = %d\n", cu_bx); 
         cu_bx_repr = (omega::CG_chillRepr*)ocg->CreatePlus(ubrepr, ocg->CreateInt(1));
       }
       idxNames[stmt_num][level - 1] = "bx";
     } else if (i == 1) {
       if (ubrepr == NULL) {
-        cu_by = ub + 1;  fprintf(stderr, "cu_by = %d\n", cu_by); 
+        cu_by = ub + 1;  debug_fprintf(stderr, "cu_by = %d\n", cu_by); 
         cu_by_repr = NULL;
       } else {
-        cu_by = 0;          fprintf(stderr, "cu_by = %d\n", cu_by); 
+        cu_by = 0;          debug_fprintf(stderr, "cu_by = %d\n", cu_by); 
         cu_by_repr = (omega::CG_chillRepr*)ocg->CreatePlus(ubrepr, ocg->CreateInt(1));
       }
       idxNames[stmt_num][level - 1] = "by";
@@ -4524,9 +4524,9 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
     int ub, lb;
     CG_outputRepr* ubrepr = extractCudaUB(stmt_num, level, ub, lb);
     fflush(stdout); 
-    fprintf(stderr, "lb3 %ldL\n", lb); 
+    debug_fprintf(stderr, "lb3 %ldL\n", lb); 
     if (lb != 0) {
-      fprintf(stderr, "lb3 != 0?\n");
+      debug_fprintf(stderr, "lb3 != 0?\n");
       //attempt to "normalize" the loop with an in-place tile and then re-check our bounds
       //if (cudaDebug)
       printf(
@@ -4537,7 +4537,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
       idxNames[stmt_num].insert(idxNames[stmt_num].begin() + (level), "");
       ubrepr = extractCudaUB(stmt_num, level, ub, lb);
     }
-    else fprintf(stderr, "lb3 == 0?\n");
+    else debug_fprintf(stderr, "lb3 == 0?\n");
     
     if (lb != 0) {
       char buf[1024];
@@ -4622,7 +4622,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
   this->array_dims = array_dims;
   
   cu_kernel_name = kernel_name.c_str();
-  fprintf(stderr, "cu_kernel_name WILL BE %s   cudaize_v2 NOT VECTOR\n", cu_kernel_name); 
+  debug_fprintf(stderr, "cu_kernel_name WILL BE %s   cudaize_v2 NOT VECTOR\n", cu_kernel_name); 
   
   */
 }
@@ -4647,18 +4647,18 @@ void swapVarReferences( chillAST_node *newkernelcode,
   vector<chillAST_VarDecl*> newdecls;
   newkernelcode->gatherVarDecls( newdecls );
   
-  fprintf(stderr, "%d variables in kernel\n", newdecls.size()); 
+  debug_fprintf(stderr, "%d variables in kernel\n", newdecls.size()); 
   for (int i=0; i<newdecls.size(); i++) { 
-    fprintf(stderr, "variable name %s  ", newdecls[i]->varname); 
+    debug_fprintf(stderr, "variable name %s  ", newdecls[i]->varname); 
     
     chillAST_VarDecl *isParam    = kernel->hasParameterNamed( newdecls[i]->varname ); 
     chillAST_VarDecl *isLocalVar = kernel->funcHasVariableNamed(  newdecls[i]->varname ); 
     
-    if (isParam)    fprintf(stderr, "is a parameter\n");
-    if (isLocalVar) fprintf(stderr, "is already defined in the kernel\n");
+    if (isParam)    debug_fprintf(stderr, "is a parameter\n");
+    if (isLocalVar) debug_fprintf(stderr, "is already defined in the kernel\n");
     
     if (!isParam && (!isLocalVar)) { 
-      fprintf(stderr, "needed to be added to kernel symbol table\n");
+      debug_fprintf(stderr, "needed to be added to kernel symbol table\n");
       kernel->addDecl(  newdecls[i] );  // adds to symbol table
       kernel->addChild( newdecls[i] );  // adds to body! 
     }

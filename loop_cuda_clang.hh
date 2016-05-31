@@ -6,7 +6,8 @@
 #include "loop.hh"
 //#include "mem_mapping_utils.hh"  // rose dependent
 #include <string.h>
-#include "chill_ast.hh" 
+#include "chill_ast.hh"
+#include "chill_io.hh"
 
 
 #include <code_gen/CG_chillRepr.h>
@@ -33,23 +34,23 @@ struct VarDefs {
   std::string original_name; //this is such a hack, to store the original name, to store a table to textures used
 
   void   print() { 
-    fprintf(stderr, "Vardefs:\n");  //  0x%x\n", this); 
-    fprintf(stderr, "name %s\n", name.c_str()); 
-    fprintf(stderr, "second name %s\n", secondName.c_str()); 
-    fprintf(stderr, "original name %s\n", original_name.c_str()); 
-    fprintf(stderr, "type ");
-    if (!type) fprintf(stderr, "NULL)\n");
-    else fprintf(stderr, "%s\n", type); 
-    fprintf(stderr, "size ");
+    debug_fprintf(stderr, "Vardefs:\n");  //  0x%x\n", this); 
+    debug_fprintf(stderr, "name %s\n", name.c_str()); 
+    debug_fprintf(stderr, "second name %s\n", secondName.c_str()); 
+    debug_fprintf(stderr, "original name %s\n", original_name.c_str()); 
+    debug_fprintf(stderr, "type ");
+    if (!type) debug_fprintf(stderr, "NULL)\n");
+    else debug_fprintf(stderr, "%s\n", type); 
+    debug_fprintf(stderr, "size ");
     size_expr->print(0, stderr);
 
     //for (int i=0; i<size_multi_dim.size(); i++) { 
-    //  if (i) fprintf(stderr, "x");
-    //  fprintf(stderr, "%d", size_multi_dim[i]);
+    //  if (i) debug_fprintf(stderr, "x");
+    //  debug_fprintf(stderr, "%d", size_multi_dim[i]);
     //} 
-    fprintf(stderr, "\n");
-    if (tex_mapped)  fprintf(stderr, "tex  mapped\n");
-    if (cons_mapped) fprintf(stderr, "cons mapped\n");
+    debug_fprintf(stderr, "\n");
+    if (tex_mapped)  debug_fprintf(stderr, "tex  mapped\n");
+    if (cons_mapped) debug_fprintf(stderr, "cons mapped\n");
   };
 };
 

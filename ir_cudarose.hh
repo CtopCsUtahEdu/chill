@@ -1,6 +1,7 @@
 #ifndef IR_CUDAROSE_HH
 #define IR_CUDAROSE_HH
 
+#include "chill_io.hh"
 #include <code_gen/CG_roseRepr.h>
 #include <code_gen/CG_roseBuilder.h>
 #include "ir_rose.hh"

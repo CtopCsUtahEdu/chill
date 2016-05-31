@@ -1,4 +1,5 @@
 
+#include "chill_io.hh"
 #include "stencil.hh"
 
 
@@ -42,7 +43,7 @@ void stencilInfo::walktree( chillAST_node *node,
     ASE->gatherIndeces( ind );
     int numindeces = ind.size();
     if (numindeces != dimensions) { 
-      fprintf(stderr, "src array has %d indeces, stencil has %d\n", numindeces, dimensions); 
+      debug_fprintf(stderr, "src array has %d indeces, stencil has %d\n", numindeces, dimensions); 
     }
     
 
@@ -56,9 +57,9 @@ void stencilInfo::walktree( chillAST_node *node,
       int numvd = vds.size();
       
       if (numvd != 1  || vds[0] != indexVariables[i]) { 
-        fprintf(stderr, "index %d has %d variables\n", i, numvd);
+        debug_fprintf(stderr, "index %d has %d variables\n", i, numvd);
         ind[i]->print(); printf("\n"); fflush(stdout); 
-        if (numvd > 0) fprintf(stderr, "variable %s vs %s\n", vds[0]->varname, indexVariables[i]->varname );
+        if (numvd > 0) debug_fprintf(stderr, "variable %s vs %s\n", vds[0]->varname, indexVariables[i]->varname );
         exit(-1);
       }
       //fprintf(stderr, "variable %s is %s\n", vds[0]->varname, indexVariables[i]->varname );
@@ -76,7 +77,7 @@ void stencilInfo::walktree( chillAST_node *node,
           if (BO->lhs->isDeclRefExpr()) offset = BO->rhs->evalAsInt();
           else  if (BO->rhs->isDeclRefExpr()) offset = BO->lhs->evalAsInt();
           else { 
-            fprintf(stderr, "expecting index to be var + int\n");
+            debug_fprintf(stderr, "expecting index to be var + int\n");
             BO->print(); printf("\n"); fflush(stdout);
             exit(-1);
           }
@@ -84,13 +85,13 @@ void stencilInfo::walktree( chillAST_node *node,
         else if (BO->isMinusOp()) {
           if (BO->lhs->isDeclRefExpr()) offset = -BO->rhs->evalAsInt(); // NEGATIVE
           else { 
-            fprintf(stderr, "expecting index to be var - int\n");
+            debug_fprintf(stderr, "expecting index to be var - int\n");
             BO->print(); printf("\n"); fflush(stdout);
             exit(-1);
           }
         }
         else { 
-          fprintf(stderr, "unhandled index expression: ");
+          debug_fprintf(stderr, "unhandled index expression: ");
           BO->print(); printf("\n"); fflush(stdout);
           exit(-1);
         }
@@ -124,7 +125,7 @@ void stencilInfo::walktree( chillAST_node *node,
       walktree( BO->rhs, coeffstohere);
     }
     else { // BOTH  should never happen
-      fprintf(stderr, "binop has 2 constants??\n");
+      debug_fprintf(stderr, "binop has 2 constants??\n");
       BO->print(); printf("\n"); 
       BO->dump();  printf("\n"); 
       fflush(stdout);
@@ -133,7 +134,7 @@ void stencilInfo::walktree( chillAST_node *node,
 
   }
   else { 
-    fprintf(stderr, "\n\nnon-constant non BinaryOperator %s?\n", node->getTypeString());
+    debug_fprintf(stderr, "\n\nnon-constant non BinaryOperator %s?\n", node->getTypeString());
     node->print(); printf("\n\n"); 
     node->dump();  printf("\n\n"); 
     fflush(stdout);
@@ -175,7 +176,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
   if (topstatement->isCompoundStmt()) { 
     statements = ((chillAST_CompoundStmt *) topstatement)->getChildren();
     
-    fprintf(stderr, "stencil of %d statements in a compound statement\n", statements.size()); 
+    debug_fprintf(stderr, "stencil of %d statements in a compound statement\n", statements.size()); 
   }
   else statements.push_back(topstatement);
 
@@ -189,14 +190,14 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     chillAST_node* statement = statements[i]; 
 
     if ( !statement->isBinaryOperator() ) { 
-      fprintf(stderr, "top level stencil is not a binop\n");
+      debug_fprintf(stderr, "top level stencil is not a binop\n");
       statement->print();
       exit(-1);
     }
     
     chillAST_BinaryOperator *binop = (chillAST_BinaryOperator *)statement;
     if ( !binop->isAssignmentOp() ) { 
-      fprintf(stderr, "top level stencil calc is not an assignment statement\n");
+      debug_fprintf(stderr, "top level stencil calc is not an assignment statement\n");
       binop->print();
       exit(-1);
     }
@@ -212,7 +213,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
       if (NULL == dstArrayVariable) dstArrayVariable = lhsarrayrefs[0]->basedecl;
       else { // make sure the statements all have the same dest 
         if (dstArrayVariable != lhsarrayrefs[0]->basedecl) { 
-          fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
+          debug_fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
           dstArrayVariable->print(); printf("\n");
           lhsarrayrefs[0]->basedecl->print();  printf("\n\n"); 
           fflush(stdout);
@@ -225,7 +226,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
       //printf("\n"); fflush(stdout); 
     }
     else { 
-      fprintf(stderr, "\n\nlhs has multiple arrayrefs?\n");
+      debug_fprintf(stderr, "\n\nlhs has multiple arrayrefs?\n");
       binop->lhs->print(); printf("\n\n"); 
       binop->lhs->dump();  printf("\n\n"); 
     }
@@ -240,7 +241,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     if (!dimensions) dimensions = numdre-1;
     else { // make sure it's consistent
       if ( dimensions != numdre-1) { 
-        fprintf(stderr, "ERROR: stencil dimension was %d now %d\n", dimensions,  numdre-1); 
+        debug_fprintf(stderr, "ERROR: stencil dimension was %d now %d\n", dimensions,  numdre-1); 
         exit(-1);
       }
     }
@@ -255,7 +256,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
       for (int j=1; j<numdre; j++) { // start with second
         chillAST_VarDecl *vd = lhsrefs[j]->getVarDecl();
         if ( indexVariables[j-1] != vd ) { 
-          fprintf(stderr, "ERROR statement %d has index variable %s, not %s\n", i, vd->varname, indexVariables[j-1]->varname); 
+          debug_fprintf(stderr, "ERROR statement %d has index variable %s, not %s\n", i, vd->varname, indexVariables[j-1]->varname); 
         }
       }
     }    
@@ -279,7 +280,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     //  
     //  vector< chillAST_node * > ind;
     //  refs[i]->gatherIndeces( ind );
-    //  fprintf(stderr, "%d indeces\n\n", ind.size()); 
+    //  debug_fprintf(stderr, "%d indeces\n\n", ind.size()); 
     //  for (int j=0; j<ind.size(); j++) { 
     //    ind[j]->print(); printf("\n"); 
     //  }
@@ -287,7 +288,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     if (NULL == srcArrayVariable) srcArrayVariable = refs[0]->basedecl;
     else { // make sure statements are consistent
       if (srcArrayVariable != refs[0]->basedecl) { 
-          fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
+          debug_fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
           srcArrayVariable->print(); printf("\n");
           refs[0]->basedecl->print();  printf("\n\n"); 
           fflush(stdout);
@@ -303,7 +304,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
   }
 
   //print(); // this should probably not be part of the process
-  fprintf(stderr, "stencil.cc stencil() DONE\n\n");
+  debug_fprintf(stderr, "stencil.cc stencil() DONE\n\n");
 }
 
 
@@ -380,9 +381,9 @@ int stencilInfo::radius() {
   int guess = -minOffset[0];  // minOffset should be a negative number 
   for (int i=0; i<dimensions; i++) { 
     if (minOffset[i] != -guess || maxOffset[i] != guess ) { 
-      fprintf(stderr, "stencilInfo::radius(), offsets are not symmetric:\n");
+      debug_fprintf(stderr, "stencilInfo::radius(), offsets are not symmetric:\n");
       for (int j=0; j<dimensions; j++) {
-        fprintf(stderr, "%s %d to %d\n",  indexVariables[j]->varname, minOffset[j], maxOffset[j]);
+        debug_fprintf(stderr, "%s %d to %d\n",  indexVariables[j]->varname, minOffset[j], maxOffset[j]);
       }
       exit(-1);
     }
@@ -395,18 +396,18 @@ int stencilInfo::radius() {
 
 bool stencilInfo::isSymmetric() 
 {
-  fprintf(stderr, "stencilInfo::isSymmetric()\n");
+  debug_fprintf(stderr, "stencilInfo::isSymmetric()\n");
 
-  fprintf(stderr, "%d dimensions\n", dimensions); 
+  debug_fprintf(stderr, "%d dimensions\n", dimensions); 
 
   // don't really need this, I suppose
   for (int i=0; i<dimensions; i++) { 
     if (  -minOffset[i] != maxOffset[i] ) { 
-      fprintf(stderr, "stencilInfo::radius(), offsets in dimension %d  are not symmetric\n", i);
+      debug_fprintf(stderr, "stencilInfo::radius(), offsets in dimension %d  are not symmetric\n", i);
       return false;
     }
 
-    fprintf(stderr, "dimension %d   %d to %d\n", i, minOffset[i], maxOffset[i] );
+    debug_fprintf(stderr, "dimension %d   %d to %d\n", i, minOffset[i], maxOffset[i] );
   }
 
   int numoff = offsets.size();
@@ -415,7 +416,7 @@ bool stencilInfo::isSymmetric()
     
     int numindex = offsets[o].size();
     if (numindex != 3) { 
-      fprintf(stderr, "UHOH, stencil is not 3D?  %d offsets\n", numindex); // TODO'
+      debug_fprintf(stderr, "UHOH, stencil is not 3D?  %d offsets\n", numindex); // TODO'
       exit(1); 
     }
 
@@ -426,8 +427,8 @@ bool stencilInfo::isSymmetric()
     chillAST_node*  n = find_coefficient( ci, cj, ck );
     
 
-    fprintf(stderr, "\n\ncoeff %2d %2d %2d  is ", ci, cj, ck);
-    n->print(0, stderr); fprintf(stderr, "\n"); 
+    debug_fprintf(stderr, "\n\ncoeff %2d %2d %2d  is ", ci, cj, ck);
+    n->print(0, stderr); debug_fprintf(stderr, "\n"); 
 
     for (int d=0; d<3; d++)  { // dimension 0,1,2
 
@@ -440,18 +441,18 @@ bool stencilInfo::isSymmetric()
         
         chillAST_node*  mirror = find_coefficient( i, j, k );
         if (!mirror) { 
-          fprintf(stderr, "coeff %d %d %d  does not exist\n", i, j, k );
+          debug_fprintf(stderr, "coeff %d %d %d  does not exist\n", i, j, k );
           return false; 
         }
         else {
-          fprintf(stderr, "coeff %2d %2d %2d  is ", i, j, k);
-          mirror->print(0, stderr); fprintf(stderr, "\n"); 
+          debug_fprintf(stderr, "coeff %2d %2d %2d  is ", i, j, k);
+          mirror->print(0, stderr); debug_fprintf(stderr, "\n"); 
           
           // compare ASTs
           if (! n->isSameAs( mirror )) { 
-            fprintf(stderr, "coefficients (%d, %d, %d) and (%d, %d, d) differ\n", ci, cj, ck, i,j,k); 
-            n->print(0,stderr); fprintf(stderr, "\n"); 
-            mirror->print(0,stderr); fprintf(stderr, "\n"); 
+            debug_fprintf(stderr, "coefficients (%d, %d, %d) and (%d, %d, d) differ\n", ci, cj, ck, i,j,k); 
+            n->print(0,stderr); debug_fprintf(stderr, "\n"); 
+            mirror->print(0,stderr); debug_fprintf(stderr, "\n"); 
 
             return false; 
           }
@@ -465,7 +466,7 @@ bool stencilInfo::isSymmetric()
 
   }
 
-  fprintf(stderr, "yep, it's symmetric\n\n"); 
+  debug_fprintf(stderr, "yep, it's symmetric\n\n"); 
   return true;
 }
 
@@ -499,7 +500,7 @@ int main(int argc, char *argv[]) {
     //body->dump(); 
     
     
-    fprintf(stderr, "body is %s\n", body->getTypeString()); 
+    debug_fprintf(stderr, "body is %s\n", body->getTypeString()); 
     //if (body->isBinaryOperator()) 
     stencil(body);
   }

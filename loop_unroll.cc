@@ -486,7 +486,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     
     CG_outputRepr *lbRepr, *ubRepr; 
     if (lb_repr_list.size() > 1) {
-      //fprintf(stderr, "loop_unroll.cc createInvoke( max )\n"); 
+      //debug_fprintf(stderr, "loop_unroll.cc createInvoke( max )\n"); 
       lbRepr = ocg->CreateInvoke("max", lb_repr_list);
     }
     else if (lb_repr_list.size() == 1) {
@@ -494,7 +494,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     }
     
     if (ub_repr_list.size() > 1) {
-      //fprintf(stderr, "loop_unroll.cc createInvoke( min )\n"); 
+      //debug_fprintf(stderr, "loop_unroll.cc createInvoke( min )\n"); 
       ubRepr = ocg->CreateInvoke("min", ub_repr_list);
     }
     else if (ub_repr_list.size() == 1) {
@@ -578,7 +578,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         stmt[stmt_num].loop_level[i].parallel_level;
     }
     
-    fprintf(stderr, "loop_unroll.cc L581 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop_unroll.cc L581 adding stmt %d\n", stmt.size()); 
     stmt.push_back(overflow_stmt);
 
     uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -737,7 +737,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         new_stmt.loop_level = stmt[*i].loop_level;
         new_stmt.ir_stmt_node = NULL;
 
-        fprintf(stderr, "loop_unroll.cc L740 adding stmt %d\n", stmt.size()); 
+        debug_fprintf(stderr, "loop_unroll.cc L740 adding stmt %d\n", stmt.size()); 
         stmt.push_back(new_stmt);
 
         uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -1033,7 +1033,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         std::vector<std::string> loop_vars;
         std::vector<CG_outputRepr *> subs;
 
-        //fprintf(stderr, "loop_unroll.cc, will replace '%s with '%s+%d' ??\n",
+        //debug_fprintf(stderr, "loop_unroll.cc, will replace '%s with '%s+%d' ??\n",
         //        stmt[stmt_order[i].second].IS.set_var(level)->name().c_str(),
         //        stmt[stmt_order[i].second].IS.set_var(level)->name().c_str(), j * stride); 
         
@@ -1042,12 +1042,12 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         subs.push_back(
           ocg->CreatePlus(ocg->CreateIdent(stmt[stmt_order[i].second].IS.set_var(level)->name()),
                           ocg->CreateInt(j * stride)));  // BUG HERE
-        //fprintf(stderr, "loop_unroll.cc subs  now has %d parts\n", subs.size());
-        //for (int k=0; k< subs.size(); k++) //fprintf(stderr, "subs[%d] = 0x%x\n", k, subs[k]); 
+        //debug_fprintf(stderr, "loop_unroll.cc subs  now has %d parts\n", subs.size());
+        //for (int k=0; k< subs.size(); k++) //debug_fprintf(stderr, "subs[%d] = 0x%x\n", k, subs[k]); 
 
-        //fprintf(stderr, "ij %d %d  ", i, j);
-        //fprintf(stderr, "old src was =\n");
-        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //fprintf(stderr, "\n"); 
+        //debug_fprintf(stderr, "ij %d %d  ", i, j);
+        //debug_fprintf(stderr, "old src was =\n");
+        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //debug_fprintf(stderr, "\n"); 
 
 
 
@@ -1056,15 +1056,15 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
                                                          loop_vars,
                                                          subs);
 
-        //fprintf(stderr, "old src is =\n");
-        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //fprintf(stderr, "\n"); 
+        //debug_fprintf(stderr, "old src is =\n");
+        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //debug_fprintf(stderr, "\n"); 
 
-        //fprintf(stderr, "substituted copy is =\n"); 
-        //code->dump(); //fprintf(stderr, "\n\n"); 
+        //debug_fprintf(stderr, "substituted copy is =\n"); 
+        //code->dump(); //debug_fprintf(stderr, "\n\n"); 
 
 
         new_stmt.code = ocg->StmtListAppend(new_stmt.code, code);
-        //fprintf(stderr, "appended code =\n");
+        //debug_fprintf(stderr, "appended code =\n");
         //new_stmt.code->dump();
 
       }
@@ -1072,7 +1072,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     
 
 
-    //fprintf(stderr, "new_stmt.IS = \n"); 
+    //debug_fprintf(stderr, "new_stmt.IS = \n"); 
     new_stmt.IS = copy(stmt[stmt_num].IS);
     new_stmt.xform = copy(stmt[stmt_num].xform);
     assign_const(new_stmt.xform, 2 * max_level,
@@ -1081,17 +1081,17 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     new_stmt.ir_stmt_node = NULL;
 
     new_stmt.has_inspector = false; //  ?? or from copied stmt?
-    if (stmt[stmt_num].has_inspector) fprintf(stderr, "OLD STMT HAS INSPECTOR\n");
-    else fprintf(stderr, "OLD STMT DOES NOT HAVE INSPECTOR\n");
+    if (stmt[stmt_num].has_inspector) debug_fprintf(stderr, "OLD STMT HAS INSPECTOR\n");
+    else debug_fprintf(stderr, "OLD STMT DOES NOT HAVE INSPECTOR\n");
 
-    fprintf(stderr, "loop_unroll.cc L1083 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop_unroll.cc L1083 adding stmt %d\n", stmt.size()); 
     stmt.push_back(new_stmt);
 
     uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
     uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
     dep.insert();
     
-    //fprintf(stderr, "update dependence graph\n"); 
+    //debug_fprintf(stderr, "update dependence graph\n"); 
     // update dependence graph
     if (stmt[stmt_num].loop_level[level - 1].type == LoopLevelOriginal) {
       int dep_dim = stmt[stmt_num].loop_level[level - 1].payload;
@@ -1215,7 +1215,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     }
   }
   
-  //fprintf(stderr, "                                                  loop_unroll.cc returning new_stmts\n");
+  //debug_fprintf(stderr, "                                                  loop_unroll.cc returning new_stmts\n");
   return new_stmts;
 }
 

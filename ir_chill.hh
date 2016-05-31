@@ -8,6 +8,7 @@
 #include "ir_code.hh"
 #include "chill_error.hh"
 #include "chill_ast.hh"
+#include "chill_io.hh"
 
 
 void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ); 
@@ -18,7 +19,7 @@ struct IR_chillScalarSymbol: public IR_ScalarSymbol {
   chillAST_VarDecl *chillvd; 
 
   IR_chillScalarSymbol(const IR_Code *ir, chillAST_VarDecl *vd) {
-    fprintf(stderr, "making CHILL scalar symbol %s\n", vd->varname); 
+    debug_fprintf(stderr, "making CHILL scalar symbol %s\n", vd->varname); 
     ir_ = ir;
     chillvd = vd;
   }
@@ -38,7 +39,7 @@ struct IR_chillArraySymbol: public IR_ArraySymbol {
 
   IR_chillArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
     //if ( vd == 0 ) 
-    //fprintf(stderr, "IR_chillArraySymbol::IR_chillArraySymbol (%s)  vd 0x%x\n", vd->varname, vd); 
+    //debug_fprintf(stderr, "IR_chillArraySymbol::IR_chillArraySymbol (%s)  vd 0x%x\n", vd->varname, vd); 
     ir_ = ir;
     chillvd = vd; 
     //indirect_ = indirect;
@@ -101,7 +102,7 @@ struct IR_chillScalarRef: public IR_ScalarRef {
   chillAST_VarDecl        *chillvd; // the vardecl for this scalar 
   
   IR_chillScalarRef(const IR_Code *ir, chillAST_BinaryOperator *ins, OP_POSITION pos) {
-    fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, ins, pos ) *****\n\n"); 
+    debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, ins, pos ) *****\n\n"); 
     exit(-1); 
     // this constructor takes a binary operation and an indicator of which side of the op to use,
     // and finds the scalar in the lhs or rhs of the binary op. 
@@ -119,7 +120,7 @@ struct IR_chillScalarRef: public IR_ScalarRef {
         chillvd = (chillAST_VarDecl *)lhs;
       }
       else { 
-        fprintf(stderr, "IR_chillScalarRef constructor, I'm confused\n"); exit(-1); 
+        debug_fprintf(stderr, "IR_chillScalarRef constructor, I'm confused\n"); exit(-1); 
       }
     }
     else { 
@@ -133,42 +134,42 @@ struct IR_chillScalarRef: public IR_ScalarRef {
         chillvd = (chillAST_VarDecl *)rhs;
       }
       else { 
-        fprintf(stderr, "IR_chillScalarRef constructor, I'm confused\n"); exit(-1); 
+        debug_fprintf(stderr, "IR_chillScalarRef constructor, I'm confused\n"); exit(-1); 
       }
     }
     op_pos_ = pos;
   }
 
   IR_chillScalarRef(const IR_Code *ir, chillAST_DeclRefExpr *d) { 
-    // fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, REF EXPR sym %s ) *****\n\n", d->getVarDecl()->varname); 
-    //fprintf(stderr, "new IR_chillScalarRef with a DECLREFEXPR  (has dre) \n"); 
+    // debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, REF EXPR sym %s ) *****\n\n", d->getVarDecl()->varname); 
+    //debug_fprintf(stderr, "new IR_chillScalarRef with a DECLREFEXPR  (has dre) \n"); 
     ir_ = ir;
     dre = d;
     //bop = NULL;
     chillvd = d->getVarDecl(); 
     op_pos_ = OP_UNKNOWN; 
 
-    //fprintf(stderr, "\nScalarRef has:\n"); 
-    //fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
-    //fprintf(stderr, "ins_pos %d\n", ins_pos_); 
-    //fprintf(stderr, "op_pos %d\n", op_pos_); 
-    //fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
+    //debug_fprintf(stderr, "\nScalarRef has:\n"); 
+    //debug_fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
+    //debug_fprintf(stderr, "ins_pos %d\n", ins_pos_); 
+    //debug_fprintf(stderr, "op_pos %d\n", op_pos_); 
+    //debug_fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
   }
 
   IR_chillScalarRef(const IR_Code *ir, chillAST_VarDecl *vardecl) { 
-    fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, sym 0x1234567 ) ***** THIS SHOULD NEVER HAPPEN\n\n"); 
-    fprintf(stderr, "vardecl %s\n", vardecl->varname); 
+    debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, sym 0x1234567 ) ***** THIS SHOULD NEVER HAPPEN\n\n"); 
+    debug_fprintf(stderr, "vardecl %s\n", vardecl->varname); 
     ir_ = ir;
-    dre = NULL;  fprintf(stderr, "new IR_chillScalarRef with a vardecl but no dre\n"); 
+    dre = NULL;  debug_fprintf(stderr, "new IR_chillScalarRef with a vardecl but no dre\n"); 
     //bop = NULL;
     chillvd = vardecl; 
     op_pos_ = OP_UNKNOWN; 
 
-    //fprintf(stderr, "\nScalarRef has:\n"); 
-    //fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
-    //fprintf(stderr, "ins_pos %d\n", ins_pos_); 
-    //fprintf(stderr, "op_pos %d\n", op_pos_); 
-    //fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
+    //debug_fprintf(stderr, "\nScalarRef has:\n"); 
+    //debug_fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
+    //debug_fprintf(stderr, "ins_pos %d\n", ins_pos_); 
+    //debug_fprintf(stderr, "op_pos %d\n", op_pos_); 
+    //debug_fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
   }
 
   
@@ -190,7 +191,7 @@ struct IR_chillArrayRef: public IR_ArrayRef {
   
 
   IR_chillArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, int write ) { 
-    fprintf(stderr, "IR_chillArrayRef::IR_chillArrayRef()  write %d\n", write); 
+    debug_fprintf(stderr, "IR_chillArrayRef::IR_chillArrayRef()  write %d\n", write); 
     ir_ = ir;
     chillASE = ase; 
     iswrite = write;  // ase->imwrittento;
@@ -198,7 +199,7 @@ struct IR_chillArrayRef: public IR_ArrayRef {
   }
 
   IR_chillArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, const char *printname, int write ) { 
-    //fprintf(stderr, "IR_chillArrayRef::IR_chillArrayRef()  write %d\n", write); 
+    //debug_fprintf(stderr, "IR_chillArrayRef::IR_chillArrayRef()  write %d\n", write); 
     ir_ = ir;
     chillASE = ase; 
     iswrite = write;  // ase->imwrittento;
@@ -297,7 +298,7 @@ public:
   void dump() const; 
   
   virtual chillAST_node *getChillAST() const { 
-    fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
+    debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
     return chillAST;
   } 
   virtual void setChillAST( chillAST_node *n) { chillAST = n; }; 
@@ -311,24 +312,24 @@ struct IR_chillIf: public IR_If {
   chillAST_IfStmt  *chillif; 
   
   IR_chillIf(const IR_Code *ir, chillAST_node *i) {
-    fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_node )\n");
+    debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_node )\n");
     ir_ = ir;
     if (!i->isIfStmt()) { 
-      fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_node ) node is not an ifstmt\n");
-      fprintf(stderr, "it is a %s\n", i->getTypeString());
-      i->print(0, stderr); fprintf(stderr, "\n\n");
+      debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_node ) node is not an ifstmt\n");
+      debug_fprintf(stderr, "it is a %s\n", i->getTypeString());
+      i->print(0, stderr); debug_fprintf(stderr, "\n\n");
     }
     chillif = (chillAST_IfStmt *)i;
   }
 
 
   IR_chillIf(const IR_Code *ir, chillAST_IfStmt *i) {
-    fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_IfStmt )\n"); 
+    debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_IfStmt )\n"); 
     ir_ = ir;
     if (!i->isIfStmt()) { 
-      fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_IfStmt ) node is not an ifstmt\n");
-      fprintf(stderr, "it is a %s\n", i->getTypeString());
-      i->print(0, stderr); fprintf(stderr, "\n\n");
+      debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_IfStmt ) node is not an ifstmt\n");
+      debug_fprintf(stderr, "it is a %s\n", i->getTypeString());
+      i->print(0, stderr); debug_fprintf(stderr, "\n\n");
     }
     chillif = i;
   }
@@ -380,7 +381,7 @@ public:
   IR_ArrayRef *CreateArrayRef(const IR_ArraySymbol *sym, std::vector<omega::CG_outputRepr *> &index);
   omega::CG_outputRepr*  CreateArrayRefRepr(const IR_ArraySymbol *sym,
                                             std::vector<omega::CG_outputRepr *> &index) { 
-    fprintf(stderr, "IR_chillCode::CreateArrayRefRepr() not implemented\n");
+    debug_fprintf(stderr, "IR_chillCode::CreateArrayRefRepr() not implemented\n");
     exit(-1);
     return NULL;
   }

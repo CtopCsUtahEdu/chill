@@ -825,7 +825,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
         else
           assign_const(new_stmt.xform, dim - 1, cur_lex - 1);
         
-        fprintf(stderr, "loop_basic.cc L828 adding stmt %d\n", stmt.size()); 
+        debug_fprintf(stderr, "loop_basic.cc L828 adding stmt %d\n", stmt.size()); 
         stmt.push_back(new_stmt);
 
         uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -1418,7 +1418,7 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
 void Loop::distribute(const std::set<int> &stmt_nums, int level) {
   if (stmt_nums.size() == 0 || stmt_nums.size() == 1)
     return;
-  fprintf(stderr, "Loop::distribute()\n");
+  debug_fprintf(stderr, "Loop::distribute()\n");
 
 
   // invalidate saved codegen computation
@@ -1588,7 +1588,7 @@ std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
 std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
                                                                    std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
   
-  fprintf(stderr, "constructInspectorVariables()\n"); 
+  debug_fprintf(stderr, "constructInspectorVariables()\n"); 
 
   std::vector<std::vector<std::string> > to_return;
   
@@ -1632,7 +1632,7 @@ std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
           break;
       if (k == to_return.size()) { 
         to_return.push_back(per_index);
-        fprintf(stderr, "adding index %s\n", ref->name().c_str()); 
+        debug_fprintf(stderr, "adding index %s\n", ref->name().c_str()); 
       }
       
     }
@@ -1704,15 +1704,15 @@ CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
                                           CG_outputRepr *instance, 
                                           CG_outputRepr *class_def) {
   
-  fprintf(stderr, "generatePointerAssignments()\n");
+  debug_fprintf(stderr, "generatePointerAssignments()\n");
   CG_outputRepr *list = NULL;
 
-  fprintf(stderr, "prefix '%s',   %d indices\n",  prefix_name.c_str(), indices.size()); 
+  debug_fprintf(stderr, "prefix '%s',   %d indices\n",  prefix_name.c_str(), indices.size()); 
   for (int i = 0; i < indices.size(); i++) {
     
     std::string s = prefix_name + "_" + indices[i][0];
 
-    fprintf(stderr, "s %s\n", s.c_str()); 
+    debug_fprintf(stderr, "s %s\n", s.c_str()); 
     
     // create a variable definition for a pointer to int with this name
     // that seems to be the only actual result of this routine ... 
@@ -1721,7 +1721,7 @@ CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
     //vd->dump(); printf("\n"); fflush(stdout); 
     
     CG_outputRepr *ptr_exp = ocg->CreatePointer(s); // but dropped on the floor. unused 
-    //fprintf(stderr, "ptr_exp created\n"); 
+    //debug_fprintf(stderr, "ptr_exp created\n"); 
     
     //CG_outputRepr *rhs = ocg->CreateDotExpression(instance,
     //                                              ocg->lookup_member_data(class_def, indices[i][0], instance));
@@ -1732,7 +1732,7 @@ CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
     
   }
   
-  fprintf(stderr, "generatePointerAssignments() DONE\n\n");
+  debug_fprintf(stderr, "generatePointerAssignments() DONE\n\n");
   return list;
 }
 #endif
@@ -1741,7 +1741,7 @@ CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
 #if 0
 void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_levels,
                    std::string inspector_name) {
-  fprintf(stderr, "Loop::flatten( stmt_num %d )\n", stmt_num); 
+  debug_fprintf(stderr, "Loop::flatten( stmt_num %d )\n", stmt_num); 
      
   //  apply_xform();
   
@@ -1862,7 +1862,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
       }
       
       if (comp == indices[i][0]) {
-        fprintf(stderr, "making a pointer to int type for %s\n", comp.c_str()); 
+        debug_fprintf(stderr, "making a pointer to int type for %s\n", comp.c_str()); 
         CG_outputRepr *arr_type = ir->CreatePointerType(IR_CONSTANT_INT);
         
         //ir->CreateArrayType(IR_CONSTANT_INT,
@@ -1914,14 +1914,14 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   CG_outputRepr *list = NULL;
 
   // make a declaration of the newly-defined struct  - WHAT IS THE SCOPE? function?  TODO 
-  fprintf(stderr, "loop_basic.cc L1910 creating an instance of the inspector named %s\n", inspector_name.c_str()); 
+  debug_fprintf(stderr, "loop_basic.cc L1910 creating an instance of the inspector named %s\n", inspector_name.c_str()); 
   CG_outputRepr *instance = ocg->CreateClassInstance(inspector_name,   // instance is a VARDECL seems wrong
                                                      class_def);
 
   CG_outputRepr *constructor_data = ocg->lookup_member_data(class_def,
                                                             "count", instance);
   for (int i = 0; i < function_param.size(); i++) {
-    fprintf(stderr, "making assignment for class data %d %s\n", i, class_data[i].c_str());  
+    debug_fprintf(stderr, "making assignment for class data %d %s\n", i, class_data[i].c_str());  
     
     // what is this? 
     CG_outputRepr *func_mem_data = ocg->lookup_member_data(class_def,     // scope 
@@ -1933,15 +1933,15 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     
     // c.j[c.count] = t4;
     // c.i[c.count] = t2;
-    fprintf(stderr, "\nloop_basic.cc L1958  calling CreateDotExpression with CLONE  (c.j)\n"); 
+    debug_fprintf(stderr, "\nloop_basic.cc L1958  calling CreateDotExpression with CLONE  (c.j)\n"); 
     // clone is because CreateDotetc DELETES the args (why?) 
     CG_outputRepr *array = ocg->CreateDotExpression(instance, // ->clone(),                   //clone is WRONG?
                                                     func_mem_data ); // ->clone()); // c.j
-    fprintf(stderr, "\nloop_basic.cc L1962  calling CreateDotExpression with CLONE  (c.count)\n"); 
+    debug_fprintf(stderr, "\nloop_basic.cc L1962  calling CreateDotExpression with CLONE  (c.count)\n"); 
     CG_outputRepr *index = ocg->CreateDotExpression(instance, // ->clone(), // c.count
                                                     ocg->lookup_member_data(class_def, "count", instance));
     
-    fprintf(stderr, "\nloop_basic.cc L1967  calling CreateAssignment()\n"); 
+    debug_fprintf(stderr, "\nloop_basic.cc L1967  calling CreateAssignment()\n"); 
     CG_outputRepr *func_mem_body = ocg->CreateAssignment(0,
                                                          ocg->CreateArrayRefExpression(array, 
                                                                                        index), 
@@ -1971,7 +1971,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   //  CG_outputRepr *stmts_to_append = checkAndGenerateIndirectMappings(ocg,
   //      indices, instance, class_def, count->clone());
 
-  fprintf(stderr, "CALLING unused code generatePointerAssignments();\n"); 
+  debug_fprintf(stderr, "CALLING unused code generatePointerAssignments();\n"); 
   // unused  ?? but seems to have needed side effects   
   CG_outputRepr *initializations = generatePointerAssignments(ocg, // never used !! TODO 
                                                               inspector_name, indices, instance, class_def);
@@ -1984,7 +1984,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
    *
    */
   
-  fprintf(stderr, "*** BLAAT\n");
+  debug_fprintf(stderr, "*** BLAAT\n");
   init_code = ocg->StmtListAppend(init_code,
                                   ocg->CreateAssignment(0,
                                                         ocg->CreateDotExpression(instance->clone(),
@@ -2202,15 +2202,15 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
 //  std::string cpy_iegen_is = std::string("{[i,j] : index_(i) <= j && j < index__(i) && 0 <= i && i < n}");//iegen_is;
 //  std::string cpy_iegen_flattened = std::string("{[coalesced_index] : 0 <= coalesced_index && coalesced_index < nnz}");
 
-  fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str()); 
+  debug_fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str()); 
 
-  fprintf(stderr, "\ndomain\n"); 
+  debug_fprintf(stderr, "\ndomain\n"); 
   iegenlib::Set *domain   = new iegenlib::Set(iegen_is);
-  fprintf(stderr, "\nrange\n"); 
+  debug_fprintf(stderr, "\nrange\n"); 
   iegenlib::Set *range = new iegenlib::Set(iegen_flattened); 
 
 
-  fprintf(stderr, "Loop::flatten(), line 2202, calling iegenlib::appendCurrEnv()\n"); 
+  debug_fprintf(stderr, "Loop::flatten(), line 2202, calling iegenlib::appendCurrEnv()\n"); 
   iegenlib::appendCurrEnv(inspector_name, // UF name
                           // UF domain
                           domain, // new iegenlib::Set(iegen_is),
@@ -2218,11 +2218,11 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
                           range, // new iegenlib::Set(iegen_flattened),
                           // c function is bijective
                           true);
-  fprintf(stderr, "FINISHED iegenlib::appendCurrEnv()\n\n"); 
+  debug_fprintf(stderr, "FINISHED iegenlib::appendCurrEnv()\n\n"); 
 
 
   iegenlib::Relation* T_coalesce = new iegenlib::Relation(r1_coalesce); 
-  fprintf(stderr, "T_coalesce\n"); 
+  debug_fprintf(stderr, "T_coalesce\n"); 
 
   // then applies the transformation to each of the access relation
   iegenlib::Relation* T_coalesce_inv = T_coalesce->Inverse();
@@ -2326,9 +2326,9 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   new_stmt.ir_stmt_node = NULL;
   new_stmt.has_inspector = false;
   
-  //fprintf(stderr, "BEFORE CLONE\n"); 
+  //debug_fprintf(stderr, "BEFORE CLONE\n"); 
   new_stmt.code = stmt[stmt_num].code->clone();
-  //fprintf(stderr, "AFTER CLONE\n"); 
+  //debug_fprintf(stderr, "AFTER CLONE\n"); 
   
   delete stmt[stmt_num].code;
   stmt[stmt_num].code = ocg->StmtListAppend(list, count_plusplus);
@@ -2337,24 +2337,24 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   ocg->CreateIdent(index_name);
 
   // create  #define c(i,j) c.count
-  fprintf(stderr, "*** create  #define c(i,j) (*c_count)\n");
+  debug_fprintf(stderr, "*** create  #define c(i,j) (*c_count)\n");
 
   std::vector< std::string> args;
   args.push_back( std::string("i") );
   args.push_back( std::string("j") );
 
-  fprintf(stderr, "\nloop_basic.cc in loop_flatten(), calling CreateDefineMacro( %s, i,j, count)\n", inspector_name.c_str()); 
+  debug_fprintf(stderr, "\nloop_basic.cc in loop_flatten(), calling CreateDefineMacro( %s, i,j, count)\n", inspector_name.c_str()); 
   ir->CreateDefineMacro(inspector_name, 
                         args, // "(i,j)", // (i,j) hardcoded ???  TODO 
                         ocg->ObtainInspectorRange(inspector_name, "count"));  // ?? 
-  fprintf(stderr, "*** create  #define c(i,j) (*c_count) DONE\n");
+  debug_fprintf(stderr, "*** create  #define c(i,j) (*c_count) DONE\n");
   
   // add macro to sourceFile  ( should be in CreateDefineMacro ?? ) 
   //IR_rosecode *irrose = (IR_rosecode *)ir_; 
   //ChillAST_SourceFile *sf = irrose->entire_file_AST;
   //sf->addMacro( 
   
-  fprintf(stderr, "loop_basic.cc L2353 adding stmt %d\n", stmt.size()); 
+  debug_fprintf(stderr, "loop_basic.cc L2353 adding stmt %d\n", stmt.size()); 
   stmt.push_back(new_stmt);
   
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -2492,7 +2492,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     iegenlib::Exp* r0_v1_exp = r0_v1->findFunction(1, 0, 0);
     
     std::string s = r0_v1_exp->prettyPrintString(r0_v1->getTupleDecl());
-    fprintf(stderr, "*** s %s\n", s.c_str()); 
+    debug_fprintf(stderr, "*** s %s\n", s.c_str()); 
 
     CG_outputRepr * subscript = iegen_parser(s, index_names);
     
@@ -2530,25 +2530,25 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
                                                        stmt[new_stmt_num].code, loop_vars, subs, true);
   
 
-  fprintf(stderr, "BEFORE changing stmt[%d].IS\n", new_stmt_num); 
+  debug_fprintf(stderr, "BEFORE changing stmt[%d].IS\n", new_stmt_num); 
   //debugRelations(); 
 
   Relation buh = Restrict_Domain(mapping, stmt[new_stmt_num].IS);
-  fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
+  debug_fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
   stmt[new_stmt_num].IS = omega::Range( buh ); 
-  fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
+  debug_fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
  
   printf("\n*** mapping3   ");   mapping.print(); printf("\n"); fflush(stdout); 
 
   // above breaks the following into parts 
   //stmt[new_stmt_num].IS = omega::Range(Restrict_Domain(mapping, stmt[new_stmt_num].IS));
 
-  fprintf(stderr, "AFTER changing stmt[%d].IS\n", new_stmt_num); 
+  debug_fprintf(stderr, "AFTER changing stmt[%d].IS\n", new_stmt_num); 
   //debugRelations(); 
 
   stmt[new_stmt_num].IS.simplify();
   
-  fprintf(stderr, "AFTER simplify\n"); 
+  debug_fprintf(stderr, "AFTER simplify\n"); 
   //debugRelations(); 
 
   // replace original transformation relation with straight 1-1 mapping
@@ -2576,7 +2576,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   delete T_coalesce;
   delete T_coalesce_inv;
   
-  fprintf(stderr, "Loop::flatten() END\n"); 
+  debug_fprintf(stderr, "Loop::flatten() END\n"); 
   //debugRelations(); 
 }
 #endif

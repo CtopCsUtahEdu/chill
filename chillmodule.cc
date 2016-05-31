@@ -1,7 +1,7 @@
 
 // chill interface to python
 
-#include "chilldebug.h"
+#include "chill_io.hh"
 
 #ifdef CUDACHILL
 
@@ -115,7 +115,7 @@ void finalize_loop() {
 }
 static void init_loop(int loop_num_start, int loop_num_end) {
   if (source_filename.empty()) {
-    fprintf(stderr, "source file not set when initializing the loop");
+    debug_fprintf(stderr, "source file not set when initializing the loop");
     if (!is_interactive)
       exit(2);
   }
@@ -145,19 +145,19 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   set_loop_num_start(loop_num_start);
   set_loop_num_end(loop_num_end);
   if (loop_num_end < loop_num_start) {
-    fprintf(stderr, "the last loop must be after the start loop");
+    debug_fprintf(stderr, "the last loop must be after the start loop");
     if (!is_interactive)
       exit(2);
   }              
   if (loop_num_end >= loops.size()) {
-    fprintf(stderr, "loop %d does not exist", loop_num_end);
+    debug_fprintf(stderr, "loop %d does not exist", loop_num_end);
     if (!is_interactive)
       exit(2);
   }
   std::vector<IR_Control *> parm;
   for (int i = loops[loop_num_start]; i <= loops[loop_num_end]; i++) {
     if (ir_controls[i] == NULL) {
-      fprintf(stderr, "loop has already been processed");
+      debug_fprintf(stderr, "loop has already been processed");
       if (!is_interactive)
         exit(2);
     }
@@ -208,7 +208,7 @@ static int intArg(PyObject* args, int index, int dval = 0) {
   Py_INCREF(item);
   if (PyInt_Check(item)) ival = PyInt_AsLong(item);
   else {
-    fprintf(stderr, "argument at index %i is not an int\n", index);
+    debug_fprintf(stderr, "argument at index %i is not an int\n", index);
     exit(-1);
   }
   return ival;
@@ -222,7 +222,7 @@ static std::string strArg(PyObject* args, int index, const char* dval = NULL) {
   Py_INCREF(item);
   if (PyString_Check(item)) strval = strdup(PyString_AsString(item));
   else {
-    fprintf(stderr, "argument at index %i is not an string\n", index);
+    debug_fprintf(stderr, "argument at index %i is not an string\n", index);
     exit(-1);
   }
   return strval;
@@ -329,7 +329,7 @@ chill_print_ri(PyObject *self, PyObject *args)
 {
   //DEBUG_PRINT("\nC chill_print_ri() called from python\n"); 
   myloop->printRuntimeInfo();
-  DEBUG_PRINT("\n");
+  debug_fprintf(stderr, "\n");
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
 
@@ -338,14 +338,14 @@ chill_print_idx(PyObject *self, PyObject *args)
 {
   //DEBUG_PRINT("\nC chill_print_idx() called from python\n"); 
   myloop->printIndexes();
-  DEBUG_PRINT("\n");
+  debug_fprintf(stderr, "\n");
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
 
 static PyObject *
 chill_print_dep(PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("\nC chill_print_dep()\n"); 
+  debug_fprintf(stderr, "\nC chill_print_dep()\n"); 
   std::cout << myloop->dep;
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
@@ -353,9 +353,9 @@ chill_print_dep(PyObject *self, PyObject *args)
 static PyObject *
 chill_print_space(PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("\nC chill_print_space()\n"); 
+  debug_fprintf(stderr, "\nC chill_print_space()\n"); 
   for (int i = 0; i < myloop->stmt.size(); i++) {
-    DEBUG_PRINT("s%d: ", i+1);
+    debug_fprintf(stderr, "s%d: ", i+1);
     Relation r;
     if (!myloop->stmt[i].xform.is_null())
       r = Composition(copy(myloop->stmt[i].xform), copy(myloop->stmt[i].IS));
@@ -379,10 +379,10 @@ chill_num_statements(PyObject *self, PyObject *args)
 static PyObject *
 chill_does_var_exist( PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("\nC chill_does_var_exist()\n"); 
+  debug_fprintf(stderr, "\nC chill_does_var_exist()\n"); 
   int yesno = 0;
   // TODO if (myloop->symbolExists(symName)) yesno = 1;
-  DEBUG_PRINT("*** chill_does_var_exist *** UNIMPLEMENTED\n"); 
+  debug_fprintf(stderr, "*** chill_does_var_exist *** UNIMPLEMENTED\n"); 
   return Py_BuildValue( "i", yesno); // there seems to be no boolean type
 }
 
@@ -397,11 +397,11 @@ chill_add_sync(PyObject *self, PyObject *args)
   static char *index_name = &Buffer[0]; 
   
   if (!PyArg_ParseTuple(args, "is", &sstmt, &index_name)){
-    fprintf(stderr, "chill_add_sync, can't parse statement number and name passed from python\n");
+    debug_fprintf(stderr, "chill_add_sync, can't parse statement number and name passed from python\n");
     exit(-1);
   }
   
-  DEBUG_PRINT("chill_add_sync, statement %d   index_name '%s'\n", 
+  debug_fprintf(stderr, "chill_add_sync, statement %d   index_name '%s'\n", 
               sstmt, index_name);
   std::string idxName( index_name); // ?? 
   myloop->addSync(sstmt, idxName);
@@ -412,7 +412,7 @@ chill_add_sync(PyObject *self, PyObject *args)
 static PyObject *
 chill_rename_index(PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("\nC chill_rename_index() called from python\n"); 
+  debug_fprintf(stderr, "\nC chill_rename_index() called from python\n"); 
   int sstmt;
   //char oldname[80], newname[80];
   static char old[1024], newn[1024];
@@ -420,7 +420,7 @@ chill_rename_index(PyObject *self, PyObject *args)
   static char *oldname = &old[0], *newname=&newn[0];
   
   if (!PyArg_ParseTuple(args, "iss", &sstmt, &oldname, &newname)){
-    fprintf(stderr, "chill_rename_index, can't parse statement number and names passed from python\n");
+    debug_fprintf(stderr, "chill_rename_index, can't parse statement number and names passed from python\n");
     exit(-1);
   }
   
@@ -460,7 +460,7 @@ chill_permute_v2(PyObject *self, PyObject *args)
   //if (!PyArg_ParseTuple( args, "iO", &sstmt, &pyObj)) {
   //if (!PyArg_ParseTuple( args, "i", &sstmt)) {
   if (!PyArg_ParseTuple( args, "O", &pyObj)) { // everything on a single tuple
-    fprintf(stderr, "failed to parse tuple\n");
+    debug_fprintf(stderr, "failed to parse tuple\n");
     exit(-1);
   }
   Py_XINCREF(pyObj);
@@ -475,7 +475,7 @@ chill_permute_v2(PyObject *self, PyObject *args)
   if (PyInt_Check( tupleItem )) sstmt = PyInt_AsLong( tupleItem );
   else {
     fflush(stdout);
-    fprintf(stderr, "first tuple item in chill_permute_v2 is not an int?\n");
+    debug_fprintf(stderr, "first tuple item in chill_permute_v2 is not an int?\n");
     exit(-1);
   }
   
@@ -502,7 +502,7 @@ chill_permute_v2(PyObject *self, PyObject *args)
       order.push_back(  cppstr );
     }
     else {
-      fprintf(stderr, "later parameter was not a string?\n");
+      debug_fprintf(stderr, "later parameter was not a string?\n");
       exit(-1);
     }
     
@@ -525,7 +525,7 @@ chill_tile_v2_3arg( PyObject *self, PyObject *args)
   int tiling_method;
   
   if (!PyArg_ParseTuple(args, "iii", &sstmt, &level, &outer_level)) {
-    fprintf(stderr,"chill_tile_v2, can't parse parameters passed from python\n");
+    debug_fprintf(stderr,"chill_tile_v2, can't parse parameters passed from python\n");
     exit(-1);
   }
   
@@ -552,7 +552,7 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple(args, "iiiissi", 
                         &sstmt, &level, &tile_size, &outer_level, 
                         &index_name, &control_name, &tiling_method)){
-    fprintf(stderr, "chill_tile_v2_7arg, can't parse parameters passed from python\n");
+    debug_fprintf(stderr, "chill_tile_v2_7arg, can't parse parameters passed from python\n");
     exit(-1);
   }
   
@@ -568,7 +568,7 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
   TilingMethodType method = StridedTile;    
   if (tiling_method == 0)  method = StridedTile;
   else if (tiling_method == 1) method = CountedTile;
-  else fprintf(stderr, "ERROR: tile_v2 illegal tiling method, using StridedTile\n");
+  else debug_fprintf(stderr, "ERROR: tile_v2 illegal tiling method, using StridedTile\n");
   
   //DEBUG_PRINT("outer level %d\n", outer_level);  
   //DEBUG_PRINT("calling myloop->tile_cuda( %d, %d, %d, %d, %s, %s, method)\n", 
@@ -583,10 +583,10 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
 static PyObject *
 chill_cur_indices(PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("cur_indices( %d )\n", stmt_num);  
+  debug_fprintf(stderr, "cur_indices( %d )\n", stmt_num);  
   int stmt_num = -123; 
   if (!PyArg_ParseTuple(args, "i", &stmt_num)){
-    fprintf(stderr, "chill_cur_indices, can't parse statement number passed from python\n");
+    chill_fprintf(stderr, "chill_cur_indices, can't parse statement number passed from python\n");
     exit(-1);
   }
   
@@ -784,7 +784,7 @@ chill_cur_indices(PyObject *self, PyObject *args)
                                       myloop->idxNames[stmt_num][16].c_str(),
                                       myloop->idxNames[stmt_num][17].c_str()); 
   
-  fprintf(stderr, "going to die horribly,  num=%d\n", num); 
+  debug_fprintf(stderr, "going to die horribly,  num=%d\n", num); 
 }
 
 
@@ -807,7 +807,7 @@ chill_block_indices(PyObject *self, PyObject *args) {
   if (howmany == 0) return Py_BuildValue("()");
   if (howmany == 1) return Py_BuildValue("(s)", loopnames[0]);
   if (howmany == 2) return Py_BuildValue("(ss)", loopnames[0], loopnames[1]);
-  fprintf(stderr, "chill_block_indices(), gonna die, howmany == %d", howmany);
+  debug_fprintf(stderr, "chill_block_indices(), gonna die, howmany == %d", howmany);
   exit(666);
   
   Py_RETURN_NONE;
@@ -841,7 +841,7 @@ chill_thread_indices(PyObject *self, PyObject *args) {
                                          loopnames[1],
                                          loopnames[2]);
   
-  fprintf(stderr, "chill_thread_indices(), gonna die, howmany == %d", howmany);
+  debug_fprintf(stderr, "chill_thread_indices(), gonna die, howmany == %d", howmany);
   exit(999);
 }
 
@@ -875,8 +875,8 @@ chill_hard_loop_bounds(PyObject *self, PyObject *args)
   int upper, lower;  // output
   
   if (!PyArg_ParseTuple(args, "ii", &sstmt, &level)){
-    fprintf(stderr, "hard_loop_bounds, ");
-    fprintf(stderr, "can't parse statement numbers passed from python\n");
+    debug_fprintf(stderr, "hard_loop_bounds, ");
+    debug_fprintf(stderr, "can't parse statement numbers passed from python\n");
     exit(-1);
   }
   //DEBUG_PRINT(" %d, %d )\n", sstmt, level); 
@@ -909,13 +909,13 @@ chill_datacopy9(PyObject *self, PyObject *args)
 
   if (!PyArg_ParseTuple( args, "O", &pyObj)) { // everything on a single tuple
     
-    fprintf(stderr, "failed to parse tuple\n");
+    debug_fprintf(stderr, "failed to parse tuple\n");
     exit(-1);
   }
   Py_XINCREF( pyObj );
   
-  //if (PyList_Check(pyObj))  fprintf(stderr, "it's a list\n");
-  //if (PyTuple_Check(pyObj)) fprintf(stderr, "it's a tuple\n");
+  //if (PyList_Check(pyObj))  debug_fprintf(stderr, "it's a list\n");
+  //if (PyTuple_Check(pyObj)) debug_fprintf(stderr, "it's a tuple\n");
   
   
   
@@ -928,7 +928,7 @@ chill_datacopy9(PyObject *self, PyObject *args)
   Py_INCREF(tupleItem1);
   if (PyInt_Check( tupleItem1)) sstmt = PyInt_AsLong( tupleItem1 );
   else {
-    fprintf(stderr, "second tuple item in chill_datacopy9 is not an int?\n");
+    debug_fprintf(stderr, "second tuple item in chill_datacopy9 is not an int?\n");
     exit(-1);
   }
   //DEBUG_PRINT("stmt %d\n", sstmt);
@@ -937,7 +937,7 @@ chill_datacopy9(PyObject *self, PyObject *args)
   Py_INCREF(tupleItem2);
   if (PyInt_Check( tupleItem2 )) level = PyInt_AsLong( tupleItem2);
   else {
-    fprintf(stderr, "second tuple item in chill_datacopy9 is not an int?\n");
+    debug_fprintf(stderr, "second tuple item in chill_datacopy9 is not an int?\n");
     exit(-1);
   }
   //DEBUG_PRINT("level %d\n", level );
@@ -993,9 +993,9 @@ chill_datacopy9(PyObject *self, PyObject *args)
                         allow_extra_read, fastest_changing_dimension,
                         padding_stride, padding_alignment, cuda_shared);
   
-  DEBUG_PRINT("before attempt (after actual datacopy)\n"); 
+  debug_fprintf(stderr, "before attempt (after actual datacopy)\n"); 
   //myloop->printCode(); // attempt to debug 
-  DEBUG_PRINT("back from attempt\n"); 
+  debug_fprintf(stderr, "back from attempt\n"); 
   
   //DEBUG_PRINT("datacopy_9args returning\n"); 
   
@@ -1012,7 +1012,7 @@ chill_datacopy_privatized(PyObject *self, PyObject *args)
   //DEBUG_PRINT("C datacopy_privatized\n"); 
   PyObject *pyObj;
   if (!PyArg_ParseTuple( args, "O", &pyObj)) { // everything on a single tuple
-    fprintf(stderr, "failed to parse tuple\n");
+    debug_fprintf(stderr, "failed to parse tuple\n");
     exit(-1);
   }
   
@@ -1079,7 +1079,7 @@ chill_unroll(PyObject *self, PyObject *args)
   int sstmt, level, unroll_amount;
   
   if (!PyArg_ParseTuple(args, "iii", &sstmt, &level, &unroll_amount)) {
-    fprintf(stderr, "chill_unroll, can't parse parameters passed from python\n");
+    debug_fprintf(stderr, "chill_unroll, can't parse parameters passed from python\n");
     exit(-1);
   }
   
@@ -1132,7 +1132,7 @@ chill_cudaize_v2(PyObject *self, PyObject *args)
   //DEBUG_PRINT("chill_cudaize_v2\n"); 
   PyObject *pyObj;
   if (!PyArg_ParseTuple( args, "O", &pyObj)) { // everything on a single tuple
-    fprintf(stderr, "failed to parse tuple\n");
+    debug_fprintf(stderr, "failed to parse tuple\n");
     exit(-1);
   }
   
@@ -1199,7 +1199,7 @@ chill_cudaize_v2(PyObject *self, PyObject *args)
 
 static PyObject *get_loop_num()  { 
   // TODO get_loop_num()     it's a global value?
-  fprintf(stderr, "get_loop_num()  UNIMPLEMENTED\n");
+  debug_fprintf(stderr, "get_loop_num()  UNIMPLEMENTED\n");
   exit(-1);
 }
 
@@ -1212,7 +1212,7 @@ chill_copy_to_texture(PyObject *self, PyObject *args)
   //DEBUG_PRINT("C copy_to_texture() called from python \n"); 
   const char *array_name;
   if (!PyArg_ParseTuple(args, "s", &array_name)){
-    fprintf(stderr, "chill_copy_to_texture can't parse array name\n");
+    debug_fprintf(stderr, "chill_copy_to_texture can't parse array name\n");
     exit(-1);
   }
   //DEBUG_PRINT("array name = %s\n", array_name);
@@ -1230,21 +1230,21 @@ chill_copy_to_texture(PyObject *self, PyObject *args)
 static PyObject *
 chill_init(PyObject *self, PyObject *args)
 {
-  DEBUG_PRINT("C chill_init() called from python as read_IR()\n");
-  DEBUG_PRINT("C init( ");  
+  debug_fprintf(stderr, "C chill_init() called from python as read_IR()\n");
+  debug_fprintf(stderr, "C init( ");  
   const char *filename;
   const char *procname;
   if (!PyArg_ParseTuple(args, "ss", &filename, &procname)){
-    fprintf(stderr, "umwut? can't parse file name and procedure name?\n");
+    debug_fprintf(stderr, "umwut? can't parse file name and procedure name?\n");
     exit(-1);
   }
   
   int loop_num = 0;
   
-  DEBUG_PRINT("%s, 0, 0 )\n", filename);  
+  debug_fprintf(stderr, "%s, 0, 0 )\n", filename);  
   
-  DEBUG_PRINT("GETTING IR CODE in chill_init() in chillmodule.cc\n");
-  DEBUG_PRINT("ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
+  debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
+  debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
   ir_code = new IR_cudaroseCode(filename, procname); //this produces 15000 lines of output 
   fflush(stdout); 
   
@@ -1255,7 +1255,7 @@ chill_init(PyObject *self, PyObject *args)
   //A lot of this code was lifted from Chun's parser.yy
   //the plan is now to create the LoopCuda object directly
   IR_Block *block = ir_code->GetCode();
-  DEBUG_PRINT("ir_code->FindOneLevelControlStructure(block); chillmodule.cc\n"); 
+  debug_fprintf(stderr, "ir_code->FindOneLevelControlStructure(block); chillmodule.cc\n"); 
   ir_controls = ir_code->FindOneLevelControlStructure(block);
   
   int loop_count = 0;
@@ -1273,26 +1273,26 @@ chill_init(PyObject *self, PyObject *args)
     parm.push_back(ir_controls[loops[j]]);
   
   
-  DEBUG_PRINT("block = ir_code->MergeNeighboringControlStructures(parm);\n"); 
+  debug_fprintf(stderr, "block = ir_code->MergeNeighboringControlStructures(parm);\n"); 
   block = ir_code->MergeNeighboringControlStructures(parm);
   
   //DEBUG_PRINT("myloop = new LoopCuda(block, loop_num); in chillmodule.cc\n"); 
   myloop = new LoopCuda(block, loop_num);
-  fflush(stdout); DEBUG_PRINT("back\n"); 
+  fflush(stdout); debug_fprintf(stderr, "back\n"); 
   delete block;
   
   //end-protonu
   
   fflush(stdout);
-  DEBUG_PRINT("myloop->original();\n"); 
+  debug_fprintf(stderr, "myloop->original();\n"); 
   myloop->original();
   fflush(stdout);
-  DEBUG_PRINT("myloop->useIdxNames=true;\n"); 
+  debug_fprintf(stderr, "myloop->useIdxNames=true;\n"); 
   myloop->useIdxNames=true;//Use idxName in code_gen
   //register_v2(L);
   
   fflush(stdout);
-  DEBUG_PRINT("chill_init DONE\n"); 
+  debug_fprintf(stderr, "chill_init DONE\n"); 
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
   
 }
@@ -1310,7 +1310,7 @@ static PyObject* chill_source(PyObject* self, PyObject* args) {
 
 static PyObject* chill_procedure(PyObject* self, PyObject* args) {
   if(!procedure_name.empty()) {
-    fprintf(stderr, "only one procedure can be handled in a script");
+    chill_fprintf(stderr, "only one procedure can be handled in a script");
     if(!is_interactive)
       exit(2);
   }
@@ -1334,9 +1334,35 @@ static PyObject* chill_loop(PyObject* self, PyObject* args) {
     end_num = intArg(args, 1);
   }
   else {
-    fprintf(stderr, "loop takes one or two arguments");
+    chill_fprintf(stderr, "loop takes one or two arguments");
     if(!is_interactive)
       exit(2);
+  }
+  set_loop_num_start(start_num);
+  set_loop_num_end(end_num);
+  init_loop(start_num, end_num);
+  Py_RETURN_NONE;
+}
+
+static PyObject* chill_source_procedure_loop(PyObject* self, PyObject* args) {
+  int nargs = strict_arg_range(args, 2, 5, "init");
+  source_filename = strArg(args, 0);
+  procedure_name = strArg(args, 1);
+  int start_num = 0;
+  int end_num = 0;
+  switch(nargs) {
+    case 2:
+      start_num = 0;
+      end_num = 0;
+      break;
+    case 3:
+      start_num = intArg(args, 2);
+      end_num = intArg(args, 2);
+      break;
+    case 4:
+      start_num = intArg(args, 2);
+      end_num = intArg(args, 3);
+      break;
   }
   set_loop_num_start(start_num);
   set_loop_num_end(end_num);
@@ -1347,7 +1373,7 @@ static PyObject* chill_loop(PyObject* self, PyObject* args) {
 static PyObject* chill_print_code(PyObject* self, PyObject* args) {
   strict_arg_num(args, 0, "print_code");
   myloop->printCode();
-  printf("\n");
+  chill_printf("\n");
   Py_RETURN_NONE;
 }
 
@@ -1380,7 +1406,7 @@ static void add_known(std::string cond_expr) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = from_string<int>(it->first);
+        int dim = std::atoi(it->first.c_str());
         if (dim == 0)
           h.update_const(it->second);
         else
@@ -1646,7 +1672,7 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = from_string<int>(it->first);
+        int dim = std::atoi(it->first.c_str());
         if (dim == 0)
           h.update_const(it->second);
         else {
@@ -1901,7 +1927,7 @@ static void register_globals(PyObject* m) {
 PyMODINIT_FUNC
 initchill(void)    // pass C methods to python 
 {
-  DEBUG_PRINT("in C, initchill() to set up C methods to be called from python\n");
+  debug_fprintf(stderr, "in C, initchill() to set up C methods to be called from python\n");
   PyObject* m = Py_InitModule("chill", ChillMethods);
   register_globals(m);
 }

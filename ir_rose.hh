@@ -5,6 +5,7 @@
 #include <code_gen/CG_chillRepr.h>  // just for CreateArrayRefRepr.  probably a bad idea 
 
 #include "chill_ast.hh"  // needed now that we're going immediately from rose ast to chill ast 
+#include "chill_io.hh"
 
 #include "ir_code.hh"
 #include "ir_rose_utils.hh"
@@ -80,7 +81,7 @@ struct IR_rosePointerSymbol;
 struct IR_roseScalarSymbol: public IR_ScalarSymbol {
   chillAST_VarDecl *chillvd; 
   IR_roseScalarSymbol(const IR_Code *ir, chillAST_VarDecl *vd) {
-    //fprintf(stderr, "making ROSE scalar symbol %s\n", vd->varname); 
+    //debug_fprintf(stderr, "making ROSE scalar symbol %s\n", vd->varname); 
     ir_ = ir;
     chillvd = vd; // using chill internals ... 
   }
@@ -100,26 +101,26 @@ struct IR_roseArraySymbol: public IR_ArraySymbol {
   chillAST_VarDecl *chillvd; 
   
   IR_roseArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
-    //fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
+    //debug_fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
     ir_     = ir;
     base = (chillAST_node *)vd; 
     chillvd = vd;
-    //fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
+    //debug_fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
     //offset_ = offset;
   }
 
   
   IR_roseArraySymbol(const IR_Code *ir, chillAST_node *n, int offset = 0) {
-    //fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
+    //debug_fprintf(stderr, "IR_roseArraySymbol::IR_roseArraySymbol (%s)\n", vd->varname); 
     ir_     = ir;
     base = n;
     chillvd = n ->multibase();
-    //fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
+    //debug_fprintf(stderr, "\nmade new  IR_roseArraySymbol %p\n", this); 
     //offset_ = offset;
   }
 
   
-  ~IR_roseArraySymbol() { /* fprintf(stderr, "deleting  IR_roseArraySymbol %p\n", this);*/ } 
+  ~IR_roseArraySymbol() { /* debug_fprintf(stderr, "deleting  IR_roseArraySymbol %p\n", this);*/ } 
   
   std::string name() const;  // IR_roseArraySymbol
   int elem_size() const;
@@ -227,7 +228,7 @@ struct IR_roseArrayRef: public IR_ArrayRef {
   bool iswrite; 
   
   IR_roseArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) { 
-    //fprintf(stderr, "IR_XXXXArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
+    //debug_fprintf(stderr, "IR_XXXXArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
     ir_ = ir;
     chillASE = ase; 
     // dies? ase->dump(); fflush(stdout); 
@@ -251,7 +252,7 @@ struct IR_rosePointerArrayRef: public IR_PointerArrayRef { // exactly the same a
   int iswrite; 
   
   IR_rosePointerArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) { 
-    //fprintf(stderr, "IR_XXXXPointerArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
+    //debug_fprintf(stderr, "IR_XXXXPointerArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write); 
     ir_ = ir;
     chillASE = ase; 
     // dies? ase->dump(); fflush(stdout); 
@@ -307,39 +308,39 @@ struct IR_roseBlock: public IR_chillBlock {
   chillAST_node *chillAST;             // how about for now we say if there are statements, which is presumably the top level of statements from ... somewhere, otherwise the code is in   chillAST
   
   IR_roseBlock(const IR_Code *ir, chillAST_node *ast) { 
-    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir, chillast )\n"); 
+    debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir, chillast )\n"); 
     ir_ = ir;
     chillAST = ast; 
-    //fprintf(stderr, "making a new IR_roseBlock %p with chillAST %p\nit is:\n", this, ast); 
+    //debug_fprintf(stderr, "making a new IR_roseBlock %p with chillAST %p\nit is:\n", this, ast); 
     //ast->print(); printf("\n"); fflush(stdout); 
-    //fprintf(stderr, "block %p still has chillAST %p\n", this, ast); 
+    //debug_fprintf(stderr, "block %p still has chillAST %p\n", this, ast); 
   }
   
   IR_roseBlock(const IR_Code *ir) { 
-    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir );  NO AST\n"); 
+    debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir );  NO AST\n"); 
     chillAST = NULL;
     ir_ = ir;
-    fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
-    fprintf(stderr, "this roseBlock is %p\n", this); 
+    debug_fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
+    debug_fprintf(stderr, "this roseBlock is %p\n", this); 
   }
   
   
   IR_roseBlock(const IR_Code *ir, SgNode *tnl, SgNode *start, SgNode *end) {
-    fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl, SgNode *start, SgNode *end)    die\n"); 
+    debug_fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl, SgNode *start, SgNode *end)    die\n"); 
     int *i = 0; int j = i[0]; 
   }
   
   IR_roseBlock(const IR_Code *ir, SgNode *tnl) {
-    fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl)   (die)\n"); 
+    debug_fprintf(stderr, "WARNING: IR_roseBlock(const IR_Code *ir, SgNode *tnl)   (die)\n"); 
     int *i = 0; int j = i[0]; 
   } 
   
   IR_roseBlock( const IR_roseBlock *CB ) {  // clone existing IR_roseBlock
-    fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\nblock %p\n", this); 
+    debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\nblock %p\n", this); 
     ir_ = CB->ir_;
-    fprintf(stderr, "%d statements    AST %p\n", CB->statements.size(), CB->chillAST); 
+    debug_fprintf(stderr, "%d statements    AST %p\n", CB->statements.size(), CB->chillAST); 
     for (int i=0; i<CB->statements.size(); i++) {
-      CB->statements[i]->print(0, stderr); fprintf(stderr, "\n"); 
+      CB->statements[i]->print(0, stderr); debug_fprintf(stderr, "\n"); 
       statements.push_back( CB->statements[i] ); 
     }
     chillAST = CB->chillAST; 
@@ -352,8 +353,8 @@ struct IR_roseBlock: public IR_chillBlock {
   IR_Control *clone() const;
   
   // all access of statements and chillAST must be through these, else it will use the IR_chillBlock version and die 
-  void addStatement( chillAST_node *s ) { /* fprintf(stderr, "IR_roseBlock::addStatement()\n"); */ statements.push_back( s );
-    //fprintf(stderr, "now %d statements\n", statements.size()); 
+  void addStatement( chillAST_node *s ) { /* debug_fprintf(stderr, "IR_roseBlock::addStatement()\n"); */ statements.push_back( s );
+    //debug_fprintf(stderr, "now %d statements\n", statements.size()); 
   } 
   vector<chillAST_node *> getStatements() { return statements; } 
   vector<chillAST_node *> getStmtList() const { return statements; } 
@@ -361,7 +362,7 @@ struct IR_roseBlock: public IR_chillBlock {
   int numstatements() const { return statements.size(); } 
   
   void setChillAst( chillAST_node *ast ) { chillAST = ast; } ;
-  chillAST_node *getChillAST() const {  fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );return chillAST; } 
+  chillAST_node *getChillAST() const {  debug_fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );return chillAST; } 
 };
 
 
@@ -376,7 +377,7 @@ struct IR_roseIf: public IR_If {
   
   
   IR_roseIf(const IR_Code *irc) { // empty 
-    //fprintf(stderr, "IR_roseIf( const IR_Code *irc) %p\n", this); 
+    //debug_fprintf(stderr, "IR_roseIf( const IR_Code *irc) %p\n", this); 
     ir_ = irc;
     cond     = NULL;
     thenbody = NULL;
@@ -391,7 +392,7 @@ struct IR_roseIf: public IR_If {
   }
   
   IR_roseIf( const IR_Code *irc, chillAST_node *c, chillAST_node *t, chillAST_node *e) {
-    //fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *c, chillAST_node *t, chillAST_node *e) %p\n", this); 
+    //debug_fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *c, chillAST_node *t, chillAST_node *e) %p\n", this); 
     ir_ = irc;
     cond = c;
     thenbody = t;
@@ -400,7 +401,7 @@ struct IR_roseIf: public IR_If {
   
   
   IR_roseIf( const IR_Code *irc, chillAST_node *anif) { // will take any single chill node, but checks to make sure it's an if
-    //fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *anif)  %p\n", this); 
+    //debug_fprintf(stderr, "IR_roseIf( const IR_Code *irc, chillAST_node *anif)  %p\n", this); 
     if ( anif->isIfStmt()) { 
       chillAST_IfStmt *cif = (chillAST_IfStmt *) anif;
       ir_ = irc;
@@ -409,7 +410,7 @@ struct IR_roseIf: public IR_If {
       elsebody = cif->elsepart;
     }
     else { 
-      fprintf(stderr, "IR_roseIf::IR_roseIf( const IR_Code *irc, chillAST_node *anif ) node is not a chillAST_ItStmt\n");
+      debug_fprintf(stderr, "IR_roseIf::IR_roseIf( const IR_Code *irc, chillAST_node *anif ) node is not a chillAST_ItStmt\n");
       exit(-1); 
     }
     
@@ -417,7 +418,7 @@ struct IR_roseIf: public IR_If {
   
   IR_roseIf(const IR_Code *irc, SgNode *ti) { // TODO remove 
     ir_ = irc;
-    fprintf(stderr, "WARNING: IR_roseIf using rose internals (die)\n"); 
+    debug_fprintf(stderr, "WARNING: IR_roseIf using rose internals (die)\n"); 
     int *i = 0;  i[0] = 123; // die
   }
   

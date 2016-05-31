@@ -308,14 +308,14 @@ namespace client
 CG_outputRepr * Loop::iegen_parser(std::string &str, std::vector<std::string> &index_names)
 {
   
-  fprintf(stderr, "Loop::iegen_parser()\nstr = \"%s\"\n", str.c_str());
-  fprintf(stderr, "index_names: ");
+  debug_fprintf(stderr, "Loop::iegen_parser()\nstr = \"%s\"\n", str.c_str());
+  debug_fprintf(stderr, "index_names: ");
   int n = index_names.size();
   for (int i=0; i<n; i++) { 
-    fprintf(stderr, "%s", index_names[i].c_str());
-    if (i<(n-1)) fprintf(stderr, ", ");
+    debug_fprintf(stderr, "%s", index_names[i].c_str());
+    if (i<(n-1)) debug_fprintf(stderr, ", ");
   }
-  fprintf(stderr, "\n\n");
+  debug_fprintf(stderr, "\n\n");
   
   typedef std::string::const_iterator iterator_type;
   typedef client::calculator<iterator_type> calculator;
@@ -334,13 +334,13 @@ CG_outputRepr * Loop::iegen_parser(std::string &str, std::vector<std::string> &i
              std::cout << "\n\nresult = " << mach.top() << std::endl;
              std::cout << "-------------------------\n\n";
       */
-      fprintf(stderr, "Loop::iegen_parser DONE\n"); 
+      debug_fprintf(stderr, "Loop::iegen_parser DONE\n"); 
       return code[0];
       
     }
   else
     throw loop_error("iegen string parsing failed");
   
-  fprintf(stderr, "Loop::iegen_parser DONE\n"); 
+  debug_fprintf(stderr, "Loop::iegen_parser DONE\n"); 
   return code[0];
 }

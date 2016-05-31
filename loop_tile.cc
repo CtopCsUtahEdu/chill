@@ -21,7 +21,7 @@ using namespace omega;
 
 void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                 TilingMethodType method, int alignment_offset, int alignment_multiple) {
-  fprintf(stderr, "loop_tile.cc,  Loop::tile( 7 args )\n"); 
+  debug_fprintf(stderr, "loop_tile.cc,  Loop::tile( 7 args )\n"); 
 
   // check for sanity of parameters
   if (tile_size < 0)
@@ -108,7 +108,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
 
   // special case for no tiling
   if (tile_size == 0) {
-  fprintf(stderr, "loop_tile.cc  L110 special case for no tiling\n"); 
+  debug_fprintf(stderr, "loop_tile.cc  L110 special case for no tiling\n"); 
     for (std::set<int>::iterator i = same_tile_controlling_loop.begin();
          i != same_tile_controlling_loop.end(); i++) {
       Relation r(stmt[*i].xform.n_out(), stmt[*i].xform.n_out() + 2);
@@ -133,7 +133,7 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
   }
   // normal tiling
   else {
-    fprintf(stderr, "loop_tile.cc  L136 normal tiling\n"); 
+    debug_fprintf(stderr, "loop_tile.cc  L136 normal tiling\n"); 
     std::set<int> private_stmt;
     for (std::set<int>::iterator i = same_tile_controlling_loop.begin();
          i != same_tile_controlling_loop.end(); i++) {

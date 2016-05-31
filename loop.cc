@@ -52,19 +52,19 @@ const std::string Loop::overflow_var_name_prefix = std::string("over");
 void echocontroltype( const IR_Control *control ) { 
   switch(control->type()) { 
   case IR_CONTROL_BLOCK: {
-    fprintf(stderr, "IR_CONTROL_BLOCK\n"); 
+    debug_fprintf(stderr, "IR_CONTROL_BLOCK\n"); 
     break;
   }
   case IR_CONTROL_LOOP: {
-    fprintf(stderr, "IR_CONTROL_LOOP\n"); 
+    debug_fprintf(stderr, "IR_CONTROL_LOOP\n"); 
     break;
   }
   case IR_CONTROL_IF: {
-    fprintf(stderr, "IR_CONTROL_IF\n"); 
+    debug_fprintf(stderr, "IR_CONTROL_IF\n"); 
     break;
   }
   default:
-    fprintf(stderr, "just a bunch of statements?\n"); 
+    debug_fprintf(stderr, "just a bunch of statements?\n"); 
     
   } // switch
 }
@@ -102,7 +102,7 @@ void Loop::reduce(int stmt_num,
                   std::vector<int> cudaized_levels, 
                   int bound_level) {
 
-  // illegal instruction?? fprintf(stderr, " Loop::reduce( stmt %d, param %d, func_name (encrypted)...)\n", stmt, param); // , func_name.c_str()); 
+  // illegal instruction?? debug_fprintf(stderr, " Loop::reduce( stmt %d, param %d, func_name (encrypted)...)\n", stmt, param); // , func_name.c_str()); 
   
   //std::cout << "Reducing stmt# " << stmt_num << " at level " << level << "\n";
   //ir->printStmt(stmt[stmt_num].code);
@@ -111,7 +111,7 @@ void Loop::reduce(int stmt_num,
     std::cout << "loop.cc Cannot reduce this statement\n";
     return;
   }
-  fprintf(stderr, "loop.cc CAN reduce this statment?\n"); 
+  debug_fprintf(stderr, "loop.cc CAN reduce this statment?\n"); 
 
   /*for (int i = 0; i < level.size(); i++)
     if (stmt[stmt_num].loop_level[level[i] - 1].segreducible != true) {
@@ -303,23 +303,23 @@ bool Loop::isInitialized() const {
 bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
                      std::vector<ir_tree_node *> &ir_stmt) {
   
-  fprintf(stderr, "\n                                                  Loop::init_loop()\n");
+  debug_fprintf(stderr, "\n                                                  Loop::init_loop()\n");
   
-  fprintf(stderr, "extract_ir_stmts()\n");
-  fprintf(stderr, "ir_tree has %d statements\n", ir_tree.size()); 
+  debug_fprintf(stderr, "extract_ir_stmts()\n");
+  debug_fprintf(stderr, "ir_tree has %d statements\n", ir_tree.size()); 
 
   ir_stmt = extract_ir_stmts(ir_tree);
   
-  fprintf(stderr,"nesting level stmt size = %d\n", (int)ir_stmt.size());
+  debug_fprintf(stderr,"nesting level stmt size = %d\n", (int)ir_stmt.size());
   stmt_nesting_level_.resize(ir_stmt.size());
   
   std::vector<int> stmt_nesting_level(ir_stmt.size());
   
-  fprintf(stderr, "%d statements?\n", (int)ir_stmt.size()); 
+  debug_fprintf(stderr, "%d statements?\n", (int)ir_stmt.size()); 
   
   // find out how deeply nested each statement is.  (how can these be different?) 
   for (int i = 0; i < ir_stmt.size(); i++) {
-    fprintf(stderr, "i %d\n", i); 
+    debug_fprintf(stderr, "i %d\n", i); 
     ir_stmt[i]->payload = i;
     int t = 0;
     ir_tree_node *itn = ir_stmt[i];
@@ -330,14 +330,14 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     }
     stmt_nesting_level_[i] = t;
     stmt_nesting_level[i] = t;
-    fprintf(stderr, "stmt_nesting_level[%d] = %d\n", i, t); 
+    debug_fprintf(stderr, "stmt_nesting_level[%d] = %d\n", i, t); 
   }
   
   if (actual_code.size() == 0)
     actual_code = std::vector<CG_outputRepr*>(ir_stmt.size());
   
   stmt = std::vector<Statement>(ir_stmt.size());
-  fprintf(stderr, "in init_loop, made %d stmts\n", (int)ir_stmt.size());
+  debug_fprintf(stderr, "in init_loop, made %d stmts\n", (int)ir_stmt.size());
   
   uninterpreted_symbols =             std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >(ir_stmt.size());
   uninterpreted_symbols_stringrepr =  std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >(ir_stmt.size());
@@ -357,34 +357,34 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       }
     }
     
-    fprintf(stderr, "max nesting level %d at location %d\n", max_nesting_level, loc); 
+    debug_fprintf(stderr, "max nesting level %d at location %d\n", max_nesting_level, loc); 
     
     // most deeply nested statement acting as a reference point
     if (n_dim == -1) {
-      fprintf(stderr, "loop.cc L356  n_dim now max_nesting_level %d\n", max_nesting_level); 
+      debug_fprintf(stderr, "loop.cc L356  n_dim now max_nesting_level %d\n", max_nesting_level); 
       n_dim = max_nesting_level;
       max_loc = loc;
       
       index = std::vector<std::string>(n_dim);
       
       ir_tree_node *itn = ir_stmt[loc];
-      fprintf(stderr, "itn = stmt[%d]\n", loc); 
+      debug_fprintf(stderr, "itn = stmt[%d]\n", loc); 
       int cur_dim = n_dim - 1;
       while (itn->parent != NULL) {
-        fprintf(stderr, "parent\n"); 
+        debug_fprintf(stderr, "parent\n"); 
         
         itn = itn->parent;
         if (itn->content->type() == IR_CONTROL_LOOP) {
-          fprintf(stderr, "IR_CONTROL_LOOP  cur_dim %d\n", cur_dim); 
+          debug_fprintf(stderr, "IR_CONTROL_LOOP  cur_dim %d\n", cur_dim); 
           IR_Loop *IRL = static_cast<IR_Loop *>(itn->content);
           index[cur_dim] = IRL->index()->name();
-          fprintf(stderr, "index[%d] = '%s'\n", cur_dim, index[cur_dim].c_str());
+          debug_fprintf(stderr, "index[%d] = '%s'\n", cur_dim, index[cur_dim].c_str());
           itn->payload = cur_dim--;
         }
       }
     }
     
-    fprintf(stderr, "align loops by names,\n"); 
+    debug_fprintf(stderr, "align loops by names,\n"); 
     // align loops by names, temporary solution
     ir_tree_node *itn = ir_stmt[loc];  // defined outside loops?? 
     int depth = stmt_nesting_level_[loc] - 1;
@@ -422,13 +422,13 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       }
     }
     
-    fprintf(stderr, "\nset relation variable names                      ****\n");
+    debug_fprintf(stderr, "\nset relation variable names                      ****\n");
     // set relation variable names
     
     // this finds the loop variables for loops enclosing this statement and puts
     // them in an Omega Relation (just their names, which could fail) 
     
-    fprintf(stderr, "Relation r(%d)\n", n_dim); 
+    debug_fprintf(stderr, "Relation r(%d)\n", n_dim); 
     Relation r(n_dim);
     F_And *f_root = r.add_and();
     itn = ir_stmt[loc];
@@ -437,16 +437,16 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       
       itn = itn->parent;
       if (itn->content->type() == IR_CONTROL_LOOP) {
-        fprintf(stderr, "it's a loop.  temp_depth %d\n", temp_depth); 
-        fprintf(stderr, "r.name_set_var( %d, %s )\n", itn->payload + 1, index[temp_depth].c_str());
+        debug_fprintf(stderr, "it's a loop.  temp_depth %d\n", temp_depth); 
+        debug_fprintf(stderr, "r.name_set_var( %d, %s )\n", itn->payload + 1, index[temp_depth].c_str());
         r.name_set_var(itn->payload + 1, index[temp_depth]);
         
         temp_depth--;
       }
       //static_cast<IR_Loop *>(itn->content)->index()->name());
     }
-    fprintf(stderr, "Relation r   "); r.print(); fflush(stdout); 
-    //fprintf(stderr, "f_root   "); f_root->print(stderr); fprintf(stderr, "\n"); 
+    debug_fprintf(stderr, "Relation r   "); r.print(); fflush(stdout); 
+    //debug_fprintf(stderr, "f_root   "); f_root->print(stderr); debug_fprintf(stderr, "\n"); 
     
     /*while (itn->parent != NULL) {
       itn = itn->parent;
@@ -457,7 +457,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     
     
     
-    fprintf(stderr, "extract information from loop/if structures\n"); 
+    debug_fprintf(stderr, "extract information from loop/if structures\n"); 
     // extract information from loop/if structures
     std::vector<bool> processed(n_dim, false);
     std::vector<std::string> vars_to_be_reversed;
@@ -471,24 +471,24 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       
       switch (itn->content->type()) {
       case IR_CONTROL_LOOP: {
-        fprintf(stderr, "loop.cc l 462  IR_CONTROL_LOOP\n"); 
+        debug_fprintf(stderr, "loop.cc l 462  IR_CONTROL_LOOP\n"); 
         IR_Loop *lp = static_cast<IR_Loop *>(itn->content);
         Variable_ID v = r.set_var(itn->payload + 1);
         int c;
         
         try {
           c = lp->step_size();
-          //fprintf(stderr, "step size %d\n", c); 
+          //debug_fprintf(stderr, "step size %d\n", c); 
           if (c > 0) {
             CG_outputRepr *lb = lp->lower_bound();
-            fprintf(stderr, "loop.cc, got the lower bound. it is:\n"); 
+            debug_fprintf(stderr, "loop.cc, got the lower bound. it is:\n"); 
             lb->dump(); printf("\n"); fflush(stdout); 
             
             exp2formula(ir, r, f_root, freevar, lb, v, 's',
                         IR_COND_GE, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
             
             CG_outputRepr *ub = lp->upper_bound();
-            //fprintf(stderr, "loop.cc, got the upper bound. it is:\n");
+            //debug_fprintf(stderr, "loop.cc, got the upper bound. it is:\n");
             //ub->dump(); printf("\n"); fflush(stdout); 
             
             
@@ -507,7 +507,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
                     == ir->QueryExpOperation(
                                              lp->upper_bound()))) {
               
-              fprintf(stderr, "loop.cc lower and upper are both IR_OP_ARRAY_VARIABLE?\n"); 
+              debug_fprintf(stderr, "loop.cc lower and upper are both IR_OP_ARRAY_VARIABLE?\n"); 
               
               std::vector<CG_outputRepr *> v =
                 ir->QueryExpOperand(lp->lower_bound());
@@ -563,7 +563,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         }
         
         // check for loop increment or decrement that is not 1
-        //fprintf(stderr, "abs(c)\n"); 
+        //debug_fprintf(stderr, "abs(c)\n"); 
         if (abs(c) != 1) {
           F_Exists *f_exists = f_root->add_exists();
           Variable_ID e = f_exists->declare();
@@ -585,7 +585,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         
         
       case IR_CONTROL_IF: {
-        fprintf(stderr, "IR_CONTROL_IF\n"); 
+        debug_fprintf(stderr, "IR_CONTROL_IF\n"); 
         IR_If *theif = static_cast<IR_If *>(itn->content);
         
         CG_outputRepr *cond =
@@ -625,7 +625,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         break;
       }
       default:
-        //fprintf(stderr, "default?\n"); 
+        //debug_fprintf(stderr, "default?\n"); 
         for (int i = 0; i < itn->children.size(); i++)
           delete itn->children[i];
         itn->children = std::vector<ir_tree_node *>();
@@ -635,7 +635,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     }
     
     
-    //fprintf(stderr, "add information for missing loops   n_dim(%d)\n", n_dim);
+    //debug_fprintf(stderr, "add information for missing loops   n_dim(%d)\n", n_dim);
     // add information for missing loops
     for (int j = 0; j < n_dim; j++)
       if (!processed[j]) {
@@ -777,7 +777,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     }
     
     
-    fprintf(stderr, "loop.cc L441 insert the statement\n");
+    debug_fprintf(stderr, "loop.cc L441 insert the statement\n");
     // insert the statement
     CG_outputBuilder *ocg = ir->builder();
     std::vector<CG_outputRepr *> reverse_expr;
@@ -786,35 +786,35 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       repl = ocg->CreateMinus(NULL, repl);
       reverse_expr.push_back(repl);
     }
-    fprintf(stderr, "loop.cc before extract\n"); 
+    debug_fprintf(stderr, "loop.cc before extract\n"); 
     CG_outputRepr *code =
       static_cast<IR_Block *>(ir_stmt[loc]->content)->extract();
-    fprintf(stderr, "code =  ocg->CreateSubstitutedStmt(...)\n"); 
+    debug_fprintf(stderr, "code =  ocg->CreateSubstitutedStmt(...)\n"); 
     code = ocg->CreateSubstitutedStmt(0, code, vars_to_be_reversed,
                                       reverse_expr);
-    fprintf(stderr, "stmt\n"); 
+    debug_fprintf(stderr, "stmt\n"); 
     stmt[loc].code = code;
     stmt[loc].IS = r;
     
     //Anand: Add Information on uninterpreted function constraints to
     //Known relation
     
-    fprintf(stderr, "loop.cc stmt[%d].loop_level has size n_dim %d\n", loc, n_dim); 
+    debug_fprintf(stderr, "loop.cc stmt[%d].loop_level has size n_dim %d\n", loc, n_dim); 
 
     stmt[loc].loop_level = std::vector<LoopLevel>(n_dim);
     stmt[loc].ir_stmt_node = ir_stmt[loc];
     stmt[loc].has_inspector = false;
-    fprintf(stderr, "for int i < n_dim(%d)\n", n_dim); 
+    debug_fprintf(stderr, "for int i < n_dim(%d)\n", n_dim); 
     for (int ii = 0; ii < n_dim; ii++) {
       stmt[loc].loop_level[ii].type = LoopLevelOriginal;
       stmt[loc].loop_level[ii].payload = ii;
       stmt[loc].loop_level[ii].parallel_level = 0;
     }
-    fprintf(stderr, "whew\n"); 
+    debug_fprintf(stderr, "whew\n"); 
     
     stmt_nesting_level[loc] = -1;
   }
-  fprintf(stderr, "                                        loop.cc   Loop::init_loop() END\n\n");
+  debug_fprintf(stderr, "                                        loop.cc   Loop::init_loop() END\n\n");
   
   return true;
 }
@@ -823,8 +823,8 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
 
 Loop::Loop(const IR_Control *control) {
   
-  fprintf(stderr, "\nLoop::Loop(const IR_Control *control)\n");
-  fprintf(stderr, "control type is %d   ", control->type()); 
+  debug_fprintf(stderr, "\nLoop::Loop(const IR_Control *control)\n");
+  debug_fprintf(stderr, "control type is %d   ", control->type()); 
   echocontroltype(control);
   
   last_compute_cgr_ = NULL;
@@ -832,8 +832,8 @@ Loop::Loop(const IR_Control *control) {
   
   ir = const_cast<IR_Code *>(control->ir_); // point to the CHILL IR that this loop came from
   if (ir == 0) { 
-    fprintf(stderr, "ir gotten from control = 0x%x\n", (long)ir);
-    fprintf(stderr, "loop.cc GONNA DIE SOON *******************************\n\n");
+    debug_fprintf(stderr, "ir gotten from control = 0x%x\n", (long)ir);
+    debug_fprintf(stderr, "loop.cc GONNA DIE SOON *******************************\n\n");
   }
   
   init_code = NULL;
@@ -842,25 +842,25 @@ Loop::Loop(const IR_Control *control) {
   overflow_var_name_counter = 1;
   known = Relation::True(0);
   
-  fprintf(stderr, "in Loop::Loop, calling  build_ir_tree()\n"); 
-  fprintf(stderr, "\nloop.cc, Loop::Loop() about to clone control\n"); 
+  debug_fprintf(stderr, "in Loop::Loop, calling  build_ir_tree()\n"); 
+  debug_fprintf(stderr, "\nloop.cc, Loop::Loop() about to clone control\n"); 
   ir_tree = build_ir_tree(control->clone(), NULL);
-  //fprintf(stderr,"in Loop::Loop. ir_tree has %ld parts\n", ir_tree.size()); 
+  //debug_fprintf(stderr,"in Loop::Loop. ir_tree has %ld parts\n", ir_tree.size()); 
   
   //    std::vector<ir_tree_node *> ir_stmt;
-  //fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
+  //debug_fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
   
   int count = 0;
-  //fprintf(stderr, "before init_loops, %d freevar\n", freevar.size()); 
-  //fprintf(stderr, "count %d\n", count++); 
-  //fprintf(stderr, "loop.cc before init_loop, %ld statements\n",  stmt.size()); 
+  //debug_fprintf(stderr, "before init_loops, %d freevar\n", freevar.size()); 
+  //debug_fprintf(stderr, "count %d\n", count++); 
+  //debug_fprintf(stderr, "loop.cc before init_loop, %ld statements\n",  stmt.size()); 
   while (!init_loop(ir_tree, ir_stmt)) {
-    //fprintf(stderr, "count %d\n", count++); 
+    //debug_fprintf(stderr, "count %d\n", count++); 
   }
-  fprintf(stderr, "after init_loop, %d freevar\n", (int)freevar.size()); 
+  debug_fprintf(stderr, "after init_loop, %d freevar\n", (int)freevar.size()); 
   
   
-  fprintf(stderr, "loop.cc after init_loop, %d statements\n",  (int)stmt.size()); 
+  debug_fprintf(stderr, "loop.cc after init_loop, %d statements\n",  (int)stmt.size()); 
   for (int i = 0; i < stmt.size(); i++) {
     std::map<int, CG_outputRepr*>::iterator it = replace.find(i);
     
@@ -878,13 +878,13 @@ Loop::Loop(const IR_Control *control) {
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
   
-  fprintf(stderr, "this really REALLY needs some comments\n"); 
+  debug_fprintf(stderr, "this really REALLY needs some comments\n"); 
   // this really REALLY needs some comments
   for (int i = 0; i < stmt.size(); i++) {
-    fprintf(stderr, "i %d\n", i); 
+    debug_fprintf(stderr, "i %d\n", i); 
     stmt[i].reduction = 0; // Manu -- initialization
     for (int j = i; j < stmt.size(); j++) {
-      fprintf(stderr, "j %d\n", j); 
+      debug_fprintf(stderr, "j %d\n", j); 
       std::pair<std::vector<DependenceVector>,
                 std::vector<DependenceVector> > dv = test_data_dependences(
                                                                            ir, 
@@ -899,9 +899,9 @@ Loop::Loop(const IR_Control *control) {
                                                                            uninterpreted_symbols[ i ],
                                                                            uninterpreted_symbols_stringrepr[ i ]);
       
-      fprintf(stderr, "dv.first.size() %d\n", (int)dv.first.size()); 
+      debug_fprintf(stderr, "dv.first.size() %d\n", (int)dv.first.size()); 
       for (int k = 0; k < dv.first.size(); k++) {
-        fprintf(stderr, "k1 %d\n", k); 
+        debug_fprintf(stderr, "k1 %d\n", k); 
         if (is_dependence_valid(ir_stmt[i], ir_stmt[j], dv.first[k],
                                 true))
           dep.connect(i, j, dv.first[k]);
@@ -912,7 +912,7 @@ Loop::Loop(const IR_Control *control) {
       }
       
       for (int k = 0; k < dv.second.size(); k++) { 
-        fprintf(stderr, "k2 %d\n", k); 
+        debug_fprintf(stderr, "k2 %d\n", k); 
         if (is_dependence_valid(ir_stmt[j], ir_stmt[i], dv.second[k],
                                 false))
           dep.connect(j, i, dv.second[k]);
@@ -923,46 +923,46 @@ Loop::Loop(const IR_Control *control) {
     }
   }
   
-  fprintf(stderr, "\n\n*** LOTS OF REDUCTIONS ***\n\n"); 
+  debug_fprintf(stderr, "\n\n*** LOTS OF REDUCTIONS ***\n\n"); 
   
   // TODO: Reduction check
   // Manu:: Initial implementation / algorithm
   std::set<int> reducCand = std::set<int>();
   std::vector<int> canReduce = std::vector<int>();
-  fprintf(stderr, "\ni range %d\n", stmt.size()); 
+  debug_fprintf(stderr, "\ni range %d\n", stmt.size()); 
   for (int i = 0; i < stmt.size(); i++) {
-    fprintf(stderr, "i %d\n", i); 
+    debug_fprintf(stderr, "i %d\n", i); 
     if (!dep.hasEdge(i, i)) {
       continue;
     }
-    fprintf(stderr, "dep.hasEdge(%d, %d)\n", i, i); 
+    debug_fprintf(stderr, "dep.hasEdge(%d, %d)\n", i, i); 
 
     // for each statement check if it has all the three dependences (RAW, WAR, WAW)
     // If there is such a statement, it is a reduction candidate. Mark all reduction candidates.
     std::vector<DependenceVector> tdv = dep.getEdge(i, i);
-    fprintf(stderr, "tdv size %d\n", tdv.size()); 
+    debug_fprintf(stderr, "tdv size %d\n", tdv.size()); 
     for (int j = 0; j < tdv.size(); j++) {
-      fprintf(stderr, "ij %d %d\n", i, j); 
+      debug_fprintf(stderr, "ij %d %d\n", i, j); 
       if (tdv[j].is_reduction_cand) { 
-        fprintf(stderr, "reducCand.insert( %d )\n", i); 
+        debug_fprintf(stderr, "reducCand.insert( %d )\n", i); 
         reducCand.insert(i);
       }
     }
   }
   
-  fprintf(stderr, "loop.cc reducCand.size() %d\n", reducCand.size()); 
+  debug_fprintf(stderr, "loop.cc reducCand.size() %d\n", reducCand.size()); 
   bool reduc;
   std::set<int>::iterator it;
   int counter = 0; 
   for (it = reducCand.begin(); it != reducCand.end(); it++) {
-    fprintf(stderr, "counter %d\n", counter); 
+    debug_fprintf(stderr, "counter %d\n", counter); 
     reduc = true;
     for (int j = 0; j < stmt.size(); j++) {
-      fprintf(stderr, "j %d\n", j); 
+      debug_fprintf(stderr, "j %d\n", j); 
       if ((*it != j)
           && (stmt_nesting_level_[*it] < stmt_nesting_level_[j])) {
         if (dep.hasEdge(*it, j) || dep.hasEdge(j, *it)) {
-          fprintf(stderr, "counter %d j %d  reduc = false\n", counter, j); 
+          debug_fprintf(stderr, "counter %d j %d  reduc = false\n", counter, j); 
           reduc = false;
           break;
         }
@@ -971,7 +971,7 @@ Loop::Loop(const IR_Control *control) {
     }
     
     if (reduc) {
-      fprintf(stderr, "canReduce.push_back()\n"); 
+      debug_fprintf(stderr, "canReduce.push_back()\n"); 
       canReduce.push_back(*it);
       stmt[*it].reduction = 2; // First, assume that reduction is possible with some processing
     }
@@ -979,7 +979,7 @@ Loop::Loop(const IR_Control *control) {
   
   
   // If reduction is possible without processing, update the value of the reduction variable to 1
-  fprintf(stderr, "loop.cc canReduce.size() %d\n", canReduce.size()); 
+  debug_fprintf(stderr, "loop.cc canReduce.size() %d\n", canReduce.size()); 
   for (int i = 0; i < canReduce.size(); i++) {
     // Here, assuming that stmtType returns 1 when there is a single statement within stmt[i]
     if (stmtType(ir, stmt[canReduce[i]].code) == 1) {
@@ -1012,7 +1012,7 @@ Loop::Loop(const IR_Control *control) {
   }
   // cleanup the IR tree
   
-  fprintf(stderr, "init dumb transformation relations\n"); 
+  debug_fprintf(stderr, "init dumb transformation relations\n"); 
 
   // init dumb transformation relations e.g. [i, j] -> [ 0, i, 0, j, 0]
   for (int i = 0; i < stmt.size(); i++) {
@@ -1032,7 +1032,7 @@ Loop::Loop(const IR_Control *control) {
     }
     stmt[i].xform.simplify();
   }
-  //fprintf(stderr, "done with dumb\n");
+  //debug_fprintf(stderr, "done with dumb\n");
   
   if (stmt.size() != 0)
     num_dep_dim = stmt[0].IS.n_set();
@@ -1047,7 +1047,7 @@ Loop::Loop(const IR_Control *control) {
     
     }*/
   //end debug
-  //fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
+  //debug_fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
   //printCode(); // this dies  TODO figure out why 
 }
 
@@ -1176,7 +1176,7 @@ void Loop::debugRelations() const {
 
 
 CG_outputRepr *Loop::getCode(int effort) const {
-  fprintf(stderr,"\nloop.cc Loop::getCode(  effort %d )\n", effort ); 
+  debug_fprintf(stderr,"\nloop.cc Loop::getCode(  effort %d )\n", effort ); 
   
   const int m = stmt.size();
   if (m == 0)
@@ -1184,7 +1184,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
   const int n = stmt[0].xform.n_out();
   
   if (last_compute_cg_ == NULL) {
-    fprintf(stderr, "last_compute_cg_ == NULL\n"); 
+    debug_fprintf(stderr, "last_compute_cg_ == NULL\n"); 
     
     std::vector<Relation> IS(m);
     std::vector<Relation> xforms(m);
@@ -1211,12 +1211,12 @@ CG_outputRepr *Loop::getCode(int effort) const {
   }
   
   std::vector<CG_outputRepr *> stmts(m);
-  fprintf(stderr, "%d stmts\n", m); 
+  debug_fprintf(stderr, "%d stmts\n", m); 
   for (int i = 0; i < m; i++)
     stmts[i] = stmt[i].code;
   CG_outputBuilder *ocg = ir->builder();
 
-  fprintf(stderr, "calling last_compute_cgr_->printRepr()\n"); 
+  debug_fprintf(stderr, "calling last_compute_cgr_->printRepr()\n"); 
   CG_outputRepr *repr = last_compute_cgr_->printRepr(ocg, stmts, 
                                                      uninterpreted_symbols);
   
@@ -1225,7 +1225,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
   if (cleanup_code != NULL)
     repr = ocg->StmtListAppend(repr, cleanup_code->clone());
   
-  fprintf(stderr,"\nloop.cc Loop::getCode( effort %d )   DONE\n", effort ); 
+  debug_fprintf(stderr,"\nloop.cc Loop::getCode( effort %d )   DONE\n", effort ); 
   return repr;
 }
 
@@ -1233,7 +1233,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
 
 
 void Loop::printCode(int effort) const {
-  fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort ); 
+  debug_fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort ); 
   const int m = stmt.size();
   if (m == 0)
     return;
@@ -1866,14 +1866,14 @@ std::vector<std::set<int> > Loop::typed_fusion(Graph<std::set<int>, bool> g,
 
 void Loop::setLexicalOrder(int dim, const std::set<int> &active,
                            int starting_order, std::vector<std::vector<std::string> > idxNames) {
-  fprintf(stderr, "Loop::setLexicalOrder()  %d idxNames     active size %d  starting_order %d\n", idxNames.size(), active.size(), starting_order); 
+  debug_fprintf(stderr, "Loop::setLexicalOrder()  %d idxNames     active size %d  starting_order %d\n", idxNames.size(), active.size(), starting_order); 
   if (active.size() == 0)
     return;
 
   for (int i=0; i< idxNames.size(); i++) { 
     std::vector<std::string> what = idxNames[i];
     for (int j=0; j<what.size(); j++) { 
-      fprintf(stderr, "%2d %2d %s\n", i,j, what[j].c_str()); 
+      debug_fprintf(stderr, "%2d %2d %s\n", i,j, what[j].c_str()); 
     }
   }
 
@@ -2030,7 +2030,7 @@ void Loop::setLexicalOrder(int dim, const std::set<int> &active,
           assign_const(stmt[cur_stmt].xform, j, 0);
         order++;
       } else { // recurse ! 
-        fprintf(stderr, "Loop:setLexicalOrder() recursing\n"); 
+        debug_fprintf(stderr, "Loop:setLexicalOrder() recursing\n"); 
         setLexicalOrder(dim, cur_scc, order, idxNames);
         order += sz;
       }
@@ -2118,7 +2118,7 @@ void Loop::setLexicalOrder(int dim, const std::set<int> &active,
         }
         
         if ((dim + 2) <= (stmt[ref_stmt_num].xform.n_out() - 1)) {  // recurse ! 
-          fprintf(stderr, "Loop:setLexicalOrder() recursing\n"); 
+          debug_fprintf(stderr, "Loop:setLexicalOrder() recursing\n"); 
           setLexicalOrder(dim + 2, s[i], order, idxNames);
         }
         
@@ -2250,11 +2250,11 @@ void Loop::setLexicalOrder(int dim, const std::set<int> &active,
     */
   }
 
-  fprintf(stderr, "LEAVING Loop::setLexicalOrder()  %d idxNames\n", idxNames.size()); 
+  debug_fprintf(stderr, "LEAVING Loop::setLexicalOrder()  %d idxNames\n", idxNames.size()); 
   for (int i=0; i< idxNames.size(); i++) { 
     std::vector<std::string> what = idxNames[i];
     for (int j=0; j<what.size(); j++) { 
-      fprintf(stderr, "%2d %2d %s\n", i,j, what[j].c_str()); 
+      debug_fprintf(stderr, "%2d %2d %s\n", i,j, what[j].c_str()); 
     }
   }
 }
@@ -2269,7 +2269,7 @@ void Loop::apply_xform() {
 }
 
 void Loop::apply_xform(int stmt_num) {
-  fprintf(stderr, "apply_xform( %d )\n", stmt_num); 
+  debug_fprintf(stderr, "apply_xform( %d )\n", stmt_num); 
   std::set<int> active;
   active.insert(stmt_num);
   apply_xform(active);
@@ -2277,7 +2277,7 @@ void Loop::apply_xform(int stmt_num) {
 
 void Loop::apply_xform(std::set<int> &active) {
   fflush(stdout); 
-  fprintf(stderr, "loop.cc apply_xform( set )\n");
+  debug_fprintf(stderr, "loop.cc apply_xform( set )\n");
   
   int max_n = 0;
   
@@ -2369,7 +2369,7 @@ void Loop::apply_xform(std::set<int> &active) {
       loop_vars.push_back(stmt[*i].IS.set_var(j)->name());
     }
     for (int j = 0; j<loop_vars.size(); j++) { 
-      fprintf(stderr, "loop vars %d %s\n", j, loop_vars[j].c_str()); 
+      debug_fprintf(stderr, "loop vars %d %s\n", j, loop_vars[j].c_str()); 
     }
     std::vector<CG_outputRepr *> subs = output_substitutions(ocg,
                                                              Inverse(copy(mapping)),
@@ -2383,9 +2383,9 @@ void Loop::apply_xform(std::set<int> &active) {
     for (int l = 0; l < subs.size(); l++)
       subs2.push_back(subs[l]->clone());
     
-    fprintf(stderr, "%d uninterpreted symbols\n", (int)uninterpreted_symbols.size());
+    debug_fprintf(stderr, "%d uninterpreted symbols\n", (int)uninterpreted_symbols.size());
     for (int j = 0; j<loop_vars.size(); j++) {
-      fprintf(stderr, "loop vars %d %s\n", j, loop_vars[j].c_str()); 
+      debug_fprintf(stderr, "loop vars %d %s\n", j, loop_vars[j].c_str()); 
     } 
     
     
@@ -2393,36 +2393,36 @@ void Loop::apply_xform(std::set<int> &active) {
     for (std::map<std::string, std::vector<CG_outputRepr *> >::iterator it =
            uninterpreted_symbols[*i].begin();
          it != uninterpreted_symbols[*i].end(); it++) {
-      fprintf(stderr, "\ncount %d\n", count); 
+      debug_fprintf(stderr, "\ncount %d\n", count); 
       
       std::vector<CG_outputRepr *> reprs_ = it->second;
-      fprintf(stderr, "%d reprs_\n", (int)reprs_.size()); 
+      debug_fprintf(stderr, "%d reprs_\n", (int)reprs_.size()); 
       
       std::vector<CG_outputRepr *> reprs_2;
       for (int k = 0; k < reprs_.size(); k++) {
-        fprintf(stderr, "k %d\n", k); 
+        debug_fprintf(stderr, "k %d\n", k); 
         std::vector<CG_outputRepr *> subs;
         for (int l = 0; l < subs2.size(); l++) {
-          fprintf(stderr, "l %d\n", l); 
+          debug_fprintf(stderr, "l %d\n", l); 
           subs.push_back(subs2[l]->clone());
         }
         
-        fprintf(stderr, "clone\n");
+        debug_fprintf(stderr, "clone\n");
         CG_outputRepr *c =  reprs_[k]->clone(); 
         c->dump(); fflush(stdout); 
         
-        fprintf(stderr, "createsub\n"); 
+        debug_fprintf(stderr, "createsub\n"); 
         CG_outputRepr *s = ocgr->CreateSubstitutedStmt(0, c,
                                                        loop_vars, subs, true);
         
-        fprintf(stderr, "push back\n"); 
+        debug_fprintf(stderr, "push back\n"); 
         reprs_2.push_back( s ); 
         
       }
       
       it->second = reprs_2;
       count++;
-      fprintf(stderr, "bottom\n"); 
+      debug_fprintf(stderr, "bottom\n"); 
     }
     
     std::vector<CG_outputRepr *> subs3 = output_substitutions(
@@ -2455,20 +2455,20 @@ void Loop::apply_xform(std::set<int> &active) {
     }
     
     
-    fprintf(stderr, "loop.cc stmt[*i].code =\n"); 
+    debug_fprintf(stderr, "loop.cc stmt[*i].code =\n"); 
     //stmt[*i].code->dump(); 
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
     stmt[*i].code = ocg->CreateSubstitutedStmt(0, stmt[*i].code, loop_vars,
                                                subs);
-    //fprintf(stderr, "loop.cc substituted code =\n"); 
+    //debug_fprintf(stderr, "loop.cc substituted code =\n"); 
     //stmt[*i].code->dump(); 
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
     
     stmt[*i].IS = omega::Range(Restrict_Domain(mapping, stmt[*i].IS));
     stmt[*i].IS.simplify();
     
     // replace original transformation relation with straight 1-1 mapping
-    //fprintf(stderr, "replace original transformation relation with straight 1-1 mapping\n"); 
+    //debug_fprintf(stderr, "replace original transformation relation with straight 1-1 mapping\n"); 
     mapping = Relation(n, 2 * n + 1);
     f_root = mapping.add_and();
     for (int j = 1; j <= n; j++) {
@@ -2483,19 +2483,19 @@ void Loop::apply_xform(std::set<int> &active) {
     }
     stmt[*i].xform = mapping;
     
-    //fprintf(stderr, "\ncode is: \n"); 
+    //debug_fprintf(stderr, "\ncode is: \n"); 
     //stmt[*i].code->dump(); 
-    //fprintf(stderr, "\n\n"); 
+    //debug_fprintf(stderr, "\n\n"); 
     
   }
   
   tmp_loop_var_name_counter += max_n;
   fflush(stdout); 
-  fprintf(stderr, "loop.cc LEAVING apply_xform( set )\n\n"); 
+  debug_fprintf(stderr, "loop.cc LEAVING apply_xform( set )\n\n"); 
   //for (std::set<int>::iterator i = active.begin(); i != active.end(); i++) {
-  //  fprintf(stderr, "\nloop.cc stmt[i].code =\n"); 
+  //  debug_fprintf(stderr, "\nloop.cc stmt[i].code =\n"); 
   //  stmt[*i].code->dump(); 
-  //  fprintf(stderr, "\n\n"); 
+  //  debug_fprintf(stderr, "\n\n"); 
   //} 
   
 }
@@ -2721,12 +2721,12 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   //std::cout << "In scalar_expand function: " << stmt_num << ", " << arrName << "\n";
   //std::cout.flush(); 
 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   // check for sanity of parameters
   bool found_non_constant_size_dimension = false;
@@ -2756,33 +2756,33 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
   
-  fprintf(stderr, "\nloop.cc finding array accesses in stmt %d of the code\n",stmt_num ); 
+  debug_fprintf(stderr, "\nloop.cc finding array accesses in stmt %d of the code\n",stmt_num ); 
   std::vector<IR_ArrayRef *> access = ir->FindArrayRef(stmt[stmt_num].code);
-  fprintf(stderr, "loop.cc L2726  %d access\n", access.size()); 
+  debug_fprintf(stderr, "loop.cc L2726  %d access\n", access.size()); 
 
   IR_ArraySymbol *sym = NULL;
-  fprintf(stderr, "arrName %s\n", arrName.c_str()); 
+  debug_fprintf(stderr, "arrName %s\n", arrName.c_str()); 
   if (arrName == "RHS") { 
-    fprintf(stderr, "sym RHS\n"); 
+    debug_fprintf(stderr, "sym RHS\n"); 
     sym = access[0]->symbol();
   }
   else {
-    fprintf(stderr, "looking for array %s in access\n", arrName.c_str()); 
+    debug_fprintf(stderr, "looking for array %s in access\n", arrName.c_str()); 
     for (int k = 0; k < access.size(); k++) { // BUH
 
-      //fprintf(stderr, "access[%d] = %s ", k, access[k]->getTypeString()); access[k]->print(0,stderr); fprintf(stderr, "\n"); 
+      //debug_fprintf(stderr, "access[%d] = %s ", k, access[k]->getTypeString()); access[k]->print(0,stderr); debug_fprintf(stderr, "\n"); 
 
       string name = access[k]->symbol()->name();
-      //fprintf(stderr, "comparing %s to %s\n", name.c_str(), arrName.c_str()); 
+      //debug_fprintf(stderr, "comparing %s to %s\n", name.c_str(), arrName.c_str()); 
 
       if (access[k]->symbol()->name() == arrName) {
-        fprintf(stderr, "found it   sym access[ k=%d ]\n", k); 
+        debug_fprintf(stderr, "found it   sym access[ k=%d ]\n", k); 
         sym = access[k]->symbol();
       }      
     }
   }
-  if (!sym) fprintf(stderr, "DIDN'T FIND IT\n"); 
-  fprintf(stderr, "sym %p\n", sym); 
+  if (!sym) debug_fprintf(stderr, "DIDN'T FIND IT\n"); 
+  debug_fprintf(stderr, "sym %p\n", sym); 
 
   // collect array references by name
   std::vector<int> lex = getLexicalOrder(stmt_num);
@@ -2800,9 +2800,9 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   omega::coef_t lb[levels.size()], ub[levels.size()], size[levels.size()];
   
   //Anand Adding apply xform so that tiled loop bounds are reflected
-  fprintf(stderr, "Adding apply xform so that tiled loop bounds are reflected\n");
+  debug_fprintf(stderr, "Adding apply xform so that tiled loop bounds are reflected\n");
   apply_xform(same_loop);
-  fprintf(stderr, "loop.cc, back from apply_xform()\n"); 
+  debug_fprintf(stderr, "loop.cc, back from apply_xform()\n"); 
   
   //Anand commenting out the folowing 4 lines
   /*  copy(stmt[stmt_num].IS).query_variable_bounds(
@@ -2853,12 +2853,12 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   //std::cout << "In scalar_expand function 2: " << stmt_num << ", " << arrName << "\n";
   //std::cout.flush(); 
 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
 
 
@@ -3234,12 +3234,12 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   //std::cout << "In scalar_expand function 3: " << stmt_num << ", " << arrName << "\n";
   //std::cout.flush(); 
 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   
   shiftLexicalOrder(lex, dim + 1, 1);
@@ -3247,10 +3247,10 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   s.ir_stmt_node = NULL;
   int newStmt_num = stmt.size();
 
-  fprintf(stderr, "loop.cc L3249 adding stmt %d\n", stmt.size()); 
+  debug_fprintf(stderr, "loop.cc L3249 adding stmt %d\n", stmt.size()); 
   stmt.push_back(s);
   
-  fprintf(stderr, "uninterpreted_symbols.push_back()  newStmt_num %d\n", newStmt_num); 
+  debug_fprintf(stderr, "uninterpreted_symbols.push_back()  newStmt_num %d\n", newStmt_num); 
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
   uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
   stmt[newStmt_num].code = stmt[stmt_num].code->clone();
@@ -3260,12 +3260,12 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   stmt[newStmt_num].reductionOp = stmt[stmt_num].reductionOp;
 
 
-  //fprintf(stderr, "\nafter clone, %d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\nafter clone, %d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
 
 
@@ -3312,10 +3312,10 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
                                   stmt[stmt_num].IS.set_var(levels[levels.size() - 1])->name());
   
   CG_outputRepr *total_size = size_repr[0];
-  fprintf(stderr, "total_size = ");   total_size->dump(); fflush(stdout); 
+  debug_fprintf(stderr, "total_size = ");   total_size->dump(); fflush(stdout); 
 
   for (int i = 1; i < size_repr.size(); i++) {
-    fprintf(stderr, "total_size now "); total_size->dump(); fflush(stdout); fprintf(stderr, " times  something\n\n"); 
+    debug_fprintf(stderr, "total_size now "); total_size->dump(); fflush(stdout); debug_fprintf(stderr, " times  something\n\n"); 
 
     total_size = ocg->CreateTimes(total_size->clone(),
                                   size_repr[i]->clone());
@@ -3323,37 +3323,37 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   }
   
   // COMMENT NEEDED 
-  //fprintf(stderr, "\nloop.cc COMMENT NEEDED\n"); 
+  //debug_fprintf(stderr, "\nloop.cc COMMENT NEEDED\n"); 
   for (int k = levels.size() - 2; k >= 0; k--) {
     CG_outputRepr *temp_repr =ocg->CreateIdent(stmt[stmt_num].IS.set_var(levels[k])->name());
     for (int l = k + 1; l < levels.size(); l++) { 
-      //fprintf(stderr, "\nloop.cc CREATETIMES\n"); 
+      //debug_fprintf(stderr, "\nloop.cc CREATETIMES\n"); 
       temp_repr = ocg->CreateTimes(temp_repr->clone(),
                                    size_repr[l]->clone());
     }
     
-    //fprintf(stderr, "\nloop.cc CREATEPLUS\n"); 
+    //debug_fprintf(stderr, "\nloop.cc CREATEPLUS\n"); 
     arr_ref_repr = ocg->CreatePlus(arr_ref_repr->clone(),
                                    temp_repr->clone());
   }
   
 
-  //fprintf(stderr, "loop.cc, about to die\n"); 
+  //debug_fprintf(stderr, "loop.cc, about to die\n"); 
   std::vector<CG_outputRepr *> to_push;
   to_push.push_back(total_size);
 
   if (!found_non_constant_size_dimension) { 
-    fprintf(stderr, "constant size dimension\n"); 
+    debug_fprintf(stderr, "constant size dimension\n"); 
     tmp_sym = ir->CreateArraySymbol(sym, to_push, memory_type);
   }
   else {
-    fprintf(stderr, "NON constant size dimension?\n"); 
+    debug_fprintf(stderr, "NON constant size dimension?\n"); 
     //tmp_sym = ir->CreatePointerSymbol(sym, to_push);
     tmp_sym = ir->CreatePointerSymbol(sym, to_push);
 
     static_cast<IR_PointerSymbol *>(tmp_sym)->set_size(0, total_size); // ?? 
     ptr_variables.push_back(static_cast<IR_PointerSymbol *>(tmp_sym));
-    fprintf(stderr, "ptr_variables now has %d entries\n", ptr_variables.size()); 
+    debug_fprintf(stderr, "ptr_variables now has %d entries\n", ptr_variables.size()); 
   }
   
   // add tmp_sym to Loop symtables ??
@@ -3370,16 +3370,16 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   //  std::cout << "loop index variable is '" << v.c_str() << "'\n";
   
   // create a reference for the temporary array
-  fprintf(stderr, "create a reference for the temporary array\n"); 
+  debug_fprintf(stderr, "create a reference for the temporary array\n"); 
   //std::cout << "In scalar_expand function 4: " << stmt_num << ", " << arrName << "\n";
   //std::cout.flush(); 
 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   
 
@@ -3393,25 +3393,25 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   IR_PointerArrayRef * tmp_ptr_array_ref;  // was IR_PointerArrayref
 
   if (!found_non_constant_size_dimension) {
-    fprintf(stderr, "constant size\n");
+    debug_fprintf(stderr, "constant size\n");
 
     tmp_array_ref = ir->CreateArrayRef(
                                        static_cast<IR_ArraySymbol *>(tmp_sym), to_push2);
   }
   else { 
-    fprintf(stderr, "NON constant size\n"); 
+    debug_fprintf(stderr, "NON constant size\n"); 
     tmp_ptr_array_ref = ir->CreatePointerArrayRef(
                                        static_cast<IR_PointerSymbol *>(tmp_sym), to_push2);
     // TODO static_cast<IR_PointerSymbol *>(tmp_sym), to_push2);
   }
   fflush(stdout); 
 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
 
   //std::string stemp;
@@ -3419,7 +3419,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   //std::cout << "Created array reference --> " << stemp.c_str() << "\n";
   
   // get the RHS expression
-  fprintf(stderr, "get the RHS expression   arrName %s\n", arrName.c_str()); 
+  debug_fprintf(stderr, "get the RHS expression   arrName %s\n", arrName.c_str()); 
 
   CG_outputRepr *rhs;
   if (arrName == "RHS") {
@@ -3434,12 +3434,12 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   
   fflush(stdout); 
 
-  //fprintf(stderr, "\nbefore if (arrName == RHS)\n%d statements\n", stmt.size()); // problem is after here 
+  //debug_fprintf(stderr, "\nbefore if (arrName == RHS)\n%d statements\n", stmt.size()); // problem is after here 
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   if (arrName == "RHS") {
     
@@ -3450,16 +3450,16 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   } 
   else {
 
-    fprintf(stderr, "finding array refs in stmt_num %d\n", stmt_num); 
-    //fprintf(stderr, "\n%d statements\n", stmt.size());
+    debug_fprintf(stderr, "finding array refs in stmt_num %d\n", stmt_num); 
+    //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
     //for (int i=0; i<stmt.size(); i++) { 
-    //  fprintf(stderr, "%2d   ", i); 
+    //  debug_fprintf(stderr, "%2d   ", i); 
     //  ((CG_chillRepr *)stmt[i].code)->Dump();
     //} 
-    //fprintf(stderr, "\n"); 
+    //debug_fprintf(stderr, "\n"); 
 
     std::vector<IR_ArrayRef *> refs = ir->FindArrayRef(stmt[stmt_num].code);
-    fprintf(stderr, "\n%d refs\n", refs.size()); 
+    debug_fprintf(stderr, "\n%d refs\n", refs.size()); 
 
     
     bool found = false;
@@ -3467,33 +3467,33 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
     for (int j = 0; j < refs.size(); j++) {
       CG_outputRepr* to_replace;
 
-      fprintf(stderr, "j %d   build new assignment statement with temporary array\n",j); 
+      debug_fprintf(stderr, "j %d   build new assignment statement with temporary array\n",j); 
       // build new assignment statement with temporary array
       if (!found_non_constant_size_dimension) {
         to_replace = tmp_array_ref->convert();
       } else {
         to_replace = tmp_ptr_array_ref->convert();
       }
-      //fprintf(stderr, "to_replace  %p\n", to_replace); 
+      //debug_fprintf(stderr, "to_replace  %p\n", to_replace); 
       //CG_chillRepr *CR = (CG_chillRepr *) to_replace;
       //CR->Dump(); 
 
       if (refs[j]->name() == arrName) {
         fflush(stdout); 
-        fprintf(stderr, "loop.cc L353\n");  // problem is after here 
-        //fprintf(stderr, "\n%d statements\n", stmt.size());
+        debug_fprintf(stderr, "loop.cc L353\n");  // problem is after here 
+        //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
         //for (int i=0; i<stmt.size(); i++) { 
-        //  fprintf(stderr, "%2d   ", i); 
+        //  debug_fprintf(stderr, "%2d   ", i); 
         //  ((CG_chillRepr *)stmt[i].code)->Dump();
         //} 
-        //fprintf(stderr, "\n"); 
+        //debug_fprintf(stderr, "\n"); 
         
 
         sym_names.insert(refs[j]->symbol()->name());
         
         if (!found) {
           if (!found_non_constant_size_dimension) { 
-            fprintf(stderr, "constant size2\n"); 
+            debug_fprintf(stderr, "constant size2\n"); 
             omega::CG_outputRepr * t =  tmp_array_ref->convert();
             omega::CG_outputRepr * r = refs[j]->convert()->clone();
             //CR = (CG_chillRepr *) t;
@@ -3501,14 +3501,14 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
             //CR = (CG_chillRepr *) r;
             //CR->Dump(); 
 
-            //fprintf(stderr, "lhs t %p   lhs r %p\n", t, r); 
+            //debug_fprintf(stderr, "lhs t %p   lhs r %p\n", t, r); 
             stmt[newStmt_num].code =
               ir->builder()->CreateAssignment(0,
                                               t, // tmp_array_ref->convert(),
                                               r); // refs[j]->convert()->clone()
           }
           else { 
-            fprintf(stderr, "NON constant size2\n"); 
+            debug_fprintf(stderr, "NON constant size2\n"); 
             omega::CG_outputRepr * t =  tmp_ptr_array_ref->convert(); // this fails
             omega::CG_outputRepr * r = refs[j]->convert()->clone();
 
@@ -3517,7 +3517,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
             //CR = (omega::CG_chillRepr *) r;
             //CR->Dump(); 
 
-            //fprintf(stderr, "lhs t %p   lhs r %p\n", t, r); 
+            //debug_fprintf(stderr, "lhs t %p   lhs r %p\n", t, r); 
             stmt[newStmt_num].code =
               ir->builder()->CreateAssignment(0,
                                               t, // tmp_ptr_array_ref->convert(),
@@ -3528,7 +3528,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
         }
         
         // refs[j] has no parent?
-        fprintf(stderr, "replacing refs[%d]\n", j ); 
+        debug_fprintf(stderr, "replacing refs[%d]\n", j ); 
         ir->ReplaceExpression(refs[j], to_replace);
       }
       
@@ -3537,13 +3537,13 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   }
   //ToDo need to update the dependence graph
   //Anand adding dependence graph update
-  fprintf(stderr, "adding dependence graph update\n");   // problem is before here 
-  //fprintf(stderr, "\n%d statements\n", stmt.size());
+  debug_fprintf(stderr, "adding dependence graph update\n");   // problem is before here 
+  //debug_fprintf(stderr, "\n%d statements\n", stmt.size());
   //for (int i=0; i<stmt.size(); i++) { 
-  //  fprintf(stderr, "%2d   ", i); 
+  //  debug_fprintf(stderr, "%2d   ", i); 
   //  ((CG_chillRepr *)stmt[i].code)->Dump();
   //} 
-  //fprintf(stderr, "\n"); 
+  //debug_fprintf(stderr, "\n"); 
 
   dep.insert();
   
@@ -3606,7 +3606,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
       if (assign_then_accumulate) {
         stmt[newStmt_num].code = ir->builder()->CreateAssignment(0,
                                                                  tmp_array_ref->convert(), rhs);
-        fprintf(stderr, "ir->ReplaceRHSExpression( stmt_ num %d )\n", stmt_num); 
+        debug_fprintf(stderr, "ir->ReplaceRHSExpression( stmt_ num %d )\n", stmt_num); 
         ir->ReplaceRHSExpression(stmt[stmt_num].code, tmp_array_ref);
       } else {
         CG_outputRepr *temp = tmp_array_ref->convert()->clone();
@@ -3615,7 +3615,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
           throw ir_error(
                          "Statement is not a += accumulation statement");
 
-        fprintf(stderr, "replacing in a +=\n"); 
+        debug_fprintf(stderr, "replacing in a +=\n"); 
         stmt[newStmt_num].code = ir->builder()->CreatePlusAssignment(0,
                                                                      temp->clone(), rhs);
         
@@ -3693,7 +3693,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
         init_.code = ir->builder()->CreateAssignment(0, temp->clone(),
                                                      ir->builder()->CreateInt(0));
 
-        fprintf(stderr, "loop.cc L3693 adding stmt %d\n", stmt.size()); 
+        debug_fprintf(stderr, "loop.cc L3693 adding stmt %d\n", stmt.size()); 
         stmt.push_back(init_);
 
         uninterpreted_symbols.push_back(uninterpreted_symbols[newStmt_num]);
@@ -3848,8 +3848,8 @@ std::pair<Relation, Relation> createCSRstyleISandXFORM(CG_outputBuilder *ocg,
     CG_outputRepr *repr = ocg->CreateArrayRefExpression(index_name,
                                                         ocg->CreateIdent(IS.set_var(outer_loop_bounds.size())->name()));
     
-    //fprintf(stderr, "( VECTOR _)\n"); 
-    //fprintf(stderr, "loop.cc calling CreateDefineMacro( %s, argvec, repr)\n", (index_name + "_").c_str()); 
+    //debug_fprintf(stderr, "( VECTOR _)\n"); 
+    //debug_fprintf(stderr, "loop.cc calling CreateDefineMacro( %s, argvec, repr)\n", (index_name + "_").c_str()); 
     this_loop->ir->CreateDefineMacro(index_name + "_", argvec, repr);
     
     Relation known_(copy(IS).n_set());
@@ -3877,8 +3877,8 @@ std::pair<Relation, Relation> createCSRstyleISandXFORM(CG_outputBuilder *ocg,
                                                                                           IS.set_var(outer_loop_bounds.size())->name()),
                                                                          ocg->CreateInt(1)));
     
-    //fprintf(stderr, "( VECTOR __)\n"); 
-    //fprintf(stderr, "loop.cc calling CreateDefineMacro( %s, argvec, repr)\n", (index_name + "__").c_str()); 
+    //debug_fprintf(stderr, "( VECTOR __)\n"); 
+    //debug_fprintf(stderr, "loop.cc calling CreateDefineMacro( %s, argvec, repr)\n", (index_name + "__").c_str()); 
     
     this_loop->ir->CreateDefineMacro(index_name + "__", argvec, repr2);
     
@@ -4282,23 +4282,23 @@ std::map<std::string, std::vector<std::string> > recurse_on_exp_for_arrays(
 
 
 std::vector<CG_outputRepr *> find_guards(IR_Code *ir, IR_Control *code) {
-  fprintf(stderr, "find_guards()\n"); 
+  debug_fprintf(stderr, "find_guards()\n"); 
   std::vector<CG_outputRepr *> guards;
   switch (code->type()) {
   case IR_CONTROL_IF: {
-    fprintf(stderr, "find_guards() it's an if\n"); 
+    debug_fprintf(stderr, "find_guards() it's an if\n"); 
     CG_outputRepr *cond = dynamic_cast<IR_If*>(code)->condition();
     
     std::vector<CG_outputRepr *> then_body;
     std::vector<CG_outputRepr *> else_body;
     IR_Block *ORTB = dynamic_cast<IR_If*>(code)->then_body(); 
     if (ORTB != NULL) {
-      fprintf(stderr, "recursing on then\n"); 
+      debug_fprintf(stderr, "recursing on then\n"); 
       then_body = find_guards(ir, ORTB); 
       //dynamic_cast<IR_If*>(code)->then_body());
     }
     if (dynamic_cast<IR_If*>(code)->else_body() != NULL) {
-      fprintf(stderr, "recursing on then\n"); 
+      debug_fprintf(stderr, "recursing on then\n"); 
       else_body = find_guards(ir,
                               dynamic_cast<IR_If*>(code)->else_body());
     }
@@ -4313,9 +4313,9 @@ std::vector<CG_outputRepr *> find_guards(IR_Code *ir, IR_Control *code) {
     break;
   }
   case IR_CONTROL_BLOCK: {
-    fprintf(stderr, "find_guards() it's a control block\n"); 
+    debug_fprintf(stderr, "find_guards() it's a control block\n"); 
     IR_Block*  IRCB = dynamic_cast<IR_Block*>(code);
-    fprintf(stderr, "find_guards() calling ir->FindOneLevelControlStructure(IRCB);\n"); 
+    debug_fprintf(stderr, "find_guards() calling ir->FindOneLevelControlStructure(IRCB);\n"); 
     std::vector<IR_Control *> stmts = ir->FindOneLevelControlStructure(IRCB); 
 
     for (int i = 0; i < stmts.size(); i++) {
@@ -4326,7 +4326,7 @@ std::vector<CG_outputRepr *> find_guards(IR_Code *ir, IR_Control *code) {
     break;
   }
   case IR_CONTROL_LOOP: {
-    fprintf(stderr, "find_guards() it's a control loop\n"); 
+    debug_fprintf(stderr, "find_guards() it's a control loop\n"); 
     std::vector<CG_outputRepr *> body = find_guards(ir,
                                                     dynamic_cast<IR_Loop*>(code)->body());
     if (body.size() > 0)
@@ -4605,9 +4605,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   // 2. Identify inner guard, if more than one throw error for now
   
   IR_Control *code = ir->GetCode(stmt[stmt_num].code->clone());
-  fprintf(stderr, "loop.cc back from ir->GetCode()\n"); 
+  debug_fprintf(stderr, "loop.cc back from ir->GetCode()\n"); 
   std::vector<CG_outputRepr *> guards = find_guards(ir, code);
-  fprintf(stderr, "loop.cc  back from find_guards()\n"); 
+  debug_fprintf(stderr, "loop.cc  back from find_guards()\n"); 
   
   if (guards.size() > 1)
     throw loop_error(
@@ -5421,9 +5421,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     
     // nameless. name generated in CreatePointerSymbol()
     offset_index2 = ir->CreatePointerSymbol(IR_CONSTANT_INT, size_repr);
-    fprintf(stderr, "IR_PointerSymbol *offset_index2 has name?\n");  
+    debug_fprintf(stderr, "IR_PointerSymbol *offset_index2 has name?\n");  
 
-    fprintf(stderr, "making a malloc of %s\n", offset_index2->name().c_str()); 
+    debug_fprintf(stderr, "making a malloc of %s\n", offset_index2->name().c_str()); 
     ptr_variables.push_back(static_cast<IR_PointerSymbol *>(offset_index2));
 
     //die(); 
@@ -5524,7 +5524,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
       data_arr_ref = refs[i];
     }
   
-  fprintf(stderr, "loop.cc 5293  calling CreateArrayType( float, %d )\n", size);
+  debug_fprintf(stderr, "loop.cc 5293  calling CreateArrayType( float, %d )\n", size);
 
 
   // all this is to create a linked list data structure
@@ -5546,7 +5546,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   
   class_data_types.push_back(temp_arr_data_type);
   class_data_types.push_back(temp_col_type);
-  fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
+  debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
   exit(-1); 
   
   CG_outputRepr *list_type =
@@ -5599,7 +5599,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   mk_data.push_back("ptr");
   mk_data_types.push_back(ir->CreatePointerType(list_type));
   
-  //fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
+  //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
   exit(-1); 
   CG_outputRepr *mk_type = static_cast<CG_roseBuilder *>(ocg)->CreateClass( // after exit();
                                                                            "mk", mk_data, mk_data_types);
@@ -5666,7 +5666,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     
     s.loop_level = ll;
     
-    fprintf(stderr, "loop.cc L5669 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop.cc L5669 adding stmt %d\n", stmt.size()); 
     stmt.push_back(s);
 
     uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -5714,7 +5714,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     CG_outputRepr * level_repr = most_reprs.find(level)->second;
     mark_code = ocg->StmtListAppend(mark_code, level_repr->clone());
     
-    //fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
+    //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
     exit(-1); 
     CG_outputRepr *mark_assign2 =
       ocg->CreateAssignment(0,
@@ -5748,7 +5748,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
         stmt[stmt_num].IS.set_var(level)->name())),
         ocg->CreateInt(-1));
     */
-    //fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
+    //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
     exit(-1); 
     CG_outputRepr *mark_assign2 =
       ocg->CreateAssignment(0,
@@ -5796,7 +5796,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
       ocg->CreateIdent(stmt[stmt_num].IS.set_var(level)->name())),
       ocg->CreateInt(-1));
   */
-  //fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
+  //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
   exit(-1); 
   marked_check2 = ocg->CreateEQ(
                                 static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression( // after exit()
@@ -6103,7 +6103,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   shiftLexicalOrder(lex, 2 * count_rem - 2, 1);
   int new_stmt_num = stmt.size();
 
-  fprintf(stderr, "loop.cc L6106 adding stmt %d\n", stmt.size()); 
+  debug_fprintf(stderr, "loop.cc L6106 adding stmt %d\n", stmt.size()); 
   stmt.push_back(s);
 
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -6137,7 +6137,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     
     assign_const(s2.xform, 2 * count_rem - 2, lex[2 * count_rem - 2] + 1);
     
-    fprintf(stderr, "loop.cc L6140 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop.cc L6140 adding stmt %d\n", stmt.size()); 
     stmt.push_back(s2);
 
     dep.insert();
@@ -6403,7 +6403,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   m_s[2].code = ll_inc_and_free;
   
   for(int i=0; i < 3;i++) { 
-    fprintf(stderr, "loop.cc L6406 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop.cc L6406 adding stmt %d\n", stmt.size()); 
     stmt.push_back(m_s[i]);
   }
   
@@ -6497,7 +6497,7 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   
   //  std::vector<int> lex3 = getLexicalOrder(new_num);
   
-  fprintf(stderr, "loop.cc L6500 adding stmt %d\n", stmt.size()); 
+  debug_fprintf(stderr, "loop.cc L6500 adding stmt %d\n", stmt.size()); 
   stmt.push_back(s3);
 
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -7092,7 +7092,7 @@ void Loop::ELLify(int stmt_num, std::vector<std::string> arrays_to_pad,
     s.code = ir->builder()->CreateAssignment(0, lhs->clone(),
                                              ir->builder()->CreateInt(0));
     
-    fprintf(stderr, "loop.cc L7095 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop.cc L7095 adding stmt %d\n", stmt.size()); 
     stmt.push_back(s);
 
     uninterpreted_symbols.push_back(uninterpreted_symbols[*it]);
@@ -7233,7 +7233,7 @@ void Loop::ELLify(int stmt_num, std::vector<std::string> arrays_to_pad,
     lex2[0] = lex2[0] + 1;
     shiftLexicalOrder(lex2, 0, 1);
     
-    fprintf(stderr, "loop.cc L7236 adding stmt %d\n", stmt.size()); 
+    debug_fprintf(stderr, "loop.cc L7236 adding stmt %d\n", stmt.size()); 
     stmt.push_back(s1);
 
     uninterpreted_symbols.push_back(
@@ -7302,7 +7302,7 @@ void Loop::ELLify(int stmt_num, std::vector<std::string> arrays_to_pad,
 void Loop::make_dense(int stmt_num, int loop_level,
                       std::string new_loop_index) {
   
-  fprintf(stderr, "\nLoop::make_dense()\n"); 
+  debug_fprintf(stderr, "\nLoop::make_dense()\n"); 
   apply_xform(stmt_num);
   std::vector<int> lex = getLexicalOrder(stmt_num);
   //1. Identify Loop Index
@@ -7417,8 +7417,8 @@ void Loop::make_dense(int stmt_num, int loop_level,
   CG_outputBuilder *ocg = ir->builder();
 
 
-  fprintf(stderr, "loop.cc  new_loop_index %s\n", new_loop_index.c_str()); 
-  fprintf(stderr, "loop.cc  %s == %s[%s] ??\n", 
+  debug_fprintf(stderr, "loop.cc  new_loop_index %s\n", new_loop_index.c_str()); 
+  debug_fprintf(stderr, "loop.cc  %s == %s[%s] ??\n", 
           new_loop_index.c_str(),
           inner_arr_name.c_str(), 
           loop_index.c_str()); 
@@ -7464,7 +7464,7 @@ void Loop::make_dense(int stmt_num, int loop_level,
     dense_loop.segment_descriptor =
       stmt[stmt_num].loop_level[loop_level - 1].segment_descriptor;
   
-  fprintf(stderr, "\n\n*** loop_level.insert() ***\n\n\n"); // this is the only insert
+  debug_fprintf(stderr, "\n\n*** loop_level.insert() ***\n\n\n"); // this is the only insert
   stmt[stmt_num].loop_level.insert(
                                    stmt[stmt_num].loop_level.begin() + (loop_level - 1), dense_loop);
   
@@ -7811,7 +7811,7 @@ void Loop::split_with_alignment(int stmt_num, int level, int alignment,
   assign_const(new_stmt.xform, dim - 1, cur_lex + 1);
   
   
-  fprintf(stderr, "loop.cc L7814 adding stmt %d\n", stmt.size()); 
+  debug_fprintf(stderr, "loop.cc L7814 adding stmt %d\n", stmt.size()); 
   stmt.push_back(new_stmt);
 
   uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
@@ -7894,25 +7894,25 @@ extern void stencil( chillAST_node *topstatement );
 
 
 bool Loop::find_stencil_shape( int statement ) { 
-  //fprintf(stderr, "Loop::find_stencil_shape( %d )\n", statement);
+  //debug_fprintf(stderr, "Loop::find_stencil_shape( %d )\n", statement);
   omega::CG_chillRepr *CR = (omega::CG_chillRepr *)stmt[ statement].code;
   
   // cheat for now
-  //fprintf(stderr, "loop has %d stmt\n", stmt.size()); 
+  //debug_fprintf(stderr, "loop has %d stmt\n", stmt.size()); 
   //CR->chillnodes[0]->print(); printf("\n\n\n"); fflush(stdout);
   
   // try to create a list of statements
   std::vector<chillAST_node*> AST_statements;
-  //fprintf(stderr, "chill gathering statements\n");
+  //debug_fprintf(stderr, "chill gathering statements\n");
   
   for (int i=0; i<CR->chillnodes.size(); i++) { 
     CR->chillnodes[i]->gatherStatements( AST_statements );
   }
   
   
-  //fprintf(stderr, "%d chill gathered statements\n", statements.size());
+  //debug_fprintf(stderr, "%d chill gathered statements\n", statements.size());
   //for (int i=0; i<statements.size(); i++) { 
-  //fprintf(stderr, "\nstatement %d\n", i);
+  //debug_fprintf(stderr, "\nstatement %d\n", i);
   //statements[i]->print(); printf("\n"); fflush(stdout); 
   //} 
   
