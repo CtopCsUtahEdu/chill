@@ -1332,7 +1332,7 @@ relation : OPEN_BRACE {need_coef = true; relationDecl = new Declaration_Site();}
          | reachable_of { $$ = $1; }
          | ASSERT_UNSAT relation {
            if (($2)->is_satisfiable()) {
-             fprintf(stderr,"assert_unsatisfiable failed on ");
+             debug_fprintf(stderr,"assert_unsatisfiable failed on ");
              ($2)->print_with_subs(stderr);
              exit(1);
            }
@@ -1770,7 +1770,7 @@ bool process_calc_debugging_flags(char *arg,int &j) {
       else 
         return false;
     if (level < 0 || level > 4) {
-      fprintf(stderr,"Debug level %c out of range: %d\n", debug_type, level);
+      debug_fprintf(stderr,"Debug level %c out of range: %d\n", debug_type, level);
       return false;
     }
     switch(debug_type) {
@@ -1801,7 +1801,7 @@ bool process_calc_debugging_flags(char *arg,int &j) {
       evac_debug = level; break;
 #endif
     default:
-      fprintf(stderr, "Unknown debug type %c\n", debug_type);
+      debug_fprintf(stderr, "Unknown debug type %c\n", debug_type);
       return false;
     }
   }
@@ -1828,11 +1828,11 @@ int main(int argc, char **argv) {
           }          
           break;
         case 'G':
-          fprintf(stderr,"Note: specifying number of GEQ's is no longer useful.\n");
+          debug_fprintf(stderr,"Note: specifying number of GEQ's is no longer useful.\n");
           while(argv[i][j] != 0) j++;
           break;
         case 'E':
-          fprintf(stderr,"Note: specifying number of EQ's is no longer useful.\n");
+          debug_fprintf(stderr,"Note: specifying number of EQ's is no longer useful.\n");
           while(argv[i][j] != 0) j++;
           break;
         case 'R':
@@ -1844,7 +1844,7 @@ int main(int argc, char **argv) {
           exit(1);
           break;
         default:
-          fprintf(stderr, "\nUnknown flag -%c\n", c);
+          debug_fprintf(stderr, "\nUnknown flag -%c\n", c);
           printUsage(stderr, argv);
           exit(1);
         }
@@ -1853,14 +1853,14 @@ int main(int argc, char **argv) {
     else {
       /* Make sure this is a file name */
       if (fileName) {
-        fprintf(stderr,"\nCan only handle a single input file\n");
+        debug_fprintf(stderr,"\nCan only handle a single input file\n");
         printUsage(stderr,argv);
         exit(1);
       }
       fileName = argv[i];
       yyin = fopen(fileName, "r");
       if (!yyin) {
-        fprintf(stderr, "\nCan't open input file %s\n",fileName);
+        debug_fprintf(stderr, "\nCan't open input file %s\n",fileName);
         printUsage(stderr,argv);
         exit(1);
       }

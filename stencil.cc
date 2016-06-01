@@ -15,16 +15,16 @@ void stencilInfo::walktree( chillAST_node *node,
                vector< chillAST_node * > &coeffstohere ) { 
   //class stencilInfo &SI /* the output */ ) { 
   
-  //fprintf(stderr, "walktree %s ", node->getTypeString()); 
+  //debug_fprintf(stderr, "walktree %s ", node->getTypeString()); 
   //node->print(); printf("\n"); fflush(stdout);
 
   if (node->isArraySubscriptExpr()) { 
     // here we've encountered an array subscript expression
     // the coefficients are on a stack.
     chillAST_ArraySubscriptExpr * ASE = (chillAST_ArraySubscriptExpr *)node;
-    //fprintf(stderr, "\nASE "); ASE->print(); printf("\n"); fflush(stdout);
+    //debug_fprintf(stderr, "\nASE "); ASE->print(); printf("\n"); fflush(stdout);
     vector <chillAST_node *> coeffs;
-    //fprintf(stderr, "coefs:  ");
+    //debug_fprintf(stderr, "coefs:  ");
     for (int i=0; i< coeffstohere.size(); i++) { 
       coeffs.push_back( coeffstohere[i]->clone() ); 
 
@@ -62,16 +62,16 @@ void stencilInfo::walktree( chillAST_node *node,
         if (numvd > 0) debug_fprintf(stderr, "variable %s vs %s\n", vds[0]->varname, indexVariables[i]->varname );
         exit(-1);
       }
-      //fprintf(stderr, "variable %s is %s\n", vds[0]->varname, indexVariables[i]->varname );
+      //debug_fprintf(stderr, "variable %s is %s\n", vds[0]->varname, indexVariables[i]->varname );
 
-      //fprintf( stderr, "%s  ", ind[i]->getTypeString()); 
+      //debug_fprintf(stderr, "%s  ", ind[i]->getTypeString()); 
       //ind[i]->print(); printf("\n");
 
       int offset = 0;
       if ( ind[i]->isDeclRefExpr()) {} // just the variable, offset is 0
       if ( ind[i]->isBinaryOperator()) { 
         chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *) ind[i];
-        //fprintf(stderr, "LR %s %s\n", BO->lhs->getTypeString(),BO->rhs->getTypeString() ); 
+        //debug_fprintf(stderr, "LR %s %s\n", BO->lhs->getTypeString(),BO->rhs->getTypeString() ); 
 
         if (BO->isPlusOp()) {
           if (BO->lhs->isDeclRefExpr()) offset = BO->rhs->evalAsInt();
@@ -96,7 +96,7 @@ void stencilInfo::walktree( chillAST_node *node,
           exit(-1);
         }
       }
-      //fprintf(stderr, "offset %d\n\n", offset); 
+      //debug_fprintf(stderr, "offset %d\n\n", offset); 
       offsetstostore.push_back( offset );
       // OK, now see if this is outside the rage we already know about
       if (offset < minOffset[ i ]) minOffset[ i ] = offset;
@@ -159,7 +159,7 @@ stencilInfo::stencilInfo() {
 
 stencilInfo::stencilInfo( chillAST_node *topstatement ) { 
 
-  //fprintf(stderr, "\n\nstencil.cc  stencil()\n"); 
+  //debug_fprintf(stderr, "\n\nstencil.cc  stencil()\n"); 
   //topstatement->print(); printf("\n\n"); fflush(stdout);
 
 
@@ -181,11 +181,11 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
   else statements.push_back(topstatement);
 
   int numstatements = statements.size(); 
-  //fprintf(stderr, "\n*** %d statements ***\n\n", numstatements); 
+  //debug_fprintf(stderr, "\n*** %d statements ***\n\n", numstatements); 
 
 
   for (int i=0; i<numstatements; i++) { 
-    //fprintf(stderr, "processing statement %d\n", i); 
+    //debug_fprintf(stderr, "processing statement %d\n", i); 
 
     chillAST_node* statement = statements[i]; 
 
@@ -202,10 +202,10 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
       exit(-1);
     }
     
-    //fprintf(stderr, "OK, it's an assignment statement, as expected\n");
+    //debug_fprintf(stderr, "OK, it's an assignment statement, as expected\n");
     vector<chillAST_ArraySubscriptExpr*> lhsarrayrefs; // gather lhs arrayrefs
     binop->lhs->gatherArrayRefs( lhsarrayrefs, 0 );
-    //fprintf(stderr, "%d arrayrefs in lhs\n", lhsarrayrefs.size());
+    //debug_fprintf(stderr, "%d arrayrefs in lhs\n", lhsarrayrefs.size());
     
     // there should be just one. It is the destination of the stencil
     chillAST_node *outvar = NULL;
@@ -222,7 +222,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
       }
 
 
-      //fprintf(stderr, "\n\noutput array variable is "); dstArrayVariable->dump();
+      //debug_fprintf(stderr, "\n\noutput array variable is "); dstArrayVariable->dump();
       //printf("\n"); fflush(stdout); 
     }
     else { 
@@ -235,7 +235,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     vector<chillAST_DeclRefExpr *>lhsrefs; 
     binop->lhs->gatherDeclRefExprs( lhsrefs );  // gather all variable refs on lhs 
     int numdre =  lhsrefs.size(); 
-    //fprintf(stderr, "%d declrefs in lhs\n", numdre);
+    //debug_fprintf(stderr, "%d declrefs in lhs\n", numdre);
     //for (int i=0; i<numdre; i++) lhsrefs[i]->dump(); 
     
     if (!dimensions) dimensions = numdre-1;
@@ -263,9 +263,9 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     
     
     // look at the rhs of the equation (this can all be commented out. it just prints debug stuff)
-    //fprintf(stderr, "\n\n"); 
+    //debug_fprintf(stderr, "\n\n"); 
     //binop->rhs->print(); 
-    //fprintf(stderr, "\n\n"); 
+    //debug_fprintf(stderr, "\n\n"); 
 
 
     // gather the array refs from the right hand side of the assignment statement into a vector
@@ -274,7 +274,7 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     int numarray =  refs.size(); 
 
 
-    //fprintf(stderr, "%d array refs in rhs\n\n", numarray);
+    //debug_fprintf(stderr, "%d array refs in rhs\n\n", numarray);
     //for (int i=0; i<numarray; i++) { 
     //  refs[i]->print(); printf("\n"); 
     //  
@@ -494,9 +494,9 @@ int main(int argc, char *argv[]) {
     //if (body->isCompoundStmt()) body = body->getChild(0);
 
 
-    //fprintf(stderr, "\n\n"); 
+    //debug_fprintf(stderr, "\n\n"); 
     //body->print();
-    //fprintf(stderr, "\n\n"); 
+    //debug_fprintf(stderr, "\n\n"); 
     //body->dump(); 
     
     

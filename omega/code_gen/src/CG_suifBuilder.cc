@@ -106,7 +106,7 @@ CG_outputRepr* CG_suifBuilder::CreatePlaceHolder (int, CG_outputRepr *stmt,
 CG_outputRepr* CG_suifBuilder::CreateAssignment(int, CG_outputRepr *lhs,
                                                 CG_outputRepr *rhs) const {
   if ( lhs == NULL || rhs == NULL ) {
-    fprintf(stderr, "Code generation: Missing lhs or rhs\n");
+    debug_fprintf(stderr, "Code generation: Missing lhs or rhs\n");
     return NULL;
   }
 
@@ -165,7 +165,7 @@ CG_outputRepr* CG_suifBuilder::CreateInvoke(const std::string &fname,
     }
   }
   else {
-    fprintf(stderr, "Code generation: invoke function io_call not implemented\n");
+    debug_fprintf(stderr, "Code generation: invoke function io_call not implemented\n");
     return NULL;
   }
 }
@@ -278,7 +278,7 @@ CG_outputRepr* CG_suifBuilder::CreateInductive(CG_outputRepr *index,
                                                CG_outputRepr *upper,
                                                CG_outputRepr *step) const {
   if ( index == NULL || lower == NULL || upper == NULL ) {
-    fprintf(stderr, "Code generation: something wrong in CreateInductive\n");
+    debug_fprintf(stderr, "Code generation: something wrong in CreateInductive\n");
     return NULL;
   }
 
@@ -316,7 +316,7 @@ CG_outputRepr* CG_suifBuilder::CreateLoop(int, CG_outputRepr *control,
     return NULL;
   }
   else if ( control == NULL ) {
-    fprintf(stderr, "Code generation: no inductive for this loop\n");
+    debug_fprintf(stderr, "Code generation: no inductive for this loop\n");
     return stmtList;
   }
 
@@ -433,7 +433,7 @@ CG_outputRepr* CG_suifBuilder::CreateTimes(CG_outputRepr *lop,
 CG_outputRepr* CG_suifBuilder::CreateIntegerDivide(CG_outputRepr *lop,
                                                    CG_outputRepr *rop) const {
   if ( rop == NULL ) {
-    fprintf(stderr, "Code generation: divide by NULL\n");
+    debug_fprintf(stderr, "Code generation: divide by NULL\n");
     return NULL;
   }
   else if ( lop == NULL ) {

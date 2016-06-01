@@ -328,7 +328,7 @@ namespace omega {
   CG_outputRepr* CG_roseBuilder::CreateAssignment(int, CG_outputRepr *lhs,
                                                   CG_outputRepr *rhs) const {
     if (lhs == NULL || rhs == NULL) {
-      fprintf(stderr, "Code generation: Missing lhs or rhs\n");
+      debug_fprintf(stderr, "Code generation: Missing lhs or rhs\n");
       return NULL;
     }
     
@@ -355,7 +355,7 @@ namespace omega {
   CG_outputRepr* CG_roseBuilder::CreatePlusAssignment(int, CG_outputRepr *lhs,
                                                       CG_outputRepr *rhs) const {
     if (lhs == NULL || rhs == NULL) {
-      fprintf(stderr, "Code generation: Missing lhs or rhs\n");
+      debug_fprintf(stderr, "Code generation: Missing lhs or rhs\n");
       return NULL;
     }
     
@@ -385,7 +385,7 @@ namespace omega {
 //-----------------------------------------------------------------------------
   CG_outputRepr* CG_roseBuilder::CreateInvoke(const std::string &fname,
                                               std::vector<CG_outputRepr *> &list, bool is_array ) const {
-    fprintf(stderr, "REALLY CG_roseBuilder::CreateInvoke( fname %s, ...)\n", fname.c_str()); 
+    debug_fprintf(stderr, "REALLY CG_roseBuilder::CreateInvoke( fname %s, ...)\n", fname.c_str()); 
     if (fname == std::string("max") || fname == std::string("min")) {
       if (list.size() == 0) {
         return NULL;
@@ -446,7 +446,7 @@ namespace omega {
     }
     else if(is_array){
       
-      fprintf(stderr, "CG_roseBuilder::CreateInvoke()  is_array\n"); 
+      debug_fprintf(stderr, "CG_roseBuilder::CreateInvoke()  is_array\n"); 
       SgVariableSymbol *vs = symtab_->find_variable(SgName(fname.c_str()));
       if(vs == NULL)
         vs = symtab2_->find_variable(SgName(fname.c_str()));
@@ -462,7 +462,7 @@ namespace omega {
       
       
     } else {
-      fprintf(stderr,
+      debug_fprintf(stderr,
               "Code generation: invoke function io_call not implemented\n");
       return NULL;
     }
@@ -604,7 +604,7 @@ namespace omega {
                                                  CG_outputRepr *lower, CG_outputRepr *upper, CG_outputRepr *step) const {
     
     if (index == NULL || lower == NULL || upper == NULL) {
-      fprintf(stderr,
+      debug_fprintf(stderr,
               "Code generation: something wrong in CreateInductive\n");
       return NULL;
     }
@@ -702,7 +702,7 @@ namespace omega {
       delete control;
       return NULL;
     } else if (control == NULL) {
-      fprintf(stderr, "Code generation: no inductive for this loop\n");
+      debug_fprintf(stderr, "Code generation: no inductive for this loop\n");
       return stmtList;
     }
     
@@ -1031,7 +1031,7 @@ namespace omega {
   CG_outputRepr* CG_roseBuilder::CreateIntegerFloor(CG_outputRepr *lop,
                                                     CG_outputRepr *rop) const {
     if (rop == NULL) {
-      fprintf(stderr, "Code generation: divide by NULL\n");
+      debug_fprintf(stderr, "Code generation: divide by NULL\n");
       return NULL;
     } else if (lop == NULL) {
       delete rop;

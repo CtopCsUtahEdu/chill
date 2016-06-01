@@ -99,7 +99,7 @@ struct IR_Ref {
   virtual bool operator!=(const IR_Ref &that) const {return !(*this == that);}
   virtual omega::CG_outputRepr *convert() = 0;
   virtual IR_Ref *clone() const = 0;  /* shallow copy */
-  virtual void Dump() const { fprintf(stderr, "some IR_*Ref needs to implement Dump()\n"); int *i=0; int j=i[0]; };
+  virtual void Dump() const { debug_fprintf(stderr, "some IR_*Ref needs to implement Dump()\n"); int *i=0; int j=i[0]; };
 };
 
 
@@ -163,7 +163,7 @@ struct IR_ArrayRef: public IR_Ref {
     // ?? delete sym;
     return t;
   }
-  virtual void Dump() const { fprintf(stderr, "IR_ArrayRef needs to implement Dump()\n"); };
+  virtual void Dump() const { debug_fprintf(stderr, "IR_ArrayRef needs to implement Dump()\n"); };
 };
 
 struct IR_PointerArrayRef: public IR_Ref {
@@ -304,7 +304,7 @@ public:
                                             std::vector<omega::CG_outputRepr *> &index) {
     //IR_ArrayRef *AR = CreateArrayRef(sym, index);
     //return new omega::CG_outputRepr(AR);
-    fprintf(stderr, "ir_code.hh  SOME SUBCLASS OF ir_code did not implement CreateArrayRefRepr()\n"); 
+    debug_fprintf(stderr, "ir_code.hh  SOME SUBCLASS OF ir_code did not implement CreateArrayRefRepr()\n"); 
     return NULL; 
   }
 

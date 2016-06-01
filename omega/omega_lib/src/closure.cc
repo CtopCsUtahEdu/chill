@@ -142,7 +142,7 @@ Relation ConicClosure (NOT_CONST Relation &R) {
 
 bool is_lex_forward(Relation R) {
   if(R.n_inp() != R.n_out()) {
-    fprintf(stderr, "relation has wrong inputs/outpts\n");
+    debug_fprintf(stderr, "relation has wrong inputs/outpts\n");
     exit(1);
   }
   Relation forw(R.n_inp(), R.n_out());
@@ -982,7 +982,7 @@ Relation TransitiveClosure0(NOT_CONST Relation &input_r, int maxExpansion, NOT_C
     if (r.max_ufs_arity() > 0) {
       assert(r.max_ufs_arity() == 0 && "Can't take transitive closure with UFS yet.");
 
-      fprintf(stderr, "Can't take transitive closure with UFS yet.");
+      debug_fprintf(stderr, "Can't take transitive closure with UFS yet.");
       exit(1);
     }
 

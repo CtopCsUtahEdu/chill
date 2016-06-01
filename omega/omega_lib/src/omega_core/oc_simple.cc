@@ -41,10 +41,10 @@ int singleVarGEQ(eqn* e) {
 
 void checkVars(int nVars) {
   if (nVars > maxVars) {
-    fprintf(stderr, "\nERROR:\n");
-    fprintf(stderr, "An attempt was made to create a conjunction with %d variables.\n", nVars);
-    fprintf(stderr, "The current limit on variables in a single conjunction is %d.\n", maxVars);
-    fprintf(stderr, "This limit can be changed by changing the #define of maxVars in oc.h.\n\n");
+    debug_fprintf(stderr, "\nERROR:\n");
+    debug_fprintf(stderr, "An attempt was made to create a conjunction with %d variables.\n", nVars);
+    debug_fprintf(stderr, "The current limit on variables in a single conjunction is %d.\n", maxVars);
+    debug_fprintf(stderr, "This limit can be changed by changing the #define of maxVars in oc.h.\n\n");
     exit(2);
   }
 }

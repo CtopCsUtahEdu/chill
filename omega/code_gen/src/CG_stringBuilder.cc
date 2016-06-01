@@ -184,9 +184,9 @@ namespace omega {
   CG_stringRepr *CG_stringBuilder::CreateInvoke(const std::string &funcName,
                                                 std::vector<CG_outputRepr *> &list,
                                                 bool is_array) const {
-    fprintf(stderr, "CG_stringBuilder::CreateInvoke( %s, ..., is_array  ", funcName.c_str());
-    if (is_array) fprintf(stderr, " true )\n"); 
-    else fprintf(stderr, " false )\n"); 
+    debug_fprintf(stderr, "CG_stringBuilder::CreateInvoke( %s, ..., is_array  ", funcName.c_str());
+    if (is_array) debug_fprintf(stderr, " true )\n"); 
+    else debug_fprintf(stderr, " false )\n"); 
 
 
     std::string listStr = "";
@@ -216,7 +216,7 @@ namespace omega {
   CG_stringRepr* CG_stringBuilder::CreateAttribute(CG_outputRepr *control,
                                                    const std::string &commentText) const {
     
-    //fprintf(stderr, "CG_stringBuilder::CreateAttribute( jkadskjh, '%s')\n", commentText.c_str());
+    //debug_fprintf(stderr, "CG_stringBuilder::CreateAttribute( jkadskjh, '%s')\n", commentText.c_str());
 
     if (commentText == std::string("")) {
       return static_cast<CG_stringRepr *> (control);
@@ -628,14 +628,14 @@ namespace omega {
                                                 std::vector<std::string> data_members,
                                                 std::vector<CG_outputRepr *> data_types)
   { 
-    fprintf(stderr, "CG_stringBuilder::CreateStruct( %s )\n", struct_name.c_str()); 
-    fprintf(stderr, "that makes no sense\n"); 
+    debug_fprintf(stderr, "CG_stringBuilder::CreateStruct( %s )\n", struct_name.c_str()); 
+    debug_fprintf(stderr, "that makes no sense\n"); 
     exit(0); 
   }
   
   CG_outputRepr *CG_stringBuilder::CreateClassInstance(std::string name , 
                                                       CG_outputRepr *class_def){
-    fprintf(stderr, "CG_stringBuilder::CreateClassInstance( %s )\n", name.c_str()); 
+    debug_fprintf(stderr, "CG_stringBuilder::CreateClassInstance( %s )\n", name.c_str()); 
     exit(0); 
     
   }
@@ -643,17 +643,17 @@ namespace omega {
 	CG_outputRepr *CG_stringBuilder::lookup_member_data(CG_outputRepr* scope, 
                                                      std::string varName, 
                                                      CG_outputRepr *instance) {
-    fprintf(stderr, "CG_stringBuilder::lookup_member_data( )\n"); 
+    debug_fprintf(stderr, "CG_stringBuilder::lookup_member_data( )\n"); 
     exit(0); 
   }
   
   CG_outputRepr* CG_stringBuilder::CreatePointer(std::string  &name) const { 
-    fprintf(stderr, "CG_chillBuilder::CreatePointer( %s )\n", name.c_str()); 
+    debug_fprintf(stderr, "CG_chillBuilder::CreatePointer( %s )\n", name.c_str()); 
     exit(0); 
   }
 
 	CG_outputRepr* CG_stringBuilder::ObtainInspectorRange(const std::string &_s, const std::string &_name) const {
-    fprintf(stderr, "CG_stringBuilder::ObtainInspectorRange(%s,  %s )\n", _s.c_str(), _name.c_str()); 
+    debug_fprintf(stderr, "CG_stringBuilder::ObtainInspectorRange(%s,  %s )\n", _s.c_str(), _name.c_str()); 
     exit(0); 
   }
 

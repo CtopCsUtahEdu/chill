@@ -38,13 +38,13 @@ public:
 
   CG_chillRepr( chillAST_node *chillast ) { 
     stmtclassname = strdup(chillast->getTypeString()); 
-    //fprintf(stderr, "made new chillRepr of class %s\n", stmtclassname); 
+    //debug_fprintf(stderr, "made new chillRepr of class %s\n", stmtclassname); 
     if (chillast->asttype == CHILLAST_NODETYPE_COMPOUNDSTMT) { 
       vector<chillAST_node*> children = chillast->getChildren(); 
       int numchildren = children.size();
       for (int i=0; i<numchildren; i++) {
         chillnodes.push_back( children[i] ); 
-        //fprintf(stderr, "adding a statement from a CompoundStmt\n"); 
+        //debug_fprintf(stderr, "adding a statement from a CompoundStmt\n"); 
       }
     }
     else { // for now, assume it's a single statement 

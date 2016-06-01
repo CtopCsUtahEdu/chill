@@ -31,16 +31,16 @@ namespace omega {
   
 
   chillAST_node * CG_chillRepr::GetCode() { 
-    //fprintf(stderr, "CG_chillRepr::GetCode() this %p   size %d\n", this, chillnodes.size()); 
+    //debug_fprintf(stderr, "CG_chillRepr::GetCode() this %p   size %d\n", this, chillnodes.size()); 
 
     if (0 == chillnodes.size()) return NULL; // error?
         
     if (1 == chillnodes.size()) return chillnodes[0];
 
     // make a compoundstatement with all the code ???  probably should be that way already
-    fprintf(stderr, "CG_chillRepr GetCode(), multiple (%d) statements in the code??\n", chillnodes.size());
+    debug_fprintf(stderr, "CG_chillRepr GetCode(), multiple (%d) statements in the code??\n", chillnodes.size());
     for (int i=0; i<chillnodes.size(); i++) {
-      fprintf(stderr, "chillnode %d  %p\n", i, chillnodes[i] );
+      debug_fprintf(stderr, "chillnode %d  %p\n", i, chillnodes[i] );
     }
 
 
@@ -54,7 +54,7 @@ namespace omega {
 
 
   CG_outputRepr* CG_chillRepr::clone() const {  // make a deep/shallow  COPY of all the nodes
-    //fprintf(stderr, "CG_chillRepr::clone()  %d chill nodes\n", chillnodes.size()); 
+    //debug_fprintf(stderr, "CG_chillRepr::clone()  %d chill nodes\n", chillnodes.size()); 
     //for (int i=0; i<chillnodes.size(); i++) { chillnodes[i]->print(); printf("\n"); } fflush(stdout);
 
     CG_chillRepr *newrepr = new  CG_chillRepr(); // empty
@@ -64,7 +64,7 @@ namespace omega {
 
     // shallow (the submembers are the same ) 
     //for (int i=0; i<chillnodes.size(); i++) newrepr->addStatement( chillnodes[i] ); 
-    //fprintf(stderr, "done cloning\n"); 
+    //debug_fprintf(stderr, "done cloning\n"); 
     return newrepr; 
   }
 
@@ -114,10 +114,10 @@ namespace omega {
 
   void CG_chillRepr::Dump() const {
     CG_chillRepr *me = (CG_chillRepr *)this;  // ?? 
-    //fprintf(stderr, "repr of type ");
-    //fprintf(stderr, "%s\n", this->type()); 
+    //debug_fprintf(stderr, "repr of type ");
+    //debug_fprintf(stderr, "%s\n", this->type()); 
     int numnodes = me->chillnodes.size();
-    //fprintf(stderr, "repr %p  %d nodes\n", this, numnodes); 
+    //debug_fprintf(stderr, "repr %p  %d nodes\n", this, numnodes); 
     for (int i=0; i<numnodes; i++) {
       me->chillnodes[i]->print();  printf("\n"); fflush(stdout);
     }
