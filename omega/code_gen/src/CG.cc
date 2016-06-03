@@ -35,6 +35,8 @@
 #include <stack>
 #include <string.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
   
   extern std::vector<std::vector<int> > smtNonSplitLevels;

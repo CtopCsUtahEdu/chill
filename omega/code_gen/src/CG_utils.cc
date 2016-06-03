@@ -23,6 +23,8 @@
 #include <math.h>
 #include <stack>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
   
   int checkLoopLevel;

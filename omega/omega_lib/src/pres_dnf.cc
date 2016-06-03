@@ -18,6 +18,8 @@
 #include <omega/Relation.h>
 #include <omega/omega_i.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 void DNF::remap() {

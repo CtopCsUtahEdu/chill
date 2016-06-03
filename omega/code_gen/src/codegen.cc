@@ -30,6 +30,8 @@
 #include <code_gen/codegen_error.h>
 #include <code_gen/CG_utils.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 const std::string CodeGen::loop_var_name_prefix = "t";

@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 int checkIfSingleVar(eqn* e, int i) {

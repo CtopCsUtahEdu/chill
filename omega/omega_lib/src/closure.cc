@@ -32,6 +32,8 @@
 #include <basic/List.h>
 #include <basic/SimpleList.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 void InvestigateClosure(Relation r, Relation r_closure, Relation bounds);

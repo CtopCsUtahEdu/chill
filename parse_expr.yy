@@ -1,6 +1,7 @@
 %{
 #include "chill_run_util.hh"
 #include "parse_expr.ll.hh"
+#include "chill_io.hh"
 
 extern int yydebug;
 

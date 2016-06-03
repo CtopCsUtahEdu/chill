@@ -18,6 +18,8 @@
 #include <code_gen/CG_roseBuilder.h>
 #include <string>
 
+#include "../../../chill_io.hh"
+
 struct ir_error: public std::runtime_error {
   ir_error(const std::string &msg) :
     std::runtime_error(msg) {

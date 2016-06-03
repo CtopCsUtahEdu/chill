@@ -21,6 +21,8 @@
 #include <omega/omega_i.h>
 #include <assert.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 Rel_Body null_rel;

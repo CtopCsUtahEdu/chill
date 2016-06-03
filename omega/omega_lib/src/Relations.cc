@@ -27,6 +27,8 @@
 #endif
 #include <assert.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 #define CHECK_MAYBE_SUBSET 1

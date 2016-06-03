@@ -25,6 +25,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "../../../chill_io.hh"
+
 namespace {
   
   std::string SafeguardString(const std::string &s, char op) {
