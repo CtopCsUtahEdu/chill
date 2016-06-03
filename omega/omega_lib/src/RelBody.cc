@@ -21,6 +21,8 @@
 #include <omega/omega_i.h>
 #include <assert.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 Rel_Body null_rel;
@@ -453,7 +455,7 @@ void Rel_Body::simplify(int rdt_conjs, int rdt_constrs) {
         if(DebugFile==NULL) {
           DebugFile = fopen("test.out", "w");
           if(DebugFile==NULL)
-            fprintf(stderr, "Can not open file test.out\n");
+            debug_fprintf(stderr, "Can not open file test.out\n");
         }
       }
 

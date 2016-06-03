@@ -73,7 +73,7 @@ template<class T> inline void set_min(T &m, const T &x) {
 
 /* inline coef_t check_pos_mul(coef_t x, coef_t y) { */
 /*   if (y >= 48051280 && y < posInfinity) */
-/*     fprintf(stderr, "%d %d\n", x, y); */
+/*     debug_fprintf(stderr, "%d %d\n", x, y); */
 /* /\* #if !defined NDEBUG *\/ */
 /* /\*   if (x != 0) *\/ */
 /* /\*     assert(((MAXINT)/4) / x > y); *\/ */

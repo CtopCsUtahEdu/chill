@@ -1393,7 +1393,7 @@ relation : OPEN_BRACE {need_coef = true; relationDecl = new Declaration_Site();}
          | reachable_of { $$ = $1; }
          | ASSERT_UNSAT relation {
            if (($2)->is_satisfiable()) {
-             fprintf(stderr,"assert_unsatisfiable failed on ");
+             debug_fprintf(stderr,"assert_unsatisfiable failed on ");
              ($2)->print_with_subs(stderr);
              exit(1);
            }
@@ -1842,7 +1842,7 @@ void yyerror(const std::string &s) {
 
 int main(int argc, char **argv) {
   if (argc > 2){
-    fprintf(stderr, "Usage: %s [script_file]\n", argv[0]);
+    debug_fprintf(stderr, "Usage: %s [script_file]\n", argv[0]);
     exit(1);
   }
 
@@ -1850,7 +1850,7 @@ int main(int argc, char **argv) {
     std::ifstream *ifs = new std::ifstream;
     ifs->open(argv[1], std::ifstream::in);
     if (!ifs->is_open()) {
-        fprintf(stderr, "can't open input file %s\n", argv[1]);
+        debug_fprintf(stderr, "can't open input file %s\n", argv[1]);
         exit(1);
     }
     yy_buffer_state *bs = mylexer.yy_create_buffer(ifs, 8092);

@@ -1,6 +1,7 @@
 %{
 #include "chill_run_util.hh"
 #include "parse_expr.ll.hh"
+#include "chill_io.hh"
 
 extern int yydebug;
 
@@ -61,7 +62,7 @@ neg_expr : '-' neg_expr          { $$ = make_cond_item_neg($2); }
 %%
 
 void yyerror(const char* msg) {
-  fprintf(stderr, "Parse error: %s", msg);
+  debug_fprintf(stderr, "Parse error: %s", msg);
 }
 
 simap_vec_t* parse_relation_vector(const char* expr) {

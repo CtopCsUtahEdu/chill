@@ -66,6 +66,8 @@ std::set<int> Loop::unroll_extra(int stmt_num, int level, int unroll_amount, int
 }
 
 void Loop::peel(int stmt_num, int level, int peel_amount) {
+  debug_fprintf(stderr, "Loop::peel( stmt_num %d, level %d, amount %d)\n", stmt_num, level, peel_amount); 
+  
   // check for sanity of parameters
   if (stmt_num < 0 || stmt_num >= stmt.size())
     throw std::invalid_argument("invalid statement number " + to_string(stmt_num));
@@ -79,14 +81,22 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
   std::vector<Relation> Rs;
   for (std::set<int>::iterator i = subloop.begin(); i != subloop.end(); i++) {
     Relation r = getNewIS(*i);
+    r.print(); fflush(stdout); 
+
     Relation f(r.n_set(), level);
+    f.print(); fflush(stdout); 
     F_And *f_root = f.add_and();
     for (int j = 1; j <= level; j++) {
       EQ_Handle h = f_root->add_EQ();
       h.update_coef(f.input_var(2*j), 1);
       h.update_coef(f.output_var(j), -1);
     }
-    r = Composition(f, r);
+    r.print(); fflush(stdout); 
+    f.print();  fflush(stdout); 
+
+    //Anand composition will fail due to unintepreted function symbols introduced by flattening
+		//r = Composition(f, r);
+    r = omega::Range(Restrict_Domain(f, r));
     r.simplify();
     Rs.push_back(r);
   }

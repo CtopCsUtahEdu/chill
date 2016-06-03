@@ -3,6 +3,8 @@
 #include <basic/Dynamic_Array.h>
 #include <omega/reach.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 typedef Dynamic_Array1<Relation> Rel_Array1;
@@ -53,7 +55,7 @@ void dump_rels(Rel_Array2 &a, reachable_information *reachable_info) {
   int n_nodes = reachable_info->node_names.size();
   for(i = 1; i <= n_nodes; i++)
     for(j = 1; j <= n_nodes; j++) {
-      fprintf(stderr,"t[%s][%s] = ",
+      debug_fprintf(stderr,"t[%s][%s] = ",
               (reachable_info->node_names[i]).c_str(),
               (reachable_info->node_names[j]).c_str());
       a[i][j].print_with_subs(stderr);
@@ -65,7 +67,7 @@ void dump_sets(Rel_Array1 &a, reachable_information *reachable_info) {
   int i;
   int n_nodes = reachable_info->node_names.size();
   for(i = 1; i <= n_nodes; i++) {
-    fprintf(stderr,"r[%s] = ", (reachable_info->node_names[i]).c_str());
+    debug_fprintf(stderr,"r[%s] = ", (reachable_info->node_names[i]).c_str());
     a[i].print_with_subs(stderr);
   }
 }
@@ -84,14 +86,14 @@ Rel_Array1 *Reachable_Nodes(reachable_information *reachable_info) {
 #define DUMP_CLOSED 1
 
   if(DUMP_INITIAL && relation_debug){
-    fprintf(stderr,"Initially:\n");
+    debug_fprintf(stderr,"Initially:\n");
     dump_rels(transitions, reachable_info);
   }
 
   close_rels(transitions,n_nodes);
 
   if(DUMP_CLOSED && relation_debug) {
-    fprintf(stderr,"Closed:\n");
+    debug_fprintf(stderr,"Closed:\n");
     dump_rels(transitions, reachable_info);
   }
 
@@ -187,13 +189,13 @@ Rel_Array1 *I_Reachable_Nodes(reachable_information *reachable_info) {
 #define DUMP_CLOSED 1
 
   if(DUMP_INITIAL && relation_debug > 1) {
-    fprintf(stderr,"Closed:\n");
+    debug_fprintf(stderr,"Closed:\n");
     dump_rels(closed, reachable_info);
   }
   if(DUMP_INITIAL && relation_debug) {
-    fprintf(stderr,"start nodes:\n");
+    debug_fprintf(stderr,"start nodes:\n");
     dump_sets(start_nodes, reachable_info);
-    fprintf(stderr,"Initially reachable:\n");
+    debug_fprintf(stderr,"Initially reachable:\n");
     dump_sets(r, reachable_info);
   }
 

@@ -15,6 +15,9 @@ struct DependenceVector {
   DependenceType type;
   IR_Symbol *sym;
   
+  bool from_same_stmt; // Manu
+  bool is_reduction_cand; // Manu
+
   bool is_reduction; // used to identify a class of flow dependence
                      // that can be broken
   std::vector<omega::coef_t> lbounds;
@@ -26,12 +29,14 @@ struct DependenceVector {
     type = DEP_UNKNOWN;
     sym = NULL;
     is_reduction = false;
+    from_same_stmt = false; // Manu
+    is_reduction_cand = false; // Manu
     quasi = false;
     is_scalar_dependence = false;
   }
   // DependenceVector(int size);
   DependenceVector(const DependenceVector &that);
-  ~DependenceVector() {delete sym;}
+  ~DependenceVector() { delete sym; }  // is this legal? TODO
   DependenceVector &operator=(const DependenceVector &that);
   
   bool is_data_dependence() const;

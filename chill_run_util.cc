@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include "chill_io.hh"
 #include "chill_run_util.hh"
 
 static std::string to_string(int ival) {
@@ -86,7 +87,7 @@ simap_t* make_cond_item_mul(simap_t* lhs, simap_t* rhs) {
     return rhs;
   }
   else {
-    fprintf(stderr, "require Presburger formula");
+    chill_error_fprintf(stderr, "require Presburger formula");
     delete lhs;
     delete rhs;
     // exit(2); <-- this may be a boost feature

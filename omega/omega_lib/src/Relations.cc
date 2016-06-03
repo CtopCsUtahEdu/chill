@@ -27,6 +27,8 @@
 #endif
 #include <assert.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 #define CHECK_MAYBE_SUBSET 1
@@ -705,7 +707,7 @@ Relation DeltasToRelation(NOT_CONST Relation &D, int n_inputs, int n_outputs) {
   if (R.max_ufs_arity() > 0) {
     assert(R.max_ufs_arity() == 0 &&
            "'Deltas' not ready for UFS yet"); // FERD
-    fprintf(stderr, "'Deltas' not ready for UFS yet");
+    debug_fprintf(stderr, "'Deltas' not ready for UFS yet");
     exit(1);
   }
 
@@ -756,7 +758,7 @@ bool prepare_relations_for_composition(Relation &r1,Relation &r2) {
       return true;
     else {
       assert(0 && "Can't compose relation and set with function symbols");
-      fprintf(stderr, "Can't compose relation and set with function symbols");
+      debug_fprintf(stderr, "Can't compose relation and set with function symbols");
       exit(1);
       return false;  // make compiler shut up
     }
@@ -794,14 +796,14 @@ Relation Composition(NOT_CONST Relation &input_r1, NOT_CONST Relation &input_r2)
   if(r2.is_set()) {
     int a1 = r1.max_ufs_arity_of_in(), a2 = r2.max_ufs_arity_of_set();
     if (r2.n_set() != r1.n_inp()) {
-      fprintf(stderr,"Illegal composition/application, arities don't match\n");
-      fprintf(stderr,"Trying to compute r1(r2)\n");
-      fprintf(stderr,"arity of r2 must match input arity of r1\n");
-      fprintf(stderr,"r1: ");
+      debug_fprintf(stderr,"Illegal composition/application, arities don't match\n");
+      debug_fprintf(stderr,"Trying to compute r1(r2)\n");
+      debug_fprintf(stderr,"arity of r2 must match input arity of r1\n");
+      debug_fprintf(stderr,"r1: ");
       r1.print_with_subs(stderr);
-      fprintf(stderr,"r2: ");
+      debug_fprintf(stderr,"r2: ");
       r2.print_with_subs(stderr);
-      fprintf(stderr,"\n");
+      debug_fprintf(stderr,"\n");
       assert(r2.n_set() == r1.n_inp());
       exit(1);
     }
@@ -823,7 +825,7 @@ Relation Composition(NOT_CONST Relation &input_r1, NOT_CONST Relation &input_r2)
     else {
       assert(0 &&
              "Can't compose relation and set with function symbols");
-      fprintf(stderr,
+      debug_fprintf(stderr,
               "Can't compose relation and set with function symbols");
       exit(1);
       return Identity(0);  // make compiler shut up
@@ -831,14 +833,14 @@ Relation Composition(NOT_CONST Relation &input_r1, NOT_CONST Relation &input_r2)
   }
 
   if (r2.n_out() != r1.n_inp()) {
-    fprintf(stderr,"Illegal composition, arities don't match\n");
-    fprintf(stderr,"Trying to compute r1 compose r2\n");
-    fprintf(stderr,"Output arity of r2 must match input arity of r1\n");
-    fprintf(stderr,"r1: ");
+    debug_fprintf(stderr,"Illegal composition, arities don't match\n");
+    debug_fprintf(stderr,"Trying to compute r1 compose r2\n");
+    debug_fprintf(stderr,"Output arity of r2 must match input arity of r1\n");
+    debug_fprintf(stderr,"r1: ");
     r1.print_with_subs(stderr);
-    fprintf(stderr,"r2: ");
+    debug_fprintf(stderr,"r2: ");
     r2.print_with_subs(stderr);
-    fprintf(stderr,"\n");
+    debug_fprintf(stderr,"\n");
     assert(r2.n_out() == r1.n_inp());
     exit(1);
   }
@@ -873,7 +875,7 @@ Relation Composition(NOT_CONST Relation &input_r1, NOT_CONST Relation &input_r2)
 
     if (b1 == b2) {
       assert(0 && "Compose: not ready to handle b1 == b2 yet.");
-      fprintf(stderr, "Compose: not ready to handle b1 == b2 yet.\n");
+      debug_fprintf(stderr, "Compose: not ready to handle b1 == b2 yet.\n");
       exit(1);
     }
 
@@ -2042,7 +2044,7 @@ Relation Solution(NOT_CONST Relation &S, Sequence<Variable_ID> &for_these ) {
   }
   
   // No solution found for any conjunct, we bail out.
-  fprintf(stderr,"Couldn't find suitable constraint for variable\n");
+  debug_fprintf(stderr,"Couldn't find suitable constraint for variable\n");
   return Relation::Unknown(R);  
 }
 

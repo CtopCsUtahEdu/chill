@@ -18,6 +18,8 @@
 #include <omega/Relation.h>
 #include <omega/omega_i.h>
 
+#include "../../../chill_io.hh"
+
 namespace omega {
 
 void DNF::remap() {
@@ -453,7 +455,7 @@ DNF* conj_and_not_dnf(Conjunct *positive_conjunct, DNF *neg_conjs, bool weak) {
         OMEGA_WHINGE = getenv("OMEGA_WHINGE") ? atoi(getenv("OMEGA_WHINGE")) : 0;
       }
       if (OMEGA_WHINGE) {
-        fprintf(stderr, "Ignoring negative clause that can't be negated and generating inexact result\n");
+        debug_fprintf(stderr, "Ignoring negative clause that can't be negated and generating inexact result\n");
         if (!pres_debug) fprintf(DebugFile, "Ignoring negative clause that can't be negated and generating inexact result\n");
       }
 
@@ -878,13 +880,13 @@ DNF* F_And::DNFize() {
             }
           }
           if (OMEGA_WHINGE) {
-            fprintf(stderr, "Uh-oh: F_AND::DNFize() resorting to TRUE and not DNF\n");
-            fprintf(stderr, "--- F_AND::DNFize() neg_conjs\n");
+            debug_fprintf(stderr, "Uh-oh: F_AND::DNFize() resorting to TRUE and not DNF\n");
+            debug_fprintf(stderr, "--- F_AND::DNFize() neg_conjs\n");
             neg_conjs->prefix_print(stderr);
-            fprintf(stderr, "--- F_AND::DNFize() pos_dnfs:\n");
+            debug_fprintf(stderr, "--- F_AND::DNFize() pos_dnfs:\n");
             for (pos_dnf_i=List_Iterator<DNF*>(pos_dnfs); pos_dnf_i; pos_dnf_i++) {
               (*pos_dnf_i)->prefix_print(stderr);
-              fprintf(stderr,"---- --\n");
+              debug_fprintf(stderr,"---- --\n");
             }
           }
           positive_conjunct = new Conjunct(NULL, my_relation);

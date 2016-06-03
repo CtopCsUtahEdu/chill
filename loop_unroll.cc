@@ -151,7 +151,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         h.update_coef(mapping.output_var(j), -1);
       }
       hull = Intersection(hull,
-                          Range(Restrict_Domain(mapping, copy(stmt[*i].IS))));
+                          omega::Range(Restrict_Domain(mapping, copy(stmt[*i].IS))));
       hull.simplify(2, 4);
       
     }
@@ -308,7 +308,8 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
           overflow_table[i][j][NULL] = int_mod_hat(
             overflow_table[i][j][NULL], unroll_amount);
           
-          // Since we don't have MODULO instruction in SUIF yet (only MOD), make all coef positive in the final formula
+          // Since we don't have MODULO instruction in SUIF yet (only MOD), 
+          // make all coef positive in the final formula
           for (std::map<Variable_ID, int>::iterator k =
                  overflow_table[i][j].begin();
                k != overflow_table[i][j].end(); k++)
@@ -457,14 +458,16 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     std::vector<CG_outputRepr *> lb_repr_list, ub_repr_list;
     for (int i = 0; i < lb_list.size(); i++) {
       lb_repr_list.push_back(
-        output_lower_bound_repr(ocg, lb_list[i],
+        output_lower_bound_repr(ocg, 
+                                lb_list[i],
                                 bound.set_var(dim + 1), result.first, result.second,
                                 bound, Relation::True(bound.n_set()),
                                 std::vector<std::pair<CG_outputRepr *, int> >(
                                   bound.n_set(),
                                   std::make_pair(
                                     static_cast<CG_outputRepr *>(NULL),
-                                    0))));
+                                    0)),
+                                uninterpreted_symbols[stmt_num]));
       GEQ_Handle h = cond_lower.and_with_GEQ(lb_list[i]);
     }
     for (int i = 0; i < ub_list.size(); i++) {
@@ -475,21 +478,28 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
                                   bound.n_set(),
                                   std::make_pair(
                                     static_cast<CG_outputRepr *>(NULL),
-                                    0))));
+                                    0)),
+                                uninterpreted_symbols[stmt_num]));
       GEQ_Handle h = cond_upper.and_with_GEQ(ub_list[i]);
       h.update_coef(cond_upper.get_local(over_free_var), -stride);
     }
     
-    CG_outputRepr *lbRepr, *ubRepr;
-    if (lb_repr_list.size() > 1)
+    CG_outputRepr *lbRepr, *ubRepr; 
+    if (lb_repr_list.size() > 1) {
+      //debug_fprintf(stderr, "loop_unroll.cc createInvoke( max )\n"); 
       lbRepr = ocg->CreateInvoke("max", lb_repr_list);
-    else if (lb_repr_list.size() == 1)
+    }
+    else if (lb_repr_list.size() == 1) {
       lbRepr = lb_repr_list[0];
+    }
     
-    if (ub_repr_list.size() > 1)
+    if (ub_repr_list.size() > 1) {
+      //debug_fprintf(stderr, "loop_unroll.cc createInvoke( min )\n"); 
       ubRepr = ocg->CreateInvoke("min", ub_repr_list);
-    else if (ub_repr_list.size() == 1)
+    }
+    else if (ub_repr_list.size() == 1) {
       ubRepr = ub_repr_list[0];
+    }
     
     // create overflow assignment
     CG_outputRepr *rhs = ocg->CreatePlus(ocg->CreateMinus(ubRepr, lbRepr),
@@ -523,7 +533,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
       h.update_coef(mapping.output_var(i), 1);
       h.update_coef(mapping.input_var(i), -1);
     }
-    Relation overflow_IS = Range(Restrict_Domain(mapping, copy(hull)));
+    Relation overflow_IS = omega::Range(Restrict_Domain(mapping, copy(hull)));
     for (int i = 1; i < cleanup_split_level; i++)
       overflow_IS.name_set_var(i, hull.set_var(i)->name());
     overflow_IS.setup_names();
@@ -568,7 +578,11 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         stmt[stmt_num].loop_level[i].parallel_level;
     }
     
+    debug_fprintf(stderr, "loop_unroll.cc L581 adding stmt %d\n", stmt.size()); 
     stmt.push_back(overflow_stmt);
+
+    uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
+    uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
     dep.insert();
     overflow_stmt_num = stmt.size() - 1;
     overflow[overflow_stmt_num] = over_var_list;
@@ -587,8 +601,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     dv.type = DEP_W2W;
     {
       IR_ScalarSymbol *overflow_sym = NULL;
-      std::vector<IR_ScalarRef *> scalars = ir->FindScalarRef(
-        overflow_code);
+      std::vector<IR_ScalarRef *> scalars = ir->FindScalarRef(overflow_code);
       for (int i = scalars.size() - 1; i >= 0; i--)
         if (scalars[i]->is_write()) {
           overflow_sym = scalars[i]->symbol();
@@ -723,7 +736,12 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
         
         new_stmt.loop_level = stmt[*i].loop_level;
         new_stmt.ir_stmt_node = NULL;
+
+        debug_fprintf(stderr, "loop_unroll.cc L740 adding stmt %d\n", stmt.size()); 
         stmt.push_back(new_stmt);
+
+        uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
+        uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
         dep.insert();
         what_stmt_num[*i].push_back(stmt.size() - 1);
       }
@@ -1010,33 +1028,70 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     
     Statement new_stmt;
     new_stmt.code = NULL;
-    for (int j = 1; j < unroll_amount; j++)
+    for (int j = 1; j < unroll_amount; j++) { 
       for (int i = 0; i < stmt_order.size(); i++) {
         std::vector<std::string> loop_vars;
         std::vector<CG_outputRepr *> subs;
+
+        //debug_fprintf(stderr, "loop_unroll.cc, will replace '%s with '%s+%d' ??\n",
+        //        stmt[stmt_order[i].second].IS.set_var(level)->name().c_str(),
+        //        stmt[stmt_order[i].second].IS.set_var(level)->name().c_str(), j * stride); 
+        
         loop_vars.push_back(
           stmt[stmt_order[i].second].IS.set_var(level)->name());
         subs.push_back(
-          ocg->CreatePlus(
-            ocg->CreateIdent(
-              stmt[stmt_order[i].second].IS.set_var(
-                level)->name()),
-            ocg->CreateInt(j * stride)));
+          ocg->CreatePlus(ocg->CreateIdent(stmt[stmt_order[i].second].IS.set_var(level)->name()),
+                          ocg->CreateInt(j * stride)));  // BUG HERE
+        //debug_fprintf(stderr, "loop_unroll.cc subs  now has %d parts\n", subs.size());
+        //for (int k=0; k< subs.size(); k++) //debug_fprintf(stderr, "subs[%d] = 0x%x\n", k, subs[k]); 
+
+        //debug_fprintf(stderr, "ij %d %d  ", i, j);
+        //debug_fprintf(stderr, "old src was =\n");
+        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //debug_fprintf(stderr, "\n"); 
+
+
+
         CG_outputRepr *code = ocg->CreateSubstitutedStmt(0,
-                                                         stmt[stmt_order[i].second].code->clone(), loop_vars,
+                                                         stmt[stmt_order[i].second].code->clone(), 
+                                                         loop_vars,
                                                          subs);
+
+        //debug_fprintf(stderr, "old src is =\n");
+        //stmt[stmt_order[i].second].code->dump(); fflush(stdout); //debug_fprintf(stderr, "\n"); 
+
+        //debug_fprintf(stderr, "substituted copy is =\n"); 
+        //code->dump(); //debug_fprintf(stderr, "\n\n"); 
+
+
         new_stmt.code = ocg->StmtListAppend(new_stmt.code, code);
+        //debug_fprintf(stderr, "appended code =\n");
+        //new_stmt.code->dump();
+
       }
+    }
     
+
+
+    //debug_fprintf(stderr, "new_stmt.IS = \n"); 
     new_stmt.IS = copy(stmt[stmt_num].IS);
     new_stmt.xform = copy(stmt[stmt_num].xform);
     assign_const(new_stmt.xform, 2 * max_level,
                  stmt_order[stmt_order.size() - 1].first + 1);
     new_stmt.loop_level = stmt[stmt_num].loop_level;
     new_stmt.ir_stmt_node = NULL;
+
+    new_stmt.has_inspector = false; //  ?? or from copied stmt?
+    if (stmt[stmt_num].has_inspector) debug_fprintf(stderr, "OLD STMT HAS INSPECTOR\n");
+    else debug_fprintf(stderr, "OLD STMT DOES NOT HAVE INSPECTOR\n");
+
+    debug_fprintf(stderr, "loop_unroll.cc L1083 adding stmt %d\n", stmt.size()); 
     stmt.push_back(new_stmt);
+
+    uninterpreted_symbols.push_back(uninterpreted_symbols[stmt_num]);
+    uninterpreted_symbols_stringrepr.push_back(uninterpreted_symbols_stringrepr[stmt_num]);
     dep.insert();
     
+    //debug_fprintf(stderr, "update dependence graph\n"); 
     // update dependence graph
     if (stmt[stmt_num].loop_level[level - 1].type == LoopLevelOriginal) {
       int dep_dim = stmt[stmt_num].loop_level[level - 1].payload;
@@ -1160,6 +1215,7 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     }
   }
   
+  //debug_fprintf(stderr, "                                                  loop_unroll.cc returning new_stmts\n");
   return new_stmts;
 }
 

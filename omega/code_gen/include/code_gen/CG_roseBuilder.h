@@ -1,6 +1,9 @@
 #ifndef CG_roseBuilder_h
 #define CG_roseBuilder_h
 
+// wrap the entire file in an ifdef
+#ifdef FRONTEND_ROSE 
+
 #include <basic/Tuple.h>
 #include <code_gen/rose_attributes.h>
 #include <code_gen/CG_outputBuilder.h>
@@ -11,15 +14,20 @@ namespace omega {
 
 class CG_roseBuilder : public CG_outputBuilder { 
 public:
-  CG_roseBuilder(int isFortran, SgGlobal* global, SgGlobal* global_scope, SgSymbolTable* symtab1, SgSymbolTable* symtab2,  SgNode* root);
+  //CG_roseBuilder(int isFortran, SgGlobal* global, SgGlobal* global_scope, SgSymbolTable* symtab1, SgSymbolTable* symtab2,  SgNode* root);
+  CG_roseBuilder(SgGlobal* global, SgGlobal* global_scope, SgSymbolTable* symtab1, SgSymbolTable* symtab2,  SgNode* root);
   ~CG_roseBuilder();
    
+
+  const char *ClassName() { return "roseBuilder"; }; 
+
   //---------------------------------------------------------------------------
   // place holder generation
   //---------------------------------------------------------------------------
-  // CG_outputRepr* CreatePlaceHolder(int indent, CG_outputRepr *stmt,
-  //                                         Tuple<CG_outputRepr*> &funcList,
-  //                                         Tuple<std::string> &loop_vars) const;
+  // CG_outputRepr* CreatePlaceHolder(int indent, 
+  //                                  CG_outputRepr *stmt,
+  //                                  Tuple<CG_outputRepr*> &funcList,
+  //                                  Tuple<std::string> &loop_vars) const;
 
 
   //---------------------------------------------------------------------------
@@ -28,38 +36,50 @@ public:
 
 
  
-   CG_outputRepr *CreateSubstitutedStmt(int indent, CG_outputRepr *stmt,
-                                               const std::vector<std::string> &vars,
-                                               std::vector<CG_outputRepr *> &subs) const;
+   CG_outputRepr *CreateSubstitutedStmt(int indent, 
+                                        CG_outputRepr *stmt,
+                                        const std::vector<std::string> &vars,
+                                        std::vector<CG_outputRepr *> &subs,
+                                        bool actuallyPrint) const;
 
 
   
   //---------------------------------------------------------------------------
   // assignment generation
   //---------------------------------------------------------------------------
-   CG_outputRepr* CreateAssignment(int indent, CG_outputRepr* lhs,
-                                          CG_outputRepr* rhs) const;
+   CG_outputRepr* CreateAssignment(int indent, 
+                                   CG_outputRepr* lhs,
+                                   CG_outputRepr* rhs) const;
+
+   CG_outputRepr* CreatePlusAssignment(int indent, 
+                                   CG_outputRepr* lhs,
+                                   CG_outputRepr* rhs) const;
 
   //---------------------------------------------------------------------------
   // function invocation generation
   //---------------------------------------------------------------------------
     CG_outputRepr* CreateInvoke(const std::string &funcName,
-    		std::vector<CG_outputRepr *> &argList) const;
+                                std::vector<CG_outputRepr *> &argList,
+                                bool is_array=false) const;
   
   //---------------------------------------------------------------------------
   // comment generation
   //---------------------------------------------------------------------------
-   CG_outputRepr* CreateComment(int indent, const std::string &commentText) const;
+   CG_outputRepr* CreateComment(int indent, 
+                                const std::string &commentText) const;
+
   //---------------------------------------------------------------------------
   // Attribute generation
   //---------------------------------------------------------------------------
     CG_outputRepr* CreateAttribute(CG_outputRepr  *control,
-                                          const std::string &commentText) const;
+                                   const std::string &commentText) const;
+
   //---------------------------------------------------------------------------
   // Pragma Attribute
   //---------------------------------------------------------------------------
-  CG_outputRepr* CreatePragmaAttribute(CG_outputRepr *scopeStmt, int looplevel,
-                                          const std::string &pragmaText) const;
+  CG_outputRepr* CreatePragmaAttribute(CG_outputRepr *scopeStmt, 
+                                       int looplevel,
+                                       const std::string &pragmaText) const;
   
   //---------------------------------------------------------------------------
   // Prefetch Attribute
@@ -70,8 +90,10 @@ public:
   //---------------------------------------------------------------------------
   // if stmt gen operations
   //---------------------------------------------------------------------------
-   CG_outputRepr* CreateIf(int indent, CG_outputRepr* guardCondition,
-                                  CG_outputRepr* true_stmtList, CG_outputRepr* false_stmtList) const;
+   CG_outputRepr* CreateIf(int indent, 
+                           CG_outputRepr* guardCondition,
+                           CG_outputRepr* true_stmtList, 
+                           CG_outputRepr* false_stmtList) const;
    
   //---------------------------------------------------------------------------
   // inductive variable generation, to be used in CreateLoop as control
@@ -84,15 +106,30 @@ public:
   //---------------------------------------------------------------------------
   // loop stmt generation
   //---------------------------------------------------------------------------
-   CG_outputRepr* CreateLoop(int indent, CG_outputRepr* control,
-                                    CG_outputRepr* stmtList) const;
+   CG_outputRepr* CreateLoop(int indent, 
+                             CG_outputRepr* control,
+                             CG_outputRepr* stmtList) const;
 
   //---------------------------------------------------------------------------
   // basic operations
   //---------------------------------------------------------------------------
-   CG_outputRepr* CreateInt(int num ) const;
-   bool isInteger(CG_outputRepr *op) const;
-   CG_outputRepr* CreateIdent(const std::string &varName) const;
+  CG_outputRepr* CreateInt(int num ) const;
+  CG_outputRepr* CreateFloat(float num ) const;
+  CG_outputRepr* CreateDouble(double num ) const;
+
+	CG_outputRepr* CreateNullStatement() const;
+  bool isInteger(CG_outputRepr *op) const;
+
+	bool QueryInspectorType(const std::string &varName) const;
+
+  CG_outputRepr* CreateIdent(const std::string &varName) const;
+	CG_outputRepr* CreateDotExpression(CG_outputRepr *lop,
+			CG_outputRepr *rop) const;
+	CG_outputRepr* CreateArrayRefExpression(const std::string &_s,
+			CG_outputRepr *rop) const;
+	CG_outputRepr* CreateArrayRefExpression(CG_outputRepr *lop,
+			CG_outputRepr *rop) const;
+	CG_outputRepr* ObtainInspectorData(const std::string &_s, const std::string &member_name) const;
 
   //---------------------------------------------------------------------------
   // binary arithmetic operations
@@ -112,8 +149,9 @@ public:
   // binary relational operations
   //---------------------------------------------------------------------------
   // CG_outputRepr* CreateGE(CG_outputRepr*, CG_outputRepr*) const;
-   CG_outputRepr* CreateLE(CG_outputRepr* lop, CG_outputRepr* rop) const;
-   CG_outputRepr* CreateEQ(CG_outputRepr* lop, CG_outputRepr* rop) const;
+  CG_outputRepr* CreateLE(CG_outputRepr* lop, CG_outputRepr* rop) const;
+  CG_outputRepr* CreateEQ(CG_outputRepr* lop, CG_outputRepr* rop) const;
+	CG_outputRepr* CreateNEQ(CG_outputRepr* lop, CG_outputRepr* rop) const;
      
   //---------------------------------------------------------------------------
   // stmt list gen operations
@@ -126,11 +164,52 @@ public:
     StmtListAppend(CG_outputRepr* list1, CG_outputRepr* list2) const;
 
    //CG_outputRepr* CreateDim3(const char* varName, int  arg1, int  arg2) const;
-   CG_outputRepr* CreateDim3(const char* varName, CG_outputRepr* arg1, CG_outputRepr*  arg2, CG_outputRepr* arg3 = NULL) const;
+   CG_outputRepr* CreateDim3(const char* varName, 
+                             CG_outputRepr* arg1, 
+                             CG_outputRepr* arg2, 
+                             CG_outputRepr* arg3 = NULL) const;
+
+  CG_outputRepr* ObtainInspectorRange(const std::string &_s,
+			const std::string &_name) const;
+
+	CG_outputRepr* CreateArrowRefExpression(const std::string &_s,
+			CG_outputRepr *rop) const;
+	CG_outputRepr* CreateArrowRefExpression(CG_outputRepr *lop,
+			CG_outputRepr *rop) const;
+
+	CG_outputRepr *CreateNullExpression()const;
+
+  CG_outputRepr *CreateStruct(const std::string struct_name,
+                              std::vector<std::string> data_members,
+                              std::vector<CG_outputRepr *> data_types);
+
+	CG_outputRepr *CreateClass(const std::string class_name,
+			std::vector<std::string> class_data_members = std::vector<std::string>(), std::vector<CG_outputRepr *> class_data_types = std::vector<
+					CG_outputRepr *>(), std::vector<std::string> methods =
+					std::vector<std::string>(),
+			std::vector<std::vector<std::string> > method_params = std::vector<
+					std::vector<std::string> >(),
+			std::vector<CG_outputRepr *> method_return_types = std::vector<
+					CG_outputRepr *>(),
+			std::vector<CG_outputRepr *> method_bodies = std::vector<
+					CG_outputRepr *>());
+	CG_outputRepr *CreateLinkedListStruct(const std::string class_name,
+			std::vector<std::string> class_data_members,
+			std::vector<CG_outputRepr *> class_data_types);
+	CG_outputRepr *lookup_member_function(CG_outputRepr* scope, std::string  varName);
+	CG_outputRepr *lookup_member_data(CG_outputRepr* scope, std::string varName, CG_outputRepr *instance);
+
+  CG_outputRepr* CreatePointer(std::string  &name) const;
+
+	void setFunctionBody(CG_outputRepr *scope, CG_outputRepr *body);
+	CG_outputRepr *CreateClassInstance(std::string name , CG_outputRepr *class_def);
 
    // Manu:: added for fortran support
    bool isInputFortran() const;
 
+	CG_outputRepr *CreateAddressOf(CG_outputRepr *op) const ;
+	CG_outputRepr *CreateBreakStatement(void) const;
+	CG_outputRepr *CreateStatementFromExpression(CG_outputRepr *exp) const;
   //---------------------------------------------------------------------------
   // kernel generation
   //---------------------------------------------------------------------------
@@ -148,6 +227,7 @@ private:
   SgNode* root_;
   SgGlobal* global_;
   SgGlobal* global_scope;
+	SgStatement *firstStatement;
   int isFortran; // Manu:: added for fortran support
 };
 
@@ -161,4 +241,6 @@ std::vector<SgVarRefExp *>substitute(SgNode *tnl, const SgVariableSymbol *sym, S
 
 } // namespace
 
-#endif
+#endif // BUILD ROSE 
+
+#endif // first time we've seen this header 

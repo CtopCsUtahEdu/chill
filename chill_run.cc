@@ -1,4 +1,9 @@
-#include "chilldebug.h"
+//#define PYTHON 1 
+// uncomment above line to have python interpret something.lua transformation files
+// TODO: put in Makefile?
+
+#include "chill_io.hh"
+
 
 // this is a little messy. the Makefile should be able to define one or the other
 #ifndef PYTHON
@@ -7,12 +12,13 @@
 #endif
 #endif
 
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <argp.h>
 
-//#include "chill_env.hh"
+#include "chill_env.hh"
 
 #include "loop.hh"
 #include <omega.h>
@@ -20,36 +26,33 @@
 
 #ifdef CUDACHILL
 
-#ifdef BUILD_ROSE
-#include "loop_cuda_rose.hh"
+#ifdef FRONTEND_ROSE
+#include "loop_cuda_chill.hh"
 #include "ir_cudarose.hh"
-#elif BUILD_SUIF
-#include "loop_cuda.hh"
-#include "ir_cudasuif.hh"
 #endif
 
-#else
+typedef LoopCuda loop_t;
+#else // not defined(CUDACHILL)
 
-#ifdef BUILD_ROSE
+#ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
-#elif BUILD_SUIF
-#include "ir_suif.hh"
 #endif
 
-#endif
+typedef Loop loop_t;
+#endif // not defined(CUDACHILL)
 
 #ifdef LUA
 #define lua_c //Get the configuration defines for doing an interactive shell
 #include <lua.hpp> //All lua includes wrapped in extern "C"
 #include "chill_env.hh" // Lua wrapper functions for CHiLL
-#elif PYTHON
+#elif defined(PYTHON)
 #include "chillmodule.hh" // Python wrapper functions for CHiLL
 #endif
 
 //---
-// CHiLL globals
+// CHiLL globals 
 //---
-Loop *myloop = NULL;
+loop_t *myloop = NULL;  // was Loop !! 
 IR_Code *ir_code = NULL;
 bool repl_stop = false;
 bool is_interactive = false;
@@ -81,9 +84,8 @@ static void laction (int i) {
 
 
 static void l_message (const char *pname, const char *msg) {
-  if (pname) fprintf(stderr, "%s: ", pname);
-  fprintf(stderr, "%s\n", msg);
-  fflush(stderr); // ? does this do anything ?
+  if (pname) debug_fprintf(stderr, "%s: ", pname);
+  debug_fprintf(stderr, "%s\n", msg);
 }
 
 
@@ -119,16 +121,20 @@ static int traceback (lua_State *L) {
 
 
 static int docall (lua_State *L, int narg, int clear) {
-  DEBUG_PRINT("\ndocall()\n"); 
+  debug_fprintf(stderr, "\ndocall() narg %d  clear %d\n", narg, clear); 
   int status;
   int base = lua_gettop(L) - narg;  /* function index */
   lua_pushcfunction(L, traceback);  /* push traceback function */
   lua_insert(L, base);  /* put it under chunk and args */
   signal(SIGINT, laction);
   
-  DEBUG_PRINT("status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);\n"); 
+  debug_fprintf(stderr, "status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);\n"); 
   
+  debug_fprintf(stderr, "chill_run.cc L122\n"); 
+
   status = lua_pcall(L, narg, (clear ? 0 : LUA_MULTRET), base);
+  debug_fprintf(stderr, "docall will return status %d\n", status); 
+
   signal(SIGINT, SIG_DFL);
   lua_remove(L, base);  /* remove traceback function */
   /* force a complete garbage collection in case of errors */
@@ -137,7 +143,17 @@ static int docall (lua_State *L, int narg, int clear) {
 }
 
 static int dofile (lua_State *L, const char *name) {
-  int status = luaL_loadfile(L, name) || docall(L, 0, 1);
+  // FORMERLY int status = luaL_loadfile(L, name) || docall(L, 0, 1);
+
+  debug_fprintf(stderr,"dofile %s\n", name);
+  int status =  luaL_loadfile(L, name);
+  debug_fprintf(stderr, "loadfile stat %d\n", status); 
+  
+  if (status == 0) { 
+    debug_fprintf(stderr, "calling docall()\n");
+    status = docall(L, 0, 1);
+    debug_fprintf(stderr, "docall status %d\n", status); 
+  }
   return report(L, status);
 }
 
@@ -232,21 +248,77 @@ static void dotty (lua_State *L) {
 //---
 //---
 
+// Argument variables
+static bool   arg_is_interactive  = 1;
+static char*  arg_script_filename = NULL;
+static char*  arg_output_filename = NULL;
+
+// Argument parser function
+static error_t parse_chill_arg(int key, char* value, argp_state* state) {
+  switch(key) {
+  case ARGP_KEY_ARG:
+    if(state->arg_num == 0) {
+      arg_script_filename = value;
+      arg_is_interactive = 0;
+    }
+    else {
+      return ARGP_ERR_UNKNOWN;
+    }
+  case 'd':
+    if(value != NULL) {
+      debug_enable();
+      debug_define(value);
+    }
+    else {
+      debug_enable();
+    }
+    break;
+  case 'o':
+    arg_output_filename = value;
+    break;
+  default:
+    return ARGP_ERR_UNKNOWN;
+  }
+  return 0;
+}
+
+static const argp_option chill_options[] = {
+  //long-name,  char-name,  value-name,         flags,                  doc,                        group
+  {"debug",     'D',        "debug-symbol",     OPTION_ARG_OPTIONAL,    "Define a debug symbol.",   0},
+  {"outfile",   'o',        "output-filename",  0,                      "Set output filename.",     0},
+  {NULL,        NULL,       NULL,               NULL,                   NULL,                       0}
+};
+
+static const argp chill_args {
+  chill_options,                // options
+  &parse_chill_arg,             // parse function
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 //---
 // CHiLL program main
 // Initialize state and run script or interactive mode
 //---
 int main( int argc, char* argv[] )
 {
-  DEBUG_PRINT("%s  main()\n", argv[0]);
-  if (argc > 2) {
-    fprintf(stderr, "Usage: %s [script_file]\n", argv[0]);
-    exit(-1);
-  }
+  // parse program arguments
+  argp_parse(&chill_args, argc, argv, ARGP_IN_ORDER, NULL, NULL);
   
   int fail = 0;
   
 #ifdef PYTHON
+  // PYTHON version  (python interprets the transformation file )            
+  
+  //Operate on a single global IR_Code and Loop instance
+  ir_code = NULL;
+  myloop = NULL;
+  omega::initializeOmega();
+  debug_fprintf(stderr, "Omega initialized\n");
+  
   // Create PYTHON interpreter
   /* Pass argv[0] to the Python interpreter */
   Py_SetProgramName(argv[0]);
@@ -257,45 +329,31 @@ int main( int argc, char* argv[] )
   /* Add a static module */
   initchill();
   
-  if (argc == 2) {
-/*  #ifdef CUDACHILL --- This code is for translating lua to python before interprating. ---
-    //DEBUG_PRINT("\ncalling python\n");
-    // file interpretlua.py  has routines to read the lua transformation file
-    PyRun_SimpleString("from interpretlua import *");
-    //DEBUG_PRINT("DONE calling python import of functions\n\n");
-    char pythoncommand[800];
-    sprintf(pythoncommand, "\n\ndopytransform(\"%s\")\0", argv[1]);
-    //DEBUG_PRINT("in C, running python command '%s'\n", pythoncommand);
-    
-    PyRun_SimpleString( pythoncommand );
-    #else*/
-    FILE* f = fopen(argv[1], "r");
+  if (!arg_is_interactive) {
+    /* Run Python interpreter */
+    FILE* f = fopen(arg_script_filename, "r");
     if(!f){
-      printf("can't open script file \"%s\"\n", argv[1]);
+      chill_printf("can't open script file \"%s\"\n", argv[1]);
       exit(-1);
     }
-    PyRun_SimpleFile(f, argv[1]);
+    PyRun_SimpleFile(f, arg_script_filename);
     fclose(f);
   }
-  if (argc == 1) {
+  if (arg_is_interactive) {
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
-    printf("Copyright (C) 2008 University of Southern California\n");
-    printf("Copyright (C) 2009-2012 University of Utah\n");
+    chill_printf("CHiLL v0.2.3 (built on %s)\n", CHILL_BUILD_DATE);
+    chill_printf("Copyright (C) 2008 University of Southern California\n");
+    chill_printf("Copyright (C) 2009-2016 University of Utah\n");
     //is_interactive = true; // let the lua interpreter know.
     fflush(stdout);
     // TODO: read lines of python code.
     //Not sure if we should set fail from interactive mode
-    printf("CHiLL ending...\n");
-    fflush(stdout);
+    chill_printf("CHiLL ending...\n");
   }
-
-  //printf("DONE with PyRun_SimpleString()\n");
-//  #endif --- endif for CUDACHILL ---
-#endif
   //END python setup
+#endif
 #ifdef LUA
   
   //Create interpreter
@@ -311,79 +369,82 @@ int main( int argc, char* argv[] )
   //Register CHiLL functions
   register_functions(L);
   
-  if (argc == 2) {
+  if (!arg_is_interactive) {
     //---
     // Run a CHiLL script from a file
     //---
     
     //Check that the file can be opened
-    FILE* f = fopen(argv[1],"r");
+    FILE* f = fopen(arg_script_filename, "r");
     if(!f){
       printf("can't open script file \"%s\"\n", argv[1]);
       exit(-1);
     }
     fclose(f);
     
-    DEBUG_PRINT("\n*********************evaluating file '%s'\n", argv[1]); 
+    debug_fprintf(stderr, "\n*********************evaluating file '%s'\n", arg_script_filename); 
     
     //Evaluate the file
     fail = dofile(L, argv[1]);
     if(!fail){
-      fprintf(stderr, "script success!\n");
+      debug_fprintf(stderr, "script success!\n");
     }
   }
-  if (argc == 1 && isatty((int)fileno(stdin))) {
+  if (arg_is_interactive && isatty((int)fileno(stdin))) {
     //---
     // Run a CHiLL interpreter
     //---
-    printf("CUDA-CHiLL v0.2.1 (built on %s)\n", CHILL_BUILD_DATE);
-    printf("Copyright (C) 2008 University of Southern California\n");
-    printf("Copyright (C) 2009-2012 University of Utah\n");
+    chill_printf("CHiLL v0.2.3 (built on %s)\n", CHILL_BUILD_DATE);
+    chill_printf("Copyright (C) 2008 University of Southern California\n");
+    chill_printf("Copyright (C) 2009-2016 University of Utah\n");
+
     is_interactive = true; // let the lua interpreter know.
-    fflush(stdout);
     dotty(L);
     //Not sure if we should set fail from interactive mode
-    printf("CUDA-CHiLL ending...\n");
-    fflush(stdout);
+    chill_printf("CHiLL ending...\n");
   }
 #endif
   
+  debug_fprintf(stderr, "BIG IF\n"); 
+  debug_fprintf(stderr, "fail %d\n", fail);
   
   if (!fail && ir_code != NULL && myloop != NULL && myloop->stmt.size() != 0 && !myloop->stmt[0].xform.is_null()) {
+    debug_fprintf(stderr, "big if true\n"); 
 #ifdef CUDACHILL
+    debug_fprintf(stderr, "CUDACHILL IS DEFINED\n"); 
     int lnum;
     #ifdef PYTHON
     lnum = 0;
     #else
     lnum = get_loop_num( L );
     #endif
-    #ifdef BUILD_ROSE
+    #ifdef FRONTEND_ROSE
+    debug_fprintf(stderr, "calling commit_loop()\n"); 
     ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
-    #elif BUILD_SUIF
-    ((IR_cudasuifCode *)(ir_code))->commit_loop(myloop, lnum);
     #endif
 #else
+    debug_fprintf(stderr, "CUDACHILL IS NOT DEFINED\n"); 
     int lnum_start;
     int lnum_end;
     #ifdef PYTHON
     lnum_start = get_loop_num_start();
     lnum_end = get_loop_num_end();
-    DEBUG_PRINT("calling ROSE code gen?    loop num %d\n", lnum);
+    debug_fprintf(stderr, "calling ROSE code gen?    loop num %d\n", lnum);
     #else
     lnum_start = get_loop_num_start(L);
     lnum_end = get_loop_num_end(L);
-    DEBUG_PRINT("calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
+    debug_fprintf(stderr, "calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
+    
 #endif
-    #ifdef BUILD_ROSE
+    #ifdef FRONTEND_ROSE
     finalize_loop(lnum_start, lnum_end);
-    //((IR_roseCode*)(ir_cide))->commit_loop(myloop, lnum);
     ((IR_roseCode*)(ir_code))->finalizeRose();
-    //#elif BUILD_SUIF
-    //((IR_suifCode*)(ir_code))->commit_loop(myloop, lnum);
     #endif
     delete ir_code;
   }
+  else     debug_fprintf(stderr, "big if FALSE\n"); 
+
 #ifdef PYTHON
   Py_Finalize();
 #endif

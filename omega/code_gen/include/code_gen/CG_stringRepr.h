@@ -18,6 +18,7 @@
 #include <code_gen/CG_outputRepr.h>
 #include <string>
 #include <iostream>
+#include <stdio.h>
 
 namespace omega {
 
@@ -26,11 +27,16 @@ private:
   std::string s_;
 
 public:
-  CG_stringRepr() {}
-  CG_stringRepr(const std::string &s) { s_ = s; }
-  ~CG_stringRepr() {}
+  char *type() const { return strdup("string"); }; 
+
+
+  CG_stringRepr() {}; 
+  CG_stringRepr(const std::string &s){ s_ = s; }
+  ~CG_stringRepr() {} 
   CG_outputRepr *clone() const { return new CG_stringRepr(s_); }
   void dump() const { std::cout << s_ << std::endl; }
+  void Dump() const;
+  void DumpToFile(FILE *fp = stderr) const;
 
   //---------------------------------------------------------------------------
   // basic operation

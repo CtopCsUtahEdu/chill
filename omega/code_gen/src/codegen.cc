@@ -28,6 +28,9 @@
 #include <code_gen/codegen.h>
 #include <code_gen/CG_outputBuilder.h>
 #include <code_gen/codegen_error.h>
+#include <code_gen/CG_utils.h>
+
+#include "../../../chill_io.hh"
 
 namespace omega {
 
@@ -42,6 +45,8 @@ std::vector< std::pair<int, std::string> > syncs;
 
 
 CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation> &IS, const Relation &known, std::vector< std::vector<int> > smtNonSplitLevels_ , std::vector< std::vector<std::string> > loopIdxNames_,  std::vector< std::pair<int, std::string> > syncs_) {
+
+  debug_fprintf(stderr, "CodeGen::CodeGen() sanity checking\n");
   // check for sanity of parameters
   int num_stmt = IS.size();
   if (xforms.size() != num_stmt)
@@ -57,12 +62,15 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
     return;
   if (known_.number_of_conjuncts() > 1)
     throw std::invalid_argument("only one conjunct allowed in known condition");
+
+  debug_fprintf(stderr, "num_stmt %d  %d xforms\n", num_stmt, xforms.size()); 
   xforms_ = xforms;
   for (int i = 0; i < num_stmt; i++) {
     xforms_[i].simplify();
-    if (!xforms_[i].has_single_conjunct())
+    if (!xforms_[i].has_single_conjunct()){
+        copy(xforms_[i]).print();
       throw std::invalid_argument("mapping relation must have only one conjunct");
-    if (xforms_[i].n_inp() != IS[i].n_inp() || IS[i].n_out() != 0)
+    }if (xforms_[i].n_inp() != IS[i].n_inp() || IS[i].n_out() != 0)
       throw std::invalid_argument("illegal iteration space or transformation arity");
   }
 
@@ -72,6 +80,15 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
   smtNonSplitLevels = smtNonSplitLevels_;
   syncs = syncs_;
   loopIdxNames = loopIdxNames_;
+  
+  debug_fprintf(stderr, "codegen.cc loopIdxNames.size() %d\n", loopIdxNames.size()); 
+  for (int i=0; i<loopIdxNames.size(); i++) { 
+    debug_fprintf(stderr, "\n"); 
+    for (int j=0; j<loopIdxNames[i].size(); j++) { 
+      debug_fprintf(stderr, "i %d   j %d %s\n", i, j,loopIdxNames[i][j].c_str() ); 
+    }
+  } 
+
   //end-protonu
 
 
@@ -94,10 +111,21 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
     for (int j = 1; j <= xforms_[i].n_out(); j++)
       xforms_[i].name_output_var(j, loop_var_name_prefix + to_string(j));
     xforms_[i].setup_names();
+  //  int x = xforms_[i].query_guaranteed_leading_0s();
+  //  int y = xforms_[i].query_possible_leading_0s();
+  //  for (DNF_Iterator conj(xforms_[i].query_DNF()); conj; conj++) ;
+  //  for (DNF_Iterator conj(copy(IS[i]).query_DNF()); conj; conj++) ;
 
-    Relation R = Range(Restrict_Domain(copy(xforms_[i]), copy(IS[i])));
+    Relation S = Restrict_Domain(copy(xforms_[i]), copy(IS[i]));
+
+
+    debug_fprintf(stderr, "here goes\n"); 
+    //Relation R = Range(Restrict_Domain(copy(xforms_[i]), copy(IS[i])));
+    Relation R = Range(S);
     R = Intersection(Extend_Set(R, num_level-R.n_inp()), copy(known_));
     R.simplify(2, 4);
+
+
     if (R.is_inexact())
       throw codegen_error("cannot generate code for inexact iteration spaces");
 
@@ -149,8 +177,11 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
     for (int j = num_level-1; j >= 1; j--) {
       projected_IS_[j-1][i] = Project(copy(projected_IS_[j][i]), j+1, Set_Var);
       projected_IS_[j-1][i].simplify(2, 4);
+      //projected_IS_[j-1][i] = checkAndRestoreIfProjectedByGlobal(projected_IS_[j][i], projected_IS_[j-1][i],
+      // 		  projected_IS_[j-1][i].set_var(j));
     }
   }
+  debug_fprintf(stderr, "CodeGen::CodeGen() DONE\n"); 
 }
 
 
@@ -342,6 +373,7 @@ CG_result *CodeGen::buildAST(int level, const BoolSet<> &active, bool split_on_c
 
 
 CG_result *CodeGen::buildAST(int effort) {
+  debug_fprintf(stderr, "CodeGen::buildAST( effort %d )\n", effort); 
   if (remap_.size() == 0)
     return NULL;
 
