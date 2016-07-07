@@ -1081,8 +1081,8 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     new_stmt.ir_stmt_node = NULL;
 
     new_stmt.has_inspector = false; //  ?? or from copied stmt?
-    if (stmt[stmt_num].has_inspector) debug_fprintf(stderr, "OLD STMT HAS INSPECTOR\n");
-    else debug_fprintf(stderr, "OLD STMT DOES NOT HAVE INSPECTOR\n");
+    if (stmt[stmt_num].has_inspector) { debug_fprintf(stderr, "OLD STMT HAS INSPECTOR\n"); }
+    else { debug_fprintf(stderr, "OLD STMT DOES NOT HAVE INSPECTOR\n"); }
 
     debug_fprintf(stderr, "loop_unroll.cc L1083 adding stmt %d\n", stmt.size()); 
     stmt.push_back(new_stmt);

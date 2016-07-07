@@ -1,6 +1,8 @@
 #ifndef CHILL_IO_HH
 #define CHILL_IO_HH
 
+#include <stdlib.h>
+
 // ----------------------------------------- //
 // Stream output (for debugging, and stdout) //
 // ----------------------------------------- //
@@ -13,9 +15,9 @@
 #define chill_error_fprintf(f, ...)         chill_fprintf(f, __VA_ARGS__)
 #define chill_error_printf(...)             chill_fprintf(stderr, __VA_ARGS__)
 
-#ifdef CHILLDEBUG
+#ifdef DEBUGCHILL
 
-void debug_enable(bool enable = TRUE);
+void debug_enable(bool enable = true);
 void debug_define(char* symbol);
 bool debug_isenabled();
 bool debug_isdefined(char* symbol);

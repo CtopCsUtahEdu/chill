@@ -17,7 +17,8 @@
 
 #include <ir_enums.hh> // for IR_CONDITION_* 
 
-using namespace std; // avoid std::vector everywhere // DO NOT EVER DO THIS 
+using std::vector;
+using std::string;
 
 char *parseUnderlyingType( char *sometype );
 char *parseArrayParts( char *sometype );
@@ -142,8 +143,8 @@ class chillAST_CudaKernelCall;
 class chillAST_CudaSyncthreads; 
 class chillAST_Preprocessing;
 
-typedef std::vector<chillAST_VarDecl *>      chillAST_SymbolTable;  // typedef
-typedef std::vector<chillAST_TypedefDecl *> chillAST_TypedefTable;  // typedef
+typedef std::vector<chillAST_VarDecl *>         chillAST_SymbolTable;   //  typedef
+typedef std::vector<chillAST_TypedefDecl *>     chillAST_TypedefTable;  //  typedef
 
 bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl 
 chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl TODO too many similar named functions
@@ -152,9 +153,9 @@ void printSymbolTable( chillAST_SymbolTable *st ); // fwd decl
 void printSymbolTableMoreInfo( chillAST_SymbolTable *st ); // fwd decl 
 
 
-chillAST_node *lessthanmacro( chillAST_node *left, chillAST_node *right);  // fwd declaration 
-chillAST_SymbolTable  *addSymbolToTable(  chillAST_SymbolTable  *st, chillAST_VarDecl *vd ); // fwd decl
-chillAST_TypedefTable *addTypedefToTable( chillAST_TypedefTable *tt, chillAST_TypedefDecl *td ); // fwd decl
+chillAST_node           *lessthanmacro( chillAST_node *left,  chillAST_node *right);  // fwd declaration 
+chillAST_SymbolTable    *addSymbolToTable( chillAST_SymbolTable *st, chillAST_VarDecl *vd ); // fwd decl
+chillAST_TypedefTable   *addTypedefToTable( chillAST_TypedefTable *tt, chillAST_TypedefDecl *td ); // fwd decl
 
 
 bool streq( const char *a, const char *b); // fwd decl
@@ -1120,8 +1121,10 @@ class chillAST_SourceFile: public chillAST_node {
 public:
 
   // constructors
-  chillAST_SourceFile();                       //  defined in chill_ast.cc 
-  chillAST_SourceFile(const char *filename );  //  defined in chill_ast.cc 
+  chillAST_SourceFile();                        //  defined in chill_ast.cc 
+  chillAST_SourceFile(const char *filename );   //  defined in chill_ast.cc
+  
+  ~chillAST_SourceFile();                       //  defined in chill_ast.cc
 
   void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
   void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
@@ -1144,27 +1147,21 @@ public:
   bool hasTypeDefTable() { return true; } ;
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_SourceFile method
-    //debug_fprintf(stderr, "\nchillAST_SourceFile addVariableToSymbolTable( %s )\n", vd->varname);
     global_symbol_table = addSymbolToTable( global_symbol_table, vd );
-    //printSymbolTable(  global_symbol_table );
     return global_symbol_table;
   }
 
-  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) { 
-    //debug_fprintf(stderr, "SOURCEFILE adding typedef %s to typedeftable\n", tdd->getStructName()); 
-    global_typedef_table = addTypedefToTable( global_typedef_table, tdd );
-    //debug_fprintf(stderr, "now global typedef table has %d entries\n", global_typedef_table->size());
+  void addTypedefToTypedefTable( chillAST_TypedefDecl *tdd ) {
+    assert(this->global_typedef_table != NULL);
+    this->global_typedef_table = addTypedefToTable( this->global_typedef_table, tdd );
   }
 
-  chillAST_node *findDatatype( char *t ) { 
-    //debug_fprintf(stderr, "%s looking for datatype %s\n", getTypeString(), t); 
-    //debug_fprintf(stderr, "%d global typedefs\n", global_typedef_table->size());
-    for (int i=0; i< global_typedef_table->size(); i++)  {
-      
-      chillAST_TypedefDecl *tdd = (*global_typedef_table)[i];
-      //debug_fprintf(stderr, "comparing to %s\n", tdd->getStructName()); 
-      if (tdd->nameis( t )) { 
-        //debug_fprintf(stderr, "found it\n"); 
+  chillAST_node *findDatatype( char *type_name ) {
+    // Look for name in global typedefs
+    assert(this->global_typedef_table != NULL);
+    for (int i=0; i < this->global_typedef_table->size(); i++)  {
+      chillAST_TypedefDecl *tdd = (*this->global_typedef_table)[i];
+      if (tdd->nameis( type_name )) {
         return (chillAST_node *)tdd;
       }
     }

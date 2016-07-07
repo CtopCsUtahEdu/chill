@@ -2196,7 +2196,7 @@ YY_RULE_SETUP
     *s = '\0';
     std::ifstream *ifs = new std::ifstream(yytext, std::ifstream::in);
     if (!ifs->is_open()) {
-      debug_fprintf(stderr, "Can't open file %s\n", yytext);
+      fprintf(stderr, "Can't open file %s\n", yytext);
     }
     else {
       yy_buffer_state *bs = mylexer.yy_create_buffer(ifs, 8092);

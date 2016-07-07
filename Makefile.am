@@ -74,7 +74,7 @@ chill_python_yacc_src       = parse_expr.yy.cc parse_expr.tab.cc
 if DEBUG_OPT
 debug_flags					= -DDEBUGCHILL
 else
-debug_flags					=
+debug_flags					= -DNO_CHILL_DEBUG
 endif
 
 
@@ -92,7 +92,7 @@ runner_flags         += -DCHILL_BUILD_VERSION=$(CHILL_BUILD_VERSION)
 runner_flags         += -DPYTHON
 else
 if LUA_OPT
-runner_libs           = -llua -lreadline -lhistory -lpthread -ldl
+runner_libs           = -llua -lpthread -ldl
 runner_libdirs        = -L$(LUAHOME)/lib
 runner_includes       = -I$(LUAHOME)/include
 chill_runner_src      = $(chill_lua_runner_src) $(chill_lua_yacc_src)
@@ -149,8 +149,10 @@ common_libdirs          = $(core_libdirs) $(runner_libdirs)
 
 ## Binaries ##
 if CUDACHILL_OPT
+TESTS=
 bin_PROGRAMS=cuda-chill
 else
+TESTS=
 bin_PROGRAMS=chill
 endif
 
