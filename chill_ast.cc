@@ -167,8 +167,8 @@ chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, con
               //debug_fprintf(stderr, "has a recordDecl\n"); 
               
               chillAST_VarDecl *sp = rd->findSubpart( subpart );
-              if (sp) debug_fprintf(stderr, "found a struct member named %s\n", subpart);
-              else debug_fprintf(stderr, "DIDN'T FIND a struct member named %s\n", subpart);
+              if (sp) { debug_fprintf(stderr, "found a struct member named %s\n", subpart); }
+              else  { debug_fprintf(stderr, "DIDN'T FIND a struct member named %s\n", subpart); }
               return sp;  // return the subpart?? 
             }
             else { 
@@ -349,30 +349,35 @@ chillAST_VarDecl * chillAST_node::findVariableNamed( const char *name ) { // rec
 
 
 chillAST_SourceFile::chillAST_SourceFile::chillAST_SourceFile() { 
-  SourceFileName = strdup("No Source File");
-  asttype = CHILLAST_NODETYPE_SOURCEFILE;
-  parent = NULL; // top node
-  metacomment = NULL;
-  global_symbol_table = NULL;
-  global_typedef_table = NULL;
-  FileToWrite = NULL;
-  frontend = strdup("unknown"); 
-  isFromSourceFile = true;
-  filename = NULL; 
+    SourceFileName = strdup("No Source File");
+    asttype = CHILLAST_NODETYPE_SOURCEFILE;
+    parent = NULL; // top node
+    metacomment = NULL;
+    global_symbol_table = new chillAST_SymbolTable();
+    global_typedef_table = new chillAST_TypedefTable();
+    FileToWrite = NULL;
+    frontend = strdup("unknown"); 
+    isFromSourceFile = true;
+    filename = NULL; 
 };
 
 chillAST_SourceFile::chillAST_SourceFile(const char *filename ) { 
-  SourceFileName = strdup(filename); 
-  asttype = CHILLAST_NODETYPE_SOURCEFILE;  
-  parent = NULL; // top node
-  metacomment = NULL;
-  global_symbol_table = NULL;
-  global_typedef_table = NULL;
-  FileToWrite = NULL; 
-  frontend = strdup("unknown"); 
-  isFromSourceFile = true;
-  filename = NULL; 
+    SourceFileName = strdup(filename); 
+    asttype = CHILLAST_NODETYPE_SOURCEFILE;  
+    parent = NULL; // top node
+    metacomment = NULL;
+    global_symbol_table = new chillAST_SymbolTable();
+    global_typedef_table = new chillAST_TypedefTable();
+    FileToWrite = NULL; 
+    frontend = strdup("unknown"); 
+    isFromSourceFile = true;
+    filename = NULL; 
 };
+
+chillAST_SourceFile::~chillAST_SourceFile() {
+    delete this->global_symbol_table;
+    delete this->global_typedef_table;
+}
 
 void chillAST_SourceFile::print( int indent, FILE *fp ) { 
   debug_fprintf(stderr, "chillAST_SourceFile::print()\n"); 
@@ -3811,26 +3816,22 @@ void chillAST_VarDecl::splitarraypart() {
   int asteriskcount = 0;
   int fixedcount = 0;
   for ( int i=0; i<strlen(arraypart); i++) {
-    if (arraypart[i] == '*') { 
-      if (fixedcount) {
-        debug_fprintf(stderr, "illegal vardecl arraypart: '%s'\n", arraypart);
-        segfault(); 
-        exit(-1);
+    if (this->arraypart[i] == '*') { 
+      if (!fixedcount) {
+        asteriskcount++;
       }
-      asteriskcount++;
     }
     else { // remainder is fixed? 
       fixedcount++; 
       // check for brackets and digits only?   TODO
     }
   }
-  arraypointerpart = (char *) calloc( asteriskcount+1, sizeof(char));
-  arraysetpart     = (char *) calloc( fixedcount+1,    sizeof(char));
+  this->arraypointerpart = (char *) calloc( asteriskcount+1, sizeof(char));
+  this->arraysetpart     = (char *) calloc( fixedcount+1,    sizeof(char));
+  
   char *ptr = arraypart;
   for ( int i=0; i<asteriskcount; i++)  arraypointerpart[i] = *ptr++;
   for ( int i=0; i<fixedcount; i++)     arraysetpart[i]   = *ptr++;
-
-  //debug_fprintf(stderr, "%s = %s + %s\n", arraypart, arraypointerpart, arraysetpart); 
 }
 
 

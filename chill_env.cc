@@ -758,8 +758,8 @@ static int cur_indices(lua_State *L) {
 
 static int block_indices(lua_State *L) {
   REQUIRE_LOOP;
-  debug_fprintf(stderr, "\n\n\n*** chill_env.cc block_indices probably an error with cu_bx vs Vcu_bx\n");
-  exit(-1);
+  //debug_fprintf(stderr, "\n\n\n*** chill_env.cc block_indices probably an error with cu_bx vs Vcu_bx\n");
+  //exit(-1);
   
   strict_arg_num(L, 0);
   lua_newtable(L);
@@ -778,8 +778,8 @@ static int block_indices(lua_State *L) {
 
 static int thread_indices(lua_State *L) {
   REQUIRE_LOOP;
-  debug_fprintf(stderr, "\n\n\n*** chill_env.cc thread_indices probably an error with cu_bx vs Vcu_bx\n");
-  exit(-1);
+  //debug_fprintf(stderr, "\n\n\n*** chill_env.cc thread_indices probably an error with cu_bx vs Vcu_bx\n");
+  //exit(-1);
 
   strict_arg_num(L, 0);
   lua_newtable(L);
@@ -803,8 +803,8 @@ static int thread_indices(lua_State *L) {
 
 static int block_dims(lua_State *L) {
   REQUIRE_LOOP;
-  debug_fprintf(stderr, "\n\n\n*** chill_env.cc block_dims probably an error with cu_bx vs Vcu_bx\n");    
-  exit(-1);
+  //debug_fprintf(stderr, "\n\n\n*** chill_env.cc block_dims probably an error with cu_bx vs Vcu_bx\n");    
+  //exit(-1);
 
   strict_arg_num(L, 0);
   lua_pushinteger(L, myloop->cu_bx);
@@ -815,8 +815,8 @@ static int block_dims(lua_State *L) {
 
 static int thread_dims(lua_State *L) {
   REQUIRE_LOOP;
-  debug_fprintf(stderr, "\n\n\n*** chill_env.cc thread_dims probably an error with cu_bx vs Vcu_bx\n");    
-  exit(-1);
+  //debug_fprintf(stderr, "\n\n\n*** chill_env.cc thread_dims probably an error with cu_bx vs Vcu_bx\n");    
+  //exit(-1);
 
   strict_arg_num(L, 0);
   lua_pushinteger(L, myloop->cu_tx);

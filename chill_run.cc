@@ -264,13 +264,13 @@ static error_t parse_chill_arg(int key, char* value, argp_state* state) {
     else {
       return ARGP_ERR_UNKNOWN;
     }
-  case 'd':
+  case 'D':
     if(value != NULL) {
-      debug_enable();
+      debug_enable(true);
       debug_define(value);
     }
     else {
-      debug_enable();
+      debug_enable(true);
     }
     break;
   case 'o':
@@ -421,6 +421,7 @@ int main( int argc, char* argv[] )
     #ifdef FRONTEND_ROSE
     debug_fprintf(stderr, "calling commit_loop()\n"); 
     ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
+    ((IR_roseCode*)(ir_code))->finalizeRose();
     #endif
 #else
     debug_fprintf(stderr, "CUDACHILL IS NOT DEFINED\n"); 
@@ -435,12 +436,11 @@ int main( int argc, char* argv[] )
     lnum_end = get_loop_num_end(L);
     debug_fprintf(stderr, "calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
-    
-#endif
     #ifdef FRONTEND_ROSE
     finalize_loop(lnum_start, lnum_end);
     ((IR_roseCode*)(ir_code))->finalizeRose();
     #endif
+#endif
     delete ir_code;
   }
   else     debug_fprintf(stderr, "big if FALSE\n"); 

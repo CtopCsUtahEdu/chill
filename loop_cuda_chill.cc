@@ -856,12 +856,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // for each pointer, build malloc( sizeof( int/float ) ) ??
   for (std::set<int>::iterator it = ptrs.begin(); it != ptrs.end(); it++) {
-    if (ptr_variables[*it]->elem_type() == IR_CONSTANT_FLOAT)
-      debug_fprintf(stderr, "pointer to float\n"); 
-    else if (ptr_variables[*it]->elem_type() == IR_CONSTANT_INT)
-      debug_fprintf(stderr, "pointer to INT\n"); 
-    else
+    if (ptr_variables[*it]->elem_type() == IR_CONSTANT_FLOAT) {
+      debug_fprintf(stderr, "pointer to float\n");
+    } 
+    else if (ptr_variables[*it]->elem_type() == IR_CONSTANT_INT) {
+      debug_fprintf(stderr, "pointer to INT\n");
+    }
+    else {
       throw loop_error("Pointer type unidentified in cudaize_codegen_v2!");
+    }
     debug_fprintf(stderr, "TODO - DIDN'T ACTUALLY DO THE MALLOC\n");
   } 
   debug_fprintf(stderr, "done making mallocs?\n");
@@ -1503,7 +1506,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
             macro->print();  printf("\n"); fflush(stdout); 
 
             char *blurb = macro->getRhsString();
-            if (blurb == NULL) debug_fprintf(stderr, "macro rhs NULL\n"); 
+            if (blurb == NULL) { debug_fprintf(stderr, "macro rhs NULL\n"); }
             else 
             {
               //debug_fprintf(stderr, "macro rhs "); macro->getBody()->print(); debug_fprintf(stderr, "\n");
@@ -1526,8 +1529,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
         }
         
-        if (!found)  debug_fprintf(stderr, "var_sym == NULL\n"); 
-        else debug_fprintf(stderr, "var_sym NOT == NULL\n"); 
+        if (!found) { debug_fprintf(stderr, "var_sym == NULL\n"); }
+        else { debug_fprintf(stderr, "var_sym NOT == NULL\n"); }
       
 
         // UMWUT 
@@ -1696,8 +1699,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         v.cons_mapped = false;
         
         bool isNOTAParameter = (kernel_parameters.find(name) == kernel_parameters.end());
-        if (isNOTAParameter) debug_fprintf(stderr, "%s is NOT a kernel parameter\n", name.c_str() );
-        else debug_fprintf(stderr, "%s IS a parameter\n", name.c_str()); 
+        if (isNOTAParameter) { debug_fprintf(stderr, "%s is NOT a kernel parameter\n", name.c_str() ); }
+        else { debug_fprintf(stderr, "%s IS a parameter\n", name.c_str()); } 
         
         
         // find the underlying type of the array
@@ -1966,8 +1969,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //like (float(*) [1024])
         
         if (arrayVars[i].tex_mapped || arrayVars[i].cons_mapped) { 
-          if (arrayVars[i].tex_mapped) debug_fprintf(stderr, "arrayVars[i].tex_mapped\n"); 
-          if (arrayVars[i].cons_mapped) debug_fprintf(stderr, "arrayVars[i].cons_mapped\n"); 
+          if (arrayVars[i].tex_mapped) { debug_fprintf(stderr, "arrayVars[i].tex_mapped\n"); }
+          if (arrayVars[i].cons_mapped) { debug_fprintf(stderr, "arrayVars[i].cons_mapped\n"); } 
           continue;
         }
         
@@ -2650,7 +2653,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   int nump = GPUKernel->parameters.size();
   debug_fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
-  for (int i=0; i<nump; i++) debug_fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
+  for (int i=0; i<nump; i++) { debug_fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname ); }
   debug_fprintf(stderr, "\n"); 
   
   
@@ -2832,10 +2835,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     bool isdeclared = false;
     debug_fprintf(stderr, "%2d %s ", i, vd->varname); 
     if (vd->isBuiltin())     isdeclared = true;
-    if (isdeclared) debug_fprintf(stderr, " (builtin)");
+    if (isdeclared) { debug_fprintf(stderr, " (builtin)"); }
     else { 
       if (vd->isParmVarDecl()) isdeclared = true;
-      if (isdeclared) debug_fprintf(stderr, " (param)");
+      if (isdeclared) { debug_fprintf(stderr, " (param)"); }
     }
     for (int j=0; j<numdeclared; j++) { 
       if (kerneldeclsused[i] == kerneldecls[j] ) {
@@ -2968,7 +2971,7 @@ bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
   const int n = stmt[stmt_num].xform.n_out();
   if (pi.size() > (n - 1) / 2) { 
  debug_fprintf(stderr, "\n\nloop_cuda_CHILL.cc L 761, pi.size() %d  > ((n=%d)-1)/2 =  %d\n", pi.size(), n, (n-1)/2);
-    for (int i=0; i<pi.size(); i++) debug_fprintf(stderr, "pi[%d] = %d\n", i, pi[i]);
+    for (int i=0; i<pi.size(); i++) { debug_fprintf(stderr, "pi[%d] = %d\n", i, pi[i]); }
     
     throw std::invalid_argument(
                                 "iteration space dimensionality does not match permute dimensionality");
@@ -4215,7 +4218,7 @@ void LoopCuda::scalar_expand_cuda(int stmt_num, std::vector<int> level,
   
   std::vector<std::string> namez = idxNames[stmt_num];
   debug_fprintf(stderr, "pushing ALL %d of THESE repeatedly (%d times)???\n", namez.size(), new_num_stmts - old_num_stmts); 
-  for (int i = 0; i < namez.size(); i++) debug_fprintf(stderr, "%d %s\n", i, namez[i].c_str()); 
+  for (int i = 0; i < namez.size(); i++) { debug_fprintf(stderr, "%d %s\n", i, namez[i].c_str()); }
   debug_fprintf(stderr, "\n"); 
 
   for (int i = 0; i < new_num_stmts - old_num_stmts; i++) {  // ??? 
@@ -4654,8 +4657,8 @@ void swapVarReferences( chillAST_node *newkernelcode,
     chillAST_VarDecl *isParam    = kernel->hasParameterNamed( newdecls[i]->varname ); 
     chillAST_VarDecl *isLocalVar = kernel->funcHasVariableNamed(  newdecls[i]->varname ); 
     
-    if (isParam)    debug_fprintf(stderr, "is a parameter\n");
-    if (isLocalVar) debug_fprintf(stderr, "is already defined in the kernel\n");
+    if (isParam)    { debug_fprintf(stderr, "is a parameter\n"); }
+    if (isLocalVar) { debug_fprintf(stderr, "is already defined in the kernel\n"); }
     
     if (!isParam && (!isLocalVar)) { 
       debug_fprintf(stderr, "needed to be added to kernel symbol table\n");

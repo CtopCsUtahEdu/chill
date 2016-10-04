@@ -1,4 +1,4 @@
-AC_INIT([chill],[0.2.1])
+AC_INIT([chill],[0.2.3])
 AC_CONFIG_AUX_DIR([.])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
-AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.1\\\""])
+AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.3\\\""])
 AC_SUBST([CXXFLAGS],[-g])
 
 AM_PROG_AR
@@ -30,11 +30,10 @@ AM_PATH_PYTHON([2.7],[
 #    AS_IF([test "x$enableval" != xno],[
 #        AC_SUBST([enable_cuda],[yes])])])
 
-AC_ARG_ENABLE([cuda],[
-    AS_HELP_STRING([--enable-cuda],[builds cudachill])
-    ],[
-    AS_IF([test "x$enableval" != xno],[
-        AC_SUBST([enable_cuda],[yes])])])
+AC_ARG_ENABLE([cuda],
+   [AS_HELP_STRING([--enable-cuda],[builds cudachill])],
+   [AS_IF([test "x$enableval" != xno],
+       [AC_SUBST([enable_cuda],[yes])])])
 
 AM_CONDITIONAL([CUDACHILL_OPT],[test "x$enable_cuda" == xyes])
 
@@ -49,7 +48,9 @@ AC_ARG_ENABLE([coverage],
 AC_ARG_ENABLE([debug],
    [AS_HELP_STRING([--enable-debug],[enable debug info])],
    [AS_IF(["x$enableval" != xno],
-       [AC_SUBST([enable_debug_info],[yes])],[])])
+       [AC_SUBST([enable_debug],[yes])])])
+
+AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug" == xyes])
 
 AC_ARG_WITH([rose],[
     AS_HELP_STRING([--with-rose],[set rose home])
@@ -123,7 +124,6 @@ AS_IF([test "x$interface_lang" == xscript],
     AC_SUBST([use_lue],[no])
     AC_SUBST([use_script],[yes])],[])
 
-AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug_info" = xyes])
 AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])

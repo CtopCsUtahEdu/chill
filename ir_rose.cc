@@ -228,8 +228,8 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
           debug_fprintf(stderr, "\nfunctiondecl                     %s blurb %s\n", name, blurb.c_str()); 
           bool samefile =  (nodefile == sourcefile);
           debug_fprintf(stderr, "nodefile   %s\nsourcefile %s\n", nodefile.c_str(), sourcefile.c_str()); 
-          if (samefile) debug_fprintf(stderr, "SAME FILE\n");
-          else  debug_fprintf(stderr, "NOT THE SAME FILE\n");
+          if (samefile) { debug_fprintf(stderr, "SAME FILE\n"); }
+          else  { debug_fprintf(stderr, "NOT THE SAME FILE\n"); }
 
           //debug_fprintf(stderr, "\n\n%3d   %p   %s    ", i, n, blurb.c_str()); 
           //debug_fprintf(stderr, "node %s\n", n->class_name().c_str()); 
@@ -1483,7 +1483,7 @@ chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *rose_varrefexp, chillAST_node
     debug_fprintf(stderr, "variables I know of are:\n");
     for (int i=0; i<numvars; i++) { 
       chillAST_VarDecl *adecl = VariableDeclarations[i];
-      if (adecl->isParmVarDecl()) debug_fprintf(stderr, "(parameter) ");
+      if (adecl->isParmVarDecl()) { debug_fprintf(stderr, "(parameter) "); }
       debug_fprintf(stderr, "%s %s at location 0x%x\n", adecl->vartype, adecl->varname, adecl->uniquePtr); 
     }  
     debug_fprintf(stderr, "\n"); 
@@ -3269,8 +3269,8 @@ debug_fprintf(stderr, "\n");
     chillAST_VarDecl *b = refs[i]->basedecl; // WRONG
     //b->dump(); printf("\n"); b->print();  printf("\n"); fflush(stdout); 
 
-    if (refs[i]->imwrittento) debug_fprintf(stderr, "ref[%d] %s is writtento\n", i, b->varname); 
-    else debug_fprintf(stderr, "ref[%d] %s is NOT writtento\n", i, b->varname); 
+    if (refs[i]->imwrittento) { debug_fprintf(stderr, "ref[%d] %s is writtento\n", i, b->varname); }
+    else { debug_fprintf(stderr, "ref[%d] %s is NOT writtento\n", i, b->varname); } 
 
     arrays.push_back( new IR_roseArrayRef( this, refs[i], refs[i]->imwrittento ) );
     if (refs[i]->imreadfrom) { 

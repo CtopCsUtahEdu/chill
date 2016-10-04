@@ -43,7 +43,7 @@ void flushScanBuffer();
   flushScanBuffer();
 
   if (include_stack_ptr >= MAX_INCLUDE_DEPTH) {
-    debug_fprintf(stderr, "File including nested too deeply, abort");
+    fprintf(stderr, "File including nested too deeply, abort");
     exit(1);
   }
   
@@ -52,7 +52,7 @@ void flushScanBuffer();
   *s = '\0';
   FILE *f = fopen(yytext, "r");
   if (!f) {
-    debug_fprintf(stderr, "Can't open file %s\n", yytext);
+    fprintf(stderr, "Can't open file %s\n", yytext);
   }
   else {
     include_stack[include_stack_ptr++] = YY_CURRENT_BUFFER;
@@ -62,8 +62,8 @@ void flushScanBuffer();
   BEGIN(INITIAL);
 }
 <INCLUDE>[ \n] {
-  debug_fprintf(stderr,"Error in include syntax\n");
-  debug_fprintf(stderr,"Use <<fname>> to include the file named fname\n");
+  fprintf(stderr,"Error in include syntax\n");
+  fprintf(stderr,"Use <<fname>> to include the file named fname\n");
   BEGIN(INITIAL);
   if(is_interactive && include_stack_ptr == 0)
     printf("%s ", PROMPT_STRING);
