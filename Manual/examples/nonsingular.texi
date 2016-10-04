@@ -1,0 +1,30 @@
+@unnumberedsubsec Nonsingular
+@c Nonsingular
+@deftypefn {Transform} {} nonsingular (matrix @var{transform})
+The @code{nonsingular} transformation applies a unimodular or nonunimodular transformation on a perfect loop nest. The only requirement for the matrix is that it be invertible. All statements in the loop nest are effected by the transformation. 
+
+Given a perfect loop nest of depth @math{n}, with original iteration indexes @math{i} and an @math{n} x @math{n} transformation matrix @math{T}, a new set of index vectors @math{i'} is formed as @math{i' = T i}. If the transformation matrix @math{T} is an @math{n} x @math{n+1} matrix, the last column vector is a constant shift as shown below.
+
+@math{\pmatrix{i_1'\cr i_2'\cr \vdots\cr i_n'} = \pmatrix{t_{11}&t_{12}&\ldots&t_{1n}&c_{1,{n+1}}\cr
+t_{21}&t_{22}&\ldots&t_{2n}&c_{2,{n+1}}\cr
+\vdots&\vdots&\ddots&\vdots&\vdots\cr
+t_{n1}&t_{n2}&\ldots&t_{nn}&c_{n,{n+1}}\cr} \pmatrix{i_1\cr i_2\cr \vdots\cr i_n \cr 1}}
+
+This transform has the ability to simultaneously compose the transforms of permutation, skew, reverse and shift. For example ...
+
+@math{\pmatrix{0&0&1\cr1&0&0\cr0&1&0}} is equivalent to @code{permute(}@dots{}@code{, [3,1,2])}
+@sp1
+@math{\pmatrix{1&0&0\cr1&1&0\cr0&0&1}} is equivalent to @code{skew(}@dots{}@code{, 2, [1,1,0])}
+@sp1
+@math{\pmatrix{1&0&0\cr0&-1&0\cr0&0&1}} is equivalent to @code{reverse(}@dots{}@code{, 2)}
+@sp1
+@math{\pmatrix{1&0&0&0\cr0&1&0&4\cr0&0&1&0}} is equivalent to @code{shift(}@dots{}@code{, 2, 4)}
+@sp1
+The difference between @code{nonsingular} and @code{permute}, @code{skew}, @code{reverse} and @code{shift} is that @code{nonsingular} can apply combinations of all of the above transformations simultaneously but it must be applied to all statements in the nest. The individual transformations accept a set of statements depicted above with ``@dots{}''.
+
+Python stores arrays in row major order (like C and unlike Fortran) so@/
+@sp 1
+the array @math{\pmatrix{1&0&0&0\cr0&1&0&4\cr0&0&1&0}} is written as [[1,0,0,0],[0,1,0,4],[0,0,1,0]].
+
+@end deftypefn
+

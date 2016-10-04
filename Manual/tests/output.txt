@@ -1,0 +1,43 @@
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int i, j, n;
+
+  for(i = 0; i < an; i++) {
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++) {
+        C[i][j] += A[i][n] * B[n][j];
+      }
+    }
+  }
+}
+
+
+
+chill test2.script
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2,t4,0);
+    s1(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+    }
+  }
+}
+
+
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2,t4,0);
+  }
+}
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    for(t6 = 0; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+    }
+  }
+}
+
+
+invalid permutation for statement 1 at line 14
+# 

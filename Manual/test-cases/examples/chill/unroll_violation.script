@@ -1,0 +1,14 @@
+#matrix multiply large array size for intel machine
+source: unroll_violation.c
+procedure: main
+format: rose
+loop: 0
+
+original()
+#permute([3,2,1])
+unroll(0,2,2)
+
+
+
+print
+

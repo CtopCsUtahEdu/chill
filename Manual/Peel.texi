@@ -1,0 +1,94 @@
+@c Peel
+@deftypefn {Transform} @code{peel} {} (int @var{stmt}, int @var{loop}, int @var{peel_amount} = 1)
+The @code{peel} transformation @dots{}
+
+@b{Arguments}
+
+@c The peel command has two forms:
+@c peel (number, number, expr)
+@c peel (number, number)
+@c The peel command @dots{}
+@c peel            stmt#
+@c                 loop level
+@c                 peel amount (default to 1)
+@c                   if positive, peel the specified number of iterations from the
+@c                 start of the loop; if negative, peel from the end
+
+@sp 2
+@b{Conditions}
+
+@sp 1
+
+@c Example description and python script
+@b{Example}
+@multitable @columnfractions .50 .50 
+The Python script to the right does @dots{}
+@tab @b{Python script}
+@smallformat
+@cartouche
+@c Script in verbatim block below
+@verbatim
+from chill import *
+
+source('mm.c')
+procedure('mm')
+loop(0)
+
+known(['ambn > 4', 'an > 0', 'bm > 0'])
+peel(1,3,4)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@c Code Transformation Example
+@multitable @columnfractions .45 .50 .05
+@b{Original code}
+@smallformat
+@cartouche
+@c Original Code in verbatim block below
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+
+  for(i = 0; i < an; i++) 
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+
+@tab 
+@b{Transformed code}
+@smallformat
+@cartouche
+@c Transformed Code in verbatim block below
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+
+  for (i = 0; i <= an - 1; i += 1) 
+    for (j = 0; j <= bm - 1; j += 1) {
+      C[i][j] = 0.0f;
+      C[i][j] += (A[i][0] * B[0][j]);
+      C[i][j] += (A[i][1] * B[1][j]);
+      C[i][j] += (A[i][2] * B[2][j]);
+      C[i][j] += (A[i][3] * B[3][j]);
+      for (n = 4; n <= ambn - 1; n += 1) 
+        C[i][j] += (A[i][n] * B[n][j]);
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@end deftypefn
+

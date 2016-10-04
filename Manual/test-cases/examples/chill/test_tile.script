@@ -1,0 +1,14 @@
+#matrix multiply large array size for intel machine
+source: test_tile.c
+procedure: func
+format : rose
+loop: 0
+
+original()
+#permute([3,2,1])
+tile(0,1,4)
+
+
+
+print
+

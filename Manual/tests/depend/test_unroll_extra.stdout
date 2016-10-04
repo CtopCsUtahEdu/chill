@@ -1,0 +1,58 @@
+for(t2 = 0; t2 <= an-1; t2++) {
+  s2(t2);
+  for(t4 = 0; t4 <= -over1+bm-1; t4 += 4) {
+    s0(t2,t4,0);
+    s1(t2,t4,0);
+    s5(t2,t4,0);
+    s6(t2,t4,0);
+    s7(t2,t4,0);
+    s8(t2,t4,0);
+    s9(t2,t4,0);
+    s10(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+      s6(t2,t4,t6);
+      s8(t2,t4,t6);
+      s10(t2,t4,t6);
+    }
+  }
+  for(t4 = max(bm-over1,0); t4 <= bm-1; t4++) {
+    s3(t2,t4,0);
+    s4(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s4(t2,t4,t6);
+    }
+  }
+}
+
+
+dependence graph:
+s0->s1: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
+s0->s4: C:true(0, *, +) C:true(0, *, 0) C:output(0, *, +) C:output(0, *, 0)
+s1->s1: C:anti(0, 0, +) C:output(0, 0, +)
+s1->s4: C:anti(0, *, +) C:output(0, *, +)
+s2->s0: control()
+s2->s1: control()
+s2->s2: output(+, *, *)
+s2->s3: control()
+s2->s4: control()
+s2->s5: control()
+s2->s6: control()
+s2->s7: control()
+s2->s8: control()
+s2->s9: control()
+s2->s10: control()
+s3->s4: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
+s4->s4: C:anti(0, 0, +) C:output(0, 0, +)
+s5->s4: C:true(0, *, +) C:true(0, *, 0) C:output(0, *, +) C:output(0, *, 0)
+s5->s6: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
+s6->s4: C:anti(0, *, +) C:output(0, *, +)
+s6->s6: C:anti(0, 0, +) C:output(0, 0, +)
+s7->s4: C:true(0, *, +) C:true(0, *, 0) C:output(0, *, +) C:output(0, *, 0)
+s7->s8: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
+s8->s4: C:anti(0, *, +) C:output(0, *, +)
+s8->s8: C:anti(0, 0, +) C:output(0, 0, +)
+s9->s4: C:true(0, *, +) C:true(0, *, 0) C:output(0, *, +) C:output(0, *, 0)
+s9->s10: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
+s10->s4: C:anti(0, *, +) C:output(0, *, +)
+s10->s10: C:anti(0, 0, +) C:output(0, 0, +)

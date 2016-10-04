@@ -1,0 +1,10 @@
+@c Permute
+
+The @code{permute} transformation interchanges the loops of a loop nest.
+
+@deftypefn {Transform} @code{permute} {} (int @var{stmt} = 0, int @var{level} = 0, Vector @var{p})
+
+The loop nest to permute is specified by @var{stmt} and @var{level}. The loops in the next are permuted acording to the vector @var{p}.
+@end deftypefn
+
+@include examples/permute.texi

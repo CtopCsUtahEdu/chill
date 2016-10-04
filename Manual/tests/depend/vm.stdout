@@ -1,0 +1,36 @@
+original
+for(t2 = 1; t2 <= n-2; t2++) {
+  if (t2 <= 1) {
+    s0(2,t2);
+    s2(2,t2);
+    for(t4 = 3; t4 <= n-1; t4++) {
+      s0(t4,t2);
+      s1(t4,t2);
+    }
+  }
+  else {
+    s2(t2+1,t2);
+    for(t4 = t2+2; t4 <= n-1; t4++) {
+      s1(t4,t2);
+    }
+  }
+}
+
+
+s0: { Sym=[n] [t1,t2,t3,t4,t5] : t5 = 0 && t3 = 0 && t1 = 0 && t2 = 1 && 2 <= t4 < n }
+s1: { Sym=[n] [t1,t2,t3,t4,t5] : t5 = 1 && t3 = 0 && t1 = 0 && t2+2 <= t4 < n && 1 <= t2 }
+s2: { Sym=[n] [t1,t2,t3,t4,t5] : t4 = 1+t2 && t3 = 0 && t1 = 0 && t5 = 2 && 1 <= t2 <= n-2 }
+dependence graph:
+s0->s1: s:output(+, 0) s:output(0, 0) s:true(+, 0) s:true(0, 0)
+s0->s2: s:true(+, 0) s:true(0, 0)
+s1->s1: s:output(+, 0) s:true(+, 0) s:true(0, 0) s:anti(+, 0)
+s1->s2: s:true(+, 0)
+s2->s1: b:true(1, 2+)
+s2->s2: b:true(0, 0)
+dependence graph:
+s0->s1: s:output(+, 0) s:output(0, 0) s:true(+, 0) s:true(0, 0)
+s0->s2: s:true(+, 0) s:true(0, 0)
+s1->s1: s:output(+, 0) s:true(+, 0) s:true(0, 0) s:anti(+, 0)
+s1->s2: s:true(+, 0)
+s2->s1: b:true(1, 2+)
+s2->s2: b:true(0, 0)

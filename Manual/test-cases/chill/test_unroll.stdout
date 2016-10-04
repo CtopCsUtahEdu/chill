@@ -1,0 +1,19 @@
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2,t4,0);
+  }
+}
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s2(t2,t4);
+    for(t6 = 0; t6 <= -over1+ambn-1; t6 += 4) {
+      s1(t2,t4,t6);
+      s4(t2,t4,t6);
+    }
+    for(t6 = max(0,ambn-over1); t6 <= ambn-1; t6++) {
+      s3(t2,t4,t6);
+    }
+  }
+}
+
+

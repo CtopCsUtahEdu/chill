@@ -1,0 +1,33 @@
+\initial {D}
+\entry {\code {distribute}}{10}
+\initial {E}
+\entry {\code {exit}}{9}
+\initial {F}
+\entry {\code {fuse}}{11}
+\initial {K}
+\entry {\code {known}}{9}
+\initial {L}
+\entry {\code {loop}}{9}
+\initial {N}
+\entry {\code {nonsingular}}{12}
+\initial {P}
+\entry {\code {peel}}{13}
+\entry {\code {permute}}{14}
+\entry {\code {print_code}}{9}
+\entry {\code {print_dep}}{9}
+\entry {\code {print_space}}{9}
+\entry {\code {procedure}}{9}
+\initial {R}
+\entry {\code {remove_dep}}{9}
+\entry {\code {reverse}}{15}
+\initial {S}
+\entry {\code {scale}}{16}
+\entry {\code {shift}}{17}
+\entry {\code {shift_to}}{18}
+\entry {\code {skew}}{19}
+\entry {\code {source}}{9}
+\entry {\code {split}}{20}
+\initial {T}
+\entry {\code {tile}}{21}
+\initial {U}
+\entry {\code {unroll}}{22}

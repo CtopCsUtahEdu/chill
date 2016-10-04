@@ -1,0 +1,17 @@
+void f(float *a, float *b, float *c, int n) {
+  int i;
+  float t = 0.0;
+
+  for(i = 0; i < n; i++) {
+      if (a[i] <> 0) 
+	  if (b[i]/a[i] <= 1)
+	      a[i] = b[i];
+      if (a[i] > t)
+	  t = (b[i] - a[i]) + t;
+      else {
+	  t = (t + b[i]) - a[i];
+	  b[i] = a[i];
+      }
+      c[i] = b[i] + c[i];
+  }
+}
