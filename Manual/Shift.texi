@@ -1,0 +1,95 @@
+@c Shift
+@deftypefn {Transform} @code{shift} {} (set @var{stmts}, int @var{shift_amount})
+The shift command @dots{}
+
+@b{Arguments}
+
+@c shift (vector, number, expr)
+@c shift           [set of statement numbers]
+@c                 loop level
+@c                 shift amount
+@c                   assuming targeted loop level is 2 and shift amount is
+@c                   1, then the new loop at level 2 for statements in the first
+@c                   parameter is mapped to L2+1, i.e. shifted right by 1
+
+@sp 2
+@b{Conditions}
+
+@sp 1
+
+@c Example description and python script
+@b{Example}
+@multitable @columnfractions .50 .50 
+The Python script to the right does @dots{}
+@tab @b{Python script}
+@smallformat
+@cartouche
+@c Script in verbatim block below
+@verbatim
+from chill import *
+
+source('mm.c')
+procedure('mm')
+loop(0)
+
+known(['ambn > 4', 'an > 0', 'bm > 0'])
+shift([1],1,4)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@c Code Transformation Example
+@multitable @columnfractions .45 .50 .05
+@b{Original code}
+@smallformat
+@cartouche
+@c Original Code in verbatim block below
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+
+  for(i = 0; i < an; i++) 
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+
+@tab 
+@b{Transformed code}
+@smallformat
+@cartouche
+@c Transformed Code in verbatim block below
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+
+  for (i = 0; i <= an + 3; i += 1) 
+    for (j = 0; j <= bm-1; j += 1) 
+      if (i + 1 <= an) {
+        C[i][j] = 0.0f;
+        if (4 <= i) 
+          C[i-4][j]+=(A[i-4][0]*B[0][j]);
+        if (4 <= i) 
+          for (n = 1; n <= ambn-1; n += 1) 
+            C[i-4][j]+=(A[i-4][n]*B[n][j]);
+      }
+      else if (4 <= i) 
+        for (n = 0; n <= ambn-1; n +=1) 
+          C[i-4][j]+=(A[i-4][n]*B[n][j]);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@end deftypefn
+

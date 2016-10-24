@@ -1,0 +1,4 @@
+
+-w $STAGING_DIR_WD -O $OMEGA_DEV_SRC -C $CHILL_DEV_SRC -b $STAGING_DIR_BIN batch test-cases/unit/chill-basic-script.tclist
+-w $STAGING_DIR_WD -O $OMEGA_DEV_SRC -C $CHILL_DEV_SRC -b $STAGING_DIR_BIN batch test-cases/unit/chill-basic-python.tclist
+

@@ -1,0 +1,21 @@
+@c Skew
+@deftypefn {Transform} @code{skew} {} (set @var{stmts}, int @var{level}, vector<int> @var{skew_amount})
+The @code{skew} transformation @dots{}
+
+@b{Arguments}
+
+
+@c The skew command has the form:
+@c skew (vector, number, vector)
+@c The skew command @dots{}
+@c skew            [set of statement numbers]
+@c                 loop level
+@c                 [skewing amount vector]
+@c                   assuming targeted loop level is 2 and skewing vector is
+@c                   [1,1], then new loop at level 2 for statements in the first
+@c                 parameter is mapped to L1+L2
+
+@sp 2
+@b{Conditions}
+@end deftypefn
+@include examples/skew.texi

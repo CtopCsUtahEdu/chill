@@ -1,0 +1,57 @@
+#!/bin/sh
+
+for file in *.script; do
+    name=`basename $file .script | sed 's/test_//g'`
+    outfile=examples/${name}.texi
+    echo $outfile
+
+    cat > $outfile <<EOF
+@multitable @columnfractions .50 .50 
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+EOF
+    cat test_$name.py >> $outfile 
+    cat <<EOF >> $outfile 
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+EOF
+    cat mm.c >> $outfile 
+    cat <<EOF >> $outfile 
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+EOF
+    chill test_$name.script >> $outfile
+    cat <<EOF >> $outfile 
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+EOF
+    cat rose_mm.c >> $outfile 
+    cat <<EOF >> $outfile 
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+EOF
+
+done
+

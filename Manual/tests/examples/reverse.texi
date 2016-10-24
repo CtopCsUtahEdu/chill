@@ -1,0 +1,91 @@
+@multitable @columnfractions .50 .50 
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+
+source('mm.c')
+procedure('mm')
+#format: rose
+loop(0)
+
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+distribute([0,1],1)
+reverse([1],1)
+reverse([1],2)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int i, j, n;
+
+  for(i = 0; i < an; i++) {
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++) {
+        C[i][j] += A[i][n] * B[n][j];
+      }
+    }
+  }
+}
+
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2,t4,0);
+  }
+}
+for(t2 = -an+1; t2 <= 0; t2++) {
+  for(t4 = -bm+1; t4 <= 0; t4++) {
+    for(t6 = 0; t6 <= ambn-1; t6++) {
+      s1(-t2,-t4,t6);
+    }
+  }
+}
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+#define __rose_lt(x,y) ((x)<(y)?(x):(y))
+#define __rose_gt(x,y) ((x)>(y)?(x):(y))
+
+void mm(float **A,float **B,float **C,int ambn,int an,int bm)
+{
+  int t6;
+  int t4;
+  int t2;
+  int i;
+  int j;
+  int n;
+  for (t2 = 0; t2 <= an - 1; t2 += 1) 
+    for (t4 = 0; t4 <= bm - 1; t4 += 1) 
+      C[t2][t4] = 0.0f;
+  for (t2 = -an + 1; t2 <= 0; t2 += 1) 
+    for (t4 = -bm + 1; t4 <= 0; t4 += 1) 
+      for (t6 = 0; t6 <= ambn - 1; t6 += 1) 
+        C[-t2][-t4] += (A[-t2][t6] * B[t6][-t4]);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

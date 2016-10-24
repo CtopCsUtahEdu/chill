@@ -1,0 +1,13 @@
+@c Original
+@deftypefn {Transform} @code{original} ()
+The @code{original} transformation initializes the loop structure without permuting it.
+
+@b{Arguments}
+
+@sp 2
+@b{Conditions}
+
+@include examples/original.texi
+
+@end deftypefn
+

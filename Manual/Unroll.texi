@@ -1,0 +1,33 @@
+@c Unroll
+@deftypefn {Transform} @code{unroll} {} (int @var{stmt}, int @var{level}, int @var{unroll_amount}, int @var{cleanup_split_level})
+The @code{unroll} transformation allows a loop dimension to be unrolled.
+
+@b{Arguments}
+
+@c The unroll command has four forms:
+@c unroll (expr, number, expr)
+@c unroll (expr, number, expr, expr)
+@c unroll_extra (expr, number, expr)
+@c unroll_extra (expr, number, expr, expr)
+@c The unroll command @dots{}
+@c unroll         stmt#
+@c                loop level to unroll
+@c                unroll amount
+@c                  = 0 means fully unroll the loop if the number of iterations
+@c                      can be determined statically, otherwise no unrolling
+@c                  = 1 means no unrolling
+@c                  = d means loop body unrolled d times and then fused together
+@c                      if it is legal
+@c                cleanup code splitted at loop level
+@c                  (default to unroll loop level)
+@c unroll_extra   stmt#
+@c                loop level to unroll
+@c                unroll_amount
+@c                  same as unroll except the cleanup loop is fully unrolled
+@c                  whenever possible
+@c                cleanup code splitted at loop level
+@c                  (default to unroll loop level)
+
+@end deftypefn
+
+@include examples/unroll.texi
