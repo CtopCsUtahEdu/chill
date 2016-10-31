@@ -436,8 +436,9 @@ int main( int argc, char* argv[] )
     lnum_end = get_loop_num_end(L);
     debug_fprintf(stderr, "calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #endif
-    #ifdef FRONTEND_ROSE
+    
     finalize_loop(lnum_start, lnum_end);
+    #ifdef FRONTEND_ROSE
     ((IR_roseCode*)(ir_code))->finalizeRose();
     #endif
 #endif

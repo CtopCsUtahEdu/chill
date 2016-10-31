@@ -280,15 +280,12 @@ void Loop::stencilASEPadded(int stmt_num)   {
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(), read_var->clone());
           
-          if (r<0) {
-            debug_fprintf(stderr, "%s = %s[k][j][i-%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r));
-          } 
-          else if (r == 0) {
-            debug_fprintf(stderr, "%s = %s[k][j][i]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str());
-           }
-          else if (r>0) {
-            debug_fprintf(stderr, "%s = %s[k][j][i+%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r);
-          } 
+          if (r<0) 
+            debug_fprintf(stderr, "%s = %s[k][j][i-%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
+          else if (r == 0) 
+            debug_fprintf(stderr, "%s = %s[k][j][i]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
+          else if (r>0) 
+            debug_fprintf(stderr, "%s = %s[k][j][i+%d]\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
           
           _ctr++;
         }
@@ -407,15 +404,12 @@ void Loop::stencilASEPadded(int stmt_num)   {
             reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                   ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
             
-            if (r<0) {
-              debug_fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r));
-            } 
-            else if (r == 0) {
-              debug_fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str());
-            }
-            else if (r>0) {
-              debug_fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r);
-            }
+            if (r<0) 
+              debug_fprintf(stderr, "%s = %s[k][j][i-%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), abs(r)); 
+            else if (r == 0) 
+              debug_fprintf(stderr, "%s = %s[k][j][i] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str()); 
+            else if (r>0) 
+              debug_fprintf(stderr, "%s = %s[k][j][i+%d] + ...\n",  treg_syms[_ctr]->varname, read_->symbol()->name().c_str(), r); 
             
             _ctr++;
           } // diagonal

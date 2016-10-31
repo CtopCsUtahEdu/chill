@@ -24,12 +24,6 @@ AM_PATH_PYTHON([2.7],[
     AC_SUBST([python_builds],[yes])],[
     AC_SUBST([python_builds],[no])])
 
-
-#AC_ARG_ENABLE([cuda],[
-#    AS_HELP_STRING([--enable-cuda],[builds cudachill])],[
-#    AS_IF([test "x$enableval" != xno],[
-#        AC_SUBST([enable_cuda],[yes])])])
-
 AC_ARG_ENABLE([cuda],
    [AS_HELP_STRING([--enable-cuda],[builds cudachill])],
    [AS_IF([test "x$enableval" != xno],
@@ -68,12 +62,12 @@ AC_ARG_WITH([boost],[
     ],[
     AC_SUBST([BOOSTHOME], ["${BOOSTHOME}"])])
 
-#AC_ARG_WITH([iegen],[
-#    AS_HELP_STRING([--with-iegen],[set path to iegenlib])
-#    ],[
-#    AC_SUBST([IEGENHOME], [$withval])
-#    ],[
-#    AC_SUBST([IEGENHOME], ["${IEGENHOME}"])])
+AC_ARG_WITH([iegen],[
+    AS_HELP_STRING([--with-iegen],[set path to iegenlib])
+    ],[
+    AC_SUBST([IEGENHOME], [$withval])
+    ],[
+    AC_SUBST([IEGENHOME], ["${IEGENHOME}"])])
 
 AC_ARG_WITH([omega],[
     AS_HELP_STRING([--with-omega],[set omega home])],[

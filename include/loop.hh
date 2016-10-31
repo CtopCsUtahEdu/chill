@@ -63,7 +63,7 @@ protected:
   static const std::string tmp_loop_var_name_prefix;
   int overflow_var_name_counter;
   static const std::string overflow_var_name_prefix;
-  std::vector<int> stmt_nesting_level_;
+  std::vector<int> stmt_nesting_level_; // UNDERLINE 
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
@@ -176,7 +176,7 @@ public:
   void modular_shift(int stmt_num, int level, int shift_amount) {}
   void diagonal_map(int stmt_num, const std::pair<int, int> &levels, int offset) {}
   void modular_partition(int stmt_num, int level, int stride) {}
-  //void flatten(int stmt_num, std::string index_name, std::vector<int> &loop_levels, std::string inspector_name);
+  void flatten(int stmt_num, std::string index_name, std::vector<int> &loop_levels, std::string inspector_name);
   void normalize(int stmt_num,  int loop_level);
 
   void generate_ghostcells_v2(std::vector<int> stmt, int loop_num, int ghost_value, int hold_inner_loop_constant=0 );

@@ -14,7 +14,7 @@
 #include "ir_rose.hh" 
 
 #include <code_gen/CG_utils.h>
-//#include "iegenlib.h"
+#include "iegenlib.h"
 
 
 using namespace omega;
@@ -32,6 +32,7 @@ void Loop::original() {
   for (int i = 0; i < stmt.size(); i++)
     active.insert(i);
   setLexicalOrder(0, active);
+  //apply_xform();
 }
 void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   // check for sanity of parameters
@@ -41,7 +42,7 @@ void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
       "invalid statement number " + to_string(stmt_num));
   std::set<int> active;
   if (level < 0 || level > stmt[stmt_num].loop_level.size())
-    throw std::invalid_argument("invalid loop level " + to_string(level));
+    throw std::invalid_argument("3invalid loop level " + to_string(level));
   else if (level == 0) {
     for (int i = 0; i < stmt.size(); i++)
       active.insert(i);
@@ -501,7 +502,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
   if (stmt_num < 0 || stmt_num >= stmt.size())
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
   if (level <= 0 || level > stmt[stmt_num].loop_level.size())
-    throw std::invalid_argument("invalid loop level " + to_string(level));
+    throw std::invalid_argument("4invalid loop level " + to_string(level));
   
   std::set<int> result;
   int dim = 2 * level - 1;
@@ -927,7 +928,7 @@ void Loop::skew(const std::set<int> &stmt_nums, int level,
         "invalid statement number " + to_string(*i));
     if (level < 1 || level > stmt[*i].loop_level.size())
       throw std::invalid_argument(
-        "invalid loop level " + to_string(level));
+        "5invalid loop level " + to_string(level));
     for (int j = stmt[*i].loop_level.size(); j < skew_amount.size(); j++)
       if (skew_amount[j] != 0)
         throw std::invalid_argument("invalid skewing formula");
@@ -1094,7 +1095,7 @@ void Loop::shift(const std::set<int> &stmt_nums, int level, int shift_amount) {
         "invalid statement number " + to_string(*i));
     if (level < 1 || level > stmt[*i].loop_level.size())
       throw std::invalid_argument(
-        "invalid loop level " + to_string(level));
+        "6invalid loop level " + to_string(level));
   }
   
   // do nothing
@@ -1197,14 +1198,22 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   apply_xform(); 
   for (std::set<int>::const_iterator i = stmt_nums.begin();
        i != stmt_nums.end(); i++) {
-    if (*i < 0 || *i >= stmt.size())
+    if (*i < 0 || *i >= stmt.size()) {
+      debug_fprintf(stderr, "statement number %d   should be in [0, %d)\n", *i, stmt.size()); 
       throw std::invalid_argument(
-        "invalid statement number " + to_string(*i));
+        "FUSE invalid statement number " + to_string(*i));
+    }
     if (level <= 0
-        || (level > (stmt[*i].xform.n_out() - 1) / 2
-            || level > stmt[*i].loop_level.size()))
+        //    || (level > (stmt[*i].xform.n_out() - 1) / 2
+        //    || level > stmt[*i].loop_level.size())
+      ) {
+      debug_fprintf(stderr, "FUSE level %d ", level);
+      debug_fprintf(stderr, "must be greater than zero and \n");
+      debug_fprintf(stderr, "must NOT be greater than (%d - 1)/2 == %d   and\n", stmt[*i].xform.n_out(), (stmt[*i].xform.n_out() - 1) / 2);
+      debug_fprintf(stderr, "must NOT be greater than %d\n", stmt[*i].loop_level.size());
       throw std::invalid_argument(
-        "invalid loop level " + to_string(level));
+        "FUSE invalid loop level " + to_string(level));
+    }
     if (ref_lex.size() == 0) {
       ref_lex = getLexicalOrder(*i);
       ref_stmt_num = *i;
@@ -1440,7 +1449,7 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
         || (level > (stmt[*i].xform.n_out() - 1) / 2
             || level > stmt[*i].loop_level.size()))
       throw std::invalid_argument(
-        "invalid loop level " + to_string(level));
+        "8invalid loop level " + to_string(level));
     if (ref_lex.size() == 0) {
       ref_lex = getLexicalOrder(*i);
       ref_stmt_num = *i;
@@ -1565,7 +1574,7 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
 
 
 
-#if 0
+
 std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
                                               std::vector<IR_ArrayRef *> &arr_refs) {
     std::vector<IR_ArrayRef *> to_return;
@@ -1580,11 +1589,11 @@ std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
     }
   return to_return;
 }
-#endif
 
 
 
-#if 0
+
+
 std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
                                                                    std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
   
@@ -1642,7 +1651,6 @@ std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
   return to_return;
   
 }
-#endif
 
 /*std::vector<CG_outputRepr *> constructInspectorData(IR_Code *ir, std::vector<std::vector<std::string> >  &indices){
   
@@ -1664,7 +1672,7 @@ std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
   }
   
 */
-#if 0
+
 CG_outputRepr * checkAndGenerateIndirectMappings(CG_outputBuilder * ocg,
                                                  std::vector<std::vector<std::string> > &indices,
                                                  CG_outputRepr * instance, CG_outputRepr * class_def,
@@ -1695,9 +1703,7 @@ CG_outputRepr * checkAndGenerateIndirectMappings(CG_outputBuilder * ocg,
   return to_return;
   
 }
-#endif
 
-#if 0
 CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
                                           std::string prefix_name,
                                           std::vector<std::vector<std::string> > &indices,
@@ -1735,10 +1741,9 @@ CG_outputRepr *generatePointerAssignments(CG_outputBuilder *ocg,
   debug_fprintf(stderr, "generatePointerAssignments() DONE\n\n");
   return list;
 }
-#endif
 
 
-#if 0
+
 void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_levels,
                    std::string inspector_name) {
   debug_fprintf(stderr, "Loop::flatten( stmt_num %d )\n", stmt_num); 
@@ -1757,7 +1762,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   set_it++;
   
   if (current <= 0)
-    throw std::invalid_argument("invalid loop level " + to_string(current));
+    throw std::invalid_argument("9invalid loop level " + to_string(current));
   if (current > stmt[stmt_num].loop_level.size())
     throw std::invalid_argument(
       "there is no loop level " + to_string(current)
@@ -1774,7 +1779,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     
     if (current <= 0)
       throw std::invalid_argument(
-        "invalid loop level " + to_string(current));
+        "10invalid loop level " + to_string(current));
     if (current > stmt[stmt_num].loop_level.size())
       throw std::invalid_argument(
         "there is no loop level " + to_string(current)
@@ -1784,7 +1789,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
   if (loop_levels[loop_levels.size() - 1] != stmt[stmt_num].loop_level.size())
     throw std::invalid_argument(
-      "invalid loop level: currrently flattened loop levels must extend to last dimension");
+      "11invalid loop level: currrently flattened loop levels must extend to last dimension");
   
   //apply_xform(stmt_num);
   
@@ -2070,7 +2075,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
       for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)          // all the iteration space indeces enclosing this
         r.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
       Variable_ID v = r.output_var(1);
-      exp2formula(ir, r, f_root, freevar, index, v, 'w', IR_COND_EQ,
+      exp2formula(
+        ir, r, f_root, freevar, index, v, 'w', IR_COND_EQ,
                   true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num]);
       r.setup_names();
       r.simplify(2, 4);
@@ -2125,7 +2131,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   iegenlib::setCurrEnv(); // Clears out the environment
   
   Relation IS_for_iegen = copy(stmt[stmt_num].IS);
-  printf("IS_for_iegen   ");   IS_for_iegen.print(); printf("\n"); fflush(stdout); 
+  printf("IS_for_iegen   "); IS_for_iegen.print(); printf("\n"); fflush(stdout); 
 
   std::string set_string = "{[";
   for (int j = 1; j <= IS_for_iegen.n_set(); j++) {
@@ -2217,7 +2223,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
                           // UF range
                           range, // new iegenlib::Set(iegen_flattened),
                           // c function is bijective
-                          true);
+                          true,
+                          iegenlib::Monotonic_NONE);
   debug_fprintf(stderr, "FINISHED iegenlib::appendCurrEnv()\n\n"); 
 
 
@@ -2325,10 +2332,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   */
   new_stmt.ir_stmt_node = NULL;
   new_stmt.has_inspector = false;
-  
-  //debug_fprintf(stderr, "BEFORE CLONE\n"); 
   new_stmt.code = stmt[stmt_num].code->clone();
-  //debug_fprintf(stderr, "AFTER CLONE\n"); 
   
   delete stmt[stmt_num].code;
   stmt[stmt_num].code = ocg->StmtListAppend(list, count_plusplus);
@@ -2577,9 +2581,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   delete T_coalesce_inv;
   
   debug_fprintf(stderr, "Loop::flatten() END\n"); 
-  //debugRelations(); 
 }
-#endif
+
 
 
 
@@ -2598,7 +2601,7 @@ void Loop::normalize(int stmt_num, int loop_level) {
   
   if (loop_level <= 0)
     throw std::invalid_argument(
-      "invalid loop level " + to_string(loop_level));
+      "12invalid loop level " + to_string(loop_level));
   if (loop_level > stmt[stmt_num].loop_level.size())
     throw std::invalid_argument(
       "there is no loop level " + to_string(loop_level)

@@ -56,6 +56,7 @@ extern bool repl_stop;
 
 std::string procedure_name;
 std::string source_filename;
+std::string dest_filename;
 
 int loop_start_num;
 int loop_end_num;
@@ -127,7 +128,12 @@ static void init_loop(int loop_num_start, int loop_num_end) {
       #endif
         
       #ifdef FRONTEND_ROSE
-      ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str());
+      if(dest_filename.empty()) {
+        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str());
+      }
+      else {
+        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
+      }
       #endif
           
       IR_Block *block = ir_code->GetCode();
@@ -1091,19 +1097,21 @@ chill_unroll(PyObject *self, PyObject *args)
 }
 
 
-#if 0
+//#if 0
 static PyObject* chill_flatten(PyObject* self, PyObject* args) {
     int                 stmt                = intArg(args, 0);
     std::string         idxs                = strArg(args, 1);
-    std::vector<int>    loop_levels         = intVectorArg(args, 2);
+    std::vector<int>    loop_levels;
     std::string         inspector_name      = strArg(args, 3);
+
+    tointvector(args, 2, loop_levels);
     
     myloop->flatten_cuda(stmt, idxs, loop_levels, inspector_name);
     Py_RETURN_NONE;
 }
-#endif
+//#endif
 
-#if 0
+//#if 0
 static PyObject* chill_compact(PyObject* self, PyObject* args) {
     int                 stmt                = intArg(args, 0);
     int                 loop_level          = intArg(args, 1);
@@ -1114,7 +1122,7 @@ static PyObject* chill_compact(PyObject* self, PyObject* args) {
     myloop->compact_v2(stmt, loop_level, new_array, zero, data_array);
     Py_RETURN_NONE;
 }
-#endif
+//#endif
 
 static PyObject* chill_make_dense(PyObject* self, PyObject* args) {
     int                 stmt                = intArg(args, 0);
@@ -1315,6 +1323,13 @@ static PyObject* chill_procedure(PyObject* self, PyObject* args) {
       exit(2);
   }
   procedure_name = strArg(args, 0);
+  Py_RETURN_NONE;
+}
+
+static PyObject *
+chill_destination(PyObject *self, PyObject* args) {
+  strict_arg_num(args, 1, "destination");
+  dest_filename = strArg(args, 0);
   Py_RETURN_NONE;
 }
 
@@ -1784,18 +1799,20 @@ static PyObject* chill_distribute(PyObject* self, PyObject* args) {
 }
 
 
-#if 0
+//#if 0
 static PyObject* chill_flatten(PyObject* self, PyObject* args) {
     strict_arg_num(args, 4);
     int                 stmt_num        = intArg(args, 0);
     std::string         idxs            = strArg(args, 1);
-    std::vector<int>    loop_levels     = intVectorArg(args, 2);
+    std::vector<int>    loop_levels;
     std::string         inspector_name  = strArg(args, 3);
+    
+    tointvector(args, 2, loop_levels);
     
     myloop->flatten(stmt_num, idxs, loop_levels, inspector_name);
     Py_RETURN_NONE;
 }
-#endif
+//#endif
 
 
 static PyObject* chill_compact(PyObject* self, PyObject* args) {
@@ -1851,11 +1868,11 @@ static PyMethodDef ChillMethods[] = {
   {"block_indices",       chill_block_indices,       METH_VARARGS,    "bx, by"},
   {"hard_loop_bounds",    chill_hard_loop_bounds,    METH_VARARGS,    "lower, upper"},
   {"unroll",              chill_unroll,              METH_VARARGS,    "unroll a loop"},
-//{"coalesce",            chill_flatten,             METH_VARARGS,    "Convert a multidimentianal iteration space into a single dimensional one"},
-//{"make_dense",          chill_make_dense,          METH_VARARGS,    "Convert a non-affine iteration space into an affine one to enable loop transformations"},
-//{"compact",             chill_compact,             METH_VARARGS,    "Call after make_dense to convert an affine iteration space back into a non-affine one"},
+  {"coalesce",            chill_flatten,             METH_VARARGS,    "Convert a multidimentianal iteration space into a single dimensional one"},
+  {"make_dense",          chill_make_dense,          METH_VARARGS,    "Convert a non-affine iteration space into an affine one to enable loop transformations"},
+  {"compact",             chill_compact,             METH_VARARGS,    "Call after make_dense to convert an affine iteration space back into a non-affine one"},
   {"cudaize",             chill_cudaize_v2,          METH_VARARGS,    "dunno"},
-//{"cudaize5arg",         chill_cudaize_v3,          METH_VARARGS,    "dunno"},
+  {"cudaize5arg",         chill_cudaize_v3,          METH_VARARGS,    "dunno"},
   {"datacopy_privatized", chill_datacopy_privatized, METH_VARARGS,    "dunno"},
   
   {"datacopy_9arg",       chill_datacopy9,           METH_VARARGS,    "datacopy with 9 arguments"},
@@ -1874,6 +1891,7 @@ static PyMethodDef ChillMethods[] = {
   //python name           C routine                  parameter passing comment
   {"source",              chill_source,                    METH_VARARGS,     "set source file for chill script"},
   {"procedure",           chill_procedure,                 METH_VARARGS,     "set the name of the procedure"},
+  {"destination",         chill_destination,               METH_VARARGS,     "set the destination file"},
   {"loop",                chill_loop,                      METH_VARARGS,     "indicate which loop to optimize"},
   {"print_code",          chill_print_code,                METH_VARARGS,     "print generated code"},
   {"print_dep",           chill_print_dep,                 METH_VARARGS,     "print the dependencies graph"},
@@ -1900,7 +1918,7 @@ static PyMethodDef ChillMethods[] = {
   {"peel",                chill_peel,                      METH_VARARGS,     "peel"},
   {"fuse",                chill_fuse,                      METH_VARARGS,     "fuse"},
   {"distribute",          chill_distribute,                METH_VARARGS,     "distribute"},
-//{"coalesce",            chill_flatten,                   METH_VARARGS,     "Convert a multidimentianal iteration space into a single dimensional one"},
+  {"coalesce",            chill_flatten,                   METH_VARARGS,     "Convert a multidimentianal iteration space into a single dimensional one"},
   {"make_dense",          chill_make_dense,                METH_VARARGS,     "Convert a non-affine iteration space into an affine one to enable loop transformations"},
   {"compact",             chill_compact,                   METH_VARARGS,     "Call after make_dense to convert an affine iteration space back into a non-affine one"},
   {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},

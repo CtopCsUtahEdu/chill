@@ -35,8 +35,6 @@
 #include <stack>
 #include <string.h>
 
-#include "../../../chill_io.hh"
-
 namespace omega {
   
   extern std::vector<std::vector<int> > smtNonSplitLevels;
@@ -196,7 +194,7 @@ namespace omega {
     
     if (repr != NULL) {
       std::string s = repr->GetString();
-      debug_fprintf(stderr, "repr->GetString() = '%s'\n", s.c_str()); 
+      //debug_fprintf(stderr, "\nCG.cc L197 repr->GetString() = '%s'\n\n\n", s.c_str()); 
       delete repr;
       return s;
     } else

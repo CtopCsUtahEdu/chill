@@ -298,7 +298,8 @@ public:
   void dump() const; 
   
   virtual chillAST_node *getChillAST() const { 
-    debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
+    //debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
+    debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements\n", statements.size() );
     return chillAST;
   } 
   virtual void setChillAST( chillAST_node *n) { chillAST = n; }; 

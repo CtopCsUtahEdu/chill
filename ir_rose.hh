@@ -22,10 +22,10 @@
 
 // forward declarations 
 chillAST_node * ConvertRoseFile(  SgGlobal *sg, const char *filename ); // the entire file 
-chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D , chillAST_node *parent);
+chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D , chillAST_node *parent );
 chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl, chillAST_node *p );
 chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl, chillAST_node *p );
-chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_node *p ); // stupid name TODO 
+chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl, chillAST_node *p ); // stupid name TODO 
 chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement, chillAST_node *p );
 chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement, chillAST_node *p );
 chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *binaryop, chillAST_node *p );
@@ -321,7 +321,7 @@ struct IR_roseBlock: public IR_chillBlock {
     chillAST = NULL;
     ir_ = ir;
     debug_fprintf(stderr, "making a new IR_roseBlock with NO chillAST (nil)\n"); 
-    debug_fprintf(stderr, "this roseBlock is %p\n", this); 
+    //debug_fprintf(stderr, "this roseBlock is %p\n", this); 
   }
   
   
@@ -336,7 +336,8 @@ struct IR_roseBlock: public IR_chillBlock {
   } 
   
   IR_roseBlock( const IR_roseBlock *CB ) {  // clone existing IR_roseBlock
-    debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\nblock %p\n", this); 
+    //debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\nblock %p\n", this); 
+    debug_fprintf(stderr, "IR_roseBlock::IR_roseBlock( ir ); (CLONE)\n"); 
     ir_ = CB->ir_;
     debug_fprintf(stderr, "%d statements    AST %p\n", CB->statements.size(), CB->chillAST); 
     for (int i=0; i<CB->statements.size(); i++) {
@@ -362,7 +363,10 @@ struct IR_roseBlock: public IR_chillBlock {
   int numstatements() const { return statements.size(); } 
   
   void setChillAst( chillAST_node *ast ) { chillAST = ast; } ;
-  chillAST_node *getChillAST() const {  debug_fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );return chillAST; } 
+  chillAST_node *getChillAST() const {
+    //debug_fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
+    debug_fprintf(stderr, "IR_roseBlock::getChillAST(), %d statements\n", statements.size() );
+    return chillAST; } 
 };
 
 

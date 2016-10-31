@@ -65,7 +65,8 @@ enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_CUDAFREE,
   CHILLAST_NODETYPE_CUDAMEMCPY,
   CHILLAST_NODETYPE_CUDAKERNELCALL,
-  CHILLAST_NODETYPE_CUDASYNCTHREADS
+  CHILLAST_NODETYPE_CUDASYNCTHREADS,
+  CHILLAST_NODETYPE_NULL    // explicit non-statement 
   // TODO 
   
 } ;
@@ -108,6 +109,7 @@ extern const char* Chill_AST_Node_Names[];  // WARNING MUST BE KEPT IN SYNC WITH
 
 // fwd declarations
 class chillAST_node;         // the generic node. specific types derive from this
+class chillAST_NULL;         // empty 
 class chillAST_SourceFile;  // ast for an entire source file (translationunit)
 
 class chillAST_TypedefDecl; 
@@ -209,6 +211,7 @@ public:
   bool isFree()               { return (asttype == CHILLAST_NODETYPE_FREE); }; 
   bool isPreprocessing()      { return (asttype == CHILLAST_NODETYPE_PREPROCESSING); }; 
   bool isNoOp()               { return (asttype == CHILLAST_NODETYPE_NOOP); }; 
+  bool isNull()               { return (asttype == CHILLAST_NODETYPE_NULL); }; 
   bool isCStyleCastExpr()     { return (asttype == CHILLAST_NODETYPE_CSTYLECASTEXPR); }; 
   bool isCStyleAddressOf()    { return (asttype == CHILLAST_NODETYPE_CSTYLEADDRESSOF); }; 
   bool isCudaMalloc()         { return (asttype == CHILLAST_NODETYPE_CUDAMALLOC); }; 
@@ -239,7 +242,11 @@ public:
   virtual bool hasSymbolTable() { return false; } ; // most nodes do NOT have a symbol table
   virtual bool hasTypedefTable() { return false; } ; // most nodes do NOT have a typedef table
   virtual chillAST_SymbolTable *getSymbolTable() { return NULL; } // most nodes do NOT have a symbol table
-  chillAST_VarDecl *findVariableNamed( const char *name ); // recursive 
+
+  virtual chillAST_VarDecl *findVariableNamed( const char *name ); // recursive 
+
+  chillAST_RecordDecl *findRecordDeclNamed( const char *name ); // recursive
+  
   // void addDecl( chillAST_VarDecl *vd); // recursive, adds to first  symbol table it can find 
 
   // TODO decide how to hide some data
@@ -482,11 +489,11 @@ public:
     exit(-1); ; 
   };
   virtual void dump(  int indent=0,  FILE *fp = stderr ) { 
-    fflush(stdout); 
+    fflush(fp); 
     fprintf(fp,"(%s) forgot to implement dump()\n" ,Chill_AST_Node_Names[asttype]); };// print ast
   
   virtual void print( int indent=0,  FILE *fp = stderr ) { 
-    fflush(stdout); 
+    fflush(fp); 
     //debug_fprintf(stderr, "generic chillAST_node::print() called!\n"); 
     //debug_fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
@@ -495,7 +502,7 @@ public:
   };// print CODE 
   
   virtual void printName( int indent=0,  FILE *fp = stderr ) { 
-    fflush(stdout); 
+    fflush(fp); 
     //debug_fprintf(stderr, "generic chillAST_node::printName() called!\n"); 
     //debug_fprintf(stderr, "asttype is %d\n", asttype); 
     fprintf(fp, "\n");
@@ -658,6 +665,20 @@ public:
 
 };
 
+class chillAST_NULL: public chillAST_node {  // NOOP?
+public:
+  chillAST_NULL(chillAST_node *p = NULL)  {  parent = p; asttype = CHILLAST_NODETYPE_NULL; };
+  void print( int indent=0,  FILE *fp = stderr ) { 
+    chillindent( indent, fp );
+    fprintf(fp, "/* (NULL statement); */ ");
+    fflush(fp);
+  }
+  void dump(  int indent=0,  FILE *fp = stderr ) {
+    chillindent( indent, fp );
+    fprintf(fp, "(NULL statement) "); fflush(fp);
+  }
+};
+
 
 class chillAST_Preprocessing: public chillAST_node { 
 public:
@@ -673,8 +694,8 @@ public:
   // other methods particular to this type of node
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  //void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  //void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
 }; 
 
 
@@ -716,9 +737,9 @@ public:
   const char* getUnderlyingType() { debug_fprintf(stderr, "TypedefDecl getUnderLyingType()\n"); return underlyingtype; }; 
   //virtual chillAST_VarDecl* getUnderlyingVarDecl() { return this; }; // ?? 
 
-  void dump(  int indent=0,  FILE *fp = stdout ) { 
+  void dump(  int indent=0,  FILE *fp = stderr ) { 
     fprintf(fp, "(TypedefDecl %s %s %s)\n",  underlyingtype, newtype, arraypart); };
-  void print( int indent=0,  FILE *fp = stdout ) ;
+  void print( int indent=0,  FILE *fp = stderr ) ;
   //void printString( std::string &s );
 
 };
@@ -767,6 +788,7 @@ public:
   chillAST_node *init;
   void setInit( chillAST_node *i ) { init = i; i->setParent(this); };
   bool hasInit() { return init != NULL; };
+  chillAST_node *getInit() { return init; };
   
   chillAST_VarDecl();
   chillAST_VarDecl( const char *t,  const char *n, const char *a, chillAST_node *p);
@@ -774,9 +796,9 @@ public:
   chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *n, const char *arraypart, chillAST_node *par); 
   chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *n, const char *arraypart, chillAST_node *par); 
 
-  void dump(  int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout );
-  void printName( int indent=0,  FILE *fp = stdout ); 
+  void dump(  int indent=0,  FILE *fp = stderr );
+  void print( int indent=0,  FILE *fp = stderr );
+  void printName( int indent=0,  FILE *fp = stderr ); 
   bool isParmVarDecl() { return( isAParameter == 1 ); };
   bool isBuiltin()     { return( isABuiltin == 1 ); };  // designate variable as a builtin
   void setLocation( void *ptr ) { uniquePtr = ptr; } ; 
@@ -835,8 +857,8 @@ public:
   }; 
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE  
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast   
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE  
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast   
   char *stringRep(int indent=0 );
 
   chillAST_node* constantFold();
@@ -879,6 +901,7 @@ public:
   bool hasSymbolTable()  { return true; } ;
   bool hasTypeDefTable() { return true; } ;
   chillAST_node *findDatatype( char *t ) { 
+    debug_fprintf(stderr, "chillAST_CompoundStmt::findDatatype( %s )\n", t); 
     if (typedef_table) { 
       for (int i=0; i< typedef_table->size(); i++)  {
         chillAST_TypedefDecl *tdd = (*typedef_table)[i];
@@ -910,8 +933,8 @@ public:
   
   // required methods 
   void replaceChild( chillAST_node *old, chillAST_node *newchild );
-  void dump(  int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout );
+  void dump(  int indent=0,  FILE *fp = stderr );
+  void print( int indent=0,  FILE *fp = stderr );
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
@@ -940,6 +963,7 @@ private:
   char *name;  // could be NULL? for unnamed structs?
   char *originalname; 
   bool isStruct;
+
   bool isUnion;
   vector<chillAST_VarDecl *> subparts;
   
@@ -951,23 +975,26 @@ public:
   void  setName( const char *newname) { name = strdup(newname); }; 
   char *getName( ) { return name; }; 
   
-  bool isAStruct() { return isStruct; }; 
   bool isAUnion()  { return isUnion;  };
+  bool isAStruct() { return isStruct; }; 
+  bool isUnnamed;
+  void setUnnamed( bool b ) { isUnnamed = b; };
+
 
   void setStruct(bool tf) { isStruct = tf; }; 
   //debug_fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 
   void setUnion( bool tf) { isUnion  = tf; };
 
-  chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ); // does NOTHING
+  chillAST_SymbolTable *addVariableToSymbolTable( chillAST_VarDecl *vd ); //  RecordDecl does NOTHING
   
   int numSubparts() { return subparts.size(); }; 
   void addSubpart( chillAST_VarDecl *s ) { subparts.push_back(s); }; 
   chillAST_VarDecl *findSubpart( const char *name );
   chillAST_VarDecl *findSubpartByType( const char *typ );
 
-  void dump(  int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout ) ;
-  void printStructure( int indent=0,  FILE *fp = stdout ) ;
+  void dump(  int indent=0,  FILE *fp = stderr );
+  void print( int indent=0,  FILE *fp = stderr ) ;
+  void printStructure( int indent=0,  FILE *fp = stderr ) ;
 };
 
 
@@ -1041,8 +1068,8 @@ public:
   void setBody( chillAST_node * bod );  
   chillAST_CompoundStmt *getBody() { return( body); }
   
-  void print( int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr ); // in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr ); // in chill_ast.cc
 
   void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
@@ -1121,13 +1148,13 @@ class chillAST_SourceFile: public chillAST_node {
 public:
 
   // constructors
-  chillAST_SourceFile();                        //  defined in chill_ast.cc 
-  chillAST_SourceFile(const char *filename );   //  defined in chill_ast.cc
+  chillAST_SourceFile();                       //  defined in chill_ast.cc 
+  chillAST_SourceFile(const char *filename );  //  defined in chill_ast.cc 
   
   ~chillAST_SourceFile();                       //  defined in chill_ast.cc
 
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
+void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   void printToFile( char *filename = NULL ); 
   
   char *SourceFileName; // where this originated
@@ -1141,7 +1168,7 @@ public:
 
   chillAST_SymbolTable  *global_symbol_table;  // (global) symbols defined inside this source file 
   chillAST_TypedefTable *global_typedef_table; // source file 
-
+  chillAST_VarDecl *findVariableNamed( const char *name ); // looks in global_symbol_table;
 
   bool hasSymbolTable()  { return true; } ;  // "has" vs "can have"    TODO 
   bool hasTypeDefTable() { return true; } ;
@@ -1207,8 +1234,8 @@ public:
    chillAST_VarDecl( char *t,  char *n, char *a);
    void addDecl( char *t,  char *n, char *a);
    
-   void dump(  int indent=0,  FILE *fp = stdout );
-   void print( int indent=0,  FILE *fp = stdout );
+   void dump(  int indent=0,  FILE *fp = stderr );
+   void print( int indent=0,  FILE *fp = stderr );
    }; 
 */
 
@@ -1227,9 +1254,9 @@ public:
   chillAST_ParmVarDecl(); 
   chillAST_ParmVarDecl( const char *type, const char *name, const char *ap, chillAST_node *p );
   
-  void dump(  int indent=0,  FILE *fp = stdout ) { 
+  void dump(  int indent=0,  FILE *fp = stderr ) { 
     fprintf(fp, "(2VarDecl'%s' '%s' '%s')",  vartype, varname, arraypart); };
-  void print( int indent=0,  FILE *fp = stdout );
+  void print( int indent=0,  FILE *fp = stderr );
 };
 */
 
@@ -1264,8 +1291,8 @@ public:
   void setBody( chillAST_node * bod );  
   chillAST_node *getBody() { return( body); }
   
-  void print( int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout ); // in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr ); // in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr ); // in chill_ast.cc
   
   bool hasSymbolTable() { return true; } ;
 
@@ -1331,9 +1358,9 @@ public:
 
   
   // required methods that I can't seem to get to inherit
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printControl( int indent=0,  FILE *fp = stdout );  // print just for ( ... ) but not body 
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printControl( int indent=0,  FILE *fp = stderr );  // print just for ( ... ) but not body 
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
@@ -1434,9 +1461,9 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void dump(  int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printonly( int indent=0,  FILE *fp = stdout );
+  void dump(  int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printonly( int indent=0,  FILE *fp = stderr );
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
@@ -1516,9 +1543,9 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void dump(  int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printonly( int indent=0,  FILE *fp = stdout );
+  void dump(  int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printonly( int indent=0,  FILE *fp = stderr );
   char *stringRep(int indent=0 );
 
   chillAST_node* constantFold();
@@ -1582,10 +1609,10 @@ public:
   void replaceChild( chillAST_node *old, chillAST_node *newchild ); // will examine index
 
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printonly( int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout ) const;  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printonly( int indent=0,  FILE *fp = stderr );
+  void print( int indent=0,  FILE *fp = stderr ) const;  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   char *stringRep(int indent=0 );
 
   chillAST_node* constantFold();
@@ -1637,10 +1664,10 @@ public:
   bool operator==( const chillAST_MemberExpr& ) ; 
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printonly( int indent=0,  FILE *fp = stdout );
-  void print( int indent=0,  FILE *fp = stdout ) const;  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printonly( int indent=0,  FILE *fp = stderr );
+  void print( int indent=0,  FILE *fp = stderr ) const;  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   char *stringRep( int indent = 0);
  
   chillAST_node* constantFold();
@@ -1685,8 +1712,8 @@ public:
   int evalAsInt() { return value; } 
 
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool w ){}; // does nothing
@@ -1731,8 +1758,8 @@ public:
   int getPrecision() { return precision; } 
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool w ){}; // does nothing
@@ -1773,8 +1800,8 @@ public:
   }
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
@@ -1816,9 +1843,9 @@ public:
   
   // required methods that I can't seem to get to inherit
   void replaceChild( chillAST_node *old, chillAST_node *newchild );
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void printonly( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout ) { print( indent, fp); };  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void printonly( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr ) { print( indent, fp); };  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1853,8 +1880,8 @@ public:
   
   // required methods that I can't seem to get to inherit
   void replaceChild( chillAST_node *old, chillAST_node *newchild );
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1887,8 +1914,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1922,8 +1949,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1955,8 +1982,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1993,8 +2020,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -2042,8 +2069,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -2074,8 +2101,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   //chillAST_node* constantFold() {};
   //chillAST_node* clone(); 
   //void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ){};
@@ -2108,8 +2135,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
@@ -2146,8 +2173,8 @@ public:
   
   // required methods that I can't seem to get to inherit
   chillAST_node* constantFold();
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
@@ -2178,8 +2205,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone();
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -2211,8 +2238,8 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone();
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -2238,8 +2265,8 @@ public:
   chillAST_NoOp( chillAST_node *p = NULL ); //  { parent = p; };
 
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout ) {};  // print CODE   in chill_ast.cc
-  void dump(  int indent=0,  FILE *fp = stdout ) {};  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr ) {};  // print CODE   in chill_ast.cc
+  void dump(  int indent=0,  FILE *fp = stderr ) {};  // print ast    in chill_ast.cc
   chillAST_node* constantFold() {};
   chillAST_node* clone() { return new chillAST_NoOp( parent ); }; // ?? 
 
@@ -2277,13 +2304,13 @@ public:
   chillAST_node *getThen() { return thenpart; };
   chillAST_node *getElse() { return elsepart; };
 
-  void setCond( chillAST_node *b ) {     cond = b;      cond->parent = this; };
-  void setThen( chillAST_node *b ) { thenpart = b;  thenpart->parent = this; };
-  void setElse( chillAST_node *b ) { elsepart = b;  elsepart->parent = this; };
+  void setCond( chillAST_node *b ) {     cond = b;  if (cond)     cond->parent = this; };
+  void setThen( chillAST_node *b ) { thenpart = b;  if (thenpart) thenpart->parent = this; };
+  void setElse( chillAST_node *b ) { elsepart = b;  if (elsepart) elsepart->parent = this; };
   
   // required methods that I can't seem to get to inherit
-  void dump(  int indent=0,  FILE *fp = stdout ); 
-  void print( int indent=0,  FILE *fp = stdout ); 
+  void dump(  int indent=0,  FILE *fp = stderr ); 
+  void print( int indent=0,  FILE *fp = stderr ); 
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
@@ -2323,8 +2350,8 @@ public:
   
 
   // required methods that I can't seem to get to inherit
-  void print( int indent=0,  FILE *fp = stdout );  // print CODE   in chill_ast.cc
-  //void dump(  int indent=0,  FILE *fp = stdout );  // print ast    in chill_ast.cc
+  void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
+  //void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
 }; 
 
 

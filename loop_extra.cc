@@ -65,53 +65,74 @@ std::set<int> Loop::unroll_extra(int stmt_num, int level, int unroll_amount, int
   return cleanup_stmts;
 }
 
+
+
+
+
 void Loop::peel(int stmt_num, int level, int peel_amount) {
-  debug_fprintf(stderr, "Loop::peel( stmt_num %d, level %d, amount %d)\n", stmt_num, level, peel_amount); 
-  
+  debug_fprintf(stderr, "\n\nloop_extra.cc\n*** Loop::peel( stmt_num %d, level %d, amount %d)\n", stmt_num, level, peel_amount); 
+
+
   // check for sanity of parameters
   if (stmt_num < 0 || stmt_num >= stmt.size())
     throw std::invalid_argument("invalid statement number " + to_string(stmt_num));
   if (level <= 0 || level > stmt[stmt_num].loop_level.size())
     throw std::invalid_argument("invalid loop level " + to_string(level));
+
+  debug_fprintf(stderr, "peel amount %d\n", peel_amount);
   
-  if (peel_amount == 0)
+  if (peel_amount == 0) {
+    debug_fprintf(stderr, "peel amount is zero???\n\n\n\n\n\n\n\n"); 
     return;
-  
+  }
+
   std::set<int> subloop = getSubLoopNest(stmt_num, level);
   std::vector<Relation> Rs;
+  int sl = 0; 
   for (std::set<int>::iterator i = subloop.begin(); i != subloop.end(); i++) {
+    debug_fprintf(stderr, "\nSUBLOOP %d\n", sl);
+
     Relation r = getNewIS(*i);
-    r.print(); fflush(stdout); 
+    //r.print(); fflush(stdout); 
 
     Relation f(r.n_set(), level);
-    f.print(); fflush(stdout); 
+    //f.print(); fflush(stdout); 
     F_And *f_root = f.add_and();
     for (int j = 1; j <= level; j++) {
       EQ_Handle h = f_root->add_EQ();
       h.update_coef(f.input_var(2*j), 1);
       h.update_coef(f.output_var(j), -1);
     }
-    r.print(); fflush(stdout); 
-    f.print();  fflush(stdout); 
+    //r.print(); fflush(stdout); 
+    //f.print();  fflush(stdout); 
 
     //Anand composition will fail due to unintepreted function symbols introduced by flattening
 		//r = Composition(f, r);
     r = omega::Range(Restrict_Domain(f, r));
     r.simplify();
     Rs.push_back(r);
+
+    sl++; 
   }
-  Relation hull = SimpleHull(Rs);
-  
+
+  Relation hull = SimpleHull(Rs); 
+    
   if (peel_amount > 0) {
+    debug_fprintf(stderr, "\n*** peel from beginning of loop\n"); 
     GEQ_Handle bound_eq;
     bool found_bound = false;
-    for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++)
+    for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++) { 
       if (!(*e).has_wildcards() && (*e).get_coef(hull.set_var(level)) > 0) {
         bound_eq = *e;
         found_bound = true;
         break;
       }
-    if (!found_bound)
+    }
+
+    if (found_bound) debug_fprintf(stderr, "beginning of loop, peel after first,  found bound\n");
+    else  debug_fprintf(stderr, "beginning of loop, peel after first,  NOT found bound\n");
+    
+    if (!found_bound) { 
       for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++)
         if ((*e).has_wildcards() && (*e).get_coef(hull.set_var(level)) > 0) {
           bool is_bound = true;
@@ -128,10 +149,18 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
             break;
           }
         }
+    }
+    
+    if (found_bound) debug_fprintf(stderr, "beginning of loop, peel after second, found bound\n");
+    else  debug_fprintf(stderr, "beginning of loop, peel after second, NOT found bound\n");
+    
+
     if (!found_bound)
       throw loop_error("can't find lower bound for peeling at loop level " + to_string(level));
     
     for (int i = 1; i <= peel_amount; i++) {
+      debug_fprintf(stderr, "peeling statement %d\n", i);
+      
       Relation r(level);
       F_Exists *f_exists = r.add_and()->add_exists();
       F_And *f_root = f_exists->add_and();
@@ -162,20 +191,30 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
         }
       h.update_const(bound_eq.get_const() - i);
       r.simplify();
-      
+
+      debug_fprintf(stderr, "loop_extra.cc peel() calling split()\n"); 
       split(stmt_num, level, r);
+      debug_fprintf(stderr, "loop_extra.cc peel() DONE calling split()\n"); 
     }
   }
   else { // peel_amount < 0
+    debug_fprintf(stderr, "\n*** peel from end of loop\n");
+    //debug_fprintf(stderr, "*** NOT DOING THAT. SOMETHING ELSE IS DOING THE FRONT PEEL\n"); 
+
     GEQ_Handle bound_eq;
     bool found_bound = false;
-    for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++)
+    for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++) {
       if (!(*e).has_wildcards() && (*e).get_coef(hull.set_var(level)) < 0) {
         bound_eq = *e;
         found_bound = true;
         break;
       }
-    if (!found_bound)
+    }
+
+    if (found_bound) debug_fprintf(stderr, "end of loop, peel after first,  found bound\n");
+    else  debug_fprintf(stderr, "end of loop, peel after first,  NOT found bound  (will try again) \n");
+       
+    if (!found_bound) { 
       for (GEQ_Iterator e(hull.single_conjunct()->GEQs()); e; e++)
         if ((*e).has_wildcards() && (*e).get_coef(hull.set_var(level)) < 0) {
           bool is_bound = true;
@@ -192,10 +231,18 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
             break;
           }
         }
+    }
+
+    if (found_bound) debug_fprintf(stderr, "end of loop, peel after second, found bound\n");
+    else  debug_fprintf(stderr, "end of loop, peel after second, NOT found bound\n");
+    
+   
     if (!found_bound)
       throw loop_error("can't find upper bound for peeling at loop level " + to_string(level));
     
     for (int i = 1; i <= -peel_amount; i++) {
+      debug_fprintf(stderr, "\npeel i %d\n", i);
+      
       Relation r(level);
       F_Exists *f_exists = r.add_and()->add_exists();
       F_And *f_root = f_exists->add_and();
@@ -229,6 +276,15 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
       
       split(stmt_num, level, r);
     }
+
   }
+
+
+  // we just made a change to the code. invalidate the previous generated code
+  last_compute_cg_ = NULL;
+
+  debug_fprintf(stderr, "loop_extra.cc peel() DONE\n\n\n");
+
+  
 }
 

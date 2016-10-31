@@ -287,7 +287,7 @@ test_data_dependences(IR_Code *ir,
   debug_fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout); 
   debug_fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout); 
 
-  for (int i=0; i<index.size(); i++) { debug_fprintf(stderr, "index %d %s\n", i, index[i].c_str()) } 
+  for (int i=0; i<index.size(); i++) debug_fprintf(stderr, "index %d %s\n", i, index[i].c_str()); 
   Relation *helper = new Relation(IS1); debug_fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
   helper = new Relation(IS2); debug_fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
 
@@ -359,13 +359,13 @@ test_data_dependences(IR_Code *ir,
         
         debug_fprintf(stderr, "irtools.cc ij %d %d\n", i, j); 
         
-        if  (*sym_a == *sym_b) { debug_fprintf(stderr, "*sym_a == *sym_b\n"); }
-        else { debug_fprintf(stderr, "*sym_a NOT == *sym_b\n"); }
+        if  (*sym_a == *sym_b) debug_fprintf(stderr, "*sym_a == *sym_b\n");
+        else debug_fprintf(stderr, "*sym_a NOT == *sym_b\n");
 
-        if ( a->is_write()) { debug_fprintf(stderr, "%d a->is_write()\n", i); } 
-        else { debug_fprintf(stderr, "%d a->is_NOT_write()\n", i); }
-        if ( b->is_write()) { debug_fprintf(stderr, "%d b->is_write()\n", j); } 
-        else { debug_fprintf(stderr, "%d b->is_NOT_write()\n", j); }
+        if ( a->is_write()) debug_fprintf(stderr, "%d a->is_write()\n", i); 
+        else debug_fprintf(stderr, "%d a->is_NOT_write()\n", i); 
+        if ( b->is_write()) debug_fprintf(stderr, "%d b->is_write()\n", j); 
+        else debug_fprintf(stderr, "%d b->is_NOT_write()\n", j); 
 
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
           debug_fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
