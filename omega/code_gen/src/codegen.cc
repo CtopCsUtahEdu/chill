@@ -24,13 +24,13 @@
 #include <vector>
 #include <algorithm>
 
+#include "chill_io.hh"
+
 #include <code_gen/CG.h>
 #include <code_gen/codegen.h>
 #include <code_gen/CG_outputBuilder.h>
 #include <code_gen/codegen_error.h>
 #include <code_gen/CG_utils.h>
-
-#include "../../../chill_io.hh"
 
 namespace omega {
 

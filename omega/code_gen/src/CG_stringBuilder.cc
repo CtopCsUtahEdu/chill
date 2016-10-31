@@ -25,8 +25,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "../../../chill_io.hh"
-
 namespace {
   
   std::string SafeguardString(const std::string &s, char op) {
@@ -193,12 +191,16 @@ namespace omega {
 
     std::string listStr = "";
     
+    debug_fprintf(stderr, "list has %d elements\n", list.size());
+
     for (int i = 0; i < list.size(); i++) {
+      debug_fprintf(stderr, "accessing list[%d]\n", i); 
       listStr += GetString(list[i]);
       if ( i < list.size()-1)
         listStr += ",";
     }
-    
+
+    debug_fprintf(stderr, "returning %s\n", (funcName + "(" + listStr + ")").c_str()); 
     return new CG_stringRepr(funcName + "(" + listStr + ")");
   }
   

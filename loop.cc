@@ -131,6 +131,7 @@ void Loop::reduce(int stmt_num,
   last_compute_cgr_ = NULL;
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
+  debug_fprintf(stderr, "set last_compute_cg_ = NULL;\n");
   
   omega::CG_outputBuilder *ocg = ir->builder();
   
@@ -789,10 +790,14 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     debug_fprintf(stderr, "loop.cc before extract\n"); 
     CG_outputRepr *code =
       static_cast<IR_Block *>(ir_stmt[loc]->content)->extract();
-    debug_fprintf(stderr, "code =  ocg->CreateSubstitutedStmt(...)\n"); 
+    debug_fprintf(stderr, "code =  ocg->CreateSubstitutedStmt(...)\n");
+    ((CG_chillRepr *)code)->Dump(); fflush(stdout);
+    
     code = ocg->CreateSubstitutedStmt(0, code, vars_to_be_reversed,
                                       reverse_expr);
-    debug_fprintf(stderr, "stmt\n"); 
+    debug_fprintf(stderr, "stmt\n");
+    ((CG_chillRepr *)code)->Dump(); fflush(stdout);
+
     stmt[loc].code = code;
     stmt[loc].IS = r;
     
@@ -814,8 +819,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     
     stmt_nesting_level[loc] = -1;
   }
+  dump();
   debug_fprintf(stderr, "                                        loop.cc   Loop::init_loop() END\n\n");
-  
+
   return true;
 }
 
@@ -829,7 +835,8 @@ Loop::Loop(const IR_Control *control) {
   
   last_compute_cgr_ = NULL;
   last_compute_cg_ = NULL;
-  
+  debug_fprintf(stderr, "2set last_compute_cg_ = NULL; \n"); 
+
   ir = const_cast<IR_Code *>(control->ir_); // point to the CHILL IR that this loop came from
   if (ir == 0) { 
     debug_fprintf(stderr, "ir gotten from control = 0x%x\n", (long)ir);
@@ -1047,8 +1054,8 @@ Loop::Loop(const IR_Control *control) {
     
     }*/
   //end debug
-  //debug_fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
-  //printCode(); // this dies  TODO figure out why 
+  debug_fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
+  printCode(); // this dies  TODO figure out why 
 }
 
 Loop::~Loop() {
@@ -1184,7 +1191,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
   const int n = stmt[0].xform.n_out();
   
   if (last_compute_cg_ == NULL) {
-    debug_fprintf(stderr, "last_compute_cg_ == NULL\n"); 
+    debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ == NULL\n"); 
     
     std::vector<Relation> IS(m);
     std::vector<Relation> xforms(m);
@@ -1203,6 +1210,10 @@ CG_outputRepr *Loop::getCode(int effort) const {
     delete last_compute_cgr_;
     last_compute_cgr_ = NULL;
   }
+  else {
+    debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ NOT NULL\n"); 
+  }
+
   
   if (last_compute_cgr_ == NULL || last_compute_effort_ != effort) {
     delete last_compute_cgr_;
@@ -1240,6 +1251,7 @@ void Loop::printCode(int effort) const {
   const int n = stmt[0].xform.n_out();
   
   if (last_compute_cg_ == NULL) {
+    debug_fprintf(stderr, "Loop::printCode(), last_compute_cg_ == NULL\n"); 
     std::vector<Relation> IS(m);
     std::vector<Relation> xforms(m);
     for (int i = 0; i < m; i++) {
@@ -1252,6 +1264,7 @@ void Loop::printCode(int effort) const {
     delete last_compute_cgr_;
     last_compute_cgr_ = NULL;
   }
+  else debug_fprintf(stderr, "Loop::printCode(), last_compute_cg_ NOT NULL\n"); 
   
   if (last_compute_cgr_ == NULL || last_compute_effort_ != effort) {
     delete last_compute_cgr_;
@@ -1261,6 +1274,7 @@ void Loop::printCode(int effort) const {
   
   std::string repr = last_compute_cgr_->printString(
                                                     uninterpreted_symbols_stringrepr);
+  debug_fprintf(stderr, "leaving Loop::printCode()\n"); 
   std::cout << repr << std::endl;
 }
 
@@ -2424,7 +2438,7 @@ void Loop::apply_xform(std::set<int> &active) {
       count++;
       debug_fprintf(stderr, "bottom\n"); 
     }
-    
+     
     std::vector<CG_outputRepr *> subs3 = output_substitutions(
                                                               ocgs, Inverse(copy(mapping)),
                                                               std::vector<std::pair<CG_outputRepr *, int> >(
@@ -2510,6 +2524,7 @@ void Loop::addKnown(const Relation &cond) {
   last_compute_cgr_ = NULL;
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
+  debug_fprintf(stderr, "Loop::addKnown(), SETTING last_compute_cg_ = NULL\n");
   
   int n1 = this->known.n_set();
   
@@ -2588,6 +2603,8 @@ bool Loop::nonsingular(const std::vector<std::vector<int> > &T) {
   last_compute_cgr_ = NULL;
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
+  debug_fprintf(stderr, "Loop::nonsingular(), SETTING last_compute_cg_ = NULL\n");
+
   // build relation from matrix
   Relation mapping(2 * num_dep_dim + 1, 2 * num_dep_dim + 1);
   F_And *f_root = mapping.add_and();
@@ -2741,7 +2758,7 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   for (int i = 0; i < levels.size(); i++) {
     if (levels[i] <= 0 || levels[i] > stmt[stmt_num].loop_level.size())
       throw std::invalid_argument(
-                                  "invalid loop level " + to_string(levels[i]));
+                                  "1invalid loop level " + to_string(levels[i]));
     
     if (i > 0) {
       if (levels[i] < levels[i - 1])
@@ -2755,7 +2772,8 @@ void Loop::scalar_expand(int stmt_num, const std::vector<int> &levels,
   last_compute_cgr_ = NULL;
   delete last_compute_cg_;
   last_compute_cg_ = NULL;
-  
+  debug_fprintf(stderr, "Loop::scalar_expand(), SETTING last_compute_cg_ = NULL\n");
+
   debug_fprintf(stderr, "\nloop.cc finding array accesses in stmt %d of the code\n",stmt_num ); 
   std::vector<IR_ArrayRef *> access = ir->FindArrayRef(stmt[stmt_num].code);
   debug_fprintf(stderr, "loop.cc L2726  %d access\n", access.size()); 
@@ -7488,7 +7506,7 @@ void Loop::split_with_alignment(int stmt_num, int level, int alignment,
     throw std::invalid_argument(
                                 "invalid statement number " + to_string(stmt_num));
   if (level <= 0 || level > stmt[stmt_num].loop_level.size())
-    throw std::invalid_argument("invalid loop level " + to_string(level));
+    throw std::invalid_argument("2invalid loop level " + to_string(level));
   int dim = 2 * level - 1;
   std::set<int> subloop = getSubLoopNest(stmt_num, level);
   std::vector<Relation> Rs;

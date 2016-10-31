@@ -23,8 +23,6 @@
 #include <math.h>
 #include <stack>
 
-#include "../../../chill_io.hh"
-
 namespace omega {
   
   int checkLoopLevel;
@@ -542,7 +540,7 @@ namespace omega {
     
     return std::make_pair(if_repr, std::make_pair(assign_repr, result.second));
   }
-  
+ 
   
 //
 // return NULL if 0

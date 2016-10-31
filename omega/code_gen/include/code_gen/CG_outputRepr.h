@@ -15,6 +15,8 @@
 #ifndef _CG_OUTPUTREPR_H
 #define _CG_OUTPUTREPR_H
 
+#include "chill_io.hh"
+
 #include <string.h>
 
 namespace omega {

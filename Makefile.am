@@ -11,8 +11,13 @@ core_libs    += -lm -lrose -lrt -lutil -ldl
 core_libs    += -lboost_date_time -lboost_filesystem -lboost_program_options
 core_libs    += -lboost_regex -lboost_system -lboost_wave -lboost_iostreams
 
+core_libs    += -liegenlib -lisl -lgmp
+
 core_libdirs  = -Lomega/code_gen/obj -Lomega/omega_lib/obj
 core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
+
+core_libdirs += -L$(IEGENHOME)/lib
+core_libdirs += -L$(IEGENHOME)/../lib/installed/lib
 
 
 
@@ -20,6 +25,9 @@ core_libdirs += -L$(ROSEHOME)/lib -L$(BOOSTHOME)/lib
 core_includes  = -I$(srcdir)/omega/include
 core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
+
+core_includes += -I$(IEGENHOME)/include/iegenlib
+core_includes += -I$(IEGENHOME)/../lib/installed/include
 
 
 ## Source ##

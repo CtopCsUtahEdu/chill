@@ -765,6 +765,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
                           std::vector<std::string> blockIdxs,
                           std::vector<std::string> threadIdxs) {
   debug_fprintf(stderr, " LoopCuda::cudaize_v2() ROSE\n");
+  exit(-1); 
   for(std::map<std::string, int>::iterator it = array_dims->begin(); it != array_dims->end(); it++)  {
     debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
   }
@@ -1534,7 +1535,7 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
       ro_refs.erase(it_);
     }
     
-    debug_fprintf(stderr, "adding written v to arrayVars\n\n"); 
+    debug_fprintf(stderr, "loop_cuda_rose.ccc L1537 adding written v to arrayVars\n\n"); 
     v.print(); 
     arrayVars.push_back(v);
   } //  wo_refs 
@@ -1633,7 +1634,7 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
     v.out_data = 0;
     
     
-    debug_fprintf(stderr, "adding input v to arrayVars\n\n"); 
+    debug_fprintf(stderr, "loop_cuda_rose.ccc L1636 adding input v to arrayVars\n\n"); 
     v.print(); 
     arrayVars.push_back(v);   
   } // end of READ refs

@@ -55,20 +55,20 @@ struct VarDefs {
     debug_fprintf(stderr, "second name %s\n", secondName.c_str()); 
     debug_fprintf(stderr, "original name %s\n", original_name.c_str()); 
     debug_fprintf(stderr, "type ");
-    if (!type) { debug_fprintf(stderr, "NULL)\n"); }
-    else { debug_fprintf(stderr, "%s\n", type); } 
+    if (!type) debug_fprintf(stderr, "NULL)\n");
+    else debug_fprintf(stderr, "%s\n", type); 
     debug_fprintf(stderr, "size ");
     size_expr->print(0, stderr);
-    if ( vardecl ) { debug_fprintf(stderr, "\nvardecl %p\n", vardecl); } 
-    else { debug_fprintf(stderr, "\nvardecl NULL\n"); } 
+    if ( vardecl ) debug_fprintf(stderr, "\nvardecl %p\n", vardecl); 
+    else debug_fprintf(stderr, "\nvardecl NULL\n"); 
 
     //for (int i=0; i<size_multi_dim.size(); i++) { 
     //  if (i) debug_fprintf(stderr, "x");
     //  debug_fprintf(stderr, "%d", size_multi_dim[i]);
     //} 
     debug_fprintf(stderr, "\n");
-    if (tex_mapped)  { debug_fprintf(stderr, "tex  mapped\n"); }
-    if (cons_mapped) { debug_fprintf(stderr, "cons mapped\n"); }
+    if (tex_mapped)  debug_fprintf(stderr, "tex  mapped\n");
+    if (cons_mapped) debug_fprintf(stderr, "cons mapped\n");
   };
 };
 #endif
@@ -200,7 +200,7 @@ public:
   bool unroll_cuda(int stmt_num, int level, int unroll_amount);
 
 
-//void flatten_cuda(int stmt_num, std::string idxs, std::vector<int> &loop_levels, std::string inspector_name);
+  void flatten_cuda(int stmt_num, std::string idxs, std::vector<int> &loop_levels, std::string inspector_name);
   void ELLify_cuda(int stmt_num, std::vector<std::string> arrays_to_pad, int pad_to,bool dense_pad, std::string pos_array_name);
 
   void distribute_cuda(std::vector<int> &stmt_nums, int loop_level);

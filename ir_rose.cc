@@ -216,9 +216,11 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
         //ST->print(); fflush(stdout); 
       }
       else if ( isSgFunctionDeclaration(n) ) {
+        //debug_fprintf(stderr, "it's a function DECLARATION\n"); 
         SgFunctionDeclaration *fd = (SgFunctionDeclaration *)n;
-        const char *name = fd->get_name().str();
-        
+        const char *name = strdup( fd->get_name().str()) ;
+        //const char *name = fd->get_name().str() ;
+        //debug_fprintf(stderr, "name %p\n", name );
         
         if (strncmp("__builtin", name, 9) &&//if name DOESN'T start with __builtin
             strcmp("__sync_lock_test_and_set", name) && 
@@ -228,8 +230,8 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
           debug_fprintf(stderr, "\nfunctiondecl                     %s blurb %s\n", name, blurb.c_str()); 
           bool samefile =  (nodefile == sourcefile);
           debug_fprintf(stderr, "nodefile   %s\nsourcefile %s\n", nodefile.c_str(), sourcefile.c_str()); 
-          if (samefile) { debug_fprintf(stderr, "SAME FILE\n"); }
-          else  { debug_fprintf(stderr, "NOT THE SAME FILE\n"); }
+          if (samefile) debug_fprintf(stderr, "SAME FILE\n");
+          else  debug_fprintf(stderr, "NOT THE SAME FILE\n");
 
           //debug_fprintf(stderr, "\n\n%3d   %p   %s    ", i, n, blurb.c_str()); 
           //debug_fprintf(stderr, "node %s\n", n->class_name().c_str()); 
@@ -242,7 +244,7 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
           node->filename = strdup(nodefile.c_str()); 
 
           //debug_fprintf(stderr, "ir_rose.cc adding function %s as child of topnode\n\n", name); 
-          //topnode->addChild( node ); // this is done in the convert as well!
+          //topnode->addChild( node ); // this is done in the convert
           //debug_fprintf(stderr, "topnode now has %d children\n", topnode->getNumChildren()); 
         }
         else { 
@@ -250,22 +252,33 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
         }
       }
       else if (isSgVariableDeclaration(n)) { 
-        debug_fprintf(stderr, "\n\n%3d   %p   %s    ", i, n, blurb.c_str()); 
+        debug_fprintf(stderr, "\n\nA TOP LEVEL GLOBAL VARIABLE\n");
+        debug_fprintf(stderr, "\n%3d   %p   %s  \n", i, n, blurb.c_str()); 
         //debug_fprintf(stderr, "node %s\n", n->class_name().c_str());       
-        debug_fprintf(stderr, "a top level global variable\n");
         SgVariableDeclaration *rosevd = (SgVariableDeclaration *)n;
-        chillAST_node *vd = ConvertRoseVarDecl2( rosevd, topnode);
+        chillAST_node *vd = ConvertRoseVarDecl( rosevd, topnode);
         
         vd->isFromSourceFile = (nodefile == sourcefile); 
         vd->filename = strdup(nodefile.c_str()); 
-        //debug_fprintf(stderr, "global "); vd->print(); printf("\n"); fflush(stdout); 
-        // topnode->addChild( vd ); // done in convert? 
+        debug_fprintf(stderr, "global "); vd->print(); printf("\n"); fflush(stdout);
+        if (vd->parent) {
+          debug_fprintf(stderr, "global has parent of type %s\n", vd->parent->getTypeString());
+          if (vd->parent->isSourceFile()) { // ?? other cases  TODO
+            debug_fprintf(stderr, "adding global variable as child of sourcefile\n"); 
+            vd->parent->addChild(vd); // seems wrong
+            
+          }
+        }
+        else debug_fprintf(stderr, "global has parent no parent\n");
+        
+        // topnode->addChild( vd ); // done in convert
       }
       
       else if (isSgClassDeclaration(n)) { 
-        debug_fprintf(stderr, "\n\n%3d   %p   %s    ", i, n, blurb.c_str()); 
+        debug_fprintf(stderr, "\n\nA TOP LEVEL CLASS OR STRUCT DEFINITION\n"); 
+        debug_fprintf(stderr, "\n%3d   %p   %s  \n", i, n, blurb.c_str()); 
         //debug_fprintf(stderr, "node %s\n", n->class_name().c_str());       
-        debug_fprintf(stderr, "a top level Class or Struct declaration?\n"); 
+        
         SgClassDeclaration *SD = (SgClassDeclaration *)n;
         SgClassDeclaration::class_types class_type = SD->get_class_type(); 
         if (class_type == SgClassDeclaration::e_struct) { 
@@ -273,14 +286,31 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
           
           // what we really want is the class DEFINTION, not the DECLARATION
           SgClassDefinition *def = SD->get_definition(); 
-          chillAST_node *str = ConvertRoseStructDefinition( def, topnode ); 
-          str->isFromSourceFile = (nodefile == sourcefile); 
-          str->filename = strdup(nodefile.c_str());           
-          //debug_fprintf(stderr, "struct is %p\n", str); 
-          topnode->addChild( str );  // adds the STRUCT but not the individual members
+          chillAST_node *structdef = ConvertRoseStructDefinition( def, topnode ); // really a recorddecl
+          structdef->isFromSourceFile = (nodefile == sourcefile); 
+          structdef->filename = strdup(nodefile.c_str());           
+          //debug_fprintf(stderr, "struct is %p\n", structdef);
           
-          //debug_fprintf(stderr, "we need to add struct definition to globals\n");
+          chillAST_RecordDecl *RD = ( chillAST_RecordDecl *) structdef;
           
+          // figure out what file the struct decl is in
+          
+          SgLocatedNode *locatedNode = isSgLocatedNode (SD);
+          if (locatedNode != NULL) {
+            debug_fprintf(stderr, "know the location of the struct definition\n");
+            Sg_File_Info *FI = locatedNode->get_file_info();
+            std::string nodefile =  FI->get_filename();
+            debug_fprintf(stderr, "nodefile is '%s'\n", nodefile.c_str()); 
+            
+            if (nodefile == topnode->SourceFileName) { 
+              
+              debug_fprintf(stderr, "adding struct DEFINITION %s to children of topnode\n", RD->getName()); 
+              topnode->addChild( structdef );  // adds the STRUCT but not the individual members
+              // TODO this should only happen if the class declaration is in the same file as topnode (a source file)
+              // this is done above debug_fprintf(stderr, "*** we need to add struct definition to globals ***\n");
+            }
+          }
+          else debug_fprintf(stderr, "DON'T know the location of the struct definition\n");
         }
         else { 
           debug_fprintf(stderr, "unhandled top node SgClassDeclaration that is not a struct!\n");
@@ -292,9 +322,11 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
       //   if (strncmp("__builtin", name, 9)) debug_fprintf(stderr, "decl %s is a forward declaration or a builtin\n", name ); 
       //}
       //}
-      else if (isSgTypedefDeclaration(n)) {  // sometimes structs are this 
+      else if (isSgTypedefDeclaration(n)) {  // sometimes structs are this
+
+        debug_fprintf(stderr, "\nTYPEDEF\n\n"); 
         debug_fprintf(stderr, "\n\n%3d   %p   %s    ", i, n, blurb.c_str()); 
-        //debug_fprintf(stderr, "node %s\n", n->class_name().c_str());       
+        debug_fprintf(stderr, "node %s\n", n->class_name().c_str());       
         
         //debug_fprintf(stderr, "\nsometimes structs are this calling  ConvertRoseTypeDefDecl\n"); 
         SgTypedefDeclaration *TDD = (SgTypedefDeclaration *) n;
@@ -321,23 +353,23 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
 }
 
 
-int uglyhack = 99999;
+
 
 // shorten really ugly unnamed struct names, or just strdup to turn const char * to char *
-char *shortenRoseUnnamedName( const char *origname ) { 
+char *shortenRoseUnnamedName( const char *origname ) {  // usually a TYPE not a name ... 
+
+  // this used to be something like "
   if (origname == NULL) return NULL; // ?? 
   
   int l = strlen(origname); 
-  debug_fprintf(stderr, "\nshortenRoseUnnamedName( origname %d characters ) %s\n", l, origname);
+  //debug_fprintf(stderr, "\nshortenRoseUnnamedName( origname %d characters ) origname was '%s'\n", l, origname);
   
-  if ( l > 15 ) {
+  if ( l > 25 ) {
     //debug_fprintf(stderr, "long (variable type) name is '%s'\n", origname );
     if ( (!strncmp(        "__unnamed_class", origname, 15)) || 
-         (!strncmp( "struct __unnamed_class", origname, 22)) ||
-         (!strncmp(               "struct {", origname,  8)) ||
-         (!strncmp(           "__anonymous_", origname, 12))) { 
-
-      debug_fprintf(stderr, "an unnamed struct with %d characters in the name!\n", strlen(origname));
+         (!strncmp( "struct __unnamed_class", origname, 22)) || 
+         (!strncmp( "__anonymous_", origname, 13))) { 
+      //debug_fprintf(stderr, "an unnamed struct with %d characters in the name!\n", strlen(origname));
       
       // this was the beginning of dealing with unnamed struct names inside unnamed structs, but that seems not to be needed 
       //string o( origname ); 
@@ -369,20 +401,6 @@ char *shortenRoseUnnamedName( const char *origname ) {
         //debug_fprintf(stderr, "shortened name is %s\n\n", shortname); 
         return shortname; 
       }
-	else { 
-		int linenumber = uglyhack++;
-		debug_fprintf(stderr, "no line number!\n");
-			char newname[128];
-        	if (startsWithStruct)
-       		   sprintf(newname, "struct unnamedStructAtLine%d\0", linenumber);
-        	else
-          	sprintf(newname, "unnamedStructAtLine%d\0", linenumber);
-        	char *shortname = strdup(newname);
-        	debug_fprintf(stderr, "shortened name is %s\n\n", shortname); 
-        return shortname;
-
-	}
-	
     }
   }
   //debug_fprintf(stderr, "unable to shorten '%s'\n", origname); 
@@ -395,7 +413,7 @@ char *shortenRoseUnnamedName( const char *origname ) {
 
 char * shortenRoseStructMemberName( const char *oldname ) {
   char *temp = strdup(oldname);
-  //debug_fprintf(stderr, "shortening '%s'\n", oldname); 
+  //debug_fprintf(stderr, "shortenRoseStructMemberName( '%s' )\n", oldname); 
   if (rindex(oldname, ':')) { 
     int i = rindex(oldname, ':') - oldname;
     //debug_fprintf(stderr, "last part i=%d   '%s'\n", i, &(temp[i])); 
@@ -412,8 +430,9 @@ char * shortenRoseStructMemberName( const char *oldname ) {
 
 chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *fd , chillAST_node *parent) 
 {
-  const char *functionname = fd->get_name().str();
-  debug_fprintf(stderr, "ConvertRoseFunctionDecl( %s )\n", functionname); 
+  const char *functionname = strdup( fd->get_name().str());
+  debug_fprintf(stderr, "\nConvertRoseFunctionDecl( %s )\n", functionname); 
+
   
   // need return type 
   SgType *rt = fd->get_orig_return_type(); 
@@ -421,7 +440,7 @@ chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *fd , chillAST_no
   const char *returntype = temp.c_str(); 
   //debug_fprintf(stderr, "return type %s\n", returntype);
   
-  chillAST_FunctionDecl *chillFD = new chillAST_FunctionDecl( returntype,  functionname, parent, (void *)fd);
+  chillAST_FunctionDecl *chillFD = new chillAST_FunctionDecl( returntype,  functionname, parent, (void *)fd /* unique */ );
   ConvertRosePreprocessing( fd, chillFD);  // before doing the function decl itself? 
 
   // add parameters
@@ -437,19 +456,22 @@ chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *fd , chillAST_no
   SgFunctionDefinition *funcdef = fd->get_definition(); 
   if (funcdef)  { 
     SgBasicBlock *bodybasicblock = funcdef->get_body(); 
-    //debug_fprintf(stderr, "got body\n"); 
+    debug_fprintf(stderr, "got body\n"); 
     
     std::vector<SgStatement* > statements = bodybasicblock->get_statements(); 
     int num_statements = statements.size(); 
-    //debug_fprintf(stderr, "%d statements in FunctionDecl body\n", num_statements);
+    debug_fprintf(stderr, "%d statements in FunctionDecl body\n", num_statements);
     
     // create a compound statement for the function body, to hold the rest of the statements 
     chillAST_CompoundStmt *chillCS = new chillAST_CompoundStmt; 
     chillCS->setParent( chillFD );
+    debug_fprintf(stderr, "chillCS is %p\n", chillCS); 
     
     for (int i=0; i<num_statements; i++) { 
       SgStatement* statement = statements[i];
-      //debug_fprintf(stderr, "\nstatement %d %s\n", i, statement->unparseToString().c_str()); 
+      debug_fprintf(stderr, "\nstatement %d     %s\n", i, statement->unparseToString().c_str());
+      //debug_fprintf(stderr,"calling ConvertRoseGenericAST with parent %p\n",chillCS);
+      debug_fprintf(stderr, "calling ConvertRoseGenericAST\n", chillCS); 
       chillAST_node *n =  ConvertRoseGenericAST( statement, chillCS ); 
       if (n) {
         chillCS->addChild( n ); 
@@ -475,7 +497,7 @@ chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl, chillAST_no
   //debug_fprintf(stderr, "ConvertRoseParamVarDecl()   "); 
   chillAST_VarDecl *chillVD = (chillAST_VarDecl *) ConvertRoseInitName( vardecl, parent );
   chillVD->isAParameter = true;
-  //debug_fprintf(stderr, "new parameter:\n"); 
+  debug_fprintf(stderr, "new parameter:\n"); 
   //chillVD->dump(); printf("\n"); fflush(stdout); // dump in ConvertRoseInitName
   
   return chillVD;
@@ -575,17 +597,19 @@ chillAST_node *find_wacky_vartype( const char *typ, chillAST_node *parent ) {
   
 }
 
+
+
 chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node *parent ) // TODO probably wrong
 {
-  debug_fprintf(stderr, "ConvertXXXXInitName()  %s\n", initname->unparseToString().c_str()); 
-  //debug_fprintf(stderr, "initname %s\n", initname->unparseToString().c_str()); 
+  debug_fprintf(stderr, "\n\n***  ConvertRoseInitName()  %s\n", initname->unparseToString().c_str()); 
+  debug_fprintf(stderr, "initname %s\n", initname->unparseToString().c_str()); 
   
   int numattr = initname->numberOfAttributes();
   //debug_fprintf(stderr, "initname has %d attributes\n", numattr); 
   
   
   char *varname = shortenRoseStructMemberName( initname->unparseToString().c_str() ); 
-  debug_fprintf(stderr, "shortened varname '%s'\n", varname); 
+  debug_fprintf(stderr, "varname '%s'\n", varname); 
   
   //VariantT V;
   //V = initname->variantT();
@@ -602,23 +626,26 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
   
   // if this is a struct, the vartype may be a huge mess. make it nicer
   char *vartype = parseUnderlyingType(restricthack( shortenRoseUnnamedName( otype ))); 
-  debug_fprintf(stderr, "prettied vartype '%s'\n", vartype); 
+  //debug_fprintf(stderr, "prettied vartype '%s'\n", vartype); 
   char *arraypart;// = strdup(""); // leak // splitTypeInfo(vartype); // do before possible mucking with vartype
   arraypart =  parseArrayParts( strdup(otype) );
-  //debug_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart); 
+  debug_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart); 
   
   // need underlying type to pass to constructor?  double and arraypart **, not type double ** and arraypart ** 
   
-  if ( !strncmp(vartype, "struct ", 7) ) { 
-    //debug_fprintf(stderr, "this is a struct ???\n"); 
-    SgDeclarationStatement *dec = initname->get_declaration();
-    SgDeclarationStatement *def = initname->get_definition();
+  SgDeclarationStatement *dec = initname->get_declaration();
+  SgDeclarationStatement *defdec = dec->get_definingDeclaration();
+
+  if ( !strncmp(vartype, "struct ", 7) ) {
+    debug_fprintf(stderr, "this is a struct ???\n"); 
     //debug_fprintf(stderr, "\ndec  %s\n", dec->unparseToString().c_str());
     std::vector< std::pair< SgNode *, std::string > > subparts = dec->returnDataMemberPointers();
     SgClassDeclaration *CD = NULL; 
     
     chillAST_RecordDecl *RD = new chillAST_RecordDecl( vartype, otype, parent); 
     int numsub =  subparts.size();
+    //RD->uniquePtr = dec;
+    
     //debug_fprintf(stderr, "%d subparts\n", numsub); 
     for (int i=0; i<numsub; i++) { 
       SgNode *thing = subparts[i].first;
@@ -630,7 +657,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
       
       if (name == string("baseTypeDefiningDeclaration")) { 
         CD = (SgClassDeclaration *)thing;
-        //debug_fprintf(stderr, "me: %p  defining %p\n", dec, CD); 
+        //debug_fprintf(stderr, "me: %p  defining %p\n", defdecc, CD); 
         //if (CD) 
         //  debug_fprintf(stderr, "\ndefining  %s\n", CD->unparseToString().c_str());
         //else
@@ -660,7 +687,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
     debug_fprintf(stderr, "OK, NOW WHAT convertroseinitname\n");
     //die(); 
     exit(-1); 
-  } 
+  }  
   
   
   // figure out if this is some non-standard typedef'd type
@@ -678,7 +705,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
     SgArrayType *AT = (SgArrayType *)typ;
     //if (arraypart) free(arraypart); 
     if (!arraypart) arraypart = ConvertSgArrayTypeToString( AT ); 
-    debug_fprintf(stderr, "in convertrosevardecl(), arraypart %s\n", arraypart); 
+    debug_fprintf(stderr, "in convertroseinitname(), arraypart %s\n", arraypart); 
     
     //SgArrayType* arraybase = isSgArrayType(t->get_base_type());
     //SgExpression* indexExp = AT->get_index();
@@ -753,8 +780,9 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
   }
   
   chillVD->isRestrict = restricted; // TODO nicer way 
-  
-  //debug_fprintf(stderr, "ConvertRoseInitName()  storing variable declaration '%s' with unique value %p from  SgInitializedName\n", varname, initname ); 
+  chillVD->uniquePtr = defdec;
+ 
+  debug_fprintf(stderr, "ConvertRoseInitName()  storing variable declaration '%s' with unique value %p\n", varname,  chillVD->uniquePtr ); 
   // store this away for declrefexpr that references it! 
   VariableDeclarations.push_back(chillVD);
   //debug_fprintf(stderr, "ConvertRoseInitName() END\n"); 
@@ -763,108 +791,249 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname, chillAST_node 
   SgInitializer * initptr = initname->get_initptr();
   if (initptr) { 
     debug_fprintf(stderr, "%s gets initialized\n", chillVD->varname);
-    chillAST_node *init = ConvertRoseGenericAST( initptr, NULL); 
+    chillAST_node *init = ConvertRoseGenericAST( initptr, parent);  // NULL); 
     chillVD->setInit( init ); 
     
   }
-
-
-
   //chillVD->dump(); printf("\n"); fflush(stdout); 
   return chillVD;
 }
 
 
 
-
-chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_node *parent ) 
+char *fixUnnamedStructType( char *otype, char *entiredecl ) // deal with unnamed struct messiness
 {
-  debug_fprintf(stderr, "\nConvertRoseVarDecl2() \n");
+  char *result = otype; // default is to not change anything
+  
+  // see if otype looks like an unnamed struct
+  if ( 0 == strncmp(otype, "struct", 6)) { // it's a struct
+    // find the first non-space character starting at position 8
+    int l = strlen(otype);
+    //debug_fprintf(stderr, "%d chars in '%s'\n", l, otype);
+    for (int i=6; i<l; i++) {
+      char c = otype[i]; 
+      //debug_fprintf(stderr, "char %d is '%c'\n", i, c);
+      if (c != ' ') {
+        if (c == '{') {
+          // first nonblank is open bracket, it's an unnamed struct
+          //debug_fprintf(stderr, "it's an unnamed struct!\n");
+
+          //debug_fprintf(stderr, "want to get the type from '%s'\n", entiredecl);
+          char *decl = strdup(entiredecl);
+          if (strncmp(decl, "struct ", 7)) { // make sure entiredecl looks like "struct something"
+            debug_fprintf(stderr, "ir_rose.ccERROR, trying to get name of an unnamed struct from '%s'\n", decl);
+            exit(-1);
+          }
+
+          char *bettertype = decl;
+          char *p = bettertype + 6;
+          
+          // handle possible lots of spaces (should never happen)
+          //debug_fprintf(stderr, "bettertype '%s'\n", bettertype);
+          l = strlen(bettertype);
+          for (int j=6; j<l; j++) {
+            if (*p == ' ') { // ignore initial spaces after "struct"
+              p++;
+            }
+            else break; // not a space, we should be pointing at the start of the name 
+          }
+
+          // find the name. end name at first space if any
+          
+          l = strlen(p); // how many chars we haven't looked at yet  (off by one?) 
+          for (int j=0; j<l; j++) {
+            if (*p != ' ') { // include non spaces
+              p++;
+            }
+            else {  // a space, end the name
+              *p = '\0';
+              break;
+            }
+          }
+          debug_fprintf(stderr, "unnamed struct '%s'\n", bettertype);
+          result = bettertype;
+          
+          break;
+        }
+        else {
+          // first nonblank looks like a struct name - leave the type alone
+          break;  
+        }
+      }
+    }
+  }
+  return result; 
+}
+
+
+
+
+chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl, chillAST_node *parent ) 
+{
+  debug_fprintf(stderr, "\nConvertRoseVarDecl() \n");
+
+  SgDeclarationStatement *defdecl = vardecl->get_definingDeclaration(); // unique
+  debug_fprintf(stderr, "defdecl %p\n", defdecl);
+  if (defdecl == NULL) defdecl = vardecl;
   
   std::vector<SgInitializedName* > names = vardecl->get_variables();
-  //debug_fprintf(stderr, "%d initialized names\n", names.size()); 
+  if (1 != names.size()) debug_fprintf(stderr, "%d initialized names\n", names.size()); 
   
   char *entiredecl = strdup( vardecl->unparseToString().c_str());
-  debug_fprintf(stderr, "entiredecl: '%s'\n", entiredecl); 
-
+ 
   if ( names.size() > 1 ) { 
-    debug_fprintf(stderr, "ConvertRoseVarDecl2()  %s\n", entiredecl); 
+    debug_fprintf(stderr, "ConvertRoseVarDecl()  %s\n", entiredecl); 
     debug_fprintf(stderr, "too many decls in a decl!\n"); 
     exit(-1); 
   }
   
-  // first, get the type. this may be a really ugly thing for an unnamed struct
+  // first, get the type. this may be a really ugly thing for an unnamed struct (not with more recent rose)
   SgInitializedName* iname =  names[0];
   SgType *typ = iname->get_type();
-  char *temp = shortenRoseUnnamedName( typ->unparseToString().c_str() );
-  //debug_fprintf(stderr, "temp %s\n", temp); 
-  bool restricted = isRestrict( temp) ; // is __restrict__ in there? 
+  
+  char *ovarname = strdup(iname->unparseToString().c_str()); // original 
+  char *otype    = strdup(typ->unparseToString().c_str());   // original
+  //this otype is useless, as it does not deal with unnamed structs well 
+  
+  debug_fprintf(stderr, "entiredecl: '%s'\n", entiredecl); 
+  debug_fprintf(stderr, "original vartype '%s'\n", otype); 
+  debug_fprintf(stderr, "original varname '%s'\n", ovarname);
+
+
+  
+  char *shorttype = otype; // shortenRoseUnnamedName( otype ); // this used to be REALLY LONG for unnamed structs
+
+  bool restricted = isRestrict( otype ) ; // is __restrict__ in there? 
   //if (restricted) debug_fprintf(stderr, "RESTRICTED\n"); 
-  //else debug_fprintf(stderr, "NOT RESTRICTED\n"); 
-  char *vartype   = restricthack( temp ); // remove  __restrict__
+  //else debug_fprintf(stderr, "NOT RESTRICTED\n");
+
+
+
+  //char *fixedtype = fixUnnamedStructType( otype, entiredecl ); 
+  
+  //debug_fprintf(stderr, "SHORT TYPE IS %s\n", shorttype);
+          
+  otype = restricthack( otype); // remove  __restrict__
+  
+  char *vartype   = fixUnnamedStructType( otype, entiredecl ); 
   char *arraypart = splitTypeInfo(vartype);
-  char *varname   = shortenRoseStructMemberName( iname->unparseToString().c_str()); 
-  debug_fprintf(stderr, "vartype: %s\nvarname: %s\narraypart %s\n\n", vartype, varname, arraypart);
+  char *varname   = shortenRoseStructMemberName( ovarname );
+  if (strlen(arraypart) > 1) 
+    debug_fprintf(stderr, "vartype: %s\nvarname: %s\narraypart %s\n\n", vartype, varname, arraypart);
+  else 
+    debug_fprintf(stderr, "vartype: %s\nvarname: %s\n\n", vartype, varname);
+
+  bool unnamedstruct = false; // ususally not
+  char *nameOfStruct = vartype;
   
-  
-#ifdef OLDCODE 
-  debug_fprintf(stderr, "entire (type of variable) decl '%s'\n", entiredecl);
-  
-  std::vector<SgInitializedName* > names = vardecl->get_variables(); 
-  
-  debug_fprintf(stderr, "original name: '%s'\n", iname->unparseToString().c_str()); 
-  char *varname = shortenRoseStructMemberName(iname->unparseToString().c_str() );
-  debug_fprintf(stderr, "SHORTENED varname %s\n", varname); 
-#endif 
-  
-  
-  // this if handles structs (and typedefs?) 
-  if (vardecl->get_variableDeclarationContainsBaseTypeDefiningDeclaration()) {
-    //debug_fprintf(stderr, "there is a defining declaration  (a struct or typedef?)\n");
-    SgDeclarationStatement *DS = vardecl->get_baseTypeDefiningDeclaration();
-    //debug_fprintf(stderr, "DS type %s\n", roseGlobalVariantNameList[DS->variantT()]);
+  if ( !strncmp( vartype, "struct ", 7)) { 
+    debug_fprintf(stderr, "it is a struct of type '%s' \n", vartype);
     
-    if (SgClassDeclaration *CD = isSgClassDeclaration(DS)) { 
-      //debug_fprintf(stderr, "it's a ClassDeclaration\n"); 
-      SgClassDeclaration::class_types class_type = CD->get_class_type(); 
-      if (class_type == SgClassDeclaration::e_struct) { 
-        //debug_fprintf(stderr, "it's a ClassDeclaration of a struct\n"); 
-        
-        // str should be the RecordDecl that says what's in the struct
-        chillAST_RecordDecl *STR = (chillAST_RecordDecl *) ConvertRoseStructDeclaration( CD, parent );
-        
-        //debug_fprintf(stderr, "\nhere is the struct definition:\n"); STR->print(); printf("\n"); fflush(stdout); 
-        
-        //debug_fprintf(stderr, "we need to declare a variable of this STRUCT type named %s\n", varname); 
-        
-        chillAST_VarDecl *vd = new chillAST_VarDecl( STR, varname, "", parent);
-        vd->setStruct( true ); 
-        //debug_fprintf(stderr, "setting that it IS A STRUCT\n");
-        //if (vd->isAStruct()) debug_fprintf(stderr, "yes, it is!\n"); else debug_fprintf(stderr, "no, it isn't!\n"); 
-        vd->isRestrict = restricted; 
-        return vd; 
-      }
+    nameOfStruct = &vartype[7];
+    debug_fprintf(stderr, "struct name is '%s'\n", nameOfStruct);
+    if ('{' == nameOfStruct[0]) {
+      debug_fprintf(stderr, "it's an unnamed struct\n");
+      unnamedstruct = true; 
     }
   }
-  else { // stupid special case code.  
-    
+
+
+  // this if handles structs  DEFINITIONS (and typedefs?)
+  // things like
+  //  struct { int i} b;   // this is an unnamed struct. the vardecl for b will have a BaseTypeDefiningDeclaration
+  //
+  //  struct a { int i; } b;  // this will ALSO have a BaseTypeDefiningDeclaration, for struct a
+
+  chillAST_RecordDecl *RD = NULL;
+  SgDeclarationStatement *defining = NULL;
+  
+  if (vardecl->get_variableDeclarationContainsBaseTypeDefiningDeclaration()) {
     //struct { 
     //  struct { a,b,c} d,e;
     //} 
     // d willhave a defining decl.  e will not
     
-    //debug_fprintf(stderr, "checking ugly special case\n");
-    //debug_fprintf(stderr, "vartype is %s\n", vartype); 
-    //if (parent) debug_fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
+
+    debug_fprintf(stderr, "in ConvertRoseVarDecl(), there is a defining declaration  (a struct or typedef?)\n");
+    SgDeclarationStatement *DS = vardecl->get_baseTypeDefiningDeclaration();
+    //debug_fprintf(stderr, "DS type %s\n", roseGlobalVariantNameList[DS->variantT()]);
     
-    if (  (!strncmp( vartype, "struct unnamed", 14))  && 
-          !strcmp("RecordDecl", parent->getTypeString())) { 
+    if (SgClassDeclaration *CD = isSgClassDeclaration(DS)) { 
+      debug_fprintf(stderr, "it's a ClassDeclaration\n"); 
+      SgClassDeclaration::class_types class_type = CD->get_class_type(); 
+      if (class_type == SgClassDeclaration::e_struct) { 
+        debug_fprintf(stderr, "it's a ClassDeclaration of a struct\n"); 
+        
+        // RD should be the RecordDecl that says what's in the struct
+        RD = (chillAST_RecordDecl *) ConvertRoseStructDeclaration( CD, parent );
+        
+        debug_fprintf(stderr, "\nhere is the struct definition:\n"); RD->print(); printf("\n"); fflush(stdout); 
+        
+        //debug_fprintf(stderr, "we need to declare a variable of this STRUCT type named %s\n", varname); 
+
+        // do we need to remember this struct type somewhere in case there are more of them?
+        
+      }
+    }
+  }
+
+  
+  if ( !strncmp( vartype, "struct ", 7)) { 
+    debug_fprintf(stderr, "it is a struct of type '%s' \n", vartype);
+    
+    if (RD) {
+      debug_fprintf(stderr, "we know what the struct definition looks like because it was part of this vardecl\n"); 
       
-      //debug_fprintf(stderr, "MAYBE\n"); 
+      chillAST_VarDecl *vd = new chillAST_VarDecl( RD, varname, "", parent);
+      //parent->addChild( vd ); // ?? 
+      vd->setStruct( true );
+      RD->setUnnamed ( unnamedstruct ) ;
+      vd->uniquePtr = defdecl; // ??
+      debug_fprintf(stderr, "dammit setting %s uniquePtr to %p the SgVariableDeclaration that defined it?\n", vd->varname, vd->uniquePtr); 
+      
+      //debug_fprintf(stderr, "setting that it IS A STRUCT\n");
+      //if (vd->isAStruct()) debug_fprintf(stderr, "yes, it is!\n"); else debug_fprintf(stderr, "no, it isn't!\n"); 
+      vd->isRestrict = restricted;
+
+      debug_fprintf(stderr, "STORING vardecl %s in global VariableDeclarations %d\n", vd->varname, VariableDeclarations.size()); 
+      VariableDeclarations.push_back( vd );
+      return vd; 
+    }
+    
+    debug_fprintf(stderr, "we will have to find the recorddecl for %s\n", nameOfStruct);
+
+    RD = parent->findRecordDeclNamed( nameOfStruct );
+    if (!RD) {
+      debug_fprintf(stderr, "could not find recordDecl named %s\n", nameOfStruct);
+      exit(-1);
+    }
+    
+    RD->print();
+    
+    // make a variable with recorddecl    duplicated code.  rethink.  TODO 
+    chillAST_VarDecl *vd = new chillAST_VarDecl( RD, varname, "", parent);
+    vd->setStruct( true );
+    vd->isRestrict = restricted; 
+    VariableDeclarations.push_back( vd );
+    return vd; 
+
+
+    //*************************************************************** can't get to here 
+    
+    debug_fprintf(stderr, "checking ugly special case   for unnamed struct in an unnamed struct ??? \n");
+    debug_fprintf(stderr, "vartype is %s\n", vartype); 
+    if (parent) debug_fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
+    
+    if (  !strncmp( vartype, "struct ", 7)) { 
+      
+      debug_fprintf(stderr, "this variable is a struct \n"); 
       
       char *structName = strdup( &(vartype[7]) ); // remove the "struct "
-      //debug_fprintf(stderr, "structName '%s'\n", structName); 
+      debug_fprintf(stderr, "structName '%s'\n", structName); 
       
+      
+      
+      // 
       // see if the parent struct has a 
       // parent->print(); printf("\n\n"); fflush(stdout); 
       
@@ -878,10 +1047,7 @@ chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_no
         //  subpart->dump();  printf("\n\n"); fflush(stdout);
       } 
       else { 
-	prd->print(0,stderr); debug_fprintf(stderr, "\n"); 
-	prd->dump(0,stderr); debug_fprintf(stderr, "\n"); 
         debug_fprintf(stderr, "member '%s', can't find unnamed struct that is part of a struct\n", varname); 
-	debug_fprintf(stderr, "type is '%s'\n", structName );
         exit(-1);
       }
       
@@ -899,9 +1065,11 @@ chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_no
       //debug_fprintf(stderr, "setting that it IS A STRUCT\n");
       //if (vd->isAStruct()) debug_fprintf(stderr, "yes, it is!\n"); else debug_fprintf(stderr, "no, it isn't!\n"); 
       vd->isRestrict = restricted; 
+      VariableDeclarations.push_back( vd );
       return vd; 
     }
-  }
+    
+  }  
   
   
   
@@ -910,11 +1078,11 @@ chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_no
   // and this is e 
   
   
-  
   // call the  ConvertRoseInitName() that takes a SgInitializedName
   chillAST_VarDecl * chillVD = (chillAST_VarDecl *) ConvertRoseInitName( iname, parent ); 
+  
   chillVD->isRestrict = restricted; 
-  //debug_fprintf(stderr, "ConvertRoseVarDecl2() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  names[0] ); 
+  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  chillVD->uniquePtr ); 
   
   // store this away for declrefexpr that references it! 
   // since we called ConvertRoseInitName() which added it already, don't do that again.  
@@ -925,7 +1093,9 @@ chillAST_node * ConvertRoseVarDecl2( SgVariableDeclaration *vardecl, chillAST_no
 
 chillAST_node * ConvertRoseForStatement( SgForStatement *fs, chillAST_node *parent )
 {
-  //debug_fprintf(stderr, "\n%s\n", fs->unparseToString().c_str()); 
+
+  debug_fprintf(stderr, "\nConvertRoseForStatement()  parent %p\n", parent); 
+  debug_fprintf(stderr, "%s\n", fs->unparseToString().c_str()); 
   std::vector<SgStatement* >inits  = fs->get_init_stmt();  // these 2 seem to be equivalent. 
   //SgForInitStatement *init2 = fs->get_for_init_stmt();  
   //std::vector<SgStatement* >inits = init2->get_init_stmt(); 
@@ -957,16 +1127,29 @@ chillAST_node * ConvertRoseForStatement( SgForStatement *fs, chillAST_node *pare
   
   // create the 4 components of a for statement
   //debug_fprintf(stderr, "\nconvert init %s\n", roseinit->unparseToString().c_str()); 
-  chillAST_node *init = ConvertRoseGenericAST( roseinit, NULL); 
+  chillAST_node *init = ConvertRoseGenericAST( roseinit, parent); // temp parent so it can look up variables   NULL); 
+
+  debug_fprintf(stderr, "FORSTMT INIT ");
+  if (init) {
+    init->print();
+    debug_fprintf(stderr, "\n");
+    init->dump();
+  }
+  else {
+    debug_fprintf(stderr, "(NULL)");
+    debug_fprintf(stderr, "this should never happen\n");
+    exit(-1);
+  }
+  debug_fprintf(stderr, "\n\n");
   
   //debug_fprintf(stderr, "\nconvert cond %s\n", rosecond->unparseToString().c_str()); 
-  chillAST_node *cond = ConvertRoseGenericAST( rosecond, NULL); 
+  chillAST_node *cond = ConvertRoseGenericAST( rosecond, parent); // temp parent so it can look up variables   NULL); 
   
   //debug_fprintf(stderr, "\nconvert incr %s\n", roseincr->unparseToString().c_str()); 
-  chillAST_node *incr = ConvertRoseGenericAST( roseincr, NULL); 
+  chillAST_node *incr = ConvertRoseGenericAST( roseincr, parent); // temp parent so it can look up variables   NULL); 
   
   //debug_fprintf(stderr, "\nfor statement, converting body\n"); 
-  chillAST_node *body = ConvertRoseGenericAST( rosebody, NULL);   
+  chillAST_node *body = ConvertRoseGenericAST( rosebody, parent); // temp parent so it can look up variables   NULL);   
   
   // force body to be a compound statement? 
   if (!body->isCompoundStmt()) { 
@@ -992,7 +1175,8 @@ chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement, chillA
 {
   chillAST_node *ret = NULL; 
   
-  //debug_fprintf(stderr, "ConvertRoseExprStatement() exprstatement %s\n", exprstatement->unparseToString().c_str()); 
+  debug_fprintf(stderr, "ConvertRoseExprStatement() exprstatement %s\n", exprstatement->unparseToString().c_str()); 
+  //debug_fprintf(stderr, "parent %p\n", parent);
   
   SgExpression *expr = exprstatement->get_expression();
   //debug_fprintf(stderr, "ConvertRoseExprStatement() expr %s\n", expr->unparseToString().c_str()); 
@@ -1010,7 +1194,9 @@ chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement, chillA
     //SgType *botyp= bo->get_type(); 
     //debug_fprintf(stderr, "binop typ %s\n", botyp->unparseToString().c_str()); 
     
-    //if (isSgCommaOpExp(bo))   { debug_fprintf(stderr, "commaop binop\n");  } 
+    //if (isSgCommaOpExp(bo))   { debug_fprintf(stderr, "commaop binop\n");  }
+    debug_fprintf(stderr, "calling ConvertRoseBinaryOp, chill parent is %p\n", parent);
+    if (parent != NULL) parent->print(); 
     ret = ConvertRoseBinaryOp( bo, parent ); 
   }
   else if ( isSgIntVal(expr)     ) ret = ConvertRoseIntVal   ((SgIntVal *)expr, parent ); 
@@ -1142,12 +1328,14 @@ const char * unaryop_string( VariantT typ ) {
 
 chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *rose_binop, chillAST_node *p )
 {
+  debug_fprintf(stderr, "\nConvertRoseBinaryOp()\n");
+  debug_fprintf(stderr, "%s\n", rose_binop->unparseToString().c_str()); 
+  
   //size_t ns = rose_binop->get_numberOfTraversalSuccessors(); 
   //debug_fprintf(stderr, "binary op has %d successors\n", ns);      // always 2 I hope?
   //assert( ns == 2 ) ; 
   VariantT typ = rose_binop->variantT();
   //debug_fprintf(stderr,"\nConvertRoseBinaryOp() AST Node is %d %s\n",typ,roseGlobalVariantNameList[typ]);
-  //debug_fprintf(stderr, "%s\n", rose_binop->unparseToString().c_str()); 
   
   
 #ifdef WORDY 
@@ -1168,8 +1356,9 @@ chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *rose_binop, chillAST_node *p )
   
   
   const char *op = binop_string( typ ); 
-  //debug_fprintf(stderr, "op is %s\n", op ); 
-  
+  debug_fprintf(stderr, "op is %s\n", op ); 
+  debug_fprintf(stderr, "LHS is %s\n", rose_binop->get_lhs_operand_i()->unparseToString().c_str());
+  debug_fprintf(stderr, "RHS is %s\n", rose_binop->get_rhs_operand_i()->unparseToString().c_str());
   
   if ( !strcmp(op, ".") ) { // special case. rose says member func is a binop 
     //debug_fprintf(stderr, "this binaryop is really a member expression\n"); 
@@ -1178,15 +1367,15 @@ chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *rose_binop, chillAST_node *p )
   
   // Rose encodes Array Subscript Expression as a binary operator array '[]' index
   // make that a chill ArraySubscriptExpr
-  //debug_fprintf(stderr, "umwut?\n"); 
   if (isSgPntrArrRefExp(rose_binop)) return ConvertRoseArrayRefExp( (SgPntrArrRefExp *)rose_binop, p); 
   
   
   // when this is a . (member) operation, it would be nice for the rhs 
   // to know that, so that it could know to look for the reference variable 
-  // in the struct definitions
-  
-  chillAST_BinaryOperator *chill_binop = new chillAST_BinaryOperator(NULL, op, NULL, NULL); 
+  // in the struct definitions  TODO 
+
+  debug_fprintf(stderr, "ir_rose.cc L1357, making a binop with no LHS no RHS but a parent\n"); 
+  chillAST_BinaryOperator *chill_binop = new chillAST_BinaryOperator(NULL, op, NULL, p); 
   
   chillAST_node *l = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i(), chill_binop );
   chill_binop->setLHS(l);
@@ -1207,12 +1396,16 @@ chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *rose_binop, chillAST_node *p )
 
 chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *rose_binop, chillAST_node *p ) // rose member exp is a binop
 {
-  //debug_fprintf(stderr, "ConvertXXXXMemberExp()\n"); 
+  debug_fprintf(stderr, "\nConvertXXXXMemberExp()\n"); 
   
   VariantT typ = rose_binop->variantT();
   //debug_fprintf(stderr, "ConvertRoseMemberExp()  AST Node is %d %s\n", typ, roseGlobalVariantNameList[ typ ] );  
   
-  const char *op = binop_string( typ ); 
+  const char *op = binop_string( typ );
+  debug_fprintf(stderr, "op is %s\n", op);
+  debug_fprintf(stderr, "LHS is %s\n", rose_binop->get_lhs_operand_i()->unparseToString().c_str());
+  debug_fprintf(stderr, "RHS is %s\n", rose_binop->get_rhs_operand_i()->unparseToString().c_str());
+  
   if ( strcmp(op, ".") ) { // special case. rose says member func is a binop 
     // this should never happen because this test is what got convertrosebinaryop to call 
     // convertrosememberexpr
@@ -1228,7 +1421,7 @@ chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *rose_binop, chillAST_node *p 
   }
   
   
-  chillAST_node *base   = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i(), NULL ); 
+  chillAST_node *base   = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i(), p ); 
   char *member = ConvertRoseMember( (SgVarRefExp*)(rose_binop->get_rhs_operand_i()), base ); 
   //debug_fprintf(stderr, "member (string) is %s\n", member); 
   
@@ -1243,10 +1436,10 @@ chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *rose_binop, chillAST_node *p 
 
 chillAST_node * ConvertRoseArrowExp( SgBinaryOp *rose_binop, chillAST_node *p ) // rose arrow (member) exp is a binop
 {
-  //debug_fprintf(stderr, "ConvertXXXXArrowExp()\n"); 
+  debug_fprintf(stderr, "ConvertXXXXArrowExp()  parent %p\n", p); 
   
   VariantT typ = rose_binop->variantT();
-  //debug_fprintf(stderr, "ConvertRoseMemberExp()  AST Node is %d %s\n", typ, roseGlobalVariantNameList[ typ ] );  
+  debug_fprintf(stderr, "ConvertRoseMemberExp()  AST Node is %d %s\n", typ, roseGlobalVariantNameList[ typ ] );  
   
   const char *op = binop_string( typ ); 
   if ( strcmp(op, "->") ) { // special case. rose says member func is a binop 
@@ -1257,21 +1450,24 @@ chillAST_node * ConvertRoseArrowExp( SgBinaryOp *rose_binop, chillAST_node *p ) 
   }
   
   typ = rose_binop->get_rhs_operand_i()->variantT();
-  //debug_fprintf(stderr, "ConvertRoseMemberExp()  member is %d %s\n", typ,roseGlobalVariantNameList[typ]);
+  debug_fprintf(stderr, "ConvertRoseMemberExp()  member is %d %s\n", typ,roseGlobalVariantNameList[typ]);
   if (strcmp( "SgVarRefExp", roseGlobalVariantNameList[ typ ])) { 
     debug_fprintf(stderr, "rhs of binop arrow expression does not seem right\n");
     exit(-1);
   }
-  
-  
-  chillAST_node *base   = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i(), NULL ); 
-  char *member = ConvertRoseMember( (SgVarRefExp*)(rose_binop->get_rhs_operand_i()), base ); 
-  //debug_fprintf(stderr, "member (string) is %s\n", member); 
+
+  debug_fprintf(stderr, "chillAST_MemberExpr *AE = new chillAST_MemberExpr( NULL /* base */, NULL /* member */, p, (void *)rose_binop, CHILL_MEMBER_EXP_ARROW);\n"); 
+  chillAST_MemberExpr *AE = new chillAST_MemberExpr( NULL /* base */, NULL /* member */, p, (void *)rose_binop, CHILL_MEMBER_EXP_ARROW); 
+
+  debug_fprintf(stderr, "converting base\n");
+  AE->base   = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i(), AE ); 
+  AE->member = ConvertRoseMember( (SgVarRefExp*)(rose_binop->get_rhs_operand_i()), AE ); 
+
+  debug_fprintf(stderr, "member (string) is %s\n", AE->member); 
   
   //chillAST_MemberExpr *ME = new chillAST_MemberExpr( base, member, p, (void *)rose_binop); 
-  chillAST_MemberExpr *AE = new chillAST_MemberExpr( base, member, p, (void *)rose_binop, CHILL_MEMBER_EXP_ARROW); 
   
-  //debug_fprintf(stderr, "this is the Arrow Expresion\n"); AE->print(); debug_fprintf(stderr, "\n"); 
+  debug_fprintf(stderr, "this is the Arrow Expresion\n"); AE->print(); debug_fprintf(stderr, "\n"); 
   
   return AE; 
 }
@@ -1347,7 +1543,7 @@ chillAST_node * ConvertRoseUnaryOp( SgUnaryOp *rose_unaryop, chillAST_node *pare
   bool pre = (SgUnaryOp::prefix == rose_unaryop->get_mode());
   
   
-  chillAST_node *sub = ConvertRoseGenericAST( rose_unaryop->get_operand(), NULL ); 
+  chillAST_node *sub = ConvertRoseGenericAST( rose_unaryop->get_operand(), parent); // temp parent to find references NULL ); 
   
   chillAST_UnaryOperator *chillUO = new chillAST_UnaryOperator( op, pre, sub, parent ); 
   sub->setParent( chillUO );
@@ -1359,14 +1555,39 @@ chillAST_node * ConvertRoseUnaryOp( SgUnaryOp *rose_unaryop, chillAST_node *pare
 
 chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *rose_varrefexp, chillAST_node *p )
 {
-  //debug_fprintf(stderr, "ConvertXXXXXVarRefExpr()\n");
-  //debug_fprintf(stderr, "%s\n", rose_varrefexp->unparseToString().c_str()); 
+  debug_fprintf(stderr, "\n*** ConvertXXXXVarRefExpr()\n");
+  debug_fprintf(stderr, "ref is '%s'\n", rose_varrefexp->unparseToString().c_str());
+  //debug_fprintf(stderr, "parent is: %p\n", p );
+  if (p == NULL) {
+    debug_fprintf(stderr, "(NULL)\n");
+    debug_fprintf(stderr, "ConvertRoseVarRefExp() I can't find the reference if I have no context\n");
+  }
+  else {
+    debug_fprintf(stderr, "p is a %s  (perhaps not filled in yet)\n", p->getTypeString()); 
+    //p->print();
+  }
+  debug_fprintf(stderr, "\n\n");
+  
   // this is equivalent to chill declrefexpr ??  but we always know it's a variable
   char *varname = strdup(rose_varrefexp->unparseToString().c_str());
   //debug_fprintf(stderr, "varname %s\n", varname);
+
+  // find chill variable decl with this name?
+  chillAST_VarDecl *chillvd= p->findVariableNamed( varname );
+  //debug_fprintf(stderr, "in  ConvertRoseVarRefExp() found vardecl %p\n", chillvd);
+  debug_fprintf(stderr, "in  ConvertRoseVarRefExp() found vardecl\n");
+  if (chillvd) {
+    chillvd->print();
+    debug_fprintf(stderr, "\n\n");
+  }
+  else {
+    debug_fprintf(stderr, "couldn't find variable named '%s'\n", varname); 
+  }
+  
   
   SgVariableSymbol  *sym = rose_varrefexp->get_symbol();
-  SgInitializedName *def = sym->get_declaration(); 
+  SgInitializedName *de = sym->get_declaration();
+  //SgDeclarationStatement *defdecl =
   
   // ugliness to remove "UL" from array sizes 
   char *ugly = strdup( sym->get_type()->unparseToString().c_str() ); 
@@ -1381,33 +1602,32 @@ chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *rose_varrefexp, chillAST_node
   
   // find the definition (we hope)          TODO this becomes a function?
   // it's a variable reference 
-  int numvars = VariableDeclarations.size();
+  //int numvars = VariableDeclarations.size();
   //debug_fprintf(stderr, "checking %d variable declarations\n", numvars); 
-  //debug_fprintf(stderr, "varname %s   vartype %s   def %p\n", varname, typ, def); 
-  chillAST_VarDecl *chillvd = NULL;
-  for (int i=0; i<numvars; i++) { 
-    //debug_fprintf(stderr, "checking against '%s' vartype %s   uniquePtr %p \n", VariableDeclarations[i]->varname, VariableDeclarations[i]->vartype, VariableDeclarations[i]->uniquePtr); 
-    if (VariableDeclarations[i]->uniquePtr == def) {
-      //debug_fprintf(stderr, "found it!\n\n"); 
-      chillvd = VariableDeclarations[i];
-      //debug_fprintf(stderr, "found it at variabledeclaration of %s at %d of %d\n", rose_varrefexp->unparseToString().c_str(), i, numvars);
-      //debug_fprintf(stderr, "chillvd "); chillvd->dump(); printf("\n"); fflush(stdout);    
-      break;
-    }
-    if (streq( varname, VariableDeclarations[i]->varname )) { 
-      //debug_fprintf(stderr, "here's something of the same name!\n");
-      if (streq(VariableDeclarations[i]->vartype, underlying)) { 
-        //debug_fprintf(stderr, "and the same type!\n\n");
-        chillvd = VariableDeclarations[i];
-        break;
-      }
-    }
-  }
+  //debug_fprintf(stderr, "looking for varname %s   vartype %s   uniquePtr %p\n", varname, typ, dec); 
+  //for (int i=0; i<numvars; i++) { 
+  //  debug_fprintf(stderr, "checking against '%s' vartype %s   uniquePtr %p \n", VariableDeclarations[i]->varname, VariableDeclarations[i]->vartype, Vari//ableDeclarations[i]->uniquePtr); 
+  //  if (VariableDeclarations[i]->uniquePtr == dec) {
+  //    //debug_fprintf(stderr, "found it!\n\n"); 
+  //    chillvd = VariableDeclarations[i];
+  //    //debug_fprintf(stderr, "found it at variabledeclaration of %s at %d of %d\n", rose_varrefexp->unparseToString().c_str(), i, numvars);
+  //    //debug_fprintf(stderr, "chillvd "); chillvd->dump(); printf("\n"); fflush(stdout);    
+  //    break;
+  //  }
+  //  if (streq( varname, VariableDeclarations[i]->varname )) { 
+  //    //debug_fprintf(stderr, "here's something of the same name!\n");
+  //    if (streq(VariableDeclarations[i]->vartype, underlying)) { 
+  //      //debug_fprintf(stderr, "and the same type!\n\n");
+  //      chillvd = VariableDeclarations[i];
+  //      break;
+  //    }
+  //  }
+  //} 
   
   
   if (!chillvd) { 
     // couldn't find the reference as a variable. perhaps it is a member of a struct
-    //debug_fprintf(stderr, "VarRefExp %s of type %s is not a variable? maybe it's a struct member\n", varname, typ); 
+    debug_fprintf(stderr, "VarRefExp %s of type %s is not a variable? maybe it's a struct member\n", varname, typ); 
     //debug_fprintf(stderr, "I should look into how to check for that!\n");
     //debug_fprintf(stderr, "parent p is "); p->dump(); printf("\n"); fflush(stdout);
     
@@ -1478,16 +1698,16 @@ chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *rose_varrefexp, chillAST_node
   
   
   
-  if (!chillvd) { 
-    debug_fprintf(stderr, "\nWARNING, ir_rose.cc rose SgVarRefExp %s refers to a declaration I can't find! at ox%x\n", varname, sym); 
-    debug_fprintf(stderr, "variables I know of are:\n");
-    for (int i=0; i<numvars; i++) { 
-      chillAST_VarDecl *adecl = VariableDeclarations[i];
-      if (adecl->isParmVarDecl()) { debug_fprintf(stderr, "(parameter) "); }
-      debug_fprintf(stderr, "%s %s at location 0x%x\n", adecl->vartype, adecl->varname, adecl->uniquePtr); 
-    }  
-    debug_fprintf(stderr, "\n"); 
-  }
+  //if (!chillvd) { 
+  //  debug_fprintf(stderr, "\nWARNING, ir_rose.cc rose SgVarRefExp %s refers to a declaration I can't find! at ox%x\n", varname, sym); 
+  //  debug_fprintf(stderr, "variables I know of are:\n");
+  //  for (int i=0; i<numvars; i++) { 
+  //    chillAST_VarDecl *adecl = VariableDeclarations[i];
+  //    if (adecl->isParmVarDecl()) debug_fprintf(stderr, "(parameter) ");
+  //    debug_fprintf(stderr, "%s %s at location 0x%x\n", adecl->vartype, adecl->varname, adecl->uniquePtr); 
+  //  }  
+  //  debug_fprintf(stderr, "\n"); 
+  //} 
   
   if (chillvd == NULL) { debug_fprintf(stderr, "chillDRE->decl = 0x%x\n", chillvd); exit(-1); }
   
@@ -1559,13 +1779,13 @@ chillAST_node * ConvertRoseBasicBlock( SgBasicBlock *bb, chillAST_node *parent )
 
 chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE, chillAST_node *parent)
 {
-  //debug_fprintf(stderr, "ConvertRoseFunctionCallExp()\n"); 
+  debug_fprintf(stderr, "\nConvertRoseFunctionCallExp()\n"); 
   SgExpression  *func = FCE->get_function();
   SgExprListExp *args = FCE->get_args();
   
   const char *funcname = func->unparseToString().c_str(); 
-  //debug_fprintf(stderr, "function %s is of type %s\n", funcname, func->class_name().c_str()); 
-  //debug_fprintf(stderr, "args %s\n", args->unparseToString().c_str()); 
+  debug_fprintf(stderr, "function %s is of type %s\n", funcname, func->class_name().c_str()); 
+  debug_fprintf(stderr, "(rose) args %s\n", args->unparseToString().c_str()); 
   
   if (!isSgFunctionRefExp(func)) { // should never happen  (assert?)
     debug_fprintf(stderr, "ConvertRoseFunctionCallExp() function call not made of SgFunctionRefExp???\n"); 
@@ -1573,17 +1793,44 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE, chillAST_nod
   }
   
   SgFunctionRefExp * FRE = (SgFunctionRefExp * ) func; 
-  SgFunctionSymbol *symbol = FRE->get_symbol_i(); 
-  SgFunctionDeclaration *fdecl = symbol->get_declaration(); 
+
+  //SgFunctionDeclaration *fdecl;
+  //SgFunctionSymbol *symbol = FRE->get_symbol_i(); 
+  //fdecl = symbol->get_declaration();
+  //debug_fprintf(stderr, "symbol->get_declaration() %p  %s\n", fdecl, fdecl->get_name().str() ); 
+  
+  SgFunctionDeclaration *fdecl = FRE->getAssociatedFunctionDeclaration(); 
+  SgFunctionDeclaration *defining_fdecl = (SgFunctionDeclaration *) fdecl->get_definingDeclaration(); // this fails for builtins?
+
+
+  if (defining_fdecl) {
+    fdecl = defining_fdecl; 
+    debug_fprintf(stderr, "symbol->get_definingDeclaration() %p  %s\n", fdecl, fdecl->get_name().str() ); 
+  }
+  else { 
+    debug_fprintf(stderr, "symbol->get_definingDeclaration() NULL  a builtin?\n");
+  }
+
+  const char *name = strdup(fdecl->get_name().str());
   
   // fdecl should match the uniquePtr for some function definition we've seen already (todo builtins?)
   chillAST_FunctionDecl *chillfd = NULL;
   int numfuncs = FunctionDeclarations.size();
-  for (int i=0; i<numfuncs; i++) { 
-    if (FunctionDeclarations[i]->uniquePtr == fdecl) {
+  debug_fprintf(stderr, "there are %d functions to compare to\n", numfuncs); 
+  for (int i=0; i<numfuncs; i++) {
+    SgFunctionDeclaration *fd = (SgFunctionDeclaration *) FunctionDeclarations[i]->uniquePtr;
+    
+    debug_fprintf(stderr, "func %2d unique %p %s  vs fdecl %p %s\n", i, fd, fd->get_name().str(), fdecl, name ); 
+    if (fd == fdecl) {
       chillfd = FunctionDeclarations[i];
-      //debug_fprintf(stderr, "found it at functiondeclaration %d of %d\n", i, numfuncs);
+      debug_fprintf(stderr, "found it at functiondeclaration %d of %d\n", i, numfuncs);
     }
+    //else  { // temp compare names until I can figure out why the nodes are not the same
+    //  if (!strcmp( fd->get_name().str(), name )) {
+    //    debug_fprintf(stderr, "\nWARNING: HACK TO FIND FUNCTIONDECL TRIGGERED. name matched but not node address\n\n");
+    //    chillfd = FunctionDeclarations[i];
+    //  }
+    //} 
   }
   if (chillfd == NULL) { debug_fprintf(stderr, "couldn't find function definition for %s in the locally defined list of functions\n", func->unparseToString().c_str()); exit(-1); }
   
@@ -1596,20 +1843,33 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE, chillAST_nod
   
   // now add the args  - I can't find a clean way to get the args. 
   // this will probably die horribly at some point
-  std::vector<std::pair< SgNode *, std::string > > subnodes = args->returnDataMemberPointers(); 
-  int firstnull = -1;
-  for (int i=0; i<subnodes.size(); i++) {
+  std::vector<std::pair< SgNode *, std::string > > subnodes = args->returnDataMemberPointers();
+  int numsubnodes = subnodes.size();
+  debug_fprintf(stderr, "when looking for args, %d subnodes\n", numsubnodes);
+  
+  int firstnull = numsubnodes;
+  for (int i=0; i<numsubnodes; i++) {
     SgNode *part =  subnodes[i].first;
+    
+    debug_fprintf(stderr, "subnode %d  '%s'\n", i, subnodes[i].second.c_str());
     if (part == NULL)  { firstnull = i; break; } 
   }
-  //debug_fprintf(stderr, "I think function call has %d arguments\n", firstnull); 
+  debug_fprintf(stderr, "I think function call has up to ? %d arguments\n", firstnull); 
   
-  for (int i=0; i<firstnull; i++) { 
-    SgNode *part =  subnodes[i].first;
-    chillCE->addArg( ConvertRoseGenericAST( part, chillCE ) );
+  for (int i=0; i<firstnull; i++) {
+    string subtype = subnodes[i].second;
+    if (subtype == "expressions") { 
+      SgNode *part =  subnodes[i].first;
+      debug_fprintf(stderr, "CONVERTING SUBNODE %d\n", i);
+      debug_fprintf(stderr, "%s\n", part->unparseToString().c_str()); 
+      chillCE->addArg( ConvertRoseGenericAST( part, chillCE ) );
+    }
   }
   
-  //chillCE->dump(); 
+  chillCE->dump();\
+  debug_fprintf(stderr, "\n\n"); 
+  chillCE->print(); 
+  debug_fprintf(stderr, "\n\n"); 
   //exit(0); 
   
   return chillCE; 
@@ -1620,10 +1880,13 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE, chillAST_nod
 
 
 chillAST_node * ConvertRoseReturnStmt( SgReturnStmt *rs, chillAST_node *p )
-{
-  chillAST_node *retval = ConvertRoseGenericAST( rs->get_expression(), NULL);
   
-  chillAST_ReturnStmt * chillRS = new chillAST_ReturnStmt( retval, p );
+{
+  debug_fprintf(stderr, "ConvertRoseReturnStmt() parent %p\n");
+  
+  chillAST_node *retval = ConvertRoseGenericAST( rs->get_expression(), p); // temp fake parent 
+  
+  chillAST_ReturnStmt * chillRS = new chillAST_ReturnStmt( retval, p ); // resets p parent
   if (retval) retval->setParent( chillRS );
   return chillRS; 
 }
@@ -1633,10 +1896,12 @@ chillAST_node * ConvertRoseReturnStmt( SgReturnStmt *rs, chillAST_node *p )
 
 chillAST_node * ConvertRoseArrayRefExp( SgPntrArrRefExp *roseARE, chillAST_node *p ) // most specific binop 
 {
-  //debug_fprintf(stderr, "ConvertRoseArrayRefExp()\n"); 
-  //debug_fprintf(stderr, "converting base\n"); 
-  chillAST_node *base  = ConvertRoseGenericAST( roseARE->get_lhs_operand_i(), NULL ); 
-  chillAST_node *index = ConvertRoseGenericAST( roseARE->get_rhs_operand_i(), NULL ); 
+  //debug_fprintf(stderr, "ConvertRoseArrayRefExp()  p %p\n", p); 
+  debug_fprintf(stderr, "ConvertRoseArrayRefExp()\n"); 
+  //debug_fprintf(stderr, "converting base\n");
+  
+  chillAST_node *base  = ConvertRoseGenericAST( roseARE->get_lhs_operand_i(), p ); // temp set p as parent so it can find vardecls?
+  chillAST_node *index = ConvertRoseGenericAST( roseARE->get_rhs_operand_i(), p ); 
   
   //debug_fprintf(stderr, "ConvertRoseArrayRefExp, base  '"); base->print(); printf("'\n"); fflush(stdout);
   //debug_fprintf(stderr, "ConvertRoseArrayRefExp, index '"); index->print(); printf("'\n"); fflush(stdout);
@@ -1659,7 +1924,7 @@ chillAST_node * ConvertRoseCastExp( SgCastExp *roseCE, chillAST_node *parent )
   SgCastExp::cast_type_enum casttype = roseCE->get_cast_type();
   char *types[] = { "error", "default", "C Style", "C++ const", "C++ static", "C++ dynamic", "C++ reinterpret" }; 
   
-  //debug_fprintf(stderr, "ConvertRoseCastExp()  casttype %d = %s    ", casttype, types[casttype] ); 
+  debug_fprintf(stderr, "ConvertRoseCastExp()  casttype %d = %s    ", casttype, types[casttype] ); 
   
   if (casttype != SgCastExp::e_C_style_cast ) { 
     debug_fprintf(stderr, "unhandled cast expression type %d = %s    ", casttype, types[casttype] ); 
@@ -1670,10 +1935,11 @@ chillAST_node * ConvertRoseCastExp( SgCastExp *roseCE, chillAST_node *parent )
   SgType *towhat = roseCE->get_type(); 
   //debug_fprintf(stderr, "to %s\n", towhat->unparseToString().c_str()); 
   
-  chillAST_node *sub = ConvertRoseGenericAST( roseCE->get_operand(), NULL ); 
-  
+  chillAST_node *sub = ConvertRoseGenericAST( roseCE->get_operand(), parent ); // temp - wrong parent 
+
+  // this sets the parent on sub
   chillAST_CStyleCastExpr *chillCSCE = new chillAST_CStyleCastExpr( towhat->unparseToString().c_str(), sub, parent ); 
-  sub->setParent( chillCSCE );
+  //sub->setParent( chillCSCE ); // once mor ewith feeling 
   return chillCSCE; 
   
 }
@@ -1705,11 +1971,11 @@ chillAST_node * ConvertRoseAssignInitializer( SgAssignInitializer *roseAI, chill
 
 chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC, chillAST_node *p )  // DEFINITION of a struct
 {
-  debug_fprintf(stderr, "ConvertRoseStructDeclaration( CLASSDEC )\n"); 
-  //if (p) debug_fprintf(stderr, "parent is a %s\n", p->getTypeString()); 
+  debug_fprintf(stderr, "ConvertRoseStructDeclaration( CLASSDEC, p %p )\n",p); 
+  if (p) debug_fprintf(stderr, "parent is a %s\n", p->getTypeString()); 
   
-  const char *origname = CLASSDEC->get_name().str();
-  //debug_fprintf(stderr, "struct name is '%s'\n", origname); 
+  const char *origname = strdup( CLASSDEC->get_name().str());
+  debug_fprintf(stderr, "struct name is '%s'\n", origname); 
   
   // temp  TODO   DANGER 
   char *name = shortenRoseUnnamedName( origname ); 
@@ -1718,9 +1984,9 @@ chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC, chil
   
   
   char blurb[4096];
-  debug_fprintf(stderr, "name is %d characters long\n", strlen(name));
-  sprintf(blurb,  "struct %s", name ); 
-  debug_fprintf(stderr, "blurb is '%s'\n", blurb); 
+  //debug_fprintf(stderr, "name is %d characters long\n", strlen(name));
+  //sprintf(blurb,  "struct %s", name ); 
+  //debug_fprintf(stderr, "blurb is '%s'\n", blurb); 
   
   chillAST_RecordDecl *RD = new chillAST_RecordDecl( name, origname, p);
   RD->setStruct( true ); 
@@ -1765,7 +2031,7 @@ chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC, chil
         
         
         chillAST_VarDecl *VD;
-        VD = (chillAST_VarDecl *)ConvertRoseVarDecl2(vardecl, RD); //subpart is a child of RecordDecl
+        VD = (chillAST_VarDecl *)ConvertRoseVarDecl(vardecl, RD); //subpart is a child of RecordDecl
         VD->isRestrict = restricted; // TODO nicer 
         
         //debug_fprintf(stderr, "\nprinting %s member %d\n", blurb, i); 
@@ -1828,14 +2094,18 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node
       //debug_fprintf(stderr, "it's a declaration!!\n"); 
       // doublecheck
       if ( !strcmp( "SgClassDeclaration", roseGlobalVariantNameList[ thing->variantT() ])) { 
-        //debug_fprintf(stderr, "gonna return a struct\n"); 
+        debug_fprintf(stderr, "typedef gonna be a struct\n"); 
+        if (p) p->print(); 
+        debug_fprintf(stderr, "that's all\n\n"); 
         SgClassDeclaration *CLASSDEC = (SgClassDeclaration *)thing;
-        chillAST_RecordDecl *rd = (chillAST_RecordDecl *)ConvertRoseStructDeclaration( CLASSDEC, p );
+        chillAST_RecordDecl *rd = (chillAST_RecordDecl *)ConvertRoseStructDeclaration( CLASSDEC, tdd ); // parent is the TYPEDEF
         //debug_fprintf(stderr, "definition that this typedecl called %s really is, is:\n", typedefname);
         //rd->print(); printf("\n"); fflush(stdout); 
         //rd->dump();  printf("\n"); fflush(stdout); 
         // add definition to the typedef ... ?? 
-        
+
+        debug_fprintf(stderr, "now have recorddecl\n");
+        if (p) p->print(); 
         tdd->setStructInfo( rd );
         return tdd; 
       }
@@ -1890,19 +2160,27 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node
 
 chillAST_node *ConvertRoseIfStmt(SgIfStmt *ifstatement , chillAST_node *p)
 {
+  debug_fprintf(stderr, "ConvertRoseIfStmt() parent %p\n", p);
+  debug_fprintf(stderr, "%s", ifstatement->unparseToString().c_str());
+
+  chillAST_IfStmt *ifstmt = new chillAST_IfStmt( NULL, NULL, NULL, p ); // and EMPTY if but with a parent
+  
   SgStatement *cond     = ifstatement->get_conditional();
   SgStatement *thenpart = ifstatement->get_true_body();
   SgStatement *elsepart = ifstatement->get_false_body();
   
-  chillAST_node *con = ConvertRoseGenericAST( cond, NULL);
+  chillAST_node *con = ConvertRoseGenericAST( cond, ifstmt);
   chillAST_node *thn = NULL;
   if (thenpart) { 
-    thn = ConvertRoseGenericAST( thenpart, NULL);
+    thn = ConvertRoseGenericAST( thenpart, ifstmt);
   }
   chillAST_node *els = NULL;
-  if (elsepart) els = ConvertRoseGenericAST( elsepart, NULL);
+  if (elsepart) els = ConvertRoseGenericAST( elsepart, ifstmt);
+
+  ifstmt->setCond( con );
+  ifstmt->setThen( thn );
+  ifstmt->setElse( els );
   
-  chillAST_IfStmt *ifstmt = new chillAST_IfStmt( con, thn, els, NULL);
   return ifstmt; 
 }
 
@@ -1912,7 +2190,8 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent )
 {
   if (n == NULL) return NULL;
   
-  //debug_fprintf(stderr, "ConvertRoseGenericAST(),  rose AST node of type %s\n", roseGlobalVariantNameList[ n->variantT() ]);
+  //debug_fprintf(stderr, "ConvertRoseGenericAST(),  rose AST node of type %s    parent %p\n", roseGlobalVariantNameList[ n->variantT() ], parent);
+  debug_fprintf(stderr, "ConvertRoseGenericAST(),  rose AST node of type %s\n", roseGlobalVariantNameList[ n->variantT() ]);
 
 
 
@@ -1920,7 +2199,7 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent )
   chillAST_node *ret = NULL;
   if        ( isSgFunctionDeclaration(n) ) { ret = ConvertRoseFunctionDecl    ((SgFunctionDeclaration *)n, parent ); 
   } else if ( isSgInitializedName(n)     ) { /*debug_fprintf(stderr, "(1)\n"); */ret = ConvertRoseInitName         ((SgInitializedName *)n, parent );    // param?
-  } else if ( isSgVariableDeclaration(n) ) { /*debug_fprintf(stderr, "(2)\n"); */ret = ConvertRoseVarDecl2(       (SgVariableDeclaration *)n, parent );    
+  } else if ( isSgVariableDeclaration(n) ) { /*debug_fprintf(stderr, "(2)\n"); */ret = ConvertRoseVarDecl(       (SgVariableDeclaration *)n, parent );    
   } else if ( isSgForStatement(n)        ) { ret = ConvertRoseForStatement    ((SgForStatement *)n, parent ); 
   } else if ( isSgExprStatement(n)       ) { ret = ConvertRoseExprStatement   ((SgExprStatement *)n, parent ); // expression hidden inside exprstatement  
     
@@ -1941,19 +2220,21 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent )
   } else if ( isSgUnaryOp(n)             ) { ret = ConvertRoseUnaryOp         ((SgUnaryOp *)n, parent );      // MANY types will trigger this 
     
     
-  } else if ( isSgVarRefExp(n)           ) { ret = ConvertRoseVarRefExp       ((SgVarRefExp *)n, parent );     
+  } else if ( isSgVarRefExp(n)           ) { /* debug_fprintf(stderr, "parent %p\n", parent); */ret = ConvertRoseVarRefExp       ((SgVarRefExp *)n, parent );     
   } else if ( isSgBasicBlock(n)          ) { ret = ConvertRoseBasicBlock      ((SgBasicBlock *)n, parent );     
   } else if ( isSgFunctionCallExp(n)     ) { ret = ConvertRoseFunctionCallExp ((SgFunctionCallExp *)n, parent );     
   } else if ( isSgReturnStmt(n)          ) { ret = ConvertRoseReturnStmt      ((SgReturnStmt *)n, parent );     
   } else if ( isSgIfStmt(n)              ) { ret = ConvertRoseIfStmt          ((SgIfStmt *)n, parent );     
   } else if ( isSgAssignInitializer(n)   ) { ret = ConvertRoseAssignInitializer((SgAssignInitializer *)n, parent);   
-
-    //} else if ( isSgLessOrEqualOp(n)       ) { ret = ConvertRoseExprStatement((SgLessOrEqualOp *)n, parent ); // binary 
-    //} else if ( isSgPlusPlusOp(n)       ) { ret = ConvertRoseExprStatement((SgPlusPlusOp *)n, parent );       // unary 
-    
-    
-    
+  } else if ( isSgNullExpression(n)      ) {  //  ignore ?? 
+      //return the NULL
   }
+  else if ( isSgNullStatement(n)      ) {
+    ret = new chillAST_NULL( parent ); 
+  }
+  //} else if ( isSgLessOrEqualOp(n)       ) { ret = ConvertRoseExprStatement((SgLessOrEqualOp *)n, parent ); // binary 
+    //} else if ( isSgPlusPlusOp(n)       ) { ret = ConvertRoseExprStatement((SgPlusPlusOp *)n, parent );       // unary  
+    
   else { 
     debug_fprintf(stderr, "ConvertRoseGenericAST(), unhandled node of type %s   '%s'\n", n->class_name().c_str(), n->unparseToString().c_str()); 
     exit(-1);
@@ -2424,33 +2705,64 @@ IR_roseLoop::IR_roseLoop(const IR_Code *ir, chillAST_node *achillnode) {  // dir
     exit(-1); 
   }
   
-  //debug_fprintf(stderr, "loop is:\n"); 
   chillAST_ForStmt *achillforstmt = (chillAST_ForStmt *) achillnode;
-  
+  //debug_fprintf(stderr, "loop is:\n"); 
   //achillforstmt->print(); printf("\n"); fflush(stdout); 
+  //achillforstmt->dump(); printf("\n"); fflush(stdout);
   
   ir_ = ir; 
   chillforstmt = achillforstmt;
-  chillbody = achillforstmt->getBody(); 
+  chillbody    = achillforstmt->getBody(); 
   //debug_fprintf(stderr, "IR_roseLoop::IR_roseLoop()    chillbody\n"); 
   //debug_fprintf(stderr, "body is:\n"); 
   //chillbody->print(); printf("\n\n"); fflush(stdout); 
   //debug_fprintf(stderr, "chillbody of type %s\n", chillbody->getTypeString()); 
+
+  // there should be a better way to do this
+  chillAST_node *initnode = chillforstmt->getInit();
+  chillAST_BinaryOperator *initBO = (chillAST_BinaryOperator *)chillforstmt->getInit();
+  chillAST_VarDecl        *initVD = (chillAST_VarDecl        *)chillforstmt->getInit();
+
+  chillAST_VarDecl *loopvar = NULL;
   
-  chillAST_BinaryOperator *init = (chillAST_BinaryOperator *)chillforstmt->getInit();
   chillAST_BinaryOperator *cond = (chillAST_BinaryOperator *)chillforstmt->getCond();
+
+  bool initOK = initnode->isNull() || initBO->isAssignmentOp()  || ( initVD->isVarDecl() && initVD->hasInit() );
+  
   // check to be sure  (assert) 
-  if (!init->isAssignmentOp() || !cond->isComparisonOp() ) {
+  if (!initOK || !cond->isComparisonOp() ) {
     debug_fprintf(stderr, "ir_rose.cc, malformed loop init or cond:\n");
+   
+    if ( !cond->isComparisonOp() ) {
+      debug_fprintf(stderr, "cond is %s, NOT ComparisonOp\n", cond->getTypeString()); 
+    }
     achillforstmt->print(); 
     exit(-1); 
   }
   
-  // this is too simple. the init can be multipe statements, for example
+  // this is STILL too simple. the init can be multipe statements, for example
   //   for (i=0,j=3; i<5; i++)
-  // 
-  chilllowerbound = init->getRHS();
-  chillupperbound = cond->getRHS();
+  //
+  if (initnode->isNull()) {
+    // TODO we're screwed. we would have to figure out what the lower bound is, which could be impossible
+    chilllowerbound = new chillAST_IntegerLiteral( 0 );  // make a fake constant
+    debug_fprintf(stderr, "\n\nguessing at the loop's lower bound since it does not have an init!\n");
+    chillforstmt->print(); debug_fprintf(stderr, "\n\n\n");
+    initVD = NULL;
+    initBO = NULL; 
+  }
+  else if (initBO->isAssignmentOp()) {
+    //loopvar         = initBO->getLHS();
+    chilllowerbound = initBO->getRHS();
+    initVD = NULL; 
+  }
+  else {
+    //loopvar         = initVD;
+    chilllowerbound = initVD->getInit();
+    initBO = NULL; 
+  }
+  
+  chillupperbound   = cond->getRHS();
   conditionoperator = achillforstmt->conditionoperator; 
   
   chillAST_node *inc  = chillforstmt->getInc();
@@ -2509,13 +2821,51 @@ IR_roseLoop::IR_roseLoop(const IR_Code *ir, chillAST_node *achillnode) {  // dir
     exit(-1); 
   }
   //inc->print(0, stderr);debug_fprintf(stderr, "\n"); 
-  
-  chillAST_DeclRefExpr *dre = (chillAST_DeclRefExpr *)init->getLHS();
-  if (!dre->isDeclRefExpr()) { 
-    debug_fprintf(stderr, "malformed loop init.\n"); 
-    init->print(); 
+
+
+  //
+  // figure out what the loop index variable is.   there has to be one, for us.
+  //
+  chillAST_DeclRefExpr *dre = NULL;
+  if (initBO) { // TODO ugly
+    dre = (chillAST_DeclRefExpr *)initBO->getLHS();
+    if (!dre->isDeclRefExpr()) { 
+      debug_fprintf(stderr, "malformed loop init. initBO\n"); 
+      initBO->print(); 
+    }
   }
-  
+  else if (initVD) { // TODO ugly  init is a vardecl WITH initialization
+    dre = buildDeclRefExpr( initVD ); 
+  }
+  else { // TODO ugly 
+    // init is not going to find the loop var for us 
+    // see if we can find the declrefexpr from the cond or incr ??
+    //cond->dump(); debug_fprintf(stderr, "\n\n"); 
+    //inc->dump(); debug_fprintf(stderr, "\n\n");
+    if (cond->isBinaryOperator()) {
+      chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *) cond;
+      chillAST_node *l = BO->getLHS();
+      if (l->isDeclRefExpr()) dre = (chillAST_DeclRefExpr *)l;
+    }
+    if (!dre) { // we haven't figured it out yet.  try the increment
+      if (inc->isBinaryOperator()) { // i = i + 1
+        chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *)inc;
+        chillAST_node *l = BO->getLHS();
+        if (l->isDeclRefExpr()) dre = (chillAST_DeclRefExpr *)l;
+      }
+      else if (inc->isUnaryOperator()) { // ++ or -- maybe
+        chillAST_UnaryOperator *UO = (chillAST_UnaryOperator *)inc;
+        chillAST_node *s = UO->subexpr;
+        if (s->isDeclRefExpr()) dre = (chillAST_DeclRefExpr *)s;
+      }
+    }
+  }
+
+  if (!dre) {
+    debug_fprintf(stderr, "ir_rose.cc L2842, I can't figure out the loop index variable\n");
+    chillforstmt->print(); debug_fprintf(stderr, "\n\n\n");
+    exit(-1);
+  }
   chillindex = dre; // the loop index variable
   
   //debug_fprintf(stderr, "\n\nindex is ");  dre->print(0, stderr);  debug_fprintf(stderr, "\n"); 
@@ -2830,10 +3180,10 @@ void IR_roseCode::finalizeRose() {
   //project->unparse();
   //backend((IR_roseCode_Global_Init::Instance(NULL))->project);
   
-  // clean up a bit (TODO this is poorly implemented)
   debug_fprintf(stderr, "IR_roseCode::finalizeRose() before cleanup\n"); 
   chillfunc->print(); 
   
+  // clean up a bit (TODO this is poorly implemented)
   chillfunc->constantFold(); 
   chillfunc->cleanUpVarDecls(); 
   
@@ -2843,7 +3193,7 @@ void IR_roseCode::finalizeRose() {
   
   chillAST_SourceFile *src = chillfunc->getSourceFile(); 
   if (src) {
-    debug_fprintf(stderr, "src->printToFile( %s )\n", outputname );
+    debug_fprintf(stderr, "\n\nir_rose.cc   src->printToFile( %s )\n", outputname );
     if (src->isSourceFile()) src->printToFile( outputname );
   }
   else { 
@@ -3247,7 +3597,7 @@ std::vector<IR_ArrayRef *> IR_roseCode::FindArrayRef( const omega::CG_outputRepr
   for (int i=0; i<chillstmts.size(); i++) { 
     debug_fprintf(stderr, "chillstatement %d = ", i); chillstmts[i]->print(0, stderr); debug_fprintf(stderr, "\n"); 
   }
-debug_fprintf(stderr, "\n"); 
+fprintf(stderr, "\n"); 
 
   
   std::vector<chillAST_ArraySubscriptExpr*> refs; 
@@ -3269,8 +3619,8 @@ debug_fprintf(stderr, "\n");
     chillAST_VarDecl *b = refs[i]->basedecl; // WRONG
     //b->dump(); printf("\n"); b->print();  printf("\n"); fflush(stdout); 
 
-    if (refs[i]->imwrittento) { debug_fprintf(stderr, "ref[%d] %s is writtento\n", i, b->varname); }
-    else { debug_fprintf(stderr, "ref[%d] %s is NOT writtento\n", i, b->varname); } 
+    if (refs[i]->imwrittento) debug_fprintf(stderr, "ref[%d] %s is writtento\n", i, b->varname); 
+    else debug_fprintf(stderr, "ref[%d] %s is NOT writtento\n", i, b->varname); 
 
     arrays.push_back( new IR_roseArrayRef( this, refs[i], refs[i]->imwrittento ) );
     if (refs[i]->imreadfrom) { 
