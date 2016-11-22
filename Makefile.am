@@ -23,6 +23,9 @@ core_libdirs += -L$(IEGENHOME)/../lib/installed/lib
 
 ## Core Includes ##
 core_includes  = -I$(srcdir)/omega/include
+core_includes += -I$(srcdir)/omega/basic/include
+core_includes += -I$(srcdir)/omega/code_gen/include
+core_includes += -I$(srcdir)/omega/omega_lib/includes
 core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
 
