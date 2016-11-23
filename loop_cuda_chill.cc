@@ -663,7 +663,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
 
 
-//#include "cudaize_codegen_v2.cc"
+#include "cudaize_codegen_v2.cc"
 
 
 
