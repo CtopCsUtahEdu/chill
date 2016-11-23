@@ -25,7 +25,7 @@ core_libdirs += -L$(IEGENHOME)/../lib/installed/lib
 core_includes  = -I$(srcdir)/omega/include
 core_includes += -I$(srcdir)/omega/basic/include
 core_includes += -I$(srcdir)/omega/code_gen/include
-core_includes += -I$(srcdir)/omega/omega_lib/includes
+core_includes += -I$(srcdir)/omega/omega_lib/include
 core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
 
@@ -56,6 +56,7 @@ core_src += stencil.cc
 cudachill_src  = mem_mapping_utils.cc
 cudachill_src += loop_cuda.cc
 cudachill_src += loop_cuda_chill.cc
+cudachill_src += loop_cuda_rose.cc
 
 # IR #
 #  chill

@@ -277,11 +277,27 @@ static bool tointvector(PyObject* seq, std::vector<int>& vec) {
   return true;
 }
 
+static bool tostringvector(PyObject* seq, std::vector<std::string>& vec) {
+    int seq_len = PyList_Size(seq);
+    for(int i = 0; i < seq_len; i++) {
+        PyObject* item = PyList_GetItem(seq, i);
+        vec.push_back(std::string(strdup(PyString_AsString(item))));
+    }
+    return true;
+}
+
 static bool tointvector(PyObject* args, int index, std::vector<int>& vec) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq = PyTuple_GetItem(args, index);
   return tointvector(seq, vec);
+}
+
+static bool tostringvector(PyObject* args, int index, std::vector<std::string>& vec) {
+  if(PyTuple_Size(args) <= index)
+    return false;
+  PyObject* seq = PyTuple_GetItem(args, index);
+  return tostringvector(seq, vec);
 }
 
 static bool tointset(PyObject* args, int index, std::set<int>& set) {
@@ -1119,7 +1135,7 @@ static PyObject* chill_compact(PyObject* self, PyObject* args) {
     int                 zero                = intArg(args, 3);
     std::string         data_array          = strArg(args, 4);
     
-    myloop->compact_v2(stmt, loop_level, new_array, zero, data_array);
+    myloop->compact_cuda(stmt, loop_level, new_array, zero, data_array);
     Py_RETURN_NONE;
 }
 //#endif
@@ -1202,6 +1218,37 @@ chill_cudaize_v2(PyObject *self, PyObject *args)
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
 
+
+static PyObject* chill_cudaize_v3(PyObject *self, PyObject *args)
+{ 
+  int stmt_num            = intArg(args, 0);
+  std::string kernel_name = strArg(args, 1);
+  int offset = 3;
+  
+  PyObject* py_array_sizes = PyTuple_GetItem(args, 2);
+  std::map<std::string, int> array_sizes;
+  for(int i = 0; i < PyList_Size(py_array_sizes); i++) {
+    PyObject* elem     = PyList_GetItem(py_array_sizes, i);
+    std::string cppstr = strArg(elem, 0);
+    int siz            = intArg(elem, 1);
+    array_sizes.insert( std::make_pair( cppstr, siz )); 
+  }
+  
+  
+  std::vector<std::string> blockIdxs;
+  tostringvector(args, 3, blockIdxs);
+  
+  std::vector<std::string> threadIdxs;
+  tostringvector(args, 4, threadIdxs);
+  
+  std::vector<std::string> kernel_parameters;
+  tostringvector(args, 5, kernel_parameters);
+  
+  
+  myloop->cudaize_v3(stmt_num, kernel_name, array_sizes, blockIdxs, threadIdxs, kernel_parameters);
+  
+  Py_RETURN_NONE;  // return Py_BuildValue( "" );
+}
 
 
 
@@ -1871,8 +1918,8 @@ static PyMethodDef ChillMethods[] = {
   {"coalesce",            chill_flatten,             METH_VARARGS,    "Convert a multidimentianal iteration space into a single dimensional one"},
   {"make_dense",          chill_make_dense,          METH_VARARGS,    "Convert a non-affine iteration space into an affine one to enable loop transformations"},
   {"compact",             chill_compact,             METH_VARARGS,    "Call after make_dense to convert an affine iteration space back into a non-affine one"},
-  {"cudaize",             chill_cudaize_v2,          METH_VARARGS,    "dunno"},
-  {"cudaize5arg",         chill_cudaize_v3,          METH_VARARGS,    "dunno"},
+//{"cudaize",             chill_cudaize_v2,          METH_VARARGS,    "dunno"},
+  {"cudaize",             chill_cudaize_v3,          METH_VARARGS,    "dunno"},
   {"datacopy_privatized", chill_datacopy_privatized, METH_VARARGS,    "dunno"},
   
   {"datacopy_9arg",       chill_datacopy9,           METH_VARARGS,    "datacopy with 9 arguments"},
