@@ -56,6 +56,7 @@ core_src += stencil.cc
 cudachill_src  = mem_mapping_utils.cc
 cudachill_src += loop_cuda.cc
 cudachill_src += loop_cuda_chill.cc
+cudachill_src += loop_cuda_rose.cc
 
 # IR #
 #  chill

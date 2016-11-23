@@ -30,11 +30,17 @@ IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name) :
   
   debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n"); 
   //std::string file_suffix = StringUtility::fileNameSuffix(filename);
+  char *fname = strdup(filename);
+  char *f = fname;
+  char *ptr = rindex(fname, '/');
+  if (ptr) fname = ptr + 1;
+  
+  std::string orig_name(fname); 
+  
+  char *dot = index(fname, '.'); 
+  if (dot) *dot = '\0';
 
-
-  std::string orig_name  = StringUtility::stripPathFromFileName(filename);
-  std::string naked_name = StringUtility::stripFileSuffixFromFileName(
-    orig_name);
+  std::string naked_name( fname );
   //file->set_unparse_output_filename("rose_" + naked_name + ".cu");
   cudaFileToWrite = "rose_" + naked_name + ".cu";
   chillfunc->getSourceFile()->setFileToWrite( strdup( cudaFileToWrite.c_str())); 

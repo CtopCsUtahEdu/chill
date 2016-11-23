@@ -13,7 +13,7 @@
  31/1/11 Modified by Protonu Basu
 *****************************************************************************/
 
-#define FRONTEND_ROSE  // TODO  wrap this file in #ifdef 
+#ifdef FRONTEND_ROSE
 
 #include <malloc.h>
 
@@ -38,10 +38,13 @@
 #include "Outliner.hh"
 //#define DEBUG
 using namespace omega;
+using namespace SageBuilder;
+using namespace SageInterface;
 
 
-
-extern char *omega::k_cuda_texture_memory; //protonu--added to track texture memory type
+namespace omega {
+    extern char* k_cuda_texture_memory; //protonu--added to track texture memory type
+}
 extern char *k_ocg_comment;
 
 extern bool cudaDebug;
@@ -201,7 +204,7 @@ void findReplacePreferedIdxs(chillAST_node *newkernelcode,
                              chillAST_FunctionDecl *kernel ) { 
   debug_fprintf(stderr, "\nrecursiveFindReplacePreferedIdxs( sync 0 )    perhaps adding syncthreads\n"); 
 
-  const std::vector<chillAST_VarDecl *> symtab = kernel->getSymbolTable();
+  std::vector<chillAST_VarDecl *>* symtab = kernel->getSymbolTable();
 
   newkernelcode->findLoopIndexesToReplace( symtab, false ); 
 
@@ -732,8 +735,8 @@ void swapVarReferences( chillAST_node *newkernelcode,
     chillAST_VarDecl *isParam    = kernel->hasParameterNamed( newdecls[i]->varname ); 
     chillAST_VarDecl *isLocalVar = kernel->hasVariableNamed(  newdecls[i]->varname ); 
 
-    if (isParam)    debug_fprintf(stderr, "is a parameter\n");
-    if (isLocalVar) debug_fprintf(stderr, "is already defined in the kernel\n");
+    if (isParam)    { debug_fprintf(stderr, "is a parameter\n"); }
+    if (isLocalVar) { debug_fprintf(stderr, "is already defined in the kernel\n"); }
 
     if (!isParam && (!isLocalVar)) { 
       debug_fprintf(stderr, "needed to be added to kernel symbol table\n");
@@ -972,8 +975,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
   }
   
   if (cudaDebug) {
-    printf("cudaize_vman svn 
-2: current names: ");
+    printf("cudaize_vman svn 2: current names: ");
     printVS(idxNames[stmt_num]);
   }
   //Set codegen flag
@@ -1264,8 +1266,6 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
 
   int tex_mem_on = 0;
   int cons_mem_on = 0;
-  
-  debug_fprintf(stderr, "here goes nothing\n"); 
   
   
   CG_outputRepr* repr;
@@ -2999,4 +2999,6 @@ void LoopCuda::printIS() {
   }
   fflush(stdout); 
 }
+
+#endif
 

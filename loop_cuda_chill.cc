@@ -272,7 +272,8 @@ bool LoopCuda::validIndexes(int stmt_num, const std::vector<std::string>& idxs) 
 bool LoopCuda::cudaize_v3(int stmt_num, 
                           std::string kernel_name,
                           std::map<std::string, int> array_dims,
-                          std::vector<std::string> blockIdxs, std::vector<std::string> threadIdxs,
+                          std::vector<std::string> blockIdxs,
+                          std::vector<std::string> threadIdxs,
                           std::vector<std::string> kernel_params) {
 
   cudaDebug = true; 
@@ -662,7 +663,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
 
 
-#include "cudaize_codegen_v2.cc"
+//#include "cudaize_codegen_v2.cc"
 
 
 
