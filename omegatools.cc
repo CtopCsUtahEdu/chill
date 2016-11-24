@@ -20,7 +20,7 @@
 #include "chill_error.hh"
 
 #include "chill_ast.hh"
-#include "../code_gen/include/code_gen/CG_chillRepr.h"
+#include "code_gen/CG_chillRepr.h"
 #include <code_gen/CG_utils.h>
 
 using namespace omega;

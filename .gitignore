@@ -3,6 +3,10 @@
 Makefile.in
 Makefile
 
+# vim swap file
+
+*.swp
+
 # http://www.gnu.org/software/autoconf
 
 /autom4te.cache
