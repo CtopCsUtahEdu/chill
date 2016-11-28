@@ -3,6 +3,19 @@
 Makefile.in
 Makefile
 
+# vim swap file
+
+*.swp
+
+# CMake build
+
+/build
+
+# CLion project config
+
+/.idea
+/cmake-build-*
+
 # http://www.gnu.org/software/autoconf
 
 /autom4te.cache
