@@ -5,7 +5,6 @@
 %}
 
 %option noyywrap
-%option header-file="parse_expr.ll.hh"
 
 %%
 [ \t]+                  /*ignore*/

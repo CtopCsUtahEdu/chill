@@ -143,7 +143,7 @@ parser.tab.cc: $(srcdir)/parser.yy
 
 EXTRA_DIST += parse_expr.yy.cc
 parse_expr.yy.cc: parse_expr.tab.cc $(srcdir)/parse_expr.ll
-	flex -o parse_expr.yy.cc $(srcdir)/parse_expr.ll
+	flex -o parse_expr.yy.cc --header-file=parse_expr.ll.hh $(srcdir)/parse_expr.ll
 
 EXTRA_DIST += parse_expr.tab.yy
 parse_expr.tab.cc: $(srcdir)/parse_expr.yy
