@@ -48,6 +48,14 @@ set(CHILL_AST_SRC
     chill_ast.cc
     )
 
+set(CUDACHILL_SRC
+    mem_mapping_utils.cc
+    loop_cuda.cc
+    loop_cuda_chill.cc
+    ir_cudarose.cc
+    ir_cuda_rose_utils.cc
+    )
+
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
 set(CMAKE_CXX_FLAGS "-DPYTHON -DFRONTEND_ROSE -D_GLIBCXX_USE_CXX11_ABI=0 ${COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -65,7 +73,6 @@ else()
 endif()
 
 set(CHILL_INC ${CMAKE_CURRENT_SOURCE_DIR})
-
 
 find_package(BISON)
 find_package(FLEX)
@@ -108,9 +115,32 @@ add_executable(chill
 target_link_libraries(chill
         ${CORE_LIBS}
         ${PYTHON_LIBRARY})
+
 add_dependencies(chill parseRel omega_basic omega_lib codegen codegen_rose codegen_chill )
 
 install(TARGETS chill
+        RUNTIME DESTINATION bin)
+
+add_executable(cuda-chill
+        chill_run.cc
+        ${CORE_SRC}
+        ${PYTHON_SRC}
+        ${IR_CHILL_SRC}
+        ${CHILL_AST_SRC}
+        ${CUDACHILL_SRC}
+        )
+
+target_link_libraries(cuda-chill
+        ${CORE_LIBS}
+        ${PYTHON_LIBRARY})
+
+add_dependencies(cuda-chill parseRel omega_basic omega_lib codegen codegen_rose codegen_chill )
+
+target_compile_definitions(cuda-chill
+        PRIVATE
+        CUDACHILL)
+
+install(TARGETS cuda-chill
         RUNTIME DESTINATION bin)
 
 add_subdirectory(omega/basic)
