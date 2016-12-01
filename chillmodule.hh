@@ -4,6 +4,11 @@
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
 
+/*!
+ * \file
+ * \brief chill interface to python
+ */
+
 #include <Python.h>
 
 // a C routine that will be called from python
@@ -17,5 +22,6 @@ int get_loop_num_start();
 int get_loop_num_end();
 #endif
 
+//! pass C methods to python
 PyMODINIT_FUNC initchill() ;   // pass C methods to python
 #endif

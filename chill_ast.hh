@@ -20,17 +20,29 @@
 using std::vector;
 using std::string;
 
+//! Parse to the most basic type
 char *parseUnderlyingType( char *sometype );
+
 char *parseArrayParts( char *sometype );
+
 bool isRestrict( const char *sometype );
+
 char *splitTypeInfo( char *underlyingtype );
-char *ulhack(  char *brackets ); // change "1024UL" to "1024" 
-char *restricthack( char *typeinfo ); // remove __restrict__ , MODIFIES the argument!
+
+//! remove UL from numbers, MODIFIES the argument!
+/*!
+ * change "1024UL" to "1024" 
+ */
+char *ulhack(  char *brackets );
+
+//! remove __restrict__ , MODIFIES the argument!
+char *restricthack( char *typeinfo );
 
 
 enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_UNKNOWN=0,
   CHILLAST_NODETYPE_SOURCEFILE,
+  CHILLAST_NODETYPE_TRANSLATIONUNIT = CHILLAST_NODETYPE_SOURCEFILE,
   CHILLAST_NODETYPE_TYPEDEFDECL,
   CHILLAST_NODETYPE_VARDECL,
   //  CHILLAST_NODETYPE_PARMVARDECL,   not used any more 
@@ -39,6 +51,7 @@ enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_MACRODEFINITION,
   CHILLAST_NODETYPE_COMPOUNDSTMT,
   CHILLAST_NODETYPE_LOOP,               // AKA ForStmt
+  CHILLAST_NODETYPE_FORSTMT = CHILLAST_NODETYPE_LOOP,
   CHILLAST_NODETYPE_TERNARYOPERATOR,
   CHILLAST_NODETYPE_BINARYOPERATOR,
   CHILLAST_NODETYPE_UNARYOPERATOR,
@@ -70,9 +83,6 @@ enum CHILL_ASTNODE_TYPE {
   // TODO 
   
 } ;
-
-#define CHILLAST_NODETYPE_FORSTMT CHILLAST_NODETYPE_LOOP
-#define CHILLAST_NODETYPE_TRANSLATIONUNIT CHILLAST_NODETYPE_SOURCEFILE
 
 enum CHILL_FUNCTION_TYPE { 
   CHILL_FUNCTION_CPU = 0,
@@ -108,18 +118,39 @@ extern const char* Chill_AST_Node_Names[];  // WARNING MUST BE KEPT IN SYNC WITH
 
 
 // fwd declarations
-class chillAST_node;         // the generic node. specific types derive from this
-class chillAST_NULL;         // empty 
-class chillAST_SourceFile;  // ast for an entire source file (translationunit)
 
+//! the generic node. specific types derive from this
+class chillAST_node;         
+
+//! empty node
+class chillAST_NULL;
+
+//! ast for an entire source file (translationunit)
+class chillAST_SourceFile;
+
+//! C++ typedef node
 class chillAST_TypedefDecl; 
+
+//! Variable declaration
 class chillAST_VarDecl; 
+
 //class chillAST_ParmVarDecl; 
+
+//! Function declaration & definition
 class chillAST_FunctionDecl; 
-class chillAST_RecordDecl;       // structs and unions (and classes?)
+
+//! structs and unions (and classes?)
+class chillAST_RecordDecl;
+
+//! Macro definition
 class chillAST_MacroDefinition;
-class chillAST_CompoundStmt;  // just a bunch of other statements 
-class chillAST_ForStmt;    // AKA a LOOP
+
+//! A sequence of statements
+class chillAST_CompoundStmt;
+
+//! a for loop
+class chillAST_ForStmt;
+
 class chillAST_TernaryOperator; 
 class chillAST_BinaryOperator; 
 class chillAST_ArraySubscriptExpr;
@@ -174,12 +205,16 @@ chillAST_DeclRefExpr *buildDeclRefExpr( chillAST_VarDecl  *);
 // an actual chill ast. 
 // nodes based on clang AST which are in turn based on C++ 
 
-class chillAST_node {   // generic node. a tree of these is the AST. this is virtual (can't instantiate)
+//! generic node of the actual chillAST, a multiway tree node.
+class chillAST_node {
 public: 
 
-  static int chill_scalar_counter;   // for manufactured scalars 
-  static int chill_array_counter ;   // for manufactured arrays
-  static int chill_pointer_counter ; // for manufactured arrays
+  //! for manufactured scalars 
+  static int chill_scalar_counter;
+  //! for manufactured arrays
+  static int chill_array_counter;
+  //! for manufactured arrays
+  static int chill_pointer_counter;
 
 
   CHILL_ASTNODE_TYPE asttype;
@@ -250,19 +285,28 @@ public:
   // void addDecl( chillAST_VarDecl *vd); // recursive, adds to first  symbol table it can find 
 
   // TODO decide how to hide some data
-  chillAST_node *parent; 
-  bool isFromSourceFile;  // false = #included 
-  char *filename;  // file this node is from
 
+  //! this Node's parent
+  chillAST_node *parent; 
+  //! whether it is from a source file, when false it is from included files
+  bool isFromSourceFile;
+  //! the name of file this node from
+  char *filename;
+
+  // FIXME: should not call this one, either exit(-1) or throw an exception
   void segfault() { debug_fprintf(stderr, "segfaulting on purpose\n"); int *i=0; int j = i[0]; }; // seg fault
+
   int getNumChildren() { return children.size(); }; 
+  //! this node's children, which MAY or MAY NOT includes the child of this node
   vector<chillAST_node*> children; 
   vector<chillAST_node*> getChildren() { return children; } ;  // not usually useful
-  void                   setChildren( vector<chillAST_node*>&c ) { children = c; } ; // does not set parent. probably should
+  // FIXME: does not set parent. probably should
+  void                   setChildren( vector<chillAST_node*>&c ) { children = c; } ;
   chillAST_node *getChild( int which)                    { return children[which]; };
   void           setChild( int which, chillAST_node *n ) { children[which] = n; children[which]->parent = this; } ;
   
-  char *metacomment; // for compiler internals, formerly a comment
+  //! for compiler internals, formerly a comment
+  char *metacomment;
   void setMetaComment( char *c ) { metacomment = strdup(c); }; 
 
   vector<chillAST_Preprocessing*> preprocessinginfo; 
@@ -384,7 +428,8 @@ public:
     debug_fprintf(stderr, "\n\n"); 
   };
  
-  virtual void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces ) { // recursive walk parent links, looking for loops, and grabbing the declRefExpr in the loop init and cond. 
+  //! recursively walking parent links, looking for loops and grabbing the declRefExpr in the loop init and cond
+  virtual void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces ) {
     // you can quit when you get to certain nodes
 
     //debug_fprintf(stderr, "%s::gatherLoopIndeces()\n", getTypeString()); 
@@ -406,8 +451,9 @@ public:
   }
 
 
-  chillAST_ForStmt* findContainingLoop() { // recursive walk parent links, looking for loops
-    //debug_fprintf(stderr, "%s::findContainingLoop()   ", getTypeString()); 
+  //! recursively walking parent links, looking for loops
+  chillAST_ForStmt* findContainingLoop() {
+    //debug_fprintf(stderr, "%s::findContainingLoop()   ", getTypeString());
     //if (parent) debug_fprintf(stderr, "parents is a %s\n", parent->getTypeString()); 
     //else debug_fprintf(stderr, "no parent\n"); 
     // do not check SELF type, as we may want to find the loop containing a loop
@@ -416,8 +462,9 @@ public:
     return parent->findContainingLoop(); // recurse upwards
   }
 
-  chillAST_node* findContainingNonLoop() { // recursive walk parent links, avoiding loops
-    debug_fprintf(stderr, "%s::findContainingNonLoop()   ", getTypeString()); 
+  //! recursively walking parent links, avoiding loops
+  chillAST_node* findContainingNonLoop() {
+    debug_fprintf(stderr, "%s::findContainingNonLoop()   ", getTypeString());
     //if (parent) debug_fprintf(stderr, "parent is a %s\n", parent->getTypeString()); 
     //else debug_fprintf(stderr, "no parent\n"); 
     // do not check SELF type, as we may want to find the loop containing a loop
@@ -428,36 +475,36 @@ public:
   }
 
   // TODO gather loop init and cond (and if cond) like gatherloopindeces
-
-  virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){  // both scalar and arrays
+  //! gather both scalar and array references
+  virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){
     debug_fprintf(stderr,"(%s) forgot to implement gatherDeclRefExpr()\n" ,Chill_AST_Node_Names[asttype]); 
   };
-
-
 
   virtual void gatherVarUsage( vector<chillAST_VarDecl*> &decls ) { 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarUsage()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
+  //! gather all variable that is used as a lefthand side operand
   virtual void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) { 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarLHSUsage()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
-
-  virtual void gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
+  //! gather ACTUAL variable declarations
+  virtual void gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
-  
   virtual void gatherVarDeclsMore( vector<chillAST_VarDecl*> &decls ) {  // even if the decl itself is not in the ast. 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarDeclsMore()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
-  virtual void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
+  //! gather ACTUAL scalar variable declarations
+  virtual void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherScalarVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
-  virtual void gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {  // ACTUAL Declaration
+  //! gather ACTUAL array variable declarations
+  virtual void gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
@@ -472,13 +519,18 @@ public:
     debug_fprintf(stderr,"(%s) forgot to implement replaceVarDecls()\n" ,Chill_AST_Node_Names[asttype]); 
   }; 
 
+  //! this just looks for ForStmts with preferred index metacomment attached 
   virtual bool findLoopIndexesToReplace( chillAST_SymbolTable *symtab, bool forcesync=false ) { 
-    // this just looks for ForStmts with preferred index metacomment attached 
     debug_fprintf(stderr,"(%s) forgot to implement findLoopIndexesToReplace()\n" ,Chill_AST_Node_Names[asttype]); 
     return false; 
   }
 
-  
+ 
+  //! Folding constant, to some degree
+  /*!
+   * We should need to delegate this to the backend compiler
+   * @return This node
+   */
   virtual chillAST_node* constantFold() {  // hacky. TODO. make nice
     debug_fprintf(stderr,"(%s) forgot to implement constantFold()\n" ,Chill_AST_Node_Names[asttype]); 
     exit(-1); ; 
@@ -488,6 +540,7 @@ public:
     debug_fprintf(stderr,"(%s) forgot to implement clone()\n" ,Chill_AST_Node_Names[asttype]); 
     exit(-1); ; 
   };
+
   virtual void dump(  int indent=0,  FILE *fp = stderr ) { 
     fflush(fp); 
     fprintf(fp,"(%s) forgot to implement dump()\n" ,Chill_AST_Node_Names[asttype]); };// print ast
@@ -526,7 +579,7 @@ public:
 
 
   virtual void get_top_level_loops( std::vector<chillAST_ForStmt *> &loops) {
-    int n = children.size(); 
+    int n = children.size();
     //debug_fprintf(stderr, "get_top_level_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
       //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
@@ -537,9 +590,8 @@ public:
     //debug_fprintf(stderr, "found %d top level loops\n", loops.size()); 
   }
 
-
   virtual void repairParentChild() {  // for nodes where all subnodes are children
-    int n = children.size(); 
+    int n = children.size();
     for (int i=0; i<n; i++) { 
       if (children[i]->parent != this) { 
         debug_fprintf(stderr, "fixing child %s that didn't know its parent\n", children[i]->getTypeString()); 
@@ -551,7 +603,7 @@ public:
 
 
   virtual void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // this is probably broken - returns ALL loops under it
-    int n = children.size(); 
+    int n = children.size();
     //debug_fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
     for (int i=0; i<n; i++) { 
       //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
@@ -561,8 +613,9 @@ public:
   }
 
 
-  // generic for chillAST_node with children
+  //! generic for chillAST_node with children
   virtual void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) { // returns DEEPEST nesting of loops 
+    // TODO hide implementation
     std::vector<chillAST_ForStmt *>deepest; // deepest below here 
     
     int n = children.size(); 
@@ -643,7 +696,7 @@ public:
     exit(-1);
   }
 
-  
+  //! Get a vector of statements
   virtual void gatherStatements( std::vector<chillAST_node*> &statements ) { 
     debug_fprintf(stderr,"(%s) forgot to implement gatherStatements()\n" ,Chill_AST_Node_Names[asttype]); 
     dump();fflush(stdout); 

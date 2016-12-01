@@ -96,10 +96,14 @@ enum OP_POSITION { OP_DEST =-1, OP_UNKNOWN, OP_SRC };
 #define OP_RIGHT OP_SRC
 
 struct IR_chillScalarRef: public IR_ScalarRef {
-  OP_POSITION op_pos_; // -1 means destination operand, 0== unknown, 1 == source operand
+  /*!
+   * @brief the position of the operand
+   * -1 means destination operand, 0== unknown, 1 == source operand
+   */
+  OP_POSITION op_pos_;
   //chillAST_BinaryOperator *bop;  // binary op that contains this scalar? 
-  chillAST_DeclRefExpr    *dre;   // declrefexpr that uses this scalar ref, if that exists
-  chillAST_VarDecl        *chillvd; // the vardecl for this scalar 
+  chillAST_DeclRefExpr    *dre;   //!< declrefexpr that uses this scalar ref, if that exists
+  chillAST_VarDecl        *chillvd; //!< the vardecl for this scalar 
   
   IR_chillScalarRef(const IR_Code *ir, chillAST_BinaryOperator *ins, OP_POSITION pos) {
     debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, ins, pos ) *****\n\n"); 
