@@ -1,4 +1,5 @@
 add_subdirectory(basic_tests)
+add_subdirectory(chill_ast)
 
 set(UTD_PATH ${CMAKE_BINARY_DIR}/tests/UTdriver.py)
 

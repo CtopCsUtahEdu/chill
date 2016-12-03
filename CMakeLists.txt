@@ -20,7 +20,8 @@ find_package(PythonLibs 2.7 REQUIRED)
 
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
-set(CORE_LIBS m rose rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
+set(CORE_LIBS chill_core chill_ir chill_ast
+    m rose rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
     boost_date_time boost_filesystem boost_program_options iegenlib isl
     boost_regex boost_system boost_wave boost_iostreams)
 
@@ -38,11 +39,15 @@ set(CORE_SRC
     calculator_eval.cc
     )
 
+add_library(chill_core ${CORE_SRC})
+
 set(IR_CHILL_SRC
     ir_chill.cc
     ir_rose.cc
     ir_rose_utils.cc
     )
+
+add_library(chill_ir ${IR_CHILL_SRC})
 
 set(PYTHON_SRC
     chillmodule.cc
@@ -52,6 +57,8 @@ set(CHILL_AST_SRC
     chill_ast.cc
     )
 
+add_library(chill_ast ${CHILL_AST_SRC})
+
 set(CUDACHILL_SRC
     mem_mapping_utils.cc
     loop_cuda.cc
@@ -59,6 +66,8 @@ set(CUDACHILL_SRC
     ir_cudarose.cc
     ir_cuda_rose_utils.cc
     )
+
+add_library(chill_cuda ${CUDACHILL_SRC})
 
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
@@ -108,37 +117,36 @@ include_directories(
     ${IEGENHOME}/include/iegenlib
     ${PYTHON_INCLUDE_DIRS})
 
+set(chill-libs
+    parseRel omega_basic omega_lib codegen codegen_rose codegen_chill
+    chill_core chill_ir chill_ast)
+
 add_executable(chill
         chill_run.cc
-        ${CORE_SRC}
         ${PYTHON_SRC}
-        ${IR_CHILL_SRC}
-        ${CHILL_AST_SRC}
         )
 
 target_link_libraries(chill
         ${CORE_LIBS}
-        ${PYTHON_LIBRARY})
+        ${PYTHON_LIBRARY}
+        )
 
-add_dependencies(chill parseRel omega_basic omega_lib codegen codegen_rose codegen_chill )
+add_dependencies(chill ${chill-libs})
 
 install(TARGETS chill
         RUNTIME DESTINATION bin)
 
 add_executable(cuda-chill
         chill_run.cc
-        ${CORE_SRC}
         ${PYTHON_SRC}
-        ${IR_CHILL_SRC}
-        ${CHILL_AST_SRC}
-        ${CUDACHILL_SRC}
         )
 
 target_link_libraries(cuda-chill
+        chill_cuda
         ${CORE_LIBS}
         ${PYTHON_LIBRARY})
 
-add_dependencies(cuda-chill parseRel omega_basic omega_lib codegen codegen_rose codegen_chill )
+add_dependencies(cuda-chill ${chill-libs} chill_cuda)
 
 target_compile_definitions(cuda-chill
         PRIVATE
