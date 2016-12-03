@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 2.8)
 project(chill)
 set(CHILL_VERSION 0.2.1) # 2.8 doesn't support project version clause
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+include(GTest)
+
 if(NOT DEFINED ROSEHOME)
     message( FATAL_ERROR "ROSEHOME is not set, try use -DROSEHOME" )
 endif()
@@ -148,3 +152,4 @@ add_subdirectory(omega/omega_lib)
 add_subdirectory(omega/code_gen)
 
 add_subdirectory(doc)
+add_subdirectory(unittests)
