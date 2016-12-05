@@ -15,24 +15,44 @@
 
 #include "stencil.hh"
 
+/*!
+ * \file
+ * \brief Core loop transformation functionality.
+ *
+ * "level" (starting from 1) means loop level and it corresponds to "dim"
+ * (starting from 0) in transformed iteration space [c_1,l_1,c_2,l_2,....,
+ * c_n,l_n,c_(n+1)], e.g., l_2 is loop level 2 in generated code, dim 3
+ * in transformed iteration space, and variable 4 in Omega relation.
+ * All c's are constant numbers only and they will not show up as actual loops.
+ *
+ * Formula:
+ *
+ * ~~~
+ *   dim = 2*level - 1
+ *   var = dim + 1
+ * ~~~
+ */
 
 class IR_Code;
 
 enum TilingMethodType { StridedTile, CountedTile };
 enum LoopLevelType { LoopLevelOriginal, LoopLevelTile, LoopLevelUnknown };
 
-
-// Describes properties of each loop level of a statement. "payload"
-// for LoopLevelOriginal means iteration space dimension, for
-// LoopLevelTile means tiled loop level.  Special value -1 for
-// LoopLevelTile means purely derived loop. For dependence dimension
-// payloads, the values must be in an increasing order.
-// "parallel_level" will be used by code generation to support
-// multi-level parallelization (default 0 means sequential loop under
-// the current parallelization level).
+//! Describes properties of each loop level of a statement.
 struct LoopLevel {
   LoopLevelType type;
-  int payload;  
+  /*!
+   * For LoopLevelOriginal means iteration space dimension
+   * For LoopLevelTile means tiled loop level. Special value -1 for
+   * LoopLevelTile means purely derived loop. For dependence dimension
+   * payloads, the values must be in an increasing order.
+   */
+  int payload;
+  /*!
+   * Used by code generation to support
+   * multi-level parallelization (default 0 means sequential loop under
+   * the current parallelization level).
+   */
   int parallel_level;
   bool segreducible;
   std::string segment_descriptor;
@@ -46,7 +66,12 @@ struct Statement {
   std::vector<LoopLevel> loop_level;
   ir_tree_node *ir_stmt_node;
   bool has_inspector;
-  int reduction; // Manu:: 0 == reduction not possible, 1 == reduction possible, 2 == reduction with some processing
+  /*!
+   * @brief Whether reduction is possible
+   *
+   * 0 == reduction not possible, 1 == reduction possible, 2 == reduction with some processing
+   */
+  int reduction;
   IR_OPERATION_TYPE reductionOp; // Manu
 
   class stencilInfo *statementStencil;
@@ -133,10 +158,10 @@ public:
   void dump() const;
   
   std::vector<std::set <int > > sort_by_same_loops(std::set<int > active, int level);
-  //
-  // legacy unimodular transformations for perfectly nested loops
-  // e.g. M*(i,j)^T = (i',j')^T or M*(i,j,1)^T = (i',j')^T
-  //
+  //! legacy unimodular transformations for perfectly nested loops
+  /*!
+   * e.g. \f$M*(i,j)^T = (i',j')^T or M*(i,j,1)^T = (i',j')^T\f$
+   */
   bool nonsingular(const std::vector<std::vector<int> > &M);
   
   //
@@ -145,13 +170,44 @@ public:
   void permute(const std::set<int> &active, const std::vector<int> &pi);
   void permute(int stmt_num, int level, const std::vector<int> &pi);
   void permute(const std::vector<int> &pi);
+  // TODO doc and usage needed
   void original();
   
   void tile(int stmt_num, int level, int tile_size, int outer_level = 1, TilingMethodType method = StridedTile, int alignment_offset = 0, int alignment_multiple = 1);
   std::set<int> split(int stmt_num, int level, const omega::Relation &cond);
   std::set<int> unroll(int stmt_num, int level, int unroll_amount, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >(), int cleanup_split_level = 0);
-  
+
+  //! Datacopy function by reffering arrays by numbers
+  /*!
+   * for example
+   * ~~~
+   * A[i] = A[i-1] + B[i];
+   * ~~~
+   * parameter array_ref_num=[0,2] means to copy data touched by A[i-1] and A[i]
+   *
+   * @param array_ref_nums
+   * @param level
+   * @param allow_extra_read
+   * @param fastest_changing_dimension
+   * @param padding_stride
+   * @param padding_alignment
+   * @param memory_type
+   * @return
+   */
   bool datacopy(const std::vector<std::pair<int, std::vector<int> > > &array_ref_nums, int level, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, int memory_type = 0);
+  //! Datacopy function by reffering arrays by name
+  /*!
+   * parameter array_name=A means to copy data touched by A[i-1] and A[i]
+   * @param stmt_num
+   * @param level
+   * @param array_name
+   * @param allow_extra_read
+   * @param fastest_changing_dimension
+   * @param padding_stride
+   * @param padding_alignment
+   * @param memory_type
+   * @return
+   */
   bool datacopy(int stmt_num, int level, const std::string &array_name, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, int memory_type = 0);
   bool datacopy_privatized(int stmt_num, int level, const std::string &array_name, const std::vector<int> &privatized_levels, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 1, int memory_type = 0);
   bool datacopy_privatized(const std::vector<std::pair<int, std::vector<int> > > &array_ref_nums, int level, const std::vector<int> &privatized_levels, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 1, int memory_type = 0);

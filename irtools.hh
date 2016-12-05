@@ -8,15 +8,23 @@
 #include "dep.hh"
 #define DEP_DEBUG 0
 
-// IR tree is used to initialize a loop. For a loop node, payload is
-// its mapped iteration space dimension. For a simple block node,
-// payload is its mapped statement number. Normal if-else is split
-// into two nodes where the one with odd payload represents then-part and
-// the one with even payload represents else-part.
+/*!
+ * \file
+ * \brief Useful tools to analyze code in compiler IR format.
+ */
+
+//! IR tree is used to initialize a loop.
 struct ir_tree_node {
   IR_Control *content;
   ir_tree_node *parent;
   std::vector<ir_tree_node *> children;
+/*!
+ * * For a loop node, payload is its mapped iteration space dimension.
+ * * For a simple block node, payload is its mapped statement number.
+ * * Normal if-else is split into two nodes where
+ *   * odd payload represents then-part
+ *   * even payload represents else-part.
+ */
   int payload;
   
   ~ir_tree_node() {
@@ -25,13 +33,49 @@ struct ir_tree_node {
     delete content;
   }
 };
-
+/*!
+ * @brief Build IR tree from the source code
+ *
+ * Block type node can only be leaf, i.e., there is no further stuctures inside a block allowed
+ *
+ * @param control
+ * @param parent
+ * @return
+ */
 std::vector<ir_tree_node *> build_ir_tree(IR_Control *control,
                                           ir_tree_node *parent = NULL);
+/*!
+ * @brief Extract statements from IR tree
+ *
+ * Statements returned are ordered in lexical order in the source code
+ *
+ * @param ir_tree
+ * @return
+ */
 std::vector<ir_tree_node *> extract_ir_stmts(
   const std::vector<ir_tree_node *> &ir_tree);
+
 bool is_dependence_valid(ir_tree_node *src_node, ir_tree_node *dst_node,
                          const DependenceVector &dv, bool before);
+/*!
+ * @brief test data dependeces between two statements
+ *
+ * The first statement in parameter must be lexically before the second statement in parameter.
+ * Returned dependences are all lexicographically positive
+ *
+ * @param ir
+ * @param repr1
+ * @param IS1
+ * @param repr2
+ * @param IS2
+ * @param freevar
+ * @param index
+ * @param i
+ * @param j
+ * @param uninterpreted_symbols
+ * @param uninterpreted_symbols_stringrepr
+ * @return
+ */
 std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > test_data_dependences(
   IR_Code *ir, const omega::CG_outputRepr *repr1,
   const omega::Relation &IS1, const omega::CG_outputRepr *repr2,

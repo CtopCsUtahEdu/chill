@@ -35,21 +35,36 @@
 #include <code_gen/CG_outputRepr.h>
 #include <code_gen/CG_outputBuilder.h>
 
-
+/*!
+ * \file
+ * \brief CHiLL's compiler intermediate representation interface that extends Omega's builder interface to accomodate compiler analyses and extra code generation.
+ *
+ * Unlike CG_outputRepr, IR_Symbol,IR_Ref and IR_Control are place holders
+ * to the underlying code, thus deleting or duplicating them does not affect
+ * the actual code.  Similar to Omega builder's memory allocation strategy,
+ * all non-const pointer parameters of CG_outputRepr/IR_Symbol/IR_Ref/IR_Control
+ * are destroyed after the call.
+ */
 
 class IR_Code; // forward declaration
 
-
-// Base abstract class for scalar and array symbols.  This is a place
-// holder for related declaration in IR code.
+/*!
+ * @brief Base abstract class for scalar and array symbols.
+ *
+ * This is a place holder for related declaration in IR code.
+ */
 struct IR_Symbol {
   const IR_Code *ir_;
 
-  virtual ~IR_Symbol() {/* ir_ is not the responsibility of this object */}
-  virtual int n_dim() const = 0; // IR_Symbol
+  //! ir_ is not the responsibility of this object
+  virtual ~IR_Symbol() { }
+
+  virtual int n_dim() const = 0;
   virtual std::string name() const = 0;
   virtual bool operator==(const IR_Symbol &that) const = 0;
   virtual bool operator!=(const IR_Symbol &that) const {return !(*this == that);}
+
+  //! shallow copy
   virtual IR_Symbol *clone() const = 0;  /* shallow copy */
 
   virtual bool isScalar()  const { return false; } // default
@@ -87,18 +102,24 @@ struct IR_PointerSymbol: public IR_Symbol {
   bool isPointer() const { return true; }
 };
 
-// Base abstract class for scalar and array references.  This is a
-// place holder for related code in IR code.
+
+/*!
+ * @brief Base abstract class for scalar and array references.
+ *
+ * This is a place holder for related code in IR code.
+ */
 struct IR_Ref {
   const IR_Code *ir_;
-  
-  virtual ~IR_Ref() {/* ir_ is not the responsibility of this object */}
-  virtual int n_dim() const = 0; // IR_Ref  
+  //! ir_ is not the responsibility of this object
+  virtual ~IR_Ref() { }
+
+  virtual int n_dim() const = 0;
   virtual bool is_write() const = 0;
   virtual std::string name() const = 0;
   virtual bool operator==(const IR_Ref &that) const = 0;
   virtual bool operator!=(const IR_Ref &that) const {return !(*this == that);}
   virtual omega::CG_outputRepr *convert() = 0;
+  //! shallow copy
   virtual IR_Ref *clone() const = 0;  /* shallow copy */
   virtual void Dump() const { debug_fprintf(stderr, "some IR_*Ref needs to implement Dump()\n"); int *i=0; int j=i[0]; };
 };
@@ -195,13 +216,15 @@ struct IR_PointerArrayRef: public IR_Ref {
 
 struct IR_Block;
 
-// Base abstract class for code structures.  This is a place holder
-// for the actual structure in the IR code.  However, in cases that
-// original source code may be transformed during loop initialization
-// such as converting a while loop to a for loop or reconstructing the
-// loop from low level IR code, the helper loop class (NOT
-// IMPLEMENTED) must contain the transformed code that needs to be
-// freed when out of service.
+//! Base abstract class for code structures.
+/*!
+ * This is a place holder for the actual structure in the IR code.
+ * However, in cases that original source code may be transformed during
+ * loop initialization such as converting a while loop to a for loop or
+ * reconstructing the loop from low level IR code, the helper loop class (NOT
+ * IMPLEMENTED) must contain the transformed code that needs to be
+ * freed when out of service.
+ */
 struct IR_Control {
   const IR_Code *ir_; // hate this
 
@@ -278,8 +301,11 @@ public:
   
   omega::CG_outputRepr* init_code(){ return init_code_; }
 
-  // memory_type is for differentiating the location of where the new memory is allocated.
-  // this is useful for processors with heterogeneous memory hierarchy.
+  /*!
+   * \param memory_type is for differentiating the location of
+   *    where the new memory is allocated. this is useful for
+   *    processors with heterogeneous memory hierarchy.
+   */
   virtual IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int memory_type) = 0;
   virtual IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type, std::string name="" ) =0;
 
@@ -321,10 +347,15 @@ public:
   virtual omega::CG_outputRepr *CreatePointerType(IR_CONSTANT_TYPE type)=0;
   virtual omega::CG_outputRepr *CreatePointerType(omega::CG_outputRepr *type)=0;
   virtual omega::CG_outputRepr *CreateScalarType(IR_CONSTANT_TYPE type)=0;
-  // Array references should be returned in their accessing order.
-  // e.g. s1: A[i] = A[i-1]
-  //      s2: B[C[i]] = D[i] + E[i]
-  // return A[i-1], A[i], D[i], E[i], C[i], B[C[i]] in this order.
+  /*!
+  * Array references should be returned in their accessing order.
+  *
+  * ~~~
+  * e.g. s1: A[i] = A[i-1]
+  *      s2: B[C[i]] = D[i] + E[i]
+  * return A[i-1], A[i], D[i], E[i], C[i], B[C[i]] in this order.
+  * ~~~
+  */
   virtual std::vector<IR_ArrayRef *> FindArrayRef(const omega::CG_outputRepr *repr) const = 0;
   virtual std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const = 0 ;
   virtual std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const = 0;
@@ -334,10 +365,12 @@ public:
   // so we know when to stop looking inside.
   virtual std::vector<IR_Control *> FindOneLevelControlStructure(const IR_Block *block) const = 0;
 
-  // All controls must be in the same block, at the same level and in
-  // contiguous lexical order as appeared in parameter vector.
+  /*!
+   * All controls must be in the same block, at the same level and in
+   * contiguous lexical order as appeared in parameter vector.
+   */
   virtual IR_Block *MergeNeighboringControlStructures(const std::vector<IR_Control *> &controls) const = 0;
-  
+
   virtual IR_Block *GetCode() const = 0;
   virtual IR_Control *GetCode(omega::CG_outputRepr *code) const = 0;
   virtual void ReplaceCode(IR_Control *old, omega::CG_outputRepr *repr) = 0;
