@@ -1,9 +1,10 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=etex 2016.9.8)  7 DEC 2016 14:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=etex 2016.9.8)  7 DEC 2016 14:53
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**\input ./CHiLL.texi
+**\catcode126=12 \def\normaltilde{~}\catcode126=13 \let~\normaltilde  \input ./
+CHiLL.texi
 (./CHiLL.texi (/usr/share/texmf/tex/texinfo/texinfo.tex
 Loading texinfo [version 2016-02-05.07.deb2]:
 \outerhsize=\dimen16
@@ -228,10 +229,10 @@ texinfo.tex: doing @include of examples/unroll.texi
 Here is how much of TeX's memory you used:
  3160 strings out of 497120
  32015 string characters out of 6207310
- 72171 words of memory out of 5000000
+ 72170 words of memory out of 5000000
  4303 multiletter control sequences out of 15000+600000
  32778 words of font info for 114 fonts, out of 8000000 for 9000
  51 hyphenation exceptions out of 8191
- 16i,8n,16p,972b,774s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 16i,8n,16p,1040b,774s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on CHiLL.dvi (26 pages, 91004 bytes).
+Output written on CHiLL.dvi (26 pages, 91012 bytes).
