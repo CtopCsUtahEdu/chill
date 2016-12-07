@@ -474,8 +474,8 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @include examples/distribute.texi
 @page
 @include examples/fuse.texi
-@page
-@include examples/nonsingular.texi
+@c @page
+@c @include examples/nonsingular.texi
 @c @page
 @c @include examples/original.texi
 @page

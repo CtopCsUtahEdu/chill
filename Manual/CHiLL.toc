@@ -16,16 +16,15 @@
 @numsecentry{Transformations}{3.3}{}{10}
 @unnsubsecentry{Distribute}{10000.3.1}{}{10}
 @unnsubsecentry{Fuse}{10000.3.2}{}{11}
-@unnsubsecentry{Nonsingular}{10000.3.3}{}{12}
-@unnsubsecentry{Peel}{10000.3.4}{}{13}
-@unnsubsecentry{Permute}{10000.3.5}{}{14}
-@unnsubsecentry{Reverse}{10000.3.6}{}{15}
-@unnsubsecentry{Scale}{10000.3.7}{}{16}
-@unnsubsecentry{Shift}{10000.3.8}{}{17}
-@unnsubsecentry{Shift_to}{10000.3.9}{}{18}
-@unnsubsecentry{Skew}{10000.3.10}{}{19}
-@unnsubsecentry{Split}{10000.3.11}{}{20}
-@unnsubsecentry{Tile}{10000.3.12}{}{21}
-@unnsubsecentry{Unroll}{10000.3.13}{}{22}
-@unnchapentry{Concept Index}{10001}{Concept Index}{23}
-@unnchapentry{Function and Transformation Index}{10002}{Function Index}{24}
+@unnsubsecentry{Peel}{10000.3.3}{}{12}
+@unnsubsecentry{Permute}{10000.3.4}{}{13}
+@unnsubsecentry{Reverse}{10000.3.5}{}{14}
+@unnsubsecentry{Scale}{10000.3.6}{}{15}
+@unnsubsecentry{Shift}{10000.3.7}{}{16}
+@unnsubsecentry{Shift_to}{10000.3.8}{}{17}
+@unnsubsecentry{Skew}{10000.3.9}{}{18}
+@unnsubsecentry{Split}{10000.3.10}{}{19}
+@unnsubsecentry{Tile}{10000.3.11}{}{20}
+@unnsubsecentry{Unroll}{10000.3.12}{}{21}
+@unnchapentry{Concept Index}{10001}{Concept Index}{22}
+@unnchapentry{Function and Transformation Index}{10002}{Function Index}{23}

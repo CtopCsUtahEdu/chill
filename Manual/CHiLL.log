@@ -1,10 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=etex 2016.6.2)  5 JUL 2016 13:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=etex 2016.9.8)  7 DEC 2016 14:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**\catcode126=12 \def\normaltilde{~}\catcode126=13 \let~\normaltilde  \input ./
-CHiLL.texi
+**\input ./CHiLL.texi
 (./CHiLL.texi (/usr/share/texmf/tex/texinfo/texinfo.tex
 Loading texinfo [version 2016-02-05.07.deb2]:
 \outerhsize=\dimen16
@@ -160,19 +159,19 @@ This is `epsf.tex' v2.7.4 <14 February 2011>
  formatting,
 \defaultparindent=\dimen50
  and turning on texinfo input format.) [1] [2]
-(/home/derick/dev/chill/Manual/CHiLL.toc) [-1] Chapter 1
+(/home/derick/dev/chill/chill-dev-git/Manual/CHiLL.toc) [-1] Chapter 1
 \openout0 = `CHiLL.toc'.
 
 
-(/home/derick/dev/chill/Manual/CHiLL.aux)
+(/home/derick/dev/chill/chill-dev-git/Manual/CHiLL.aux)
 \openout1 = `CHiLL.aux'.
 
  [1] Chapter 2 [2]
 @cpindfile=@write2
 \openout2 = `CHiLL.cp'.
 
- [3] [4] [5]
-[6] Chapter 3 [7] [8]
+
+[3] [4] [5] [6] Chapter 3 [7] [8]
 @fnindfile=@write3
 \openout3 = `CHiLL.fn'.
 
@@ -180,63 +179,59 @@ This is `epsf.tex' v2.7.4 <14 February 2011>
 texinfo.tex: doing @include of examples/distribute.texi
 
 
-(/home/derick/dev/chill/Manual/examples/distribute.texi) [10]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/distribute.texi) [10]
 texinfo.tex: doing @include of examples/fuse.texi
 
 
-(/home/derick/dev/chill/Manual/examples/fuse.texi) [11]
-texinfo.tex: doing @include of examples/nonsingular.texi
-
-
-(/home/derick/dev/chill/Manual/examples/nonsingular.texi) [12]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/fuse.texi) [11]
 texinfo.tex: doing @include of examples/peel.texi
 
 
-(/home/derick/dev/chill/Manual/examples/peel.texi) [13]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/peel.texi) [12]
 texinfo.tex: doing @include of examples/permute.texi
 
 
-(/home/derick/dev/chill/Manual/examples/permute.texi) [14]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/permute.texi) [13]
 texinfo.tex: doing @include of examples/reverse.texi
 
 
-(/home/derick/dev/chill/Manual/examples/reverse.texi) [15]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/reverse.texi) [14]
 texinfo.tex: doing @include of examples/scale.texi
 
 
-(/home/derick/dev/chill/Manual/examples/scale.texi) [16]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/scale.texi) [15]
 texinfo.tex: doing @include of examples/shift.texi
 
 
-(/home/derick/dev/chill/Manual/examples/shift.texi) [17]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/shift.texi) [16]
 texinfo.tex: doing @include of examples/shift_to.texi
 
 
-(/home/derick/dev/chill/Manual/examples/shift_to.texi) [18]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/shift_to.texi) [17]
 texinfo.tex: doing @include of examples/skew.texi
 
 
-(/home/derick/dev/chill/Manual/examples/skew.texi) [19]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/skew.texi) [18]
 texinfo.tex: doing @include of examples/split.texi
 
 
-(/home/derick/dev/chill/Manual/examples/split.texi) [20]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/split.texi) [19]
 texinfo.tex: doing @include of examples/tile.texi
 
 
-(/home/derick/dev/chill/Manual/examples/tile.texi) [21]
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/tile.texi) [20]
 texinfo.tex: doing @include of examples/unroll.texi
 
 
-(/home/derick/dev/chill/Manual/examples/unroll.texi) [22] (Concept Index)
-(Function and Transformation Index) [23] [24] ) 
+(/home/derick/dev/chill/chill-dev-git/Manual/examples/unroll.texi) [21]
+(Concept Index) (Function and Transformation Index) [22] [23] ) 
 Here is how much of TeX's memory you used:
- 3163 strings out of 495084
- 31716 string characters out of 6161165
- 75635 words of memory out of 5000000
- 4665 multiletter control sequences out of 15000+600000
+ 3160 strings out of 497120
+ 32015 string characters out of 6207310
+ 72171 words of memory out of 5000000
+ 4303 multiletter control sequences out of 15000+600000
  32778 words of font info for 114 fonts, out of 8000000 for 9000
- 1178 hyphenation exceptions out of 8191
- 16i,11n,16p,1040b,774s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 51 hyphenation exceptions out of 8191
+ 16i,8n,16p,972b,774s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on CHiLL.dvi (27 pages, 95600 bytes).
+Output written on CHiLL.dvi (26 pages, 91004 bytes).
