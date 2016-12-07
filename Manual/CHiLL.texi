@@ -7,7 +7,7 @@
 @c %**end of header
 
 @copying
-This manual describes CHiLL (version 0.2.1 September 2015), a source-to-source translator for optimizing loop based calculations. 
+This manual describes CHiLL (version 0.2.4 November 2016), a source-to-source translator for optimizing loop based calculations. 
 
 Copyright @copyright{} 2008 University of Southern California @*
 Copyright @copyright{} 2009-2016 University of Utah
@@ -30,7 +30,7 @@ Compiler Technology to Optimize Performance Research Group@*
 @titlepage
 @title CHiLL
 @subtitle The Composable High Level Loop Source-to-Source Translator
-@subtitle For version 0.2.1, September 2015
+@subtitle For version 0.2.4, November 2016
 
 @page
 @vskip 0pt plus 1filll
