@@ -7,6 +7,7 @@ The loop nest to tile is specified by @var{stmt} and @var{loop}. The argument @v
 @end deftypefn
 
 @multitable @columnfractions .50 .50 
+@item
 @b{Python Script}
 @smallformat
 @cartouche
@@ -41,6 +42,7 @@ void mm(float **A, float **B, float **C,
 @end multitable
 
 @multitable @columnfractions .50 .50
+@item
 @b{Output on stdout}
 @smallformat
 @cartouche

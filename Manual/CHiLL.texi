@@ -38,8 +38,17 @@ Compiler Technology to Optimize Performance Research Group@*
 @end titlepage
 @contents
 
+@ifnottex
+@node Top
+@top The Composable High Level Loop Source-to-Source Translator
+
+This manual is for The Composable High Level Loop Source-to-Source Translator, aka CHiLL (version 0.2.4).
+@end ifnottex
+
 @menu
 * First Chapter::       Introduction
+* Second Chapter::      Background
+* Third Chapter::       The CHiLL Scripting Language
 * Index::               Complete index.
 @end menu
 
@@ -622,11 +631,11 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @c                 calls must use the same dimentions between calls. i.e. threads can not
 @c                 be 16x16 in one call and 16x4 in another.
 
-@node Concept Index
+@node Index
+
 @unnumbered Concept Index
 @printindex cp
 
-@node Function Index
 @unnumbered Function and Transformation Index
 @printindex fn
 

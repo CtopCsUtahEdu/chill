@@ -4,7 +4,8 @@ Distribute the set of statements in @var{stmts} such that each statement execute
 
 The transformation is legal if and only if, all loop-carried dependences between the statements in @var{stmts} are contained entirely to loop levels less than @var{loop}.
 @end deftypefn
-@multitable @columnfractions .50 .50 
+@multitable @columnfractions .50 .50
+@item
 @b{Python Script}
 @smallformat
 @cartouche
@@ -39,6 +40,7 @@ void mm(float **A, float **B, float **C,
 @end multitable
 
 @multitable @columnfractions .50 .50
+@item
 @b{Output on stdout}
 @smallformat
 @cartouche

@@ -9,6 +9,7 @@ Let @math{i_1, i_2, \dots{}, i_{loop}} be the original loop indexes and let @mat
 @noindent The example below takes an algorithm with a negative loop-carried dependence and transforms it into one without a dependence.
 @sp 1
 @multitable @columnfractions .50 .50 
+@item
 @b{Python Script}
 @smallformat
 @cartouche
@@ -43,6 +44,7 @@ void f(float **a, int n, int m) {
 @end multitable
 
 @multitable @columnfractions .50 .50
+@item
 @b{Output on stdout}
 @smallformat
 @cartouche

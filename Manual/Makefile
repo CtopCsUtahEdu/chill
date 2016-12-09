@@ -1,8 +1,8 @@
+all :
+	@ texi2pdf CHiLL.texi
 
+clean :
+	@- rm *.cp *.cps *.fn *.fns *.aux *.toc *.log
 
-all : CHiLL.texi
-	@ texi2dvi --dvi $<
-
-pdf : CHiLL.dvi
-	@ dvipdf CHiLL.dvi CHiLL.pdf
-
+info :
+	@ makeinfo CHiLL.texi

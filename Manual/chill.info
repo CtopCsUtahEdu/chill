@@ -1,73 +1,95 @@
+This is chill.info, produced by makeinfo version 6.3 from CHiLL.texi.
+
+This manual describes CHiLL (version 0.2.4 November 2016), a
+source-to-source translator for optimizing loop based calculations.
+
+   Copyright (C) 2008 University of Southern California
+Copyright (C) 2009-2016 University of Utah
+
+   Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+published by the Free Software Foundation.  To receive a copy of the GNU
+Free Documentation License, write to the Free Software Foundation, Inc.,
+59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
 
 
-
+   Published by the University of Utah School of Computing
+Compiler Technology to Optimize Performance Research Group
+<ctop.cs.utah.edu/ctop/>
+50 S., Central Campus Dr., Salt Lake City, UT 84112
 
 
-File: chill.info, Node: Top
+File: chill.info,  Node: Top,  Next: First Chapter,  Up: (dir)
 
-Short Sample
-************
+The Composable High Level Loop Source-to-Source Translator
+**********************************************************
 
-This is a short sample Texinfo file.
+This manual is for The Composable High Level Loop Source-to-Source
+Translator, aka CHiLL (version 0.2.4).
 
 * Menu:
 
 * First Chapter::       Introduction
+* Second Chapter::      Background
+* Third Chapter::       The CHiLL Scripting Language
 * Index::               Complete index.
 
-
 
-File: chill.info, Node: First Chapter
+File: chill.info,  Node: First Chapter,  Next: Second Chapter,  Prev: Top,  Up: Top
 
-Introduction
-************
+1 Introduction
+**************
 
 CHiLL is a source-to-source translator for composing high level loop
 transformations to improve the performance of nested loop calculations
-written in C, C++ or FORTRAN. CHiLL's operations are driven by a user
-supplied script file which specifies the location of the original
-source file, the function and loops to transform in that file and the
-transformations to create a new transformed source file. A version of
-CHiLL called CUDA-CHiLL can generate source code for both host
-functions and device functions which can be compiled with the NVIDIA
-CUDA Compiler Driver and executed on NVIDIA GPUs.
+written in C, C++ or Fortran.  CHiLL's operations are driven by a script
+which is generated or supplied by the user that specifies the location
+of the original source file, the function and loops to modify and the
+transformations to apply.  CHiLL can be configured to include support
+for the NVIDIA CUDA compiler.  In this mode, CHiLL can generate source
+code for both host functions and device functions to be compiled and
+executed on NVIDIA GPUs.
 
+1.1 Intended Audience
+=====================
 
-Intended Audience
+This manual is intended for C/C++ or Fortran programmers wishing to
+optimize loop based calculations.  The user should have sufficient
+knowledge of the underlying hardware on which the code should execute to
+generate an optimization strategy.
+
+1.2 Getting CHiLL
 =================
-This manual is intended for C/C++ or FORTRAN programmers wishing to
-optimize loop based calculations. The user should have sufficient
-knowledge of the underlying hardware on which the code should execute
-to generate an optimization strategy.
 
-
-Getting CHiLL
-=============
 CHiLL is available in source form from
-https://github.com/CtopCsUtahEdu. CHiLL relies on the ROSE compiler
-from Lawrence Livermore National Laboratory that must be installed
-before CHiLL. To install CHiLL simply execute the following commands
-within the root of the source directory.
+<https://github.com/CtopCsUtahEdu> and requires the ROSE compiler from
+Lawrence Livermore National Laboratory (see
+<http://rosecompiler.org>)(1).  When ROSE is available CHiLL can be
+installed and tested by executing the following commands in the source
+direcory.
 
-     ./configure --with-interface=python
-     make
+     ./configure --with-interface=python --prefix=<INSTALLDIR> \
+                 --with-rose=<ROSEINSTALLDIR> --with-boost=<BOOSTINSTALLDIR>
+     make -j`nproc`
+     make -j`nproc` install
+     cd test-chill; ./runtests
 
-If you have problems or issues with installation or have comments,
+   If you have problems with installation, find bugs or have comments,
 questions or suggestions for this document, please send mail to
-<bobw@cs.utah.edu>.
+<chill-support@cs.utah.edu>.
 
+1.3 Invoking CHiLL
+==================
 
-Invoking CHiLL
-==============
-Assume the code below is in a file named `mm.c'. This program written
-in C implements matrix multiplication as a direct translation of an
-optimized FORTRAN program where all of the loops are ordered such that
-memory accesses to the arrays a, b and c are all in column
-order. Since C and C++ store arrays in row major order there is an
-opportunity for better cache utilization if the arrays are accessed as
-rows and not columns.
+The C program below is an implementation of matrix multiplication as a
+direct translation of an optimized Fortran program where all of the
+loops are ordered such that memory accesses to the arrays a, b and c are
+all in column order.  Since C stores arrays in row major order there is
+an opportunity for better cache utilization if the arrays are accessed
+as rows and not columns.  We will refer to this code often and assume it
+is in a file named 'mm.c'.
 
-     void mm(float **A, float **B, float **C, 
+     void mm(float **A, float **B, float **C,
              int ambn, int an, int bm) {
        int i, j, n;
        for(i = 0; i < an; i++)
@@ -78,26 +100,26 @@ rows and not columns.
          }
      }
 
-Permuting the order of the loops from j, k, i to i, k, j results in a
-more cache centric algorithm where all array accesses are in row major
-order as shown below.
+   Permuting the order of the loops from i, j, n to n, j, i results in
+the more cache centric C algorithm as shown below where all array
+accesses are in row major order.
 
      void mm(float **A, float **B, float **C,
      	int ambn, int an, int bm) {
        int i, j, k;
-       for (n = 0; n <= ambn - 1; n += 1) 
-         for (j = 0; j <= bm - 1; j += 1) 
-           if (n <= 0) 
+       for (n = 0; n <= ambn - 1; n += 1)
+         for (j = 0; j <= bm - 1; j += 1)
+           if (n <= 0)
              for (i = 0; i <= an - 1; i += 1) {
                C[i][j] = 0.0f;
                C[i][j] += (A[i][n] * B[n][j]);
              }
-           else 
-             for (i = 0; i <= an - 1; i += 1) 
+           else
+             for (i = 0; i <= an - 1; i += 1)
                C[i][j] += (A[i][n] * B[n][j]);
      }
 
-The interchanges of the outer and inner most loops can be done in
+   The interchanges of the outer and innermost loops can be done in
 CHiLL with this simple Python script.
 
      from chill import *
@@ -108,1701 +130,1044 @@ CHiLL with this simple Python script.
      permute([3,2,1])
      print_code()
 
-
-The first line of the script `from chill import *' loads the CHiLL
-interface into the python interpreter. The commands `source' and
-`procedure' identify the source file and the procedure to modify. The
-`loop' command specifies the loop nest to be transformed. The `known'
+   The first line of the script 'from chill import *' loads the CHiLL
+interface into the python interpreter.  The commands 'source' and
+'procedure' identify the source file and the procedure to modify.  The
+'loop' command specifies the loop nest to be transformed.  The 'known'
 command specifies constraints on parameters that are known and the
-transformation `permute([3,2,1])' exchanges the inner and outer most
-loops.  Assuming for this example that that the script above is in the
-file `mm.py', the command `chill mm.script' would produce the
-transformed code in the file `rose_mm.c'. (1) (*Note First
-Chapter-Footnotes::)
+transformation 'permute([3,2,1])' exchanges the inner and outermost
+loops.  Finally the command 'print_code' prints the transformed loop
+nest in a C-like pseudo code showing the loops, indices and statements.
+
+   Assuming for this example that that the script above is in the file
+'mm.py', the command 'chill mm.py' would print to STDOUT pseudo code
+similar to that shown below and produce the transformed code in the file
+'rose_mm.c' (2)
+
+
+     for(n = 0; n <= ambn-1; n++)
+       for(j = 0; j <= bm-1; j++)
+         if (n <= 0)
+           for(i = 0; i <= an-1; i++) {
+             s0(i,j,n);
+             s1(i,j,n);
+           }
+         else
+           for(i = 0; i <= an-1; i++)
+             s1(i,j,n);
+
+   ---------- Footnotes ----------
+
+   (1) Building ROSE requires very specific versions of GNU autoconf,
+gcc and the boost libraries.  If you do not have ROSE installed then
+please see and modify the script 'buildall' which was used to install
+CHiLL on Blue Waters at NCSA.
+
+   (2) The code produced by the current version of CHiLL does not
+preserve loop variables names in the transformed code which makes it
+difficult to see the effects of a transformation.  In this manual we
+have used the original loop variable names in the generated code to make
+it easier to understand.
 
 
-File: chill.info  Node: First Chapter-Footnotes, Up: First Chapter
+File: chill.info,  Node: Second Chapter,  Next: Third Chapter,  Prev: First Chapter,  Up: Top
 
-(1) Change this, should have output(filename) command
+2 Background
+************
 
-
-
-File: chill.info, Node: Second Chapter
-
-Background
-**********
-
-CHiLL allows a programmer to optimize loop nests by permuting the
-sequence in which statements in the original code are execute to
-exploit a hardware advantage such as reordering memory access to be
-more cache efficient or reordering the execution of statements to
-utilize multiple threads.
-
-Not all statements can be reordered. If a dependence exists between
-two statements it creates a constraint on the ability to schedule the
-relative execution of the statements. To guarantee that the original
-code and transformed code produce the same results all transformations
-must insure that the two dependent statements execute in the original
-order.
-
-
-Dependences
-===========
-
-Before CHiLL applies a user specified transformations to the loop
+Before CHiLL applies a user specified transformation to the loop
 structure it first insures that the transformed code will produce the
-same results as the original code. It does this by determining all
+same results as the original code.  It does this by determining all
 dependences between statements in the original program and then
-requiring that any and all transformations that are applied preserve
-the dependences between the statements in the original code.
+requiring that any and all transformations that are applied preserve the
+dependences between the statements in the original code.
 
-To effectively use CHiLL, it is important to understand the types of
-dependences that can exist and the effects that transformations have
-on those dependences. There are two general categories of dependences,
-data dependences and control dependences.
+   Conceptually CHiLL treats each statement in a source program as one
+of three basic types; a loop, a conditional or a statement.  When we
+refer to "a statement" in CHiLL, we are referring to a block of one or
+more actual program statements which have a single uninterrupted
+execution path through them and we notationally represent it as a
+function which is passed the values of the indices of all loops
+enclosing it.
 
-A "control dependence" exist when one statement is executed
-conditionally on the result of another. For example, in the statements
-below `S1' cannot be executed before `S0' and thus `S1' has a control
-dependence on `S0'.
-       S0     if (x != 0)
-       S1       a /= x;
+   For each statement we compute an "iteration vector" that encodes the
+the absolute execution order of the statement as a function of its
+lexical position in the source code and the index values of the
+enclosing loops.  We then define the "iteration space" for the statement
+by joining the iteration vector with the constraints on each index that
+is in an enclosing loop.
 
-A "data dependence" exists between statements `S0' and `S1' (meaning
-`S1' depends on statement `S0') if and only if there is a plausible
-run-time execution path from `S0' to `S1', both statements access the
-same memory location and at least one of them stores to it. There are
-three types of data dependences:
+   Next we analyze the memory access patterns of the statements and
+loops.  We compute the set of "dependences" by taking all statements
+pair-wise and finding those pairs of statements (S_1, S_2) where there
+exists an iteration vector i_1 and i_2 in the respective iteration
+spaces of S_1 and S_2 such that S_1(i_1) and S_2(i_2) both refer to the
+same memory location and one or both of them write to that location.
+The "distance vector" defined by i_2 - i_1 gives the execution distance
+from the source statement S_1 to the sink statement S_2.
 
-A "true dependence" exists when `S0' writes to a location that is
-later read by `S1'.
+   If a dependence exists between statements S_1 and S_2 with the
+constraint that S_1 must execute before S_2 in the original code then
+that constraint must be preserved across any and all transformations.
+If a dependence exists that can not be preserved across a transformation
+then CHiLL alerts the user to this problem.  Dependence information
+between S_1 and S_2 is maintained by a "dependence vector" which
+encapsulates the notion of all the distance vectors where statement S_1
+must execute before S_2.
 
-       S0     x = ...
-       S1     ... = x
+   The diagnostic commands 'print_space' and 'print_dep' will print the
+iteration space of each statement and the dependences between all pairs
+of statements.  The command 'remove_dep' will force the removal of a
+dependence leaving responsibility for the correctness of the
+transformation to the user.
 
-An "antidependence" exists when `S0' reads from a location that is
-later written to by `S1'.
-       S0     ... = x
-       S1     x = ...
+2.1 Iteration Vectors
+=====================
 
-An "output dependence" exists when `S0' writes to a location that is
-later written to by `S1'.
-       S0     x = ...
-       S1     x = ...
+Given a loop nest with a maximum loop depth of n, we define for each
+executed statement an iteration vector that encodes the time of
+execution of a statement executed with specific values for the loop
+indices which enclose the statement.  This allows us to determine the
+relative order of execution of any two statements so that dependences
+between statements can be preserved.
 
-In the parlance of hardware design, a true dependence is known as a @abbr{RAW, read after write} hazard, an antidependence is a @abbr{WAR, write after read} hazard and an output dependence is a @abbr{WAW, write after write} hazard. These dependences are fairly intuitively and are used instinctively by every programmer to determine the correct order of statements in sequential code. However, when loops and arrays are involved these same data dependences arise in more subtle ways.
+   We define an iteration vector for a nest of n loops as i = {c_0, l_1,
+c_1, l_2, ..., c_n, l_n, c_{n+1} } where l_k is the value of the
+index(1) of the loop at nesting level k and c_k is an auxiliary loop
+used to track the lexigraphical ordering of statement executed within
+the loop nested at level k.  The outermost loop level in the nest is 1
+and c_0 lexigraphically orders any statements that precede the first
+loop.
 
-@section Dependences with loops and arrays
+   At this level of abstraction we only care about loops and blocks of
+code between loops.  The even numbered elements {c_0, c_1, ..., c_{n+1}
+} are always constant integers that describe the static lexigraphical
+ordering of the statements in the original code.  The odd numbered
+elements {l_1, ..., l_n } represent the current values of the loop
+levels.  This scheme allows a uniform method to both track both the
+progression of the loop indices as well as the execution order of
+statements within each loop.
 
-@cindex loop-independent dependence
-@cindex loop-carried dependence
-It is useful to categorize data dependences in loops as two types. Consider loop that contains two statements, @code{S0} and @code{S1} within it. If both @code{S0} and @code{S1} reference the same memory location within the same iteration as they do in this case, then the dependence is @dfn{loop-independent}. If statement @code{S0} and @code{S1} reference the same memory location in different iterations, then the dependence is created by the loop and it is said to be @dfn{loop-carried}.@refill
+   Iteration vectors are ordered and thus can be used to enforce
+dependences between statements.  Iteration vector i precedes iteration
+j, denoted i < j, if and only if i[1:n-1] < j[1:n-1] or i[1:n-1] =
+j[1:n-1] and i[n] < j[n].
 
-Consider the example below which has two loop-independent dependences between the statements independen of the iteration of the loop. Statement @code{S1} has a true dependence on @code{S0} as @code{S1} must read the value @code{b[i]} @emph{after} @code{S0} writes it and @code{S0} has an antidependence in @code{S1} as @code{S0} must write @code{a[i]} @emph{before} @code{S1} reads it.@refill
-@smallexample
-       for (i = 0; i < n; i++) @{
-  S0     a[i] = b[i];
-  S1     b[i] = a[i] + 1;
-       @}
-@end smallexample
+   Given two statements S_0 which executes at a time specified by
+iteration vector i_0 and a statement S_1 which executes at a time
+specified by iteration vector i_1, then the execution of S_0 precedes
+that of S_1 if and only if i_0 < i_1.
 
-Contrast this to the loop below which has two loop-carried dependences and two loop-independent dependences.@refill
+2.2 Iteration Spaces
+====================
 
-@smallexample
-       for (i = 0; i < n; i++) @{
-  S0     a[i + 1] = b[i];
-  S1     b[i + 1] = a[i];
-  S2     c[i] = a[i] + b[i];
-       @}
-@end smallexample
+Consider the following loop nest below.  There are three loop levels to
+track the three indices i, j and k and four auxiliary loop levels to
+track the relative execution of the statements within the loops.
 
-In every iteration other than the first, @code{S1} reads an element of @code{a[]} that was written to by @code{S0} in the previous iteration and thus there is dependence from @code{S0} to @code{S1}. Because @code{S0} appears before @code{S1} in the loop, it is a loop-carried forward true dependence.@refill
+     S_0
+     for (i ...) {
+       S_1
+       S_2
+       for (j ...) {
+         S_3
+         for (k ...) {
+           S_4
+         }
+         S_5
+       }
+       S_6
+     }
 
-Likewise, for every iteration other than the first, @code{S0} uses a value of @code{b[]} that was written by @code{S1} in the previous iteration and thus there is also a dependence from @code{S1} to @code{S0} but because @code{S1} appears after @code{S0} in the loop, it is a loop-carried backward true dependence.@refill
+   An iteration space is is a set of iteration vectors.  It is usually
+specified in set notation with one or more values of l specified as an
+integer variable along with constraints on the variables.  The iteration
+space for each statement is shown below as a set of integer tuples.  In
+practice, the upper and lower bounds of each loop index would be
+specified in each set condition as well.
 
-However, @code{S2} reads a value of @code{a[]} that was written by @code{S0} and a value of @code{b[]} that was written by @code{S1} in the same iteration and thus there is both a loop-independent true dependence of @code{S2} on @code{S0} and a loop-independent true dependence of @code{S2} on @code{S1}.@refill
+     S_0: {[0, 0, 0, 0, 0, 0, 0]}
+     S_1: {[1, i, 0, 0, 0, 0, 0]}
+     S_2: {[1, i, 1, 0, 0, 0, 0]}
+     S_3: {[1, i, 2, j, 0, 0, 0]}
+     S_4: {[1, i, 2, j, 1, k, 0]}
+     S_5: {[1, i, 2, j, 2, 0, 0]}
+     S_6: {[1, i, 3, 0, 0, 0, 0]}
 
-@section Iteration Vectors
+   If we were were told that the current point of execution of the above
+loop nest was described by the iteration vector [1, 3, 2, 6, 2, 0, 0] we
+would know that statement S_5 was executing with the indices of the
+loops being i = 3 and j = 6.
 
-Iteration vectors are used to specify the execution order of statements within the loop nest to ensure that dependences between statements are maintained. We define an iteration vector in a nest of @math{n} loops as @math{@strong{i} = @{i_1, i_2, ..., i_n@}} where @math{i_k} is the value of the index of the loop at nesting @math{k}.@refill
-
-Iteration vectors are ordered. Interation vector @math{@strong{i}} @i{preceeds} iteration @math{@strong{j}}, denoted @math{@strong{i} < @strong{j}}, if and only if @math{@strong{i}[1:n-1] < @strong{j}[1:n-1]} or @math{@strong{i}[1:n-1] = @strong{j}[1:n-1]} and @math{i_n < j_n}.@refill
-
-The above scheme captures the progression of all of the loop indicies in the nest. To capture the lexical ordering of statements within loops we introduce an auxilary loop before each loop level and an auxillary loop as the last dimension. This allows a uniform method to both track the progression of the loop levels as well as schedule the statements within a loop as shown below.@refill
-
-@page
-Consider the following loop nest below. There are three loop levels to track the three indicies i, j and k and four auxillary loop levels to track the relative execution of the statements within the loops.@refill
-@smallexample
-S0
-for (i @dots{}) @{
-  S1
-  S2
-  for (j @dots{}) @{
-    S3
-    S4
-    for (k @dots{}) @{
-      S5
-      S6
-    @}
-  @}
-@}
-@end smallexample
-
-The iteration vectors which would describe the execution order of the statements above are shown below.@refill
-@sp 1
-
-@smallexample 
-S0: [0, 0, 0, 0, 0, 0, 0]
-S1: [1, i, 0, 0, 0, 0, 0]
-S2: [1, i, 1, 0, 0, 0, 0]
-S3: [1, i, 0, j, 0, 0, 0]
-S4  [1, i, 0, j, 1, 0, 0]
-S5: [1, i, 0, j, 0, k, 0]
-S6: [1, i, 0, j, 0, k, 1]
-@end smallexample
-@sp 1
-
-If were were told that the current point of execution of the above loop nest was described by the iteration vector [1, 3, 0, 2, 0, 8, 1] we would know that statement S6 was executing with the indexes of the loops being i = 3, j = 2 and k = 8.@refill
-
-@section Distance and Direction Vectors
-
-@section Iteration Spaces
-
-@section Legalily of Transformations
-
-@node Third Chapter
-@chapter The CHiLL Scripting Language
-
-@section Loop and Statement Identification
-
-The first two statements in this and every CHiLL script identify the source file and the procedure to modify. Only one source file and one procedure can be modified in any single script.@refill
-
-Individual loops within a loop nest are identified by level that they are nested and the statement that they surround. The outer most loop of a nest is always loop level 1. Thus in the previous example, the transformation @samp{permute([3,2,1])} exchanged the inner and outer most loops.@refill
-
-It is very important to realize that every transformation has the capability to insert or reorder the loops and thus the identification of a specific loop will change after a transformation. In figure 1 the j, k and i loops that were respectively at levels 1, 2 and 3 before the permutation are now at levels 3, 2 and 1 after the transformation. Any subsequent transformation must use these new loop levels to identify the individual loops.@refill
-
-Conceptually CHiLL treats the statements in a loop nest as one of three types: loops, conditionals and everything else. When we refer to "a statement" in CHiLL, we are referring to a block of one or more program statements which have a single uninterrupted execution path through them.@refill
-
-Consider the pseudo code below.@refill
-
-@smallexample
-for (i ...) @{
-  S0
-  for (j ...) @{
-    S1
-    for (k ...)
-      S2
-  @}
-  for (j ...)
-    S3
-@}  
-@end smallexample
+   The 'print_space' command will print the iteration space for every
+statement (or block of statements).  For example 'print_space' applied
+to the following code.
 
 
-The loop level alone insufficient to uniquely determine a specific loop within a nest unless a statement enclosed by the loop is also provided. Statements are initially numbered in the order they appear from top to bottom in the nest starting with zero. Transformations may also insert or reorder the statements in the nest and thus the identification of a specific statement can change after a transformation as well.@refill
+     for(i = 0; i < an; i++)
+       for(j = 0; j < bm; j++) {
+         C[i][j] = 0.0f;
+         for(n = 0; n < ambn; n++)
+           C[i][j] += A[i][n] * B[n][j];
+       }
+   gives the following results.
 
-The @command{print_code} command by default displays C-like pseudo code of the nest showing the loops, indices and statements. Statements consist of the largest block of code that does not contain a loop or conditional statement. The statement in the pseudo-code appears as a function indexed by the loop indices as if it were a call to the block of code.
-Adding print statements around the permute transformation in figure 3 would produce the following output
-The arguments in the call to s0 before and after the transformation show that the first and last loops indices have been exchanged in the statement block.@refill
+     s0: {Sym=[bm,an,ambn] [t1,t2,t3,t4,t5,t6,t7] : t1=0 && t3=0 && t5=0 && 
+          t7=0 && t6=0 && 0<=t2<an && 0<=t4<bm && 1<=ambnyes }
+     s1: {Sym=[ambn,bm,an] [t1,t2,t3,t4,t5,t6,t7] : t1=0 && t3=0 && t5=0 && 
+          t7=0 && 0<=t2<an && 0<=t6<ambn && 0<=t4<bm }
 
-@page
-@section Commands
+2.3 Dependences
+===============
 
-@c @def
-pefn {Transform} @code{tile} {} (int @var{stmt}, int @var{level}, int @var{tile_size}, int @var{outer_level} = 1, TileMethod @var{method} = StridedTile, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+There are two general categories of dependences, control dependences and
+data dependences.
 
-@c Source
-@cindex source command
-@deftypefn {Command} @code{source}(string @var{filename})
-The @code{source} command specifies the filename of the original code to be transformed. For example @samp{source("mm.c")}. There can only be one @code{source} command in a script and it must preceed the @code{loop} command.@refill
-@end deftypefn
+   A "control dependence" exist when one statement is executed
+conditionally on the result of another.  For example, in the statements
+below S_1 cannot be executed before S_0 and thus S_1 has a control
+dependence on S_0.
+       S_0     if (x != 0)
+       S_1       a /= x;
 
-@c Procedure
-@cindex procedure command
-@deftypefn {Command} @code{procedure}(string @var{name})
-The @code{procedure} command specifies the procedure name in the file to transform. For example @samp{procedure("mm")}. There can only be one procedure modified in a given script.@refill
-@end deftypefn
+   A "data dependence" exists between statements S_0 and S_1 (meaning
+S_1 depends on statement S_0) if and only if there is a plausible
+run-time execution path from S_0 to S_1, both statements access the same
+memory location and at least one of them stores to it.  There are three
+types of data dependences:
 
-@c Loop
-@cindex loop command
-@deftypefn {Command} @code{loop}(int @var{level})
-@deftypefnx {Command} @code{loop}(int @var{start}, int @var{end})
-The @command{loop} command specifies the loop nest to be transformed by specifying the top level loop of the nest. Top level loops are those loops at procedure scope and are numbered starting from zero. The first form of the command selects a nest contained in a single top level loop. The second form takes a range of top level loops and treats them as a single unified nest.@refill
+   A "true dependence" exists when S_0 writes to a location that is
+later read by S_1.
 
-The @code{loop} command can be issued multiple times in a script to select and modify different top level loops within the same file.@refill
-@end deftypefn
+       S_0     x = ...
+       S_1     ... = x
 
-@c The print command takes one of five forms:
-@deftypefn {Command} {} @code{print_code}()
-The @code{print code} commands display C-like pseudo code of the nest showing the loops, indices and statements. Statements in the pseudo-code appears as a function indexed by the loop indices as if it were a call to the block of code.@refill
+   An "antidependence" exists when S_0 reads from a location that is
+later written to by S_1.
+       S_0     ... = x
+       S_1     x = ...
 
-For example, the command @code{print_code} applied to the loop@refill
-@sp 1
-@smallexample
-for(i = 0; i < an; i++)
-  for(j = 0; j < bm; j++) @{
-    C[i][j] = 0.0f;
-    for(n = 0; n < ambn; n++)
-      C[i][j] += A[i][n] * B[n][j];
-  @}
-@end smallexample
+   An "output dependence" exists when S_0 writes to a location that is
+later written to by S_1.
+       S_0     x = ...
+       S_1     x = ...
 
-produces the results@refill
-@smallexample
-for(t2 = 0; t2 <= an-1; t2++) @{
-  for(t4 = 0; t4 <= bm-1; t4++) @{
-    s0(t2,t4,0);
-    s1(t2,t4,0);
-    for(t6 = 1; t6 <= ambn-1; t6++) @{
-      s1(t2,t4,t6);
-    @}
-  @}
-@}
-@end smallexample
+   In the parlance of hardware design, a true dependence is known as a
+RAW (read after write) hazard, an antidependence is a WAR (write after
+read) hazard and an output dependence is a WAW (write after write)
+hazard.  These dependences are fairly intuitively and are used
+instinctively by every programmer to determine the correct order of
+statements in sequential code.  However, when loops and arrays are
+involved these same data dependences arise in more subtle ways.
 
-Notice that the first iteration of statement s1 was peeled from the innermost loop and the iteration space of that loop was modified to start at 1 and not 0.@refill
-@end deftypefn
+2.4 Dependences with loops and arrays
+=====================================
 
-@page
-@cindex print_dep command
-@deftypefn {Command} {} @code{print_dep}()
-The @code{print_dep} command displays the dependences between all statements in the current nest. For example, the command @code{print_dep()} applied to the loop@refill
-@sp 1
-@smallexample
-for(i = 0; i < an; i++)
-  for(j = 0; j < bm; j++) @{
-    C[i][j] = 0.0f;
-    for(n = 0; n < ambn; n++)
-      C[i][j] += A[i][n] * B[n][j];
-  @}
-@end smallexample
-gives the following results.@refill
+It is useful to categorize data dependences in loops into two types.
+Consider a loop that contains two statements call them S_0 and S_1.  If
+both S_0 and S_1 reference the same memory location within the same
+iteration as they do in this case, then the dependence is
+"loop-independent".  If statement S_0 and S_1 reference the same memory
+location in different iterations, then the dependence is created by the
+loop and it is said to be "loop-carried".
 
-@smallexample
-s0->s1: C:true(0, 0, +) C:true(0, 0, 0) C:output(0, 0, +) C:output(0, 0, 0)
-s1->s1: C:anti(0, 0, +) C:output(0, 0, +)
-@end smallexample
-@sp 1
-It shows two statements and the dependences between them. There are four dependences between statements s0 and s1 and two dependences between s1 and itself.@refill
-@sp 1
-Given a nest with @math{n} loops each individual dependence has the form:@refill
-@indentedblock
-@var{var}:@var{type}(@math{d_1}, @math{d_2}, @dots{}, @math{d_n})
-@end indentedblock
-where @var{var} is the variable name that is creating the dependence, @var{type} is the type of dependence which is one of @i{_quasi}, @i{true}, @i{anti}, @i{output}, @i{input}, @i{control} or @i{unknown}.@refill
+   As an example the loop below which has two loop-carried dependences
+and two loop-independent dependences.
 
-The value of @math{d_i} indicates the distance of the dependence between the source and sink carried by loop @i{i} and is one of the following symbols below where @math{n}, @math{n_l} and @math{n_u} represent integer values in the iteration space of the loop.@refill
-@multitable @columnfractions .1 .2 .2 .2 .3
-@headitem @tab Symbol @tab Lower Bound @tab Upper Bound
-@item @tab @math{n} @tab @math{n} @tab @math{n}
-@item @tab @math{n_l{\sim}n_u} @tab @math{n_l} @tab @math{n_u}
-@item @tab @math{*} @tab @math{-\infty} @tab @math{+\infty}
-@item @tab @math{-} @tab @math{-\infty} @tab @math{-1}
-@item @tab @math{n-} @tab @math{-\infty} @tab @math{n}
-@item @tab @math{+} @tab @math{1} @tab @math{+\infty}
-@item @tab @math{n+} @tab @math{n} @tab @math{+\infty}
-@end multitable
-@end deftypefn
+            for (i = 0; i < n; i++) {
+       S_0     a[i + 1] = b[i];
+       S_1     b[i + 1] = a[i];
+       S_2     c[i] = a[i] + b[i];
+            }
 
-@cindex print_space command
-@deftypefn {Command} {} @code{print_space}()
-The @code{print_space} command displays the iteration space for each statement in the current nest. For example, the command @code{print_space()} applied to the loop@refill
-@sp 1
-@smallexample
-for(i = 0; i < an; i++)
-  for(j = 0; j < bm; j++) @{
-    C[i][j] = 0.0f;
-    for(n = 0; n < ambn; n++)
-      C[i][j] += A[i][n] * B[n][j];
-  @}
-@end smallexample
-gives the following results.@refill
+   In every iteration other than the first, S_1 reads an element of
+'a[]' that was written to by S_0 in the previous iteration and thus
+there is dependence from S_0 to S_1.  Because S_0 appears before S_1 in
+the loop, it is a "loop-carried forward" true dependence.
 
-@smallexample
-s0: @{ Sym=[bm,an,ambn] [t1,t2,t3,t4,t5,t6,t7] : t1 = 0 && t3 = 0 && t5 = 0 && @*     t7 = 0 && t6 = 0 && 0 <= t2 < an && 0 <= t4 < bm && 1 <= ambn @}
-s1: @{ Sym=[ambn,bm,an] [t1,t2,t3,t4,t5,t6,t7] : t1 = 0 && t3 = 0 && t5 = 0 && @*     t7 = 0 && 0 <= t2 < an && 0 <= t6 < ambn && 0 <= t4 < bm @}
-@end smallexample
+   Likewise, for every iteration other than the first, S_0 uses a value
+of 'b[]' that was written by S_1 in the previous iteration and thus
+there is also a dependence from S_1 to S_0 but because S_1 appears after
+S_0 in the loop, it is a "loop-carried backward" true dependence.
 
-The notation for an iteration space is that of a set of indicies [t1, t2, @dots{} ,tn] where n is the two times number loops in the nest plus one and the definition of which includes symbols designated in the Sym=[ @dots{} ] construction followed by a colon and the defining relationships between the symbols and iteration values.@refill
-@sp 1
-The odd elements of the iteration space represent phantom loops for establishing the order of multiple statements within a loop and the even elements of the iteration space represent the values of the actual indexes of the loops in the nest.@refill
-@end deftypefn
+   Finally S_2 reads a value of 'a[]' that was written by S_0 and a
+value of 'b[]' that was written by S_1 in the same iteration and thus
+there are two "loop-independent" true dependence, one is S_2 on S_0 and
+the other is of S_2 on S_1.
 
-@cindex print_structure command
-@deftypefn {Command} {} @code{print_structure}()
-The @code{print structure} command displays the structure of each statement.@refill
-@smallexample
-s1: 0(dim:0) 0(dim:1) 0(dim:2) 0
-@end smallexample
-@end deftypefn
+2.5 Distance Vectors
+====================
 
-@cindex exit command
-@c The exit command has the form:
-@deftypefn {Command} {} @code{exit}()
-The @code{exit} command exists the script.@refill
-@end deftypefn
+Given two statements S_1 and S_2 with iteration vector i_1 and i_2
+respectively where S2 depends on S1 we define the distance vector d of
+the dependence as follows.  Let
+     i_1 = {c_0', l_1', c_1', l_2', ..., c_n', l_n', c_{n+1}'} and
+     i_2 = {c_0, l_1, c_1, l_2, ..., c_n, l_n, c_{n+1}}
+   then we define the distance vector as
+     d = {l_1-l_1', l_2-l_2', ..., l_n-l_n'}.
+   The only statement in the nested loop below has a loop-dependent
+dependence with itself.
+       for(i = 0; i < 2 * n; i++)
+         for (j = 1; j < m; j++)
+           a[i+1][j-1] = a[i][j] + b[i][j];
 
-@cindex known command
-@c The known command has the form:
-@deftypefn {Command} {} @code{known}(vector @var{cond})
-The @code{known} command adds a condition as an expression.@refill
-@end deftypefn
+   The right hand side of the assignment reads array A at iteration
+vector i_R below and the left hand side of the assignment writes to the
+same location of the array at the iteration vector i_W.
 
-@unnumberedsubsec Remove dependency
-@c The remove dependency has the form:
-@deftypefn {Command} @code{remove_dep} {} (int @var{stmt1}, int @var{stmt2})
-The @code{remove_dep} removes a dependence between two statements in the loop nest.@refill
-@end deftypefn
+     i_R = {0, i, 0, j, 0}
+     i_W = {0, i+1, 0, j-1, 0}.
 
-@cindex pragma command
-@c The pragma command has the form:
-@deftypefn {Command} @code{pragma} {} (int @var{stmt}, int @var{level}, string @var{text})
-The @code{pragma} does what?@refill
-@end deftypefn
+   Because i_R<i_W this is a read/write dependence and the distance
+vector is
+     d=i_W-i_R={1, -1}.
 
-@page
-@section Transformations
-@c --------------------------------- Original -----------------------------
-@unnumberedsubsec Original
-@deftypefn {Transform} @code{original} ()
-The @code{original} transformation initializes the loop structure without permuting it.@refill
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 4', 'an > 0', 'bm > 0'])
-peel(1,3,4)
-print_code()
-original()
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++) {
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++) {
-        C[i][j] += A[i][n] * B[n][j];
-      }
-    }
-  }
+   The command 'print_dep' applied to this loop yields 's0->s0:
+a:true(1, -1)'
+
+2.6 Direction Vectors
+=====================
+
+In the same way that an iteration space is a set of iteration vectors, a
+direction vector is a summarization of a set of distance vectors between
+two statements.
+
+   In the matrix multiplication loop nest below, statement S_0
+initializes the value of 'C[i][j]' and statement S_1 accumulates the
+inner product into it.  S_1 has multiple dependences on S_0 as the
+initialization must occur before _every_ accumulation statement S_1
+executed in the loop.
+
+            for(i = 0; i < an; i++)
+              for(j = 0; j < bm; j++) {
+       S_0        C[i][j] = 0.0f;
+                for(n = 0; n < ambn; n++)
+       S_1          C[i][j] += A[i][n] * B[n][j];
+              }
+
+   In general, given a nest with n loops each direction vector has the
+form (d_1, d_2, ..., d_n) where The value of d_i indicates the range of
+distances between the source and sink carried by loop i and is one of
+the following symbols below where n, n_l and n_u represent integer
+values in the iteration space of the loop.
+        Symbol         Lower Bound    Upper Bound
+-----------------------------------------------------
+        n              n              n
+        n_l{\sim}n_u   n_l            n_u
+        *              -\infty        +\infty
+        -              -\infty        -1
+        n-             -\infty        n
+        +              1              +\infty
+        n+             n              +\infty
+
+   Notice that neither the symbols + nor - includes the value of 0.  The
+reason is that a distance of 0 means that the dependence is not
+loop-carried which CHiLL likes to separate from dependences that are
+loop-carried.  This is shown below with output of the command
+'print_dep' on the above code.
+
+     s0->s1: C:true(0,0,+) C:true(0,0,0) C:output(0,0,+) C:output(0,0,0)
+     s1->s1: C:anti(0,0,+) C:output(0,0,+)
+
+2.7 Legality of Transformations
+===============================
+
+From the definition of an iteration vector it is clear that
+transformations that permute the loop structure also permute the
+iteration vector and distance vectors of all dependences in exactly the
+same way.  Because the distance vector is the distance from the source
+to the sink, any permutation of the loop structure that causes the
+permuted distance vector to be negative is illegal as the transformation
+has caused the sink to execute before the source.
+
+   Looking at the transformed elements of an iteration vector or
+distance vector from left to right (or outer loop to inner loop), if the
+first non-zero loop element is negative, then the distance vector is
+negative and the transformation is illegal.
+
+   ---------- Footnotes ----------
+
+   (1) with a suitable transformation such that the index is
+monotonically increasing as the loop progresses
+
+
+File: chill.info,  Node: Third Chapter,  Next: Index,  Prev: Second Chapter,  Up: Top
+
+3 The CHiLL Scripting Language
+******************************
+
+3.1 Loop and Statement Identification
+=====================================
+
+The first two commands in every CHiLL script identify the source file
+and the procedure to modify.  Only one source file and one procedure can
+be modified in any single script.
+
+   Individual loops within a loop nest are identified by the level that
+they are nested and the statement that they surround.  The outermost
+loop of a nest is always loop level 1.  Thus in the introductory
+example, the transformation 'permute([3,2,1])' exchanged the inner and
+outermost loops.
+
+   It is very important to realize that every transformation has the
+capability to insert or reorder the loops and thus the identification of
+a specific loop will change after a transformation.  In the example
+referenced above the j, k and i loops that were respectively at levels
+1, 2 and 3 before the permutation are now at levels 3, 2 and 1 after the
+transformation.  Any subsequent transformation must use these new loop
+levels to identify the individual loops.
+
+   Consider the pseudo code below.
+
+     for (i ...) {
+       S_0
+       for (j ...) {
+         S_1
+         for (k ...)
+           S_2
+       }
+       for (j ...)
+         S_3
+     }
+
+   The loop level alone insufficient to uniquely determine a specific
+loop within a nest unless a statement enclosed by the loop is also
+provided.  Statements are initially numbered in the order they appear
+from top to bottom in the nest starting with zero.  Transformations may
+also insert or reorder the statements in the nest but the identification
+of a specific statement will not change after a transformation.
+
+3.2 Commands
+============
+
+ -- Command: source (string FILENAME)
+     The 'source' command specifies the filename of the original code to
+     be transformed.  There can only be one 'source' command in a script
+     and it must precede the 'loop' command.
+
+ -- Command: procedure (string NAME)
+     The 'procedure' command specifies the procedure name in the file to
+     transform.  There can only be one procedure modified in a given
+     script.
+
+ -- Command: loop (int LEVEL)
+ -- Command: loop (int START, int END)
+     The 'loop' command specifies the loop nest to be transformed by
+     specifying the top level loop of the nest.  The first form of the
+     command selects a nest contained in a single top level loop.  The
+     second form takes a range of top level loops and treats them as a
+     single unified nest.
+
+     Top level loops are those loops at procedure scope and are numbered
+     starting from zero.  Once a loop nest is selected by the 'loop'
+     command the outermost loop of the nest is numbered from one.
+
+     The 'loop' command can be issued multiple times in a script to
+     select and modify different top level loops within the same file.
+
+ -- Command: print_code ()
+     The 'print code' commands display C-like pseudo code of the nest
+     showing the loops, indices and statements.  Statements in the
+     pseudo-code appears as a function indexed by the loop indices as if
+     it were a call to the block of code.
+
+ -- Command: print_dep ()
+     The 'print_dep' command displays the dependences between all
+     statements in the current nest.  Given a nest with n loops each
+     individual dependence has the form:
+          VAR:TYPE(d_1, d_2, ..., d_n)
+     where VAR is the variable name that is creating the dependence,
+     TYPE is the type of dependence which is one of _quasi, true, anti,
+     output, input, control or unknown.
+
+     The value of d_i indicates the distance or range of distances where
+     a dependence exists between the source and sink carried by loop i.
+
+ -- Command: print_space ()
+     The 'print_space' command displays the iteration space for each
+     statement in the current nest.
+
+ -- Command: exit ()
+     The 'exit' command exists the script.
+
+ -- Command: known (string COND)
+     The 'known' command adds a condition as an expression.  The value
+     of COND can be a string or a list of strings.
+
+ -- Command: remove_dep (int STMT1, int STMT2)
+     The 'remove_dep' removes a dependence between two statements in the
+     loop nest.
+
+3.3 Transformations
+===================
+
+Distribute
+----------
+
+ -- Transform: distribute (set<int> STMTS, int LOOP)
+     Distribute the set of statements in STMTS such that each statement
+     executes under its own clone of the common loop structure down to
+     and including level LOOP.
+
+     The transformation is legal if and only if, all loop-carried
+     dependences between the statements in STMTS are contained entirely
+     to loop levels less than LOOP.
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+distribute([0,1], 1)                       C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s0(t2,t4,0);                       int i, j, n;
+  }                                    for (i = 0; i <= an - 1; i += 1)
+}                                        for (j = 0; j <= bm - 1; j += 1)
+for(t2 = 0; t2 <= an-1; t2++) {            C[i][j] = 0.0f;
+  for(t4 = 0; t4 <= bm-1; t4++) {      for (i = 0; i <= an - 1; i += 1)
+    for(t6 = 0; t6 <= ambn-1; t6++) {    for (j = 0; j <= bm - 1; j += 1)
+      s1(t2,t4,t6);                        for (n = 0; n <= ambn - 1; n += 1)
+    }                                        C[i][j] += (A[i][n] * B[n][j]);
+  }                                  }
 }
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-    s1(t2,t4,0);
-    for(t6 = 1; t6 <= ambn-1; t6++) {
-      s1(t2,t4,t6);
-    }
-  }
+Fuse
+----
+
+ -- Transform: fuse (set<int> STMTS, int LOOP)
+     Fuse the set of statements in STMTS such that all statement
+     executes under the common loop structure down to and including
+     level LOOP.
+
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('dist.c')                             int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0, 1)                             for (i = 0; i <= an - 1; i += 1)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for (j = 0; j <= bm - 1; j += 1)
+fuse([0,1], 1)                             C[i][j] = 0.0f;
+print_code()                         
+                                       for (i = 0; i <= an - 1; i += 1)
+                                         for (j = 0; j <= bm - 1; j += 1)
+                                           for (n = 0; n <= ambn - 1; n += 1)
+                                             C[i][j] += (A[i][n] * B[n][j]);
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s0(t2,t4,0);                       int i, j, n;
+    s1(t2,t4,0);                       for (i = 0; i <= an - 1; i += 1)
+    for(t6 = 1; t6 <= ambn-1; t6++) {    for (j = 0; j <= bm - 1; j += 1) {
+      s1(t2,t4,t6);                        C[i][j] = 0.0f;
+    }                                      C[i][j] += (A[i][0] * B[0][j]);
+  }                                        for (n = 1; n <= ambn - 1; n += 1)
+}                                            C[i][j] += (A[i][n] * B[n][j]);
+                                         }
+                                     }
+
+Peel
+----
+
+ -- Transform: peel (int STMT, int LOOP, int AMOUNT = 1)
+     The 'peel' transformation unrolls a specified number of iterations
+     of a statement from the beginning or the end of a loop at level
+     LOOP.
+
+     If AMOUNT is positive then statements are peeled from the start of
+     the loop, if negative then the statements are peeled from the end.
+
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 4', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+peel(1,3,4)                                C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s2(t2,t4,0);                       int i, j, n;
+    s3(t2,t4,0);                       for (i = 0; i <= an - 1; i += 1)  {
+    s4(t2,t4,1);                         for (j = 0; j <= bm - 1; j += 1) {
+    s5(t2,t4,2);                           C[i][j] = 0.0f;
+    s6(t2,t4,3);                           C[i][j] += (A[i][0] * B[0][j]);
+    for(t6 = 4; t6 <= ambn-1; t6++) {      if(2 <= ambn) {
+      s1(t2,t4,t6);                          C[i][j] += (A[i][1] * B[1][j]);
+    }                                        if(3 <= ambn) {
+  }                                            C[i][j] += (A[i][2] * B[2][j]);
+}                                              if(4 <= ambn)
+                                                 C[i][j] += (A[i][3] * B[3][j]);
+                                             }
+                                           }
+                                         }
+                                       }
+                                     }
+
+Permute
+-------
+
+The 'permute' transformation interchanges the loops of a loop nest.
+ -- Transform: permute (vector<int> P)
+ -- Transform: permute (set<int> STMTS, vector<int> P)
+
+     The loop nest to permute is specified by the statements in the set
+     STMTS.  The loops in the nest are permuted according to the
+     permutation vector P.
+
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+permute([3,1,2])                           C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= ambn-1; t2++) {    void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= an-1; t4++) {            int ambn, int an, int bm) {
+    if (t2 <= 0) {                     int i, j, n;
+      for(t6 = 0; t6 <= bm-1; t6++) {  for (n = 0; n <= ambn - 1; n += 1)
+        s0(t4,t6,t2);                    for (i = 0; i <= an - 1; i += 1)
+        s1(t4,t6,t2);                      if (n <= 0)
+      }                                      for (j = 0; j <= bm - 1; j += 1) {
+    }                                          C[i][j] = 0.0f;
+    else {                                     C[i][j] += (A[i][n] * B[n][j]);
+      for(t6 = 0; t6 <= bm-1; t6++) {        }
+        s1(t4,t6,t2);                      else
+      }                                      for (j = 0; j <= bm - 1; j += 1)
+    }                                          C[i][j] += (A[i][n] * B[n][j]);
+  }                                  }
 }
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) {
-      C[i][j] = 0.0f;
-      C[i][j] += (A[i][0] * B[0][j]);
-      for (n = 1; n <= ambn - 1; n += 1) 
-        C[i][j] += (A[i][n] * B[n][j]);
-    }
+
+Reverse
+-------
+
+ -- Transform: reverse (set<int> STMTS, int LEVEL)
+     The 'reverse' transformation changes the direction of the iteration
+     through the loop and is a shortcut for the transformation
+     'scale(STMTS, LEVEL, -1)'.
+
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+distribute([0,1],1)                        C[i][j] = 0.0f;
+reverse([1],1)                             for(n = 0; n < ambn; n++)
+reverse([1],2)                               C[i][j] += A[i][n] * B[n][j];
+print_code()                             }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s0(t2,t4,0);                       int i, j, n;
+  }                                    for (i = 0; i <= an - 1; i += 1)
+}                                        for (j = 0; j <= bm - 1; j += 1)
+for(t2 = -an+1; t2 <= 0; t2++) {           C[i][j] = 0.0f;
+  for(t4 = -bm+1; t4 <= 0; t4++) {     for (i = -an + 1; i <= 0; i += 1)
+    for(t6 = 0; t6 <= ambn-1; t6++) {    for (j = -bm + 1; j <= 0; j += 1)
+      s1(-t2,-t4,t6);                      for (n = 0; n <= ambn - 1; n += 1)
+    }                                        C[-i][-j] += (A[-i][n] * B[n][-j]);
+  }                                  }
 }
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
 
-@c --------------------------------- Permute -----------------------------
-@page
-@unnumberedsubsec Permute
-The @code{permute} transformation interchanges the loops of a loop nest.@refill
-@deftypefn {Transform} @code{permute} {} (int @var{stmt} = 0, int @var{level} = 0, Vector @var{p})
-The loop nest to permute is specified by @var{stmt} and @var{level}. The loops in the next are permuted acording to the vector @var{p}.@refill
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-permute([3,1,2])
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
+Scale
+-----
+
+ -- Transform: scale (set<int> STMTS, int LOOP, int AMOUNT)
+     The 'scale' transformation multiplies the index variable for the
+     loop at level LOOP by AMOUNT and is a shortcut for the
+     transformation 'skew'(STMTS, LOOP, [0, \dots{}, 0, AMOUNT]).
+
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+distribute([0,1],1)                        C[i][j] = 0.0f;
+scale([1],1,4)                             for(n = 0; n < ambn; n++)
+scale([1],2,4)                               C[i][j] += A[i][n] * B[n][j];
+print_code()                             }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s0(t2,t4,0);                       int i, j, n;
+  }                                    for (i = 0; i <= an - 1; i += 1)
+}                                        for (j = 0; j <= bm - 1; j += 1)
+for(t2 = 0; t2 <= 4*an-4; t2 += 4) {       C[i][j] = 0.0f;
+  for(t4 = 0; t4 <= 4*bm-4; t4 += 4) {  for (i = 0; i <= 4 * an - 4; i += 4)
+    for(t6 = 0; t6 <= ambn-1; t6++) {    for (j = 0; j <= 4 * bm - 4; j += 4)
+      s1(t2/4,t4/4,t6);                    for (n = 0; n <= ambn - 1; n += 1)
+    }                                        C[i/4][j/4] += A[i/4][n]*B[n][j/4];
+  }                                  }
 }
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= ambn-1; t2++) {
-  for(t4 = 0; t4 <= an-1; t4++) {
-    if (t2 <= 0) {
-      for(t6 = 0; t6 <= bm-1; t6++) {
-        s0(t4,t6,t2);
-        s1(t4,t6,t2);
-      }
-    }
-    else {
-      for(t6 = 0; t6 <= bm-1; t6++) {
-        s1(t4,t6,t2);
-      }
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (n = 0; n <= ambn - 1; n += 1) 
-    for (i = 0; i <= an - 1; i += 1) 
-      if (n <= 0) 
-        for (j = 0; j <= bm - 1; j += 1) {
-          C[i][j] = 0.0f;
-          C[i][j] += (A[i][n] * B[n][j]);
-        }
-      else 
-        for (j = 0; j <= bm - 1; j += 1) 
-          C[i][j] += (A[i][n] * B[n][j]);
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Shift
+-----
 
-@c --------------------------------- Tile -----------------------------
-@page
-@unnumberedsubsec Tile
-The @code{tile} transformation allows a loop dimension to be segregated into tiles, the execution of which are scheduled by a control loop placed outside the tiled loop. Statements and loops inside the control loop will be executed a tile at a time along the tiled dimension.
-@deftypefn {Transform} @code{tile} {} (int @var{stmt}, int @var{level}, int @var{tile_size}, int @var{outer_level} = 1, TileMethod @var{method} = StridedTile, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
-@b{Arguments}
-The loop nest to tile is specified by @var{stmt} and @var{level}. The @var{tile_size} specifies the tile size, a value of 0 indicates no tiling, a value of 1 is similar to loop interchange. The @var{outer_loop} @dots{}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-tile(0,2,4)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
+ -- Transform: shift (set<int> STMTS, int LOOP, int AMOUNT)
+     The 'shift' transformation adjusts the index of the loop at level
+     LOOP by adding AMOUNT to what the the non transformed index would
+     be and then subtracting AMOUNT from the index when it is used by
+     statements in STMTS.  The aim of this transformation is to add a
+     constant offset to the index used when executing selected
+     statements and it is accomplishes by either adjusting the staring
+     point of the loop or using conditionals when there are statements
+     in the loop that are not in STMTS.
 
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+shift([1],1,4)                             C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-chill test_tile.py
-for(t2 = 0; t2 <= bm-1; t2 += 4) {
-  for(t4 = 0; t4 <= an-1; t4++) {
-    for(t6 = t2; t6 <= min(t2+3,bm-1); t6++) {
-      s0(t4,t6,0);
-      s1(t4,t6,0);
-      for(t8 = 1; t8 <= ambn-1; t8++) {
-        s1(t4,t6,t8);
-      }
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-#define __rose_lt(x,y) ((x)<(y)?(x):(y))
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n, jj;
-  for (jj = 0; jj <= bm - 1; jj += 4) 
-    for (i = 0; i <= an - 1; i += 1) 
-      for (j=jj; j<=__rose_lt(bm-1,jj+3); 
-           j+=1) {
-        C[i][j] = 0.0f;
-        C[i][j] += (A[i][0] * B[0][j]);
-        for (n = 1; n <= ambn - 1; n += 1) 
-            C[i][j] += (A[i][n] * B[n][j]);
-      }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c tile           stmt#
-@c                loop level to tile
-@c                tile size
-@c                  = 0 means no tiling
-@c                  = 1 similar to loop interchange
-@c                  = d tiling with tile/block size d
-@c                tile controlling loop level (default = 1, i.e. outermost loop)
-@c                tile controlling loop iteration method
-@c                tile boundary alignment offset (default = 0, >= 0)
-@c                tile boundary alignment multiple (default = 1, >= 1)
-@c align the starting point of the very first tile to be the closest designated  multiples right below (original_lb - offset)
-
-@c --------------------------------- Unroll -----------------------------
-@page
-@unnumberedsubsec Unroll
-@c Unroll
-@deftypefn {Transform} @code{unroll} {} (int @var{stmt}, int @var{level}, int @var{unroll_amount}, int @var{cleanup_split_level})
-The @code{unroll} transformation allows a loop dimension to be unrolled.
-@b{Arguments}
-
-@c The unroll command has four forms:
-@c unroll (expr, number, expr)
-@c unroll (expr, number, expr, expr)
-@c unroll_extra (expr, number, expr)
-@c unroll_extra (expr, number, expr, expr)
-@c The unroll command @dots{}
-@c unroll         stmt#
-@c                loop level to unroll
-@c                unroll amount
-@c                  = 0 means fully unroll the loop if the number of iterations
-@c                      can be determined statically, otherwise no unrolling
-@c                  = 1 means no unrolling
-@c                  = d means loop body unrolled d times and then fused together
-@c                      if it is legal
-@c                cleanup code splitted at loop level
-@c                  (default to unroll loop level)
-@c unroll_extra   stmt#
-@c                loop level to unroll
-@c                unroll_amount
-@c                  same as unroll except the cleanup loop is fully unrolled
-@c                  whenever possible
-@c                cleanup code splitted at loop level
-@c                  (default to unroll loop level)
-
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known('ambn > 0', 'an > 0', 'bm > 0')
-distribute([0,1], 1)
-unroll(1, 3, 4)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-     int ambn, int an, int bm) {
-  int i, j, n;
-
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-  }
-}
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s2(t2,t4);
-    for(t6 = 0; t6 <= -over1+ambn-1; 
-        t6 += 4) {
-      s1(t2,t4,t6);
-      s4(t2,t4,t6);
-    }
-    for(t6 = max(0, ambn-over1); 
-        t6 <= ambn-1; t6++) {
-      s3(t2,t4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-#define __rose_gt(x,y) ((x)>(y)?(x):(y))
-
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm)
-{
-  int i, j, n, over1;
-  over1 = 0;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      C[i][j] = 0.0f;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) {
-      over1 = ambn % 4;
-      for (n = 0; n <= -over1 + ambn - 1; 
-           n += 4) {
-        C[i][j] += (A[i][n]*B[n][j]);
-        C[i][j] += (A[i][n+1]*B[n+1][j]);
-        C[i][j] += (A[i][n+2]*B[n+2][j]);
-        C[i][j] += (A[i][n+3]*B[n+3][j]);
-      }
-      for (n = __rose_gt(0,ambn - over1); 
-           n <= ambn - 1; n += 1) 
-        C[i][j] += (A[i][n] * B[n][j]);
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c --------------------------------- Split -----------------------------
-@page
-@unnumberedsubsec Split
-@deftypefn {Transform} @code{split} {} (int @var{stmt}, int @var{level}, int @var{condition})
-The @code{split} transformation allows a loop to be split.
-@b{Arguments}
-
-@c Split
-@c The split command has the form:
-@c split (expr, number, cond)
-@c The split command @dots{}
-@c split          stmt#
-@c                loop level to split
-@c                expression
-@c                  in which L<n> has special meaning of loop level n,
-@c                  only one expression is allowed, i.e no logical and/or of
-@c                  multiple formulas
-
-@b{Conditions}
-@end deftypefn
-
-@c @include examples/split.texi
-
-@c --------------------------------- Nonsingular -----------------------------
-@page
-@unnumberedsubsec Nonsingular
-@c Nonsingular
-@deftypefn {Transform} @code{nonsingular} {} (matrix @var{transform})
-The @code{nonsingular} transformation @dots{}@refill
-
-@b{Arguments}
-
-@c The nonsingular command has the form:
-@c nonsingular (matrix)
-@c The nonsingular command @dots{}
-@c nonsingular    [[vector],...,[vector]]
-@c                  matrix parameter describes a unimodular or nonunimodular
-@c                  transformation to be performed on the perfect loop nest,
-@c                  the only requirement for the matrix is invertible. each
-@c                  vector can be (n+1)-dimension where n is iteration space
-@c                  dimension. in the case, the last entry in the vector is
-@c                  interpreted as the constant shift factor.
-
-@sp 2
-@b{Conditions}
-@end deftypefn
-
-@c @include examples/nonsingular.texi
-
-
-@c --------------------------------- Skew -----------------------------
-@page
-@unnumberedsubsec Skew
-@c Skew
-@deftypefn {Transform} @code{skew} {} (set @var{stmts}, int @var{level}, vector<int> @var{skew_amount})
-The @code{skew} transformation @dots{}@refill
-
-@b{Arguments}
-
-
-@c The skew command has the form:
-@c skew (vector, number, vector)
-@c The skew command @dots{}
-@c skew            [set of statement numbers]
-@c                 loop level
-@c                 [skewing amount vector]
-@c                   assuming targeted loop level is 2 and skewing vector is
-@c                   [1,1], then new loop at level 2 for statements in the first
-@c                 parameter is mapped to L1+L2
-
-@sp 2
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known('ambn > 0', 'an > 0', 'bm > 0')
-skew([1],1,[4])
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-     int ambn, int an, int bm) {
-  int i, j, n;
-
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= 4*an-4; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    if (an >= t2+1) {
-      s0(t2,t4,0);
-      if (intMod(t2,4) == 0) {
-        s1(t2/4,t4,0);
-      }
-    }
-    else {
-      if (intMod(t2,4) == 0) {
-        s1(t2/4,t4,0);
-      }
-    }
-    if (intMod(t2,4) == 0) {
-      for(t6 = 1; t6 <= ambn-1; t6++) {
-        s1(t2/4,t4,t6);
-      }
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm)
-{
-  int i, j, n;
-  for (i = 0; i <= 4 * an - 4; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) {
-      if (i + 1 <= an) {
-        C[i][j] = 0.0f;
-        if (i % 4 == 0) 
-          C[i/4][j] += (A[i/4][0]*B[0][j]);
-      } else if (i % 4 == 0) 
-        C[i/4][j] += (A[i/4][0]*B[0][j]);
-      if (i % 4 == 0) 
-        for (n = 1; n <= ambn - 1; n += 1) 
-          C[i/4][j] += (A[i/4][n]*B[n][j]);
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c --------------------------------- Scale -----------------------------
-@page
-@unnumberedsubsec Scale
-@deftypefn {Transform} @code{scale} {} (set @var{stmts}, int @var{level}, vector<int> @var{scale_amount})
-The @code{scale} transformation @dots{}@refill
-
-@b{Arguments}
-
-@c The scale command has the form:
-@c scale (vector, number, expr)
-@c The scale command @dots{}
-@c scale           [set of statement numbers]
-@c                 loop level
-@c                 scale amount
-@c                   shortcut to "skew([...],level,[0,..,0,amount])"
-
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-distribute([0,1],1)
-scale([1],1,4)
-scale([1],2,4)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-  }
-}
-for(t2 = 0; t2 <= 4*an-4; t2 += 4) {
-  for(t4 = 0; t4 <= 4*bm-4; t4 += 4) {
-    for(t6 = 0; t6 <= ambn-1; t6++) {
-      s1(t2/4,t4/4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      C[i][j] = 0.0f;
-  for (i = 0; i <= 4 * an - 4; i += 4) 
-    for (j = 0; j <= 4 * bm - 4; j += 4) 
-      for (n = 0; n <= ambn - 1; n += 1) 
-        C[i/4][j/4] += A[i/4][n]*B[n][j/4];
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c --------------------------------- Reverse -----------------------------
-@page
-@unnumberedsubsec Reverse
-@c Reverse
-@deftypefn {Transform} @code{reverse} {} (set @var{stmts}, int @var{level})
-The @code{reverse} transformation @dots{}@refill
-
-@b{Arguments}
-
-@c The reverse command has the form:
-@c reverse (vector, number)
-@c The reverse command @dots{}
-@c reverse         [set of statement numbers]
-@c                 loop level
-@c                   shortcut to "scale([...],level,-1)"
-
-@sp 2
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-distribute([0,1],1)
-reverse([1],1)
-reverse([1],2)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-  }
-}
-for(t2 = -an+1; t2 <= 0; t2++) {
-  for(t4 = -bm+1; t4 <= 0; t4++) {
-    for(t6 = 0; t6 <= ambn-1; t6++) {
-      s1(-t2,-t4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      C[i][j] = 0.0f;
-  for (i = -an + 1; i <= 0; i += 1) 
-    for (j = -bm + 1; j <= 0; j += 1) 
-      for (n = 0; n <= ambn - 1; n += 1) 
-        C[-i][-j] += (A[-i][n] * B[n][-j]);
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c --------------------------------- Shift -----------------------------
-@page
-@unnumberedsubsec Shift
-@deftypefn {Transform} @code{shift} {} (set @var{stmts}, int @var{shift_amount})
-The shift command @dots{}
-@b{Arguments}
-
-@c shift (vector, number, expr)
-@c shift           [set of statement numbers]
-@c                 loop level
-@c                 shift amount
-@c                   assuming targeted loop level is 2 and shift amount is
-@c                   1, then the new loop at level 2 for statements in the first
-@c                   parameter is mapped to L2+1, i.e. shifted right by 1
-
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-shift([1],1,4)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an+3; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    if (an >= t2+1) {
-      s0(t2,t4,0);
-      if (t2 >= 4) {
-        s1(t2-4,t4,0);
-      }
-      if (t2 >= 4) {
-        for(t6 = 1; t6 <= ambn-1; t6++) {
-          s1(t2-4,t4,t6);
-        }
-      }
-    }
-    else {
-      if (t2 >= 4) {
-        for(t6 = 0; t6 <= ambn-1; t6++) {
-          s1(t2-4,t4,t6);
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an+3; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    if (an >= t2+1) {                  int i, j, n;
+      s0(t2,t4,0);                     for (i = 0; i <= an + 3; i += 1)
+      if (t2 >= 4) {                     for (j = 0; j <= bm-1; j += 1)
+        s1(t2-4,t4,0);                     if (i + 1 <= an) {
+      }                                      C[i][j] = 0.0f;
+      if (t2 >= 4) {                         if (4 <= i)
+        for(t6 = 1; t6 <= ambn-1; t6++) {          C[i-4][j] += A[i-4][0]*B[0][j];
+          s1(t2-4,t4,t6);                    if (4 <= i)
+        }                                      for (n = 1; n <= ambn-1; n += 1)
+      }                                          C[i-4][j] += A[i-4][n]*B[n][j];
+    }                                      }
+    else {                                 else if (4 <= i)
+      if (t2 >= 4) {                         for (n = 0; n <= ambn-1; n += 1)
+        for(t6 = 0; t6 <= ambn-1; t6++) {          C[i-4][j] += A[i-4][n]*B[n][j];
+          s1(t2-4,t4,t6);            }
         }
       }
     }
   }
 }
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an + 3; i += 1) 
-    for (j = 0; j <= bm-1; j += 1) 
-      if (i + 1 <= an) {
-        C[i][j] = 0.0f;
-        if (4 <= i) 
-          C[i-4][j] += A[i-4][0]*B[0][j];
-        if (4 <= i) 
-          for (n = 1; n <= ambn-1; n += 1) 
-            C[i-4][j] += A[i-4][n]*B[n][j];
-      }
-      else if (4 <= i) 
-        for (n = 0; n <= ambn-1; n += 1) 
-          C[i-4][j] += A[i-4][n]*B[n][j];
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
 
-@c --------------------------------- ShiftTo -----------------------------
-@page
-@unnumberedsubsec Shift_to
-@c ShiftTo
-@deftypefn {Transform} @code{shift_to} {} (set @var{stmts}, int @var{absolute_position})
-The @code{shift} transformation @dots{}
-@b{Arguments}
+Shift_to
+--------
 
-@c shift_to        stmt#
-@c                 loop level
-@c                 absolute position
-@c                   shift the loop starting point to this position
+ -- Transform: shift_to (int STMT, int LOOP, int AMOUNT)
+     The 'shift_to' transformation adjusts the index of the loop at
+     level LOOP by adding AMOUNT to the upper and lower bounds of the
+     loop and then subtracting AMOUNT from every statement within the
+     same loop structure as STMT.
 
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-shift_to(1,1,4)
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+shift_to(1,1,4)                            C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
+
+Output on stdout                     Transformed code
+for(t2 = 4; t2 <= an+3; t2++) {      void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= bm-1; t4++) {            int ambn, int an, int bm) {
+    s0(t2-4,t4,0);                     int i, j, n;
+    s1(t2-4,t4,0);                     for (i = 4; i <= an + 3; i += 1)
+    for(t6 = 1; t6 <= ambn-1; t6++) {    for (j = 0; j <= bm-1; j += 1) {
+      s1(t2-4,t4,t6);                      C[i-4][j] = 0.0f;
+    }                                      C[i-4][j] += A[i-4][0]*B[0][j];
+  }                                        for (n = 1; n <= ambn-1; n += 1)
+}                                            C[i-4][j] += A[i-4][n]*B[n][j];
+                                         }
+                                     }
+
+Skew
+----
+
+ -- Transform: skew (set<int> STMTS, int LOOP, vector<int> AMOUNT)
+     The 'skew' transformation changes the index variable of the loop at
+     level LOOP to be a linear combination of the indexes that are less
+     than or equal to the level being transformed.
+
+     Let i_1, i_2, \dots{}, i_{loop} be the original loop indexes and
+     let amount = (a_1, a_2, \dots{}, a_{loop}).  The new index
+     i'_{loop} will be \sum\limits_{l = 1}^{loop} a_l i_l.
+
+The example below takes an algorithm with a negative loop-carried
+dependence and transforms it into one without a dependence.
+
+Python Script                        Original code
+from chill import *                  void f(float **a, int n, int m) {
+source('skew.c')                       int i, j;
+procedure('f')                         for (i = 1; i < n; i++)
+loop(0)                                  for (j = 0; j < m; j++)
+known(['n > 0', 'm > 1'])                  a[i][j] = a[i-1][j+1] + 1;
+print_code()                         }
+print_dep()
+
+skew([0], 2, [1, 1])
 print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+print_dep()
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 4; t2 <= an+3; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2-4,t4,0);
-    s1(t2-4,t4,0);
-    for(t6 = 1; t6 <= ambn-1; t6++) {
-      s1(t2-4,t4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 4; i <= an + 3; i += 1) 
-    for (j = 0; j <= bm-1; j += 1) {
-      C[i-4][j] = 0.0f;
-      C[i-4][j] += A[i-4][0]*B[0][j];
-      for (n = 1; n <= ambn-1; n += 1) 
-        C[i-4][j] += A[i-4][n]*B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Output on stdout                     Transformed code
+for(t2 = 1; t2 <= n-1; t2++) {       void f(float **a,int n,int m)
+  for(t4 = 0; t4 <= m-1; t4++) {     {
+    s0(t2,t4);                         int i, j;
+  }                                    for (i = 1; i < n; i += 1)
+}                                        for (j = i; j < i + m; j += 1)
+                                           a[i][j-i] = (a[i-1][j-i+1]+1);
+dependence graph:                    }
+s0->s0: a:true(1, -1)
 
-@c --------------------------------- Peel -----------------------------
-@page
-@unnumberedsubsec Peel
-@c Peel
-@deftypefn {Transform} @code{peel} {} (int @var{stmt}, int @var{loop}, int @var{peel_amount} = 1)
-The @code{peel} transformation @dots{}@refill
-@c The peel command has two forms:
-@c peel (number, number, expr)
-@c peel (number, number)
-@c The peel command @dots{}
-@c peel            stmt#
-@c                 loop level
-@c                 peel amount (default to 1)
-@c                   if positive, peel the specified number of iterations from the
-@c                 start of the loop; if negative, peel from the end
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 4', 'an > 0', 'bm > 0'])
-peel(1,3,4)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s2(t2,t4,0);
-    s3(t2,t4,0);
-    s4(t2,t4,1);
-    s5(t2,t4,2);
-    s6(t2,t4,3);
-    for(t6 = 4; t6 <= ambn-1; t6++) {
-      s1(t2,t4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) {
-      C[i][j] = 0.0f;
-      C[i][j] += (A[i][0] * B[0][j]);
-      C[i][j] += (A[i][1] * B[1][j]);
-      C[i][j] += (A[i][2] * B[2][j]);
-      C[i][j] += (A[i][3] * B[3][j]);
-      for (n = 4; n <= ambn - 1; n += 1) 
-        C[i][j] += (A[i][n] * B[n][j]);
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@c --------------------------------- Fuse -----------------------------
-@page
-@unnumberedsubsec Fuse
-@deftypefn {Transform} @code{fuse} {} (set @var{stmts}, int @var{loop_level})
-The @code{fuse} transformation @dots{}@refill
-
-@b{Arguments}
-
-@c The fuse command has the form:
-@c fuse (vector, number)
-@c The fuse command @dots{}
-@c fuse            [set of statement numbers]
-@c                 loop level
-
-@b{Conditions}
-@end deftypefn
-
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-fuse([0,1], 1)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
-
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-  }
-}
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    for(t6 = 0; t6 <= ambn-1; t6++) {
-      s1(t2,t4,t6);
-    }
+for(t2 = 1; t2 <= n-1; t2++) {
+  for(t4 = t2; t4 <= t2+m-1; t4++) {
+    s0(t2,-t2+t4);
   }
 }
 
+dependence graph:
+s0->s0: a:true(1, 0)
 
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      C[i][j] = 0.0f;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      for (n = 0; n <= ambn - 1; n += 1) 
-        C[i][j] += (A[i][n] * B[n][j]);
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Split
+-----
 
-@c --------------------------------- Distribute -----------------------------
-@page
-@unnumberedsubsec Distribute
-@deftypefn {Transform} @code{distribute} {} (set @var{stmts}, int @var{loop_level})
-The @code{distribute} transformation @dots{}@refill
+ -- Transform: split (int STMT, int LOOP, int EXPR)
+     The 'split' transformation divides the iteration space of the loop
+     at level LOOP using the condition specified in EXPR for the
+     statement in STMT.
 
-@b{Arguments}
+     The condition in EXPR can refer to the value of the iteration of
+     the loop nested at level n as "L<n>".  Only one expression is
+     allowed and it may not contain logical operators and/or or multiple
+     formulas.
 
-@c The distribute command has the form:
-@c distribute (vector, number)
-@c The distribute command @dots{}
-@c distribute      [set of statement numbers]
-@c                 loop level
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+                                             int ambn, int an, int bm) {
+source('mm.c')                         int i, j, n;
+procedure('mm')                        for(i = 0; i < an; i++)
+loop(0)                                  for(j = 0; j < bm; j++) {
+known('ambn > 0')                          C[i][j] = 0.0f;
+known('an > 0')                            for(n = 0; n < ambn; n++)
+known('bm > 10')                             C[i][j] += A[i][n] * B[n][j];
+split(1, 2, "L2 < 5")                    }
+print_code()                         }
 
-@b{Conditions}
-@end deftypefn
-@multitable @columnfractions .50 .50 
-@b{Python Script}
-@smallformat
-@cartouche
-@verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-distribute([0,1], 1)
-print_code()
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Original code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      #define __rose_lt(x,y) ((x)<(y)?(x):(y))
+  for(t4 = 0; t4 <= 4; t4++) {       
+    s0(t2,t4,0);                     void mm(float **A, float **B, float **C,
+    s1(t2,t4,0);                             int ambn, int an, int bm) {
+    for(t6 = 1; t6 <= ambn-1; t6++) {  int i, j, n;
+      s1(t2,t4,t6);                    for (i = 0; i <= an - 1; i += 1) {
+    }                                    for (j=0; j<=__rose_lt(4,bm-1);j+=1){
+  }                                        C[i][j] = 0.0f;
+  for(t4 = 5; t4 <= bm-1; t4++) {          C[i][j] += (A[i][0] * B[0][j]);
+    s2(t2,t4,0);                           for (n = 1; n <= ambn - 1; n += 1)
+    s3(t2,t4,0);                             C[i][j] += (A[i][n] * B[n][j]);
+    for(t6 = 1; t6 <= ambn-1; t6++) {    }
+      s3(t2,t4,t6);                      for (j = 5; j <= bm - 1; j += 1) {
+    }                                      C[i][j] = 0.0f;
+  }                                        C[i][j] += (A[i][0] * B[0][j]);
+}                                          for (n = 1; n <= ambn - 1; n += 1)
+                                             C[i][j] += (A[i][n] * B[n][j]);
+                                         }
+                                       }
+                                     }
 
-@multitable @columnfractions .50 .50
-@b{Output on stdout}
-@smallformat
-@cartouche
-@verbatim
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    s0(t2,t4,0);
-  }
-}
-for(t2 = 0; t2 <= an-1; t2++) {
-  for(t4 = 0; t4 <= bm-1; t4++) {
-    for(t6 = 0; t6 <= ambn-1; t6++) {
-      s1(t2,t4,t6);
-    }
-  }
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@tab @b{Transformed code}
-@smallformat
-@cartouche
-@verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      C[i][j] = 0.0f;
-  for (i = 0; i <= an - 1; i += 1) 
-    for (j = 0; j <= bm - 1; j += 1) 
-      for (n = 0; n <= ambn - 1; n += 1) 
-        C[i][j] += (A[i][n] * B[n][j]);
-}
-@end verbatim
-@end cartouche
-@end smallformat
-@end multitable
+Tile
+----
 
-@page
+ -- Transform: tile (int STMT, int LOOP, int TILE_SIZE, int CONTROL_LOOP
+          = 1, TileMethod METHOD = 0, int ALIGNMENT_OFFSET = 1,
+          int ALIGNMENT_MULTIPLE = 1)
 
-@c Data operations
-@c Prefetch
-@c The prefetch command has the form:
-@c prefetch (number, number, string, expr)
-@c The prefetch command @dots{}
-@c Datacopy
-@c The datacopy command has eight forms:
-@c datacopy (matrix, number)
-@c datacopy (matrix, number, trueorfalse)
-@c datacopy (matrix, number, trueorfalse, expr)
-@c datacopy (matrix, number, trueorfalse, expr, expr)
-@c datacopy (matrix, number, trueorfalse, expr, expr, expr)
-@c datacopy (expr, number, variable)
-@c datacopy (expr, number, variable, trueorfalse)
-@c datacopy (expr, number, variable, trueorfalse, expr)
-@c datacopy (expr, number, variable, trueorfalse, expr, expr)
-@c datacopy (expr, number, variable, trueorfalse, expr, expr, expr)
-@c The datacopy command @dots{}
-@c datacopy       stmt#
-@c                loop level
-@c                  inside which data footprint is copied and put right before
-@c                  this loop
-@c                array name
-@c                  all array accesses in the subloop with this array name
-@c                true|false (default = false)
-@c                   whether extra data copy is allowed to simplify read copy loop
-@c                fastest changing dimension in the new array layout
-@c                  = -1 (default) means no change in array layout
-@c                  = d  means contiguous array elements in the memory at
-@c                       d-th dimension
-@c                stride padding
-@c                  = 0 means keep the original data layout in all dimensions
-@c                  = 1 (default) means compressed array layout
-@c                  = d (d>=1) means accessing the fastest-changing-dimension
-@c                      in stride d, while other array dimensions are compressed
-@c                alignment padding (default = 4)
-@c                  = 1 means no alignment necessary 
-@c                  = d (d>1) means that the size of the fastest changing
-@c                      dimension is multiples of d
-@c                  = d (d<-1) means the size of the fastest changing
-@c                      dimension is coprime with |d|
-@c datacopy       [[stmt#,ref#1,ref#2,...],[...],...]
-@c                  array numbering follows accessing order, e.g.
-@c                  C[<2>]=C[<0>]*B[<1>]
-@c                level level
-@c                true|false
-@c                fastest changing dimension in the new array layout
-@c                stride padding
-@c                alignment padding
-@c                  ...see above...
-@c Datacopy_Privatized
-@c The datacopy privatized command has two forms:
-@c datacopy_privatized (matrix, number, vector, trueorfalse, expr, expr, expr)
-@c datacopy_privatized (expr, number, variable, vector, trueorfalse, expr, expr, expr)
-@c The datacopy privatized command @dots{}
-@c datacopy_privatized
-@c                stmt#
-@c                loop level
-@c                array name
-@c                [privatized loop levels]
-@c                   array footprint by assuming these loop levels fixed,
-@c                   the output code is only correct in parallel mode.
-@c                true|false
-@c                fastest changing dimension
-@c                stride padding
-@c                alignment padding
-@c                  ...see above...
-@c datacopy_privatized
-@c                [[stmt#,ref#1,ref#2,...],[...],...]
-@c                level level
-@c                [privatized loop levels]
-@c                true|false
-@c                fastest changing dimension in the new array layout
-@c                stride padding
-@c                alignment padding
-@c                  ...see above...
-@c CUDA-CHiLL 
-@c Cudaize
-@c The cudaize command has the form:
-@c cudaize (...)
-@c The cudaize command @dots{}
-@c cudaize         kernel name
-@c                 stmt num
-@c                 loop level
-@c                 grid x size
-@c                 grid y size
-@c                 array size(input array size, only needed when not statically defined)
-@c                 memory model (global)
+     The 'tile' transformation allows a loop dimension to be segregated
+     into tiles, the execution of which are scheduled by a control loop
+     placed outside the tiled loop.  The statements STMT and surrounding
+     loops inside the control loop will be executed a tile at a time
+     along the tiled dimension.
 
-@c                 Cudaize call means there will be a cudaize step in the code-gen. 
-@c                 The last parameter specifies the memory model for the
-@c                 arrays. "textured" could be explored in the future.
+     The loop nest to tile is specified by STMT and LOOP.  The argument
+     TILE_SIZE specifies the tile size, a value of 0 indicates no
+     tiling, a value of 1 is similar to loop interchange and a value
+     greater than 1 sets the tile size to that value.  The argument
+     CONTROL_LOOP specifies the loop level where the controlling loop
+     should be placed, the default is 1 or the outermost loop.  The
+     argument METHOD specifies the tiling method, a value of 0 indicates
+     that the index value of the control loop is the actual index to the
+     start of the tile and is known as a "strided tile", a value of 1
+     indicates that the index value of control loop is the value of the
+     tile and must be multiplied by TILE_SIZE to get the index to the
+     start of the tile.  The value of ALIGNMENT_OFFSET shifts the
+     beginning of the area to tile consistent with the alignment
+     constraint in ALIGNMENT_MULTIPLE.
 
-@c                 If using 1D arrays, the dimention of the referenced arrays is specified
-@c                 with the N parameter for used with malloc/memcpy in the generated
-@c                 scaffolding code.
-@c Cudathread
-@c The cudathread command has the form:
-@c cudathread (...)
-@c The cudathread command @dots{}
-@c cudathread      [vector] of pairs of stmt numbers nad loop levels to indicate a loop
-@c                 thread x size
-@c                 thread y size (optionally)
-@c                 thread z size (optionally)
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                               int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known(['ambn > 0', 'an > 0', 'bm > 0'])    for(j = 0; j < bm; j++) {
+tile(0,2,4)                                C[i][j] = 0.0f;
+print_code()                               for(n = 0; n < ambn; n++)
+                                             C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
 
-@c                 The CudaThread command indicates that some loop levels will be reduced
-@c                 as thread.{x,y,z} in the kernel. It can specify one, two or three
-@c                 dimensions by providing the loop level and related dimention.
+Output on stdout                     Transformed code
+chill test_tile.py                   #define __rose_lt(x,y) ((x)<(y)?(x):(y))
+for(t2 = 0; t2 <= bm-1; t2 += 4) {   void mm(float **A, float **B, float **C,
+  for(t4 = 0; t4 <= an-1; t4++) {            int ambn, int an, int bm) {
+    for(t6 = t2; t6 <= min(t2+3,bm-1); t6++) {  int i, j, n, jj;
+      s0(t4,t6,0);                     for (jj = 0; jj <= bm - 1; jj += 4)
+      s1(t4,t6,0);                       for (i = 0; i <= an - 1; i += 1)
+      for(t8 = 1; t8 <= ambn-1; t8++) {      for (j=jj; j<=__rose_lt(bm-1,jj+3);
+        s1(t4,t6,t8);                           j+=1) {
+      }                                      C[i][j] = 0.0f;
+    }                                        C[i][j] += (A[i][0] * B[0][j]);
+  }                                          for (n = 1; n <= ambn - 1; n += 1)
+}                                                C[i][j] += (A[i][n] * B[n][j]);
+                                           }
+                                     }
 
-@c                 The first parameter is the location of the loop. Its in array form to
-@c                 allow for addressing arbitrarily complex positions in a loop tree. The
-@c                 addressing starts from the inner block of the loops that are reduced by
-@c                 the cudaize command. For example [0,1] is stmt 0, loop 1. [1,1,0,1] is
-@c                 stmt 1, loop 1, then inside that loop stmt 0, loop 1.
+Unroll
+------
 
-@c                 A "SYNC" last parameter means a __syncthreads() is
-@c                 inserted after the respective code generated in the kernel.
+ -- Transform: unroll (int STMT, int LOOP, int UNROLL_AMOUNT, int
+          CLEANUP_SPLIT_LEVEL)
+     The 'unroll' transformation unrolls a specified number of
+     iterations of a statement inside the loop at level LOOP.
 
-@c                 A invariant that raises an exception is that all cudathread
-@c                 calls must use the same dimentions between calls. i.e. threads can not
-@c                 be 16x16 in one call and 16x4 in another.
+Python Script                        Original code
+from chill import *                  void mm(float **A, float **B, float **C,
+source('mm.c')                            int ambn, int an, int bm) {
+procedure('mm')                        int i, j, n;
+loop(0)                                for(i = 0; i < an; i++)
+known('ambn > 0', 'an > 0', 'bm > 0')    for(j = 0; j < bm; j++) {
+distribute([0,1], 1)                       C[i][j] = 0.0f;
+unroll(1, 3, 4)                            for(n = 0; n < ambn; n++)
+print_code()                                 C[i][j] += A[i][n] * B[n][j];
+                                         }
+                                     }
 
-@c @node Index
-@unnumbered Index
-@printindex cp
+Output on stdout                     Transformed code
+for(t2 = 0; t2 <= an-1; t2++) {      #define __rose_gt(x,y) ((x)>(y)?(x):(y))
+  for(t4 = 0; t4 <= bm-1; t4++) {    
+    s0(t2,t4,0);                     void mm(float **A, float **B, float **C,
+  }                                          int ambn, int an, int bm)
+}                                    {
+for(t2 = 0; t2 <= an-1; t2++) {        int i, j, n, over1;
+  for(t4 = 0; t4 <= bm-1; t4++) {      over1 = 0;
+    s2(t2,t4);                         for (i = 0; i <= an - 1; i += 1)
+    for(t6 = 0; t6 <= -over1+ambn-1;     for (j = 0; j <= bm - 1; j += 1)
+        t6 += 4) {                         C[i][j] = 0.0f;
+      s1(t2,t4,t6);                    for (i = 0; i <= an - 1; i += 1)
+      s4(t2,t4,t6);                      for (j = 0; j <= bm - 1; j += 1) {
+    }                                      over1 = ambn % 4;
+    for(t6 = max(0, ambn-over1);           for (n = 0; n <= -over1 + ambn - 1;
+        t6 <= ambn-1; t6++) {                   n += 4) {
+      s3(t2,t4,t6);                          C[i][j] += (A[i][n]*B[n][j]);
+    }                                        C[i][j] += (A[i][n+1]*B[n+1][j]);
+  }                                          C[i][j] += (A[i][n+2]*B[n+2][j]);
+}                                            C[i][j] += (A[i][n+3]*B[n+3][j]);
+                                           }
+                                           for (n = __rose_gt(0,ambn - over1);
+                                                n <= ambn - 1; n += 1)
+                                             C[i][j] += (A[i][n] * B[n][j]);
+                                         }
+                                     }
 
+
+File: chill.info,  Node: Index,  Prev: Third Chapter,  Up: Top
+
+Concept Index
+*************
+
+ [index ]
+* Menu:
+
+* antidependence:                        Second Chapter.      (line 173)
+* control dependence:                    Second Chapter.      (line 154)
+* data dependence:                       Second Chapter.      (line 161)
+* dependence types:                      Second Chapter.      (line 151)
+* direction vector:                      Second Chapter.      (line 259)
+* distance vector:                       Second Chapter.      (line 229)
+* iteration space:                       Second Chapter.      (line  92)
+* iteration vector:                      Second Chapter.      (line  55)
+* legality of transformations:           Second Chapter.      (line 303)
+* loop-carried dependence:               Second Chapter.      (line 194)
+* loop-independent dependence:           Second Chapter.      (line 194)
+* output dependence:                     Second Chapter.      (line 178)
+* true dependence:                       Second Chapter.      (line 167)
+
+Function and Transformation Index
+*********************************
+
+ [index ]
+* Menu:
+
+* distribute:                            Third Chapter.       (line 114)
+* exit:                                  Third Chapter.       (line  97)
+* fuse:                                  Third Chapter.       (line 151)
+* known:                                 Third Chapter.       (line 100)
+* loop:                                  Third Chapter.       (line  60)
+* loop <1>:                              Third Chapter.       (line  61)
+* peel:                                  Third Chapter.       (line 186)
+* permute:                               Third Chapter.       (line 230)
+* permute <1>:                           Third Chapter.       (line 231)
+* print_code:                            Third Chapter.       (line  75)
+* print_dep:                             Third Chapter.       (line  81)
+* print_space:                           Third Chapter.       (line  93)
+* procedure:                             Third Chapter.       (line  55)
+* remove_dep:                            Third Chapter.       (line 104)
+* reverse:                               Third Chapter.       (line 269)
+* scale:                                 Third Chapter.       (line 303)
+* shift:                                 Third Chapter.       (line 337)
+* shift_to:                              Third Chapter.       (line 386)
+* skew:                                  Third Chapter.       (line 420)
+* source:                                Third Chapter.       (line  50)
+* split:                                 Third Chapter.       (line 468)
+* tile:                                  Third Chapter.       (line 515)
+* unroll:                                Third Chapter.       (line 571)
+
+
+
+Tag Table:
+Node: Top840
+Node: First Chapter1307
+Ref: First Chapter-Footnote-15823
+Ref: First Chapter-Footnote-26063
+Node: Second Chapter6366
+Ref: Second Chapter-Footnote-119737
+Node: Third Chapter19847
+Node: Index49729
+
+End Tag Table

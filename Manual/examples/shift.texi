@@ -4,6 +4,7 @@ The @code{shift} transformation adjusts the index of the loop at level @var{loop
 @end deftypefn
 
 @multitable @columnfractions .50 .50 
+@item
 @b{Python Script}
 @smallformat
 @cartouche
@@ -38,6 +39,7 @@ void mm(float **A, float **B, float **C,
 @end multitable
 
 @multitable @columnfractions .50 .50
+@item
 @b{Output on stdout}
 @smallformat
 @cartouche

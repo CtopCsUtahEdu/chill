@@ -1,9 +1,0 @@
-source: test_split2.c
-procedure: main
-format: rose
-loop: 0
-original()
-N=10
-split(0,1, L4 <= 5)  
-print
-

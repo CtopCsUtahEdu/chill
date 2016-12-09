@@ -6,6 +6,7 @@ The condition in @var{expr} can refer to the value of the iteration of the loop 
 @end deftypefn
 
 @multitable @columnfractions .50 .50 
+@item
 @b{Python Script}
 @smallformat
 @cartouche
@@ -43,6 +44,7 @@ void mm(float **A, float **B, float **C,
 @end multitable
 
 @multitable @columnfractions .50 .50
+@item
 @b{Output on stdout}
 @smallformat
 @cartouche
