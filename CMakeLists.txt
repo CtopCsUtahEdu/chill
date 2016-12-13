@@ -6,24 +6,20 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(GTest)
 
-if(NOT DEFINED ROSEHOME)
-    message( FATAL_ERROR "ROSEHOME is not set, try use -DROSEHOME" )
-endif()
-if (NOT DEFINED BOOSTHOME)
-    message( FATAL_ERROR "BOOSTHOME is not set, try use -DBOOSTHOME" )
-endif()
-if (NOT DEFINED IEGENHOME)
-    message( FATAL_ERROR "IEGENHOME is not set, try use -DIEGENHOME" )
+if (DEFINED ENV{CHILLENV})
+    set(CHILLENV $ENV{CHILLENV})
 endif()
 
 find_package(PythonLibs 2.7 REQUIRED)
+find_package(Rose REQUIRED)
+find_package(RoseBoost REQUIRED)
+find_package(IEGen REQUIRED)
 
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS chill_core chill_ir chill_ast
-    m rose rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
-    boost_date_time boost_filesystem boost_program_options iegenlib isl
-    boost_regex boost_system boost_wave boost_iostreams)
+    m ${Rose_LIBS} rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
+    ${IEGen_LIBS} isl ${RoseBoost_LIBS})
 
 set(CORE_SRC
     dep.cc
@@ -106,15 +102,12 @@ add_library(parseRel
     ${BISON_ExprParser_OUTPUTS}
     )
 
-link_directories(${ROSEHOME}/lib ${BOOSTOME}/lib ${IEGENHOME}/lib)
-
 include_directories(
     ${CHILL_INC}
     ${OMEGA_INC}
-    ${ROSEHOME}/include
-    ${ROSEHOME}/include/rose
-    ${BOOSTHOME}/include
-    ${IEGENHOME}/include/iegenlib
+    ${Rose_INCLUDE_DIRS}
+    ${RoseBoost_INCLUDE_DIRS}
+    ${IEGen_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS})
 
 set(chill-libs
