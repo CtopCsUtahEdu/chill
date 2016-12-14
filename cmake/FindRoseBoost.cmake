@@ -38,8 +38,7 @@ if (RoseBoost_LIBS AND RoseBoost_INCLUDE_DIR)
     MESSAGE(STATUS "Boost libs: " ${RoseBoost_LIBS})
     set(RoseBoost_FOUND TRUE)
     set(RoseBoost_INCLUDE_DIRS
-        ${RoseBoost_INCLUDE_DIR}
-        ${RoseBoost_INCLUDE_DIR}/rose)
+        ${RoseBoost_INCLUDE_DIR})
 endif (RoseBoost_LIBS AND RoseBoost_INCLUDE_DIR)
 
 if (RoseBoost_FOUND)
