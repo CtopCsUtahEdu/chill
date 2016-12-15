@@ -34,3 +34,7 @@ if __name__=="__main__":
     d = UTdriver()
     runTestFolder(d,sys.argv[1])
     d.printResult()
+    if d.failures + d.errors > 0:
+        exit(-1)
+    else:
+        exit(0)
