@@ -1,0 +1,78 @@
+@unnumberedsubsec Shift_to
+@c ShiftTo
+@deftypefn {Transform} {} shift_to (int @var{stmt}, int @var{loop}, int @var{amount})
+The @code{shift_to} transformation adjusts the index of the loop at level @var{loop} by adding @var{amount} to the upper and lower bounds of the loop and then subtracting @var{amount} from every statement within the same loop structure as @var{stmt}.
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+source('mm.c')
+procedure('mm')
+loop(0)
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+shift_to(1,1,4)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for(i = 0; i < an; i++)
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 4; t2 <= an+3; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2-4,t4,0);
+    s1(t2-4,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s1(t2-4,t4,t6);
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for (i = 4; i <= an + 3; i += 1) 
+    for (j = 0; j <= bm-1; j += 1) {
+      C[i-4][j] = 0.0f;
+      C[i-4][j] += A[i-4][0]*B[0][j];
+      for (n = 1; n <= ambn-1; n += 1) 
+        C[i-4][j] += A[i-4][n]*B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

@@ -1,0 +1,87 @@
+@unnumberedsubsec Skew
+@c Skew
+@deftypefn {Transform} {} skew (set<int> @var{stmts}, int @var{loop}, vector<int> @var{amount})
+The @code{skew} transformation changes the index variable of the loop at level @var{loop} to be a linear combination of the indexes that are less than or equal to the level being transformed. 
+
+Let @math{i_1, i_2, \dots{}, i_{loop}} be the original loop indexes and let @math{amount = (a_1, a_2, \dots{}, a_{loop})}. The new index @math{i'_{loop}} will be @math{\sum\limits_{l = 1}^{loop} a_l i_l}.
+@end deftypefn
+
+@noindent The example below takes an algorithm with a negative loop-carried dependence and transforms it into one without a dependence.
+@sp 1
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+source('skew.c')
+procedure('f')
+loop(0)
+known(['n > 0', 'm > 1'])
+print_code()
+print_dep()
+
+skew([0], 2, [1, 1])
+print_code()
+print_dep()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void f(float **a, int n, int m) {
+  int i, j;
+  for (i = 1; i < n; i++)
+    for (j = 0; j < m; j++)
+      a[i][j] = a[i-1][j+1] + 1;
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 1; t2 <= n-1; t2++) {
+  for(t4 = 0; t4 <= m-1; t4++) {
+    s0(t2,t4);
+  }
+}
+
+dependence graph:
+s0->s0: a:true(1, -1)
+
+
+for(t2 = 1; t2 <= n-1; t2++) {
+  for(t4 = t2; t4 <= t2+m-1; t4++) {
+    s0(t2,-t2+t4);
+  }
+}
+
+dependence graph:
+s0->s0: a:true(1, 0)
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+void f(float **a,int n,int m)
+{
+  int i, j;
+  for (i = 1; i < n; i += 1) 
+    for (j = i; j < i + m; j += 1) 
+      a[i][j-i] = (a[i-1][j-i+1]+1);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

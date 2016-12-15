@@ -1,0 +1,98 @@
+@unnumberedsubsec Split
+@deftypefn {Transform} {} split (int @var{stmt}, int @var{loop}, int @var{expr})
+The @code{split} transformation divides the iteration space of the loop at level @var{loop} using the condition specified in @var{expr} for the statement in @var{stmt}.
+
+The condition in @var{expr} can refer to the value of the iteration of the loop nested at level @math{n} as ``L<n>''. Only one expression is allowed and it may not contain logical operators and/or or multiple formulas.
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+
+source('mm.c')
+procedure('mm')
+loop(0)
+known('ambn > 0')
+known('an > 0')
+known('bm > 10')
+split(1, 2, "L2 < 5")
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for(i = 0; i < an; i++)
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= 4; t4++) {
+    s0(t2,t4,0);
+    s1(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+    }
+  }
+  for(t4 = 5; t4 <= bm-1; t4++) {
+    s2(t2,t4,0);
+    s3(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s3(t2,t4,t6);
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+#define __rose_lt(x,y) ((x)<(y)?(x):(y))
+
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for (i = 0; i <= an - 1; i += 1) {
+    for (j=0; j<=__rose_lt(4,bm-1);j+=1){
+      C[i][j] = 0.0f;
+      C[i][j] += (A[i][0] * B[0][j]);
+      for (n = 1; n <= ambn - 1; n += 1) 
+        C[i][j] += (A[i][n] * B[n][j]);
+    }
+    for (j = 5; j <= bm - 1; j += 1) {
+      C[i][j] = 0.0f;
+      C[i][j] += (A[i][0] * B[0][j]);
+      for (n = 1; n <= ambn - 1; n += 1) 
+        C[i][j] += (A[i][n] * B[n][j]);
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

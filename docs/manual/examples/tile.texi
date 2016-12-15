@@ -1,0 +1,86 @@
+@unnumberedsubsec Tile
+@deftypefn {Transform} {} tile (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+
+The @code{tile} transformation allows a loop dimension to be segregated into tiles, the execution of which are scheduled by a control loop placed outside the tiled loop. The statements @var{stmt} and surrounding loops inside the control loop will be executed a tile at a time along the tiled dimension.
+
+The loop nest to tile is specified by @var{stmt} and @var{loop}. The argument @var{tile_size} specifies the tile size, a value of 0 indicates no tiling, a value of 1 is similar to loop interchange and a value greater than 1 sets the tile size to that value. The argument @var{control_loop} specifies the loop level where the controlling loop should be placed, the default is 1 or the outermost loop. The argument @var{method} specifies the tiling method, a value of 0 indicates that the index value of the control loop is the actual index to the start of the tile and is known as a ``strided tile'', a value of 1 indicates that the index value of control loop is the value of the tile and must be multiplied by @var{tile_size} to get the index to the start of the tile. The value of @var{alignment_offset} shifts the beginning of the area to tile consistent with the alignment constraint in @var{alignment_multiple}.
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+source('mm.c')
+procedure('mm')
+loop(0)
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+tile(0,2,4)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for(i = 0; i < an; i++)
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+chill test_tile.py
+for(t2 = 0; t2 <= bm-1; t2 += 4) {
+  for(t4 = 0; t4 <= an-1; t4++) {
+    for(t6 = t2; t6 <= min(t2+3,bm-1); t6++) {
+      s0(t4,t6,0);
+      s1(t4,t6,0);
+      for(t8 = 1; t8 <= ambn-1; t8++) {
+        s1(t4,t6,t8);
+      }
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+#define __rose_lt(x,y) ((x)<(y)?(x):(y))
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
+  int i, j, n, jj;
+  for (jj = 0; jj <= bm - 1; jj += 4) 
+    for (i = 0; i <= an - 1; i += 1) 
+      for (j=jj; j<=__rose_lt(bm-1,jj+3); 
+           j+=1) {
+        C[i][j] = 0.0f;
+        C[i][j] += (A[i][0] * B[0][j]);
+        for (n = 1; n <= ambn - 1; n += 1) 
+            C[i][j] += (A[i][n] * B[n][j]);
+      }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

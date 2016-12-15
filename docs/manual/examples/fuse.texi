@@ -1,0 +1,79 @@
+@unnumberedsubsec Fuse
+@deftypefn {Transform} {} fuse (set<int> @var{stmts}, int @var{loop})
+Fuse the set of statements in @var{stmts} such that all statement executes under the common loop structure down to and including level @var{loop}. 
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+source('dist.c')
+procedure('mm')
+loop(0, 1)
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+fuse([0,1], 1)
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for (i = 0; i <= an - 1; i += 1) 
+    for (j = 0; j <= bm - 1; j += 1) 
+      C[i][j] = 0.0f;
+
+  for (i = 0; i <= an - 1; i += 1) 
+    for (j = 0; j <= bm - 1; j += 1) 
+      for (n = 0; n <= ambn - 1; n += 1) 
+        C[i][j] += (A[i][n] * B[n][j]);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s0(t2,t4,0);
+    s1(t2,t4,0);
+    for(t6 = 1; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for (i = 0; i <= an - 1; i += 1) 
+    for (j = 0; j <= bm - 1; j += 1) {
+      C[i][j] = 0.0f;
+      C[i][j] += (A[i][0] * B[0][j]);
+      for (n = 1; n <= ambn - 1; n += 1) 
+        C[i][j] += (A[i][n] * B[n][j]);
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

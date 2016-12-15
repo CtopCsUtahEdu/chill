@@ -1,0 +1,89 @@
+@unnumberedsubsec Permute
+The @code{permute} transformation interchanges the loops of a loop nest.
+@deftypefn {Transform} {} permute (vector<int> @var{p})
+@deftypefnx {Transform} {} permute (set<int> @var{stmts}, vector<int> @var{p})
+
+The loop nest to permute is specified by the statements in the set @var{stmts}. The loops in the nest are permuted according to the permutation vector @var{p}.
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+from chill import *
+source('mm.c')
+procedure('mm')
+loop(0)
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+permute([3,1,2])
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for(i = 0; i < an; i++)
+    for(j = 0; j < bm; j++) {
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+for(t2 = 0; t2 <= ambn-1; t2++) {
+  for(t4 = 0; t4 <= an-1; t4++) {
+    if (t2 <= 0) {
+      for(t6 = 0; t6 <= bm-1; t6++) {
+        s0(t4,t6,t2);
+        s1(t4,t6,t2);
+      }
+    }
+    else {
+      for(t6 = 0; t6 <= bm-1; t6++) {
+        s1(t4,t6,t2);
+      }
+    }
+  }
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
+  int i, j, n;
+  for (n = 0; n <= ambn - 1; n += 1) 
+    for (i = 0; i <= an - 1; i += 1) 
+      if (n <= 0) 
+        for (j = 0; j <= bm - 1; j += 1) {
+          C[i][j] = 0.0f;
+          C[i][j] += (A[i][n] * B[n][j]);
+        }
+      else 
+        for (j = 0; j <= bm - 1; j += 1) 
+          C[i][j] += (A[i][n] * B[n][j]);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

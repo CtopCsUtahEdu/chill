@@ -1,0 +1,693 @@
+\input texinfo  @c -*-texinfo-
+@c %**start of header
+
+@c @exampleindent 10
+@setfilename chill.info
+@settitle CHiLL Manual 1.0
+@c %**end of header
+
+@copying
+This manual describes CHiLL (version 0.2.4 November 2016), a source-to-source translator for optimizing loop based calculations. 
+
+Copyright @copyright{} 2008 University of Southern California @*
+Copyright @copyright{} 2009-2016 University of Utah
+
+@c quotation
+Permission is granted to copy, distribute and/or modify this document 
+under the terms of the GNU Free Documentation License, Version 1.3
+published by the Free Software Foundation. To receive a copy of the
+GNU Free Documentation License, write to the Free Software Foundation, Inc., 
+59 Temple Place, Suite 330, Boston, MA  02111-1307 USA.
+@c end quotation
+
+@sp 1
+Published by the University of Utah School of Computing@*
+Compiler Technology to Optimize Performance Research Group@*
+@url{ctop.cs.utah.edu/ctop/}@*
+50 S., Central Campus Dr., Salt Lake City, UT 84112
+@end copying
+
+@titlepage
+@title CHiLL
+@subtitle The Composable High Level Loop Source-to-Source Translator
+@subtitle For version 0.2.4, November 2016
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+@contents
+
+@ifnottex
+@node Top
+@top The Composable High Level Loop Source-to-Source Translator
+
+This manual is for The Composable High Level Loop Source-to-Source Translator, aka CHiLL (version 0.2.4).
+@end ifnottex
+
+@menu
+* First Chapter::       Introduction
+* Second Chapter::      Background
+* Third Chapter::       The CHiLL Scripting Language
+* Index::               Complete index.
+@end menu
+
+@node First Chapter
+@chapter Introduction
+
+CHiLL is a source-to-source translator for composing high level loop transformations to improve the performance of nested loop calculations written in C, C++ or Fortran. CHiLL's operations are driven by a script which is generated or supplied by the user that specifies the location of the original source file, the function and loops to modify and the transformations to apply. CHiLL can be configured to include support for the NVIDIA CUDA compiler. In this mode, CHiLL can generate source code for both host functions and device functions to be compiled and executed on NVIDIA GPUs.
+
+@section Intended Audience
+This manual is intended for C/C++ or Fortran programmers wishing to optimize loop based calculations. The user should have sufficient knowledge of the underlying hardware on which the code should execute to generate an optimization strategy.
+
+@section Getting CHiLL
+CHiLL is available in source form from @url{https://github.com/CtopCsUtahEdu} and requires the ROSE compiler from Lawrence Livermore National Laboratory (see @url{http://rosecompiler.org})@footnote{Building ROSE requires very specific versions of GNU autoconf, gcc and the boost libraries. If you do not have ROSE installed then please see and modify the script @code{buildall} which was used to install CHiLL on Blue Waters at NCSA.}. When ROSE is available CHiLL can be installed and tested by executing the following commands in the source direcory. 
+ 
+@smallexample
+./configure --with-interface=python --prefix=<INSTALLDIR> \
+            --with-rose=<ROSEINSTALLDIR> --with-boost=<BOOSTINSTALLDIR>
+make -j`nproc`
+make -j`nproc` install
+cd test-chill; ./runtests
+@end smallexample
+
+If you have problems with installation, find bugs or have comments, questions or suggestions for this document, please send mail to @email{chill-support@@cs.utah.edu}.
+
+@section Invoking CHiLL
+The C program below is an implementation of matrix multiplication as a direct translation of an optimized Fortran program where all of the loops are ordered such that memory accesses to the arrays a, b and c are all in column order. Since C stores arrays in row major order there is an opportunity for better cache utilization if the arrays are accessed as rows and not columns. We will refer to this code often and assume it is in a file named @file{mm.c}. 
+@sp 1
+@smallexample
+void mm(float **A, float **B, float **C, 
+        int ambn, int an, int bm) @{
+  int i, j, n;
+  for(i = 0; i < an; i++)
+    for(j = 0; j < bm; j++) @{
+      C[i][j] = 0.0f;
+      for(n = 0; n < ambn; n++)
+        C[i][j] += A[i][n] * B[n][j];
+    @}
+@}
+@end smallexample
+
+@page
+Permuting the order of the loops from i, j, n to n, j, i results in the more cache centric C algorithm as shown below where all array accesses are in row major order.
+
+@smallexample
+void mm(float **A, float **B, float **C,
+	int ambn, int an, int bm) @{
+  int i, j, k;
+  for (n = 0; n <= ambn - 1; n += 1) 
+    for (j = 0; j <= bm - 1; j += 1) 
+      if (n <= 0) 
+        for (i = 0; i <= an - 1; i += 1) @{
+          C[i][j] = 0.0f;
+          C[i][j] += (A[i][n] * B[n][j]);
+        @}
+      else 
+        for (i = 0; i <= an - 1; i += 1) 
+          C[i][j] += (A[i][n] * B[n][j]);
+@}
+@end smallexample
+
+The interchanges of the outer and innermost loops can be done in CHiLL with this simple Python script.
+@sp 1
+@smallexample
+from chill import *
+source('mm.c')
+procedure('mm')
+loop(0)
+known(['ambn > 0', 'an > 0', 'bm > 0'])
+permute([3,2,1])
+print_code()
+@end smallexample
+@sp 1
+
+The first line of the script @samp{from chill import *} loads the CHiLL interface into the python interpreter. The commands @command{source} and @command{procedure} identify the source file and the procedure to modify. The @command{loop} command specifies the loop nest to be transformed. The @command{known} command specifies constraints on parameters that are known and the transformation @samp{permute([3,2,1])} exchanges the inner and outermost loops. Finally the command @command{print_code} prints the transformed loop nest in a C-like pseudo code showing the loops, indices and statements. 
+
+Assuming for this example that that the script above is in the file @file{mm.py}, the command @samp{chill mm.py} would print to @var{stdout} pseudo code similar to that shown below and produce the transformed code in the file @file{rose_mm.c} @footnote{The code produced by the current version of CHiLL does not preserve loop variables names in the transformed code which makes it difficult to see the effects of a transformation. In this manual we have used the original loop variable names in the generated code to make it easier to understand.}
+
+@sp 1
+@smallexample
+for(n = 0; n <= ambn-1; n++)
+  for(j = 0; j <= bm-1; j++)
+    if (n <= 0)
+      for(i = 0; i <= an-1; i++) @{
+        s0(i,j,n);
+        s1(i,j,n);
+      @}
+    else
+      for(i = 0; i <= an-1; i++)
+        s1(i,j,n);
+@end smallexample
+
+
+
+
+@node Second Chapter
+@chapter Background
+
+Before CHiLL applies a user specified transformation to the loop structure it first insures that the transformed code will produce the same results as the original code. It does this by determining all dependences between statements in the original program and then requiring that any and all transformations that are applied preserve the dependences between the statements in the original code.
+
+Conceptually CHiLL treats each statement in a source program as one of three basic types; a loop, a conditional or a statement. When we refer to ``a statement'' in CHiLL, we are referring to a block of one or more actual program statements which have a single uninterrupted execution path through them and we notationally represent it as a function which is passed the values of the indices of all loops enclosing it.
+
+For each statement we compute an @dfn{iteration vector} that encodes the the absolute execution order of the statement as a function of its lexical position in the source code and the index values of the enclosing loops. We then define the @dfn{iteration space} for the statement by joining the iteration vector with the constraints on each index that is in an enclosing loop.
+
+Next we analyze the memory access patterns of the statements and loops. We compute the set of @dfn{dependences} by taking all statements pair-wise and finding those pairs of statements @math{(S_1, S_2)} where there exists an iteration vector @math{i_1} and @math{i_2} in the respective iteration spaces of @math{S_1} and @math{S_2} such that @math{S_1(i_1)} and @math{S_2(i_2)} both refer to the same memory location and one or both of them write to that location. The @dfn{distance vector} defined by @math{i_2 - i_1} gives the execution distance from the source statement @math{S_1} to the sink statement @math{S_2}.
+
+If a dependence exists between statements @math{S_1} and @math{S_2} with the constraint that @math{S_1} must execute before @math{S_2} in the original code then that constraint must be preserved across any and all transformations. If a dependence exists that can not be preserved across a transformation then CHiLL alerts the user to this problem. Dependence information between @math{S_1} and @math{S_2} is maintained by a @dfn{dependence vector} which encapsulates the notion of all the distance vectors where statement @math{S_1} must execute before @math{S_2}.
+
+The diagnostic commands @code{print_space} and @code{print_dep} will print the iteration space of each statement and the dependences between all pairs of statements. The command @code{remove_dep} will force the removal of a dependence leaving responsibility for the correctness of the transformation to the user. 
+
+@section Iteration Vectors
+@cindex iteration vector
+
+Given a loop nest with a maximum loop depth of @math{n}, we define for each executed statement an iteration vector that encodes the time of execution of a statement executed with specific values for the loop indices which enclose the statement. This allows us to determine the relative order of execution of any two statements so that dependences between statements can be preserved.
+
+We define an iteration vector for a nest of @math{n} loops as @math{i = @{c_0, l_1, c_1, l_2, ..., c_n, l_n, c_{n+1} @}} where @math{l_k} is the value of the index@footnote{with a suitable transformation such that the index is monotonically increasing as the loop progresses} of the loop at nesting level @math{k} and @math{c_k} is an auxiliary loop used to track the lexigraphical ordering of statement executed within the loop nested at level @math{k}. The outermost loop level in the nest is @math{1} and @math{c_0} lexigraphically orders any statements that precede the first loop. 
+
+At this level of abstraction we only care about loops and blocks of code between loops. The even numbered elements @math{@{c_0, c_1, ..., c_{n+1} @}} are always constant integers that describe the static lexigraphical ordering of the statements in the original code. The odd numbered elements @math{@{l_1, ..., l_n @}} represent the current values of the loop levels. This scheme allows a uniform method to both track both the progression of the loop indices as well as the execution order of statements within each loop. 
+
+Iteration vectors are ordered and thus can be used to enforce dependences between statements. Iteration vector @math{i} @i{precedes} iteration @math{j}, denoted @math{i < j}, if and only if @math{i[1:n-1] < j[1:n-1]} or @math{i[1:n-1] = j[1:n-1]} and @math{i[n] < j[n]}.
+
+Given two statements @math{S_0} which executes at a time specified by iteration vector @math{i_0} and a statement @math{S_1} which executes at a time specified by iteration vector @math{i_1}, then the execution of @math{S_0} precedes that of @math{S_1} if and only if @math{i_0 < i_1}.
+
+@section Iteration Spaces
+@cindex iteration space
+
+Consider the following loop nest below. There are three loop levels to track the three indices i, j and k and four auxiliary loop levels to track the relative execution of the statements within the loops.
+
+@smallexample
+@math{S_0}
+for (i @dots{}) @{
+  @math{S_1}
+  @math{S_2}
+  for (j @dots{}) @{
+    @math{S_3}
+    for (k @dots{}) @{
+      @math{S_4}
+    @}
+    @math{S_5}
+  @}
+  @math{S_6}
+@}
+@end smallexample
+
+An iteration space is is a set of iteration vectors. It is usually specified in set notation with one or more values of @math{l} specified as an integer variable along with constraints on the variables. The iteration space for each statement is shown below as a set of integer tuples. In practice, the upper and lower bounds of each loop index would be specified in each set condition as well.
+@sp 1
+
+@smallexample 
+@math{S_0: @{[0, 0, 0, 0, 0, 0, 0]@}}
+@math{S_1: @{[1, i, 0, 0, 0, 0, 0]@}}
+@math{S_2: @{[1, i, 1, 0, 0, 0, 0]@}}
+@math{S_3: @{[1, i, 2, j, 0, 0, 0]@}}
+@math{S_4: @{[1, i, 2, j, 1, k, 0]@}}
+@math{S_5: @{[1, i, 2, j, 2, 0, 0]@}}
+@math{S_6: @{[1, i, 3, 0, 0, 0, 0]@}}
+@end smallexample
+@sp 1
+
+If we were were told that the current point of execution of the above loop nest was described by the iteration vector [1, 3, 2, 6, 2, 0, 0] we would know that statement @math{S_5} was executing with the indices of the loops being i = 3 and j = 6. 
+
+@page
+The @command{print_space} command will print the iteration space for every statement (or block of statements). For example @command{print_space} applied to the following code.
+
+@sp 1
+@smallexample
+for(i = 0; i < an; i++)
+  for(j = 0; j < bm; j++) @{
+    C[i][j] = 0.0f;
+    for(n = 0; n < ambn; n++)
+      C[i][j] += A[i][n] * B[n][j];
+  @}
+@end smallexample
+gives the following results.
+
+@example
+s0: @{Sym=[bm,an,ambn] [t1,t2,t3,t4,t5,t6,t7] : t1=0 && t3=0 && t5=0 && @*     t7=0 && t6=0 && 0<=t2<an && 0<=t4<bm && 1<=ambnyes @}
+s1: @{Sym=[ambn,bm,an] [t1,t2,t3,t4,t5,t6,t7] : t1=0 && t3=0 && t5=0 && @*     t7=0 && 0<=t2<an && 0<=t6<ambn && 0<=t4<bm @}
+@end example
+
+
+@c @sp 1
+@c @smallexample
+@c for(i = 0; i < an; i++)
+@c   for(j = 0; j < bm; j++) @{
+@c     C[i][j] = 0.0f;
+@c     for(n = 0; n < ambn; n++)
+@c       C[i][j] += A[i][n] * B[n][j];
+@c   @}
+@c @end smallexample
+@c gives the following results.
+
+@c @smallexample
+@c s0: @{ Sym=[bm,an,ambn] [t1,t2,t3,t4,t5,t6,t7] : t1 = 0 && t3 = 0 && t5 = 0 && @*     t7 = 0 && t6 = 0 && 0 <= t2 < an && 0 <= t4 < bm && 1 <= ambn @}
+@c s1: @{ Sym=[ambn,bm,an] [t1,t2,t3,t4,t5,t6,t7] : t1 = 0 && t3 = 0 && t5 = 0 && @*     t7 = 0 && 0 <= t2 < an && 0 <= t6 < ambn && 0 <= t4 < bm @}
+@c @end smallexample
+
+@section Dependences
+@cindex dependence types
+
+There are two general categories of dependences, control dependences and data dependences.
+
+@cindex control dependence
+A @dfn{control dependence} exist when one statement is executed conditionally on the result of another. For example, in the statements below @math{S_1} cannot be executed before @math{S_0} and thus @math{S_1} has a control dependence on @math{S_0}.
+@smallexample
+  @math{S_0}     if (x != 0)
+  @math{S_1}       a /= x;
+@end smallexample
+
+@cindex data dependence
+A @dfn{data dependence} exists between statements @math{S_0} and @math{S_1} (meaning @math{S_1} depends on statement @math{S_0}) if and only if there is a plausible run-time execution path from @math{S_0} to @math{S_1}, both statements access the same memory location and at least one of them stores to it. There are three types of data dependences:
+
+@cindex true dependence
+A @dfn{true dependence} exists when @math{S_0} writes to a location that is later read by @math{S_1}. 
+
+@smallexample
+  @math{S_0}     x = @dots{}
+  @math{S_1}     @dots{} = x
+@end smallexample
+
+@cindex antidependence
+An @dfn{antidependence} exists when @math{S_0} reads from a location that is later written to by @math{S_1}. 
+@smallexample
+  @math{S_0}     @dots{} = x
+  @math{S_1}     x = @dots{}
+@end smallexample
+
+@cindex output dependence
+An @dfn{output dependence} exists when @math{S_0} writes to a location that is later written to by @math{S_1}. 
+@smallexample
+  @math{S_0}     x = @dots{}
+  @math{S_1}     x = @dots{}
+@end smallexample
+
+In the parlance of hardware design, a true dependence is known as a @abbr{RAW, read after write} hazard, an antidependence is a @abbr{WAR, write after read} hazard and an output dependence is a @abbr{WAW, write after write} hazard. These dependences are fairly intuitively and are used instinctively by every programmer to determine the correct order of statements in sequential code. However, when loops and arrays are involved these same data dependences arise in more subtle ways.
+
+@section Dependences with loops and arrays
+
+@cindex loop-independent dependence
+@cindex loop-carried dependence
+It is useful to categorize data dependences in loops into two types. Consider a loop that contains two statements call them @math{S_0} and @math{S_1}. If both @math{S_0} and @math{S_1} reference the same memory location within the same iteration as they do in this case, then the dependence is @dfn{loop-independent}. If statement @math{S_0} and @math{S_1} reference the same memory location in different iterations, then the dependence is created by the loop and it is said to be @dfn{loop-carried}.
+
+As an example the loop below which has two loop-carried dependences and two loop-independent dependences.
+
+@smallexample
+       for (i = 0; i < n; i++) @{
+  @math{S_0}     a[i + 1] = b[i];
+  @math{S_1}     b[i + 1] = a[i];
+  @math{S_2}     c[i] = a[i] + b[i];
+       @}
+@end smallexample
+
+In every iteration other than the first, @math{S_1} reads an element of @code{a[]} that was written to by @math{S_0} in the previous iteration and thus there is dependence from @math{S_0} to @math{S_1}. Because @math{S_0} appears before @math{S_1} in the loop, it is a @dfn{loop-carried forward} true dependence.
+
+Likewise, for every iteration other than the first, @math{S_0} uses a value of @code{b[]} that was written by @math{S_1} in the previous iteration and thus there is also a dependence from @math{S_1} to @math{S_0} but because @math{S_1} appears after @math{S_0} in the loop, it is a @dfn{loop-carried backward} true dependence.
+
+Finally @math{S_2} reads a value of @code{a[]} that was written by @math{S_0} and a value of @code{b[]} that was written by @math{S_1} in the same iteration and thus there are two @dfn{loop-independent} true dependence, one is @math{S_2} on @math{S_0} and the other is of @math{S_2} on @math{S_1}.
+
+@section Distance Vectors
+@cindex distance vector
+
+Given two statements @math{S_1} and @math{S_2} with iteration vector @math{i_1} and @math{i_2} respectively where S2 depends on S1 we define the distance vector @math{d} of the dependence as follows. Let
+@example
+@math{i_1 = @{c_0', l_1', c_1', l_2', ..., c_n', l_n', c_{n+1}'@}} and
+@math{i_2 = @{c_0, l_1, c_1, l_2, ..., c_n, l_n, c_{n+1}@}} 
+@end example
+then we define the distance vector as 
+@example
+@math{d = @{l_1-l_1', l_2-l_2', ..., l_n-l_n'@}}. 
+@end example
+The only statement in the nested loop below has a loop-dependent dependence with itself.
+@example
+  for(i = 0; i < 2 * n; i++)
+    for (j = 1; j < m; j++)
+      a[i+1][j-1] = a[i][j] + b[i][j];
+@end example
+@sp 1
+The right hand side of the assignment reads array @var{a} at iteration vector @math{i_R} below and the left hand side of the assignment writes to the same location of the array at the iteration vector @math{i_W}.
+
+@example
+@math{i_R = @{0, i, 0, j, 0@}} 
+@math{i_W = @{0, i+1, 0, j-1, 0@}}.
+@end example
+
+Because @math{i_R<i_W} this is a read/write dependence and the distance vector is 
+@example
+@math{d=i_W-i_R=@{1, -1@}}.
+@end example
+
+The command @code{print_dep} applied to this loop yields @samp{s0->s0: a:true(1, -1)}
+
+@page
+
+@section Direction Vectors
+@cindex direction vector
+
+In the same way that an iteration space is a set of iteration vectors, a direction vector is a summarization of a set of distance vectors between two statements. 
+
+In the matrix multiplication loop nest below, statement @math{S_0} initializes the value of @code{C[i][j]} and statement @math{S_1} accumulates the inner product into it. @math{S_1} has multiple dependences on @math{S_0} as the initialization must occur before @emph{every} accumulation statement @math{S_1} executed in the loop. 
+
+@smallexample
+       for(i = 0; i < an; i++)
+         for(j = 0; j < bm; j++) @{
+  @math{S_0}        C[i][j] = 0.0f;
+           for(n = 0; n < ambn; n++)
+  @math{S_1}          C[i][j] += A[i][n] * B[n][j];
+         @}
+@end smallexample
+
+In general, given a nest with @math{n} loops each direction vector has the form @math{(d_1, d_2, @dots{}, d_n)} where The value of @math{d_i} indicates the range of distances between the source and sink carried by loop @i{i} and is one of the following symbols below where @math{n}, @math{n_l} and @math{n_u} represent integer values in the iteration space of the loop.
+@multitable @columnfractions .1 .2 .2 .2 .3
+@headitem @tab Symbol @tab Lower Bound @tab Upper Bound
+@item @tab @math{n} @tab @math{n} @tab @math{n}
+@item @tab @math{n_l{\sim}n_u} @tab @math{n_l} @tab @math{n_u}
+@item @tab @math{*} @tab @math{-\infty} @tab @math{+\infty}
+@item @tab @math{-} @tab @math{-\infty} @tab @math{-1}
+@item @tab @math{n-} @tab @math{-\infty} @tab @math{n}
+@item @tab @math{+} @tab @math{1} @tab @math{+\infty}
+@item @tab @math{n+} @tab @math{n} @tab @math{+\infty}
+@end multitable
+@sp 1
+
+Notice that neither the symbols @math{+} nor @math{-} includes the value of @math{0}. The reason is that a distance of @math{0} means that the dependence is not loop-carried which CHiLL likes to separate from dependences that are loop-carried. This is shown below with output of the command @code{print_dep} on the above code.
+
+@example
+s0->s1: C:true(0,0,+) C:true(0,0,0) C:output(0,0,+) C:output(0,0,0)
+s1->s1: C:anti(0,0,+) C:output(0,0,+)
+@end example
+
+@section Legality of Transformations
+@cindex legality of transformations
+
+From the definition of an iteration vector it is clear that transformations that permute the loop structure also permute the iteration vector and distance vectors of all dependences in exactly the same way. Because the distance vector is the distance from the source to the sink, any permutation of the loop structure that causes the permuted distance vector to be negative is illegal as the transformation has caused the sink to execute before the source.
+
+Looking at the transformed elements of an iteration vector or distance vector from left to right (or outer loop to inner loop), if the first non-zero loop element is negative, then the distance vector is negative and the transformation is illegal.
+
+@node Third Chapter
+@chapter The CHiLL Scripting Language
+
+@section Loop and Statement Identification
+
+The first two commands in every CHiLL script identify the source file and the procedure to modify. Only one source file and one procedure can be modified in any single script.
+
+Individual loops within a loop nest are identified by the level that they are nested and the statement that they surround. The outermost loop of a nest is always loop level 1. Thus in the introductory example, the transformation @samp{permute([3,2,1])} exchanged the inner and outermost loops.
+
+It is very important to realize that every transformation has the capability to insert or reorder the loops and thus the identification of a specific loop will change after a transformation. In the example referenced above the j, k and i loops that were respectively at levels 1, 2 and 3 before the permutation are now at levels 3, 2 and 1 after the transformation. Any subsequent transformation must use these new loop levels to identify the individual loops.
+
+Consider the pseudo code below. 
+
+@smallexample
+for (i @dots{}) @{
+  @math{S_0}
+  for (j @dots{}) @{
+    @math{S_1}
+    for (k @dots{})
+      @math{S_2}
+  @}
+  for (j @dots{})
+    @math{S_3}
+@}  
+@end smallexample
+
+The loop level alone insufficient to uniquely determine a specific loop within a nest unless a statement enclosed by the loop is also provided. Statements are initially numbered in the order they appear from top to bottom in the nest starting with zero. Transformations may also insert or reorder the statements in the nest but the identification of a specific statement will not change after a transformation.
+
+@page
+@section Commands
+
+@c Source
+@deftypefn {Command} {} source (string @var{filename})
+The @code{source} command specifies the filename of the original code to be transformed. There can only be one @code{source} command in a script and it must precede the @code{loop} command.
+@end deftypefn
+
+@c Procedure
+@deftypefn {Command} {} procedure (string @var{name})
+The @code{procedure} command specifies the procedure name in the file to transform. There can only be one procedure modified in a given script. 
+@end deftypefn
+
+@c Loop
+@deftypefn {Command} {} loop (int @var{level})
+@deftypefnx {Command} {} loop (int @var{start}, int @var{end})
+The @command{loop} command specifies the loop nest to be transformed by specifying the top level loop of the nest. The first form of the command selects a nest contained in a single top level loop. The second form takes a range of top level loops and treats them as a single unified nest.
+
+Top level loops are those loops at procedure scope and are numbered starting from zero. Once a loop nest is selected by the @code{loop} command the outermost loop of the nest is numbered from one.
+ 
+The @code{loop} command can be issued multiple times in a script to select and modify different top level loops within the same file.
+@end deftypefn
+
+@c Print_code
+@deftypefn {Command} {} print_code ()
+The @code{print code} commands display C-like pseudo code of the nest showing the loops, indices and statements. Statements in the pseudo-code appears as a function indexed by the loop indices as if it were a call to the block of code.
+@end deftypefn
+ 
+@c Print_dep
+@deftypefn {Command} {} print_dep ()
+The @code{print_dep} command displays the dependences between all statements in the current nest. Given a nest with @math{n} loops each individual dependence has the form:
+@indentedblock
+@var{var}:@var{type}(@math{d_1}, @math{d_2}, @dots{}, @math{d_n})
+@end indentedblock
+where @var{var} is the variable name that is creating the dependence, @var{type} is the type of dependence which is one of @i{_quasi}, @i{true}, @i{anti}, @i{output}, @i{input}, @i{control} or @i{unknown}. 
+
+The value of @math{d_i} indicates the distance or range of distances where a dependence exists between the source and sink carried by loop @math{i}.
+@end deftypefn
+
+@c Print_space
+@deftypefn {Command} {} print_space ()
+The @code{print_space} command displays the iteration space for each statement in the current nest.
+@end deftypefn
+
+@c @deftypefn {Command} {} print_structure ()
+@c The @code{print structure} command displays the structure of each statement.
+@c @smallexample
+@c s1: 0(dim:0) 0(dim:1) 0(dim:2) 0
+@c @end smallexample
+@c @end deftypefn
+
+@deftypefn {Command} {} exit ()
+The @code{exit} command exists the script.
+@end deftypefn
+
+@deftypefn {Command} {} known (string @var{cond})
+The @code{known} command adds a condition as an expression. The value of @var{cond} can be a string or a list of strings.
+@end deftypefn
+
+@deftypefn {Command} {} remove_dep (int @var{stmt1}, int @var{stmt2})
+The @code{remove_dep} removes a dependence between two statements in the loop nest.
+@end deftypefn
+
+@c @deftypefn {Command} {} pragma (int @var{stmt}, int @var{level}, string @var{text})
+@c The @code{pragma} does what?
+@c @end deftypefn
+
+@page
+@section Transformations
+@include examples/distribute.texi
+@page
+@include examples/fuse.texi
+@c @page
+@c @include examples/nonsingular.texi
+@c @page
+@c @include examples/original.texi
+@page
+@include examples/peel.texi
+@page
+@include examples/permute.texi
+@page
+@include examples/reverse.texi
+@page
+@include examples/scale.texi
+@page
+@include examples/shift.texi
+@page
+@include examples/shift_to.texi
+@page
+@include examples/skew.texi
+@page
+@include examples/split.texi
+@page
+@include examples/tile.texi
+@page
+@include examples/unroll.texi
+@page
+
+@c Data operations
+@c Prefetch
+@c The prefetch command has the form:
+@c prefetch (number, number, string, expr)
+@c The prefetch command @dots{}
+@c Datacopy
+@c The datacopy command has eight forms:
+@c datacopy (matrix, number)
+@c datacopy (matrix, number, trueorfalse)
+@c datacopy (matrix, number, trueorfalse, expr)
+@c datacopy (matrix, number, trueorfalse, expr, expr)
+@c datacopy (matrix, number, trueorfalse, expr, expr, expr)
+@c datacopy (expr, number, variable)
+@c datacopy (expr, number, variable, trueorfalse)
+@c datacopy (expr, number, variable, trueorfalse, expr)
+@c datacopy (expr, number, variable, trueorfalse, expr, expr)
+@c datacopy (expr, number, variable, trueorfalse, expr, expr, expr)
+@c The datacopy command @dots{}
+@c datacopy       stmt#
+@c                loop level
+@c                  inside which data footprint is copied and put right before
+@c                  this loop
+@c                array name
+@c                  all array accesses in the subloop with this array name
+@c                true|false (default = false)
+@c                   whether extra data copy is allowed to simplify read copy loop
+@c                fastest changing dimension in the new array layout
+@c                  = -1 (default) means no change in array layout
+@c                  = d  means contiguous array elements in the memory at
+@c                       d-th dimension
+@c                stride padding
+@c                  = 0 means keep the original data layout in all dimensions
+@c                  = 1 (default) means compressed array layout
+@c                  = d (d>=1) means accessing the fastest-changing-dimension
+@c                      in stride d, while other array dimensions are compressed
+@c                alignment padding (default = 4)
+@c                  = 1 means no alignment necessary 
+@c                  = d (d>1) means that the size of the fastest changing
+@c                      dimension is multiples of d
+@c                  = d (d<-1) means the size of the fastest changing
+@c                      dimension is coprime with |d|
+@c datacopy       [[stmt#,ref#1,ref#2,...],[...],...]
+@c                  array numbering follows accessing order, e.g.
+@c                  C[<2>]=C[<0>]*B[<1>]
+@c                level level
+@c                true|false
+@c                fastest changing dimension in the new array layout
+@c                stride padding
+@c                alignment padding
+@c                  ...see above...
+@c Datacopy_Privatized
+@c The datacopy privatized command has two forms:
+@c datacopy_privatized (matrix, number, vector, trueorfalse, expr, expr, expr)
+@c datacopy_privatized (expr, number, variable, vector, trueorfalse, expr, expr, expr)
+@c The datacopy privatized command @dots{}
+@c datacopy_privatized
+@c                stmt#
+@c                loop level
+@c                array name
+@c                [privatized loop levels]
+@c                   array footprint by assuming these loop levels fixed,
+@c                   the output code is only correct in parallel mode.
+@c                true|false
+@c                fastest changing dimension
+@c                stride padding
+@c                alignment padding
+@c                  ...see above...
+@c datacopy_privatized
+@c                [[stmt#,ref#1,ref#2,...],[...],...]
+@c                level level
+@c                [privatized loop levels]
+@c                true|false
+@c                fastest changing dimension in the new array layout
+@c                stride padding
+@c                alignment padding
+@c                  ...see above...
+@c CUDA-CHiLL 
+@c Cudaize
+@c The cudaize command has the form:
+@c cudaize (...)
+@c The cudaize command @dots{}
+@c cudaize         kernel name
+@c                 stmt num
+@c                 loop level
+@c                 grid x size
+@c                 grid y size
+@c                 array size(input array size, only needed when not statically defined)
+@c                 memory model (global)
+
+@c                 Cudaize call means there will be a cudaize step in the code-gen. 
+@c                 The last parameter specifies the memory model for the
+@c                 arrays. "textured" could be explored in the future.
+
+@c                 If using 1D arrays, the dimention of the referenced arrays is specified
+@c                 with the N parameter for used with malloc/memcpy in the generated
+@c                 scaffolding code.
+@c Cudathread
+@c The cudathread command has the form:
+@c cudathread (...)
+@c The cudathread command @dots{}
+@c cudathread      [vector] of pairs of stmt numbers nad loop levels to indicate a loop
+@c                 thread x size
+@c                 thread y size (optionally)
+@c                 thread z size (optionally)
+
+@c                 The CudaThread command indicates that some loop levels will be reduced
+@c                 as thread.{x,y,z} in the kernel. It can specify one, two or three
+@c                 dimensions by providing the loop level and related dimention.
+
+@c                 The first parameter is the location of the loop. Its in array form to
+@c                 allow for addressing arbitrarily complex positions in a loop tree. The
+@c                 addressing starts from the inner block of the loops that are reduced by
+@c                 the cudaize command. For example [0,1] is stmt 0, loop 1. [1,1,0,1] is
+@c                 stmt 1, loop 1, then inside that loop stmt 0, loop 1.
+
+@c                 A "SYNC" last parameter means a __syncthreads() is
+@c                 inserted after the respective code generated in the kernel.
+
+@c                 A invariant that raises an exception is that all cudathread
+@c                 calls must use the same dimentions between calls. i.e. threads can not
+@c                 be 16x16 in one call and 16x4 in another.
+
+@node Index
+
+@unnumbered Concept Index
+@printindex cp
+
+@unnumbered Function and Transformation Index
+@printindex fn
+
+@c @page
+
+@c @unnumbered Known Bugs and Workarounds
+@c @node Known Bugs and Workarounds
+
+@c @itemize @bullet
+@c @item
+@c Can't handle iterations that decrement, for (i = n - 1; i >= 0; i--) ...
+
+@c @item
+@c Can't distribute([0,1], 1) and then permute([1], [3, 2, 1]) mm.c
+
+@c @item
+@c Can't fuse([0,1], 1) with two top level loops it leaves the old loop there (see fuse example).
+
+@c @item
+@c nonsingular applied to smallperm.c with matrix [[.5, 0], [1, 1]] fails but doesn't complain
+
+
+@c @end itemize
+ 
+@bye
+
+  @c {"source",              chill_source,                    METH_VARARGS,     "set source file for chill script"},
+  @c {"procedure",           chill_procedure,                 METH_VARARGS,     "set the name of the procedure"},
+  @c {"loop",                chill_loop,                      METH_VARARGS,     "indicate which loop to optimize"},
+  @c {"print_code",          chill_print_code,                METH_VARARGS,     "print generated code"},
+  @c {"print_dep",           chill_print_dep,                 METH_VARARGS,     "print the dependencies graph"},
+  @c {"print_space",         chill_print_space,               METH_VARARGS,     "print space"},
+  @c {"exit",                chill_exit,                      METH_VARARGS,     "exit the interactive consule"},
+  @c {"known",               chill_known,                     METH_VARARGS,     "knwon"},
+  @c {"remove_dep",          chill_remove_dep,                METH_VARARGS,     "remove dependency i suppose"},
+  @c {"original",            chill_original,                  METH_VARARGS,     "original"},
+  @c {"permute",             chill_permute,                   METH_VARARGS,     "permute"},
+  @c {"pragma",              chill_pragma,                    METH_VARARGS,     "pragma"},
+  @c {"prefetch",            chill_prefetch,                  METH_VARARGS,     "prefetch"},
+  @c {"tile",                chill_tile,                      METH_VARARGS,     "tile"},
+  @c {"datacopy",            chill_datacopy,                  METH_VARARGS,     "datacopy"},
+  @c {"datacopy_privitized", chill_datacopy_privatized,       METH_VARARGS,     "datacopy_privatized"},
+  @c {"unroll",              chill_unroll,                    METH_VARARGS,     "unroll"},
+  @c {"unroll_extra",        chill_unroll_extra,              METH_VARARGS,     "unroll_extra"},
+  @c {"split",               chill_split,                     METH_VARARGS,     "split"},
+  @c {"nonsingular",         chill_nonsingular,               METH_VARARGS,     "nonsingular"},
+  @c {"skew",                chill_skew,                      METH_VARARGS,     "skew"},
+  @c {"scale",               chill_scale,                     METH_VARARGS,     "scale"},
+  @c {"reverse",             chill_reverse,                   METH_VARARGS,     "reverse"},
+  @c {"shift",               chill_shift,                     METH_VARARGS,     "shift"},
+  @c {"shift_to",            chill_shift_to,                  METH_VARARGS,     "shift_to"},
+  @c {"peel",                chill_peel,                      METH_VARARGS,     "peel"},
+  @c {"fuse",                chill_fuse,                      METH_VARARGS,     "fuse"},
+  @c {"distribute",          chill_distribute,                METH_VARARGS,     "distribute"},
+  @c {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},

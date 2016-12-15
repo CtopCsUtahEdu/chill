@@ -159,5 +159,5 @@ add_subdirectory(omega/basic)
 add_subdirectory(omega/omega_lib)
 add_subdirectory(omega/code_gen)
 
-add_subdirectory(doc)
+add_subdirectory(docs)
 add_subdirectory(unittests)

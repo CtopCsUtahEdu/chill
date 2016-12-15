@@ -1,7 +1,0 @@
-type _quasi : 0
-type true : 68
-type anti : 80
-type output : 136
-type input : 0
-type control : 13
-type unknown : 0
