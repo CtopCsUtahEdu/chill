@@ -394,11 +394,11 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
   //debug_fprintf(stderr, "increment is of type %s\n", inc->getTypeString()); 
   //inc->print(); printf("\n"); fflush(stdout);
 
-  if (inc->asttype == CHILLAST_NODETYPE_UNARYOPERATOR) { 
+  if (inc->getType() == CHILLAST_NODETYPE_UNARYOPERATOR) {
     if (!strcmp(((chillAST_UnaryOperator *) inc)->op, "++")) step_size_ = 1;
     else  step_size_ = -1;
   }
-  else if (inc->asttype == CHILLAST_NODETYPE_BINARYOPERATOR) { 
+  else if (inc->getType() == CHILLAST_NODETYPE_BINARYOPERATOR) {
     int beets = false;  // slang
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator *) inc;
     if (bop->isAssignmentOp()) {        // I=I+1   or similar
@@ -575,7 +575,7 @@ void IR_chillBlock::addStatement( chillAST_node* s ) {
 void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ) {
   //debug_fprintf(stderr, "findmanually()                CHILL AST node of type %s\n", node->getTypeString()); 
   
-  if (node->asttype == CHILLAST_NODETYPE_FUNCTIONDECL ) { 
+  if (node->getType() == CHILLAST_NODETYPE_FUNCTIONDECL ) {
     char *name = ((chillAST_FunctionDecl *) node)->functionName;
     //debug_fprintf(stderr, "node name 0x%x  ", name);
     //debug_fprintf(stderr, "%s     procname ", name); 
@@ -1110,7 +1110,7 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
   for (int i=0; i<numchildren; i++) { 
     debug_fprintf(stderr, "child %d/%d  is of type %s\n", i, numchildren, children[i]->getTypeString());
 
-    CHILL_ASTNODE_TYPE typ = children[i]->asttype;
+    CHILL_ASTNODE_TYPE typ = children[i]->getType();
     if (typ == CHILLAST_NODETYPE_LOOP) {
       debug_fprintf(stderr, "loop\n"); 
       // we will add the loop as a control, but before we can do that, 

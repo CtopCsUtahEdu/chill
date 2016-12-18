@@ -949,7 +949,7 @@ chillAST_node * ConvertForStmt( ForStmt *clangFS, chillAST_node *p ) {
   chillAST_node *con = ConvertGenericClangAST( cond, NULL); 
   chillAST_node *inc = ConvertGenericClangAST( incr, NULL); 
   chillAST_node *bod = ConvertGenericClangAST( body, NULL); 
-  if (bod->asttype != CHILLAST_NODETYPE_COMPOUNDSTMT) { 
+  if (bod->getType() != CHILLAST_NODETYPE_COMPOUNDSTMT) {
     //debug_fprintf(stderr, "ForStmt body of type %s\n", bod->getTypeString()); 
     // make single statement loop bodies loop like other loops
     chillAST_CompoundStmt *cs = new chillAST_CompoundStmt( );
@@ -1610,19 +1610,19 @@ IR_ArraySymbol *IR_chillArrayRef::symbol() const {
   chillAST_node *b = chillASE->base;
   debug_fprintf(stderr, "base of type %s\n", b->getTypeString()); 
   //b->print(); printf("\n"); fflush(stdout); 
-  if (b->asttype == CHILLAST_NODETYPE_IMPLICITCASTEXPR) {
+  if (b->getType() == CHILLAST_NODETYPE_IMPLICITCASTEXPR) {
     b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
     debug_fprintf(stderr, "base of type %s\n", b->getTypeString()); 
   }
   
-  if (b->asttype == CHILLAST_NODETYPE_DECLREFEXPR)  {
+  if (b->getType() == CHILLAST_NODETYPE_DECLREFEXPR)  {
     if (NULL == ((chillAST_DeclRefExpr*)b)->decl) { 
       debug_fprintf(stderr, "IR_chillArrayRef::symbol()  var decl = 0x%x\n", ((chillAST_DeclRefExpr*)b)->decl); 
       exit(-1); 
     }
     return new IR_chillArraySymbol(ir_, ((chillAST_DeclRefExpr*)b)->decl); // -> decl?
   }
-  if (b->asttype ==  CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR)  { // multidimensional array
+  if (b->getType() ==  CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR)  { // multidimensional array
     return (
   }
   debug_fprintf(stderr, "IR_chillArrayRef::symbol() can't handle\n");
@@ -1711,11 +1711,11 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
   //debug_fprintf(stderr, "increment is of type %s\n", inc->getTypeString()); 
   //inc->print(); printf("\n"); fflush(stdout);
 
-  if (inc->asttype == CHILLAST_NODETYPE_UNARYOPERATOR) { 
+  if (inc->getType() == CHILLAST_NODETYPE_UNARYOPERATOR) {
     if (!strcmp(((chillAST_UnaryOperator *) inc)->op, "++")) step_size_ = 1;
     else  step_size_ = -1;
   }
-  else if (inc->asttype == CHILLAST_NODETYPE_BINARYOPERATOR) { 
+  else if (inc->getType() == CHILLAST_NODETYPE_BINARYOPERATOR) {
     int beets = false;  // slang
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator *) inc;
     if (bop->isAssignmentOp()) {        // I=I+1   or similar
@@ -1920,7 +1920,7 @@ class NULLASTConsumer : public ASTConsumer
 void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ) {
   //debug_fprintf(stderr, "findmanually()                CHILL AST node of type %s\n", node->getTypeString()); 
   
-  if (node->asttype == CHILLAST_NODETYPE_FUNCTIONDECL ) { 
+  if (node->getType() == CHILLAST_NODETYPE_FUNCTIONDECL ) {
     char *name = ((chillAST_FunctionDecl *) node)->functionName;
     //debug_fprintf(stderr, "node name 0x%x  ", name);
     //debug_fprintf(stderr, "%s     procname ", name); 
@@ -2625,7 +2625,7 @@ std::vector<IR_Control *> IR_clangCode::FindOneLevelControlStructure(const IR_Bl
   vector<chillAST_node *> children;
 
   
-  if (blockast->asttype == CHILLAST_NODETYPE_FORSTMT) { fflush(stdout); 
+  if (blockast->getType() == CHILLAST_NODETYPE_FORSTMT) { fflush(stdout);
     debug_fprintf(stderr, "found a top level For statement (Loop)\n"); 
     debug_fprintf(stderr, "For Stmt (loop) is:\n");
     blockast->print(); 
@@ -2633,14 +2633,14 @@ std::vector<IR_Control *> IR_clangCode::FindOneLevelControlStructure(const IR_Bl
 
     controls.push_back( new IR_chillLoop( this, (chillAST_ForStmt *)blockast)); 
   }
-  //else if (blockast->asttype == CHILLAST_NODETYPE_IFSTMT) { 
+  //else if (blockast->getType() == CHILLAST_NODETYPE_IFSTMT) {
   //  controls.push_back( new IR_clangIf( this, (chillAST_IfStmt *)blockast)); 
   //} 
-  else if (blockast->asttype == CHILLAST_NODETYPE_COMPOUNDSTMT || 
-           blockast->asttype == CHILLAST_NODETYPE_FUNCTIONDECL) { 
+  else if (blockast->getType() == CHILLAST_NODETYPE_COMPOUNDSTMT ||
+           blockast->getType() == CHILLAST_NODETYPE_FUNCTIONDECL) {
 
-    if (blockast->asttype == CHILLAST_NODETYPE_FUNCTIONDECL) { 
-      //debug_fprintf(stderr, "ir_clanc.cc blockast->asttype == CHILLAST_NODETYPE_FUNCTIONDECL\n"); 
+    if (blockast->getType() == CHILLAST_NODETYPE_FUNCTIONDECL) {
+      //debug_fprintf(stderr, "ir_clanc.cc blockast->getType() == CHILLAST_NODETYPE_FUNCTIONDECL\n");
 
       chillAST_FunctionDecl *FD =  (chillAST_FunctionDecl *)blockast;
       chillAST_node *bod = FD->getBody(); 
@@ -2670,7 +2670,7 @@ std::vector<IR_Control *> IR_clangCode::FindOneLevelControlStructure(const IR_Bl
     IR_chillBlock *basicblock = new IR_chillBlock(this); // no statements
     for (int i=0; i<numchildren; i++) { 
       //debug_fprintf(stderr, "child %d is of type %s\n", i, children[i]->getTypeString());
-      CHILL_ASTNODE_TYPE typ = children[i]->asttype;
+      CHILL_ASTNODE_TYPE typ = children[i]->getType();
       if (typ == CHILLAST_NODETYPE_LOOP) {
         if (numchildren == 1) { 
           debug_fprintf(stderr, "found a For statement (Loop)\n"); 

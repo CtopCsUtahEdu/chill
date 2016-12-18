@@ -2770,11 +2770,11 @@ IR_roseLoop::IR_roseLoop(const IR_Code *ir, chillAST_node *achillnode) {  // dir
   //debug_fprintf(stderr, "increment is of type %s\n", inc->getTypeString()); 
   //inc->print(); printf("\n"); fflush(stdout);
   
-  if (inc->asttype == CHILLAST_NODETYPE_UNARYOPERATOR) { 
+  if (inc->getType() == CHILLAST_NODETYPE_UNARYOPERATOR) {
     if (!strcmp(((chillAST_UnaryOperator *) inc)->op, "++")) step_size_ = 1;
     else  step_size_ = -1;
   }
-  else if (inc->asttype == CHILLAST_NODETYPE_BINARYOPERATOR) { 
+  else if (inc->getType() == CHILLAST_NODETYPE_BINARYOPERATOR) {
     int beets = false;  // slang
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator *) inc;
     if (bop->isAssignmentOp()) {        // I=I+1   or similar
@@ -3331,7 +3331,7 @@ IR_PointerSymbol *IR_roseCode::CreatePointerSymbol(const IR_Symbol *sym,
   vd->print(0,stderr); debug_fprintf(stderr, "\n"); 
 
   // TODO parent? symbol table? 
-  chillfunc->insertChild( 0, vd);  // is this always the right function to add to? 
+  chillfunc->getBody()->insertChild( 0, vd);  // is this always the right function to add to?
   chillfunc->addVariableToSymbolTable( vd ); // always right? 
 
 
