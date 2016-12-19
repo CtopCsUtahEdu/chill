@@ -2458,7 +2458,7 @@ void swapVarReferences( chillAST_node *newkernelcode,
     if (!isParam && (!isLocalVar)) { 
       debug_fprintf(stderr, "needed to be added to kernel symbol table\n");
       kernel->addDecl(  newdecls[i] );  // adds to symbol table
-      kernel->addChild( newdecls[i] );  // adds to body! 
+      kernel->getBody()->addChild( newdecls[i] );  // adds to body!
     }
   }
 }

@@ -372,30 +372,20 @@ chillAST_RecordDecl * chillAST_node::findRecordDeclNamed( const char *name ) { /
   }
 
 
-chillAST_SourceFile::chillAST_SourceFile::chillAST_SourceFile() { 
+chillAST_SourceFile::chillAST_SourceFile() {
     SourceFileName = strdup("No Source File");
-    asttype = CHILLAST_NODETYPE_SOURCEFILE;
-    parent = NULL; // top node
-    metacomment = NULL;
     global_symbol_table = new chillAST_SymbolTable();
     global_typedef_table = new chillAST_TypedefTable();
     FileToWrite = NULL;
     frontend = strdup("unknown"); 
-    isFromSourceFile = true;
-    filename = NULL; 
 };
 
 chillAST_SourceFile::chillAST_SourceFile(const char *filename ) { 
     SourceFileName = strdup(filename); 
-    asttype = CHILLAST_NODETYPE_SOURCEFILE;  
-    parent = NULL; // top node
-    metacomment = NULL;
     global_symbol_table = new chillAST_SymbolTable();
     global_typedef_table = new chillAST_TypedefTable();
     FileToWrite = NULL; 
     frontend = strdup("unknown"); 
-    isFromSourceFile = true;
-    filename = NULL; 
 };
 
 chillAST_SourceFile::~chillAST_SourceFile() {
@@ -584,14 +574,9 @@ chillAST_VarDecl * chillAST_SourceFile::findVariableNamed( const char *name ) {
 
 chillAST_TypedefDecl::chillAST_TypedefDecl() { 
   underlyingtype = newtype = arraypart = NULL; 
-  asttype = CHILLAST_NODETYPE_TYPEDEFDECL; 
-  parent = NULL;
-  metacomment = NULL;
   isStruct = isUnion = false;
   structname = NULL; 
   rd = NULL; 
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
@@ -600,14 +585,9 @@ chillAST_TypedefDecl::chillAST_TypedefDecl(char *t, char *nt, chillAST_node *par
   underlyingtype = strdup(t); 
   newtype = strdup(nt);
   arraypart = NULL; 
-  asttype = CHILLAST_NODETYPE_TYPEDEFDECL;
-  parent = NULL; 
-  metacomment = NULL;
   isStruct = isUnion = false;
   structname = NULL; 
   rd = NULL; 
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
@@ -619,14 +599,10 @@ chillAST_TypedefDecl::chillAST_TypedefDecl(char *t, char *a, char *p, chillAST_n
   arraypart = strdup(p);  // array (p)art? 
   // splitarraypart(); // TODO 
 
-  asttype = CHILLAST_NODETYPE_TYPEDEFDECL; 
   parent = par;
-  metacomment = NULL;
   isStruct = isUnion = false;
   structname = NULL; 
   rd = NULL; 
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
@@ -706,31 +682,23 @@ chillAST_RecordDecl * chillAST_TypedefDecl::getStructDef() {
 
 
 chillAST_RecordDecl::chillAST_RecordDecl() { 
-  asttype = CHILLAST_NODETYPE_RECORDDECL;
-  name = strdup("unknown"); // ?? 
+  name = strdup("unknown"); // ??
   originalname = NULL;      // ?? 
   isStruct = isUnion = false;
-  parent = NULL; 
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 }
 
 chillAST_RecordDecl::chillAST_RecordDecl( const char *nam, chillAST_node *p ) { 
   //debug_fprintf(stderr, "chillAST_RecordDecl::chillAST_RecordDecl()\n");
-  asttype = CHILLAST_NODETYPE_RECORDDECL;
-  parent = p; 
+  parent = p;
   if (nam) name = strdup(nam);
   else name = strdup("unknown"); // ?? 
   originalname = NULL;      // ??   // make them do it manually?
   isStruct = isUnion = false;
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 }
 
 chillAST_RecordDecl::chillAST_RecordDecl( const char *nam, const char *orig, chillAST_node *p ) { 
   //debug_fprintf(stderr, "chillAST_RecordDecl::chillAST_RecordDecl( %s, (orig) )\n", nam); 
-  asttype = CHILLAST_NODETYPE_RECORDDECL;
-  parent = p; 
+  parent = p;
   if (p) p->addChild( this );
 
   if (nam) name = strdup(nam);
@@ -740,8 +708,6 @@ chillAST_RecordDecl::chillAST_RecordDecl( const char *nam, const char *orig, chi
   if (orig) originalname = strdup(orig);
   
   isStruct = isUnion = false;
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 }
 
 
@@ -838,42 +804,34 @@ void chillAST_RecordDecl::dump( int indent,  FILE *fp ) {
 }
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl() { 
+chillAST_FunctionDecl::chillAST_FunctionDecl():body(this,0) {
   functionName = strdup("YouScrewedUp"); 
-  asttype = CHILLAST_NODETYPE_FUNCTIONDECL; 
-  forwarddecl = externfunc = builtin = false; 
+  forwarddecl = externfunc = builtin = false;
   uniquePtr = (void *) NULL;
   this->setFunctionCPU(); 
-  parent = NULL;
-  metacomment = NULL;
   //symbol_table = NULL;   // eventually, pointing to body's symbol table
   typedef_table = NULL;
   body = new chillAST_CompoundStmt();
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par) { 
+chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par):body(this,0) {
   returnType = strdup(rt);
   functionName = strdup(fname);
   this->setFunctionCPU(); 
   //debug_fprintf(stderr, "functionName %s\n", functionName); 
   forwarddecl = externfunc = builtin = false; 
 
-  asttype = CHILLAST_NODETYPE_FUNCTIONDECL; 
   parent = par;
-  metacomment = NULL;
   if (par) par->getSourceFile()->addFunc( this );
   // symbol_table = NULL; //use body's instead
   typedef_table = NULL;
   body = new chillAST_CompoundStmt();
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par, void *unique) { 
+chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par, void *unique)
+    :body(this,0) {
   returnType = strdup(rt);
   functionName = strdup(fname);
   this->setFunctionCPU(); 
@@ -881,15 +839,11 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, 
   forwarddecl = externfunc = builtin = false; 
 
   body = new chillAST_CompoundStmt();
-  asttype = CHILLAST_NODETYPE_FUNCTIONDECL; 
-  uniquePtr = unique; // a quick way to check equivalence. DO NOT ACCESS THROUGH THIS 
+  uniquePtr = unique; // a quick way to check equivalence. DO NOT ACCESS THROUGH THIS
   parent = par;
-  metacomment = NULL;
   if (par) par->getSourceFile()->addFunc( this );
   //symbol_table = NULL; // use body's 
   typedef_table = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
@@ -990,38 +944,6 @@ void chillAST_FunctionDecl::setBody( chillAST_node * bod ) {
   bod->setParent( this );  // well, ... 
 }
 
-
-void chillAST_FunctionDecl::insertChild(int i, chillAST_node* node) { 
-  debug_fprintf(stderr, "chillAST_FunctionDecl::insertChild()  "); node->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
-  body->insertChild( i, node ); 
-
-  if (node->isVarDecl()) { 
-    chillAST_VarDecl *vd = ((chillAST_VarDecl *) node);
-    debug_fprintf(stderr, "functiondecl %s inserting a VarDecl named %s\n", functionName, vd->varname);
-    chillAST_SymbolTable *st = getSymbolTable();
-    if (!st) { 
-      debug_fprintf(stderr, "symbol table is NULL!\n"); 
-    }
-    else { 
-      debug_fprintf(stderr, "%d entries in the symbol table\n", st->size()); 
-      printSymbolTable( getSymbolTable() );
-    }
-    debug_fprintf(stderr, "\n\n"); 
-  }
-}
-
-void chillAST_FunctionDecl::addChild(chillAST_node* node) { 
-  debug_fprintf(stderr, "chillAST_FunctionDecl::addChild( )  "); node->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
-  if (node->isVarDecl()) { 
-    chillAST_VarDecl *vd = ((chillAST_VarDecl *) node);
-    debug_fprintf(stderr, "functiondecl %s adding a VarDecl named %s\n", functionName, vd->varname);
-  }
-
-  body->addChild( node ); 
-  node->parent = this; // this, or body?? 
-}
-
-
 void  chillAST_FunctionDecl::printParameterTypes( FILE *fp ) {  // also prints names
   //debug_fprintf(stderr, "\n\n%s chillAST_FunctionDecl::printParameterTypes()\n", functionName); 
   fprintf(fp, "( "); 
@@ -1034,9 +956,6 @@ void  chillAST_FunctionDecl::printParameterTypes( FILE *fp ) {  // also prints n
   fprintf(fp, " )"); // end of input parameters
 
 }
-
-
-
 
 void chillAST_FunctionDecl::print(  int indent,  FILE *fp ) {
   //fprintf(fp, "\n// functiondecl %p    \n", this); 
@@ -1119,41 +1038,24 @@ void chillAST_FunctionDecl::dump(  int indent,  FILE *fp ) {
 }
  
 
-
-
-
-
 void chillAST_FunctionDecl::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_FunctionDecl::gatherVarDecls()\n"); 
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  //debug_fprintf(stderr, "functiondecl has %d parameters\n", numParameters());
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherVarDecls( decls );   
-  //debug_fprintf(stderr, "after parms, %d decls\n", decls.size()); 
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls ); 
-  //debug_fprintf(stderr, "after children, %d decls\n", decls.size()); 
-  body->gatherVarDecls( decls );  // todo, figure out if functiondecl has actual children
-  //debug_fprintf(stderr, "after body, %d decls\n", decls.size()); 
-  //for (int d=0; d<decls.size(); d++) {
-  //  decls[d]->print(0,stderr); debug_fprintf(stderr, "\n"); 
-  //} 
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls );
+  body->gatherVarDecls( decls );
 }
 
 
 void chillAST_FunctionDecl::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherScalarVarDecls( decls );   
-  for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls ); 
-  body->gatherScalarVarDecls( decls );  // todo, figure out if functiondecl has actual children
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherScalarVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls );
+  body->gatherScalarVarDecls( decls );
 }
 
 
 void chillAST_FunctionDecl::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherArrayVarDecls( decls );   
-  for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls ); 
-  body->gatherArrayVarDecls( decls );  // todo, figure out if functiondecl has actual children
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherArrayVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls );
+  body->gatherArrayVarDecls( decls );
 }
 
 
@@ -1178,20 +1080,6 @@ chillAST_VarDecl *chillAST_FunctionDecl::findArrayDecl( const char *name ) {
   //debug_fprintf(stderr, "can't find array named %s in function %s \n", name, functionName); 
   return NULL; 
 }
-
-
-void chillAST_FunctionDecl::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarUsage( decls ); 
-  body->gatherVarUsage( decls );  // todo, figure out if functiondecl has actual children
-}
-
-
-void chillAST_FunctionDecl::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherDeclRefExprs( refs ); 
-  body->gatherDeclRefExprs( refs );  // todo, figure out if functiondecl has actual children
-}
-
-
 
 void chillAST_FunctionDecl::cleanUpVarDecls() {  
   //debug_fprintf(stderr, "\ncleanUpVarDecls() for function %s\n", functionName); 
@@ -1293,22 +1181,15 @@ bool chillAST_FunctionDecl::findLoopIndexesToReplace(  chillAST_SymbolTable *sym
 chillAST_MacroDefinition::chillAST_MacroDefinition() { 
   macroName = strdup("UNDEFINEDMACRO");
   rhsString = NULL;
-  asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
-  parent  = NULL;
-  metacomment = NULL;
   symbol_table = NULL;
   //rhsideString = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
 chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, chillAST_node *par) { 
   macroName = strdup(mname);
   rhsString = NULL;
-  asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
   parent = par;
-  metacomment = NULL;
   symbol_table = NULL;
   //rhsideString = NULL;
 
@@ -1317,17 +1198,13 @@ chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, chillAST_n
   //debug_fprintf(stderr, "chillAST_MacroDefinition::chillAST_MacroDefinition( %s, ", mname); 
   //if (par) debug_fprintf(stderr, " parent NOT NULL);\n");
   //else debug_fprintf(stderr, " parent NULL);\n");
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
 chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, const char *rhs, chillAST_node *par) { 
   macroName = strdup(mname);
   rhsString = strdup(rhs);
-  asttype = CHILLAST_NODETYPE_MACRODEFINITION; 
   parent = par;
-  metacomment = NULL;
   symbol_table = NULL;
 
   if (par) par->getSourceFile()->addMacro( this );
@@ -1335,8 +1212,6 @@ chillAST_MacroDefinition::chillAST_MacroDefinition(const char *mname, const char
   //debug_fprintf(stderr, "chillAST_MacroDefinition::chillAST_MacroDefinition( %s, ", mname); 
   //if (par) debug_fprintf(stderr, " parent NOT NULL);\n");
   //else debug_fprintf(stderr, " parent NULL);\n");
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 };
 
 
@@ -1434,43 +1309,28 @@ void chillAST_MacroDefinition::print(  int indent,  FILE *fp ) {  // UHOH   TODO
 
 
 
-chillAST_ForStmt::chillAST_ForStmt() {
+chillAST_ForStmt::chillAST_ForStmt():init(this, 0),cond(this,1),incr(this,2),body(this,3) {
   init = cond = incr = NULL;
   body = new chillAST_CompoundStmt();
 
-  asttype = CHILLAST_NODETYPE_LOOP;  // breaking with tradition, this was CHILL_AST_FORSTMT
   conditionoperator = IR_COND_UNKNOWN;
-  parent = NULL;
-  metacomment = NULL;
   symbol_table = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 }
 
 
-chillAST_ForStmt::chillAST_ForStmt(  chillAST_node *ini, chillAST_node *con, chillAST_node *inc, chillAST_node *bod, chillAST_node *par) {
+chillAST_ForStmt::chillAST_ForStmt(  chillAST_node *ini, chillAST_node *con, chillAST_node *inc, chillAST_node *bod, chillAST_node *par):chillAST_ForStmt() {
   parent = par; 
-  metacomment = NULL;
   init = ini;
   cond = con;
   incr = inc;
   body = bod;
-  init->setParent( this ); 
-  cond->setParent( this ); 
-  incr->setParent( this ); 
-  
-  //debug_fprintf(stderr, "chillAST_ForStmt::chillAST_ForStmt() bod %p\n", bod); 
 
-  if (body) body->setParent( this );  // not sure this should be legal 
-  
-  asttype = CHILLAST_NODETYPE_LOOP;  // breaking with tradition, this was CHILL_AST_FORSTMT  
-
-  if (!cond->isBinaryOperator()) { 
+  if (!cond->isBinaryOperator()) {
     debug_fprintf(stderr, "ForStmt conditional is of type %s. Expecting a BinaryOperator\n", cond->getTypeString());
     exit(-1); 
   }
   chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond;
-  char *condstring = bo->op; 
+  char *condstring = bo->op;
   if (!strcmp(condstring, "<"))       conditionoperator = IR_COND_LT;
   else if (!strcmp(condstring, "<=")) conditionoperator = IR_COND_LE;
   else if (!strcmp(condstring, ">"))  conditionoperator = IR_COND_GT;
@@ -1480,8 +1340,6 @@ chillAST_ForStmt::chillAST_ForStmt(  chillAST_node *ini, chillAST_node *con, chi
     debug_fprintf(stderr, "currently can only handle <, >, <=, >=\n");
     exit(1);
   }
-  isFromSourceFile = true; // default 
-  filename = NULL; 
 }
 
 
@@ -1623,7 +1481,7 @@ void chillAST_ForStmt::print( int indent, FILE *fp ) {
   b->print(indent+1, fp );
 
   // I think this can't happen any more. body is always a compound statement 
-  if (b->asttype ==  CHILLAST_NODETYPE_BINARYOPERATOR) { // a single assignment statement
+  if (b->getType() ==  CHILLAST_NODETYPE_BINARYOPERATOR) { // a single assignment statement
     fprintf(fp, ";\n"); 
   }
 
@@ -1668,33 +1526,6 @@ chillAST_node *chillAST_ForStmt::constantFold() {
   return fs;
  }
 
-void chillAST_ForStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherVarDecls()\n"); 
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherVarDecls()  before %d\n", decls.size());
-  // TODO clear a loop_var_decls variable and then walk it ? 
-  init->gatherVarDecls( decls ); 
-  cond->gatherVarDecls( decls ); 
-  incr->gatherVarDecls( decls ); 
-  body->gatherVarDecls( decls ); 
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-void chillAST_ForStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherScalarVarDecls()  before %d\n", decls.size());
-  init->gatherScalarVarDecls( decls ); 
-  cond->gatherScalarVarDecls( decls ); 
-  incr->gatherScalarVarDecls( decls ); 
-  body->gatherScalarVarDecls( decls ); 
-}
-
-void chillAST_ForStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherArrayVarDecls()  before %d\n", decls.size());
-  init->gatherArrayVarDecls( decls ); 
-  cond->gatherArrayVarDecls( decls ); 
-  incr->gatherArrayVarDecls( decls ); 
-  body->gatherArrayVarDecls( decls ); 
-}
-
 void chillAST_ForStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   init->gatherArrayRefs( refs, 0 );  // 0 ??
   cond->gatherArrayRefs( refs, 0 );  // 0 ??
@@ -1708,22 +1539,6 @@ void chillAST_ForStmt::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &ref
   incr->gatherScalarRefs( refs, 0 );  // 0 ??
   body->gatherScalarRefs( refs, 0 );  // 0 ??
 } 
-
-void chillAST_ForStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  init->gatherDeclRefExprs( refs ); 
-  cond->gatherDeclRefExprs( refs ); 
-  incr->gatherDeclRefExprs( refs ); 
-  body->gatherDeclRefExprs( refs ); 
-}
-
-
-
-void chillAST_ForStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  init->gatherVarUsage( decls ); 
-  cond->gatherVarUsage( decls ); 
-  incr->gatherVarUsage( decls ); 
-  body->gatherVarUsage( decls ); 
-}
 
 void chillAST_ForStmt::gatherStatements(std::vector<chillAST_node*> &statements ){
   
@@ -2125,17 +1940,13 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
 
 
 
-chillAST_BinaryOperator::chillAST_BinaryOperator() {
+chillAST_BinaryOperator::chillAST_BinaryOperator():lhs(this,0),rhs(this,1) {
   //debug_fprintf(stderr, "chillAST_BinaryOperator::chillAST_BinaryOperator()  %p\n", this);
-  lhs = rhs = NULL;
   op = NULL;
-  asttype = CHILLAST_NODETYPE_BINARYOPERATOR; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
-chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *oper, chillAST_node *r, chillAST_node *par) { 
+chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *oper, chillAST_node *r, chillAST_node *par):chillAST_BinaryOperator() {
   //debug_fprintf(stderr, "chillAST_BinaryOperator::chillAST_BinaryOperator( l %p  %s  r %p  par %p)  %p\n", l, oper, r, par, this); 
 
   //if (l && r ) { 
@@ -2149,7 +1960,6 @@ chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *o
   if (lhs) lhs->setParent( this );  
   if (rhs) rhs->setParent( this );  // may only have part of the lhs and rhs when binop is created
   op = strdup(oper);
-  asttype = CHILLAST_NODETYPE_BINARYOPERATOR; 
 
   // if this writes to lhs and lhs type has an 'imwrittento' concept, set that up
   if (isAssignmentOp()) { 
@@ -2165,9 +1975,6 @@ chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *o
       ((chillAST_ArraySubscriptExpr*)lhs)->imreadfrom = true; // note will ALSO have imwrittento true
     }
   }
-
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
@@ -2421,45 +2228,6 @@ void chillAST_BinaryOperator::replaceChild( chillAST_node *old, chillAST_node *n
   //} 
 }
 
-
-
-void chillAST_BinaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherVarDecls()\n"); 
-
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherVarDecls()  before %d\n", decls.size()); 
-  //print(0,stderr); debug_fprintf(stderr, "\n"); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  if (lhs) lhs->gatherVarDecls( decls ); // 'if' to deal with partially formed
-  if (rhs) rhs->gatherVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-void chillAST_BinaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherScalarVarDecls()  before %d\n", decls.size()); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  lhs->gatherScalarVarDecls( decls );
-  rhs->gatherScalarVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-void chillAST_BinaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherArrayVarDecls()  before %d\n", decls.size()); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  lhs->gatherArrayVarDecls( decls );
-  rhs->gatherArrayVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-
-void chillAST_BinaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  lhs->gatherDeclRefExprs( refs );
-  rhs->gatherDeclRefExprs( refs );
-}
-
-
 void chillAST_BinaryOperator::gatherStatements(std::vector<chillAST_node*> &statements ){
   
   // what's legit?
@@ -2467,14 +2235,6 @@ void chillAST_BinaryOperator::gatherStatements(std::vector<chillAST_node*> &stat
     statements.push_back( this );
   }
 
-}
-
-
-
-
-void chillAST_BinaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  lhs->gatherVarUsage( decls );
-  rhs->gatherVarUsage( decls );
 }
 
 void chillAST_BinaryOperator::gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) {
@@ -2506,23 +2266,15 @@ bool chillAST_BinaryOperator::isSameAs( chillAST_node *other ){
 
 
 
-chillAST_TernaryOperator::chillAST_TernaryOperator() {
+chillAST_TernaryOperator::chillAST_TernaryOperator():condition(this,0),lhs(this,1),rhs(this,2) {
   op = strdup("?"); // the only one so far
-  condition = lhs = rhs = NULL;
-  asttype = CHILLAST_NODETYPE_TERNARYOPERATOR; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
-chillAST_TernaryOperator::chillAST_TernaryOperator(const char *oper, chillAST_node *c, chillAST_node *l, chillAST_node *r, chillAST_node *par) {
-  
+chillAST_TernaryOperator::chillAST_TernaryOperator(const char *oper, chillAST_node *c, chillAST_node *l, chillAST_node *r, chillAST_node *par):chillAST_TernaryOperator() {
   op = strdup(oper);
-  condition = c;        condition->setParent( this ); 
-  lhs = l;              lhs->setParent( this ); 
-  rhs = r;              rhs->setParent( this ); 
-  asttype = CHILLAST_NODETYPE_TERNARYOPERATOR; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
+  condition = c;
+  lhs = l;
+  rhs = r;
 }
 
 void chillAST_TernaryOperator::dump( int indent, FILE *fp ) {
@@ -2560,42 +2312,6 @@ void chillAST_TernaryOperator::replaceChild( chillAST_node *old, chillAST_node *
   // silently ignore? 
   //else { 
   //}
-}
-
-
-void chillAST_TernaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherVarDecls( decls );
-  lhs->gatherVarDecls( decls );
-  rhs->gatherVarDecls( decls );
-}
-
-void chillAST_TernaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherScalarVarDecls( decls );
-  lhs->gatherScalarVarDecls( decls );
-  rhs->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_TernaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherArrayVarDecls( decls );
-  lhs->gatherArrayVarDecls( decls );
-  rhs->gatherArrayVarDecls( decls );
-}
-
-
-
-void chillAST_TernaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  condition->gatherDeclRefExprs( refs );
-  lhs->gatherDeclRefExprs( refs );
-  rhs->gatherDeclRefExprs( refs );
-}
-
-
-
-void chillAST_TernaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherVarUsage( decls );
-  lhs->gatherVarUsage( decls );
-  rhs->gatherVarUsage( decls );
 }
 
 void chillAST_TernaryOperator::gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) {
@@ -2688,7 +2404,6 @@ class chillAST_node* chillAST_TernaryOperator::clone() {
   l->setParent( to );
   r->setParent( to );
   to->isFromSourceFile = isFromSourceFile;
-  filename = NULL;
   return to;
 }
 
@@ -2710,28 +2425,19 @@ void chillAST_TernaryOperator::gatherScalarRefs( std::vector<chillAST_DeclRefExp
 
 
 
-chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() { 
-  //debug_fprintf(stderr, "\n%p chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 0\n", this); 
-  asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
+chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr():base(this,0),index(this,1) {
   base = index = NULL;
   basedecl = NULL; //debug_fprintf(stderr, "setting basedecl NULL for ASE %p\n", this); 
   imwrittento = false; // ?? 
   imreadfrom  = false; // ?? 
-  parent = NULL;
-  metacomment = NULL;
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr()  NEED TO FAKE A LOCATION\n");
-  isFromSourceFile = true; // default 
-  filename = NULL;
-  //debug_fprintf(stderr, "\nASE %p is empty\n", this); 
 }
 
 
 
-chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, chillAST_node *par, void *unique ) { 
+chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, chillAST_node *par, void *unique ):chillAST_ArraySubscriptExpr() {
 
   //debug_fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 1\n");
   //debug_fprintf(stderr, "ASE index %p ", indx); indx->print(0,stderr); debug_fprintf(stderr, "\n"); 
-  asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
   bas->setParent( this );
   if (bas->isImplicitCastExpr()) base = ((chillAST_ImplicitCastExpr*)bas)->subexpr; // probably wrong
   else   base = bas;
@@ -2750,19 +2456,16 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   //basedecl->print(); printf("\n");
   //basedecl->dump(); printf("\n"); fflush(stdout); 
   //debug_fprintf(stderr, "basedecl varname %s\n", basedecl->varname); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 
   //debug_fprintf(stderr, "\nASE %p   parent %p  ", this, parent); print(0,stderr); debug_fprintf(stderr, "\n\n"); 
 }
 
 
 
-chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, chillAST_node *par, void  *unique ) {
+chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, chillAST_node *par, void  *unique ):chillAST_ArraySubscriptExpr() {
   //debug_fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 2  parent %p\n", par ); 
   //debug_fprintf(stderr, "ASE %p   index %p ", this, indx); indx->print(0,stderr); debug_fprintf(stderr, "\n"); 
   
-  asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
   bas->setParent( this );
   if (bas->isImplicitCastExpr()) base = ((chillAST_ImplicitCastExpr*)bas)->subexpr; // probably wrong
   else base = bas;
@@ -2788,8 +2491,6 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   //printf("basedecl is  "); fflush(stdout); basedecl->print(); printf("\n"); fflush(stdout); 
   //basedecl->dump(); printf("\n"); fflush(stdout);
   //debug_fprintf(stderr, "basedecl varname %s\n", basedecl->varname); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 
   //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 2 DONE\n");
   //print(0,stderr); debug_fprintf(stderr, "\n\n"); 
@@ -2798,10 +2499,9 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
 
 
 
-chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces,  chillAST_node *par) {
+chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces,  chillAST_node *par):chillAST_ArraySubscriptExpr() {
   //debug_fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 4\n"); 
   //debug_fprintf(stderr,"chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<int> indeces)\n");
-  asttype = CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR; 
   parent = par;
   //if (parent == NULL) { 
   //  debug_fprintf(stderr, "dammit.  ASE %p has no parent\n", this); 
@@ -2845,8 +2545,6 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, s
   imwrittento = false;
   imreadfrom = false; 
   //debug_fprintf(stderr, "ASE is "); print(); printf("\n\n"); fflush(stdout); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 
   //debug_fprintf(stderr, "\nASE %p   parent %p  ", this, parent); print(0,stderr); debug_fprintf(stderr, "\n\n"); 
 }
@@ -2887,7 +2585,7 @@ chillAST_node *chillAST_node::getEnclosingStatement( int level ) {  // TODO do f
 
 
 void chillAST_ArraySubscriptExpr::gatherIndeces(std::vector<chillAST_node*>&ind) { 
-  if (base->isArraySubscriptExpr()) ((chillAST_ArraySubscriptExpr *)base)->gatherIndeces( ind ); 
+  if (base->isArraySubscriptExpr()) ((chillAST_ArraySubscriptExpr *)base)->gatherIndeces( ind );
   ind.push_back( index );
 }
 
@@ -2993,16 +2691,16 @@ chillAST_VarDecl *chillAST_ArraySubscriptExpr::multibase() {
 
   if (!b) return NULL; // just in case ??
 
-  if (base->asttype == CHILLAST_NODETYPE_IMPLICITCASTEXPR) { // bad coding
+  if (base->getType() == CHILLAST_NODETYPE_IMPLICITCASTEXPR) { // bad coding
     b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
   }
 
-  if (b->asttype == CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR) { // multidimensional array!
+  if (b->getType() == CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR) { // multidimensional array!
     // recurse
     return ((chillAST_ArraySubscriptExpr *)b)->multibase();
   }
 
-  if (b->asttype == CHILLAST_NODETYPE_DECLREFEXPR) return(((chillAST_DeclRefExpr*)b)->getVarDecl());
+  if (b->getType() == CHILLAST_NODETYPE_DECLREFEXPR) return(((chillAST_DeclRefExpr*)b)->getVarDecl());
 
   
   if (b->isBinaryOperator()) { 
@@ -3084,8 +2782,8 @@ chillAST_node *chillAST_ArraySubscriptExpr::getIndex(int dim) {
   std::vector<chillAST_node*> ind;
   chillAST_node *curindex = index;
   for (;;) { 
-    if (b->asttype == CHILLAST_NODETYPE_IMPLICITCASTEXPR) b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
-    else if (b->asttype == CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR) {
+    if (b->getType() == CHILLAST_NODETYPE_IMPLICITCASTEXPR) b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
+    else if (b->getType() == CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR) {
       //debug_fprintf(stderr, "base  "); b->print(); debug_fprintf(stderr, "\n"); 
       //debug_fprintf(stderr, "index "); curindex->print(); debug_fprintf(stderr, "\n"); 
       ind.push_back(curindex);
@@ -3145,7 +2843,7 @@ class chillAST_node* chillAST_ArraySubscriptExpr::clone() {
   //debug_fprintf(stderr, "old base   "); base->print();  printf("\n"); fflush(stdout);
   //debug_fprintf(stderr, "old base   "); base->dump();  printf("\n"); fflush(stdout);
   if (base->isDeclRefExpr()) { 
-    chillAST_VarDecl *vd = (chillAST_VarDecl *)(((chillAST_DeclRefExpr *)base)->decl); 
+    chillAST_VarDecl *vd = (chillAST_VarDecl *)(((chillAST_DeclRefExpr *)base)->decl);
     //debug_fprintf(stderr, "old decl   "); vd->print();  printf("\n");fflush(stdout);
     //debug_fprintf(stderr, "old decl   "); vd->dump();   printf("\n");fflush(stdout);
   }
@@ -3201,42 +2899,6 @@ void chillAST_ArraySubscriptExpr::gatherArrayRefs( std::vector<chillAST_ArraySub
 void chillAST_ArraySubscriptExpr::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
   index->gatherScalarRefs( refs, 0 ); 
 } 
-
-void chillAST_ArraySubscriptExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherVarDecls()\n"); 
-
-  base->gatherVarDecls( decls );
-  index->gatherVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherScalarVarDecls()\n");
-  //debug_fprintf(stderr, "base %s   index %s\n", base->getTypeString(), index->getTypeString()); 
-  base->gatherScalarVarDecls( decls );
-  index->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherArrayVarDecls()\n");
-  //debug_fprintf(stderr, "base %s   index %s\n", base->getTypeString(), index->getTypeString()); 
-  base->gatherArrayVarDecls( decls );
-  index->gatherArrayVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  base->gatherDeclRefExprs( refs );
-  index->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  base->gatherVarUsage( decls );
-  index->gatherVarUsage( decls );
-}
-
 
 void chillAST_ArraySubscriptExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   base->replaceVarDecls( olddecl, newdecl );
@@ -3297,27 +2959,18 @@ bool chillAST_ArraySubscriptExpr::operator==( const chillAST_ArraySubscriptExpr 
 
 
 chillAST_MemberExpr::chillAST_MemberExpr() { 
-  asttype = CHILLAST_NODETYPE_MEMBEREXPR; 
   base = NULL;
   member = NULL;
-  parent = NULL;
-  metacomment = NULL;
-  exptype = CHILL_MEMBER_EXP_DOT; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
+  exptype = CHILL_MEMBER_EXP_DOT;
 }
 
 chillAST_MemberExpr::chillAST_MemberExpr( chillAST_node *bas, const char *mem, chillAST_node *p, void *unique, CHILL_MEMBER_EXP_TYPE t ) { 
-  asttype = CHILLAST_NODETYPE_MEMBEREXPR; 
   base = bas;
   if (base)   base->setParent( this ); 
   if (mem)    member = strdup( mem );
   parent = p;
-  metacomment = NULL;
   uniquePtr = unique;
   exptype = t;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 
   return;  // ignore tests below ?? TODO ?? 
 
@@ -3436,17 +3089,6 @@ void chillAST_MemberExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls 
   base->gatherArrayVarDecls( decls );
 }
 
-
-void chillAST_MemberExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  base->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_MemberExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  base->gatherVarUsage( decls );
-}
-
-
 void chillAST_MemberExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   base->replaceVarDecls( olddecl, newdecl );
 }
@@ -3535,69 +3177,49 @@ chillAST_VarDecl *chillAST_MemberExpr::multibase() {
 
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr() { 
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup("UNKNOWN"); 
+  declarationType = strdup("UNKNOWN");
   declarationName = strdup("NONE");
   decl = NULL; 
-  parent = NULL;
-  metacomment = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( const char *varname, chillAST_node *par ) { 
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup("UNKNOWN"); 
+  declarationType = strdup("UNKNOWN");
   declarationName = strdup(varname); 
   decl = NULL; 
   parent = par; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( const char *vartype, const char *varname, chillAST_node *par) {
   //debug_fprintf(stderr, "DRE::DRE 0x%x   %s %s\n", this, vartype, varname ); 
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup(vartype); 
+  declarationType = strdup(vartype);
   declarationName = strdup(varname); 
   decl = NULL; 
   parent = par; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( const char *vartype, const char *varname, chillAST_node *d, chillAST_node *par ) {
   //debug_fprintf(stderr, "DRE::DRE2 0x%x   %s %s  0x%x\n", this, vartype, varname, d ); 
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup(vartype); 
+  declarationType = strdup(vartype);
   declarationName = strdup(varname); 
   decl = d; 
   parent = par; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_VarDecl *vd, chillAST_node *par ){ // variable def
   //debug_fprintf(stderr, "DRE::DRE3 (VD)  0x%x   %s %s  0x%x\n", this, vd->vartype, vd->varname, vd ); 
   
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup(vd->vartype); 
+  declarationType = strdup(vd->vartype);
   declarationName = strdup(vd->varname); 
   decl = vd; 
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_FunctionDecl *fd, chillAST_node *par ){ // function def 
-  asttype = CHILLAST_NODETYPE_DECLREFEXPR; 
-  declarationType = strdup(fd->returnType); 
+  declarationType = strdup(fd->returnType);
   declarationName = strdup(fd->functionName); 
   decl = fd; 
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
@@ -3904,10 +3526,7 @@ void chillAST_VarDecl::splitarraypart() {
 
 chillAST_IntegerLiteral::chillAST_IntegerLiteral(int val, chillAST_node *par){
   value = val; 
-  asttype = CHILLAST_NODETYPE_INTEGERLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_IntegerLiteral::print( int indent, FILE *fp) {
@@ -3941,10 +3560,7 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, chillAST_node *par
   precision = 1;
   float0double1 = 0; // which is live! 
   allthedigits = NULL; 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, chillAST_node *par){
@@ -3952,10 +3568,7 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, chillAST_node *pa
   precision = 2;
   float0double1 = 1; // which is live! 
   allthedigits = NULL; 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, chillAST_node *par){
@@ -3964,10 +3577,7 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, chillA
   float0double1 = 0; // which is live! 
   precision = precis; // 
   allthedigits = NULL; 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, int precis, chillAST_node *par){
@@ -3975,10 +3585,7 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, int precis, chill
   float0double1 = 1; // which is live! 
   precision = precis; // 
   allthedigits = NULL; 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, const char *printthis, chillAST_node *par){
@@ -3988,10 +3595,7 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, const char *printt
   allthedigits = NULL;
   if (printthis) allthedigits = strdup( printthis ); 
   //debug_fprintf(stderr, "\nfloatingliteral allthedigits = '%s'\n", allthedigits); 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, const char *printthis, chillAST_node *par){
@@ -4005,25 +3609,19 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, const 
     allthedigits = strdup( printthis ); 
   }
   //debug_fprintf(stderr, "\nfloatingliteral allthedigits = '%s'\n", allthedigits); 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral( chillAST_FloatingLiteral *old ) {
   //debug_fprintf(stderr, "chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits %p\n", old->allthedigits); 
 
-  asttype = CHILLAST_NODETYPE_FLOATINGLITERAL;
   value          = old->value;
   doublevalue    = old->doublevalue; 
   float0double1  = old->float0double1;
   allthedigits = NULL;
   if (old->allthedigits) allthedigits = strdup(old->allthedigits); 
   precision      = old->precision;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
@@ -4108,15 +3706,12 @@ bool chillAST_FloatingLiteral::isSameAs( chillAST_node *other ){
 
 
 
-chillAST_UnaryOperator::chillAST_UnaryOperator( const char *oper, bool pre, chillAST_node *sub, chillAST_node *par ) { 
+chillAST_UnaryOperator::chillAST_UnaryOperator( const char *oper, bool pre, chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
   op = strdup(oper);
   prefix = pre;
   subexpr = sub; 
   subexpr->setParent( this );
-  asttype = CHILLAST_NODETYPE_UNARYOPERATOR; 
-  parent = par; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
+  parent = par;
 }
 
 void chillAST_UnaryOperator::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*>  &refs, bool w ) {
@@ -4203,31 +3798,6 @@ class chillAST_node* chillAST_UnaryOperator::clone() {
   return UO; 
 }
 
-
-void chillAST_UnaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_UnaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
  void chillAST_UnaryOperator::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl) { 
    subexpr->replaceVarDecls( olddecl, newdecl ); 
  }
@@ -4252,15 +3822,12 @@ bool chillAST_UnaryOperator::isSameAs( chillAST_node *other ){
 }
 
 
-chillAST_ImplicitCastExpr::chillAST_ImplicitCastExpr( chillAST_node *sub, chillAST_node *par ) {
+chillAST_ImplicitCastExpr::chillAST_ImplicitCastExpr( chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
   subexpr = sub;
   subexpr->setParent( this );
-  asttype = CHILLAST_NODETYPE_IMPLICITCASTEXPR; 
-  parent = par; 
+  parent = par;
   //debug_fprintf(stderr, "ImplicitCastExpr 0x%x  has subexpr 0x%x", this, subexpr);
   //debug_fprintf(stderr, " of type %s\n", subexpr->getTypeString()); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_ImplicitCastExpr::print(  int indent, FILE *fp) {
@@ -4310,43 +3877,14 @@ void chillAST_ImplicitCastExpr::gatherScalarRefs( std::vector<chillAST_DeclRefEx
   subexpr->gatherScalarRefs( refs, writtento );
 } 
 
-void chillAST_ImplicitCastExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
-chillAST_CStyleCastExpr::chillAST_CStyleCastExpr( const char *to, chillAST_node *sub, chillAST_node *par ) {
+chillAST_CStyleCastExpr::chillAST_CStyleCastExpr( const char *to, chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
 
   //debug_fprintf(stderr, "chillAST_CStyleCastExpr::chillAST_CStyleCastExpr( %s, ...)\n", to); 
   towhat = strdup(to);
   subexpr = sub;
   if (subexpr) subexpr->setParent( this );
-  asttype = CHILLAST_NODETYPE_CSTYLECASTEXPR; 
-  parent = par; 
+  parent = par;
   //debug_fprintf(stderr, "chillAST_CStyleCastExpr (%s)   sub 0x%x\n", towhat, sub ); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_CStyleCastExpr::replaceChild( chillAST_node *old, chillAST_node *newchild ){
@@ -4383,7 +3921,7 @@ void chillAST_CStyleCastExpr::print(  int indent, FILE *fp) {
     fprintf(fp, "((%s) ", towhat); 
     //fprintf(fp, "\ntowhat '%s'\n", towhat ); 
     
-    if (subexpr->isVarDecl()) fprintf(fp, "%s", ((chillAST_VarDecl *)subexpr)->varname); 
+    if (subexpr->isVarDecl()) fprintf(fp, "%s", ((chillAST_VarDecl *)subexpr)->varname);
     else subexpr->print( indent, fp );
     //fprintf(fp, "subexpr '%s' ", subexpr->getTypeString()); 
     fprintf(fp, ")"); 
@@ -4422,42 +3960,11 @@ void chillAST_CStyleCastExpr::gatherScalarRefs( std::vector<chillAST_DeclRefExpr
   subexpr->gatherScalarRefs( refs, writtento );
 } 
 
-
-void chillAST_CStyleCastExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
-
-chillAST_CStyleAddressOf::chillAST_CStyleAddressOf( chillAST_node *sub, chillAST_node *par ) {
+chillAST_CStyleAddressOf::chillAST_CStyleAddressOf( chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
   subexpr = sub;
   subexpr->setParent( this );
-  asttype = CHILLAST_NODETYPE_CSTYLEADDRESSOF; 
-  parent = par; 
+  parent = par;
   //debug_fprintf(stderr, "chillAST_CStyleCastExpr (%s)   sub 0x%x\n", towhat, sub ); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_CStyleAddressOf::print(  int indent, FILE *fp) {
@@ -4498,49 +4005,17 @@ void chillAST_CStyleAddressOf::gatherScalarRefs( std::vector<chillAST_DeclRefExp
   subexpr->gatherScalarRefs( refs, writtento );
 } 
 
-void chillAST_CStyleAddressOf::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-void chillAST_CStyleAddressOf::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
-
-chillAST_Malloc::chillAST_Malloc(chillAST_node *size, chillAST_node *p) {
+chillAST_Malloc::chillAST_Malloc(chillAST_node *size, chillAST_node *p):sizeexpr(this,0) {
   thing = NULL;
   sizeexpr = size;  // probably a multiply like   sizeof(int) * 1024
-  asttype = CHILLAST_NODETYPE_MALLOC;
   parent = p;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-};  
+};
 
-chillAST_Malloc::chillAST_Malloc(char *thething, chillAST_node *numthings, chillAST_node *p) {
+chillAST_Malloc::chillAST_Malloc(char *thething, chillAST_node *numthings, chillAST_node *p):sizeexpr(this,0) {
   thing = strdup(thething);   // "int" or "float" or "struct widget"
   sizeexpr = numthings;  
-  asttype = CHILLAST_NODETYPE_MALLOC;
   parent = p;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-};  
+};
 
 chillAST_node* chillAST_Malloc::constantFold() {
   sizeexpr->constantFold(); 
@@ -4561,24 +4036,6 @@ void chillAST_Malloc::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*>
 void chillAST_Malloc::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
   sizeexpr->gatherScalarRefs( refs, writtento );
 };
-
-void chillAST_Malloc::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  sizeexpr->gatherVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ){
-  sizeexpr->gatherScalarVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls ) {
-  sizeexpr->gatherArrayVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherVarUsage( vector<chillAST_VarDecl*> &decls ){
-  sizeexpr->gatherVarUsage(decls); 
-};
-
-
 
 void chillAST_Malloc::print( int indent,  FILE *fp ) {
   chillindent(indent, fp); 
@@ -4604,14 +4061,11 @@ void chillAST_Malloc::dump(  int indent,  FILE *fp ) {
 
 
 
-chillAST_CudaMalloc::chillAST_CudaMalloc(chillAST_node *devmemptr, chillAST_node *size, chillAST_node *p) {
+chillAST_CudaMalloc::chillAST_CudaMalloc(chillAST_node *devmemptr, chillAST_node *size, chillAST_node *p):devPtr(this,0), sizeinbytes(this,1) {
   devPtr = devmemptr; 
   sizeinbytes = size;  // probably a multiply like   sizeof(int) * 1024
-  asttype = CHILLAST_NODETYPE_CUDAMALLOC;
   parent = p;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-};  
+};
 
 void chillAST_CudaMalloc::print(  int indent,  FILE *fp ) {
   chillindent(indent, fp); 
@@ -4655,40 +4109,10 @@ void chillAST_CudaMalloc::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &
   sizeinbytes->gatherScalarRefs( refs, false );
 }
 
-void chillAST_CudaMalloc::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherVarDecls( decls ); 
-  sizeinbytes->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMalloc::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherScalarVarDecls( decls ); 
-  sizeinbytes->gatherScalarVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaMalloc::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherArrayVarDecls( decls ); 
-  sizeinbytes->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaMalloc::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherVarUsage( decls ); 
-  sizeinbytes->gatherVarUsage( decls ); 
-}
-
-
-
-chillAST_CudaFree::chillAST_CudaFree(chillAST_VarDecl *var, chillAST_node *p) {
+chillAST_CudaFree::chillAST_CudaFree(chillAST_VarDecl *var, chillAST_node *p):variable(this,0) {
   variable = var; 
   parent = p;
-  asttype = CHILLAST_NODETYPE_CUDAFREE;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-};  
+};
 
 void chillAST_CudaFree::print(  int indent,  FILE *fp ) {
   chillindent(indent, fp); 
@@ -4716,45 +4140,14 @@ class chillAST_node* chillAST_CudaFree::clone() {
 void chillAST_CudaFree::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool w ) {}
 void chillAST_CudaFree::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {}
 
-void chillAST_CudaFree::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaFree::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CudaFree::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaFree::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherVarUsage( decls ); 
-}
-
-
-
-
-
-
-
-
-
-chillAST_CudaMemcpy::chillAST_CudaMemcpy(chillAST_VarDecl *d, chillAST_VarDecl *s, chillAST_node *siz, char *kind, chillAST_node *par) { 
+chillAST_CudaMemcpy::chillAST_CudaMemcpy(chillAST_VarDecl *d, chillAST_VarDecl *s, chillAST_node *siz, char *kind, chillAST_node *par):dest(this,0),src(this,1),size(this,2) {
   dest = d;
   src = s;
   //debug_fprintf(stderr, "chillAST_CudaMemcpy::chillAST_CudaMemcpy( dest %s, src %s, ...)\n", d->varname, s->varname ); 
   size = siz;
   cudaMemcpyKind = kind;
-  asttype = CHILLAST_NODETYPE_CUDAMEMCPY;
-  isFromSourceFile = true; // default 
-  filename = NULL;
   parent = par;
-}; 
+};
 
 void chillAST_CudaMemcpy::print(  int indent,  FILE *fp ) {
   chillindent(indent, fp); 
@@ -4805,41 +4198,9 @@ void chillAST_CudaMemcpy::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &
   size->gatherScalarRefs( refs, false );
 } 
 
-void chillAST_CudaMemcpy::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherVarDecls( decls ); 
-  src ->gatherVarDecls( decls ); 
-  size->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherScalarVarDecls( decls ); 
-  src ->gatherScalarVarDecls( decls ); 
-  size->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherArrayVarDecls( decls ); 
-  src ->gatherArrayVarDecls( decls ); 
-  size->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherVarUsage( decls ); 
-  src ->gatherVarUsage( decls ); 
-  size->gatherVarUsage( decls ); 
-}
-
-
-
 chillAST_CudaSyncthreads::chillAST_CudaSyncthreads( chillAST_node *par) { 
-  asttype = CHILLAST_NODETYPE_CUDASYNCTHREADS;
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-} 
+}
  
  void chillAST_CudaSyncthreads::print( int indent,  FILE *fp ) {
    chillindent(indent, fp); 
@@ -4862,13 +4223,10 @@ chillAST_CudaSyncthreads::chillAST_CudaSyncthreads( chillAST_node *par) {
 
 
 
-chillAST_ReturnStmt::chillAST_ReturnStmt( chillAST_node *retval, chillAST_node *par ) {
-  asttype = CHILLAST_NODETYPE_RETURNSTMT; 
+chillAST_ReturnStmt::chillAST_ReturnStmt( chillAST_node *retval, chillAST_node *par ):returnvalue(this,0) {
   returnvalue = retval;
   if (returnvalue) returnvalue->setParent( this );
   parent = par; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
@@ -4915,47 +4273,14 @@ class chillAST_node* chillAST_ReturnStmt::clone() {
   return RS;
 }
 
-
-void chillAST_ReturnStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ReturnStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ReturnStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_ReturnStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  if (returnvalue) returnvalue->gatherDeclRefExprs( refs ); 
-}
-
-
-
-void chillAST_ReturnStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherVarUsage( decls ); 
-}
-
-
-
-
 chillAST_CallExpr::chillAST_CallExpr(chillAST_node *c, chillAST_node *par) { //, int numofargs, chillAST_node **theargs ) {
   
   //debug_fprintf(stderr, "chillAST_CallExpr::chillAST_CallExpr  callee type %s\n", c->getTypeString()); 
-  asttype = CHILLAST_NODETYPE_CALLEXPR;
   callee = c;
   //callee->setParent( this ); // ?? 
   numargs = 0;
   parent = par; 
   grid = block = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 
@@ -5058,14 +4383,6 @@ void chillAST_CallExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
   }
 }
 
-
-void chillAST_CallExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<args.size(); i++) { 
-    args[i]->gatherScalarVarDecls( decls ); 
-  }
-}
-
-
 void chillAST_CallExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
   for (int i=0; i<args.size(); i++) { 
     args[i]->gatherArrayVarDecls( decls ); 
@@ -5074,8 +4391,8 @@ void chillAST_CallExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) 
 
 
 void chillAST_CallExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<args.size(); i++) { 
-    args[i]->gatherDeclRefExprs( refs ); 
+  for (int i=0; i<args.size(); i++) {
+    args[i]->gatherDeclRefExprs( refs );
   }
 }
 
@@ -5120,9 +4437,6 @@ chillAST_VarDecl::chillAST_VarDecl() {
   //debug_fprintf(stderr, "setting underlying type NULL\n" ); 
   init = NULL;
   numdimensions=0; arraysizes = NULL; 
-  asttype = CHILLAST_NODETYPE_VARDECL;  // 
-  parent = NULL;
-  metacomment = NULL;
 
   vardef  = NULL;
   isStruct = false; 
@@ -5132,9 +4446,7 @@ chillAST_VarDecl::chillAST_VarDecl() {
   isABuiltin = false; 
   isRestrict = isDevice = isShared = false; // debug_fprintf(stderr, "RDS = false\n"); 
   knownArraySizes = false;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-}; 
+};
 
 
 
@@ -5154,7 +4466,6 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
   init = NULL;
   numdimensions=0; arraysizes = NULL; 
   uniquePtr = NULL;
-  asttype = CHILLAST_NODETYPE_VARDECL;
   parent = par;
 
 
@@ -5179,9 +4490,7 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
     parent->addVariableToSymbolTable( this ); // should percolate up until something has a symbol table 
     
   }
-  isFromSourceFile = true; // default 
-  filename = NULL;
-}; 
+};
 
 
 
@@ -5208,7 +4517,6 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *na
   init = NULL;
   numdimensions=0; arraysizes = NULL; 
   uniquePtr = NULL;
-  asttype = CHILLAST_NODETYPE_VARDECL;
   parent = par;
 
   knownArraySizes = false; 
@@ -5228,11 +4536,7 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *na
   //if (parent) debug_fprintf(stderr, "yep, adding it\n"); 
 
   if (parent) parent->addVariableToSymbolTable( this ); // should percolate up until something has a symbol table 
-
-  isFromSourceFile = true; // default 
-  filename = NULL;
-
-}; 
+};
 
 
 
@@ -5254,7 +4558,6 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_TypedefDecl *tdd,  const char *n, c
   init = NULL;
   numdimensions=0; arraysizes = NULL; 
   uniquePtr = NULL;
-  asttype = CHILLAST_NODETYPE_VARDECL;
   parent = par;
 
   knownArraySizes = false; 
@@ -5273,9 +4576,7 @@ chillAST_VarDecl::chillAST_VarDecl( chillAST_TypedefDecl *tdd,  const char *n, c
   isABuiltin = false; 
   isRestrict = isDevice = isShared = false; // //debug_fprintf(stderr, "RDS = false\n"); 
   if (parent) parent->addVariableToSymbolTable( this ); // should percolate up until something has a symbol table 
-  isFromSourceFile = true; // default 
-  filename = NULL;
-}; 
+};
 
 
 
@@ -5303,7 +4604,6 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
   init = NULL;
   numdimensions=0; arraysizes = NULL; 
   uniquePtr = ptr;
-  asttype = CHILLAST_NODETYPE_VARDECL;
   parent = par;
   knownArraySizes = false; 
 
@@ -5421,9 +4721,7 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a
 
 
   //debug_fprintf(stderr, "2chillAST_VarDecl::chillAST_VarDecl LEAVING\n"); 
-  isFromSourceFile = true; // default 
-  filename = NULL;
-}; 
+};
 
 
 void chillAST_VarDecl::print( int indent, FILE *fp ) {
@@ -5539,8 +4837,6 @@ void chillAST_VarDecl::print( int indent, FILE *fp ) {
     }
   }
   fflush(fp); 
-  //debug_fprintf(stderr, "numdimensions %d    arraysizes address 0x%x\n",  numdimensions, arraysizes); 
-  //if (!isAParameter) fprintf(fp, ";\n",   vartype, varname, arraypart );  
 };
 
 
@@ -5583,13 +4879,9 @@ chillAST_RecordDecl * chillAST_VarDecl::getStructDef() {
 
 chillAST_CompoundStmt::chillAST_CompoundStmt() {
   //debug_fprintf(stderr, "chillAST_CompoundStmt::chillAST_CompoundStmt() %p\n", this); 
-  asttype = CHILLAST_NODETYPE_COMPOUNDSTMT; 
-  parent = NULL; 
   symbol_table = new chillAST_SymbolTable;
   typedef_table = NULL;
-  isFromSourceFile = true; // default 
-  filename = NULL;
-}; 
+};
 
 
 void  chillAST_CompoundStmt::print( int indent,  FILE *fp ) { 
@@ -5598,9 +4890,9 @@ void  chillAST_CompoundStmt::print( int indent,  FILE *fp ) {
   //debug_fprintf(stderr, "NUMCHILDREN %d\n", numchildren); sleep(1); 
   for (int i=0; i<numchildren; i++) {
     children[i]->print(indent, fp);
-    if (children[i]->asttype != CHILLAST_NODETYPE_FORSTMT  
-        && children[i]->asttype != CHILLAST_NODETYPE_IFSTMT
-        && children[i]->asttype != CHILLAST_NODETYPE_COMPOUNDSTMT
+    if (children[i]->getType() != CHILLAST_NODETYPE_FORSTMT
+        && children[i]->getType() != CHILLAST_NODETYPE_IFSTMT
+        && children[i]->getType() != CHILLAST_NODETYPE_COMPOUNDSTMT
         //&& children[i]->asttype != CHILLAST_NODETYPE_VARDECL   // vardecl does its own ";\n"
         ) 
       {
@@ -5739,33 +5031,6 @@ chillAST_node*  chillAST_CompoundStmt::clone(){
   return cs;
 }
 
-
-void chillAST_CompoundStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_CompoundStmt::gatherVarDecls()\n"); 
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CompoundStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarUsage( decls ); 
-}
-
-
 void chillAST_CompoundStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   for (int i=0; i<children.size(); i++) children[i]->gatherArrayRefs( refs, 0); 
 }
@@ -5844,13 +5109,10 @@ bool chillAST_CompoundStmt::findLoopIndexesToReplace(  chillAST_SymbolTable *sym
 
 
 
-chillAST_ParenExpr::chillAST_ParenExpr(  chillAST_node *sub, chillAST_node *par ){
+chillAST_ParenExpr::chillAST_ParenExpr(  chillAST_node *sub, chillAST_node *par ):subexpr(this, 0){
   subexpr = sub;
   subexpr->setParent( this );
-  asttype = CHILLAST_NODETYPE_PARENEXPR; 
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_ParenExpr::print(  int indent,  FILE *fp ) { 
@@ -5894,40 +5156,13 @@ chillAST_node* chillAST_ParenExpr::clone() {
   return PE; 
 }
 
-void chillAST_ParenExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
 void chillAST_ParenExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   subexpr->replaceVarDecls( olddecl, newdecl ); 
 }
 
-void chillAST_ParenExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
 chillAST_Sizeof::chillAST_Sizeof( char *athing, chillAST_node *par ){
   thing = strdup( athing ); // memory leak
   parent = par;
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
 
 void chillAST_Sizeof::print(  int indent,  FILE *fp ) { 
@@ -5957,27 +5192,6 @@ chillAST_node* chillAST_Sizeof::clone() {
   if (filename) SO->filename = strdup(filename); 
   return SO; 
 }
-
-void chillAST_Sizeof::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-}
-
 
 void insertNewDeclAtLocationOfOldIfNeeded( chillAST_VarDecl *newdecl, chillAST_VarDecl *olddecl) {
   //debug_fprintf(stderr, "insertNewDeclAtLocationOfOldIfNeeded( new 0x%x  old 0x%x\n", newdecl, olddecl );
@@ -6066,60 +5280,15 @@ void gatherVarUsage( vector<chillAST_node*> &code, vector<chillAST_VarDecl*> &de
 
 
 
-chillAST_IfStmt::chillAST_IfStmt() { 
-  cond     = thenpart = elsepart = NULL;
-  asttype = CHILLAST_NODETYPE_IFSTMT; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
+chillAST_IfStmt::chillAST_IfStmt():cond(this,0),thenpart(this,1),elsepart(this,2) {
 }
 
-chillAST_IfStmt::chillAST_IfStmt(chillAST_node *c, chillAST_node *t, chillAST_node *e, chillAST_node *p){
+chillAST_IfStmt::chillAST_IfStmt(chillAST_node *c, chillAST_node *t, chillAST_node *e, chillAST_node *p):chillAST_IfStmt(){
   cond = c;
-  if (cond) cond->setParent( this );
   thenpart = t;
-  if (thenpart) thenpart->setParent( this ); 
   elsepart = e;
-  if (elsepart) elsepart->setParent( this ); 
   parent = p;
-  asttype = CHILLAST_NODETYPE_IFSTMT; 
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }
-
-void chillAST_IfStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherVarDecls( decls );
-  if (thenpart) thenpart->gatherVarDecls( decls );
-  if (elsepart) elsepart->gatherVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherScalarVarDecls( decls );
-  if (thenpart) thenpart->gatherScalarVarDecls( decls );
-  if (elsepart) elsepart->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherArrayVarDecls( decls );
-  if (thenpart) thenpart->gatherArrayVarDecls( decls );
-  if (elsepart) elsepart->gatherArrayVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  if (cond)         cond->gatherDeclRefExprs( refs );
-  if (thenpart) thenpart->gatherDeclRefExprs( refs );
-  if (elsepart) elsepart->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_IfStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherVarUsage( decls );
-  if (thenpart) thenpart->gatherVarUsage( decls );
-  if (elsepart) elsepart->gatherVarUsage( decls );
-}
-
 
 void chillAST_IfStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   cond->gatherArrayRefs( refs, 0 );  // 0 ??
@@ -6363,16 +5532,7 @@ chillAST_SymbolTable *addSymbolToTable(  chillAST_SymbolTable *st, chillAST_VarD
       return s; // already there 
     }
   }
-
-  //debug_fprintf(stderr, "adding %s %s to a symbol table that didn't already have it\n", vd->vartype, vd->varname); 
-
-  //printf("before:\n"); 
-  //printSymbolTable( s ); fflush(stdout); 
-
-  s->push_back(vd); // add it 
-
-  //printf("after:\n"); 
-  //printSymbolTable( s ); fflush(stdout); 
+  s->push_back(vd); // add it
   return s;
 }
 
@@ -6395,8 +5555,6 @@ chillAST_TypedefTable *addTypedefToTable(  chillAST_TypedefTable *tdt, chillAST_
 
 chillAST_NoOp::chillAST_NoOp( chillAST_node *p ) { 
   parent = p;   
-  isFromSourceFile = true; // default 
-  filename = NULL;
 }; // so we have SOMETHING for NoOp in the cc file ???
 
 

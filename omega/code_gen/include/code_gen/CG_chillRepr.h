@@ -39,7 +39,7 @@ public:
   CG_chillRepr( chillAST_node *chillast ) { 
     stmtclassname = strdup(chillast->getTypeString()); 
     //debug_fprintf(stderr, "made new chillRepr of class %s\n", stmtclassname); 
-    if (chillast->asttype == CHILLAST_NODETYPE_COMPOUNDSTMT) { 
+    if (chillast->getType() == CHILLAST_NODETYPE_COMPOUNDSTMT) {
       vector<chillAST_node*> children = chillast->getChildren(); 
       int numchildren = children.size();
       for (int i=0; i<numchildren; i++) {

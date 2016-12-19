@@ -86,7 +86,7 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
     chillAST_VarDecl *newarray =  (chillAST_VarDecl *)vd->clone();
     newarray->varname = strdup( s.c_str() ); // 
     
-    chillfunc->insertChild( 0, newarray);  // is this always the right function to add to? 
+    chillfunc->getBody()->insertChild( 0, newarray);  // is this always the right function to add to?
     chillfunc->addVariableToSymbolTable( newarray ); // always right? 
 
     char arraystring[128];
