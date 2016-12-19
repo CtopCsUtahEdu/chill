@@ -727,18 +727,27 @@ public:
     parent->setChild(pos, NULL);
   }
 
+  //! Assignment operator will set the child
   ASTNodeClass* operator=(ASTNodeClass *ptr) {
     _parent->setChild(_pos, ptr);
     return ptr;
   }
 
+  //! Behaving like a pointer with arrow operator
   ASTNodeClass* operator ->() const { return get(); }
 
+  //! Implicit conversion to the default type
   operator ASTNodeClass* () const { return get(); }
 
-  ASTNodeClass& operator *() const { return *get(); }
+  //! Explicit conversion to some type
+  template <typename DestASTNodeClass>
+  explicit operator DestASTNodeClass* () const {
+    chillAST_node *p = (DestASTNodeClass*) NULL; // Constraint
+    return dynamic_cast<DestASTNodeClass*>(get());
+  }
 
-  ASTNodeClass* operator ()(void) const { return get(); }
+  //! Dereferencing this pointer
+  ASTNodeClass& operator *() const { return *get(); }
 };
 
 class chillAST_NULL: public chillAST_node {  // NOOP?

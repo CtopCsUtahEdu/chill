@@ -1329,8 +1329,8 @@ chillAST_ForStmt::chillAST_ForStmt(  chillAST_node *ini, chillAST_node *con, chi
     debug_fprintf(stderr, "ForStmt conditional is of type %s. Expecting a BinaryOperator\n", cond->getTypeString());
     exit(-1); 
   }
-  chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond();
-  char *condstring = bo->op; 
+  chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond;
+  char *condstring = bo->op;
   if (!strcmp(condstring, "<"))       conditionoperator = IR_COND_LT;
   else if (!strcmp(condstring, "<=")) conditionoperator = IR_COND_LE;
   else if (!strcmp(condstring, ">"))  conditionoperator = IR_COND_GT;
@@ -1355,7 +1355,7 @@ bool chillAST_ForStmt::lowerBound( int &l ) { // l is an output (passed as refer
       exit(-1);
     }
     
-    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)init();
+    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)init;
     if (!init->isAssignmentOp()) { 
       debug_fprintf(stderr, "chillAST_ForStmt::lowerBound() init is not an assignment chillAST_BinaryOperator\n");
       exit(-1);
@@ -1369,7 +1369,7 @@ bool chillAST_ForStmt::lowerBound( int &l ) { // l is an output (passed as refer
   else if (conditionoperator == IR_COND_GT || 
            conditionoperator == IR_COND_GE ) {  // decrementing 
     // lower bound is rhs of cond (not init)
-    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond();
+    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond;
     l = bo->rhs->evalAsInt(); // float could be legal I suppose
     return true; 
   }
@@ -1394,7 +1394,7 @@ bool chillAST_ForStmt::upperBound( int &u ) { // u is an output (passed as refer
       exit(-1);
     }
 
-    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)init();
+    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)init;
     if (!init->isAssignmentOp()) { 
       debug_fprintf(stderr, "chillAST_ForStmt::upperBound() init is not an assignment chillAST_BinaryOperator\n");
       exit(-1);
@@ -1407,7 +1407,7 @@ bool chillAST_ForStmt::upperBound( int &u ) { // u is an output (passed as refer
            conditionoperator == IR_COND_LE ) { 
     //debug_fprintf(stderr, "upper bound is rhs of cond   ");
     // upper bound is rhs of cond (not init)
-    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond();
+    chillAST_BinaryOperator *bo = (chillAST_BinaryOperator *)cond;
     //bo->rhs->print(0,stderr);
     u = bo->rhs->evalAsInt(); // float could be legal I suppose
 
@@ -1892,11 +1892,11 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
 
     // ACTUALLY, if I am being replaced, and my loop conditional is a min (Ternary), then wrap my loop body in an if statement
     if (cond->isBinaryOperator()) { // what else could it be?
-      chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *) cond();
+      chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *) cond;
       if (BO->rhs->isTernaryOperator()) { 
 
-        chillAST_TernaryOperator *TO = (chillAST_TernaryOperator *)BO->rhs();
-        chillAST_BinaryOperator *C =  (chillAST_BinaryOperator *)TO->condition();
+        chillAST_TernaryOperator *TO = (chillAST_TernaryOperator *)BO->rhs;
+        chillAST_BinaryOperator *C =  (chillAST_BinaryOperator *)TO->condition;
         
         //debug_fprintf(stderr, "loop condition RHS  is ternary\nCondition RHS");
         C->print(); printf("\n"); fflush(stdout); 
@@ -1964,7 +1964,7 @@ chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *o
   // if this writes to lhs and lhs type has an 'imwrittento' concept, set that up
   if (isAssignmentOp()) { 
     if (lhs && lhs->isArraySubscriptExpr()) {
-      ((chillAST_ArraySubscriptExpr*)lhs())->imwrittento = true;
+      ((chillAST_ArraySubscriptExpr*)lhs)->imwrittento = true;
       //debug_fprintf(stderr, "chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE\n"); 
     }
   }
@@ -1972,7 +1972,7 @@ chillAST_BinaryOperator::chillAST_BinaryOperator(chillAST_node *l, const char *o
     //debug_fprintf(stderr, "isAugmentedAssignmentOp()  "); print(); fflush(stdout); 
     if (lhs && lhs->isArraySubscriptExpr()) { 
       //debug_fprintf(stderr, "lhs is also read from  ");  lhs->print(); fflush(stdout); 
-      ((chillAST_ArraySubscriptExpr*)lhs())->imreadfrom = true; // note will ALSO have imwrittento true
+      ((chillAST_ArraySubscriptExpr*)lhs)->imreadfrom = true; // note will ALSO have imwrittento true
     }
   }
 }
@@ -2026,7 +2026,7 @@ void chillAST_BinaryOperator::print( int indent, FILE *fp ) {   // TODO this nee
       //  debug_fprintf(stderr, "lhs subexpr 0x%x\n", ((chillAST_ImplicitCastExpr*)lhs)->subexpr);
       //  debug_fprintf(stderr, "lhs subexpr type %s\n", ((chillAST_ImplicitCastExpr*)lhs)->subexpr->getTypeString());
       //   
-      if (((chillAST_ImplicitCastExpr*)lhs())->subexpr->isNotLeaf()) needparens = true;
+      if (((chillAST_ImplicitCastExpr*)lhs)->subexpr->isNotLeaf()) needparens = true;
     } 
     else if (lhs->isNotLeaf())  { 
       if      (isMinusOp()     && lhs->isPlusOp())     needparens = false;
@@ -2056,7 +2056,7 @@ void chillAST_BinaryOperator::print( int indent, FILE *fp ) {   // TODO this nee
   //debug_fprintf(stderr, "binop rhs is of type %s\n", rhs->getTypeString()); 
   if (rhs) { 
     if (rhs->isImplicitCastExpr()) { 
-      if (((chillAST_ImplicitCastExpr*)rhs())->subexpr->isNotLeaf()) needparens = true;
+      if (((chillAST_ImplicitCastExpr*)rhs)->subexpr->isNotLeaf()) needparens = true;
     } 
     //else if (rhs->isNotLeaf()) needparens = true; // too many parens. test too simple
     else if (rhs->isNotLeaf()) { 
@@ -2113,8 +2113,8 @@ class chillAST_node* chillAST_BinaryOperator::constantFold() {
 
     if (streq(op, "+") || streq(op, "-") || streq(op, "*")) { 
       if (lhs->isIntegerLiteral() && rhs->isIntegerLiteral()) {
-        chillAST_IntegerLiteral *l = (chillAST_IntegerLiteral *)lhs();
-        chillAST_IntegerLiteral *r = (chillAST_IntegerLiteral *)rhs();
+        chillAST_IntegerLiteral *l = (chillAST_IntegerLiteral *)lhs;
+        chillAST_IntegerLiteral *r = (chillAST_IntegerLiteral *)rhs;
         chillAST_IntegerLiteral *I;
         
         if (streq(op, "+")) I = new chillAST_IntegerLiteral(l->value+r->value, parent);
@@ -2585,7 +2585,7 @@ chillAST_node *chillAST_node::getEnclosingStatement( int level ) {  // TODO do f
 
 
 void chillAST_ArraySubscriptExpr::gatherIndeces(std::vector<chillAST_node*>&ind) { 
-  if (base->isArraySubscriptExpr()) ((chillAST_ArraySubscriptExpr *)base())->gatherIndeces( ind );
+  if (base->isArraySubscriptExpr()) ((chillAST_ArraySubscriptExpr *)base)->gatherIndeces( ind );
   ind.push_back( index );
 }
 
@@ -2843,7 +2843,7 @@ class chillAST_node* chillAST_ArraySubscriptExpr::clone() {
   //debug_fprintf(stderr, "old base   "); base->print();  printf("\n"); fflush(stdout);
   //debug_fprintf(stderr, "old base   "); base->dump();  printf("\n"); fflush(stdout);
   if (base->isDeclRefExpr()) { 
-    chillAST_VarDecl *vd = (chillAST_VarDecl *)(((chillAST_DeclRefExpr *)base())->decl);
+    chillAST_VarDecl *vd = (chillAST_VarDecl *)(((chillAST_DeclRefExpr *)base)->decl);
     //debug_fprintf(stderr, "old decl   "); vd->print();  printf("\n");fflush(stdout);
     //debug_fprintf(stderr, "old decl   "); vd->dump();   printf("\n");fflush(stdout);
   }
@@ -3767,13 +3767,13 @@ chillAST_node* chillAST_UnaryOperator::constantFold() {
     
     if (streq(op, "-")) { 
       if (subexpr->isIntegerLiteral()) {
-        int intval = ((chillAST_IntegerLiteral*)subexpr())->value;
+        int intval = ((chillAST_IntegerLiteral*)subexpr)->value;
         chillAST_IntegerLiteral *I = new chillAST_IntegerLiteral( -intval, parent);
         returnval = I;
         //debug_fprintf(stderr, "integer -%d becomes %d\n", intval, I->value);
       }
       else { 
-        chillAST_FloatingLiteral *FL = (chillAST_FloatingLiteral*)subexpr();
+        chillAST_FloatingLiteral *FL = (chillAST_FloatingLiteral*)subexpr;
         chillAST_FloatingLiteral *F = new chillAST_FloatingLiteral( FL ); // clone
         F->parent = FL->parent;
 
@@ -3921,7 +3921,7 @@ void chillAST_CStyleCastExpr::print(  int indent, FILE *fp) {
     fprintf(fp, "((%s) ", towhat); 
     //fprintf(fp, "\ntowhat '%s'\n", towhat ); 
     
-    if (subexpr->isVarDecl()) fprintf(fp, "%s", ((chillAST_VarDecl *)subexpr())->varname);
+    if (subexpr->isVarDecl()) fprintf(fp, "%s", ((chillAST_VarDecl *)subexpr)->varname);
     else subexpr->print( indent, fp );
     //fprintf(fp, "subexpr '%s' ", subexpr->getTypeString()); 
     fprintf(fp, ")"); 
@@ -5371,7 +5371,7 @@ void chillAST_IfStmt::print(int indent, FILE *fp ) {
   if (thenpart) { 
   if (thenpart->isBinaryOperator()) needbracket = false;
   if (thenpart->isCompoundStmt()) { // almost always true
-    chillAST_CompoundStmt *CS = (chillAST_CompoundStmt*) thenpart();
+    chillAST_CompoundStmt *CS = (chillAST_CompoundStmt*) thenpart;
     if (CS->children.size() == 1  && CS->children[0]->isBinaryOperator()) needbracket = false;
   }    
   
@@ -5393,7 +5393,7 @@ void chillAST_IfStmt::print(int indent, FILE *fp ) {
   if (elsepart) { 
     if (elsepart->isBinaryOperator()) needbracket = false;
     if (elsepart->isCompoundStmt()) { // almost always true
-      chillAST_CompoundStmt *CS = (chillAST_CompoundStmt*) elsepart();
+      chillAST_CompoundStmt *CS = (chillAST_CompoundStmt*) elsepart;
       
       if (CS->children.size() == 1  && CS->children[0]->isBinaryOperator()) needbracket = false;
       
