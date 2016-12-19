@@ -449,14 +449,14 @@ public:
   //! gather both scalar and array references
   virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){
     debug_fprintf(stderr,"(%s) forgot to implement gatherDeclRefExpr()\n" ,Chill_AST_Node_Names[getType()]);
-    for (auto it = children.begin(); it!=children.end(); ++it)
-      if (*it) (*it)->gatherDeclRefExprs(refs);
+    for (int i = 0; i<getNumChildren(); ++i)
+      if (getChild(i)) getChild(i)->gatherDeclRefExprs(refs);
   };
 
   virtual void gatherVarUsage( vector<chillAST_VarDecl*> &decls ) { 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarUsage()\n" ,Chill_AST_Node_Names[getType()]);
-    for (auto it = children.begin(); it!=children.end(); ++it)
-      if (*it) (*it)->gatherVarUsage(decls);
+    for (int i = 0; i<getNumChildren(); ++i)
+      if (getChild(i)) getChild(i)->gatherVarUsage(decls);
   };
 
   //! gather all variable that is used as a lefthand side operand
@@ -467,8 +467,8 @@ public:
   //! gather ACTUAL variable declarations
   virtual void gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) uses default gatherVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-    for (auto it = children.begin(); it!=children.end(); ++it)
-      if (*it) (*it)->gatherVarDecls(decls);
+    for (int i = 0; i<getNumChildren(); ++i)
+      if (getChild(i)) getChild(i)->gatherVarDecls(decls);
   };
 
   virtual void gatherVarDeclsMore( vector<chillAST_VarDecl*> &decls ) {  // even if the decl itself is not in the ast. 
@@ -478,15 +478,15 @@ public:
   //! gather ACTUAL scalar variable declarations
   virtual void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherScalarVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-    for (auto it = children.begin(); it!=children.end(); ++it)
-      if (*it) (*it)->gatherScalarVarDecls(decls);
+    for (int i = 0; i<getNumChildren(); ++i)
+      if (getChild(i)) getChild(i)->gatherScalarVarDecls(decls);
   };
 
   //! gather ACTUAL array variable declarations
   virtual void gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-    for (auto it = children.begin(); it!=children.end(); ++it)
-      if (*it) (*it)->gatherArrayVarDecls(decls);
+    for (int i = 0; i<getNumChildren(); ++i)
+      if (getChild(i)) getChild(i)->gatherArrayVarDecls(decls);
   };
 
   virtual chillAST_VarDecl *findArrayDecl( const char *name ) { // scoping TODO 
