@@ -1038,41 +1038,24 @@ void chillAST_FunctionDecl::dump(  int indent,  FILE *fp ) {
 }
  
 
-
-
-
-
 void chillAST_FunctionDecl::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_FunctionDecl::gatherVarDecls()\n"); 
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  //debug_fprintf(stderr, "functiondecl has %d parameters\n", numParameters());
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherVarDecls( decls );   
-  //debug_fprintf(stderr, "after parms, %d decls\n", decls.size()); 
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls ); 
-  //debug_fprintf(stderr, "after children, %d decls\n", decls.size()); 
-  body->gatherVarDecls( decls );  // todo, figure out if functiondecl has actual children
-  //debug_fprintf(stderr, "after body, %d decls\n", decls.size()); 
-  //for (int d=0; d<decls.size(); d++) {
-  //  decls[d]->print(0,stderr); debug_fprintf(stderr, "\n"); 
-  //} 
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls );
+  body->gatherVarDecls( decls );
 }
 
 
 void chillAST_FunctionDecl::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherScalarVarDecls( decls );   
-  for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls ); 
-  body->gatherScalarVarDecls( decls );  // todo, figure out if functiondecl has actual children
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherScalarVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls );
+  body->gatherScalarVarDecls( decls );
 }
 
 
 void chillAST_FunctionDecl::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //if (0 < children.size()) debug_fprintf(stderr, "functiondecl has %d children\n", children.size()); 
-  
-  for (int i=0; i<numParameters(); i++) parameters[i]->gatherArrayVarDecls( decls );   
-  for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls ); 
-  body->gatherArrayVarDecls( decls );  // todo, figure out if functiondecl has actual children
+  for (int i=0; i<numParameters(); i++) parameters[i]->gatherArrayVarDecls( decls );
+  //for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls );
+  body->gatherArrayVarDecls( decls );
 }
 
 
@@ -1097,20 +1080,6 @@ chillAST_VarDecl *chillAST_FunctionDecl::findArrayDecl( const char *name ) {
   //debug_fprintf(stderr, "can't find array named %s in function %s \n", name, functionName); 
   return NULL; 
 }
-
-
-void chillAST_FunctionDecl::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarUsage( decls ); 
-  body->gatherVarUsage( decls );  // todo, figure out if functiondecl has actual children
-}
-
-
-void chillAST_FunctionDecl::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherDeclRefExprs( refs ); 
-  body->gatherDeclRefExprs( refs );  // todo, figure out if functiondecl has actual children
-}
-
-
 
 void chillAST_FunctionDecl::cleanUpVarDecls() {  
   //debug_fprintf(stderr, "\ncleanUpVarDecls() for function %s\n", functionName); 
@@ -1557,33 +1526,6 @@ chillAST_node *chillAST_ForStmt::constantFold() {
   return fs;
  }
 
-void chillAST_ForStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherVarDecls()\n"); 
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherVarDecls()  before %d\n", decls.size());
-  // TODO clear a loop_var_decls variable and then walk it ? 
-  init->gatherVarDecls( decls ); 
-  cond->gatherVarDecls( decls ); 
-  incr->gatherVarDecls( decls ); 
-  body->gatherVarDecls( decls ); 
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-void chillAST_ForStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherScalarVarDecls()  before %d\n", decls.size());
-  init->gatherScalarVarDecls( decls ); 
-  cond->gatherScalarVarDecls( decls ); 
-  incr->gatherScalarVarDecls( decls ); 
-  body->gatherScalarVarDecls( decls ); 
-}
-
-void chillAST_ForStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ForStmt::gatherArrayVarDecls()  before %d\n", decls.size());
-  init->gatherArrayVarDecls( decls ); 
-  cond->gatherArrayVarDecls( decls ); 
-  incr->gatherArrayVarDecls( decls ); 
-  body->gatherArrayVarDecls( decls ); 
-}
-
 void chillAST_ForStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   init->gatherArrayRefs( refs, 0 );  // 0 ??
   cond->gatherArrayRefs( refs, 0 );  // 0 ??
@@ -1597,22 +1539,6 @@ void chillAST_ForStmt::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &ref
   incr->gatherScalarRefs( refs, 0 );  // 0 ??
   body->gatherScalarRefs( refs, 0 );  // 0 ??
 } 
-
-void chillAST_ForStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  init->gatherDeclRefExprs( refs ); 
-  cond->gatherDeclRefExprs( refs ); 
-  incr->gatherDeclRefExprs( refs ); 
-  body->gatherDeclRefExprs( refs ); 
-}
-
-
-
-void chillAST_ForStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  init->gatherVarUsage( decls ); 
-  cond->gatherVarUsage( decls ); 
-  incr->gatherVarUsage( decls ); 
-  body->gatherVarUsage( decls ); 
-}
 
 void chillAST_ForStmt::gatherStatements(std::vector<chillAST_node*> &statements ){
   
@@ -2302,45 +2228,6 @@ void chillAST_BinaryOperator::replaceChild( chillAST_node *old, chillAST_node *n
   //} 
 }
 
-
-
-void chillAST_BinaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherVarDecls()\n"); 
-
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherVarDecls()  before %d\n", decls.size()); 
-  //print(0,stderr); debug_fprintf(stderr, "\n"); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  if (lhs) lhs->gatherVarDecls( decls ); // 'if' to deal with partially formed
-  if (rhs) rhs->gatherVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-void chillAST_BinaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherScalarVarDecls()  before %d\n", decls.size()); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  lhs->gatherScalarVarDecls( decls );
-  rhs->gatherScalarVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-void chillAST_BinaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_BinaryOperator::gatherArrayVarDecls()  before %d\n", decls.size()); 
-  //debug_fprintf(stderr, "lhs is %s\n", lhs->getTypeString()); 
-  lhs->gatherArrayVarDecls( decls );
-  rhs->gatherArrayVarDecls( decls );
-  //debug_fprintf(stderr, "after %d\n", decls.size()); 
-}
-
-
-
-void chillAST_BinaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  lhs->gatherDeclRefExprs( refs );
-  rhs->gatherDeclRefExprs( refs );
-}
-
-
 void chillAST_BinaryOperator::gatherStatements(std::vector<chillAST_node*> &statements ){
   
   // what's legit?
@@ -2348,14 +2235,6 @@ void chillAST_BinaryOperator::gatherStatements(std::vector<chillAST_node*> &stat
     statements.push_back( this );
   }
 
-}
-
-
-
-
-void chillAST_BinaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  lhs->gatherVarUsage( decls );
-  rhs->gatherVarUsage( decls );
 }
 
 void chillAST_BinaryOperator::gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) {
@@ -2433,42 +2312,6 @@ void chillAST_TernaryOperator::replaceChild( chillAST_node *old, chillAST_node *
   // silently ignore? 
   //else { 
   //}
-}
-
-
-void chillAST_TernaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherVarDecls( decls );
-  lhs->gatherVarDecls( decls );
-  rhs->gatherVarDecls( decls );
-}
-
-void chillAST_TernaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherScalarVarDecls( decls );
-  lhs->gatherScalarVarDecls( decls );
-  rhs->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_TernaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherArrayVarDecls( decls );
-  lhs->gatherArrayVarDecls( decls );
-  rhs->gatherArrayVarDecls( decls );
-}
-
-
-
-void chillAST_TernaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  condition->gatherDeclRefExprs( refs );
-  lhs->gatherDeclRefExprs( refs );
-  rhs->gatherDeclRefExprs( refs );
-}
-
-
-
-void chillAST_TernaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  condition->gatherVarUsage( decls );
-  lhs->gatherVarUsage( decls );
-  rhs->gatherVarUsage( decls );
 }
 
 void chillAST_TernaryOperator::gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) {
@@ -3057,42 +2900,6 @@ void chillAST_ArraySubscriptExpr::gatherScalarRefs( std::vector<chillAST_DeclRef
   index->gatherScalarRefs( refs, 0 ); 
 } 
 
-void chillAST_ArraySubscriptExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherVarDecls()\n"); 
-
-  base->gatherVarDecls( decls );
-  index->gatherVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherScalarVarDecls()\n");
-  //debug_fprintf(stderr, "base %s   index %s\n", base->getTypeString(), index->getTypeString()); 
-  base->gatherScalarVarDecls( decls );
-  index->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::gatherArrayVarDecls()\n");
-  //debug_fprintf(stderr, "base %s   index %s\n", base->getTypeString(), index->getTypeString()); 
-  base->gatherArrayVarDecls( decls );
-  index->gatherArrayVarDecls( decls );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  base->gatherDeclRefExprs( refs );
-  index->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_ArraySubscriptExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  base->gatherVarUsage( decls );
-  index->gatherVarUsage( decls );
-}
-
-
 void chillAST_ArraySubscriptExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   base->replaceVarDecls( olddecl, newdecl );
   index->replaceVarDecls( olddecl, newdecl );
@@ -3281,17 +3088,6 @@ void chillAST_MemberExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls
 void chillAST_MemberExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
   base->gatherArrayVarDecls( decls );
 }
-
-
-void chillAST_MemberExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  base->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_MemberExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  base->gatherVarUsage( decls );
-}
-
 
 void chillAST_MemberExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   base->replaceVarDecls( olddecl, newdecl );
@@ -4002,31 +3798,6 @@ class chillAST_node* chillAST_UnaryOperator::clone() {
   return UO; 
 }
 
-
-void chillAST_UnaryOperator::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_UnaryOperator::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_UnaryOperator::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
  void chillAST_UnaryOperator::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl) { 
    subexpr->replaceVarDecls( olddecl, newdecl ); 
  }
@@ -4105,32 +3876,6 @@ void chillAST_ImplicitCastExpr::gatherArrayRefs( std::vector<chillAST_ArraySubsc
 void chillAST_ImplicitCastExpr::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
   subexpr->gatherScalarRefs( refs, writtento );
 } 
-
-void chillAST_ImplicitCastExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_ImplicitCastExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
 
 chillAST_CStyleCastExpr::chillAST_CStyleCastExpr( const char *to, chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
 
@@ -4215,34 +3960,6 @@ void chillAST_CStyleCastExpr::gatherScalarRefs( std::vector<chillAST_DeclRefExpr
   subexpr->gatherScalarRefs( refs, writtento );
 } 
 
-
-void chillAST_CStyleCastExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CStyleCastExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
-
 chillAST_CStyleAddressOf::chillAST_CStyleAddressOf( chillAST_node *sub, chillAST_node *par ):subexpr(this,0) {
   subexpr = sub;
   subexpr->setParent( this );
@@ -4288,32 +4005,6 @@ void chillAST_CStyleAddressOf::gatherScalarRefs( std::vector<chillAST_DeclRefExp
   subexpr->gatherScalarRefs( refs, writtento );
 } 
 
-void chillAST_CStyleAddressOf::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-void chillAST_CStyleAddressOf::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CStyleAddressOf::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
-
-
 chillAST_Malloc::chillAST_Malloc(chillAST_node *size, chillAST_node *p):sizeexpr(this,0) {
   thing = NULL;
   sizeexpr = size;  // probably a multiply like   sizeof(int) * 1024
@@ -4345,24 +4036,6 @@ void chillAST_Malloc::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*>
 void chillAST_Malloc::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
   sizeexpr->gatherScalarRefs( refs, writtento );
 };
-
-void chillAST_Malloc::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  sizeexpr->gatherVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ){
-  sizeexpr->gatherScalarVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls ) {
-  sizeexpr->gatherArrayVarDecls(decls); 
-};
-
-void chillAST_Malloc::gatherVarUsage( vector<chillAST_VarDecl*> &decls ){
-  sizeexpr->gatherVarUsage(decls); 
-};
-
-
 
 void chillAST_Malloc::print( int indent,  FILE *fp ) {
   chillindent(indent, fp); 
@@ -4436,33 +4109,6 @@ void chillAST_CudaMalloc::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &
   sizeinbytes->gatherScalarRefs( refs, false );
 }
 
-void chillAST_CudaMalloc::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherVarDecls( decls ); 
-  sizeinbytes->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMalloc::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherScalarVarDecls( decls ); 
-  sizeinbytes->gatherScalarVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaMalloc::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherArrayVarDecls( decls ); 
-  sizeinbytes->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaMalloc::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  devPtr->gatherVarUsage( decls ); 
-  sizeinbytes->gatherVarUsage( decls ); 
-}
-
-
-
 chillAST_CudaFree::chillAST_CudaFree(chillAST_VarDecl *var, chillAST_node *p):variable(this,0) {
   variable = var; 
   parent = p;
@@ -4493,34 +4139,6 @@ class chillAST_node* chillAST_CudaFree::clone() {
 
 void chillAST_CudaFree::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool w ) {}
 void chillAST_CudaFree::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {}
-
-void chillAST_CudaFree::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaFree::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CudaFree::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_CudaFree::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  variable->gatherVarUsage( decls ); 
-}
-
-
-
-
-
-
-
-
 
 chillAST_CudaMemcpy::chillAST_CudaMemcpy(chillAST_VarDecl *d, chillAST_VarDecl *s, chillAST_node *siz, char *kind, chillAST_node *par):dest(this,0),src(this,1),size(this,2) {
   dest = d;
@@ -4579,35 +4197,6 @@ void chillAST_CudaMemcpy::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &
   src ->gatherScalarRefs( refs, false );
   size->gatherScalarRefs( refs, false );
 } 
-
-void chillAST_CudaMemcpy::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherVarDecls( decls ); 
-  src ->gatherVarDecls( decls ); 
-  size->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherScalarVarDecls( decls ); 
-  src ->gatherScalarVarDecls( decls ); 
-  size->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherArrayVarDecls( decls ); 
-  src ->gatherArrayVarDecls( decls ); 
-  size->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CudaMemcpy::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  dest->gatherVarUsage( decls ); 
-  src ->gatherVarUsage( decls ); 
-  size->gatherVarUsage( decls ); 
-}
-
-
 
 chillAST_CudaSyncthreads::chillAST_CudaSyncthreads( chillAST_node *par) { 
   parent = par;
@@ -4683,36 +4272,6 @@ class chillAST_node* chillAST_ReturnStmt::clone() {
   if (filename) RS->filename = strdup(filename); 
   return RS;
 }
-
-
-void chillAST_ReturnStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ReturnStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ReturnStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherArrayVarDecls( decls ); 
-}
-
-
-
-void chillAST_ReturnStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  if (returnvalue) returnvalue->gatherDeclRefExprs( refs ); 
-}
-
-
-
-void chillAST_ReturnStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  if (returnvalue) returnvalue->gatherVarUsage( decls ); 
-}
-
-
-
 
 chillAST_CallExpr::chillAST_CallExpr(chillAST_node *c, chillAST_node *par) { //, int numofargs, chillAST_node **theargs ) {
   
@@ -4824,14 +4383,6 @@ void chillAST_CallExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
   }
 }
 
-
-void chillAST_CallExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<args.size(); i++) { 
-    args[i]->gatherScalarVarDecls( decls ); 
-  }
-}
-
-
 void chillAST_CallExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
   for (int i=0; i<args.size(); i++) { 
     args[i]->gatherArrayVarDecls( decls ); 
@@ -4840,8 +4391,8 @@ void chillAST_CallExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) 
 
 
 void chillAST_CallExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<args.size(); i++) { 
-    args[i]->gatherDeclRefExprs( refs ); 
+  for (int i=0; i<args.size(); i++) {
+    args[i]->gatherDeclRefExprs( refs );
   }
 }
 
@@ -5480,33 +5031,6 @@ chillAST_node*  chillAST_CompoundStmt::clone(){
   return cs;
 }
 
-
-void chillAST_CompoundStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  //debug_fprintf(stderr, "chillAST_CompoundStmt::gatherVarDecls()\n"); 
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_CompoundStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherDeclRefExprs( refs ); 
-}
-
-
-void chillAST_CompoundStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  for (int i=0; i<children.size(); i++) children[i]->gatherVarUsage( decls ); 
-}
-
-
 void chillAST_CompoundStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   for (int i=0; i<children.size(); i++) children[i]->gatherArrayRefs( refs, 0); 
 }
@@ -5585,7 +5109,7 @@ bool chillAST_CompoundStmt::findLoopIndexesToReplace(  chillAST_SymbolTable *sym
 
 
 
-chillAST_ParenExpr::chillAST_ParenExpr(  chillAST_node *sub, chillAST_node *par ){
+chillAST_ParenExpr::chillAST_ParenExpr(  chillAST_node *sub, chillAST_node *par ):subexpr(this, 0){
   subexpr = sub;
   subexpr->setParent( this );
   parent = par;
@@ -5632,34 +5156,9 @@ chillAST_node* chillAST_ParenExpr::clone() {
   return PE; 
 }
 
-void chillAST_ParenExpr::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherScalarVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherArrayVarDecls( decls ); 
-}
-
-
-void chillAST_ParenExpr::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  subexpr->gatherDeclRefExprs( refs ); 
-}
-
 void chillAST_ParenExpr::replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){
   subexpr->replaceVarDecls( olddecl, newdecl ); 
 }
-
-void chillAST_ParenExpr::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  subexpr->gatherVarUsage( decls ); 
-}
-
-
 
 chillAST_Sizeof::chillAST_Sizeof( char *athing, chillAST_node *par ){
   thing = strdup( athing ); // memory leak
@@ -5693,27 +5192,6 @@ chillAST_node* chillAST_Sizeof::clone() {
   if (filename) SO->filename = strdup(filename); 
   return SO; 
 }
-
-void chillAST_Sizeof::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  // TODO 
-}
-
-
-void chillAST_Sizeof::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-}
-
 
 void insertNewDeclAtLocationOfOldIfNeeded( chillAST_VarDecl *newdecl, chillAST_VarDecl *olddecl) {
   //debug_fprintf(stderr, "insertNewDeclAtLocationOfOldIfNeeded( new 0x%x  old 0x%x\n", newdecl, olddecl );
@@ -5811,41 +5289,6 @@ chillAST_IfStmt::chillAST_IfStmt(chillAST_node *c, chillAST_node *t, chillAST_no
   elsepart = e;
   parent = p;
 }
-
-void chillAST_IfStmt::gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherVarDecls( decls );
-  if (thenpart) thenpart->gatherVarDecls( decls );
-  if (elsepart) elsepart->gatherVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherScalarVarDecls( decls );
-  if (thenpart) thenpart->gatherScalarVarDecls( decls );
-  if (elsepart) elsepart->gatherScalarVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherArrayVarDecls( decls );
-  if (thenpart) thenpart->gatherArrayVarDecls( decls );
-  if (elsepart) elsepart->gatherArrayVarDecls( decls );
-}
-
-
-void chillAST_IfStmt::gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {
-  if (cond)         cond->gatherDeclRefExprs( refs );
-  if (thenpart) thenpart->gatherDeclRefExprs( refs );
-  if (elsepart) elsepart->gatherDeclRefExprs( refs );
-}
-
-
-void chillAST_IfStmt::gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {
-  if (cond)         cond->gatherVarUsage( decls );
-  if (thenpart) thenpart->gatherVarUsage( decls );
-  if (elsepart) elsepart->gatherVarUsage( decls );
-}
-
 
 void chillAST_IfStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) { 
   cond->gatherArrayRefs( refs, 0 );  // 0 ??

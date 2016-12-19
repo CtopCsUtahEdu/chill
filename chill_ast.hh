@@ -449,11 +449,15 @@ public:
   //! gather both scalar and array references
   virtual void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){
     debug_fprintf(stderr,"(%s) forgot to implement gatherDeclRefExpr()\n" ,Chill_AST_Node_Names[getType()]);
+    for (auto it = children.begin(); it!=children.end(); ++it)
+      if (*it) (*it)->gatherDeclRefExprs(refs);
   };
 
   virtual void gatherVarUsage( vector<chillAST_VarDecl*> &decls ) { 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarUsage()\n" ,Chill_AST_Node_Names[getType()]);
-  }; 
+    for (auto it = children.begin(); it!=children.end(); ++it)
+      if (*it) (*it)->gatherVarUsage(decls);
+  };
 
   //! gather all variable that is used as a lefthand side operand
   virtual void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls ) { 
@@ -462,22 +466,28 @@ public:
 
   //! gather ACTUAL variable declarations
   virtual void gatherVarDecls( vector<chillAST_VarDecl*> &decls ) {
-    debug_fprintf(stderr,"(%s) forgot to implement gatherVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-  }; 
+    debug_fprintf(stderr,"(%s) uses default gatherVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
+    for (auto it = children.begin(); it!=children.end(); ++it)
+      if (*it) (*it)->gatherVarDecls(decls);
+  };
 
   virtual void gatherVarDeclsMore( vector<chillAST_VarDecl*> &decls ) {  // even if the decl itself is not in the ast. 
     debug_fprintf(stderr,"(%s) forgot to implement gatherVarDeclsMore()\n" ,Chill_AST_Node_Names[getType()]);
-  }; 
+  };
 
   //! gather ACTUAL scalar variable declarations
   virtual void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherScalarVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-  }; 
+    for (auto it = children.begin(); it!=children.end(); ++it)
+      if (*it) (*it)->gatherScalarVarDecls(decls);
+  };
 
   //! gather ACTUAL array variable declarations
   virtual void gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
     debug_fprintf(stderr,"(%s) forgot to implement gatherArrayVarDecls()\n" ,Chill_AST_Node_Names[getType()]);
-  }; 
+    for (auto it = children.begin(); it!=children.end(); ++it)
+      if (*it) (*it)->gatherArrayVarDecls(decls);
+  };
 
   virtual chillAST_VarDecl *findArrayDecl( const char *name ) { // scoping TODO 
     if (!hasSymbolTable()) return parent->findArrayDecl( name ); // most things
@@ -1008,16 +1018,11 @@ public:
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
   void loseLoopWithLoopVar( char *var ); // special case this for not for debugging
@@ -1152,9 +1157,7 @@ public:
   //void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
   //void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) 
 
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
-  void cleanUpVarDecls();   
+  void cleanUpVarDecls();
 
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
@@ -1434,17 +1437,12 @@ public:
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
-  void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl); // will get called on inner loops 
+  void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl); // will get called on inner loops
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false );
 
   void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces );
@@ -1539,14 +1537,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -1623,14 +1615,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); // chillAST_BinaryOperator
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -1691,14 +1677,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -1751,8 +1731,6 @@ public:
   void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
   void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
 
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -1879,18 +1857,13 @@ public:
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); // chillAST_UnaryOperator
 
   void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls );
 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -1926,14 +1899,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
   chillAST_VarDecl *multibase(); // just recurse on subexpr
@@ -1965,15 +1932,9 @@ public:
 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
-  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
   chillAST_node *findref(){return subexpr;};// find the SINGLE constant or data reference at this node or below
 
 }; 
@@ -1998,14 +1959,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -2034,13 +1989,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
   //void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -2068,13 +2018,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
   //void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -2107,13 +2052,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
   //void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -2154,13 +2094,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
   //void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
@@ -2220,14 +2155,8 @@ public:
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -2262,7 +2191,6 @@ public:
   void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
   void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
 
   void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
@@ -2278,7 +2206,7 @@ class chillAST_ParenExpr: public chillAST_node {
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_PARENEXPR;}
   // variables that are special for this type of node
-  chillAST_node *subexpr;
+  chillAST_Child<chillAST_node> subexpr;
   
   // constructors
   chillAST_ParenExpr( chillAST_node *sub, chillAST_node *p=NULL ); 
@@ -2293,14 +2221,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -2326,14 +2248,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){};
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
 
@@ -2355,14 +2271,8 @@ public:
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {};
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {};
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls ){};
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ){};
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls ){};
-
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls ){};
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){};
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){};
   bool findLoopIndexesToReplace( chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; };//no loops under here 
 };
@@ -2396,16 +2306,11 @@ public:
   chillAST_node* constantFold();
   chillAST_node* clone(); 
 
-  void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
-  void gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayVarDecls ( vector<chillAST_VarDecl*> &decls );
-  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); 
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
-  void gatherVarUsage( vector<chillAST_VarDecl*> &decls );
-  void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
 
