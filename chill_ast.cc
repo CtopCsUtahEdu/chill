@@ -830,7 +830,7 @@ void chillAST_RecordDecl::dump( int indent,  FILE *fp ) {
 }
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl() { 
+chillAST_FunctionDecl::chillAST_FunctionDecl():body(this,0) {
   functionName = strdup("YouScrewedUp"); 
   forwarddecl = externfunc = builtin = false;
   uniquePtr = (void *) NULL;
@@ -845,7 +845,7 @@ chillAST_FunctionDecl::chillAST_FunctionDecl() {
 };
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par) { 
+chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par):body(this,0) {
   returnType = strdup(rt);
   functionName = strdup(fname);
   this->setFunctionCPU(); 
@@ -863,7 +863,8 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, 
 };
 
 
-chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par, void *unique) { 
+chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *par, void *unique)
+    :body(this,0) {
   returnType = strdup(rt);
   functionName = strdup(fname);
   this->setFunctionCPU(); 

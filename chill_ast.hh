@@ -685,6 +685,7 @@ public:
   void printPreprocBEFORE( int indent, FILE *fp );
   void printPreprocAFTER( int indent, FILE *fp );
 
+  //! Base constructor for all inherited class
   chillAST_node() {
     parent = NULL;
     metacomment = NULL;
@@ -1073,7 +1074,7 @@ public:
 class chillAST_FunctionDecl: public chillAST_node { 
 private:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_FUNCTIONDECL;}
-  chillAST_CompoundStmt *body; // always a compound statement?
+  chillAST_Child<chillAST_CompoundStmt> body; // always a compound statement?
   CHILL_FUNCTION_TYPE function_type;  // CHILL_FUNCTION_CPU or  CHILL_FUNCTION_GPU
   bool externfunc;   // function is external 
   bool builtin;      // function is a builtin
