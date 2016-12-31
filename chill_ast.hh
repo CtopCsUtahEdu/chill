@@ -292,7 +292,7 @@ public:
 
   int getNumChildren() { return children.size(); }; 
   vector<chillAST_node*> children;
-  vector<chillAST_node*> getChildren() { return children; } ;  // not usually useful
+  vector<chillAST_node*> &getChildren() { return children; } ;  // not usually useful
   chillAST_node *getChild( int which)                    { return children[which]; };
   void           setChild( int which, chillAST_node *n ) { children[which] = n; if(n) n->parent = this; } ;
   
@@ -1058,7 +1058,8 @@ public:
   chillAST_RecordDecl( const char *nam, const char *orig, chillAST_node *p ); 
 
   void  setName( const char *newname) { name = strdup(newname); }; 
-  char *getName( ) { return name; }; 
+  char *getName( ) { return name; };
+  vector<chillAST_VarDecl *> &getSubparts() {return subparts;}
   
   bool isAUnion()  { return isUnion;  };
   bool isAStruct() { return isStruct; }; 

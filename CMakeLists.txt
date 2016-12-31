@@ -65,6 +65,10 @@ set(CUDACHILL_SRC
 
 add_library(chill_cuda ${CUDACHILL_SRC})
 
+add_library(chill_printer printer/src/generic.cpp
+                          printer/src/dump.cpp
+                          printer/src/cfamily.cpp)
+
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
 set(CMAKE_CXX_FLAGS "-DPYTHON -DFRONTEND_ROSE ${COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -81,7 +85,8 @@ else()
         )
 endif()
 
-set(CHILL_INC ${CMAKE_CURRENT_SOURCE_DIR})
+set(CHILL_INC ${CMAKE_CURRENT_SOURCE_DIR}
+              ${CMAKE_CURRENT_SOURCE_DIR}/printer/include)
 
 find_package(BISON)
 find_package(FLEX)
@@ -112,7 +117,7 @@ include_directories(
 
 set(chill-libs
     parseRel omega_basic omega_lib codegen codegen_rose codegen_chill
-    chill_core chill_ir chill_ast)
+    chill_core chill_ir chill_ast chill_printer)
 
 add_executable(chill
         chill_run.cc
