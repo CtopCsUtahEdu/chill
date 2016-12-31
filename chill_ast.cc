@@ -3558,57 +3558,38 @@ class chillAST_node* chillAST_IntegerLiteral::clone() {
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, chillAST_node *par){
   value = val; 
   precision = 1;
-  float0double1 = 0; // which is live! 
-  allthedigits = NULL; 
+  allthedigits = NULL;
   parent = par;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, chillAST_node *par){
-  doublevalue = val; 
+  value = val;
   precision = 2;
-  float0double1 = 1; // which is live! 
-  allthedigits = NULL; 
-  parent = par;
-}
-
-chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, chillAST_node *par){
-  value = val; 
-  precision = 1;
-  float0double1 = 0; // which is live! 
-  precision = precis; // 
-  allthedigits = NULL; 
+  allthedigits = NULL;
   parent = par;
 }
 
 chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, int precis, chillAST_node *par){
-  doublevalue = val; 
-  float0double1 = 1; // which is live! 
-  precision = precis; // 
+  value = val; 
+  precision = precis;
   allthedigits = NULL; 
   parent = par;
 }
 
-chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, const char *printthis, chillAST_node *par){
+chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, const char *printthis, chillAST_node *par){
   value = val; 
-  float0double1 = 0; // which is live! 
-  precision = 1;
+  precision = 2;
   allthedigits = NULL;
-  if (printthis) allthedigits = strdup( printthis ); 
-  //debug_fprintf(stderr, "\nfloatingliteral allthedigits = '%s'\n", allthedigits); 
+  if (printthis) allthedigits = strdup( printthis );
   parent = par;
 }
 
-chillAST_FloatingLiteral::chillAST_FloatingLiteral(float val, int precis, const char *printthis, chillAST_node *par){
+chillAST_FloatingLiteral::chillAST_FloatingLiteral(double val, int precis, const char *printthis, chillAST_node *par){
   value = val; 
-  float0double1 = 0; // which is live! 
-  precision = precis; // but value is a float??  TODO 
+  precision = precis;
   allthedigits = NULL;
-  if (printthis) { 
-    //debug_fprintf(stderr, "\nchillAST_FloatingLiteral constructor, printthis "); 
-    //debug_fprintf(stderr, "%p\n", printthis); 
-    allthedigits = strdup( printthis ); 
-  }
-  //debug_fprintf(stderr, "\nfloatingliteral allthedigits = '%s'\n", allthedigits); 
+  if (printthis)
+    allthedigits = strdup( printthis );
   parent = par;
 }
 
@@ -3617,8 +3598,6 @@ chillAST_FloatingLiteral::chillAST_FloatingLiteral( chillAST_FloatingLiteral *ol
   //debug_fprintf(stderr, "chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits %p\n", old->allthedigits); 
 
   value          = old->value;
-  doublevalue    = old->doublevalue; 
-  float0double1  = old->float0double1;
   allthedigits = NULL;
   if (old->allthedigits) allthedigits = strdup(old->allthedigits); 
   precision      = old->precision;
@@ -3637,8 +3616,7 @@ void chillAST_FloatingLiteral::print( int indent, FILE *fp) {
     //debug_fprintf(stderr, "floatingliteral allthedigits = '%s'\n", allthedigits); 
   }
   else {
-    if (float0double1 == 0)     sprintf(output, "%f", value);
-    else sprintf(output, "%f", doublevalue);
+    sprintf(output, "%f", value);
     
     // next part to avoid printing 123.4560000000000000000000000000
     char *dot = index(output, '.');
@@ -3672,9 +3650,8 @@ void chillAST_FloatingLiteral::dump( int indent, FILE *fp) {
     fprintf(fp, "(FloatingLiteral 'float' "); 
   else fprintf(fp, "(FloatingLiteral 'double' "); 
 
-  if (float0double1 == 0) fprintf(fp, "%f)\n", value);  // %f gives enough digits 
-  else fprintf(fp, "%f)\n", doublevalue);  // %f gives enough digits 
-  fflush(fp); 
+  fprintf(fp, "%f)\n", value);  // %f gives enough digits
+  fflush(fp);
 }
 
 
@@ -3695,12 +3672,8 @@ bool chillAST_FloatingLiteral::isSameAs( chillAST_node *other ){
   if (!other->isFloatingLiteral()) return false;
   chillAST_FloatingLiteral *o = (chillAST_FloatingLiteral *)other;
   // should we care about single vs double precision?
-  if (float0double1 != o->float0double1) return false;
-  if (float0double1 == 0) { 
-    return value == o->value; // WARNING, comparing floats with ==
-  }
-  return doublevalue == o->doublevalue; // WARNING, comparing doubless with ==
-} 
+  return value == o->value; // WARNING, comparing floats with ==
+}
 
 
 
@@ -3778,8 +3751,7 @@ chillAST_node* chillAST_UnaryOperator::constantFold() {
         F->parent = FL->parent;
 
         F->value = -F->value;
-        F->doublevalue = -F->doublevalue;
-        
+
         F->print(); debug_fprintf(stderr, "\n"); 
         
         returnval = F;
