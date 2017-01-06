@@ -607,8 +607,7 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
 static PyObject *
 chill_cur_indices(PyObject *self, PyObject *args)
 {
-  debug_fprintf(stderr, "cur_indices( %d )\n", stmt_num);  
-  int stmt_num = -123; 
+  int stmt_num = -123;
   if (!PyArg_ParseTuple(args, "i", &stmt_num)){
     chill_fprintf(stderr, "chill_cur_indices, can't parse statement number passed from python\n");
     exit(-1);

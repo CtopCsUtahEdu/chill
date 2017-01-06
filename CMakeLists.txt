@@ -22,6 +22,7 @@ set(CORE_LIBS chill_core chill_ir chill_ast
     ${IEGen_LIBS} isl ${RoseBoost_LIBS})
 
 set(CORE_SRC
+    chill_io.cc
     dep.cc
     irtools.cc
     loop.cc

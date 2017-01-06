@@ -430,7 +430,7 @@ int main( int argc, char* argv[] )
     #ifdef PYTHON
     lnum_start = get_loop_num_start();
     lnum_end = get_loop_num_end();
-    debug_fprintf(stderr, "calling ROSE code gen?    loop num %d\n", lnum);
+    debug_fprintf(stderr, "calling ROSE code gen?    loop num %d - %d\n", lnum_start, lnum_end);
     #else
     lnum_start = get_loop_num_start(L);
     lnum_end = get_loop_num_end(L);
