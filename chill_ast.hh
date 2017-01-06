@@ -1797,20 +1797,17 @@ public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_FLOATINGLITERAL;}
   // variables that are special for this type of node
   // FIXME: two conflicting flag for almost the same thing
-  float value;
-  double doublevalue;
-  int float0double1; 
+  double value;
 
   char *allthedigits; // if not NULL, use this as printable representation
-  int precision;   // float == 1, double == 2, ??? 
+  int precision;   // float == 1, double == 2
 
   // constructors
   chillAST_FloatingLiteral( float  val,                                 chillAST_node *p); 
   chillAST_FloatingLiteral( double val,                                 chillAST_node *p); 
-  chillAST_FloatingLiteral( float  val, int pre,                        chillAST_node *p); 
-  chillAST_FloatingLiteral( double val, int pre,                        chillAST_node *p); 
-  chillAST_FloatingLiteral( float  val, const char *printable,          chillAST_node *p); 
-  chillAST_FloatingLiteral( float  val, int pre, const char *printable, chillAST_node *p); 
+  chillAST_FloatingLiteral( double val, int pre,                        chillAST_node *p);
+  chillAST_FloatingLiteral( double val, const char *printable,          chillAST_node *p);
+  chillAST_FloatingLiteral( double val, int pre, const char *printable, chillAST_node *p);
   chillAST_FloatingLiteral( chillAST_FloatingLiteral *old ); 
   
   // other methods particular to this type of node
