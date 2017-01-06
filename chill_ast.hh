@@ -15,7 +15,7 @@
 #include <assert.h>
 #include <vector>  // std::vector 
 
-#include <ir_enums.hh> // for IR_CONDITION_* 
+#include <ir_enums.hh> // for IR_CONDITION_*
 
 using std::vector;
 using std::string;
@@ -306,7 +306,11 @@ public:
     c->parent = this;
     // check to see if it's already there
     for (int i = 0; i < children.size(); i++)
-      assert(true || children[i] != c && "child already exist");
+      if (children[i] == c) {
+        debug_printf("addChild(): Child already exist");
+        return;
+      }
+      // assert(true || children[i] != c && "child already exist");
     children.push_back(c);
   }  // not usually useful
 
