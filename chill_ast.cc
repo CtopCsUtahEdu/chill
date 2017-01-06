@@ -760,7 +760,8 @@ void chillAST_RecordDecl::print( int indent,  FILE *fp ) {
       fprintf(fp, ";\n");
     }
     fprintf(fp, "} ");
-    fprintf(fp, "\n");  // TODO need semicolon when defining struct. can't have it when part of a typedef. One of the following lines is correct in each case. 
+    fprintf(fp, "\n");  // TODO need semicolon when defining struct. can't have it when part of a typedef. One of the following lines is correct in each case.
+                        // Fixed by printer
     //fprintf(fp, ";\n");
   }
   else { 
