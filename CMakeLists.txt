@@ -17,12 +17,13 @@ find_package(IEGen REQUIRED)
 
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
-set(CORE_LIBS chill_core chill_ir chill_ast
+set(CORE_LIBS chill_core chill_ir chill_ast chill_io
     m ${Rose_LIBS} rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
     ${IEGen_LIBS} isl ${RoseBoost_LIBS})
 
+add_library(chill_io chill_io.cc)
+
 set(CORE_SRC
-    chill_io.cc
     dep.cc
     irtools.cc
     loop.cc
@@ -118,7 +119,7 @@ include_directories(
 
 set(chill-libs
     parseRel omega_basic omega_lib codegen codegen_rose codegen_chill
-    chill_core chill_ir chill_ast chill_printer)
+    chill_core chill_ir chill_ast chill_printer chill_io)
 
 add_executable(chill
         chill_run.cc
