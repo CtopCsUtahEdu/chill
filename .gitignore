@@ -20,17 +20,26 @@ Makefile
 
 /autom4te.cache
 /aclocal.m4
+/ar-lib
 /compile
 /configure
 /depcomp
 /install-sh
 /missing
 /stamp-h1
+/test-driver
 
 /omega/autom4te.cache
 /omega/aclocal.m4
+/omega/ar-lib
 /omega/compile
+/omega/configure
 /omega/depcomp
 /omega/install-sh
 /omega/missing
 
+# Eclipse project config
+
+/.cproject
+/.settings
+/.project

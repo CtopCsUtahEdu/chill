@@ -733,7 +733,7 @@ void swapVarReferences( chillAST_node *newkernelcode,
     debug_fprintf(stderr, "variable name %s  ", newdecls[i]->varname); 
     
     chillAST_VarDecl *isParam    = kernel->hasParameterNamed( newdecls[i]->varname ); 
-    chillAST_VarDecl *isLocalVar = kernel->hasVariableNamed(  newdecls[i]->varname ); 
+    chillAST_VarDecl *isLocalVar = kernel->findVariableNamed(  newdecls[i]->varname );
 
     if (isParam)    { debug_fprintf(stderr, "is a parameter\n"); }
     if (isLocalVar) { debug_fprintf(stderr, "is already defined in the kernel\n"); }
@@ -769,7 +769,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
                           std::vector<std::string> threadIdxs) {
   debug_fprintf(stderr, " LoopCuda::cudaize_v2() ROSE\n");
   exit(-1); 
-  for(std::map<std::string, int>::iterator it = array_dims->begin(); it != array_dims->end(); it++)  {
+  for(std::map<std::string, int>::iterator it = array_dims.begin(); it != array_dims.end(); it++)  {
     debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
   }
 
@@ -1256,7 +1256,7 @@ static void texmapArrayRefs(texture_memory_mapping* texture, std::vector<IR_Arra
 
 chillAST_node* LoopCuda::cudaize_codegen_v2() {
   debug_fprintf(stderr, "cudaize codegen V2 (ROSE)\n");
-  for(std::map<std::string, int>::iterator it = array_dims->begin(); it != array_dims->end(); it++)  {
+  for(std::map<std::string, int>::iterator it = array_dims.begin(); it != array_dims.end(); it++)  {
     debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
   }
 
@@ -2777,7 +2777,7 @@ void LoopCuda::printCode(int effort, bool actuallyPrint) const {
   
   if (actuallyPrint)
     std::cout << repr << std::endl;
-  cout.flush(); 
+  std::cout.flush();
   //std::cout << static_cast<CG_stringRepr*>(repr)->GetString();
   /*
     for (int i = 1; i <= m; i++)
