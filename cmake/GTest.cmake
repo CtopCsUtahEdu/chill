@@ -16,11 +16,11 @@ function(add_unittest testname)
     include_directories(${GTEST_ROOT}/include)
     link_directories(${GTEST_ROOT}/lib)
     add_executable(${testname} EXCLUDE_FROM_ALL ${ARGN})
-    target_link_libraries(${testname} ${UTEST_MODULES} gtest_main gtest pthread)
+    target_link_libraries(${testname} ${UTEST_MODULES} chill_io gtest_main gtest pthread)
     set_target_properties(${testname}
         PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests/unittests"
     )
-    add_dependencies(${testname} googletest ${UTEST_MODULES})
+    add_dependencies(${testname} googletest ${UTEST_MODULES} chill_io)
     add_dependencies(UnitTests ${testname})
 endfunction()
