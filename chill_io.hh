@@ -1,7 +1,10 @@
 #ifndef CHILL_IO_HH
 #define CHILL_IO_HH
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include <stdlib.h>
 
 // ----------------------------------------- //
