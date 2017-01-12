@@ -159,9 +159,11 @@ common_libdirs          = $(core_libdirs) $(runner_libdirs)
 ## Binaries ##
 if CUDACHILL_OPT
 TESTS=
+include ./test-chill/cudachill_testcases.mk
 bin_PROGRAMS=cuda-chill
 else
 TESTS=
+include ./test-chill/chill_testcases.mk
 bin_PROGRAMS=chill
 endif
 

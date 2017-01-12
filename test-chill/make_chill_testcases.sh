@@ -28,7 +28,7 @@ do
             test_file=`basename $test_file_path`
             
             ## Add run test
-            run_test_file="test-chill/test-$test_file"
+            run_test_file="test-chill/test-$test_file.testcase"
             echo ""                                                                                   >  $run_test_file # make new file
             echo "err=\`$srcdir/test-chill/runchilltest.sh $srcdir/$test_dir/$test_file check-run\`"  >> $run_test_file
             echo "exit \$?"                                                                           >> $run_test_file

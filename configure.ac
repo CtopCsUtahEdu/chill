@@ -129,10 +129,8 @@ AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])
 # - Build Test System - #
 # -                   - #
 
-echo "##################################################################################################################"
-
 $srcdir/test-chill/make_chill_testcases.sh $srcdir examples/chill/testcases test-chill
-#sh ./test-chill/make_cudachill_testcases.sh
+#$srcdir/test-chill/make_cudachill_testcases.sh $srcdir examples/cudachill/testcases test-chill
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
