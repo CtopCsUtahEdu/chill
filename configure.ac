@@ -125,6 +125,15 @@ AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])
 
+# -                   - #
+# - Build Test System - #
+# -                   - #
+
+echo "##################################################################################################################"
+
+$srcdir/test-chill/make_chill_testcases.sh $srcdir examples/chill/testcases test-chill
+#sh ./test-chill/make_cudachill_testcases.sh
+
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_SUBDIRS([omega])
