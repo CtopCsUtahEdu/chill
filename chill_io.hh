@@ -1,17 +1,12 @@
 #ifndef CHILL_IO_HH
 #define CHILL_IO_HH
 
+#include "config.h"
 #include <stdlib.h>
 
 // ----------------------------------------- //
 // Stream output (for debugging, and stdout) //
 // ----------------------------------------- //
-
-#ifndef NDEBUG
-#ifndef DEBUGCHILL
-#define DEBUGCHILL
-#endif
-#endif
 
 // Normal chill output
 #define chill_fprintf(f, ...)               do { fprintf(f, __VA_ARGS__); fflush(f); } while (0)

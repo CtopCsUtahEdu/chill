@@ -1,0 +1,1023 @@
+source: unroll.c
+format rose
+parse the file because we haven't yet
+CIT_ROSE
+LOOP  ir_code = new IR_roseCode(source_filename, procedure_name);
+IR_roseCode::IR_roseCode( filename unroll.c, proc_name foo )
+IR_roseCode::IR_roseCode  actually parsing unroll.c using rose?
+"/home/markhall/srcrepository/projects/github/chill/trunk/examples/chill/unroll.c", line 24: warning: 
+          return value type does not match the function type
+  	return 0;
+  	       ^
+
+"/home/markhall/srcrepository/projects/github/chill/trunk/examples/chill/unroll.c", line 7: warning: 
+          variable "k" was set but never used
+  	int i, j, k;
+  	          ^
+
+IR_roseCode::IR_roseCode()  project defined. file parsed?
+1 files
+creating chillAST from Rose AST (todo)
+
+root is SgGlobal  0x7f017fb55010
+ConvertRoseFile(  SgGlobal *sg, filename unroll.c );
+429 top nodes
+adding function decl foo
+ConvertRoseVarDecl() storing variable declaration 'n' with unique value 0x7f01771547b0 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'x' with unique value 0x7f01771548d8 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'y' with unique value 0x7f0177154a00 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'z' with unique value 0x7f0177154b28 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'f3' with unique value 0x7f0177154c50 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'f1' with unique value 0x7f0177154d78 from  SgInitializedName
+ConvertRoseVarDecl() storing variable declaration 'w' with unique value 0x7f0177154ea0 from  SgInitializedName
+8 statements in FunctionDecl body
+int i;
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'i' with unique value 0x7f0177154fc8 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177154fc8 from  SgInitializedName
+int j;
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'j' with unique value 0x7f01771550f0 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f01771550f0 from  SgInitializedName
+int k;
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'k' with unique value 0x7f0177155218 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177155218 from  SgInitializedName
+for(((((i = 1) ,(j = 2))) ,(k = 123));i <= 14;i++) x[i] = 1.0;
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+for(((((i = 1) ,(j = 2))) ,(k = 123));i <= 14;i++) x[i] = 1.0;
+1 inits
+inits[0] is a SgExprStatement
+((((i = 1) ,(j = 2))) ,(k = 123));
+
+i <= 14
+i <= 14;
+
+i++
+
+
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement ((((i = 1) ,(j = 2))) ,(k = 123));
+ConvertRoseExprStatement() expr ((((i = 1) ,(j = 2))) ,(k = 123))
+binary op
+commaop binop
+ConvertRoseBinaryOp()  AST Node is 298 SgCommaOpExp
+op is ,
+ConvertRoseGenericAST(),  rose AST node of type SgCommaOpExp
+ConvertRoseBinaryOp()  AST Node is 298 SgCommaOpExp
+op is ,
+ConvertRoseGenericAST(),  rose AST node of type SgAssignOp
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgAssignOp
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgAssignOp
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  k
+varname k
+varname1 k
+varname2 k
+new chillAST_DeclRefExpr( int, k, p)
+varname k
+ new2 chillAST_DeclRefExpr( vd, )  varname k
+found it at variabledeclaration of k at 18 of 20
+found it at variabledeclaration of k at 19 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessOrEqualOp
+ConvertRoseBinaryOp()  AST Node is 440 SgLessOrEqualOp
+op is <=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseUnaryOp()  AST Node is 535 SgPlusPlusOp
+op is ++
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+for statement, converting body
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement x[i] = 1.0;
+ConvertRoseExprStatement() expr x[i] = 1.0
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  x
+varname x
+varname1 x
+varname2 x
+new chillAST_DeclRefExpr( float *, x, p)
+varname x
+ new2 chillAST_DeclRefExpr( vd, )  varname x
+found it at variabledeclaration of x at 2 of 20
+found it at variabledeclaration of x at 3 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseUnaryOp()  AST Node is 283 SgCastExp
+op is ??
+ConvertRoseGenericAST(),  rose AST node of type SgDoubleVal
+for(i = 1;i <= 14;i += 3) y[i] = 1.0;
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+for(i = 1;i <= 14;i += 3) y[i] = 1.0;
+1 inits
+inits[0] is a SgExprStatement
+i = 1;
+
+i <= 14
+i <= 14;
+
+i += 3
+
+
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement i = 1;
+ConvertRoseExprStatement() expr i = 1
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessOrEqualOp
+ConvertRoseBinaryOp()  AST Node is 440 SgLessOrEqualOp
+op is <=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusAssignOp
+ConvertRoseBinaryOp()  AST Node is 534 SgPlusAssignOp
+op is +=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+for statement, converting body
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement y[i] = 1.0;
+ConvertRoseExprStatement() expr y[i] = 1.0
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  y
+varname y
+varname1 y
+varname2 y
+new chillAST_DeclRefExpr( float *, y, p)
+varname y
+ new2 chillAST_DeclRefExpr( vd, )  varname y
+found it at variabledeclaration of y at 4 of 20
+found it at variabledeclaration of y at 5 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseUnaryOp()  AST Node is 283 SgCastExp
+op is ??
+ConvertRoseGenericAST(),  rose AST node of type SgDoubleVal
+for(i = 14 + 1;i <= 14 + 20;i += 3) z[i] = 1.0;
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+for(i = 14 + 1;i <= 14 + 20;i += 3) z[i] = 1.0;
+1 inits
+inits[0] is a SgExprStatement
+i = 14 + 1;
+
+i <= 14 + 20
+i <= 14 + 20;
+
+i += 3
+
+
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement i = 14 + 1;
+ConvertRoseExprStatement() expr i = 14 + 1
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgAddOp
+ConvertRoseBinaryOp()  AST Node is 3 SgAddOp
+op is +
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessOrEqualOp
+ConvertRoseBinaryOp()  AST Node is 440 SgLessOrEqualOp
+op is <=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgAddOp
+ConvertRoseBinaryOp()  AST Node is 3 SgAddOp
+op is +
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusAssignOp
+ConvertRoseBinaryOp()  AST Node is 534 SgPlusAssignOp
+op is +=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+for statement, converting body
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement z[i] = 1.0;
+ConvertRoseExprStatement() expr z[i] = 1.0
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  z
+varname z
+varname1 z
+varname2 z
+new chillAST_DeclRefExpr( float *, z, p)
+varname z
+ new2 chillAST_DeclRefExpr( vd, )  varname z
+found it at variabledeclaration of z at 6 of 20
+found it at variabledeclaration of z at 7 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseUnaryOp()  AST Node is 283 SgCastExp
+op is ??
+ConvertRoseGenericAST(),  rose AST node of type SgDoubleVal
+for(i = 0;i <= 14;i++) {for(j = i;j <=(i + 14);j++) f3[i] =(f3[i] +(f1[j] * w[j - i]));f3[i] =(f3[i] * 0.314);}
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+for(i = 0;i <= 14;i++) {for(j = i;j <=(i + 14);j++) f3[i] =(f3[i] +(f1[j] * w[j - i]));f3[i] =(f3[i] * 0.314);}
+1 inits
+inits[0] is a SgExprStatement
+i = 0;
+
+i <= 14
+i <= 14;
+
+i++
+
+
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement i = 0;
+ConvertRoseExprStatement() expr i = 0
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessOrEqualOp
+ConvertRoseBinaryOp()  AST Node is 440 SgLessOrEqualOp
+op is <=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseUnaryOp()  AST Node is 535 SgPlusPlusOp
+op is ++
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+for statement, converting body
+ConvertRoseGenericAST(),  rose AST node of type SgBasicBlock
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+for(j = i;j <=(i + 14);j++) f3[i] =(f3[i] +(f1[j] * w[j - i]));
+1 inits
+inits[0] is a SgExprStatement
+j = i;
+
+j <=(i + 14)
+j <=(i + 14);
+
+j++
+
+
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement j = i;
+ConvertRoseExprStatement() expr j = i
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgLessOrEqualOp
+ConvertRoseBinaryOp()  AST Node is 440 SgLessOrEqualOp
+op is <=
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgAddOp
+ConvertRoseBinaryOp()  AST Node is 3 SgAddOp
+op is +
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseUnaryOp()  AST Node is 535 SgPlusPlusOp
+op is ++
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+for statement, converting body
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement f3[i] =(f3[i] +(f1[j] * w[j - i]));
+ConvertRoseExprStatement() expr f3[i] =(f3[i] +(f1[j] * w[j - i]))
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f3
+varname f3
+varname1 f3
+varname2 f3
+new chillAST_DeclRefExpr( float *, f3, p)
+varname f3
+ new2 chillAST_DeclRefExpr( vd, )  varname f3
+found it at variabledeclaration of f3 at 8 of 20
+found it at variabledeclaration of f3 at 9 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgAddOp
+ConvertRoseBinaryOp()  AST Node is 3 SgAddOp
+op is +
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f3
+varname f3
+varname1 f3
+varname2 f3
+new chillAST_DeclRefExpr( float *, f3, p)
+varname f3
+ new2 chillAST_DeclRefExpr( vd, )  varname f3
+found it at variabledeclaration of f3 at 8 of 20
+found it at variabledeclaration of f3 at 9 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgMultiplyOp
+ConvertRoseBinaryOp()  AST Node is 470 SgMultiplyOp
+op is *
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f1
+varname f1
+varname1 f1
+varname2 f1
+new chillAST_DeclRefExpr( float *, f1, p)
+varname f1
+ new2 chillAST_DeclRefExpr( vd, )  varname f1
+found it at variabledeclaration of f1 at 10 of 20
+found it at variabledeclaration of f1 at 11 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  w
+varname w
+varname1 w
+varname2 w
+new chillAST_DeclRefExpr( float *, w, p)
+varname w
+ new2 chillAST_DeclRefExpr( vd, )  varname w
+found it at variabledeclaration of w at 12 of 20
+found it at variabledeclaration of w at 13 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgSubtractOp
+ConvertRoseBinaryOp()  AST Node is 589 SgSubtractOp
+op is -
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  j
+varname j
+varname1 j
+varname2 j
+new chillAST_DeclRefExpr( int, j, p)
+varname j
+ new2 chillAST_DeclRefExpr( vd, )  varname j
+found it at variabledeclaration of j at 16 of 20
+found it at variabledeclaration of j at 17 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement f3[i] =(f3[i] * 0.314);
+ConvertRoseExprStatement() expr f3[i] =(f3[i] * 0.314)
+binary op
+ConvertRoseBinaryOp()  AST Node is 258 SgAssignOp
+op is =
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f3
+varname f3
+varname1 f3
+varname2 f3
+new chillAST_DeclRefExpr( float *, f3, p)
+varname f3
+ new2 chillAST_DeclRefExpr( vd, )  varname f3
+found it at variabledeclaration of f3 at 8 of 20
+found it at variabledeclaration of f3 at 9 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseUnaryOp()  AST Node is 283 SgCastExp
+op is ??
+ConvertRoseGenericAST(),  rose AST node of type SgMultiplyOp
+ConvertRoseBinaryOp()  AST Node is 470 SgMultiplyOp
+op is *
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseUnaryOp()  AST Node is 283 SgCastExp
+op is ??
+ConvertRoseGroseuna
+enericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f3
+varname f3
+varname1 f3
+varname2 f3
+new chillAST_DeclRefExpr( float *, f3, p)
+varname f3
+ new2 chillAST_DeclRefExpr( vd, )  varname f3
+found it at variabledeclaration of f3 at 8 of 20
+found it at variabledeclaration of f3 at 9 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  i
+varname i
+varname1 i
+varname2 i
+new chillAST_DeclRefExpr( int, i, p)
+varname i
+ new2 chillAST_DeclRefExpr( vd, )  varname i
+found it at variabledeclaration of i at 14 of 20
+found it at variabledeclaration of i at 15 of 20
+ConvertRoseGenericAST(),  rose AST node of type SgDoubleVal
+0;
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement 0;
+ConvertRoseExprStatement() expr 0
+adding function decl main
+8 statements in FunctionDecl body
+float x[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'x' with unique value 0x7f0177155340 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177155340 from  SgInitializedName
+float y[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'y' with unique value 0x7f0177155468 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177155468 from  SgInitializedName
+float z[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'z' with unique value 0x7f0177155590 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177155590 from  SgInitializedName
+float f3[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'f3' with unique value 0x7f01771556b8 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f01771556b8 from  SgInitializedName
+float f1[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'f1' with unique value 0x7f01771557e0 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f01771557e0 from  SgInitializedName
+float w[14UL];
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+ConvertRoseVarDecl() storing variable declaration 'w' with unique value 0x7f0177155908 from  SgInitializedName
+ConvertRoseVarDecl2() storing variable declaration with unique value 0x7f0177155908 from  SgInitializedName
+foo(14,x,y,z,f3,f1,w);
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement foo(14,x,y,z,f3,f1,w);
+ConvertRoseExprStatement() expr foo(14,x,y,z,f3,f1,w)
+ConvertRoseFunctionCallExp()
+function foo is of type SgFunctionRefExp
+args 14,x,y,z,f3,f1,w
+I think function call has 7 arguments
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  x
+varname x
+varname1 x
+varname2 x
+new chillAST_DeclRefExpr( float [14UL], x, p)
+varname x
+ new2 chillAST_DeclRefExpr( vd, )  varname x
+found it at variabledeclaration of x at 20 of 32
+found it at variabledeclaration of x at 21 of 32
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  y
+varname y
+varname1 y
+varname2 y
+new chillAST_DeclRefExpr( float [14UL], y, p)
+varname y
+ new2 chillAST_DeclRefExpr( vd, )  varname y
+found it at variabledeclaration of y at 22 of 32
+found it at variabledeclaration of y at 23 of 32
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  z
+varname z
+varname1 z
+varname2 z
+new chillAST_DeclRefExpr( float [14UL], z, p)
+varname z
+ new2 chillAST_DeclRefExpr( vd, )  varname z
+found it at variabledeclaration of z at 24 of 32
+found it at variabledeclaration of z at 25 of 32
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f3
+varname f3
+varname1 f3
+varname2 f3
+new chillAST_DeclRefExpr( float [14UL], f3, p)
+varname f3
+ new2 chillAST_DeclRefExpr( vd, )  varname f3
+found it at variabledeclaration of f3 at 26 of 32
+found it at variabledeclaration of f3 at 27 of 32
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  f1
+varname f1
+varname1 f1
+varname2 f1
+new chillAST_DeclRefExpr( float [14UL], f1, p)
+varname f1
+ new2 chillAST_DeclRefExpr( vd, )  varname f1
+found it at variabledeclaration of f1 at 28 of 32
+found it at variabledeclaration of f1 at 29 of 32
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseVarRefExp()  w
+varname w
+varname1 w
+varname2 w
+new chillAST_DeclRefExpr( float [14UL], w, p)
+varname w
+ new2 chillAST_DeclRefExpr( vd, )  varname w
+found it at variabledeclaration of w at 30 of 32
+found it at variabledeclaration of w at 31 of 32
+return 0;
+ConvertRoseGenericAST(),  rose AST node of type SgReturnStmt
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+unhandled top node 423/429 of type SgSymbolTable
+unhandled top node 424/429 of type SgTypeTable
+topnode 425 of 429, first == NULL??  blurb numeric_label
+unhandled top node 426/429 of type Sg_File_Info
+unhandled top node 427/429 of type Sg_File_Info
+unhandled top node 428/429 of type SgSourceFile
+printing whole file
+
+
+
+// this source derived from CHILL AST originally from file 'unroll.c'
+
+void foo(( int n, float * x, float * y, float * z, float * f3, float * f1, float * w )
+{
+  int i;
+  int j;
+  int k;
+  for (((i = 1) , (j = 2)) , (k = 123); i <= 14; i++) {
+    x[i] = 1.0??;
+  }
+  for (i = 1; i <= 14; i += 3) {
+    y[i] = 1.0??;
+  }
+  for (i = (14 + 1); i <= (14 + 20); i += 3) {
+    z[i] = 1.0??;
+  }
+  for (i = 0; i <= 14; i++) {
+    for (j = i; j <= (i + 14); j++) {
+      f3[i] = (f3[i] + f1[j] * w[j - i]);
+    }
+    f3[i] = (f3[i]?? * 0.314)??;
+  }
+  0;
+
+}
+
+int main((  )
+{
+  float x[14UL];
+  float y[14UL];
+  float z[14UL];
+  float f3[14UL];
+  float f1[14UL];
+  float w[14UL];
+  foo(14, x, y, z, f3, f1, w);
+  return(0);
+
+}
+
+//CHILL AST originally from file 'unroll.c'
+
+(FunctionDecl void foo(int n, float * x, float * y, float * z, float * f3, float * f1, float * w)
+  (CompoundStmt 0x2853f20
+    (VarDecl "int i")
+    (VarDecl "int j")
+    (VarDecl "int k")
+    (ForStmt 0x2854b40
+      (BinaryOperator ','
+        (BinaryOperator ','
+          (BinaryOperator '='
+            (DeclRefExpr 'int' Var  'i' )
+            (IntegerLiteral 'int' 1)
+          )
+          (BinaryOperator '='
+            (DeclRefExpr 'int' Var  'j' )
+            (IntegerLiteral 'int' 2)
+          )
+        )
+        (BinaryOperator '='
+          (DeclRefExpr 'int' Var  'k' )
+          (IntegerLiteral 'int' 123)
+        )
+      )
+      (BinaryOperator '<='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 14)
+      )
+      (UnaryOperator postfix ++
+        (DeclRefExpr 'int' Var  'i' )
+      )
+      (BinaryOperator '='
+        (ArraySubscriptExpr 'float' lvalue
+          (DeclRefExpr 'float *' ParmVar  'x' )
+          (DeclRefExpr 'int' Var  'i' )
+        )
+        (UnaryOperator postfix ??
+          (FloatingLiteral 'double' 1.000000)
+        )
+      )
+    )
+    (ForStmt 0x2855370
+      (BinaryOperator '='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 1)
+      )
+      (BinaryOperator '<='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 14)
+      )
+      (BinaryOperator '+='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 3)
+      )
+      (BinaryOperator '='
+        (ArraySubscriptExpr 'float' lvalue
+          (DeclRefExpr 'float *' ParmVar  'y' )
+          (DeclRefExpr 'int' Var  'i' )
+        )
+        (UnaryOperator postfix ??
+          (FloatingLiteral 'double' 1.000000)
+        )
+      )
+    )
+    (ForStmt 0x2855d30
+      (BinaryOperator '='
+        (DeclRefExpr 'int' Var  'i' )
+        (BinaryOperator '+'
+          (IntegerLiteral 'int' 14)
+          (IntegerLiteral 'int' 1)
+        )
+      )
+      (BinaryOperator '<='
+        (DeclRefExpr 'int' Var  'i' )
+        (BinaryOperator '+'
+          (IntegerLiteral 'int' 14)
+          (IntegerLiteral 'int' 20)
+        )
+      )
+      (BinaryOperator '+='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 3)
+      )
+      (BinaryOperator '='
+        (ArraySubscriptExpr 'float' lvalue
+          (DeclRefExpr 'float *' ParmVar  'z' )
+          (DeclRefExpr 'int' Var  'i' )
+        )
+        (UnaryOperator postfix ??
+          (FloatingLiteral 'double' 1.000000)
+        )
+      )
+    )
+    (ForStmt 0x2857880
+      (BinaryOperator '='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 0)
+      )
+      (BinaryOperator '<='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 14)
+      )
+      (UnaryOperator postfix ++
+        (DeclRefExpr 'int' Var  'i' )
+      )
+      (CompoundStmt 0x2856050
+        (ForStmt 0x28571f0
+          (BinaryOperator '='
+            (DeclRefExpr 'int' Var  'j' )
+            (DeclRefExpr 'int' Var  'i' )
+          )
+          (BinaryOperator '<='
+            (DeclRefExpr 'int' Var  'j' )
+            (BinaryOperator '+'
+              (DeclRefExpr 'int' Var  'i' )
+              (IntegerLiteral 'int' 14)
+            )
+          )
+          (UnaryOperator postfix ++
+            (DeclRefExpr 'int' Var  'j' )
+          )
+          (BinaryOperator '='
+            (ArraySubscriptExpr 'float' lvalue
+              (DeclRefExpr 'float *' ParmVar  'f3' )
+              (DeclRefExpr 'int' Var  'i' )
+            )
+            (BinaryOperator '+'
+              (ArraySubscriptExpr 'float' rvalue
+                (DeclRefExpr 'float *' ParmVar  'f3' )
+                (DeclRefExpr 'int' Var  'i' )
+              )
+              (BinaryOperator '*'
+                (ArraySubscriptExpr 'float' rvalue
+                  (DeclRefExpr 'float *' ParmVar  'f1' )
+                  (DeclRefExpr 'int' Var  'j' )
+                )
+                (ArraySubscriptExpr 'float' rvalue
+                  (DeclRefExpr 'float *' ParmVar  'w' )
+                  (BinaryOperator '-'
+                    (DeclRefExpr 'int' Var  'j' )
+                    (DeclRefExpr 'int' Var  'i' )
+                  )
+                )
+              )
+            )
+          )
+        )
+        (BinaryOperator '='
+          (ArraySubscriptExpr 'float' lvalue
+            (DeclRefExpr 'float *' ParmVar  'f3' )
+            (DeclRefExpr 'int' Var  'i' )
+          )
+          (UnaryOperator postfix ??
+            (BinaryOperator '*'
+              (UnaryOperator postfix ??
+                (ArraySubscriptExpr 'float' rvalue
+                  (DeclRefExpr 'float *' ParmVar  'f3' )
+                  (DeclRefExpr 'int' Var  'i' )
+                )
+              )
+              (FloatingLiteral 'double' 0.314000)
+            )
+          )
+        )
+      )
+    )
+    (IntegerLiteral 'int' 0)
+  )
+)
+
+(FunctionDecl int main()
+  (CompoundStmt 0x2853970
+    (VarDecl "float x[14UL]")
+    (VarDecl "float y[14UL]")
+    (VarDecl "float z[14UL]")
+    (VarDecl "float f3[14UL]")
+    (VarDecl "float f1[14UL]")
+    (VarDecl "float w[14UL]")
+    (CallExpr void
+      (DeclRefExpr 'void' 'foo' ( int n, float * x, float * y, float * z, float * f3, float * f1, float * w ))
+      (VarDecl "int n")
+      (VarDecl "float * x")
+      (VarDecl "float * y")
+      (VarDecl "float * z")
+      (VarDecl "float * f3")
+      (VarDecl "float * f1")
+      (VarDecl "float * w")
+    )
+    (ReturnStmt
+      (IntegerLiteral 'int' 0)
+    )
+  )
+)
+bailing early in ir_rose.cc L1019
+LOOP RETURN ir_code = new IR_roseCode(source_filename, procedure_name);

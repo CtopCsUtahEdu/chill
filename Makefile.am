@@ -83,9 +83,7 @@ chill_python_yacc_src       = parse_expr.yy.cc parse_expr.tab.cc
 
 ## Debug ##
 if DEBUG_OPT
-debug_flags					= -DDEBUGCHILL
-else
-debug_flags					= -DNO_CHILL_DEBUG
+## TODO: any debug related things
 endif
 
 

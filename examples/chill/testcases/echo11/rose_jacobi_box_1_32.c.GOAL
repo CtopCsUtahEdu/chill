@@ -1,0 +1,165 @@
+#define __rose_lt(x,y) ((x)<(y)?(x):(y))
+#define __rose_gt(x,y) ((x)>(y)?(x):(y))
+#include <stdint.h>
+#include "defines.h"
+#include "box.h"
+#include "mg.h"
+#define SIZE 32
+#define GHOSTS 1
+#define PR_SIZE 32
+#define ALPHA (-128.0/30.0)
+#define BETA (14.0/30.0)
+#define GAMMA (3.0/30.0)
+#define DELTA (1.0/30.0)
+#define PENCIL (SIZE + 2 * GHOSTS)
+#define PLANE  ( PENCIL * PENCIL )
+
+void smooth_box_1_32(domain_type *domain,int level,int box_id,int phi_id,int rhs_id,double x,double y,int sweep)
+{
+  int t8;
+  int t6;
+  int t4;
+  double treg_2;
+  double treg_1;
+  double treg_0;
+  double d;
+  d = 1.00000 / 30.0000;
+  double c;
+  c = 3.00000 / 30.0000;
+  double b;
+  b = 14.0000 / 30.0000;
+  double a;
+  a = -128.000 / 30.0000;
+  double buffer_2[34];
+  double buffer_1[34];
+  double buffer_0[34];
+  int i;
+  int j;
+  int k;
+  int ii;
+  int jj;
+  int kk;
+  int t;
+  int box;
+  int s;
+  box = box_id;
+  s = sweep;
+  int pencil = (domain -> subdomains)[box].levels[level].pencil;
+  int plane = (domain -> subdomains)[box].levels[level].plane;
+  int ghosts = (domain -> subdomains)[box].levels[level].ghosts;
+  int dim_k = (domain -> subdomains)[box].levels[level].dim.k;
+  int dim_j = (domain -> subdomains)[box].levels[level].dim.j;
+  int dim_i = (domain -> subdomains)[box].levels[level].dim.i;
+  double h2inv = (1.0 / ((domain -> h)[level] * (domain -> h)[level]));
+  double TwoThirds = 2.0 / 3.0;
+	double * __restrict__ rhs    = domain->subdomains[box].levels[level].grids[  rhs_id] + ghosts*(1+pencil+plane);
+	double * __restrict__ alpha  = domain->subdomains[box].levels[level].grids[__alpha ] + ghosts*(1+pencil+plane);
+	double * __restrict__ lambda = domain->subdomains[box].levels[level].grids[__lambda] + ghosts*(1+pencil+plane);
+	double * __restrict__ in;     
+	double * __restrict__ out;
+	 in     = domain->subdomains[box].levels[level].grids[  phi_id] + ghosts*(1+pencil+plane) ;//in is phi
+	 out    = domain->subdomains[box].levels[level].grids[  __temp] + ghosts*(1+pencil+plane) ;//out is phi_new
+	double (* __restrict__ _in)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _out)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _rhs)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _lambda)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double _temp[PENCIL][PENCIL][PENCIL];
+	double _temp2[PENCIL][PENCIL][PENCIL];
+	_in = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(in);
+	_out = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(out);
+	_lambda = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(lambda);
+	_rhs = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(rhs);
+
+  if (s % 2 == 0) 
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      for (t6 = 0; t6 <= 31; t6 += 1) {
+         
+         // init pipeline
+
+         // r = -1
+         treg_0 = _in[t4][t6][0 + -1];
+         treg_1 = _in[t4 + 1][t6][0 + -1] + _in[t4 + -1][t6][0 + -1] + _in[t4][t6 + 1][0 + -1] + _in[t4][t6 + -1][0 + -1];
+         treg_2 = _in[t4 + 1][t6 + 1][0 + -1] + _in[t4 + -1][t6 + 1][0 + -1] + _in[t4 + -1][t6 + -1][0 + -1] + _in[t4 + 1][t6 + -1][0 + -1];
+         buffer_0[0 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+         
+
+
+         // r = -0
+         treg_0 = _in[t4][t6][0 + 0];
+         treg_1 = _in[t4 + 1][t6][0 + 0] + _in[t4 + -1][t6][0 + 0] + _in[t4][t6 + 1][0 + 0] + _in[t4][t6 + -1][0 + 0];
+         treg_2 = _in[t4 + 1][t6 + 1][0 + 0] + _in[t4 + -1][t6 + 1][0 + 0] + _in[t4 + -1][t6 + -1][0 + 0] + _in[t4 + 1][t6 + -1][0 + 0];
+         buffer_1[0 + 0 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+         buffer_0[0 + 1 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+         
+
+
+         // r = 1
+         treg_0 = _in[t4][t6][0 + 1];
+         treg_1 = _in[t4 + 1][t6][0 + 1] + _in[t4 + -1][t6][0 + 1] + _in[t4][t6 + 1][0 + 1] + _in[t4][t6 + -1][0 + 1];
+         treg_2 = _in[t4 + 1][t6 + 1][0 + 1] + _in[t4 + -1][t6 + 1][0 + 1] + _in[t4 + -1][t6 + -1][0 + 1] + _in[t4 + 1][t6 + -1][0 + 1];
+         buffer_2[0 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+         buffer_1[0 + 1 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+         buffer_0[0 + 2 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+
+         _out[t4][t6][0] = buffer_0[0 + 0] + buffer_1[0 + 0] + buffer_2[0 + 0];
+         // end init 
+
+
+        _out[t4][t6][0] = ((x * _in[t4][t6][0]) - ((y * h2inv) * _out[t4][t6][0]));
+        _out[t4][t6][0] = (_in[t4][t6][0] - ((TwoThirds * _lambda[t4][t6][0]) * (_out[t4][t6][0] - _rhs[t4][t6][0])));
+
+        // innermost loop 
+        for (t8 = 1; t8 <= 31; t8 += 1) {
+
+           //S1
+          treg_0 = _in[t4][t6][t8 + 1];
+          treg_1 = _in[t4 + 1][t6][t8 + 1] + _in[t4 + -1][t6][t8 + 1] + _in[t4][t6 + 1][t8 + 1] + _in[t4][t6 + -1][t8 + 1];
+          treg_2 = _in[t4 + 1][t6 + 1][t8 + 1] + _in[t4 + -1][t6 + 1][t8 + 1] + _in[t4 + -1][t6 + -1][t8 + 1] + _in[t4 + 1][t6 + -1][t8 + 1];
+
+          buffer_2[t8 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+          buffer_1[t8 + 1 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+          buffer_0[t8 + 2 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+
+
+          // S2  // output of stencil 
+          _out[t4][t6][t8] = buffer_0[t8 + 0] + buffer_1[t8 + 0] + buffer_2[t8 + 0];
+
+          // not part of the optimization (same as original code)
+          _out[t4][t6][t8] = ((x * _in[t4][t6][t8]) - ((y * h2inv) * _out[t4][t6][t8]));
+          _out[t4][t6][t8] = (_in[t4][t6][t8] - ((TwoThirds * _lambda[t4][t6][t8]) * (_out[t4][t6][t8] - _rhs[t4][t6][t8])));
+        }
+      }
+  else 
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      for (t6 = 0; t6 <= 31; t6 += 1) {
+        treg_0 = _out[t4][t6][0 + -1];
+        treg_1 = _out[t4 + 1][t6][0 + -1] + _out[t4 + -1][t6][0 + -1] + _out[t4][t6 + 1][0 + -1] + _out[t4][t6 + -1][0 + -1];
+        treg_2 = _out[t4 + 1][t6 + 1][0 + -1] + _out[t4 + -1][t6 + 1][0 + -1] + _out[t4 + -1][t6 + -1][0 + -1] + _out[t4 + 1][t6 + -1][0 + -1];
+        buffer_0[0 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+        treg_0 = _out[t4][t6][0 + 0];
+        treg_1 = _out[t4 + 1][t6][0 + 0] + _out[t4 + -1][t6][0 + 0] + _out[t4][t6 + 1][0 + 0] + _out[t4][t6 + -1][0 + 0];
+        treg_2 = _out[t4 + 1][t6 + 1][0 + 0] + _out[t4 + -1][t6 + 1][0 + 0] + _out[t4 + -1][t6 + -1][0 + 0] + _out[t4 + 1][t6 + -1][0 + 0];
+        buffer_1[0 + 0 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+        buffer_0[0 + 1 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+        treg_0 = _out[t4][t6][0 + 1];
+        treg_1 = _out[t4 + 1][t6][0 + 1] + _out[t4 + -1][t6][0 + 1] + _out[t4][t6 + 1][0 + 1] + _out[t4][t6 + -1][0 + 1];
+        treg_2 = _out[t4 + 1][t6 + 1][0 + 1] + _out[t4 + -1][t6 + 1][0 + 1] + _out[t4 + -1][t6 + -1][0 + 1] + _out[t4 + 1][t6 + -1][0 + 1];
+        buffer_2[0 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+        buffer_1[0 + 1 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+        buffer_0[0 + 2 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+        _in[t4][t6][0] = buffer_0[0 + 0] + buffer_1[0 + 0] + buffer_2[0 + 0];
+        _in[t4][t6][0] = ((x * _out[t4][t6][0]) - ((y * h2inv) * _in[t4][t6][0]));
+        _in[t4][t6][0] = (_out[t4][t6][0] - ((TwoThirds * _lambda[t4][t6][0]) * (_in[t4][t6][0] - _rhs[t4][t6][0])));
+        for (t8 = 1; t8 <= 31; t8 += 1) {
+          treg_0 = _out[t4][t6][t8 + 1];
+          treg_1 = _out[t4 + 1][t6][t8 + 1] + _out[t4 + -1][t6][t8 + 1] + _out[t4][t6 + 1][t8 + 1] + _out[t4][t6 + -1][t8 + 1];
+          treg_2 = _out[t4 + 1][t6 + 1][t8 + 1] + _out[t4 + -1][t6 + 1][t8 + 1] + _out[t4 + -1][t6 + -1][t8 + 1] + _out[t4 + 1][t6 + -1][t8 + 1];
+          buffer_2[t8 + 0 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+          buffer_1[t8 + 1 + 0] = treg_0 * a + treg_1 * b + treg_2 * c;
+          buffer_0[t8 + 2 + 0] = treg_0 * b + treg_1 * c + treg_2 * d;
+          _in[t4][t6][t8] = buffer_0[t8 + 0] + buffer_1[t8 + 0] + buffer_2[t8 + 0];
+          _in[t4][t6][t8] = ((x * _out[t4][t6][t8]) - ((y * h2inv) * _in[t4][t6][t8]));
+          _in[t4][t6][t8] = (_out[t4][t6][t8] - ((TwoThirds * _lambda[t4][t6][t8]) * (_in[t4][t6][t8] - _rhs[t4][t6][t8])));
+        }
+      }
+}

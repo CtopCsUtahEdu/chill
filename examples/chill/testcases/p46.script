@@ -1,0 +1,19 @@
+#
+# loop adapted from  "Optimizing Compilers for
+# Modern Architectures", by Randy Allen and Ken Kennedy.
+#
+
+source: p46.c
+dest:   p46modified.c
+
+procedure: foo
+format: rose
+
+
+
+loop: 0
+original()
+
+print dep 
+
+print structure

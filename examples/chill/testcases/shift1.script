@@ -1,0 +1,25 @@
+
+
+#
+#  example from CHiLL manual page 17
+#
+#  shift a loop 
+#
+
+
+source: shift.c
+dest:   shift1modified.c
+
+procedure: mm
+format: rose
+
+loop: 0
+
+known( ambn > 0 )
+known( an > 4 )
+known( bm > 0)
+
+shift( [1], 1, 4 )
+
+
+

@@ -1,0 +1,12 @@
+source:include.c
+dest: includemodified.c
+
+procedure: main
+format: rose
+loop:0
+
+
+original()
+print
+
+

@@ -1,0 +1,80 @@
+#define __rose_lt(x,y) ((x)<(y)?(x):(y))
+#define __rose_gt(x,y) ((x)>(y)?(x):(y))
+#include <stdint.h>
+#include "defines.h"
+#include "box.h"
+#include "mg.h"
+#define SIZE 64
+#define GHOSTS 1
+#define PR_SIZE 64
+#define ALPHA (-128.0/30.0)
+#define BETA (14.0/30.0)
+#define GAMMA (3.0/30.0)
+#define DELTA (1.0/30.0)
+#define PENCIL (SIZE + 2 * GHOSTS)
+#define PLANE  ( PENCIL * PENCIL )
+
+void smooth_box_1_64(domain_type *domain,int level,int box_id,int phi_id,int rhs_id,double x,double y,int sweep)
+{
+  int t8;
+  int t6;
+  int t4;
+  int i;
+  int j;
+  int k;
+  int ii;
+  int jj;
+  int kk;
+  int t;
+  int box;
+  int s;
+  box = box_id;
+  s = sweep;
+  int pencil = (domain -> subdomains)[box].levels[level].pencil;
+  int plane = (domain -> subdomains)[box].levels[level].plane;
+  int ghosts = (domain -> subdomains)[box].levels[level].ghosts;
+  int dim_k = (domain -> subdomains)[box].levels[level].dim.k;
+  int dim_j = (domain -> subdomains)[box].levels[level].dim.j;
+  int dim_i = (domain -> subdomains)[box].levels[level].dim.i;
+  double h2inv = (1.0 / ((domain -> h)[level] * (domain -> h)[level]));
+  double TwoThirds = 2.0 / 3.0;
+/*
+	double * __restrict__ rhs    = domain->subdomains[box].levels[level].grids[  rhs_id] + ghosts*(1+pencil+plane);
+	double * __restrict__ alpha  = domain->subdomains[box].levels[level].grids[__alpha ] + ghosts*(1+pencil+plane);
+	double * __restrict__ lambda = domain->subdomains[box].levels[level].grids[__lambda] + ghosts*(1+pencil+plane);
+	double * __restrict__ in;     
+	double * __restrict__ out;
+	 in     = domain->subdomains[box].levels[level].grids[  phi_id] + ghosts*(1+pencil+plane) ;//in is phi
+	 out    = domain->subdomains[box].levels[level].grids[  __temp] + ghosts*(1+pencil+plane) ;//out is phi_new
+	double (* __restrict__ _in)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _out)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _rhs)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double (* __restrict__ _lambda)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS];
+	double _temp[PENCIL][PENCIL][PENCIL];
+	double _temp2[PENCIL][PENCIL][PENCIL];
+	_in = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(in);
+	_out = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(out);
+	_lambda = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(lambda);
+	_rhs = (double (*)[PR_SIZE+2*GHOSTS][PR_SIZE+2*GHOSTS])(rhs);
+	*/
+  double _in[66UL][66UL][66UL];
+  double _out[66UL][66UL][66UL];
+  double _rhs[66UL][66UL][66UL];
+  double _lambda[66UL][66UL][66UL];
+  if (s % 2 == 0) 
+    for (t4 = 0; t4 <= 63; t4 += 1) 
+      for (t6 = 0; t6 <= 63; t6 += 1) 
+        for (t8 = 0; t8 <= 63; t8 += 1) {
+          _out[t4][t6][t8] = ((((-128.0 / 30.0 * _in[t4][t6][t8]) + (14.0 / 30.0 * (((((_in[t4 - 1][t6][t8] + _in[t4][t6 - 1][t8]) + _in[t4][t6 + 1][t8]) + _in[t4 + 1][t6][t8]) + _in[t4][t6][t8 - 1]) + _in[t4][t6][t8 + 1]))) + (3.0 / 30.0 * (((((((((((_in[t4 - 1][t6][t8 - 1] + _in[t4][t6 - 1][t8 - 1]) + _in[t4][t6 + 1][t8 - 1]) + _in[t4 + 1][t6][t8 - 1]) + _in[t4 - 1][t6 - 1][t8]) + _in[t4 - 1][t6 + 1][t8]) + _in[t4 + 1][t6 - 1][t8]) + _in[t4 + 1][t6 + 1][t8]) + _in[t4 - 1][t6][t8 + 1]) + _in[t4][t6 - 1][t8 + 1]) + _in[t4][t6 + 1][t8 + 1]) + _in[t4 + 1][t6][t8 + 1]))) + (1.0 / 30.0 * (((((((_in[t4 - 1][t6 - 1][t8 - 1] + _in[t4 - 1][t6 + 1][t8 - 1]) + _in[t4 + 1][t6 - 1][t8 - 1]) + _in[t4 + 1][t6 + 1][t8 - 1]) + _in[t4 - 1][t6 - 1][t8 + 1]) + _in[t4 - 1][t6 + 1][t8 + 1]) + _in[t4 + 1][t6 - 1][t8 + 1]) + _in[t4 + 1][t6 + 1][t8 + 1])));
+          _out[t4][t6][t8] = ((x * _in[t4][t6][t8]) - ((y * h2inv) * _out[t4][t6][t8]));
+          _out[t4][t6][t8] = (_in[t4][t6][t8] - ((TwoThirds * _lambda[t4][t6][t8]) * (_out[t4][t6][t8] - _rhs[t4][t6][t8])));
+        }
+  else 
+    for (t4 = 0; t4 <= 63; t4 += 1) 
+      for (t6 = 0; t6 <= 63; t6 += 1) 
+        for (t8 = 0; t8 <= 63; t8 += 1) {
+          _in[t4][t6][t8] = ((((-128.0 / 30.0 * _out[t4][t6][t8]) + (14.0 / 30.0 * (((((_out[t4 - 1][t6][t8] + _out[t4][t6 - 1][t8]) + _out[t4][t6 + 1][t8]) + _out[t4 + 1][t6][t8]) + _out[t4][t6][t8 - 1]) + _out[t4][t6][t8 + 1]))) + (3.0 / 30.0 * (((((((((((_out[t4 - 1][t6][t8 - 1] + _out[t4][t6 - 1][t8 - 1]) + _out[t4][t6 + 1][t8 - 1]) + _out[t4 + 1][t6][t8 - 1]) + _out[t4 - 1][t6 - 1][t8]) + _out[t4 - 1][t6 + 1][t8]) + _out[t4 + 1][t6 - 1][t8]) + _out[t4 + 1][t6 + 1][t8]) + _out[t4 - 1][t6][t8 + 1]) + _out[t4][t6 - 1][t8 + 1]) + _out[t4][t6 + 1][t8 + 1]) + _out[t4 + 1][t6][t8 + 1]))) + (1.0 / 30.0 * (((((((_out[t4 - 1][t6 - 1][t8 - 1] + _out[t4 - 1][t6 + 1][t8 - 1]) + _out[t4 + 1][t6 - 1][t8 - 1]) + _out[t4 + 1][t6 + 1][t8 - 1]) + _out[t4 - 1][t6 - 1][t8 + 1]) + _out[t4 - 1][t6 + 1][t8 + 1]) + _out[t4 + 1][t6 - 1][t8 + 1]) + _out[t4 + 1][t6 + 1][t8 + 1])));
+          _in[t4][t6][t8] = ((x * _out[t4][t6][t8]) - ((y * h2inv) * _in[t4][t6][t8]));
+          _in[t4][t6][t8] = (_out[t4][t6][t8] - ((TwoThirds * _lambda[t4][t6][t8]) * (_in[t4][t6][t8] - _rhs[t4][t6][t8])));
+        }
+}

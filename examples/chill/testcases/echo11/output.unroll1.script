@@ -1,0 +1,6 @@
+source: unroll1.c
+procedure is foo
+format: roseBUH
+format roseBUH
+unrecognized front end compiler. pick rose or clang
+ at line 7

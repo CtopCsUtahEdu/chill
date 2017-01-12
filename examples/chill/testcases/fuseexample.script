@@ -1,0 +1,18 @@
+#
+# loop adapted from  "Optimizing Compilers for
+# Modern Architectures", by Randy Allen and Ken Kennedy.
+#
+
+source: fuseexample.c
+dest:   fuseexamplemodified.c
+
+procedure: mm
+format: rose
+
+# fuse example from the Chill manual 
+loop: 0-1
+fuse( [0,1], 1 )
+
+
+
+

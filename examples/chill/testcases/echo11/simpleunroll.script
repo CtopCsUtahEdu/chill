@@ -1,0 +1,24 @@
+#
+# Test unroll-and-jam. The last loop adapted from the simple
+# convolution example from p463 of "Optimizing Compilers for
+# Modern Architectures", by Randy Allen and Ken Kennedy.
+#
+
+source: simpleunroll.c
+procedure: foo
+format: rose
+
+
+# fully unroll a loop with known iteration count
+loop: 0
+print structure
+
+original()
+
+print code
+print dep 
+unroll(0,1,0)
+print space
+print
+
+

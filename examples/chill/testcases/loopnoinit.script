@@ -1,0 +1,11 @@
+source:loopnoinit.c
+dest:  loopnoinitmodified.c
+
+procedure:main
+format: rose
+
+loop:0
+
+# fully unroll the loop
+unroll(0,1,0)
+print 

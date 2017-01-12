@@ -7,7 +7,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
 AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.3\\\""])
-AC_SUBST([CXXFLAGS],[-g])
+AC_SUBST([CXXFLAGS],[-g -std=c++11])
+
+AC_DEFINE([CHILL_BUILD_VERSION],["0.2.3"],[CHiLL Version])
 
 AM_PROG_AR
 AM_PROG_LEX
@@ -40,20 +42,21 @@ AC_ARG_ENABLE([coverage],
         AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
 
 AC_ARG_ENABLE([debug],
-   [AS_HELP_STRING([--enable-debug],[enable debug info])],
+   [AS_HELP_STRING([--enable-debug],[Enable debug messages])],
    [AS_IF(["x$enableval" != xno],
        [AC_SUBST([enable_debug],[yes])])])
 
-AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug" == xyes])
+AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug" != xyes])
+AS_IF([test "x$enable_debug" == xyes],
+    [AC_DEFINE([DEBUGCHILL], [], [Enable CHiLL debug messages])],
+    [AC_DEFINE([NO_DEBUGCHILL], [], [Disable CHiLL debug messages])])
 
-AC_ARG_WITH([rose],[
-    AS_HELP_STRING([--with-rose],[set rose home])
-    ],[
-    AC_SUBST([ROSEHOME], [$withval])
-    AC_DEFINE([BUILD_ROSE],[],[Use ROSE])
-    ],[
-    AC_SUBST([ROSEHOME], ["${ROSEHOME}"])
-    AC_DEFINE([BUILD_ROSE],[],[Use ROSE])])
+AC_ARG_WITH([rose],
+    [AS_HELP_STRING([--with-rose],[set rose home])],
+    [AC_SUBST([ROSEHOME], [$withval])
+     AC_DEFINE([BUILD_ROSE],[],[Use ROSE])],
+    [AC_SUBST([ROSEHOME], ["${ROSEHOME}"])
+     AC_DEFINE([BUILD_ROSE],[],[Use ROSE])])
 
 AC_ARG_WITH([boost],[
     AS_HELP_STRING([--with-boost],[set boost home])

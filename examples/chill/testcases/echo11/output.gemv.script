@@ -1,0 +1,1520 @@
+source: gemv.c
+procedure is main
+format: rose
+format rose
+LOOP ':' NUMBER   parse the file because we haven't yet
+CIT_ROSE
+LOOP  ir_code = new IR_roseCode(source_filename, procedure_name);
+IR_roseCode::IR_roseCode( file_name gemv.c, proc_name main )
+IR_roseCode::IR_roseCode  actually parsing gemv.c using rose?
+IR_roseCode::IR_roseCode()  project defined. file parsed by Rose
+creating chillAST from Rose AST
+ConvertXXXXVarDecl()
+original vartype 'float [10UL]'
+vartype = 'float '
+arraypart = '[10]'
+float  a   arraypart = '[10]'
+2chillAST_VarDecl::chillAST_VarDecl( type float , name a, arraypart [10] )
+2name a numdimensions 1
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'float ' 'a' '[10]'"  n_dim 1  )
+
+ConvertXXXXVarDecl()
+original vartype 'float [10UL]'
+vartype = 'float '
+arraypart = '[10]'
+float  b   arraypart = '[10]'
+2chillAST_VarDecl::chillAST_VarDecl( type float , name b, arraypart [10] )
+2name b numdimensions 1
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'float ' 'b' '[10]'"  n_dim 1  )
+
+ConvertXXXXVarDecl()
+original vartype 'float [10UL][10UL]'
+vartype = 'float '
+arraypart = '[10][10]'
+float  c   arraypart = '[10][10]'
+2chillAST_VarDecl::chillAST_VarDecl( type float , name c, arraypart [10][10] )
+2name c numdimensions 2
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'float ' 'c' '[10][10]'"  n_dim 2  )
+
+ConvertXXXXVarDecl()
+original vartype 'int'
+vartype = 'int'
+arraypart = ''
+int i   arraypart = ''
+2chillAST_VarDecl::chillAST_VarDecl( type int, name i, arraypart  )
+2name i numdimensions 0
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'int' 'i' ''"  n_dim 0  )
+
+ConvertXXXXVarDecl()
+original vartype 'int'
+vartype = 'int'
+arraypart = ''
+int j   arraypart = ''
+2chillAST_VarDecl::chillAST_VarDecl( type int, name j, arraypart  )
+2name j numdimensions 0
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'int' 'j' ''"  n_dim 0  )
+
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp()
+converting base
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (DeclRefExpr 'float [10]' Var  'a' )
+
+ConvertRoseArrayRefExp()
+converting base
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (DeclRefExpr 'float [10]' Var  'a' )
+
+ConvertRoseArrayRefExp()
+converting base
+ConvertRoseArrayRefExp()
+converting base
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (DeclRefExpr 'float [10][10]' Var  'c' )
+
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (ArraySubscriptExpr (c) 'float' rvalue
+  (DeclRefExpr 'float [10][10]' Var  'c' )
+  (DeclRefExpr 'int' Var  'i' )
+)
+
+ConvertRoseArrayRefExp()
+converting base
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (DeclRefExpr 'float [10]' Var  'b' )
+
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+unhandled top node 422/428 of type SgSymbolTable
+unhandled top node 423/428 of type SgTypeTable
+topnode 424 of 428, first == NULL??  blurb numeric_label
+unhandled top node 425/428 of type Sg_File_Info
+unhandled top node 426/428 of type Sg_File_Info
+unhandled top node 427/428 of type SgSourceFile
+found the procedure named main
+local Function Definition 0x27c4150
+
+int main(  )
+{
+  float  a[10];
+  float  b[10];
+  float  c[10][10];
+  int i;
+  int j;
+  for (i = 1; i < 10; i++) {
+    for (j = 1; j < 10; j++) 
+      a[i] = (a[i] + c[i][j] * b[j]);
+  }
+  return(0);
+
+}
+
+
+printing whole file
+
+
+// sourcefile has 1 children
+they are
+FunctionDecl
+
+// this source derived from CHILL AST originally from file 'gemv.c' as parsed by frontend compiler rose
+
+
+int main(  )
+{
+  float  a[10];
+  float  b[10];
+  float  c[10][10];
+  int i;
+  int j;
+  for (i = 1; i < 10; i++) {
+    for (j = 1; j < 10; j++) 
+      a[i] = (a[i] + c[i][j] * b[j]);
+  }
+  return(0);
+
+}
+
+//CHILL AST originally from file 'gemv.c'
+
+(FunctionDecl int main()
+  (CompoundStmt 
+    (VarDecl "'float ' 'a' '[10]'"  n_dim 1  )
+    (VarDecl "'float ' 'b' '[10]'"  n_dim 1  )
+    (VarDecl "'float ' 'c' '[10][10]'"  n_dim 2  )
+    (VarDecl "'int' 'i' ''"  n_dim 0  )
+    (VarDecl "'int' 'j' ''"  n_dim 0  )
+    (ForStmt 
+      (BinaryOperator '='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 1)
+      )
+      (BinaryOperator '<'
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 10)
+      )
+      (UnaryOperator postfix ++
+        (DeclRefExpr 'int' Var  'i' )
+      )
+      (CompoundStmt 
+        (ForStmt 
+          (BinaryOperator '='
+            (DeclRefExpr 'int' Var  'j' )
+            (IntegerLiteral 'int' 1)
+          )
+          (BinaryOperator '<'
+            (DeclRefExpr 'int' Var  'j' )
+            (IntegerLiteral 'int' 10)
+          )
+          (UnaryOperator postfix ++
+            (DeclRefExpr 'int' Var  'j' )
+          )
+          (CompoundStmt 
+            (BinaryOperator '='
+              (ArraySubscriptExpr (a) 'float' lvalue
+                (DeclRefExpr 'float [10]' Var  'a' )
+                (DeclRefExpr 'int' Var  'i' )
+              )
+              (BinaryOperator '+'
+                (ArraySubscriptExpr (a) 'float' rvalue
+                  (DeclRefExpr 'float [10]' Var  'a' )
+                  (DeclRefExpr 'int' Var  'i' )
+                )
+                (BinaryOperator '*'
+                  (ArraySubscriptExpr (c) 'float' rvalue
+                    (ArraySubscriptExpr (c) 'float' rvalue
+                      (DeclRefExpr 'float [10][10]' Var  'c' )
+                      (DeclRefExpr 'int' Var  'i' )
+                    )
+                    (DeclRefExpr 'int' Var  'j' )
+                  )
+                  (ArraySubscriptExpr (b) 'float' rvalue
+                    (DeclRefExpr 'float [10]' Var  'b' )
+                    (DeclRefExpr 'int' Var  'j' )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    (ReturnStmt
+      (IntegerLiteral 'int' 0)
+    )
+  )
+)
+need to create symbol tables?
+LOOP RETURN ir_code = new IR_roseCode(source_filename, procedure_name);
+yyparse  block = ir_code->GetCode();
+IR_roseCode::GetCode()
+chillfunc 0x27c4150
+chillast body of func is 0x27c4200
+making a new IR_roseBlock with chillAST
+
+int main(  )
+{
+  float  a[10];
+  float  b[10];
+  float  c[10][10];
+  int i;
+  int j;
+  for (i = 1; i < 10; i++) {
+    for (j = 1; j < 10; j++) 
+      a[i] = (a[i] + c[i][j] * b[j]);
+  }
+  return(0);
+
+}
+
+in yyparse, IR_Block block 0x27c0e70
+
+IR_roseCode::FindOneLevelControlStructure()
+basic block is:
+block ast of type FunctionDecl
+
+int main(  )
+{
+  float  a[10];
+  float  b[10];
+  float  c[10][10];
+  int i;
+  int j;
+  for (i = 1; i < 10; i++) {
+    for (j = 1; j < 10; j++) 
+      a[i] = (a[i] + c[i][j] * b[j]);
+  }
+  return(0);
+
+}
+
+
+
+*** block is a compoundstatement or a function decl or NULL
+
+*** block is a compoundstatement or a function decl
+basic block has 7 statements
+making a new IR_roseBlock with NO chillAST (nil)
+child 0/7 is of type VarDecl
+straight line code adding to basicblock that had 0
+child 0/7 = float  a[10]
+child 0 is part of a basic block
+now basicblock has 1 statements
+child 1/7 is of type VarDecl
+straight line code adding to basicblock that had 1
+child 1/7 = float  b[10]
+child 1 is part of a basic block
+now basicblock has 2 statements
+child 2/7 is of type VarDecl
+straight line code adding to basicblock that had 2
+child 2/7 = float  c[10][10]
+child 2 is part of a basic block
+now basicblock has 3 statements
+child 3/7 is of type VarDecl
+straight line code adding to basicblock that had 3
+child 3/7 = int i
+child 3 is part of a basic block
+now basicblock has 4 statements
+child 4/7 is of type VarDecl
+straight line code adding to basicblock that had 4
+child 4/7 = int j
+child 4 is part of a basic block
+now basicblock has 5 statements
+child 5/7 is of type ForStmt
+found a For statement (Loop) at 5/7 within a Basic Block
+pushing a run of statements 0 to 4 as a block
+making a new IR_roseBlock with NO chillAST (nil)
+IR_roseLoop::IR_roseLoop(ir_, chillforstmt)
+loop is:
+for (i = 1; i < 10; i++) {
+  for (j = 1; j < 10; j++) 
+    a[i] = (a[i] + c[i][j] * b[j]);
+}
+
+IR_roseLoop::IR_roseLoop()    chillbody
+body is:
+for (j = 1; j < 10; j++) 
+  a[i] = (a[i] + c[i][j] * b[j]);
+
+
+chillbody of type CompoundStmt
+IR_roseLoop::IR_roseLoop() DONE
+child 6/7 is of type ReturnStmt
+straight line code adding to basicblock that had 0
+child 6/7 = return(0)
+child 6 is part of a basic block
+now basicblock has 1 statements
+ns 1  numchildren 7
+end of body ends the run of 1 statements in the Basic Block
+
+*** block is a compoundstatement or a function decl  END 
+returning vector of 3 controls
+(parser.yy) I found 1 loops in the procedure
+
+parse.yy  L 505 making a new myloop loop num start 0
+
+***                                                   ROSE (parser.yy) making a new myloop
+
+Loop::Loop(const IR_Control *control)
+control type is 0   IR_CONTROL_LOOP
+in Loop::Loop, calling  build_ir_tree()
+
+loop.cc, Loop::Loop() about to clone control
+IR_roseLoop::clone()
+IR_roseLoop::IR_roseLoop(ir_, chillforstmt)
+loop is:
+for (i = 1; i < 10; i++) {
+  for (j = 1; j < 10; j++) 
+    a[i] = (a[i] + c[i][j] * b[j]);
+}
+
+IR_roseLoop::IR_roseLoop()    chillbody
+body is:
+for (j = 1; j < 10; j++) 
+  a[i] = (a[i] + c[i][j] * b[j]);
+
+
+chillbody of type CompoundStmt
+IR_roseLoop::IR_roseLoop() DONE
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+case IR_CONTROL_LOOP
+recursing. build_ir_tree() of CONTROL_LOOP creating children  L122
+IR_roseLoop::body()
+making a new IR_roseBlock with chillAST
+for (j = 1; j < 10; j++) 
+  a[i] = (a[i] + c[i][j] * b[j]);
+
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_roseCode::FindOneLevelControlStructure()
+basic block is:
+block ast of type CompoundStmt
+for (j = 1; j < 10; j++) 
+  a[i] = (a[i] + c[i][j] * b[j]);
+
+
+
+*** block is a compoundstatement or a function decl or NULL
+
+*** block is a compoundstatement or a function decl
+found a top level Basic Block Compound Statement
+basic block has 1 statements
+making a new IR_roseBlock with NO chillAST (nil)
+child 0/1 is of type ForStmt
+found a For statement (Loop)
+IR_roseLoop::IR_roseLoop(ir_, chillforstmt)
+loop is:
+for (j = 1; j < 10; j++) 
+  a[i] = (a[i] + c[i][j] * b[j]);
+
+IR_roseLoop::IR_roseLoop()    chillbody
+body is:
+a[i] = (a[i] + c[i][j] * b[j]);
+
+
+chillbody of type CompoundStmt
+IR_roseLoop::IR_roseLoop() DONE
+ns 0  numchildren 1
+
+*** block is a compoundstatement or a function decl  END 
+returning vector of 1 controls
+irtools.cc BACK FROM FindOneLevelControlStructure()
+controls.size() == 1  (NONZERO)
+controls[0] is IR_CONTROL_LOOP
+IR_roseLoop::body()
+making a new IR_roseBlock with chillAST
+a[i] = (a[i] + c[i][j] * b[j]);
+
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_roseCode::FindOneLevelControlStructure()
+basic block is:
+block ast of type CompoundStmt
+a[i] = (a[i] + c[i][j] * b[j]);
+
+
+
+*** block is a compoundstatement or a function decl or NULL
+
+*** block is a compoundstatement or a function decl
+found a top level Basic Block Compound Statement
+basic block has 1 statements
+making a new IR_roseBlock with NO chillAST (nil)
+child 0/1 is of type BinaryOperator
+straight line code adding to basicblock that had 0
+child 0/1 = a[i] = (a[i] + c[i][j] * b[j])
+child 0 is part of a basic block
+now basicblock has 1 statements
+ns 1  numchildren 1
+NOT sending straightline run of statements, because it would be the entire block. There are no control statements in the block
+
+*** block is a compoundstatement or a function decl  END 
+returning vector of 0 controls
+irtools.cc BACK FROM FindOneLevelControlStructure()
+controls.size() == 0
+build_ir_tree()  vector result has 1 parts
+build_ir_tree()  vector result has 1 parts
+recursing. build_ir_tree() of CONTROL_LOOP creating children DONE
+build_ir_tree()  vector result has 1 parts
+in Loop::Loop. ir_tree has 1 parts
+before init_loops, 0 freevar
+dammit 0
+
+                                                  Loop::init_loop()
+extract
+nesting level stmt size = 1
+1 statements?
+i 0
+stmt_nesting_level[0] = 2
+in init_loop, made 1 stmts
+max nesting level 2 at location 0
+itn = stmt[0]
+parent
+IR_CONTROL_LOOP  cur_dim 1
+making scalar symbol j
+index[1] = 'j'
+parent
+IR_CONTROL_LOOP  cur_dim 0
+making scalar symbol i
+index[0] = 'i'
+align loops by names,
+
+set relation variable names                      ****
+Relation r(2)
+it's a loop.  temp_depth 1
+r.name_set_var( 2, j )
+it's a loop.  temp_depth 0
+r.name_set_var( 1, i )
+Relation r   {[i,j] : TRUE }
+extract information from loop/if structures
+IR_CONTROL_LOOP
+IR_roseLoop::lower_bound()
+loop.cc, got the lower bound. it is:
+1
+
+exp2formula()
+{[i,j] : TRUE }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::upper_bound()
+loop.cc, got the upper bound. it is:
+10
+
+IR_roseLoop::stop_cond()
+exp2formula()
+{[i,j] : 1 <= j }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::lower_bound()
+IR_roseCode::QueryExpOperation()
+abs(c)
+IR_CONTROL_LOOP
+IR_roseLoop::lower_bound()
+loop.cc, got the lower bound. it is:
+1
+
+exp2formula()
+{[i,j] : 1 <= j <= 9 }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::upper_bound()
+loop.cc, got the upper bound. it is:
+10
+
+IR_roseLoop::stop_cond()
+exp2formula()
+{[i,j] : 1 <= j <= 9 && 1 <= i }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::lower_bound()
+IR_roseCode::QueryExpOperation()
+abs(c)
+add information for missing loops   n_dim(2)
+loop.cc L441 insert the statement
+loop.cc before extract
+IR_roseBlock::extract()
+block has chillAST of type CompoundStmt
+block has 0 exploded statements
+IR_roseBlock::extract() LEAVING
+code =  ocg->CreateSubstitutedStmt(...)
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+0 vars and 0 substitutions
+1 nodes in old code. was:
+stmt(0) = a[i] = (a[i] + c[i][j] * b[j])
+
+nosubs old code was:
+stmt = a[i] = (a[i] + c[i][j] * b[j])
+stmt
+for int i < n_dim(2)
+whew
+                                        loop.cc   Loop::init_loop() END
+
+after init_loops, 0 freevar
+loop.cc 1 statements
+this really REALLY needs some comments
+i 0
+j 0
+
+irtools.cc test_data_dependences()  0 freevars
+repr1   a[i] = (a[i] + c[i][j] * b[j])
+repr2   a[i] = (a[i] + c[i][j] * b[j])
+index 0 i
+index 1 j
+IS1  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+IS2  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+repr1 == repr2
+repr1->dump()
+a[i] = (a[i] + c[i][j] * b[j])
+IR_roseCode::FindArrayRef()
+there are 1 chill statements in this repr
+
+chillstatement 0 = a[i] = (a[i] + c[i][j] * b[j])
+chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento 1 for a
+chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento 0 for a
+chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento 0 for c[i]
+chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento 0 for b
+a
+a
+c
+b
+a
+a
+c
+b
+a
+a
+c
+b
+4 total refs 
+ref[0] a is writtento
+IR_XXXXArrayRef::IR_XXXXArrayRef() 'a' write 1
+ref[1] a is NOT writtento
+IR_XXXXArrayRef::IR_XXXXArrayRef() 'a' write 0
+ref[2] c is NOT writtento
+IR_XXXXArrayRef::IR_XXXXArrayRef() 'c' write 0
+ref[3] b is NOT writtento
+IR_XXXXArrayRef::IR_XXXXArrayRef() 'b' write 0
+access of size 4
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+WRITE  array access 0 = a
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+       array access 1 = a
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+       array access 2 = c
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+       array access 3 = b
+that was the list
+
+
+before mapRefstoStatements()
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+ IR_roseCode::FromSameStmt()
+a[i]
+a[i]
+trivially true because they are exactly the same statement
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+ IR_roseCode::FromSameStmt()
+a[i]
+a[i]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] = (a[i] + c[i][j] * b[j])
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] + c[i][j] * b[j]
+a[i] = (a[i] + c[i][j] * b[j])
+a[i] + c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+ IR_roseCode::FromSameStmt()
+a[i]
+c[i][j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] = (a[i] + c[i][j] * b[j])
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+c[i][j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+a[i] = (a[i] + c[i][j] * b[j])
+c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+ IR_roseCode::FromSameStmt()
+a[i]
+b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] = (a[i] + c[i][j] * b[j])
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+b[j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+a[i] = (a[i] + c[i][j] * b[j])
+c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+ IR_roseCode::FromSameStmt()
+a[i]
+a[i]
+trivially true because they are exactly the same statement
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+ IR_roseCode::FromSameStmt()
+a[i]
+c[i][j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] + c[i][j] * b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+c[i][j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+a[i] + c[i][j] * b[j]
+c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+ IR_roseCode::FromSameStmt()
+a[i]
+b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+a[i]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+a[i] + c[i][j] * b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+b[j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+a[i] + c[i][j] * b[j]
+c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+ IR_roseCode::FromSameStmt()
+c[i][j]
+c[i][j]
+trivially true because they are exactly the same statement
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+ IR_roseCode::FromSameStmt()
+c[i][j]
+b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+c[i][j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+chillAST_node::getEnclosingStatement( level 0 ) node type ArraySubscriptExpr
+b[j]
+chillAST_node::getEnclosingStatement( level 1 ) node type BinaryOperator
+c[i][j] * b[j]
+c[i][j] * b[j]
+c[i][j] * b[j]
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+ IR_roseCode::FromSameStmt()
+b[j]
+b[j]
+trivially true because they are exactly the same statement
+after mapRefstoStatements()
+
+i 0
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+sym_a = a
+j 0
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+sym_b = a
+irtools.cc ij 0 0
+*sym_a == *sym_b
+0 a->is_write()
+0 b->is_write()
+
+irtools.cc ij 0 0   SYMBOL A == SYMBOL B and one is a write
+arrays2relation()
+0 freevars
+IS1  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+IS2  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+r    {[In_1,In_2] -> [Out_1,Out_2] : FALSE }
+omegatools.cc sym_src
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+omegatools.cc  (*sym_src != *sym_dst) FALSE
+f_root
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+omegatools.cc ref_src->n_dim() 1
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+arrays2 i 0
+IR_roseArrayRef::index( 0 )  
+IR_roseArrayRef::index( 0 )  
+IR_roseCode::QueryExpOperation()
+IR_roseCode::QueryExpOperation()
+exp2formula()
+{[i,j] -> [i',j'] : exists ( e1,e2 : ( TRUE )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+exp2formula()
+{[i,j] -> [i',j'] : exists ( e1,e2 : ( i = e1 )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+r    {[i,j] -> [i',j'] : exists ( e1,e2 : ( i = e1 && i' = e2 && e2 = e1 )) and 1 <= j <= 9 && 1 <= i <= 9 and 1 <= j' <= 9 && 1 <= i' <= 9 }
+leaving arrays2relation
+r    {[i,j] -> [i',j'] : exists ( e1,e2 : ( i = e1 && i' = e2 && e2 = e1 )) and 1 <= j <= 9 && 1 <= i <= 9 and 1 <= j' <= 9 && 1 <= i' <= 9 }
+1
+relation2dependences()
+{[In_1,In_2] : exists ( i,j,i',j' : ( i' = i && i' = i+In_1 && j' = j+In_2 && 1 <= j <= 9 && 1 <= i <= 9 && 1 <= j' <= 9 )) }
+{[In_1,In_2] : exists ( i,j,i',j' : ( i = i' && i' = i+In_1 && j' = j+In_2 && 1 <= j <= 9 && 1 <= i' <= 9 && 1 <= j' <= 9 )) }
+
+dv created in if                                         ***
+omegatools.cc calling ref_src->symbol();
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+symbol a  ADDING A DEPENDENCE OF TYPE DEP_W2W to dependences1
+pushing dv
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+DONE pushing dv
+now 1 dependences1
+dependences1[0]: symbol a
+
+dv goes out of scope                                      ***
+
+dv created in if                                         ***
+leaving relation2dependences, 1 and 0 dependences
+dependences1[0]: symbol a
+symbol a  HAS A left  DEPENDENCE OF TYPE DEP_W2W
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+
+irtools.cc ij 0 0 dv.first 1   dv.second 0
+2IR_roseArraySymbol::IR_roseArraySymbol (a)
+34IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+j 1
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+sym_b = a
+irtools.cc ij 0 1
+*sym_a == *sym_b
+0 a->is_write()
+1 b->is_NOT_write()
+
+irtools.cc ij 0 1   SYMBOL A == SYMBOL B and one is a write
+arrays2relation()
+0 freevars
+IS1  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+IS2  {[i,j] : 1 <= j <= 9 && 1 <= i <= 9 }
+r    {[In_1,In_2] -> [Out_1,Out_2] : FALSE }
+omegatools.cc sym_src
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+omegatools.cc  (*sym_src != *sym_dst) FALSE
+f_root
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+omegatools.cc ref_src->n_dim() 1
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+arrays2 i 0
+IR_roseArrayRef::index( 0 )  
+IR_roseArrayRef::index( 0 )  
+IR_roseCode::QueryExpOperation()
+IR_roseCode::QueryExpOperation()
+exp2formula()
+{[i,j] -> [i',j'] : exists ( e3,e4 : ( TRUE )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+exp2formula()
+{[i,j] -> [i',j'] : exists ( e3,e4 : ( i = e3 )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::n_dim() 1
+r    {[i,j] -> [i',j'] : exists ( e3,e4 : ( i = e3 && i' = e4 && e4 = e3 )) and 1 <= j <= 9 && 1 <= i <= 9 and 1 <= j' <= 9 && 1 <= i' <= 9 }
+leaving arrays2relation
+r    {[i,j] -> [i',j'] : exists ( e3,e4 : ( i = e3 && i' = e4 && e4 = e3 )) and 1 <= j <= 9 && 1 <= i <= 9 and 1 <= j' <= 9 && 1 <= i' <= 9 }
+1
+relation2dependences()
+{[In_1,In_2] : exists ( i,j,i',j' : ( i' = i && i' = i+In_1 && j' = j+In_2 && 1 <= j <= 9 && 1 <= i <= 9 && 1 <= j' <= 9 )) }
+{[In_1,In_2] : exists ( i,j,i',j' : ( i = i' && i' = i+In_1 && j' = j+In_2 && 1 <= j <= 9 && 1 <= i' <= 9 && 1 <= j' <= 9 )) }
+
+dv created in if                                         ***
+omegatools.cc calling ref_src->symbol();
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+symbol a  ADDING A DEPENDENCE OF TYPE DEP_W2R to dependences1
+pushing dv
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+DONE pushing dv
+now 1 dependences1
+dependences1[0]: symbol a
+
+dv goes out of scope                                      ***
+
+dv created in if                                         ***
+omegatools.cc calling ref_src->symbol();
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+symbol a  ADDING A DEPENDENCE OF TYPE DEP_R2W to dependences2
+pushing dv
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+DONE pushing dv
+now 1 dependences2
+dependences2[0]: symbol a
+
+dv goes out of scope                                      ***
+
+dv created in if                                         ***
+omegatools.cc calling ref_src->symbol();
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+symbol a  ADDING A DEPENDENCE OF TYPE DEP_W2R to dependences1
+pushing dv
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+DONE pushing dv
+now 2 dependences1
+dependences1[0]: symbol a
+dependences1[1]: symbol a
+
+dv goes out of scope                                      ***
+leaving relation2dependences, 2 and 1 dependences
+dependences1[0]: symbol a
+symbol a  HAS A left  DEPENDENCE OF TYPE DEP_W2R
+dependences1[1]: symbol a
+symbol a  HAS A left  DEPENDENCE OF TYPE DEP_W2R
+symbol a  HAS A right DEPENDENCE OF TYPE DEP_R2W
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+
+irtools.cc ij 0 1 dv.first 2   dv.second 1
+2IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+3IR_roseArraySymbol::IR_roseArraySymbol (a)
+4IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+j 2
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+sym_b = c
+irtools.cc ij 0 2
+*sym_a NOT == *sym_b
+0 a->is_write()
+2 b->is_NOT_write()
+j 3
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+sym_b = b
+irtools.cc ij 0 3
+*sym_a NOT == *sym_b
+0 a->is_write()
+3 b->is_NOT_write()
+i 1
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+sym_a = a
+j 1
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArrayRef::symbol()
+base a
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( a )
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+sym_b = a
+irtools.cc ij 1 1
+*sym_a == *sym_b
+1 a->is_NOT_write()
+1 b->is_NOT_write()
+j 2
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+sym_b = c
+irtools.cc ij 1 2
+*sym_a NOT == *sym_b
+1 a->is_NOT_write()
+2 b->is_NOT_write()
+j 3
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+sym_b = b
+irtools.cc ij 1 3
+*sym_a NOT == *sym_b
+1 a->is_NOT_write()
+3 b->is_NOT_write()
+i 2
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+sym_a = c
+j 2
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+IR_roseArrayRef::symbol()
+base c
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( c )
+IR_roseArraySymbol::IR_roseArraySymbol (c)
+sym_b = c
+irtools.cc ij 2 2
+*sym_a == *sym_b
+2 a->is_NOT_write()
+2 b->is_NOT_write()
+j 3
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+sym_b = b
+irtools.cc ij 2 3
+*sym_a NOT == *sym_b
+2 a->is_NOT_write()
+3 b->is_NOT_write()
+i 3
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+sym_a = b
+j 3
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+IR_roseArrayRef::symbol()
+base b
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( b )
+IR_roseArraySymbol::IR_roseArraySymbol (b)
+sym_b = b
+irtools.cc ij 3 3
+*sym_a == *sym_b
+3 a->is_NOT_write()
+3 b->is_NOT_write()
+LEAVING test_data_dependences()  first size 6    second size 2
+
+dv.first.size() 6
+k1 0
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k1 1
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k1 2
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k1 3
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k1 4
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k1 5
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k2 0
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+k2 1
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+
+
+*** LOTS OF REDUCTIONS ***
+
+
+i range 1
+i 0
+dep.hasEdge(0, 0)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+IR_roseArraySymbol::IR_roseArraySymbol (a)
+tdv size 8
+ij 0 0
+ij 0 1
+ij 0 2
+ij 0 3
+ij 0 4
+ij 0 5
+ij 0 6
+ij 0 7
+loop.cc reducCand.size() 0
+loop.cc canReduce.size() 0
+init dumb transformation relations
+                                                  at bottom of Loop::Loop, printCode
+CodeGen::CodeGen() sanity checking
+num_stmt 1  1 xforms
+here goes
+CodeGen::CodeGen() DONE
+CG.cc line 164, CG_result::printString()
+stmts.size() 1
+
+CG_result::printRepr(ocg, stmts) 
+DYINGHERE
+s 0/1
+result: t2 = Out_1, 0
+result: t4 = Out_1, 0
+return printRepr( ... )
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+for(t2 = 1; t2 <= 9; t2++) {
+  for(t4 = 1; t4 <= 9; t4++) {
+    s0(t2,t4);
+  }
+}
+
+script success!
+parser.yy almost done
+1 loop?   (loop_num_start == loop_num_end)
+
+Loop::getCode( 1 )
+
+CG_result::printRepr(ocg, stmts) 
+DYINGHERE
+s 0/1
+result: t2 = Out_1, 0
+CG_chillBuilder::CreateIdent( t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t2, arraypart  parent )
+made a new chillRepr from 
+(DeclRefExpr 'int' Var  't2' )
+CG_chillBuilder::CreatePlus()
+result: t4 = Out_1, 0
+CG_chillBuilder::CreateIdent( t4 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t4, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't4' )
+CG_chillBuilder::CreatePlus()
+return printRepr( ... )
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 0 )
+CG_chillBuilder::CreateAnd()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateInt( 9 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreateIdent( t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t2, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't2' )
+
+CG_chillBuilder::CreateInductive()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 0 )
+CG_chillBuilder::CreateAnd()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateInt( 9 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreateIdent( t4 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t4, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't4' )
+
+CG_chillBuilder::CreateInductive()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 0 )
+CG_chillBuilder::CreateAnd()
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreateIdent( t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t2, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't2' )
+CG_chillBuilder::CreatePlus()
+v Out_1
+CG_chillBuilder::CreateIdent( t4 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t4, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't4' )
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+2 vars and 2 substitutions
+1 nodes in old code. was:
+stmt(0) = a[i] = (a[i] + c[i][j] * b[j])
+sub 0  t2
+sub 1  t4
+
+subbing t2
+for  i
+subbing t4
+for  j
+
+SubABinaryOperator() subbing old variable i in 
+a[i] = (a[i] + c[i][j] * b[j])
+op =   rhs type BinaryOperator
+(BinaryOperator '+'
+  (ArraySubscriptExpr (a) 'float' rvalue
+    (DeclRefExpr 'float [10]' Var  'a' )
+    (DeclRefExpr 'int' Var  'i' )
+  )
+  (BinaryOperator '*'
+    (ArraySubscriptExpr (c) 'float' rvalue
+      (ArraySubscriptExpr (c) 'float' rvalue
+        (DeclRefExpr 'float [10][10]' Var  'c' )
+        (DeclRefExpr 'int' Var  'i' )
+      )
+      (DeclRefExpr 'int' Var  'j' )
+    )
+    (ArraySubscriptExpr (b) 'float' rvalue
+      (DeclRefExpr 'float [10]' Var  'b' )
+      (DeclRefExpr 'int' Var  'j' )
+    )
+  )
+)
+
+SubABinaryOperator() subbing old variable i in 
+a[i] + c[i][j] * b[j]
+op +   rhs type BinaryOperator
+(BinaryOperator '*'
+  (ArraySubscriptExpr (c) 'float' rvalue
+    (ArraySubscriptExpr (c) 'float' rvalue
+      (DeclRefExpr 'float [10][10]' Var  'c' )
+      (DeclRefExpr 'int' Var  'i' )
+    )
+    (DeclRefExpr 'int' Var  'j' )
+  )
+  (ArraySubscriptExpr (b) 'float' rvalue
+    (DeclRefExpr 'float [10]' Var  'b' )
+    (DeclRefExpr 'int' Var  'j' )
+  )
+)
+
+SubABinaryOperator() subbing old variable i in 
+c[i][j] * b[j]
+op *   rhs type ArraySubscriptExpr
+(ArraySubscriptExpr (b) 'float' rvalue
+  (DeclRefExpr 'float [10]' Var  'b' )
+  (DeclRefExpr 'int' Var  'j' )
+)
+
+SubABinaryOperator() subbing old variable j in 
+a[t2] = (a[t2] + c[t2][j] * b[j])
+op =   rhs type BinaryOperator
+(BinaryOperator '+'
+  (ArraySubscriptExpr (a) 'float' rvalue
+    (DeclRefExpr 'float [10]' Var  'a' )
+    (DeclRefExpr 'int' Var  't2' )
+  )
+  (BinaryOperator '*'
+    (ArraySubscriptExpr (c) 'float' rvalue
+      (ArraySubscriptExpr (c) 'float' rvalue
+        (DeclRefExpr 'float [10][10]' Var  'c' )
+        (DeclRefExpr 'int' Var  't2' )
+      )
+      (DeclRefExpr 'int' Var  'j' )
+    )
+    (ArraySubscriptExpr (b) 'float' rvalue
+      (DeclRefExpr 'float [10]' Var  'b' )
+      (DeclRefExpr 'int' Var  'j' )
+    )
+  )
+)
+
+SubABinaryOperator() subbing old variable j in 
+a[t2] + c[t2][j] * b[j]
+op +   rhs type BinaryOperator
+(BinaryOperator '*'
+  (ArraySubscriptExpr (c) 'float' rvalue
+    (ArraySubscriptExpr (c) 'float' rvalue
+      (DeclRefExpr 'float [10][10]' Var  'c' )
+      (DeclRefExpr 'int' Var  't2' )
+    )
+    (DeclRefExpr 'int' Var  'j' )
+  )
+  (ArraySubscriptExpr (b) 'float' rvalue
+    (DeclRefExpr 'float [10]' Var  'b' )
+    (DeclRefExpr 'int' Var  'j' )
+  )
+)
+
+SubABinaryOperator() subbing old variable j in 
+c[t2][j] * b[j]
+op *   rhs type ArraySubscriptExpr
+(ArraySubscriptExpr (b) 'float' rvalue
+  (DeclRefExpr 'float [10]' Var  'b' )
+  (DeclRefExpr 'int' Var  'j' )
+)
+
+IR_roseCode::ReplaceCode( old, *repr)
+old was
+for (i = 1; i < 10; i++) {
+  for (j = 1; j < 10; j++) 
+    a[i] = (a[i] + c[i][j] * b[j]);
+}
+
+
+old parent was
+
+{
+int t4;
+int t2;
+float  a[10];
+float  b[10];
+float  c[10][10];
+int i;
+int j;
+for (i = 1; i < 10; i++) {
+  for (j = 1; j < 10; j++) 
+    a[i] = (a[i] + c[i][j] * b[j]);
+}
+return(0);
+
+
+}
+
+new parent2 is
+
+{
+int t4;
+int t2;
+float  a[10];
+float  b[10];
+float  c[10][10];
+int i;
+int j;
+for (t2 = 1; t2 <= 9; t2 += 1) {
+  for (t4 = 1; t4 <= 9; t4 += 1) 
+    a[t2] = (a[t2] + c[t2][t4] * b[t4]);
+}
+;
+return(0);
+}
+deleting varDecl i
+deleting varDecl j
+// sourcefile has 1 children
+they are
+FunctionDecl
+IR_chillCode::~IR_chillCode()
+output happening as part of the destructor !!
