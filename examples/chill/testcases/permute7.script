@@ -1,0 +1,25 @@
+
+
+#
+#  example from CHiLL manual page 14 except NO KNOWN
+#
+#  permute 3 loops
+#
+
+
+source: permute123456.c
+dest:   permute7modified.c
+
+procedure: mm
+format: rose
+
+loop: 0
+
+#  NO KNOWN 
+#known( ambn > 0 )
+#known( an > 0 )
+#known( bm > 0)
+
+permute([3,1,2])
+
+

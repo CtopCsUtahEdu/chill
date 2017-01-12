@@ -6,6 +6,9 @@
 #  skew a loop 
 #
 
+## Test Harness flags:
+#>SKIP :: Works for Mark ::
+
 from chill import *
 
 source('skew.c')

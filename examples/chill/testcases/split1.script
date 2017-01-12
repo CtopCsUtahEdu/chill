@@ -1,0 +1,25 @@
+
+
+#
+#  example from CHiLL manual page 20
+#
+#  split
+#
+
+
+source: split.c
+dest:   split1modified.c
+
+procedure: mm
+format: rose
+
+loop: 0
+
+known( ambn > 0 )
+known( an > 0 )
+known( bm > 10)
+
+split( 1, 2, L2 < 5 )
+
+
+

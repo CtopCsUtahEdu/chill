@@ -1,7 +1,16 @@
 # http://www.gnu.org/software/automake
 
+# object and archive files
+
+*.o
+*.a
+
 Makefile.in
 Makefile
+
+# temporary files with ~
+
+.*~
 
 # vim swap file
 
@@ -38,8 +47,44 @@ Makefile
 /omega/install-sh
 /omega/missing
 
+*.deps/
+*.dirstamp
+
 # Eclipse project config
 
 /.cproject
 /.settings
 /.project
+
+## everything else...
+
+/config.log
+/config.status
+/chill
+/chill-calculator_eval.o
+/chill-chill_ast.o
+/chill-chill_io.o
+/chill-chill_run_util.o
+/chill-chill_run.o
+/chill-chillmodule.o
+/chill-dep.o
+/chill-ir_chill.o
+/chill-ir_rose_utils.o
+/chill-ir_rose.o
+/chill-irtools.o
+/chill-loop_basic.o
+/chill-loop_datacopy.o
+/chill-loop_extra.o
+/chill-loop_ghostcells.o
+/chill-loop_stencil.o
+/chill-loop_tile.o
+/chill-loop_unroll.o
+/chill-loop.o
+/chill-omegatools.o
+/chill-parse_expr.tab.o
+/chill-parse_expr.yy.o
+/chill-stencil.o
+/parse_expr.ll.hh
+/parse_expr.tab.cc
+/parse_expr.tab.hh
+/parse_expr.yy.cc

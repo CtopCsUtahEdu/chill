@@ -83,9 +83,7 @@ chill_python_yacc_src       = parse_expr.yy.cc parse_expr.tab.cc
 
 ## Debug ##
 if DEBUG_OPT
-debug_flags					= -DDEBUGCHILL
-else
-debug_flags					= -DNO_CHILL_DEBUG
+## TODO: any debug related things
 endif
 
 
@@ -158,12 +156,25 @@ common_cppflags        += -DBUILD_ROSE -DFRONTEND_ROSE
 common_libs             = $(core_libs) $(runner_libs)
 common_libdirs          = $(core_libdirs) $(runner_libdirs)
 
+## Testing ##
+AM_TESTS_ENVIRONMENT= SRCDIR='$(srcdir)'; export SRCDIR;
+TESTS=
+
+if CUDACHILL_OPT
+include ./test-chill/cudachill_testcases.mk
+else
+include ./test-chill/chill_testcases.mk
+endif
+EXTRA_DIST += test-chill/runchilltest.sh
+test-chill/runtestchill.sh:
+	cp $(srcdir)/test-chill/runtestchill.sh test-chill/runtestchill.sh
+
+
+
 ## Binaries ##
 if CUDACHILL_OPT
-TESTS=
 bin_PROGRAMS=cuda-chill
 else
-TESTS=
 bin_PROGRAMS=chill
 endif
 

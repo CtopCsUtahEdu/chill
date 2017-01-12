@@ -1,0 +1,19 @@
+#
+# loop adapted from  "Optimizing Compilers for
+# Modern Architectures", by Randy Allen and Ken Kennedy.
+#
+
+source: AKp256hack.c
+dest:   AKp256hackmodified.c
+
+procedure: foo
+format: rose
+
+# page 256
+# fuse 2 identically iterated loops
+loop: 0
+fuse( [0,1], 1 )
+
+
+
+

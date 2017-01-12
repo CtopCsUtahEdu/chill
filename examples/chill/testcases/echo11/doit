@@ -1,0 +1,8 @@
+
+xxdiff -b -w -B rose_gemm.c          $d/clang_gemm.c &
+xxdiff -b -w -B rose_gemv.c          $d/clang_gemv.c &
+xxdiff -b -w -B rose_jacobi1.c       $d/clang_jacobi1.c &
+xxdiff -b -w -B rose_jacobi2.c       $d/clang_jacobi2.c &
+xxdiff -b -w -B rose_simpleunroll.c  $d/clang_simpleunroll.c &
+xxdiff -b -w -B rose_unroll.c        $d/clang_unroll &
+xxdiff -b -w -B rose_unrolltrap.c    $d/clang_unrolltrap &

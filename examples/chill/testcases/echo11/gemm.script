@@ -1,0 +1,31 @@
+#matrix multiply large array size for intel machine
+source: gemm.c
+procedure: main
+format: rose
+loop: 0
+
+TI = 128
+TJ = 8
+TK = 512
+UI = 2
+UJ = 2
+
+permute([3,1,2])
+tile(0,2,TJ)
+#print space
+tile(0,2,TI)
+#print space
+tile(0,5,TK)
+#print space
+
+datacopy(0,3,a,false,1)
+#print space
+
+datacopy(0,4,b)
+print
+unroll(0,4,UI)#print space
+print 
+unroll(0,5,UJ)
+#print space
+print
+

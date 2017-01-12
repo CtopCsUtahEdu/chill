@@ -1,0 +1,15 @@
+source:jacobi_box_1_32.c
+procedure:smooth_box_1_32
+format: rose
+loop:0
+
+
+original()
+print
+
+stencil_temp(3)
+print
+
+print space
+
+

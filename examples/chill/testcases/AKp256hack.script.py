@@ -3,6 +3,9 @@
 # Modern Architectures", by Randy Allen and Ken Kennedy.
 #
 
+## Test Harness flags:
+#>SKIP
+
 from chill import *
 
 source('AKp256.c')

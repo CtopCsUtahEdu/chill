@@ -4,6 +4,9 @@
 #  peel 4 statements from the END of innermost loop
 #
 
+## Test Harness flags:
+#>SKIP
+
 from chill import *
 
 source('peel1234.c')

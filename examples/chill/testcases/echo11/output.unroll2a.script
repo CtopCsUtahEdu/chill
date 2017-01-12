@@ -1,0 +1,1743 @@
+source: unroll2.c
+dest: output_unroll2a.c
+procedure is foo
+format: rose
+format rose
+LOOP ':' NUMBER   parse the file because we haven't yet
+CIT_ROSE
+LOOP  ir_code = new IR_roseCode(source_filename, procedure_name);
+IR_roseCode::IR_roseCode( file_name unroll2.c, proc_name foo )
+IR_roseCode::IR_roseCode  actually parsing unroll2.c using rose?
+IR_roseCode::IR_roseCode()  project defined. file parsed by Rose
+creating chillAST from Rose AST
+ConvertXXXXVarDecl()
+original vartype 'float *'
+vartype = 'float *'
+arraypart = ''
+float * y   arraypart = ''
+2chillAST_VarDecl::chillAST_VarDecl( type float *, name y, arraypart  )
+2name y numdimensions 0
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'float *' 'y' ''"  n_dim 1  )
+
+ConvertXXXXVarDecl()
+original vartype 'int'
+vartype = 'int'
+arraypart = ''
+int i   arraypart = ''
+2chillAST_VarDecl::chillAST_VarDecl( type int, name i, arraypart  )
+2name i numdimensions 0
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'int' 'i' ''"  n_dim 0  )
+
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp()
+converting base
+ConvertXXXXXRefExpr()
+ConvertXXXXXRefExpr()
+ConvertRoseArrayRefExp, base (DeclRefExpr 'float *' ParmVar  'y' )
+
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+ConvertXXXXVarDecl()
+original vartype 'float [45UL]'
+vartype = 'float '
+arraypart = '[45]'
+float  y   arraypart = '[45]'
+2chillAST_VarDecl::chillAST_VarDecl( type float , name y, arraypart [45] )
+2name y numdimensions 1
+2chillAST_VarDecl::chillAST_VarDecl LEAVING
+(VarDecl "'float ' 'y' '[45]'"  n_dim 1  )
+
+ConvertXXXXXRefExpr()
+unhandled top node 423/429 of type SgSymbolTable
+unhandled top node 424/429 of type SgTypeTable
+topnode 425 of 429, first == NULL??  blurb numeric_label
+unhandled top node 426/429 of type Sg_File_Info
+unhandled top node 427/429 of type Sg_File_Info
+unhandled top node 428/429 of type SgSourceFile
+found the procedure named foo
+local Function Definition 0x293d8f0
+
+void foo( float *y )
+{
+  int i;
+  for (i = 1; i <= 45; i += 3) 
+    y[i] = 1.0f;
+
+}
+
+
+printing whole file
+
+
+// sourcefile has 2 children
+they are
+FunctionDecl
+FunctionDecl
+
+// this source derived from CHILL AST originally from file 'unroll2.c' as parsed by frontend compiler rose
+
+
+void foo( float *y )
+{
+  int i;
+  for (i = 1; i <= 45; i += 3) 
+    y[i] = 1.0f;
+
+}
+
+int main(  )
+{
+  float  y[45];
+  foo(y);
+  return(0);
+
+}
+
+//CHILL AST originally from file 'unroll2.c'
+
+(FunctionDecl void foo(float *y)
+  (CompoundStmt 
+    (VarDecl "'int' 'i' ''"  n_dim 0  )
+    (ForStmt 
+      (BinaryOperator '='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 1)
+      )
+      (BinaryOperator '<='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 45)
+      )
+      (BinaryOperator '+='
+        (DeclRefExpr 'int' Var  'i' )
+        (IntegerLiteral 'int' 3)
+      )
+      (CompoundStmt 
+        (BinaryOperator '='
+          (ArraySubscriptExpr (y) 'float' lvalue
+            (DeclRefExpr 'float *' ParmVar  'y' )
+            (DeclRefExpr 'int' Var  'i' )
+          )
+          (CStyleCastExpr  (float) 
+            (FloatingLiteral 'double' 1.000000)
+          )
+        )
+      )
+    )
+  )
+)
+
+(FunctionDecl int main()
+  (CompoundStmt 
+    (VarDecl "'float ' 'y' '[45]'"  n_dim 1  )
+    (CallExpr void
+      (DeclRefExpr 'void' 'foo' ( float *y ))
+      (VarDecl "'float *' 'y' ''"  n_dim 1  )
+    )
+    (ReturnStmt
+      (IntegerLiteral 'int' 0)
+    )
+  )
+)
+need to create symbol tables?
+LOOP RETURN ir_code = new IR_roseCode(source_filename, procedure_name);
+yyparse  block = ir_code->GetCode();
+IR_roseCode::GetCode()
+chillfunc 0x293d8f0
+chillast body of func is 0x293da60
+making a new IR_roseBlock with chillAST
+
+void foo( float *y )
+{
+  int i;
+  for (i = 1; i <= 45; i += 3) 
+    y[i] = 1.0f;
+
+}
+
+in yyparse, IR_Block block 0x293e8a0
+
+IR_roseCode::FindOneLevelControlStructure()
+basic block is:
+block ast of type FunctionDecl
+
+void foo( float *y )
+{
+  int i;
+  for (i = 1; i <= 45; i += 3) 
+    y[i] = 1.0f;
+
+}
+
+
+
+*** block is a compoundstatement or a function decl or NULL
+
+*** block is a compoundstatement or a function decl
+basic block has 2 statements
+making a new IR_roseBlock with NO chillAST (nil)
+child 0/2 is of type VarDecl
+straight line code adding to basicblock that had 0
+child 0/2 = int i
+child 0 is part of a basic block
+now basicblock has 1 statements
+child 1/2 is of type ForStmt
+found a For statement (Loop) at 1/2 within a Basic Block
+pushing a run of statements 0 to 0 as a block
+making a new IR_roseBlock with NO chillAST (nil)
+IR_roseLoop::IR_roseLoop(ir_, chillforstmt)
+loop is:
+for (i = 1; i <= 45; i += 3) 
+  y[i] = 1.0f;
+
+IR_roseLoop::IR_roseLoop()    chillbody
+body is:
+y[i] = 1.0f;
+
+
+chillbody of type CompoundStmt
+IR_roseLoop::IR_roseLoop() DONE
+ns 0  numchildren 2
+
+*** block is a compoundstatement or a function decl  END 
+returning vector of 2 controls
+(parser.yy) I found 1 loops in the procedure
+
+parse.yy  L 505 making a new myloop loop num start 0
+
+***                                                   ROSE (parser.yy) making a new myloop
+
+Loop::Loop(const IR_Control *control)
+control type is 0   IR_CONTROL_LOOP
+in Loop::Loop, calling  build_ir_tree()
+
+loop.cc, Loop::Loop() about to clone control
+IR_roseLoop::clone()
+IR_roseLoop::IR_roseLoop(ir_, chillforstmt)
+loop is:
+for (i = 1; i <= 45; i += 3) 
+  y[i] = 1.0f;
+
+IR_roseLoop::IR_roseLoop()    chillbody
+body is:
+y[i] = 1.0f;
+
+
+chillbody of type CompoundStmt
+IR_roseLoop::IR_roseLoop() DONE
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+case IR_CONTROL_LOOP
+recursing. build_ir_tree() of CONTROL_LOOP creating children  L122
+IR_roseLoop::body()
+making a new IR_roseBlock with chillAST
+y[i] = 1.0f;
+
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_roseCode::FindOneLevelControlStructure()
+basic block is:
+block ast of type CompoundStmt
+y[i] = 1.0f;
+
+
+
+*** block is a compoundstatement or a function decl or NULL
+
+*** block is a compoundstatement or a function decl
+found a top level Basic Block Compound Statement
+basic block has 1 statements
+making a new IR_roseBlock with NO chillAST (nil)
+child 0/1 is of type BinaryOperator
+straight line code adding to basicblock that had 0
+child 0/1 = y[i] = 1.0f
+child 0 is part of a basic block
+now basicblock has 1 statements
+ns 1  numchildren 1
+NOT sending straightline run of statements, because it would be the entire block. There are no control statements in the block
+
+*** block is a compoundstatement or a function decl  END 
+returning vector of 0 controls
+irtools.cc BACK FROM FindOneLevelControlStructure()
+controls.size() == 0
+build_ir_tree()  vector result has 1 parts
+recursing. build_ir_tree() of CONTROL_LOOP creating children DONE
+build_ir_tree()  vector result has 1 parts
+in Loop::Loop. ir_tree has 1 parts
+before init_loops, 0 freevar
+dammit 0
+
+                                                  Loop::init_loop()
+extract
+nesting level stmt size = 1
+1 statements?
+i 0
+stmt_nesting_level[0] = 1
+in init_loop, made 1 stmts
+max nesting level 1 at location 0
+itn = stmt[0]
+parent
+IR_CONTROL_LOOP  cur_dim 0
+making scalar symbol i
+index[0] = 'i'
+align loops by names,
+
+set relation variable names                      ****
+Relation r(1)
+it's a loop.  temp_depth 0
+r.name_set_var( 1, i )
+Relation r   {[i] : TRUE }
+extract information from loop/if structures
+IR_CONTROL_LOOP
+IR_roseLoop::lower_bound()
+loop.cc, got the lower bound. it is:
+1
+
+exp2formula()
+{[i] : TRUE }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::upper_bound()
+loop.cc, got the upper bound. it is:
+45
+
+IR_roseLoop::stop_cond()
+exp2formula()
+{[i] : 1 <= i }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+IR_roseLoop::lower_bound()
+IR_roseCode::QueryExpOperation()
+abs(c)
+IR_roseLoop::lower_bound()
+exp2formula()
+{[i] : 1 <= i <= 45 and exists ( alpha : ( exists ( beta : i = 3beta+alpha) )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+IR_OP_CONSTANT
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+add information for missing loops   n_dim(1)
+loop.cc L441 insert the statement
+loop.cc before extract
+IR_roseBlock::extract()
+block has chillAST of type CompoundStmt
+block has 0 exploded statements
+IR_roseBlock::extract() LEAVING
+code =  ocg->CreateSubstitutedStmt(...)
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+0 vars and 0 substitutions
+1 nodes in old code. was:
+stmt(0) = y[i] = 1.0f
+
+nosubs old code was:
+stmt = y[i] = 1.0f
+stmt
+for int i < n_dim(1)
+whew
+                                        loop.cc   Loop::init_loop() END
+
+after init_loops, 0 freevar
+loop.cc 1 statements
+this really REALLY needs some comments
+i 0
+j 0
+
+irtools.cc test_data_dependences()  0 freevars
+repr1   y[i] = 1.0f
+repr2   y[i] = 1.0f
+index 0 i
+IS1  {[i] : exists ( alpha : i = 1+3alpha && 1 <= i <= 43) }
+IS2  {[i] : exists ( alpha : i = 1+3alpha && 1 <= i <= 43) }
+repr1 == repr2
+repr1->dump()
+y[i] = 1.0f
+IR_roseCode::FindArrayRef()
+there are 1 chill statements in this repr
+
+chillstatement 0 = y[i] = 1.0f
+chillAST_ArraySubscriptExpr::gatherArrayRefs setting imwrittento 1 for y
+y
+1 total refs 
+ref[0] y is writtento
+IR_XXXXArrayRef::IR_XXXXArrayRef() 'y' write 1
+access of size 1
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+WRITE  array access 0 = y
+that was the list
+
+
+before mapRefstoStatements()
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+ IR_roseCode::FromSameStmt()
+y[i]
+y[i]
+trivially true because they are exactly the same statement
+after mapRefstoStatements()
+
+i 0
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+sym_a = y
+j 0
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+sym_b = y
+irtools.cc ij 0 0
+*sym_a == *sym_b
+0 a->is_write()
+0 b->is_write()
+
+irtools.cc ij 0 0   SYMBOL A == SYMBOL B and one is a write
+arrays2relation()
+0 freevars
+IS1  {[i] : exists ( alpha : i = 1+3alpha && 1 <= i <= 43) }
+IS2  {[i] : exists ( alpha : i = 1+3alpha && 1 <= i <= 43) }
+r    {[In_1] -> [Out_1] : FALSE }
+omegatools.cc sym_src
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+omegatools.cc  (*sym_src != *sym_dst) FALSE
+f_root
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArraySymbol::n_dim() 1
+omegatools.cc ref_src->n_dim() 1
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArraySymbol::n_dim() 1
+arrays2 i 0
+IR_roseArrayRef::index( 0 )  
+IR_roseArrayRef::index( 0 )  
+IR_roseCode::QueryExpOperation()
+IR_roseCode::QueryExpOperation()
+exp2formula()
+{[i] -> [i'] : exists ( e1,e2 : ( TRUE )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+exp2formula()
+{[i] -> [i'] : exists ( e1,e2 : ( i = e1 )) }
+
+IR_roseCode::QueryExpOperation()
+QueryExpOperation() done
+omegatools.cc IR_OP_VARIABLE
+repr  i
+IR_roseCode::QueryExpOperAND()
+IR_roseCode::QueryExpOperand() DONE
+v     i
+making scalar symbol i
+s i
+IR_roseArrayRef::symbol()
+base y
+IR_roseArrayRef::symbol() returning new IR_roseArraySymbol( y )
+IR_roseArraySymbol::IR_roseArraySymbol (y)
+IR_roseArraySymbol::n_dim() 1
+r    {[i] -> [i'] : exists ( e1,e2 : ( i = e1 && i' = e2 && e2 = e1 )) and exists ( alpha : i = 1+3alpha && 1 <= i <= 43) and exists ( alpha : i' = 1+3alpha && 1 <= i' <= 43) }
+leaving arrays2relation
+r    {[i] -> [i'] : exists ( e1,e2 : ( i = e1 && i' = e2 && e2 = e1 )) and exists ( alpha : i = 1+3alpha && 1 <= i <= 43) and exists ( alpha : i' = 1+3alpha && 1 <= i' <= 43) }
+1
+relation2dependences()
+{[In_1] : exists ( i,i' : ( exists ( alpha : i = i' && i' = 1+3alpha && i' = i+In_1 && 1 <= i' <= 43) )) }
+
+dv created in if                                         ***
+leaving relation2dependences, 0 and 0 dependences
+
+irtools.cc ij 0 0 dv.first 0   dv.second 0
+234LEAVING test_data_dependences()  first size 0    second size 0
+
+dv.first.size() 0
+
+
+*** LOTS OF REDUCTIONS ***
+
+
+i range 1
+i 0
+loop.cc reducCand.size() 0
+loop.cc canReduce.size() 0
+init dumb transformation relations
+                                                  at bottom of Loop::Loop, printCode
+
+
+                             parser 1          unroll( a,b,c )
+loop.cc apply_xform( set )
+{[i] -> [chill_t1] : i = chill_t1 }
+FIX THIS rose in generic loop.cc
+loop vars 0 i
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreateIdent( chill_t1 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t1, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t1' )
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+
+
+*** gonna die  *i = 0
+1 uninterpreted symbols
+loop vars 0 i
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+loop.cc stmt[*i].code =
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[i] = 1.0f
+sub 0  chill_t1
+
+subbing chill_t1
+for  i
+
+SubABinaryOperator() subbing old variable i in 
+y[i] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+{[chill_t1] -> [chill_t2] : chill_t1 = chill_t2 }
+FIX THIS rose in generic loop.cc
+loop vars 0 chill_t1
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreateIdent( chill_t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t2, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t2' )
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+
+
+*** gonna die  *i = 0
+1 uninterpreted symbols
+loop vars 0 chill_t1
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+loop.cc stmt[*i].code =
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t1] = 1.0f
+sub 0  chill_t2
+
+subbing chill_t2
+for  chill_t1
+
+SubABinaryOperator() subbing old variable chill_t1 in 
+y[chill_t1] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+{[chill_t2] -> [chill_t3] : chill_t2 = chill_t3 }
+FIX THIS rose in generic loop.cc
+loop vars 0 chill_t2
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+
+
+*** gonna die  *i = 0
+1 uninterpreted symbols
+loop vars 0 chill_t2
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+loop.cc stmt[*i].code =
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t2] = 1.0f
+sub 0  chill_t3
+
+subbing chill_t3
+for  chill_t2
+
+SubABinaryOperator() subbing old variable chill_t2 in 
+y[chill_t2] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+loop.cc LEAVING apply_xform( set )
+
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+3' ??
+CG_chillBuilder::CreateInt( 3 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 3
+
+subbing chill_t3 + 3
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 3] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+6' ??
+CG_chillBuilder::CreateInt( 6 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 6
+
+subbing chill_t3 + 6
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 6] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+9' ??
+CG_chillBuilder::CreateInt( 9 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 9
+
+subbing chill_t3 + 9
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 9] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+12' ??
+CG_chillBuilder::CreateInt( 12 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 12
+
+subbing chill_t3 + 12
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 12] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+15' ??
+CG_chillBuilder::CreateInt( 15 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 15
+
+subbing chill_t3 + 15
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 15] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+18' ??
+CG_chillBuilder::CreateInt( 18 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 18
+
+subbing chill_t3 + 18
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 18] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+21' ??
+CG_chillBuilder::CreateInt( 21 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 21
+
+subbing chill_t3 + 21
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 21] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+24' ??
+CG_chillBuilder::CreateInt( 24 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 24
+
+subbing chill_t3 + 24
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 24] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+27' ??
+CG_chillBuilder::CreateInt( 27 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 27
+
+subbing chill_t3 + 27
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 27] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+30' ??
+CG_chillBuilder::CreateInt( 30 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 30
+
+subbing chill_t3 + 30
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 30] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+y[chill_t3 + 30] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+33' ??
+CG_chillBuilder::CreateInt( 33 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 33
+
+subbing chill_t3 + 33
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 33] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+y[chill_t3 + 30] = 1.0f
+y[chill_t3 + 33] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+36' ??
+CG_chillBuilder::CreateInt( 36 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 36
+
+subbing chill_t3 + 36
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 36] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+y[chill_t3 + 30] = 1.0f
+y[chill_t3 + 33] = 1.0f
+y[chill_t3 + 36] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+39' ??
+CG_chillBuilder::CreateInt( 39 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 39
+
+subbing chill_t3 + 39
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 39] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+y[chill_t3 + 30] = 1.0f
+y[chill_t3 + 33] = 1.0f
+y[chill_t3 + 36] = 1.0f
+y[chill_t3 + 39] = 1.0f
+loop_unroll.cc, will replace 'chill_t3 with 'chill_t3+42' ??
+CG_chillBuilder::CreateInt( 42 )
+CG_chillBuilder::CreateIdent( chill_t3 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name chill_t3, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  'chill_t3' )
+CG_chillBuilder::CreatePlus()
+loop_unroll.cc subs  now has 1 parts
+old src was =
+y[chill_t3] = 1.0f
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  chill_t3 + 42
+
+subbing chill_t3 + 42
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+old src is =
+y[chill_t3] = 1.0f
+substituted copy is =
+y[chill_t3 + 42] = 1.0f
+appended code =
+y[chill_t3 + 3] = 1.0f
+y[chill_t3 + 6] = 1.0f
+y[chill_t3 + 9] = 1.0f
+y[chill_t3 + 12] = 1.0f
+y[chill_t3 + 15] = 1.0f
+y[chill_t3 + 18] = 1.0f
+y[chill_t3 + 21] = 1.0f
+y[chill_t3 + 24] = 1.0f
+y[chill_t3 + 27] = 1.0f
+y[chill_t3 + 30] = 1.0f
+y[chill_t3 + 33] = 1.0f
+y[chill_t3 + 36] = 1.0f
+y[chill_t3 + 39] = 1.0f
+y[chill_t3 + 42] = 1.0f
+new_stmt.IS = 
+update dependence graph
+                                                  loop_unroll.cc returning new_stmts
+CodeGen::CodeGen() sanity checking
+num_stmt 2  2 xforms
+here goes
+here goes
+CodeGen::CodeGen() DONE
+CG.cc line 164, CG_result::printString()
+stmts.size() 2
+
+CG_result::printRepr(ocg, stmts) 
+DYINGHERE
+s 0/2
+result: t2 = Out_1, 0
+s 1/2
+result: t2 = Out_1, 0
+return printRepr( ... )
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_split::printRepr()
+loop_print_repr()  guard_repr NULL
+CG.cc  CG_loop printrepr with more arguments
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+CG.cc  CG_loop printrepr with more arguments
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_utils.cc  output_substitutions()          DONE
+
+CG_utils.cc loop_print_repr recursive
+loop_print_repr()  guard_repr NULL
+s0(1);
+s1(1);
+
+script success!
+parser.yy almost done
+1 loop?   (loop_num_start == loop_num_end)
+
+Loop::getCode( 1 )
+
+CG_result::printRepr(ocg, stmts) 
+DYINGHERE
+s 0/2
+result: t2 = Out_1, 0
+CG_chillBuilder::CreateIdent( t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t2, arraypart  parent )
+made a new chillRepr from 
+s0: {[t1,t2,t3] : t1 = 0 && t3 = 0 && t2 = 1 }
+s1: {[t1,t2,t3] : t3 = 1 && t1 = 0 && t2 = 1 }
+
+(DeclRefExpr 'int' Var  't2' )
+CG_chillBuilder::CreatePlus()
+s 1/2
+result: t2 = Out_1, 0
+CG_chillBuilder::CreateIdent( t2 )
+chillAST_VarDecl::chillAST_VarDecl( type int, name t2, arraypart  parent )
+made a new chillRepr from (DeclRefExpr 'int' Var  't2' )
+CG_chillBuilder::CreatePlus()
+return printRepr( ... )
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 0 )
+CG_chillBuilder::CreateAnd()
+CG_loop::printRepr() w assigned_on_the_fly
+CG.cc  CG_loop printrepr with more arguments
+output_guard()
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateAnd()
+CG_split::printRepr()
+loop_print_repr()  guard_repr NULL
+CG.cc  CG_loop printrepr with more arguments
+CG_chillBuilder::CreateInt( 0 )
+CG_chillBuilder::CreateAnd()
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+1 nodes in old code. was:
+stmt(0) = y[chill_t3] = 1.0f
+sub 0  1
+
+subbing 1
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+CG.cc  CG_loop printrepr with more arguments
+CG_chillBuilder::CreateInt( 1 )
+CG_chillBuilder::CreatePlus()
+CG_chillBuilder::CreateAnd()
+CG_leaf::printRepr()
+CG_utils.cc  output_substitutions()
+v Out_1
+CG_chillBuilder::CreatePlus()
+CG_utils.cc  output_substitutions()          DONE
+
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+chillAST_FloatingLiteral::clone()  allthedigits (nil) 
+chillAST_FloatingLiteral::chillAST_FloatingLiteral( old ) allthedigits (nil)
+1.0  1.0
+chillAST_BinaryOperator, op '=', lhs is an array reference  LVALUE
+
+
+in CG_xxxxBuilder.cc (OMEGA)  CG_xxxxBuilder::CreateSubstitutedStmt()
+1 vars and 1 substitutions
+14 nodes in old code. was:
+stmt(0) = y[chill_t3 + 3] = 1.0f
+stmt(1) = y[chill_t3 + 6] = 1.0f
+stmt(2) = y[chill_t3 + 9] = 1.0f
+stmt(3) = y[chill_t3 + 12] = 1.0f
+stmt(4) = y[chill_t3 + 15] = 1.0f
+stmt(5) = y[chill_t3 + 18] = 1.0f
+stmt(6) = y[chill_t3 + 21] = 1.0f
+stmt(7) = y[chill_t3 + 24] = 1.0f
+stmt(8) = y[chill_t3 + 27] = 1.0f
+stmt(9) = y[chill_t3 + 30] = 1.0f
+stmt(10) = y[chill_t3 + 33] = 1.0f
+stmt(11) = y[chill_t3 + 36] = 1.0f
+stmt(12) = y[chill_t3 + 39] = 1.0f
+stmt(13) = y[chill_t3 + 42] = 1.0f
+sub 0  1
+
+subbing 1
+for  chill_t3
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 3] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 3
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 3)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 6] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 6
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 6)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 9] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 9
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 9)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 12] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 12
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 12)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 15] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 15
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 15)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 18] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 18
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 18)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 21] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 21
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 21)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 24] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 24
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 24)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 27] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 27
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 27)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 30] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 30
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 30)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 33] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 33
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 33)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 36] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 36
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 36)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 39] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 39
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 39)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+SubABinaryOperator() subbing old variable chill_t3 in 
+y[chill_t3 + 42] = 1.0f
+op =   rhs type CStyleCastExpr
+(CStyleCastExpr  (float) 
+  (FloatingLiteral 'double' 1.000000)
+)
+
+SubABinaryOperator() subbing old variable chill_t3 in 
+chill_t3 + 42
+op +   rhs type IntegerLiteral
+(IntegerLiteral 'int' 42)
+
+SubCStyleCastExpr()  subexpr is type FloatingLiteral
+sub in FL
+CG_utils.cc loop_print_repr recursive
+loop_print_repr()  guard_repr NULL
+IR_roseCode::ReplaceCode( old, *repr)
+old was
+for (i = 1; i <= 45; i += 3) 
+  y[chill_t3] = 1.0f;
+
+
+old parent was
+
+{
+int i;
+for (i = 1; i <= 45; i += 3) 
+  y[chill_t3] = 1.0f;
+
+
+}
+inserting y[1 + 3] = 1.0f
+inserting y[1 + 6] = 1.0f
+inserting y[1 + 9] = 1.0f
+inserting y[1 + 12] = 1.0f
+inserting y[1 + 15] = 1.0f
+inserting y[1 + 18] = 1.0f
+inserting y[1 + 21] = 1.0f
+inserting y[1 + 24] = 1.0f
+inserting y[1 + 27] = 1.0f
+inserting y[1 + 30] = 1.0f
+inserting y[1 + 33] = 1.0f
+inserting y[1 + 36] = 1.0f
+inserting y[1 + 39] = 1.0f
+inserting y[1 + 42] = 1.0f
+
+new parent2 is
+
+{
+int i;
+y[1] = 1.0f;
+y[1 + 3] = 1.0f;
+y[1 + 6] = 1.0f;
+y[1 + 9] = 1.0f;
+y[1 + 12] = 1.0f;
+y[1 + 15] = 1.0f;
+y[1 + 18] = 1.0f;
+y[1 + 21] = 1.0f;
+y[1 + 24] = 1.0f;
+y[1 + 27] = 1.0f;
+y[1 + 30] = 1.0f;
+y[1 + 33] = 1.0f;
+y[1 + 36] = 1.0f;
+y[1 + 39] = 1.0f;
+y[1 + 42] = 1.0f;
+}
+deleting varDecl i
+// sourcefile has 2 children
+they are
+FunctionDecl
+FunctionDecl
+IR_chillCode::~IR_chillCode()
+output happening as part of the destructor !!
