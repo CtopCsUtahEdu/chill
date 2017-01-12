@@ -1,0 +1,10 @@
+#!/bin/bash
+
+root_src_dir="$(dirname $0)"
+pushd $root_src_dir >/dev/null
+
+./test-chill/make_chill_testcases.sh test-chill examples/chill/testcases
+autoreconf -if
+
+popd >/dev/null
+

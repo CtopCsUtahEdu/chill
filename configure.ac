@@ -1,5 +1,10 @@
 AC_INIT([chill],[0.2.3])
 AC_CONFIG_AUX_DIR([.])
+
+# -                   - #
+# - Build Test System - #
+# -                   - #
+
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 #AC_SUBST([prefix],["$(pwd)/bin"])
@@ -7,7 +12,6 @@ AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
 AC_SUBST([CHILL_BUILD_VERSION],["\\\"0.2.3\\\""])
-AC_SUBST([CXXFLAGS],[-g -std=c++11])
 
 AC_DEFINE([CHILL_BUILD_VERSION],["0.2.3"],[CHiLL Version])
 
@@ -124,13 +128,6 @@ AS_IF([test "x$interface_lang" == xscript],
 AM_CONDITIONAL([PYTHON_OPT],[test "x$use_python" = xyes])
 AM_CONDITIONAL([LUA_OPT],[test "x$use_lua" = xyes])
 AM_CONDITIONAL([SCRIPT_OPT],[test "x$use_script" = xyes])
-
-# -                   - #
-# - Build Test System - #
-# -                   - #
-
-$srcdir/test-chill/make_chill_testcases.sh $srcdir examples/chill/testcases test-chill
-#$srcdir/test-chill/make_cudachill_testcases.sh $srcdir examples/cudachill/testcases test-chill
 
 AC_CONFIG_HEADERS([include/config.h])
 AC_CONFIG_FILES([Makefile])
