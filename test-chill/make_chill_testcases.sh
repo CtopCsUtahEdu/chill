@@ -1,10 +1,26 @@
 #!/bin/bash
 
 is_test_file() {
-    if [ -n `sed -n "s/^destination(.*)/\0/p" $1` ]; then
-        echo 1;
+    if [ -z "`sed -n "s/^destination(.*)/\0/p" $1`" ]; then
+        echo 0
     else
-        echo 0;
+        echo 1
+    fi
+}
+
+is_skip_test() {
+    if [ -z "`sed -n "s/^#>SKIP/\0/p" $1`" ]; then
+        echo 0
+    else
+        echo 1
+    fi
+}
+
+is_exfail_test() {
+    if [ -z "`sed -n "s/^#>EXFAIL/\0/p" $1`" ]; then
+        echo 0
+    else
+        echo 1
     fi
 }
 
@@ -16,15 +32,19 @@ for test_dir in $@;
 do
     for test_file_path in `ls $test_dir/*.py`
     do
-        if [ `is_test_file $test_file_path` -ne 0 ]; then
+        if [ "`is_test_file $test_file_path`" == 1 ]; then
             test_file=`basename $test_file_path`
             
-            ## Add run test
-            run_test_file="test-chill/test-$test_file.test"
+            run_test_file="test-chill/$test_file.test"
+
+            run_chill_exec="\$SRCDIR/test-chill/runchilltest.sh ./chill \$SRCDIR/$test_dir/$test_file"
+            run_chill_flags=""
+            [ `is_skip_test $test_file_path`   == 1 ] && run_chill_flags="$run_chill_flags skip"
+            [ `is_exfail_test $test_file_path` == 1 ] && run_chill_flags="$run_chill_flags exfail"
             
-            echo "#!/bin/bash"                                                                                      >  $run_test_file # make new file
-            echo "err=\`\$SRCDIR/test-chill/runchilltest.sh ./chill \$SRCDIR/$test_dir/$test_file check-run\`"    >> $run_test_file
-            echo "exit \$?"                                                                                         >> $run_test_file
+            echo "#!/bin/bash"                                  >  $run_test_file # make new file
+            echo "$run_chill_exec check-run $run_chill_flags"   >> $run_test_file
+            echo "exit \$?"                                     >> $run_test_file
             chmod +x $run_test_file
             
             

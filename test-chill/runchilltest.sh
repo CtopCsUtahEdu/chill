@@ -4,7 +4,8 @@
 ## Exit with a hard error, or continue
 maybe_exit_with_error_code() {
     if [ $1 != 0 ]; then
-        exit 77
+        echo $@
+        exit 99
     fi
 }
 
@@ -12,22 +13,28 @@ maybe_exit_with_error_code() {
 ## Exit as either pass or fail, depending on both ther error code
 ##      and whether or not the expectfail flag is set
 exit_with_passfail_code() {
-    err=$1
-    shift 1
-    msg=$@
-    
+    local err=$1
     if [ $expect_fail == 0 ]; then
         if [ $err != 0 ]; then
-            echo $err $msg
+            echo $@
+            exit $err
+        else
+            exit 0
         fi
-        exit $err
     else
         if [ $err == 0 ]; then
+            echo $@
             exit 1
         else
-            exit $err
+            echo $@
+            exit 0
         fi
     fi
+}
+
+exit_with_skip_code() {
+    echo $@
+    exit 77 
 }
 
 
@@ -56,13 +63,17 @@ fi
 
 ## Defaults
 expect_fail=0
+skip_test=0
 
 ## Read arguments
 arg_index=1
 while [ $arg_index -lt $(( $# + 1 )) ]; do
     case ${!arg_index} in
-        expectfail)
+        exfail)
                 expect_fail=1
+            ;;
+        skip)
+                skip_test=1
             ;;
         check-run)
                 test_type=${!arg_index}
@@ -98,11 +109,15 @@ run_chill() {
     echo $err $msg
 }
 
+## Skip Test? ##
+if [ $skip_test != 0 ]; then
+    exit_with_skip_code
+fi
 
 ## Run Test $$
 case $test_type in
     check-run)
-            err=`run_chill /dev/null /dev/null 1`
+            err=`run_chill /dev/null /dev/null 2`
             if [ -e $chill_generated_source ]; then
                 rm $chill_generated_source
             fi

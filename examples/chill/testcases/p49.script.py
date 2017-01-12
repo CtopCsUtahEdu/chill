@@ -3,6 +3,9 @@
 # Modern Architectures", by Randy Allen and Ken Kennedy.
 #
 
+## Test Harness flags:
+#>SKIP :: Works for Mark ::
+
 from chill import *
 
 source('p49.c')

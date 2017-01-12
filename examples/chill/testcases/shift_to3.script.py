@@ -6,6 +6,9 @@
 #  shift a loop 
 #
 
+## Test Harness flags:
+#>SKIP :: Works for Mark ::
+
 from chill import *
 
 source('shift_to.c')

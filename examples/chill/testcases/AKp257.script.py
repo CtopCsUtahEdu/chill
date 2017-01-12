@@ -3,6 +3,9 @@
 # Modern Architectures", by Randy Allen and Ken Kennedy.
 #
 
+## Test Harness flags:
+#>EXFAIL
+
 source('AKp257.c')
 destination('AKp257modified.c')
 

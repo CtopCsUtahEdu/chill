@@ -1,0 +1,43 @@
+stages:
+    - build
+    - test
+
+build-cmake:
+    stage: build
+    script:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make $CMAKEBUILD
+    only:
+        - master
+
+build-autotools:
+    stage: build
+    script:
+        - ./bootstrap
+        - ./configure
+        - make
+    only:
+        - master
+
+test-cmake:
+    stage: test
+    script:
+        - mkdir build
+        - cd build
+        - cmake ..
+        - make check-all
+    only:
+        - master
+
+test-autotools:
+    stage: test
+    script:
+        - ./bootstrap
+        - ./configure
+        - make
+        - make check
+    only:
+        - master
+
