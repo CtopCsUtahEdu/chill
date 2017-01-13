@@ -9,6 +9,13 @@ namespace omega {
 // Presburger formula nodes for quantifiers
 //
 
+/**
+ * @brief Existential qualifier
+ *
+ * This associates with one or more variables. These variables
+ * are existentially qualified in the formula represented by
+ * its single child node.
+ */
 class F_Exists : public F_Declaration {
 public:
     inline Node_Type node_type() {return Op_Exists;}
@@ -34,7 +41,13 @@ private:
     DNF* DNFize();
 };
 
-
+/**
+ * @brief Universal qualifier
+ *
+ * This associates with one or more variables. These variables
+ * are universally qualified in the formula represented
+ * by its single child node.
+ */
 class F_Forall : public F_Declaration {
 public:
     inline Node_Type node_type() {return Op_Forall;}

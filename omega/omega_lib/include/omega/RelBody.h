@@ -12,17 +12,18 @@ const Rel_Unknown_Uses no_u = 1;
 const Rel_Unknown_Uses and_u = 2;
 const Rel_Unknown_Uses or_u = 4;
 
-//
-// Relation body.
-// Body and representative are separated to do reference counting.
-//
-
+/**
+ * @brief Relation body.
+ *
+ * Body and representative are separated to do reference counting.
+ */
 class Rel_Body : public Formula {
 public:
   bool is_null() const;
 
   inline Node_Type node_type() { return Op_Relation; }
 
+  //! Check if it is a set(have no output)
   inline bool is_set() const { return number_output == 0; }
   int n_inp() const;
   int n_out() const;

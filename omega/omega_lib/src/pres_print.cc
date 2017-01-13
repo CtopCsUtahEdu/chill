@@ -6,6 +6,7 @@
 #include <basic/Bag.h>
 #include <omega/omega_i.h>
 #include <omega/omega_core/oc.h>
+#include <sstream>
 
 namespace omega {
 
@@ -355,9 +356,9 @@ std::string Rel_Body::print_with_subs_to_string(bool printSym, bool newline) {
 
 void print_var_addrs(std::string &s, Variable_ID v) {
   if(pres_debug>=2) {
-    char ss[20];
-    sprintf(ss, "(%p,%p)", v, v->remap);
-    s += ss;
+    std::ostringstream ss;
+    ss << "(" << v << "," << v->remap << ")";
+    s += ss.str();
   }
 }
 

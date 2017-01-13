@@ -4,6 +4,8 @@
 #include <omega/pres_gen.h>
 #include <map>
 
+/** @file */
+
 namespace omega {
 
 //
@@ -32,24 +34,49 @@ typedef enum {Free_Var, Coef_Var, Bomega_Var} Global_Kind;
 class Var_Decl {
 public:
   inline Var_Kind    kind() { return var_kind; }
+  /**
+   * If this variable is an input, output, or set variable, returns its position in the tuple.
+   */
   int         get_position();
   Global_Var_ID      get_global_var();
-  Argument_Tuple     function_of();  // valid iff kind() == Global_var
+  /**
+   * Valid iff kind() == Global_Var
+   * @return the function to which this uninterpreted function is applied
+   */
+  Argument_Tuple     function_of();
 
-  Const_String base_name;
+  Const_String base_name; //!< The name of the variable without primes
   void name_variable(char *newname);
 
-  // The following should be used with care, as they are only valid
-  // after setup_names has been used on the relation containing this
-  // variable.
+  /**
+   * @brief Return the variable name in c++ string
+   *
+   * Should be used with care, as they are only valid
+   * after setup_names has been used on the relation containing this
+   * variable.
+   *
+   * @return name
+   */
   std::string name();
+  /**
+   * @brief Return the variable name in c string
+   * @sa name
+   */
   const char* char_name();
   void set_kind(Var_Kind v) { var_kind = v; }
 
-  // Operation to allow the remap field to be used for
-  // union-find operations on variables.
-  // Be sure to reset the remap fields afterward
+  /**
+   * @brief Union operation for Union-Find
+   *
+   * This uses the remap field for union-find operations on the variable.
+   * Be sure to reset the remap fields afterward
+   * @param v variable to be unioned with this variable
+   */
   void         UF_union(Variable_ID v);
+  /**
+   * @brief Query the union-find owner/flag for this variable
+   * @return The owner
+   */
   Variable_ID  UF_owner();
 
 private:
@@ -66,12 +93,11 @@ private:
   friend void copy_var_decls(Variable_ID_Tuple &new_vl, Variable_ID_Tuple &vl);
 
 private:
-  int  instance;
+  int  instance; //!< Wild card instance number
   void setup_name();
 
   // these set up the names
   friend class Rel_Body;
-//  friend class F_Declaration; already a friend
 
 private:
   Variable_ID   remap;          // pointer to new copy of this node
@@ -84,7 +110,11 @@ private:
   friend class DNF;
   friend class Conjunct;
 
-  // this prints remap to the debugging output
+  /**
+   * @brief Prints remap to the debugging output(string)
+   * @param s The string to put the output
+   * @param v The variable to output
+   */
   friend void print_var_addrs(std::string &s, Variable_ID v);
 
   friend void reset_remap_field(Variable_ID v);
@@ -96,9 +126,9 @@ private:
 private:
 
   Var_Kind      var_kind;
-  int           position; // only for Input_Var, Output_Var
-  Global_Var_ID global_var;     // only for Global_Var
-  Argument_Tuple of;  // only for Global_Var
+  int           position; ///< position for Input_Var, Output_Var
+  Global_Var_ID global_var;     ///< only for Global_Var
+  Argument_Tuple of;  ///< only for Global_Var
 };
 
 bool rm_variable(Variable_ID_Tuple &vl, Variable_ID v);
@@ -129,17 +159,15 @@ Variable_ID input_var(int nth);
 Variable_ID output_var(int nth);
 Variable_ID set_var(int nth);
 
-
-
-//
-// Global_Var_ID uniquely identifies global var-s through the whole program.
-// Global_Var_Decl is an ADT with the following operations:
-// - create global variable,
-// - find the arity of the variable, (default = 0, for symbolic consts)
-// - get the name of global variable, 
-// - tell if two variables are the same (if they are the same object)
-//
-
+/**
+ * @brief Abstract data type for Global Variable declarations
+ *
+ * Supports the following operations:
+ * * create global variable,
+ * * find the arity of the variable, (default = 0, for symbolic consts)
+ * * get the name of global variable,
+ * * tell if two variables are the same (if they are the same object)
+ */
 class Global_Var_Decl {
 public:
   Global_Var_Decl(Const_String baseName);
@@ -186,10 +214,11 @@ private:
 public:
 //    friend class Rel_Body;  // Rel_Body::setup_names sets instance
   friend class Var_Decl;
-  int instance;
+  int instance; //!< Wild card instance number
+  // Only one usage: char_name() in pres_var.cc
 };
 
-
+// TODO REMOVE ME: No usage in project also no documentation on intended usage
 class Coef_Var_Decl : public Global_Var_Decl {
 public:
   Coef_Var_Decl(int id, int var);
@@ -202,11 +231,9 @@ private:
   int i, v;
 };
 
-
-
-//
-// Test subclass for Global_Var: named global variable
-//
+/**
+ * @brief Named global variable
+ */
 class Free_Var_Decl : public Global_Var_Decl {
 public:
   Free_Var_Decl(Const_String name);
@@ -220,9 +247,12 @@ private:
 
 
 /* === implementation functions === */
+//! Copy variable declarations except global var-s due to uniqueness
 void copy_var_decls(Variable_ID_Tuple &new_vl, Variable_ID_Tuple &vl);
+//! Destroy variable declarations except global var-s
 void free_var_decls(Variable_ID_Tuple &vl);
 
+//! Counter for the wild card instance number, reused in different scope
 extern int wildCardInstanceNumber;
 
 } // namespace

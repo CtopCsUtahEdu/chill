@@ -9,22 +9,36 @@ typedef enum {Op_Relation, Op_Not, Op_And, Op_Or,
               Op_Conjunct, Op_Forall, Op_Exists}  Node_Type;
 
 
-//
-// Presburger Formula base class
-//
-
+/**
+ * @brief Presburger Formula base class
+ *
+ * A multi-way(0 allowed) tree that represents a Presburger formula.
+ * Children can be either other formula nodes or "atomic" constraints
+ * (single equality, inequality, or stride).
+ */
 class Formula {
 public:
   virtual Node_Type node_type()=0;
 
   F_Forall *add_forall();
   F_Exists *add_exists();
+  /**
+   * Replacing this node with an F_And node that uses this as one of
+   * the child and another F_And node as the other.
+   *
+   * @return the other F_And node
+   */
   virtual F_And  *and_with();
   F_And  *add_and();
   F_Or *add_or();
   F_Not *add_not();
   void add_unknown();
 
+  /**
+   * Finalize the constraint to make it non-mutable so that certain simplification can take place.
+   *
+   * Should call it after each subpart is finished to achieve maximum efficiency.
+   */
   virtual void finalize();
   virtual void print(FILE *output_file);
 

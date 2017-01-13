@@ -6,29 +6,29 @@
 
 namespace omega {
 
-//
-// Mapping for relations
-// When a relation operation needs to re-arrange the variables,
-//  it describes the re-arragement with a mapping, and then calls
-//  align to re-arrange them.
-//
-// In a mapping, map_in (map_out/map_set) gives the new type and
-//  position of each of the old input (output/set) variables.
-// For variables being mapped to Input, Output, or Set variables,
-//  the position is the new position in the tuple.
-// For variables being mapped to Exists_Var, Forall_Var, or
-//  Wildcard_Var, the positions can be used to map multiple
-//  variables to the same quantified variable, by providing
-//  the same position.  Each variable with a negative position
-//  is given a unique quantified variable that is NOT listed
-//  in the seen_exists_ids list.
-// I'm not sure what the positions mean for Global_Vars - perhaps
-//  they are ignored?
-//
-// Currently, align seems to support only mapping to Set, Input,
-//  Output, and Exists vars.
-//
-
+/**
+ * @brief Mapping for relations
+ *
+ * When a relation operation needs to re-arrange the variables,
+ * it describes the re-arragement with a mapping, and then calls
+ * align to re-arrange them.
+ *
+ * In a mapping, map_in (map_out/map_set) gives the new type and
+ * position of each of the old input (output/set) variables.
+ * For variables being mapped to Input, Output, or Set variables,
+ * the position is the new position in the tuple.
+ * For variables being mapped to Exists_Var, Forall_Var, or
+ * Wildcard_Var, the positions can be used to map multiple
+ * variables to the same quantified variable, by providing
+ * the same position.  Each variable with a negative position
+ * is given a unique quantified variable that is NOT listed
+ * in the seen_exists_ids list.
+ * I'm not sure what the positions mean for Global_Vars - perhaps
+ * they are ignored?
+ *
+ * Currently, align seems to support only mapping to Set, Input,
+ * Output, and Exists vars.
+ */
 class Mapping {
 public:
   inline  Mapping(int no_in, int no_out): n_input(no_in), n_output(no_out) {}
@@ -92,10 +92,11 @@ public:
   inline int n_in()  const { return n_input;  }
   inline int n_out() const { return n_output; }
 
-  // If a tuple as a whole becomes the new Input or Output tuple,
-  //  return the Tuple of they will become (Input, Output)
-  // Return Unknown_Tuple otherwise
-
+  /**
+   * If a tuple as a whole becomes the new Input or Output tuple,
+   *  return the Tuple of they will become (Input, Output)
+   * Return Unknown_Tuple otherwise
+   */
   inline Argument_Tuple get_tuple_fate(Argument_Tuple t, int prefix = -1) const {
     return   t== Input_Tuple ?  get_input_fate(prefix) :
       (t==Output_Tuple ? get_output_fate(prefix) : Unknown_Tuple); }
@@ -150,10 +151,10 @@ public:
 private:
   int  n_input;
   int  n_output;
-  Var_Kind map_in_kind[maxVars];
-  int      map_in_pos[maxVars];
-  Var_Kind map_out_kind[maxVars];
-  int      map_out_pos[maxVars];
+  Var_Kind map_in_kind[maxVars]; ///< New kind for old input vars, also reused for setvar
+  int      map_in_pos[maxVars];  ///< New position for old input vars, also reused for setvar
+  Var_Kind map_out_kind[maxVars]; ///< New kind for old output vars
+  int      map_out_pos[maxVars];  ///< New position for old output vars
 };
 
 } // namespace
