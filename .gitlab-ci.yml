@@ -12,11 +12,20 @@ build-cmake:
     only:
         - master
 
-build-autotools:
+build-automake:
     stage: build
     script:
         - ./bootstrap
         - ./configure
+        - make
+    only:
+        - master
+
+build-automake-cuda:
+    stage: build
+    script:
+        - ./bootstrap
+        - ./configure --enable-cuda
         - make
     only:
         - master
@@ -31,11 +40,21 @@ test-cmake:
     only:
         - master
 
-test-autotools:
+test-automake:
     stage: test
     script:
         - ./bootstrap
-        - ./configure
+        - ./configure --disable-debug
+        - make
+        - make check
+    only:
+        - master
+
+test-automake-cuda:
+    stage: test
+    script:
+        - ./bootstrap
+        - ./configure --enable-cuda --disable-debug
         - make
         - make check
     only:

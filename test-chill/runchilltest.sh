@@ -52,12 +52,13 @@ chill_script_path=$(dirname `realpath $2`)
 chill_script=$(basename $2)
 shift 2
 
-pushd $chill_script_path >/dev/null
 chill_generated_source=$(get_destination $chill_script)
 
 ## remove generated file if it exists
 if [ -e $chill_generated_source ]; then
+    pushd $chill_script_path >/dev/null
     rm $chill_generated_source
+    popd >/dev/null
 fi
 
 
@@ -96,17 +97,19 @@ done
 ##          0 or nothing    - don't check
 ##          > 0             - the error code if file does not exist
 run_chill() {
+    pushd $chill_script_path >/dev/null
     $chill_exec $chill_script 1>$1 2>$2
     err=$?
     if [ $err == 0 -a -n "$3" -a $3 -gt 0 ]; then
         if [ ! -e $chill_generated_source ]; then
-            err=$3
-            msg="output file was not generated"
+            echo "$3 output file was not generated"
+            exit $3
         fi
     else
         msg="error while running CHiLL"
     fi
-    echo $err $msg
+    popd >/dev/null
+    maybe_exit_with_error_code $err $msg
 }
 
 ## Skip Test? ##
@@ -118,12 +121,13 @@ fi
 case $test_type in
     check-run)
             err=`run_chill /dev/null /dev/null 2`
+            
+            pushd $chill_script_path >/dev/null
             if [ -e $chill_generated_source ]; then
                 rm $chill_generated_source
             fi
+            popd >/dev/null
             exit_with_passfail_code $err
         ;;
 esac
-
-popd >/dev/null
 
