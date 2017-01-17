@@ -3,6 +3,15 @@
 
 #include <omega/Relation.h>
 
+/** @file
+ *
+ * This file describes the Farkas' Lemma, which let A be a real (m,n) matrix and b be an m-dimensional real vector,
+ * EXACTLY one of the following two statements is true:
+ *
+ * * \f$\exists x \in R^n: Ax = b, x \geq 0\f$
+ * * \f$\exists y \in R^m: y^TA \geq 0, y^Tb < 0\f$
+ */
+
 namespace omega {
 
 enum Farkas_Type {Basic_Farkas, Decoupled_Farkas,

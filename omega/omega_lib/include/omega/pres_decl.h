@@ -7,12 +7,12 @@
 
 namespace omega {
 
-//
-// Base class for presburger formula nodes with variables
-//
-
+/**
+ * @brief Abstract base class that can contain variable declarations
+ */
 class F_Declaration : public Formula {
 public:
+  //! add a new variable to this declaration node
   virtual Variable_ID declare(Const_String s)=0;
   virtual Variable_ID declare()=0;
   virtual Variable_ID declare(Variable_ID)=0;

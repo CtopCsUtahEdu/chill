@@ -5,9 +5,9 @@
 
 namespace omega {
 
-//
-// Disjunctive Normal Form -- list of Conjuncts
-//
+/**
+ * \brief Disjunctive Normal Form -- list of Conjuncts
+ */
 class DNF {
 public:
   void print(FILE *out_file);

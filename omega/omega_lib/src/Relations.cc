@@ -1096,10 +1096,6 @@ bool Might_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2) {
   return do_subset_check(s1,s2);
 }
 
-bool May_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2){
-  return Might_Be_Subset(r1,r2);
-}
-
 
 
 

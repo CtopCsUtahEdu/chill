@@ -18,8 +18,9 @@ class Constraint_Handle {
 public:
   Constraint_Handle() {}
   virtual ~Constraint_Handle() {}
-  
+  //! ADD delta to the coefficient of the variable
   void   update_coef(Variable_ID, coef_t delta);
+  //! ADD delta to the constant term of the constraint
   void   update_const(coef_t delta);
   coef_t get_coef(Variable_ID v) const;
   coef_t get_const() const;
@@ -37,6 +38,7 @@ public:
   // not sure that the second one can be used in a meaningful
   // way if the conjunct is in multiple relations
 
+  //! Multiply each coefficient and the constant term by multiplier
   void   finalize();
   void   multiply(int multiplier);
   Rel_Body *relation() const;
@@ -73,7 +75,12 @@ public:
   // copy_constraint does updates and gets at c and e
 
 };
-
+/**
+ * @brief Handle to access GEQ constraints
+ *
+ * Represent constraints in the form
+ * \f[\sum_i a_ix_i + a_0 \geq 0\f]
+ */
 class GEQ_Handle : public Constraint_Handle {
 public:
   inline GEQ_Handle() {}
@@ -91,7 +98,15 @@ private:
   GEQ_Handle(Conjunct *, int);
 };
 
-
+/**
+ * @brief Handle to access EQ constraints
+ *
+ * Represent constraints in the form
+ * \f[\sum_i a_ix_i + a_0 = 0\f]
+ *
+ * Note that a stride constraint(\f$(\sum a_ix_i+a_0) \% s = 0\f$) is the same as
+ * \f[\exists k, \sum_i a_ix_i + a_0 = ks\f]
+ */
 class EQ_Handle : public Constraint_Handle {
 public:
   inline EQ_Handle() {}
@@ -129,6 +144,7 @@ private:
 
 class EQ_Iterator : public Generator<EQ_Handle> {
 public:
+  //! Get the EQs in a conjunct
   EQ_Iterator(Conjunct *);
   int  live() const;
   void operator++(int);
@@ -144,6 +160,7 @@ private:
 
 class GEQ_Iterator : public Generator<GEQ_Handle> {
 public:
+  //! Get the GEQs in a conjunct
   GEQ_Iterator(Conjunct *);
   int  live() const;
   void operator++(int);

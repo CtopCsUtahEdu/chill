@@ -8,6 +8,11 @@ namespace omega {
 // Presburger formula classes for logical operations: and, or not
 //
 
+/**
+ * @brief Represents the logical conjunction of its children nodes
+ *
+ * It is "True" if it has no children
+ */
 class F_And    : public Formula {
 public:
     inline Node_Type node_type() {return Op_And;}
@@ -17,11 +22,22 @@ public:
     // leading corresponding in,out variables known to be equal
     GEQ_Handle     add_GEQ(int preserves_level = 0);
     EQ_Handle      add_EQ(int preserves_level = 0);
+    /**
+     * This is equivalent to creating and F_Exists node with a
+     * new variable alpha as a child and attach an equallity
+     * constraint \f$step \times \alpha + ? = 0$.
+     *
+     * Coefficient for all other variable is implicitly 0.
+     */
     Stride_Handle  add_stride(int step, int preserves_level = 0);
     EQ_Handle   add_EQ(const Constraint_Handle &c, int preserves_level = 0);
     GEQ_Handle  add_GEQ(const Constraint_Handle &c, int preserves_level = 0);
 
     F_And    *and_with();
+    /**
+     * Adds an unknown constraints as a child, thus making the
+     * formula an upper bound.
+     */
     void add_unknown();
 
 private:
@@ -40,7 +56,11 @@ private:
     Conjunct *pos_conj;
 };
 
-
+/**
+ * @brief Represents the logical disjunction of its children nodes
+ *
+ * It is "False" if it has no children
+ */
 class F_Or     : public Formula {
 public:
     inline Node_Type node_type() {return Op_Or;}
@@ -61,7 +81,7 @@ private:
     void push_exists(Variable_ID_Tuple &S);
 };
 
-
+//! Represents the logical negation of its single child node
 class F_Not    : public Formula {
 public:
     inline Node_Type node_type() {return Op_Not;}

@@ -5,7 +5,7 @@
 
    Creating an object of class Substitutions causes ordered elimination, 
    i.e. variables in the input and output tuples are substituted for by
-   functions of earlier variables.  Could conceivablely create a more 
+   functions of earlier variables.  Could conceivably create a more
    flexible interface to orderedElimination if we developed a way to 
    specify the desired variable order.  
 

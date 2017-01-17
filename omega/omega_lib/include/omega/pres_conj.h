@@ -22,11 +22,16 @@ namespace omega {
 //   equal to position of Variable_ID in mappedVars list otherwise.
 //
 
+  /**
+   * @brief Conjunct
+   */
 class Conjunct : public F_Declaration {
 public:
   Constraint_Iterator constraints();
   Variable_ID_Tuple  *variables();
+  //! Return the EQs in this conjunct
   EQ_Iterator         EQs();
+  //! Return the GEQs in this conjunct
   GEQ_Iterator        GEQs();
   inline int          n_EQs() { return problem->nEQs; }
   inline int          n_GEQs() { return problem->nGEQs; }
@@ -263,9 +268,9 @@ private:
   bool             simplified;
   bool             verified;
 
-  int     guaranteed_leading_0s;  // -1 if unknown
-  int     possible_leading_0s;  // -1 if unknown
-  int     leading_dir; // 0 if unknown, else +/- 1
+  int     guaranteed_leading_0s;  //!< -1 if unknown
+  int     possible_leading_0s;  //!< -1 if unknown
+  int     leading_dir; //!< 0 if unknown, else +/- 1
   int     leading_dir_valid_and_known();
 
   bool             exact;
