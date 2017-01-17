@@ -7,7 +7,6 @@
 #
 
 ## Test Harness flags:
-#>SKIP :: Works for Mark ::
 
 from chill import *
 
@@ -18,7 +17,7 @@ procedure('f')
 loop(0)
 
 known('n > 0')
-known('m > 1')
+known('m - 1 > 0')
 
 skew( [0], 2, [1,1] ) 
 

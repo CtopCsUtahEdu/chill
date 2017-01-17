@@ -5,7 +5,6 @@
 #
 
 ## Test Harness flags:
-#>SKIP :: Works for Mark ::
 
 from chill import *
 
@@ -16,9 +15,9 @@ procedure('mm')
 
 loop(0)
 
-known('an   > 0')
-known('bm   > 4')
-known('ambn > 4')
+known('an       > 0')
+known('bm   - 4 > 0')
+known('ambn - 4 > 0')
 
 peel(1,2, -4)  # statement 1, loop 2 (middle, for j), 4 statements from END
 

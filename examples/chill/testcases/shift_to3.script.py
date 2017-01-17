@@ -7,7 +7,6 @@
 #
 
 ## Test Harness flags:
-#>SKIP :: Works for Mark ::
 
 from chill import *
 
@@ -19,8 +18,8 @@ procedure('mm')
 loop(0)
 
 known('ambn > 0')
-known('an > 0')
-known('bm > 0')
+known('an   > 0')
+known('bm   > 0')
 
 shift_to( 1, 3, -5 )
 

@@ -1,7 +1,6 @@
 from chill import *
 
 ## Test Harness flags:
-#>SKIP
 
 source('include.c')
 destination('includemodified.c')

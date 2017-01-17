@@ -5,7 +5,6 @@
 #
 
 ## Test Harness flags:
-#>SKIP
 
 from chill import *
 
@@ -16,7 +15,7 @@ procedure('mm')
 
 loop(0)
 
-known('ambn > 4') # this fails ??? 
+known('ambn - 4 > 0') # this fails ??? 
 
 
 

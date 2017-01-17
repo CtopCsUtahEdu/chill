@@ -1,13 +1,7 @@
 AC_INIT([chill],[0.2.3])
 AC_CONFIG_AUX_DIR([.])
 
-# -                   - #
-# - Build Test System - #
-# -                   - #
-
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
-
-#AC_SUBST([prefix],["$(pwd)/bin"])
 
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
