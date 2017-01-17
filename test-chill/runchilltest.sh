@@ -50,9 +50,11 @@ call_path=$(dirname `realpath $0`)
 chill_exec=`realpath $1`
 chill_script_path=$(dirname `realpath $2`)
 chill_script=$(basename $2)
-shift 2
+chill_answers_path=`realpath $3`
+shift 3
 
 chill_generated_source=$(get_destination $chill_script)
+chill_correct_source=$chill_answers_path/$chill_generated_source
 
 ## remove generated file if it exists
 if [ -e $chill_generated_source ]; then
@@ -79,16 +81,14 @@ while [ $arg_index -lt $(( $# + 1 )) ]; do
         check-run)
                 test_type=${!arg_index}
             ;;
-        check-generated-diff)
+        check-diff)
                 test_type=${!arg_index}
-                arg_index=$[$arg_index + 1]
-                pushd $call_path >/dev/null
-                check_output_diff_answer_file=`realpath ${!arg_index}`
-                popd >/dev/null
             ;;
     esac
     arg_index=$[$arg_index + 1]
 done
+
+
 
 ## A basic run chill command
 ##      $1 - file to send stdout to
@@ -96,6 +96,7 @@ done
 ##      $3 - check output file exists
 ##          0 or nothing    - don't check
 ##          > 0             - the error code if file does not exist
+
 run_chill() {
     pushd $chill_script_path >/dev/null
     $chill_exec $chill_script 1>$1 2>$2
@@ -112,6 +113,20 @@ run_chill() {
     maybe_exit_with_error_code $err $msg
 }
 
+check_diff() {
+    local generated_file=$1
+    local correct_file=$2
+    
+    diff_flags="-qwB"
+    if [ -n "`diff $generated_file $correct_file`" ]; then
+        echo "1 output file is not correct"
+    else
+        echo "0"
+    fi
+}
+
+
+
 ## Skip Test? ##
 if [ $skip_test != 0 ]; then
     exit_with_skip_code
@@ -127,6 +142,11 @@ case $test_type in
                 rm $chill_generated_source
             fi
             popd >/dev/null
+            exit_with_passfail_code $err
+        ;;
+    check-diff)
+            run_chill /dev/null /dev/null 99
+            err=`check_diff $chill_generated_source $chill_correct_source`
             exit_with_passfail_code $err
         ;;
 esac

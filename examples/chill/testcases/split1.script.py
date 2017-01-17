@@ -17,7 +17,7 @@ loop(0)
 
 known('an > 0')
 known('bm > 0')
-known('ambn > 10')
+known('ambn - 10 > 0')
 
 distribute( [0,1], 1 )
 split( 1, 3, 'L3 < 7' )
