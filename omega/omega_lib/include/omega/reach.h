@@ -3,6 +3,12 @@
 
 namespace omega {
 
+/**
+ * @brief Reachability of a graph
+ *
+ * Given a tuple set for each node representing starting states at each node. The library can compute which node are
+ * reachable and values the tuples can take on.
+ */
 class reachable_information {
 public:
 	Tuple<std::string> node_names;

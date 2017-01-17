@@ -9,13 +9,14 @@
 #include <assert.h>
 #include <stdlib.h>
 
+/**
+ * @file
+ * general presburger stuff that is needed everywhere
+ */
+
 namespace omega {
 
-//
-// general presburger stuff thats needed everywhere
-//
-
-/* The following allows us to avoid warnings about passing 
+/* The following allows us to avoid warnings about passing
    temporaries as non-const references.  This is useful but 
    has suddenly become illegal.  */
 
@@ -52,11 +53,30 @@ extern negation_control pres_legal_negations;
 //
 
 class Var_Decl;
-typedef enum {Input_Var, Set_Var = Input_Var, Output_Var,
-              Global_Var, Forall_Var, Exists_Var, Wildcard_Var} Var_Kind;
+/**
+ * @enum omega::Var_Kind
+ * @brief Variable declaration.
+ *
+ * * Variables are free or quantified.
+ *   * Free variables are classified as input, output and global.
+ *   * Quantified variables are classified as forall, exists and wildcard.
+ *
+ * * All global variables are functions symbols of (possibly 0) arguments
+ * * Local variables that correspond to >0-ary functions are identified as
+ *   functions of a prefix of the input, output, or both tuples
+ */
+enum Var_Kind {Input_Var, Set_Var = Input_Var, Output_Var,
+              Global_Var, Forall_Var, Exists_Var,
+	Wildcard_Var //<! Existentially quantified variable in simplified relations
+};
 class Global_Var_Decl;
-typedef enum {Unknown_Tuple = 0, Input_Tuple = 1, Output_Tuple = 2,
-				 Set_Tuple = Input_Tuple } Argument_Tuple;
+/**
+ * @enum omega::Argument_Tuple
+ * Only Input, Output, and Set can be passed to get_local,
+ * but the values 0 and 3 are also used internally.
+ */
+enum Argument_Tuple {Unknown_Tuple = 0, Input_Tuple = 1, Output_Tuple = 2,
+				 Set_Tuple = Input_Tuple };
 
 class Constraint_Handle;
 class EQ_Handle;
@@ -78,7 +98,9 @@ class Mapping;
 class Omega_Var;
 class Coef_Var_Decl;
 
+//! Uniquely identifies variables
 typedef Var_Decl *Variable_ID;
+//! Uniquely identifies global var-s through the whole program.
 typedef Global_Var_Decl *Global_Var_ID;
 
 typedef Tuple<Variable_ID>       Variable_ID_Tuple;
@@ -100,11 +122,14 @@ class Comp_Constraints;
 typedef enum {MERGE_REGULAR, MERGE_COMPOSE, MERGE_GIST} Merge_Action;
 
 
-// Conjunct can be exact or lower or upper bound.
-// For lower bound conjunct, the upper bound is assumed to be true;
-// For upper bound conjunct, the lower bound is assumed to be false
-
-typedef enum {EXACT_BOUND, UPPER_BOUND, LOWER_BOUND, UNSET_BOUND} Bound_Type;
+/**
+ * @enum omega::Bound_Type
+ * @brief Type of conjunct
+ * Conjunct can be exact or lower or upper bound.
+ * * For lower bound conjunct, the upper bound is assumed to be true;
+ * * For upper bound conjunct, the lower bound is assumed to be false
+ */
+enum Bound_Type {EXACT_BOUND, UPPER_BOUND, LOWER_BOUND, UNSET_BOUND};
 
 
 #if defined STUDY_EVACUATIONS

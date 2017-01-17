@@ -4,6 +4,8 @@
 #include <map>
 #include <omega/Relation.h>
 
+/** @file */
+
 namespace omega {
 
 // UPDATE friend_rel_ops IN pres_gen.h WHEN ADDING TO THIS LIST
@@ -14,9 +16,13 @@ namespace omega {
    has suddenly become illegal.  */
 Relation consume_and_regurgitate(NOT_CONST Relation &R);
 
-//
-// Operations over relations
-//
+/**
+ * @defgroup RelOps Operations over relations
+ * Operations on relations that produce a relation are assumed to destroy the old relation.
+ *
+ * Work-around includes passing in another relation created specifically for this purpose or use Relation::copy
+ * @{
+ */
 Relation  Union(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 Relation  Intersection(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 Relation  Extend_Domain(NOT_CONST Relation &R);
@@ -51,8 +57,6 @@ Relation  Identity(int n_inp);
 Relation  Identity(NOT_CONST Relation &r);
 bool      Must_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 bool      Might_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
-// May is the same as might, just another name
-bool      May_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 bool      Is_Obvious_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 Relation  Composition(NOT_CONST Relation &F, NOT_CONST Relation &G);
 bool      prepare_relations_for_composition(Relation &F, Relation &G);
@@ -62,19 +66,36 @@ Relation  Symbolic_Solution(NOT_CONST Relation &S);
 Relation  Symbolic_Solution(NOT_CONST Relation &S, Sequence<Variable_ID> &T);
 Relation  Sample_Solution(NOT_CONST Relation &S);
 Relation  Solution(NOT_CONST Relation &S, Sequence<Variable_ID> &T);
+/**
+ * @brief Upper bound of the relation in question
+ *
+ * Return s such that \f$r \subseteq s\f$ is exact.
+ * Works by interpreting all UNKNOWN constraints as true.
+ */
 Relation  Upper_Bound(NOT_CONST Relation &r);
+/**
+ * @brief Lower bound of the relation in question
+ *
+ * Return s such that \f$s \subseteq r\f$ is exact.
+ * Works by interpreting all UNKNOWN constraints as false.
+ */
 Relation  Lower_Bound(NOT_CONST Relation &r);
 
 Relation merge_rels(Tuple<Relation> &R, const Tuple<std::map<Variable_ID, std::pair<Var_Kind, int> > > &mapping, const Tuple<bool> &inverse, Combine_Type ctype, int number_input = -1, int number_output = -1);
-
 // The followings might retire in the futrue!!!
+/**
+ * Discouraged when there are higher level substitutes. Map the variables from input relations to output relation.
+ */
 void MapRel1(Relation &inputRel,
              const Mapping &map,
              Combine_Type ctype,
              int number_input=-1, int number_output=-1,
              bool invalidate_resulting_leading_info = true,
              bool finalize = true);
-Relation MapAndCombineRel2(Relation &R1, Relation &R2, 
+/**
+ * Discouraged when there are higher level substitutes. Map the variables from input relations to output relation.
+ */
+Relation MapAndCombineRel2(Relation &R1, Relation &R2,
                            const Mapping &mapping1, const Mapping &mapping2,
                            Combine_Type ctype,
                            int number_input=-1, int number_output=-1);
@@ -82,7 +103,7 @@ void align(Rel_Body *originalr, Rel_Body *newr, F_Exists *fe,
            Formula *f, const Mapping &mapping, bool &newrIsSet,
            List<int> &seen_exists,
            Variable_ID_Tuple &seen_exists_ids);
-
+/** @} */
 } // namespace
 
 #endif
