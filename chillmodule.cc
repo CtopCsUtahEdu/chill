@@ -1475,7 +1475,7 @@ static void add_known(std::string cond_expr) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = std::atoi(it->first.c_str());
+        int dim = from_string<int>(it->first.c_str());
         if (dim == 0)
           h.update_const(it->second);
         else
@@ -1741,7 +1741,7 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = std::atoi(it->first.c_str());
+        int dim = from_string<int>(it->first.c_str());
         if (dim == 0)
           h.update_const(it->second);
         else {
