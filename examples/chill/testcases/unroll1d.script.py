@@ -12,6 +12,6 @@ procedure('foo')
 # should NOT have to create a second loop to handle the last remaining iterations
 loop(0)
 original()
-unroll(0,1,15)
+unroll(0,1,5)
 #print
 #print space

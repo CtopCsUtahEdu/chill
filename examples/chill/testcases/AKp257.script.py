@@ -6,6 +6,8 @@
 ## Test Harness flags:
 #>EXFAIL
 
+from chill import *
+
 source('AKp257.c')
 destination('AKp257modified.c')
 
