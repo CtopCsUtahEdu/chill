@@ -1,9 +1,0 @@
-
-/*.testcase
-/*.test
-/rose_*.c
-/rose_*.cu
-
-
-/chill_testcases.mk
-/cudachill_testcases.mk
