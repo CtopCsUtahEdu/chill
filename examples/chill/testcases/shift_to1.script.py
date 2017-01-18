@@ -9,8 +9,8 @@
 
 from chill import *
 
-source('tile.c')
-destination('tile1modified.c')
+source('shift_to.c')
+destination('shift_to1modified.c')
 
 procedure('mm')
 
@@ -20,7 +20,7 @@ known('ambn > 0')
 known('an > 0')
 known('bm > 0')
 
-tile( 0,2,4 )
+shift_to( 1, 1, 4 )
 
 
 

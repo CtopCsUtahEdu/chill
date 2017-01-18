@@ -9,6 +9,13 @@ maybe_exit_with_error_code() {
     fi
 }
 
+maybe_exit_with_skip_code() {
+    if [ $1 != 0 ]; then
+        echo $@
+        exit 77
+    fi
+}
+
 
 ## Exit as either pass or fail, depending on both ther error code
 ##      and whether or not the expectfail flag is set
@@ -53,8 +60,13 @@ chill_script=$(basename $2)
 chill_answers_path=`realpath $3`
 shift 3
 
-chill_generated_source=$(get_destination $chill_script)
-chill_correct_source=$chill_answers_path/$chill_generated_source
+chill_generated_source=$chill_script_path/$(get_destination $chill_script_path/$chill_script)
+chill_correct_source=$chill_answers_path/$(basename $chill_generated_source)
+
+echo "CHiLL script path:     $chill_script_path"
+echo "CHiLL script name:     $chill_script"
+echo "Generated source file: $chill_generated_source"
+echo "Correct source file:   $chill_correct_source"
 
 ## remove generated file if it exists
 if [ -e $chill_generated_source ]; then
@@ -101,24 +113,29 @@ run_chill() {
     pushd $chill_script_path >/dev/null
     $chill_exec $chill_script 1>$1 2>$2
     err=$?
-    if [ $err == 0 -a -n "$3" -a $3 -gt 0 ]; then
-        if [ ! -e $chill_generated_source ]; then
-            echo "$3 output file was not generated"
-            exit $3
+    if [ $err == 0 ]; then
+        if [ "x$3" != "x" -a "x$3" != "x0" ]; then
+            if [ ! -e $chill_generated_source ]; then
+                err=$3
+                msg="CHiLL did not generate output"
+            fi
         fi
     else
+        if [ $err != 0 -a "x$3" != "x" -a "x$3" != "x0" ]; then
+            err=$3
+        fi
         msg="error while running CHiLL"
     fi
     popd >/dev/null
-    maybe_exit_with_error_code $err $msg
+    echo $err $msg
 }
 
 check_diff() {
     local generated_file=$1
     local correct_file=$2
     
-    diff_flags="-qwB"
-    if [ -n "`diff $generated_file $correct_file`" ]; then
+    local diffout=`diff -qwB $generated_file $correct_file`
+    if [ -n "$diffout" ]; then
         echo "1 output file is not correct"
     else
         echo "0"
@@ -136,16 +153,11 @@ fi
 case $test_type in
     check-run)
             err=`run_chill /dev/null /dev/null 2`
-            
-            pushd $chill_script_path >/dev/null
-            if [ -e $chill_generated_source ]; then
-                rm $chill_generated_source
-            fi
-            popd >/dev/null
             exit_with_passfail_code $err
         ;;
     check-diff)
-            run_chill /dev/null /dev/null 99
+            err=`run_chill /dev/null /dev/null 77`
+            maybe_exit_with_skip_code $err
             err=`check_diff $chill_generated_source $chill_correct_source`
             exit_with_passfail_code $err
         ;;

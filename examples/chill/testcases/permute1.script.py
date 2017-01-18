@@ -16,8 +16,8 @@ procedure('mm')
 loop(0)
 
 known('ambn > 0')
-known('an > 0')
-known('bm > 0')
+known('an   > 0')
+known('bm   > 0')
 
 permute([3,1,2])
 

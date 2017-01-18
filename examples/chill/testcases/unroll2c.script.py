@@ -1,6 +1,7 @@
 #
 # Test unroll
 #
+from chill import *
 
 source('unroll2.c')
 destination('unroll2dmodified.c')
