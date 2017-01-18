@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(chill)
-set(CHILL_VERSION 0.2.1) # 2.8 doesn't support project version clause
+file(STRINGS ${CMAKE_SOURCE_DIR}/CHILL_VERSION CHILL_VERSION) # 2.8 doesn't support project version clause
+
+message(STATUS "Configuring for chill ${CHILL_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -161,3 +163,23 @@ add_subdirectory(omega/code_gen)
 
 add_subdirectory(docs)
 add_subdirectory(unittests)
+
+# setup tests
+
+set(TD_PATH ${CMAKE_BINARY_DIR}/test-chill/Testdriver.py)
+set(EE_PATH ${CMAKE_BINARY_DIR}/tests/e2e)
+
+add_custom_command(OUTPUT ${TD_PATH}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test-chill ${CMAKE_BINARY_DIR}/test-chill
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/examples ${CMAKE_BINARY_DIR}/tests/e2e
+    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS
+    DEPENDS UnitTests
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
+add_custom_target(check-all
+    COMMAND ${CMAKE_COMMAND} -E env "SRCDIR=${CMAKE_BINARY_DIR}" ${TD_PATH} ${CMAKE_BINARY_DIR}/tests/unittests ${CMAKE_BINARY_DIR}/test-chill
+    DEPENDS ${TD_PATH} chill
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    )
+
