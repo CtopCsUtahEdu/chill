@@ -7,15 +7,15 @@
 
 from chill import *
 
-source('AKp256.c')
-destination('AKp256modified.c')
+source('AKp256hack.c')
+destination('AKp256hackmodified.c')
 
 procedure('foo')
 
 # page 256
 # fuse 2 identically iterated loops
-loop(0,1)
-fuse([0,1], 1 )
+loop(0)
+fuse([0,1], 2 )
 
 
 

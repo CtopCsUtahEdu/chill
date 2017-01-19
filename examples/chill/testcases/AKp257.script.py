@@ -16,5 +16,6 @@ procedure('foo')
 # page 257
 # fuse 2 identically iterated loops - BUT ILLEGAL (changes the meaning of the code)
 loop(0,1)
+original()
 fuse([0,1], 1)
 

@@ -208,20 +208,14 @@ bool is_dependence_valid(ir_tree_node *src_node, ir_tree_node *dst_node,
         last_dim = itn->payload;
     }
     
-    if (last_dim == -1)
-      return true;
-    
     for (int i = 0; i <= last_dim; i++) {
       if (dv.lbounds[i] > 0)
         return true;
       else if (dv.lbounds[i] < 0)
         return false;
     }
-    
-    if (before)
-      return true;
-    else
-      return false;
+
+    return before;
   }
   
   return true;

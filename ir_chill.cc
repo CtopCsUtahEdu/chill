@@ -520,28 +520,11 @@ CG_outputRepr *IR_chillBlock::original() const {
 
 CG_outputRepr *IR_chillBlock::extract() const {
   fflush(stdout); 
-  //debug_fprintf(stderr, "IR_chillBlock::extract()\n"); 
-  //CG_chillRepr *tnl =  new CG_chillRepr(getStmtList());
-
-  // if the block refers to a compound statement, return the next level
-  // of statements ;  otherwise just return a repr of the statements
-
-  chillAST_node *code = chillAST;
-  //if (chillAST != NULL) debug_fprintf(stderr, "block has chillAST of type %s\n",code->getTypeString()); 
-  //debug_fprintf(stderr, "block has %d exploded statements\n", statements.size()); 
 
   CG_chillRepr *OR; 
-  if (0 == statements.size()) { 
-    OR = new CG_chillRepr(code); // presumably a compound statement ??
-  }
-  else { 
-    //debug_fprintf(stderr, "adding a statement from IR_chillBlock::extract()\n"); 
-    OR = new CG_chillRepr(); // empty of statements
-    for (int i=0; i<statements.size(); i++) OR->addStatement( statements[i] ); 
-  }
+  OR = new CG_chillRepr(); // empty of statements
+  for (int i=0; i<statements.size(); i++) OR->addStatement( statements[i] );
 
-  fflush(stdout); 
-  //debug_fprintf(stderr, "IR_chillBlock::extract() LEAVING\n"); 
   return OR;
 }
 
@@ -681,29 +664,15 @@ IR_chillCode::IR_chillCode(const char *fname, char *proc_name, char *script_name
 
 
 IR_chillCode::~IR_chillCode() {
-  //func_->print(llvm::outs(), 4); // printing as part of the destructor !! 
-  //debug_fprintf(stderr, "IR_chillCode::~IR_chillCode()\noutput happening as part of the destructor !!\n");
-  
-  if (!chillfunc) { 
-    //debug_fprintf(stderr, "in IR_chillCode::~IR_chillCode(), chillfunc is NULL?\n"); 
+  if (!chillfunc) {
     return;
   }
-  //chillfunc->dump(); 
-  //chillfunc->print(); 
-
-  //debug_fprintf(stderr, "Constant Folding before\n"); 
-  //chillfunc->print(); 
-  //chillfunc->constantFold(); 
-  //debug_fprintf(stderr, "\nConstant Folding after\n"); 
-  //chillfunc->print(); 
 
   chillfunc->cleanUpVarDecls(); 
 
   chillAST_SourceFile *src = chillfunc->getSourceFile(); 
-  //chillAST_node *p = chillfunc->parent; // should be translationDeclUnit
-  if (src) { 
-    //src->print(); // tmp
-    if (src->isSourceFile()) src->printToFile(  ); 
+  if (src) {
+    if (src->isSourceFile()) src->printToFile(outputname);
   }
 }
 
@@ -1025,167 +994,68 @@ vector<IR_Control *> IR_chillCode::FindOneLevelControlStructure(const IR_Block *
   debug_fprintf(stderr, "\nIR_chillCode::FindOneLevelControlStructure() yep CHILLcode\n"); 
   
   vector<IR_Control *> controls;
-  IR_chillBlock *CB = (IR_chillBlock *) block; 
+  IR_chillBlock *CB = (IR_chillBlock *) block;
+  int numstmts = (int)(CB->statements.size());
+  bool unwrap = false;
 
-  const IR_chillBlock *R_IR_CB = (const IR_chillBlock *) block;
-  vector<chillAST_node*> statements = R_IR_CB->getStmtList(); 
-  int ns = statements.size();  // number of statements if block has a vec of statements instead of a single AST
-  debug_fprintf(stderr, "%d statements\n", ns);
-  
-  vector<chillAST_node *> children; // we will populate this. IR_Block has multiple ways of storing its contents, for undoubtedly historical reasons.  it can be an AST node, or a vector of them.
-  
-  // if IR_Block has statements, those are them. otherwise the code is in an AST
-  if (0 < ns) {
-    //debug_fprintf(stderr, "load children with %d statements\n", ns); 
-    
-    for (int i=0; i<ns; i++) { 
-      //debug_fprintf(stderr, "statement %d (%p):   ", i, statements[i]); statements[i]->print(); printf("\n"); fflush(stdout); 
-      children.push_back( statements[i] ); 
+  chillAST_node *blockast = NULL;
+
+  if (numstmts == 0) return controls;
+  else if (numstmts == 1) blockast = CB->statements[0]; // a single statement
+
+  // build up a vector of "controls".
+  // a run of straight-line code (statements that can't cause branching) will be
+  // bundled up into an IR_Block
+  // ifs and loops will get their own entry
+  const std::vector<chillAST_node *> *children = NULL;
+  if (blockast) {
+    if (blockast->isFunctionDecl()) {
+      chillAST_FunctionDecl *FD = (chillAST_FunctionDecl *) blockast;
+      chillAST_node *bod = FD->getBody();
+      children = &bod->getChildren();
+      unwrap = true;
     }
-    exit(-1);  // ?? 
-  }
-  else { 
-    //debug_fprintf(stderr, "there is a single AST ?\n"); 
-    // we will look at the AST 
-    chillAST_node *blockast = R_IR_CB->getChillAST();
-    //debug_fprintf(stderr, "basic block %p %p is:\n", blockast, R_IR_CB->chillAST ); 
-    if (!blockast) { 
-      debug_fprintf(stderr, "blockast is NULL\n"); 
-      // this should never happen. we have an IR_Block with no statements and no AST
-      debug_fprintf(stderr, "THIS SHOULD NEVER HAPPEN ir_chill.cc\n"); 
-      return controls; // ?? 
+    if (blockast->isCompoundStmt()) {
+      children = &blockast->getChildren();
+      unwrap = true;
     }
-    
-    // we know we have an AST.  see what the top node is
-    //debug_fprintf(stderr, "block ast of type %s\n", blockast->getTypeString()); blockast->print(); printf("\n\n");  fflush(stdout);
-    
-    if (blockast->isIfStmt()) { 
-      //debug_fprintf(stderr, "found a top level Basic Block If Statement.  this will be the only control structure\n"); 
-      controls.push_back(new IR_roseIf(this, blockast));
+    if (blockast->isForStmt()) {
+      controls.push_back(new IR_chillLoop(this, (chillAST_ForStmt *) blockast));
       return controls;
     }
-    
-    if (blockast->isForStmt()) { 
-      //debug_fprintf(stderr, "found a top level Basic Block For Statement.  this will be the only control structure\n"); 
-      controls.push_back(new IR_roseLoop(this, (chillAST_ForStmt *)blockast));
-      return controls;
-    }
-    
-    
-    if  (blockast->isCompoundStmt()) { 
-      //debug_fprintf(stderr, "found a top level Basic Block Compound Statement\n"); 
-      children = blockast->getChildren();
-    }
-    else  if (blockast->isFunctionDecl()) { // why did I do this? It is not in the rose version 
-      //debug_fprintf(stderr, "blockast is a Functiondecl\n"); 
-      chillAST_FunctionDecl *FD =  (chillAST_FunctionDecl *)blockast;
-      chillAST_node *bod = FD->getBody(); 
-      children = bod->getChildren(); 
-    }
-    else { 
-      // if the AST node is not one of these, ASSUME that it is just a single statement
-      // so, no control statements underneath the block.
-      return controls; // controls is empty, and this is checked in the caller
-      
-      //debug_fprintf(stderr, "ir_rose.cc UNHANDLED blockast type %s\n", blockast->getTypeString()); 
-      //int *i=0; int j=i[0]; 
-      //exit(-1); 
-    }
   }
-  
-  // OK, at this point, we have children of the IR_Block in the vector called children.
-  // we don't care any more what the top thing is
-  
-  int numchildren = children.size(); 
-  debug_fprintf(stderr, "basic block has %d statements\n", numchildren);
-  debug_fprintf(stderr, "basic block is:\n");
-  debug_fprintf(stderr, "{\n");
-  for (int n =0; n<numchildren; n++) { 
-    children[n]->print(0,stderr); debug_fprintf(stderr, ";\n"); 
-  }
-  debug_fprintf(stderr, "}\n");
-  
-  int startofrun = -1;
-  
-  for (int i=0; i<numchildren; i++) { 
-    debug_fprintf(stderr, "child %d/%d  is of type %s\n", i, numchildren, children[i]->getTypeString());
+  if (!children)
+    children = &(CB->statements);
 
-    CHILL_ASTNODE_TYPE typ = children[i]->getType();
+  int numchildren = children->size();
+  int ns;
+  IR_chillBlock *basicblock = new IR_chillBlock(this); // no statements
+  for (int i = 0; i < numchildren; i++) {
+    CHILL_ASTNODE_TYPE typ = (*children)[i]->getType();
     if (typ == CHILLAST_NODETYPE_LOOP) {
-      debug_fprintf(stderr, "loop\n"); 
-      // we will add the loop as a control, but before we can do that, 
-      // add any group of non-special
-      if (startofrun != -1) {
-        debug_fprintf(stderr, "there was a run of statements %d to %d before the Loop\n", startofrun, i); 
-        IR_roseBlock *rb = new IR_roseBlock(this); // empty
-        //debug_fprintf(stderr, "rb %p   startofrun %d   i %d\n", rb, startofrun, i); 
-        int count = 0; 
-        for (int j=startofrun; j<i; j++) { 
-          debug_fprintf(stderr, "j %d   ", j); children[j]->print(); printf("\n"); fflush(stdout); 
-          rb->addStatement( children[j] ); 
-          count++;
-        }
-        debug_fprintf(stderr, "added %d statements to the formerly empty Block %p\n", count, rb);
-        if (count == 0) { 
-          int *k = 0;
-          int l = k[0]; 
-        }
-        controls.push_back( rb );
-        startofrun = -1;
+      ns = basicblock->numstatements();
+      if (ns) {
+        controls.push_back(basicblock);
+        basicblock = new IR_chillBlock(this); // start a new one
       }
-      // then add the loop itself 
-      controls.push_back(new IR_roseLoop(this, children[i]));
-      //debug_fprintf(stderr, "roseLoop %p\n", controls[ -1+controls.size()] ); 
-    }
-    else if (typ == CHILLAST_NODETYPE_IFSTMT ) {
-        //debug_fprintf(stderr, "if\n"); 
-        // we will add the if as a control, but before we can do that, 
-        // add any group of non-special
-        if (startofrun != -1) {
-          //debug_fprintf(stderr, "there was a run of statements before the IF\n"); 
-          IR_roseBlock *rb = new IR_roseBlock(this); // empty
-          //debug_fprintf(stderr, "rb %p\n", rb); 
-          for (int j=startofrun; j<i; j++) rb->addStatement( children[j] ); 
-          controls.push_back( rb );
-          startofrun = -1;
-        }
-        //else debug_fprintf(stderr, "there was no run of statements before the IF\n"); 
-        // then add the if itself 
-        //debug_fprintf(stderr, "adding the IF to controls\n"); 
-        controls.push_back(new IR_roseIf(this, children[i])); 
-        //debug_fprintf(stderr, "roseIf %p\n", controls[ -1+controls.size()] ); 
-    }
-    
-    else if (startofrun == -1) { // straight line code, starting a new run of statements
-      //debug_fprintf(stderr, "starting a run at %d\n", i); 
-      startofrun = i;
-    }
-  } // for i (children statements) 
 
-  // at the end, see if the block ENDED with a run of non-special statements.
-  // if so, add that run as a control. 
-  if (startofrun != -1) {
-    int num = numchildren-startofrun;
-    //debug_fprintf(stderr, "adding final run of %d statements starting with %d\n", num, startofrun); 
-    IR_roseBlock *rb = new IR_roseBlock(this); // empty
-    if (num == 1) rb->setChillAst( children[0] ); 
-    else {
-      for (int j=startofrun; j<numchildren; j++) rb->addStatement( children[j] ); 
-    }
-    controls.push_back( rb );
-  }
-  
-  debug_fprintf(stderr, "ir_chill.cc returning vector of %d controls\n", controls.size() );
-  for (int i=0; i<controls.size(); i++) { 
-    debug_fprintf(stderr, "%2d   an ", i);
-    if (controls[i]->type() == IR_CONTROL_BLOCK) debug_fprintf(stderr, "IR_CONTROL_BLOCK\n");
-    if (controls[i]->type() == IR_CONTROL_WHILE) debug_fprintf(stderr, "IR_CONTROL_WHILE\n");
-    if (controls[i]->type() == IR_CONTROL_LOOP)  debug_fprintf(stderr, "IR_CONTROL_LOOP\n");
-    if (controls[i]->type() == IR_CONTROL_IF)    debug_fprintf(stderr, "IR_CONTROL_IF\n");
-    
-  }
-  debug_fprintf(stderr, "\n"); 
+      controls.push_back(new IR_chillLoop(this, (chillAST_ForStmt *) (*children)[i]));
+    } else if (typ == CHILLAST_NODETYPE_IFSTMT ) {
+      ns = basicblock->numstatements();
+      if (ns) {
+        controls.push_back(basicblock);
+        basicblock = new IR_chillBlock(this); // start a new one
+      }
+      controls.push_back(new IR_chillIf(this, (chillAST_IfStmt *) (*children)[i]));
+    } else
+      basicblock->addStatement((*children)[i]);
+  } // for each child
+  ns = basicblock->numstatements();
+  if (ns != 0 && (unwrap || ns != numchildren))
+    controls.push_back(basicblock);
+
   return controls;
+
 }
 
 
@@ -1204,7 +1074,7 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
    for (int i = 0; i < controls.size(); i++) {
     switch (controls[i]->type()) {
     case IR_CONTROL_LOOP: {
-      debug_fprintf(stderr, "control %d is IR_CONTROL_LOOP\n", i); 
+      debug_fprintf(stderr, "control %d is IR_CONTROL_LOOP\n", i);
       chillAST_ForStmt *loop =  static_cast<IR_chillLoop *>(controls[i])->chillforstmt;
       if (parent == NULL) {
         parent = loop->parent;
@@ -1217,7 +1087,7 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
       break;
      }
     case IR_CONTROL_BLOCK: {
-      debug_fprintf(stderr, "control %d is IR_CONTROL_BLOCK\n", i); 
+      debug_fprintf(stderr, "control %d is IR_CONTROL_BLOCK\n", i);
       IR_chillBlock *CB =  static_cast<IR_chillBlock*>(controls[i]);
       vector<chillAST_node*> blockstmts = CB->statements;
       if (statements.size() != 0) { 
@@ -1231,13 +1101,6 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
             }
           }
           CBlock->addStatement( blockstmts[j] );
-        }
-      }
-      else {
-        if (CB->getChillAST())  CBlock->addStatement(CBlock->getChillAST()); // if this is a block, add theblock's statements? 
-        else { // should never happen
-          debug_fprintf(stderr, "WARNING: ir_chill.cc  IR_chillCode::MergeNeighboringControlStructures");
-          debug_fprintf(stderr, "    empty IR_CONTROL_BLOCK \n");
         }
       }
       break;
@@ -1276,157 +1139,93 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
   vector<chillAST_node*>  newcode = chillrepr->getChillCode();
   int numnew = newcode.size();
 
-  //debug_fprintf(stderr, "new code (%d) is\n", numnew); 
-  //for (int i=0; i<numnew; i++) { 
-  //  newcode[i]->print(0, stderr);
-  //  debug_fprintf(stderr, "\n"); 
-  //} 
-
   struct IR_chillLoop* cloop;
 
   vector<chillAST_VarDecl*> olddecls;
   chillfunc->gatherVarDecls( olddecls );
-  //debug_fprintf(stderr, "\n%d old decls   they are:\n", olddecls.size()); 
-  //for (int i=0; i<olddecls.size(); i++) {
-  //  debug_fprintf(stderr, "olddecl[%d]  ox%x  ",i, olddecls[i]); 
-  //  olddecls[i]->print(); printf("\n"); fflush(stdout); 
-  //} 
 
-
-  //debug_fprintf(stderr, "num new stmts %d\n", numnew); 
-  //debug_fprintf(stderr, "new code we're look for decls in:\n"); 
   vector<chillAST_VarDecl*> decls;
-  for (int i=0; i<numnew; i++)  {
-    //newcode[i]->print(0,stderr);
-    //debug_fprintf(stderr, "\n"); 
+  for (int i=0; i<numnew; i++)
     newcode[i]->gatherVarUsage( decls );
-  }
-
-  //debug_fprintf(stderr, "\n%d new vars used  they are:\n", decls.size()); 
-  //for (int i=0; i<decls.size(); i++) {
-  //  debug_fprintf(stderr, "decl[%d]  ox%x  ",i, decls[i]); 
-  //  decls[i]->print(); printf("\n"); fflush(stdout); 
-  //} 
 
 
-  for (int i=0; i<decls.size(); i++) {
-    //debug_fprintf(stderr, "\nchecking "); decls[i]->print(); printf("\n"); fflush(stdout); 
-    int inthere = 0; 
-    for (int j=0; j<VariableDeclarations.size(); j++) { 
-      if (VariableDeclarations[j] == decls[i]) { 
-        //debug_fprintf(stderr, "it's in the Variable Declarations()\n");
-      }
-    }
-    for (int j=0; j<olddecls.size(); j++) { 
-      if (decls[i] == olddecls[j]) { 
-        //debug_fprintf(stderr, "it's in the olddecls (exactly)\n");
+  for (int i = 0; i < decls.size(); i++) {
+    int inthere = 0;
+    for (int j = 0; j < VariableDeclarations.size(); j++)
+      if (VariableDeclarations[j] == decls[i])
         inthere = 1;
-      }
-      if (streq(decls[i]->varname, olddecls[j]->varname)) { 
-        if (streq(decls[i]->arraypart, olddecls[j]->arraypart)) { 
-          //debug_fprintf(stderr, "it's in the olddecls (INEXACTLY)\n");
+    for (int j = 0; j < olddecls.size(); j++) {
+      if (decls[i] == olddecls[j])
+        inthere = 1;
+      if (!strcmp(decls[i]->varname, olddecls[j]->varname))
+        if (!strcmp(decls[i]->arraypart, olddecls[j]->arraypart))
           inthere = 1;
-        }
-      }
     }
     if (!inthere) {
-      //debug_fprintf(stderr, "inserting decl[%d] for ",i); decls[i]->print(); printf("\n");fflush(stdout); 
-      chillfunc->getBody()->insertChild(0, decls[i]); 
-      olddecls.push_back( decls[i] ); 
+      chillfunc->getBody()->insertChild(0, decls[i]);
+      olddecls.push_back(decls[i]);
     }
   }
-  
+
   chillAST_node *par;
   switch (old->type()) {
-  case IR_CONTROL_LOOP: 
-    {
-      //debug_fprintf(stderr, "old is IR_CONTROL_LOOP\n"); 
-      cloop = (struct IR_chillLoop* )old;
+    case IR_CONTROL_LOOP: {
+      cloop = (struct IR_chillLoop *) old;
       chillAST_ForStmt *forstmt = cloop->chillforstmt;
 
-      debug_fprintf(stderr, "old was\n");
-      forstmt->print(); printf("\n"); fflush(stdout);
-
-      //debug_fprintf(stderr, "\nnew code is\n");
-      //for (int i=0; i<numnew; i++) { newcode[i]->print(); printf("\n"); } 
-      //fflush(stdout);
-      
-
-      par = forstmt->parent;
+      par = forstmt->getParent();
       if (!par) {
-        debug_fprintf(stderr, "old parent was NULL\n"); 
-        debug_fprintf(stderr, "ir_chill.cc that will not work very well.\n");
-        exit(-1); 
+        chill_error_printf("old parent was NULL\n");
+        chill_error_printf("ir_clang.cc that will not work very well.\n");
+        exit(-1);
       }
 
-      
-
-      debug_fprintf(stderr, "\nold parent was\n\n{\n"); 
-      par->print(); printf("\n"); fflush(stdout);
-      debug_fprintf(stderr, "\n}\n"); 
-
-      vector<chillAST_node*>  oldparentcode = par->getChildren(); // probably only works for compoundstmts
-      //debug_fprintf(stderr, "ir_chill.cc oldparentcode\n"); 
+      std::vector<chillAST_node *> *oldparentcode = &par->getChildren(); // probably only works for compoundstmts
 
       // find loop in the parent
-      int index = -1;
-      int numstatements = oldparentcode.size();
-      for (int i=0; i<numstatements; i++) if (oldparentcode[i] == forstmt) { index = i; }
-      if (index == -1) { 
-        debug_fprintf(stderr, "ir_chill.cc can't find the loop in its parent\n"); 
-        exit(-1); 
+      int numstatements = oldparentcode->size();
+      int index = par->findChild(forstmt);
+      if (index < 0) {
+        chill_error_printf("can't find the loop in its parent\n");
+        exit(-1);
       }
-      //debug_fprintf(stderr, "loop is index %d\n", index); 
-
       // insert the new code
       par->setChild(index, newcode[0]);    // overwrite old stmt
-      //debug_fprintf(stderr, "inserting %s 0x%x as index %d of 0x%x\n", newcode[0]->getTypeString(), newcode[0], index, par); 
-      // do we need to update the IR_cloop? 
-      cloop->chillforstmt = (chillAST_ForStmt*) newcode[0]; // ?? DFL 
+      // do we need to update the IR_cloop?
+      cloop->chillforstmt = (chillAST_ForStmt *) newcode[0]; // ?? DFL
 
-
-
-      //printf("inserting "); newcode[0]->print(); printf("\n"); 
-      if (numnew > 1){ 
-        //oldparentcode.insert( oldparentcode.begin()+index+1, numnew-1, NULL); // allocate in bulk
-        
+      if (numnew > 1)
         // add the rest of the new statements
-        for (int i=1; i<numnew; i++) {
-          printf("inserting "); newcode[i]->print(); printf("\n"); 
-          par->insertChild( index+i, newcode[i] );  // sets parent
-        }
-      }
+        for (int i = 1; i < numnew; i++)
+          par->insertChild(index + i, newcode[i]);  // sets parent
 
       // TODO add in (insert) variable declarations that go with the new loops
-      
 
-      fflush(stdout); 
+      fflush(stdout);
     }
-    break; 
-  case IR_CONTROL_BLOCK:
-    debug_fprintf(stderr, "old is IR_CONTROL_BLOCK\n"); 
-    debug_fprintf(stderr, "IR_chillCode::ReplaceCode() stubbed out\n"); 
-    exit(-1); 
-    //tf_old = static_cast<IR_chillBlock *>(old)->getStmtList()[0];
-    break; 
-  default:
-    throw ir_error("control structure to be replaced not supported");
-    break;    
+      break;
+    case IR_CONTROL_BLOCK: {
+      par = ((IR_chillBlock*)old)->statements[0]->getParent();
+      if (!par) {
+        chill_error_printf("old parent was NULL\n");
+        chill_error_printf("ir_clang.cc that will not work very well.\n");
+        exit(-1);
+      }
+      IR_chillBlock *cblock = (struct IR_chillBlock *) old;
+      std::vector<chillAST_node *> *oldparentcode = &par->getChildren(); // probably only works for compoundstmts
+      int index = par->findChild(cblock->statements[0]);
+      for (int i = 0;i<cblock->numstatements();++i) // delete all current statements
+        par->removeChild(par->findChild(cblock->statements[i]));
+      for (int i = 0; i < numnew; i++)
+        par->insertChild(index + i, newcode[i]);  // insert New child
+      // TODO add in (insert) variable declarations that go with the new loops
+      break;
+    }
+    default:
+      throw ir_error("control structure to be replaced not supported");
+      break;
   }
-  
-  fflush(stdout); 
-  //debug_fprintf(stderr, "\nafter inserting %d statements into the Chill IR,", numnew);
-  debug_fprintf(stderr, "\nnew parent2 is\n\n{\n");
-  vector<chillAST_node*>  newparentcode = par->getChildren();
-  for (int i=0; i<newparentcode.size(); i++) { 
-    fflush(stdout); 
-    //debug_fprintf(stderr, "%d ", i); 
-    newparentcode[i]->print(); printf(";\n"); fflush(stdout); 
-  }
 
-
-
-  debug_fprintf(stderr, "}\n"); 
 
 }
 
