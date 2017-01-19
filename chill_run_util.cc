@@ -64,7 +64,7 @@ simap_t* make_cond_item_add(simap_t* lhs, simap_t* rhs) {
 
 simap_t* make_cond_item_sub(simap_t* lhs, simap_t* rhs) {
   for(simap_t::iterator it = lhs->begin(); it != lhs->end(); it++)
-    (*rhs)[it->first] -= it->second;
+    (*rhs)[it->first] = it->second - (*rhs)[it->first];
   delete lhs;
   return rhs;
 }
