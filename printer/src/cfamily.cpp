@@ -183,10 +183,10 @@ void CFamily::printS(std::string ident, chillAST_FloatingLiteral *n, std::ostrea
   else {
     // C++11 only constants See http://en.cppreference.com/w/cpp/types/numeric_limits/max_digits10
     if (n->getPrecision() == 2)
-      o << setprecision(17) << n->value;
+      o << setprecision(std::numeric_limits<double>::max_digits10) << n->value;
     else {
       ostringstream st;
-      st << setprecision(9) << n->value;
+      st << setprecision(std::numeric_limits<float>::max_digits10) << n->value;
       o << st.str();
       if (st.str().find('.') == string::npos)
         o << ".0";

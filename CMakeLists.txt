@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
+
 project(chill)
-file(STRINGS ${CMAKE_SOURCE_DIR}/CHILL_VERSION CHILL_VERSION) # 2.8 doesn't support project version clause
+file(STRINGS ${CMAKE_SOURCE_DIR}/CHILL_VERSION CHILL_VERSION)
+
+set (CMAKE_CXX_STANDARD 11)
 
 message(STATUS "Configuring for chill ${CHILL_VERSION}")
 
