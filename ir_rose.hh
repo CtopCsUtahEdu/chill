@@ -469,9 +469,7 @@ protected:
   std::map<std::string, chillAST_node *> defined_macros;  // TODO these need to be in a LOCATION 
   
 public:
-  chillAST_SourceFile *entire_file_AST;
-  chillAST_FunctionDecl * chillfunc;   // the function we're currenly modifying
-  
+
   void print() { chillfunc->print(); printf("\n"); fflush(stdout); }; 
   
   IR_roseCode(const char *filename, const char* proc_name, const char* dest_name = NULL );
@@ -550,14 +548,9 @@ public:
   
   // just use the one at ir_chillcode?
   //std::vector<IR_Control *> FindOneLevelControlStructure(const IR_Block *block) const;
-  IR_Block *MergeNeighboringControlStructures(
-                                              const std::vector<IR_Control *> &controls) const;
-  
+
   IR_Block*   GetCode() const;
   IR_Control* GetCode(omega::CG_outputRepr*) const; // what is this ??? 
-  
-  void ReplaceCode(IR_Control *old, omega::CG_outputRepr *repr);
-  void ReplaceExpression(IR_Ref *old, omega::CG_outputRepr *repr);
   
   IR_OPERATION_TYPE QueryExpOperation(const omega::CG_outputRepr *repr) const;
   IR_CONDITION_TYPE QueryBooleanExpOperation(

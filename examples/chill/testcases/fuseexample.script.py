@@ -4,7 +4,6 @@
 #
 
 ## Test Harness flags:
-#>EXFAIL
 
 from chill import *
 

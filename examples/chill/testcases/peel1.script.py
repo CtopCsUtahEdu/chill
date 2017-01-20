@@ -15,7 +15,6 @@ procedure('mm')
 
 loop(0)
 
-# python  known([’ambn > 3’, ’an > 0’, ’bm > 0’])
 known('ambn - 4 > 0')
 known('an > 0')
 known('bm > 0')

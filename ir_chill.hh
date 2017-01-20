@@ -153,7 +153,7 @@ struct IR_chillScalarRef: public IR_ScalarRef {
     chillvd = d->getVarDecl(); 
     op_pos_ = OP_UNKNOWN; 
 
-    //debug_fprintf(stderr, "\nScalarRef has:\n"); 
+    //debug_fprintf(stderr, "\nScalarRef has:\n"); peel5
     //debug_fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
     //debug_fprintf(stderr, "ins_pos %d\n", ins_pos_); 
     //debug_fprintf(stderr, "op_pos %d\n", op_pos_); 
@@ -259,8 +259,6 @@ struct IR_chillLoop: public IR_Loop {
 
 
 struct IR_chillBlock: public IR_Block {   // ONLY ONE OF bDecl or cs_ will be nonNULL  ?? 
-private:
-  chillAST_node *chillAST;             // how about for now we say if there are statements, which is presumably the top level of statements from ... somewhere, otherwise the code is in   chillAST
 public:
   vector<chillAST_node *>statements;
   
@@ -268,24 +266,22 @@ public:
   
   IR_chillBlock() { 
     ir_ = NULL;
-    chillAST = NULL; 
   }
 
 
   IR_chillBlock(const IR_Code *ir, chillAST_node *ast) { 
     ir_ = ir;
-    chillAST = ast; 
+    if (ast != NULL)
+      statements.push_back(ast);
   }
 
   IR_chillBlock(const IR_Code *ir) { //  : cs_(NULL), bDecl_(NULL) {
-    chillAST = NULL;
     ir_ = ir;
   }
   
   IR_chillBlock( const IR_chillBlock *CB ) {  // clone existing IR_chillBlock
     ir_ = CB->ir_;
     for (int i=0; i<CB->statements.size(); i++) statements.push_back( CB->statements[i] ); 
-    chillAST = CB->chillAST; 
   }
 
 
@@ -301,12 +297,6 @@ public:
 
   void dump() const; 
   
-  virtual chillAST_node *getChillAST() const { 
-    //debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements, chillAST %p\n", statements.size(), chillAST );
-    debug_fprintf(stderr, "IR_chillBlock::getChillAST(), %d statements\n", statements.size() );
-    return chillAST;
-  } 
-  virtual void setChillAST( chillAST_node *n) { chillAST = n; }; 
 };
 
 
@@ -362,14 +352,14 @@ protected:
   char *filename;
   char *outputname;    // so we can output different results from one source, using different scripts
 
-  chillAST_node *entire_file_AST;
-  chillAST_FunctionDecl * chillfunc;   // the function we're currenly modifying
-
   std::vector<chillAST_VarDecl> entire_file_symbol_table;
   // loop symbol table??   for (int i=0;  ... )  ??
 
 
 public:
+  chillAST_SourceFile *entire_file_AST;
+  chillAST_FunctionDecl * chillfunc;   // the function we're currenly modifying
+
   char *procedurename;
 
   IR_chillCode(); 

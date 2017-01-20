@@ -11,7 +11,7 @@ if (DEFINED ENV{BOOSTHOME})
     message(STATUS "BOOSTHOME is set to ${BOOSTHOME}")
 endif()
 
-find_path(RoseBoost_INCLUDE_DIR rose/rose.h
+find_path(RoseBoost_INCLUDE_DIR boost/thread.hpp
     HINTS ${BOOSTHOME} ${CHILLENV}
     PATHS /usr
     PATH_SUFFIXES include) # This ONLY includes the include dir
