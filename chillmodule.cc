@@ -1475,13 +1475,10 @@ static void add_known(std::string cond_expr) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = from_string<int>(it->first.c_str());
-        if (dim == 0)
-          h.update_const(it->second);
-        else
-          throw std::invalid_argument("only symbolic variables are allowed in known condition");
+        int dim = std::stoi(it->first.c_str());
+        h.update_const(it->second);
       }
-      catch (std::ios::failure e) {
+      catch (std::invalid_argument &e) {
         Free_Var_Decl *g = NULL;
         for (unsigned i = 0; i < myloop->freevar.size(); i++) {
           std::string name = myloop->freevar[i]->base_name();
@@ -1491,7 +1488,7 @@ static void add_known(std::string cond_expr) {
           }
         }
         if (g == NULL)
-          throw std::invalid_argument("symbolic variable " + it->first + " not found");
+          throw std::runtime_error("symbolic variable " + it->first + " not found");
         else
           h.update_coef(rel.get_local(g), it->second);
       }
@@ -1741,16 +1738,16 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
     GEQ_Handle h = f_root->add_GEQ();
     for (std::map<std::string, int>::iterator it = (*cond)[j].begin(); it != (*cond)[j].end(); it++) {
       try {
-        int dim = from_string<int>(it->first.c_str());
+        int dim = std::stoi(it->first.c_str());
         if (dim == 0)
           h.update_const(it->second);
         else {
           if (dim > (num_dim-1)/2)
-            throw std::invalid_argument("invalid loop level " + to_string(dim) + " in split condition");
+            throw std::runtime_error("invalid loop level " + to_string(dim) + " in split condition");
           h.update_coef(rel.set_var(dim), it->second);
         }
       }
-      catch (std::ios::failure e) {
+      catch (std::invalid_argument &e) {
         Free_Var_Decl *g = NULL;
         for (unsigned i = 0; i < myloop->freevar.size(); i++) {
           std::string name = myloop->freevar[i]->base_name();
@@ -1760,7 +1757,7 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
           }
         }
         if (g == NULL)
-          throw std::invalid_argument("unrecognized variable " + to_string(it->first.c_str()));
+          throw std::runtime_error("unrecognized variable " + to_string(it->first.c_str()));
         h.update_coef(rel.get_local(g), it->second);
       }
     }
