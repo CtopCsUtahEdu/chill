@@ -18,9 +18,9 @@ AC_PROG_YACC
 
 AM_PATH_PYTHON([2.7],[
     AC_SUBST([PYTHON_INCDIR],
-        [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`])
+        [`python2.7 -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"`])
     AC_SUBST([PYTHON_LIBDIR],
-        [`${PYTHON} -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"`])
+        [`python2.7 -c "from distutils import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"`])
     AC_SUBST([python_builds],[yes])],[
     AC_SUBST([python_builds],[no])])
 
