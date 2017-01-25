@@ -43,9 +43,9 @@ include_directories(
     ${BOOSTHOME}/include
     )
 
-add_library(codegen_rose ${CODEGEN_CHILL_SRC})
+add_library(codegen_chill ${CODEGEN_CHILL_SRC})
 
-install(TARGETS codegen_rose
+install(TARGETS codegen_chill
         DESTINATION lib)
 
 include_directories(
@@ -54,8 +54,8 @@ include_directories(
     ${OMEGA_INC}
     )
 
-add_library(codegen_chill ${CODEGEN_ROSE_SRC})
+add_library(codegen_rose ${CODEGEN_ROSE_SRC})
 
-install(TARGETS codegen_chill
+install(TARGETS codegen_rose
         DESTINATION lib)
 
