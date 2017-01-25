@@ -9,10 +9,9 @@
 #include "included.c"  // local 
 
 int main() { 
-
-   for (int i=0; i<100; i++) { 
+    int i;
+   for (i=0; i<100; i++) { 
 	// nothing to see here
-
 	}
    return 0; 
 }
