@@ -215,10 +215,8 @@ static int intArg(PyObject* args, int index, int dval = 0) {
   PyObject *item = PyTuple_GetItem(args, index); 
   Py_INCREF(item);
   if (PyInt_Check(item)) ival = PyInt_AsLong(item);
-  else {
-    debug_fprintf(stderr, "argument at index %i is not an int\n", index);
-    exit(-1);
-  }
+  else
+    throw std::runtime_error("argument at index "+to_string(index)+" is not an int");
   return ival;
 }
 
@@ -229,10 +227,8 @@ static std::string strArg(PyObject* args, int index, const char* dval = NULL) {
   PyObject *item = PyTuple_GetItem(args, index); 
   Py_INCREF(item);
   if (PyString_Check(item)) strval = strdup(PyString_AsString(item));
-  else {
-    debug_fprintf(stderr, "argument at index %i is not an string\n", index);
-    exit(-1);
-  }
+  else
+    throw std::runtime_error("argument at index "+to_string(index)+" is not an string");
   return strval;
 }
 
@@ -1547,8 +1543,8 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
      myloop->permute(active, pi);
   }
   else if (nargs == 3) {
-    int stmt_num = intArg(args, 1);
-    int level = intArg(args, 2);
+    int stmt_num = intArg(args, 0);
+    int level = intArg(args, 1);
     std::vector<int> pi;
     if(!tointvector(args, 2, pi))
       throw std::runtime_error("the third argument in permute(stmt_num, level, pi) must be an int vector");
