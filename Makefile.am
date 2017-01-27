@@ -90,7 +90,7 @@ endif
 ## Interface ##
 # Libs/Source/Flags #
 if PYTHON_OPT
-runner_libs           = -lpython$(PYTHON_VERSION)
+runner_libs           = -lpython2.7
 runner_libdirs        = -L$(PYTHON_LIBDIR)
 runner_includes       = -I$(PYTHON_INCDIR)
 chill_runner_src      = $(chill_python_runner_src) $(chill_python_yacc_src)
