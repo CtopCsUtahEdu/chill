@@ -596,7 +596,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
                   stmt[*i].loop_level[dimension].payload;
               
               dimension = stmt[*i].loop_level[dimension].payload;
-              
+
               for (int i = 0; i < stmt.size(); i++) {
                 std::vector<std::pair<int, DependenceVector> > D;
                 for (DependenceGraph::EdgeList::iterator j =
@@ -643,10 +643,11 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
               }
               if ((same != 0) || !identical) {
                 dimension = dimension - 1;
-                
+
                 while (stmt[*i].loop_level[dimension].type
                        == LoopLevelTile)
-                  stmt[*i].loop_level[dimension].payload;
+                  dimension =
+                    stmt[*i].loop_level[dimension].payload;
                 
                 dimension =
                   stmt[*i].loop_level[dimension].payload;
@@ -710,7 +711,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
               
               while (stmt[*i].loop_level[dimension].type
                      == LoopLevelTile)
-                stmt[*i].loop_level[dimension].payload;
+                dimension = stmt[*i].loop_level[dimension].payload;
               
               dimension = stmt[*i].loop_level[dimension].payload;
               
@@ -764,7 +765,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
               
               while (stmt[*i].loop_level[dimension].type        //
                      == LoopLevelTile)
-                stmt[*i].loop_level[dimension].payload;
+                dimension = stmt[*i].loop_level[dimension].payload;
               
               dimension = stmt[*i].loop_level[dimension].payload;
               
