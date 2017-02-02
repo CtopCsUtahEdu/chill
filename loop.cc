@@ -5564,9 +5564,8 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   
   class_data_types.push_back(temp_arr_data_type);
   class_data_types.push_back(temp_col_type);
-  debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
-  exit(-1); 
-  
+  throw std::runtime_error("about to use ROSE Builder in generic loop.cc");
+
   CG_outputRepr *list_type =
     static_cast<CG_roseBuilder *>(ocg)->CreateLinkedListStruct("a_list", // after exit()
                                                                class_data, class_data_types);

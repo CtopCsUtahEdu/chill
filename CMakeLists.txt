@@ -24,7 +24,7 @@ find_package(IEGen REQUIRED)
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS
-    m rt util omega_basic omega_lib codegen codegen_chill codegen_rose dl
+    m rt util omega_basic omega_lib codegen codegen_chill dl
     ${IEGen_LIBS})
 
 add_chill_module(chill_io 
@@ -127,7 +127,7 @@ include_directories(
     ${PYTHON_INCLUDE_DIRS})
 
 set(chill-libs
-    parseRel omega_basic omega_lib codegen codegen_chill codegen_rose
+    parseRel omega_basic omega_lib codegen codegen_chill
     chill_core chill_ir chill_ast chill_printer chill_io)
 
 add_executable(chill
