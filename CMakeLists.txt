@@ -25,7 +25,7 @@ string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS
     m rt util omega_basic omega_lib codegen codegen_chill codegen_rose dl
-    ${IEGen_LIBS} isl)
+    ${IEGen_LIBS})
 
 add_chill_module(chill_io 
     chill_io.cc
