@@ -84,12 +84,24 @@ public:
   { return rel_body->global_decls(); }
   inline int max_ufs_arity() const
   { return rel_body->max_ufs_arity(); }
+  /**
+   * @brief Maximum arity of uninterpreted function over input tuple
+   */
   inline int max_ufs_arity_of_in() const
   { return rel_body->max_ufs_arity_of_in(); }
+  /**
+   * @brief Maximum arity of uninterpreted function over set tuple
+   */
   inline int max_ufs_arity_of_set() const
   { return rel_body->max_ufs_arity_of_set(); }
+  /**
+   * @brief Maximum arity of uninterpreted function over output tuple
+   */
   inline int max_ufs_arity_of_out() const
   { return rel_body->max_ufs_arity_of_out(); }
+  /**
+   * @brief Maximum arity of uninterpreted function over input&output tuple
+   */
   inline int max_shared_ufs_arity() const
   { return rel_body->max_shared_ufs_arity(); }
 
@@ -116,7 +128,11 @@ public:
    */
   inline Variable_ID get_local(const Global_Var_ID G)
   { return split()->get_local(G); }
-  //! Find or declare global variable.
+  /**
+   * @brief Find or declare global variable.
+   *
+   * If the VarID does not exist, it is created. Otherwise it's returned.
+   */
   inline Variable_ID get_local(const Global_Var_ID G, Argument_Tuple of)
   { return split()->get_local(G, of); }
 
@@ -228,23 +244,30 @@ public:
   inline bool is_definite_tautology()
   { return rel_body->is_definite_tautology(); }
 
-  // return x s.t. forall conjuncts c, c has >= x leading 0s
-  // for set, return -1 (pass this in, in case there are no conjuncts
+  /**
+   * @return the number of conjuncts
+   */
   inline int    number_of_conjuncts()
   { return rel_body->query_DNF()->length(); }
 
-  // return x s.t. forall conjuncts c, c has >= x leading 0s
-  // for set, return -1 (pass this in, in case there are no conjuncts
+  /**
+   * @return x s.t. forall conjuncts c, c has >= x leading 0s(in=out)
+   * for set or there are no conjuncts return -1
+   */
   inline int    query_guaranteed_leading_0s()
   { return rel_body->query_DNF()->query_guaranteed_leading_0s(this->is_set() ? -1 : 0); }
 
-  // return x s.t. forall conjuncts c, c has <= x leading 0s
-  // if no conjuncts return min of input and output tuple sizes, or -1 if relation is a set
+  /**
+   * @return x s.t. forall conjuncts c, c has <= x leading 0s(in=out)
+   * if no conjuncts return min of input and output tuple sizes, or -1 if relation is a set
+   */
   inline int    query_possible_leading_0s()
   { return rel_body->query_DNF()->query_possible_leading_0s(
       this->is_set()? -1 : min(n_inp(),n_out())); }
 
-  // return +-1 according to sign of leading dir, or 0 if we don't know
+  /**
+   * @return +-1 according to sign of leading dir, or 0 if we don't know
+   */
   inline int    query_leading_dir()
   { return rel_body->query_DNF()->query_leading_dir(); }
 
@@ -287,9 +310,11 @@ public:
 
   /**
    * @brief Determining the bounds of the difference of two variables
-   * @param lowerBound negInfinity if not bounded below
-   * @param upperBound posInfinity if not bounded above
-   * @param guaranteed True if the bounds is guaranteed to be tight
+   *
+   * This is used to calculate leading zeros
+   * @param lowerBound[out] negInfinity if not bounded below
+   * @param upperBound[out] posInfinity if not bounded above
+   * @param guaranteed[out] True if the bounds is guaranteed to be tight
    */
   void query_difference(Variable_ID v1, Variable_ID v2, coef_t &lowerBound, coef_t &upperBound, bool &guaranteed) {
     rel_body->query_difference(v1, v2, lowerBound, upperBound, guaranteed);
@@ -353,7 +378,13 @@ private:
   friend class Rel_Body;
   friend_rel_ops;
 
-  
+  /**
+   * @brief Create a separate body for this representation
+   *
+   * One of the representatives using the body wants to be changed.
+   * Return the address of the new body, with the old representative
+   * pointed to the new body.
+   */
   Rel_Body *split();
 
   DNF* simplified_DNF() {

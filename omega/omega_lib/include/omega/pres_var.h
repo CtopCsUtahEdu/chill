@@ -208,8 +208,8 @@ private:
   }
 
   // local representative, there is just 1 for every 0-ary global variable
-  Var_Decl loc_rep1; // arity == 0, or arity > 0 and of == In
-  Var_Decl loc_rep2; // arity > 0 and of == Out
+  Var_Decl loc_rep1; //!< arity == 0, or arity > 0 and of == In
+  Var_Decl loc_rep2; //!< arity > 0 and of == Out
 
 public:
 //    friend class Rel_Body;  // Rel_Body::setup_names sets instance

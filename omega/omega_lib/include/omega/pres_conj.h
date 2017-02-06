@@ -43,6 +43,12 @@ public:
   inline int is_true() {return problem->nEQs==0 && problem->nGEQs==0 
       && exact;}
 
+  /**
+   * @brief Get the "possible" difference of two variables
+   * @param[out] lowerBound
+   * @param[out] upperBound
+   * @param[out] guaranteed if the difference is guaranteed
+   */
   void query_difference(Variable_ID v1, Variable_ID v2,
                         coef_t &lowerBound, coef_t &upperBound, bool &guaranteed);
   void query_variable_bounds(Variable_ID v, coef_t &lowerBound, coef_t &upperBound);
@@ -60,16 +66,26 @@ public:
     problem->difficulty(numberNZs,maxCoef,SumAbsCoef);
   }
 
+  /**
+   * @brief The number of input and output variables that are equal
+   */
   int query_guaranteed_leading_0s() {
     count_leading_0s();
     return guaranteed_leading_0s;
   }
 
+  /**
+   * @brief The possible number of input and output variables that are equal
+   */
   int query_possible_leading_0s() {
     count_leading_0s();
     return possible_leading_0s;
   }
 
+  /**
+   * @brief The direction of the difference of the first "non-zero" in/out var
+   * @return 0: unknown, 1: positive, -1: negative
+   */
   int query_leading_dir() {
     count_leading_0s();
     return leading_dir;
