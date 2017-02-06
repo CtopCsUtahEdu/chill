@@ -342,7 +342,32 @@ struct IR_chillIf: public IR_If {
 };
 
 
+struct IR_chillPointerSymbol: public IR_PointerSymbol {
+  chillAST_VarDecl *chillvd;
 
+  std::string name_;  // these could be gotten by looking at the vardecl
+  int dim_;
+  std::vector<omega::CG_outputRepr *> dims; // ???
+
+ 	IR_chillPointerSymbol(const IR_Code *ir, chillAST_VarDecl *v ) {
+    ir_ = ir;
+    chillvd = v;
+
+    name_ = chillvd->varname;
+    dim_ = chillvd->numdimensions;
+    dims.resize(dim_);
+    // TODO set sizes
+  };
+
+  std::string name() const;
+  int n_dim() const;
+
+	bool operator==(const IR_Symbol &that) const;
+	omega::CG_outputRepr *size(int dim) const ;
+	void set_size(int dim, omega::CG_outputRepr*) ;
+  IR_Symbol *clone() const;
+	IR_CONSTANT_TYPE elem_type() const;
+};
 
 
 class IR_chillCode: public IR_Code{   // for an entire file?  A single function? 
@@ -370,17 +395,25 @@ public:
   void setOutputName( const char *name ) { outputname = strdup(name); } 
 
   IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int i);
+  IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
+
   IR_ArraySymbol  *CreateArraySymbol(const IR_Symbol *sym, std::vector<omega::CG_outputRepr *> &size, int i);
+  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *type,
+                                    std::vector<omega::CG_outputRepr *> &size_repr);
+  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *size, const IR_Symbol *sym);
+
+  IR_PointerSymbol *CreatePointerSymbol(const IR_Symbol *sym,
+                                        std::vector<omega::CG_outputRepr *> &size_repr);
+  IR_PointerSymbol *CreatePointerSymbol(const IR_CONSTANT_TYPE type,
+                                        std::vector<omega::CG_outputRepr *> &size_repr,
+                                        std::string name="");
+  IR_PointerSymbol *CreatePointerSymbol(omega::CG_outputRepr *type,
+                                        std::vector<omega::CG_outputRepr *> &size_repr);
 
   IR_ScalarRef *CreateScalarRef(const IR_ScalarSymbol *sym);
   IR_ArrayRef *CreateArrayRef(const IR_ArraySymbol *sym, std::vector<omega::CG_outputRepr *> &index);
   omega::CG_outputRepr*  CreateArrayRefRepr(const IR_ArraySymbol *sym,
-                                            std::vector<omega::CG_outputRepr *> &index) { 
-    debug_fprintf(stderr, "IR_chillCode::CreateArrayRefRepr() not implemented\n");
-    exit(-1);
-    return NULL;
-  }
-
+                                            std::vector<omega::CG_outputRepr *> &index);
 
   int ArrayIndexStartAt() { return 0;} // TODO FORTRAN
 
