@@ -1,7 +1,10 @@
 
 // chill interface to python
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "chill_io.hh"
 
 #ifdef CUDACHILL
