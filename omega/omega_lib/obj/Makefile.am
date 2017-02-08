@@ -45,3 +45,4 @@ fancy_src  +=../src/reach.cc
 
 libomega_a_SOURCES  =$(basic_src) $(oc_src) $(pres_src) $(rel_src) $(fancy_src)
 libomega_a_CPPFLAGS =-I$(srcdir)/../include -I$(srcdir)/../../basic/include
+libomega_a_CXXFLAGS =-std=c++11
