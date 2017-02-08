@@ -40,6 +40,7 @@ add_chill_module(chill_core
     loop_extra.cc
     loop_tile.cc
     loop_unroll.cc
+    loop_stencil.cc
     omegatools.cc
     stencil.cc
     calculator_eval.cc

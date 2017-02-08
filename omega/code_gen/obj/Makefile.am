@@ -16,6 +16,7 @@ libcodegen_a_SOURCES   +=../src/CG_stringBuilder.cc
 libcodegen_a_SOURCES   +=../src/CG.cc
 libcodegen_a_SOURCES   +=../src/CG_utils.cc
 libcodegen_a_CFLAGS     =-DFRONTEND_ROSE -Wno-write-strings
+libcodegen_a_CXXFLAGS   =-std=c++11
 libcodegen_a_CPPFLAGS   =-DFRONTEND_ROSE $(codegen_includes)
 #if BUILD_ROSE
 libcodegen_a_SOURCES   += ../src/rose_attributes.cc ../src/CG_roseRepr.cc ../src/CG_roseBuilder.cc

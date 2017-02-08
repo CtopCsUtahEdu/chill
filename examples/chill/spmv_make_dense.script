@@ -1,0 +1,29 @@
+source: spmv_bcsr.cpp # matrix-vector multiply
+procedure: spmv
+format : rose
+loop: 0
+
+
+#initilization for CHiLL
+original()
+print space 
+
+#make-dense inserts lower and upper bounds of k loop
+make_dense(0,2,k)  # syntax error ??? 
+
+#communicate the known values of lower bound, upper bound and n
+known(lb == 0)
+known(ub == 493)
+known(n == 494)
+
+#tile k loop by 2
+tile(0,2,2,1,counted)
+#tile outer row loop by 2
+tile(0,2,2,1,counted)
+
+#normalize tiled loops
+shift_to(0,4,0)
+shift_to(0,3,0)
+#tile(0,3,1,3,counted)
+compact(0,2,a_prime, 0, a) 
+#print space

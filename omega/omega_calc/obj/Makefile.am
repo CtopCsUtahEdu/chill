@@ -25,6 +25,7 @@ oc_SOURCES=../src/AST.cc ../src/myflex.cc lex.yy.cc parser.tab.cc
 oc_LDADD=$(calc_libs)
 oc_LDFLAGS=$(calc_lib_paths)
 oc_CPPFLAGS=$(calc_includes) -DBUILD_CODEGEN -DOMEGA_BUILD_DATE=$(build_date)
+oc_CXXFLAGS=-std=c++11
 
 EXTRA_DIST+=lex.yy.cc
 $(OC_SRCDIR)/lex.yy.cc: parser.tab.cc $(OC_SRCDIR)/parser.ll

@@ -1,0 +1,11 @@
+source:loopvarexternal.c
+dest:  rose_loopvarexternal.c
+
+procedure:main
+format: rose
+
+loop:0
+
+# fully unroll the loop
+unroll(0,1,0)
+print 

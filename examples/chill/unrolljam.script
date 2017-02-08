@@ -1,0 +1,8 @@
+source:unrolljam.c
+procedure:figure8point1
+format: rose
+
+loop:0
+
+original()
+print
