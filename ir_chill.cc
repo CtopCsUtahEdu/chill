@@ -69,8 +69,28 @@ void Indent( int level ) {
   for (int i=0; i<level; i++) debug_fprintf(stderr, "    ");
 }
 
+namespace {
 
+  char *irTypeString(IR_CONSTANT_TYPE t) {
+    switch (t) {
+      case IR_CONSTANT_INT:
+        return strdup("int");
+        break;
+      case IR_CONSTANT_FLOAT:
+        return strdup("float");
+        break;
+      case IR_CONSTANT_DOUBLE:
+        return strdup("double");
+        break; // ??
 
+      case IR_CONSTANT_UNKNOWN:
+      default:
+        debug_fprintf(stderr, "irTypeString() unknown IR_CONSTANT_TYPE\n");
+        exit(-1);
+    }
+    return NULL; // unreachable
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Class: IR_chillScalarSymbol
@@ -161,6 +181,55 @@ bool IR_chillArraySymbol::operator==(const IR_Symbol &that) const {
 IR_Symbol *IR_chillArraySymbol::clone() const {
   return new IR_chillArraySymbol(ir_, chillvd, offset_);
 }
+
+// ----------------------------------------------------------------------------
+// Class: IR_chillPointerSymbol
+// ----------------------------------------------------------------------------
+
+std::string IR_chillPointerSymbol::name() const {
+  debug_fprintf(stderr, "IR_rosePointerSymbol::name()\n");
+	return name_;
+}
+
+
+
+IR_CONSTANT_TYPE IR_chillPointerSymbol::elem_type() const {
+	char *typ = chillvd->vartype;
+  if (!strcmp("int", typ)) return IR_CONSTANT_INT;
+  else  if (!strcmp("float", typ)) return IR_CONSTANT_FLOAT;
+  else  if (!strcmp("double", typ)) return IR_CONSTANT_DOUBLE;
+  return IR_CONSTANT_UNKNOWN;
+}
+
+
+
+int IR_chillPointerSymbol::n_dim() const {
+	return dim_;
+}
+
+
+void IR_chillPointerSymbol::set_size(int dim, omega::CG_outputRepr*)  {
+  dims.resize(dim);
+};
+
+omega::CG_outputRepr *IR_chillPointerSymbol::size(int dim) const {
+	return dims[dim]; // will fail because often we don't have a size for a given dimension
+}
+
+
+bool IR_chillPointerSymbol::operator==(const IR_Symbol &that) const {
+	if (typeid(*this) != typeid(that)) return false;
+
+	const IR_chillPointerSymbol *ps_that = static_cast<const IR_chillPointerSymbol *>(&that);
+	return this->chillvd == ps_that->chillvd;
+}
+
+
+
+IR_Symbol *IR_chillPointerSymbol::clone() const {
+	return new IR_chillPointerSymbol(ir_, chillvd);
+}
+
 
 // ----------------------------------------------------------------------------
 // Class: IR_chillConstantRef
@@ -733,6 +802,16 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
   return NULL;
 }
 
+// TODO what is memory_type
+IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type, std::string name){
+
+  char *basetype = irTypeString( type ); // float or int usually
+
+  chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, name.c_str(),  "",  NULL); // TODO parent
+
+  return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd));
+
+}
 
 IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_outputRepr *> &size, int i) {
   debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol()\n");  
@@ -784,10 +863,151 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
   return new IR_chillArraySymbol( this, vd); 
 }
 
-// TODO 
+omega::CG_outputRepr*  IR_chillCode::CreateArrayRefRepr(const IR_ArraySymbol *sym,
+                                                       std::vector<omega::CG_outputRepr *> &index) {
+  //debug_fprintf(stderr, "IR_roseCode::CreateArrayRefRepr()\n");
+  IR_chillArrayRef *RAR = (IR_chillArrayRef *)CreateArrayRef(sym, index);
+  return new omega::CG_chillRepr(RAR->chillASE);
+};
+
+IR_ArraySymbol *IR_chillCode::CreateArraySymbol(CG_outputRepr *type,
+                                               std::vector<omega::CG_outputRepr *> &size) {
+
+  debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol 2( outputRepr, vector of outputreprs! size)\n");
+  exit(-1);
+}
+
+IR_ArraySymbol *IR_chillCode::CreateArraySymbol(omega::CG_outputRepr *size, const IR_Symbol *sym){
+  debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol 3( outputRepr, sym )\n");
+  exit(-1);
+}
+
+IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
+                                                   std::vector<omega::CG_outputRepr *> &size_repr)
+{
+  debug_fprintf(stderr, "IR_roseCode::CreatePointerSymbol 2()\n");
+  debug_fprintf(stderr, "symbol name %s\n", sym->name().c_str());
+
+  char *typ = NULL;
+
+  if (sym->isScalar()) {
+    debug_fprintf(stderr, "scalar\n");
+    IR_roseScalarSymbol *RSS = (IR_roseScalarSymbol *)sym;
+    chillAST_VarDecl *vd = RSS->chillvd;
+    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+    typ = strdup(vd->vartype);
+  }
+  else if (sym->isArray()) {
+    debug_fprintf(stderr, "array symbol at top,  array or pointer\n");
+    IR_roseArraySymbol *RAS = (IR_roseArraySymbol *)sym;
+    chillAST_VarDecl *vd = RAS->chillvd;
+    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+    typ = strdup(vd->vartype);
+  }
+  else if (sym->isPointer()) {
+    debug_fprintf(stderr, "pointer symbol at top,  array or pointer  (TODO)\n");
+    IR_rosePointerSymbol *RPS = (IR_rosePointerSymbol *)sym;
+    chillAST_VarDecl *vd = RPS->chillvd;
+    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+    typ = strdup(vd->vartype);
+  }
+  else debug_fprintf(stderr, "unknown symbol type at top\n");
+
+  if (!typ) {
+    debug_fprintf(stderr, "ir_rose.cc BAD TYPE\n");
+    exit(-1);
+  }
+
+  debug_fprintf(stderr, "symbol type is %s\n", typ);
+
+
+  debug_fprintf(stderr, "with %d indirections\n", (int)size_repr.size());
+  std::string asterisks = "";
+  for (int i = 0; i < size_repr.size(); i++) {
+    asterisks = asterisks + "*";
+  }
+
+  std::string s = std::string("_P_DATA")
+    + omega::to_string(getAndIncrementPointerCounter());
+  debug_fprintf(stderr, "defining s %s\n", s.c_str());
+
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typ, s.c_str(), asterisks.c_str(), NULL);
+  vd->print(0,stderr); debug_fprintf(stderr, "\n");
+
+  // TODO parent? symbol table?
+  chillfunc->getBody()->insertChild( 0, vd);  // is this always the right function to add to?
+  chillfunc->addVariableToSymbolTable( vd ); // always right?
+
+
+  return new IR_chillPointerSymbol(this, vd);
+}
+
+
+
+IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
+                                                   std::vector<CG_outputRepr *> &size_repr,
+                                                   std::string name) {
+  debug_fprintf(stderr, "\nIR_chillCode::CreatePointerSymbol()  TODO \n");
+
+
+  // this creates a definition like
+  //   int *i;
+  //  float ***array;
+  // it does NOT use the sizes in size_repr
+
+  char *basetype = irTypeString( type ); // float or int usually
+  std::string n;
+  if(name == "") {
+    debug_fprintf(stderr, "creating a P_DATA name, since none was sent in\n");
+    n = std::string("_P_DATA")
+      + omega::to_string( getAndIncrementPointerCounter() );
+    debug_fprintf(stderr, "%s\n", n.c_str());
+  }
+  else
+    n = name;
+
+  debug_fprintf(stderr,"*s *%s;\n",basetype, n.c_str());
+
+  char arraypart[100];
+  char *s = &arraypart[0];
+  for (int i=0; i<size_repr.size(); i++) arraypart[i] = '*';
+  arraypart[size_repr.size()] = '\0';
+
+  chillAST_VarDecl *vd = new  chillAST_VarDecl( basetype, n.c_str(), arraypart, NULL);
+
+  vd->print(0, stderr); debug_fprintf(stderr, "\n");
+
+  // put this in current function?  (seems wrong)  TODO
+  return new IR_chillPointerSymbol( this, vd );
+}
+
+
+IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(omega::CG_outputRepr *type,
+                                                   std::vector<omega::CG_outputRepr *> &size_repr)
+{
+  debug_fprintf(stderr, "IR_chillCode::CreatePointerSymbol 3()  TODO \n");
+  exit(-1);
+}
+
+
 vector<IR_ScalarRef *> IR_chillCode::FindScalarRef(const CG_outputRepr *repr) const {
-  vector<IR_ScalarRef *> scalars;
-  debug_fprintf(stderr, "IR_chillCode::FindScalarRef() DIE\n");  exit(-1); 
+  std::vector<IR_ScalarRef *> scalars;
+
+  CG_chillRepr *CR = (CG_chillRepr *) repr;
+  chillAST_node * chillcode = CR->GetCode();
+
+  vector<chillAST_DeclRefExpr*> refs;
+  chillcode-> gatherDeclRefExprs(refs);
+
+  int numdecls = refs.size();
+  for (int i=0; i<numdecls; i++) {
+    IR_chillScalarRef *r = new IR_chillScalarRef( this, refs[i] );
+    scalars.push_back( r );
+  }
+
   return scalars;
 }
 
@@ -1234,7 +1454,6 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
 
 void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
   debug_fprintf(stderr, "IR_chillCode::ReplaceExpression()\n");
-
   if (typeid(*old) == typeid(IR_chillArrayRef)) {
     //debug_fprintf(stderr, "expressions is IR_chillArrayRef\n"); 
     IR_chillArrayRef *CAR = (IR_chillArrayRef *)old;
