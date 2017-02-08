@@ -17,15 +17,18 @@ class F_And    : public Formula {
 public:
     inline Node_Type node_type() {return Op_And;}
 
-    // "preserves level" should be 0 unless we know this will not
-    // change the "level" of the constraints - ie the number of
-    // leading corresponding in,out variables known to be equal
+    /**
+     * @param preserves_level Should be 0 unless we know this will not
+     * change the "level" of the constraints - ie the number of
+     * leading corresponding in,out variables known to be equal
+     * @return
+     */
     GEQ_Handle     add_GEQ(int preserves_level = 0);
     EQ_Handle      add_EQ(int preserves_level = 0);
     /**
      * This is equivalent to creating and F_Exists node with a
      * new variable alpha as a child and attach an equallity
-     * constraint \f$step \times \alpha + ? = 0$.
+     * constraint \f$step \times \alpha + ? = 0\f$.
      *
      * Coefficient for all other variable is implicitly 0.
      */

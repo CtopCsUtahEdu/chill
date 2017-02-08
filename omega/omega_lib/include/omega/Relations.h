@@ -35,35 +35,94 @@ Relation  Restrict_Domain(NOT_CONST Relation &r1, NOT_CONST Relation &r2); // Ta
 Relation  Restrict_Range(NOT_CONST Relation &r1, NOT_CONST Relation &r2);  // Takes set as 2nd
 Relation  Domain(NOT_CONST Relation &r);      // Returns set
 Relation  Range(NOT_CONST Relation &r);       // Returns set
+/**
+ * Give two sets, A and B, create a relation whose
+ * domain is A and whose range is B.
+ */
 Relation  Cross_Product(NOT_CONST Relation &A, NOT_CONST Relation &B);  // Takes two sets
+//! Inverse the input and output tuple
 Relation  Inverse(NOT_CONST Relation &r);
 Relation  After(NOT_CONST Relation &r, int carried_by, int new_output,int dir=1);
+/**
+ * Works for relations only. Input arity must be the same as the output.
+ * \f[\{z | \exists x,y: f(x,y) \wedge z = y - z\}\f]
+ * @param R
+ * @return
+ */
 Relation  Deltas(NOT_CONST Relation &R);            // Returns set
+/**
+ * Works for relations only. For the first *eq_no(p)* of input var and output var,
+ * \f$\{[c_1,\dots,c_p] | f(\overrightarrow{x},\overrightarrow{y}) \wedge \forall 1 \leq j \leq p, c_j = b_j - a_j\}\f$
+ * @param eq_no[in]
+ */
 Relation  Deltas(NOT_CONST Relation &R, int eq_no); // Returns set
 Relation  DeltasToRelation(NOT_CONST Relation &R, int n_input, int n_output);
 Relation  Complement(NOT_CONST Relation &r);
 Relation  Project(NOT_CONST Relation &R, Global_Var_ID v);
 Relation  Project(NOT_CONST Relation &r, int pos, Var_Kind vkind);
+/**
+ * Works for both relations and sets. Return a new relation with all occurrences
+ * of v replaced by existentially quantified z.
+ */
 Relation  Project(NOT_CONST Relation &S, Variable_ID v);
 Relation  Project(NOT_CONST Relation &S, Sequence<Variable_ID> &s);
+/**
+ * Works with both relations and sets. All global variables projected.
+ */
 Relation  Project_Sym(NOT_CONST Relation &R);
+/**
+ * Works with both relations and sets. All input and output variables projected.
+ */
 Relation  Project_On_Sym(NOT_CONST Relation &R,
                          NOT_CONST Relation &context = Relation::Null());
 Relation  GistSingleConjunct(NOT_CONST Relation &R, NOT_CONST Relation &R2, int effort=0);
+/**
+ * Works for both relation and sets. The arguments must have the same arity.
+ * Returns \f$r = \{x \rightarrow y | f(x,y)\}\f$ such that
+ * \f$\forall x,y: f(x,y) \wedge f_2(x,y) \Leftrightarrow f_1(x,y)\f$
+ * @param effort[in] how hard we try to make f tight
+ */
 Relation  Gist(NOT_CONST Relation &R1, NOT_CONST Relation &R2, int effort=0);
 Relation  Difference(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
+/**
+ * Works for both relations and sets. For all quantified variables are designated as
+ * being able to have rational values so as to be able eliminated exactly(via Fourier
+ * variable elimination) when simplifying.
+ * @param R
+ * @param strides_allowed[in] If true, quantified variables in only one constraints(stride)
+ * can't be designated as rational thus unable to be eliminated exactly.
+ * @return
+ */
 Relation  Approximate(NOT_CONST Relation &R, bool strides_allowed = false);
 Relation  Identity(int n_inp);
 Relation  Identity(NOT_CONST Relation &r);
 bool      Must_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 bool      Might_Be_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 bool      Is_Obvious_Subset(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
+/**
+ * Works for relations only.
+ * @return F(G(x)) or \f$F\circ G\f$
+ */
 Relation  Composition(NOT_CONST Relation &F, NOT_CONST Relation &G);
 bool      prepare_relations_for_composition(Relation &F, Relation &G);
+//! Same as Composition
 Relation  Join(NOT_CONST Relation &G, NOT_CONST Relation &F);
 Relation  EQs_to_GEQs(NOT_CONST Relation &, bool excludeStrides=false);
-Relation  Symbolic_Solution(NOT_CONST Relation &S); 
+/**
+ * For a relation R, returns a relation \f$S\subseteq R\f$ where each input, output,
+ * or set variable in S has exactly one value. Plus constraints on the symbolic
+ * variables.
+ */
+Relation  Symbolic_Solution(NOT_CONST Relation &S);
+/**
+ * @param T[in] A set of extra variable to be reduced.
+ */
 Relation  Symbolic_Solution(NOT_CONST Relation &S, Sequence<Variable_ID> &T);
+/**
+ * For a relation R, returns a relation \f$S\subseteq R\f$ where each input, output,
+ * set, or global variable in S has exactly one value. If R is inexact, the result
+ * may be as well.
+ */
 Relation  Sample_Solution(NOT_CONST Relation &S);
 Relation  Solution(NOT_CONST Relation &S, Sequence<Variable_ID> &T);
 /**
@@ -81,6 +140,15 @@ Relation  Upper_Bound(NOT_CONST Relation &r);
  */
 Relation  Lower_Bound(NOT_CONST Relation &r);
 
+/**
+ *
+ * Scramble each relation's variables and merge these relations
+ * together. Support variable mapping to and from existentials.
+ * Unspecified variables in mapping are mapped to themselves by
+ * default. It intends to replace MapRel1 and MapAndCombineRel2
+ * functions (the time saved by grafting formula tree might be
+ * negligible when compared to the simplification cost).
+ */
 Relation merge_rels(Tuple<Relation> &R, const Tuple<std::map<Variable_ID, std::pair<Var_Kind, int> > > &mapping, const Tuple<bool> &inverse, Combine_Type ctype, int number_input = -1, int number_output = -1);
 // The followings might retire in the futrue!!!
 /**
