@@ -474,38 +474,7 @@ public:
   
   IR_roseCode(const char *filename, const char* proc_name, const char* dest_name = NULL );
   ~IR_roseCode();
-  
-  IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int memory_type=0);
-  IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
-  
-  
-  IR_ArraySymbol *CreateArraySymbol(const IR_Symbol *sym, 
-                                    std::vector<omega::CG_outputRepr *> &size, 
-                                    int memory_type);
-  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *type,
-                                    std::vector<omega::CG_outputRepr *> &size_repr);
-  IR_ArraySymbol *CreateArraySymbol(omega::CG_outputRepr *size, const IR_Symbol *sym);
-  
-  
-  
-  IR_PointerSymbol *CreatePointerSymbol(const IR_Symbol *sym,
-                                        std::vector<omega::CG_outputRepr *> &size_repr);
-  IR_PointerSymbol *CreatePointerSymbol(const IR_CONSTANT_TYPE type,
-                                        std::vector<omega::CG_outputRepr *> &size_repr, 
-                                        std::string name="");
-  IR_PointerSymbol *CreatePointerSymbol(omega::CG_outputRepr *type,
-                                        std::vector<omega::CG_outputRepr *> &size_repr);
-  
-  
-  
-  IR_ScalarRef *CreateScalarRef(const IR_ScalarSymbol *sym);
-  IR_ArrayRef *CreateArrayRef(const IR_ArraySymbol *sym,
-                              std::vector<omega::CG_outputRepr *> &index);
-  
-  omega::CG_outputRepr*  CreateArrayRefRepr(const IR_ArraySymbol *sym,
-                                            std::vector<omega::CG_outputRepr *> &index);
-  
-  
+
   int ArrayIndexStartAt() {
     if (is_fortran_)
       return 1;
@@ -542,13 +511,8 @@ public:
         std::vector<std::string> &index, int i, int j);
   */
   std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
-  std::vector<IR_ArrayRef *>  FindArrayRef(const omega::CG_outputRepr *repr) const;
-  bool parent_is_array(IR_ArrayRef *a); // looking for nested array refs?? 
+  bool parent_is_array(IR_ArrayRef *a); // looking for nested array refs??
   
-  
-  // just use the one at ir_chillcode?
-  //std::vector<IR_Control *> FindOneLevelControlStructure(const IR_Block *block) const;
-
   IR_Block*   GetCode() const;
   IR_Control* GetCode(omega::CG_outputRepr*) const; // what is this ??? 
   
@@ -557,7 +521,6 @@ public:
                                              const omega::CG_outputRepr *repr) const;
   std::vector<omega::CG_outputRepr *> QueryExpOperand(
                                                       const omega::CG_outputRepr *repr) const;
-  IR_Ref *Repr2Ref(const omega::CG_outputRepr *) const;
   /*    std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> >
         FindScalarDeps(const omega::CG_outputRepr *repr1,
         const omega::CG_outputRepr *repr2, std::vector<std::string> index,

@@ -13,11 +13,11 @@ destination('bug1modified.c')
 
 procedure('mm')
 
-loop(0)
+loop(0, 1)
 
 known('ambn - 4 > 0') # this fails ??? 
 
-
+distribute([0,1],1)
 
 
 

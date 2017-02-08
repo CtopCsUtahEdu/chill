@@ -10,6 +10,7 @@ message(STATUS "Configuring for chill ${CHILL_VERSION}")
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 include(GTest)
+include(CHiLLModule)
 
 if (DEFINED ENV{CHILLENV})
     set(CHILLENV $ENV{CHILLENV})
@@ -22,13 +23,15 @@ find_package(IEGen REQUIRED)
 
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
-set(CORE_LIBS chill_core chill_ir chill_ast chill_io
-    m ${Rose_LIBS} rt util omega_basic omega_lib codegen codegen_rose codegen_chill dl parseRel
-    ${IEGen_LIBS} isl ${RoseBoost_LIBS})
+set(CORE_LIBS
+    m rt util omega_basic omega_lib codegen codegen_chill codegen_rose dl
+    ${IEGen_LIBS})
 
-add_library(chill_io chill_io.cc)
+add_chill_module(chill_io 
+    chill_io.cc
+    )
 
-set(CORE_SRC
+add_chill_module(chill_core
     dep.cc
     irtools.cc
     loop.cc
@@ -43,27 +46,25 @@ set(CORE_SRC
     calculator_eval.cc
     )
 
-add_library(chill_core ${CORE_SRC})
-
-set(IR_CHILL_SRC
+add_chill_module(chill_ir
     ir_chill.cc
     ir_rose.cc
     ir_rose_utils.cc
     )
 
-add_library(chill_ir ${IR_CHILL_SRC})
+chill_module_link_libraries(chill_ir
+        ${Rose_LIBS} ${RoseBoost_LIBS}
+    )
 
 set(PYTHON_SRC
     chillmodule.cc
     )
 
-set(CHILL_AST_SRC
+add_chill_module(chill_ast
     chill_ast.cc
     )
 
-add_library(chill_ast ${CHILL_AST_SRC})
-
-set(CUDACHILL_SRC
+add_chill_module(chill_cuda
     mem_mapping_utils.cc
     loop_cuda.cc
     loop_cuda_chill.cc
@@ -71,11 +72,14 @@ set(CUDACHILL_SRC
     ir_cuda_rose_utils.cc
     )
 
-add_library(chill_cuda ${CUDACHILL_SRC})
+target_include_directories(chill_cuda
+    PRIVATE ${Rose_INCLUDE_DIRS})
 
-add_library(chill_printer printer/src/generic.cpp
-                          printer/src/dump.cpp
-                          printer/src/cfamily.cpp)
+add_chill_module(chill_printer
+    printer/src/generic.cpp
+    printer/src/dump.cpp
+    printer/src/cfamily.cpp
+    )
 
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
@@ -109,7 +113,7 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
     )
 
-add_library(parseRel
+add_chill_module(parseRel
     chill_run_util.cc
     ${FLEX_ExprScanner_OUTPUTS}
     ${BISON_ExprParser_OUTPUTS}
@@ -118,26 +122,27 @@ add_library(parseRel
 include_directories(
     ${CHILL_INC}
     ${OMEGA_INC}
-    ${Rose_INCLUDE_DIRS}
     ${RoseBoost_INCLUDE_DIRS}
+    ${Rose_INCLUDE_DIRS}
     ${IEGen_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS})
 
 set(chill-libs
-    parseRel omega_basic omega_lib codegen codegen_rose codegen_chill
+    parseRel omega_basic omega_lib codegen codegen_chill codegen_rose
     chill_core chill_ir chill_ast chill_printer chill_io)
 
 add_executable(chill
-        chill_run.cc
-        ${PYTHON_SRC}
-        )
+    chill_run.cc
+    ${PYTHON_SRC}
+    )
 
-target_link_libraries(chill
+chill_link_libraries(chill
+        chill_io chill_ir chill_ast chill_core parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY}
         )
 
-add_dependencies(chill ${chill-libs})
+add_dependencies(chill ${chill-libs} chill_cuda)
 
 install(TARGETS chill
         RUNTIME DESTINATION bin)
@@ -147,8 +152,8 @@ add_executable(cuda-chill
         ${PYTHON_SRC}
         )
 
-target_link_libraries(cuda-chill
-        chill_cuda
+chill_link_libraries(cuda-chill
+        chill_cuda chill_io chill_ir chill_ast chill_core parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY})
 
