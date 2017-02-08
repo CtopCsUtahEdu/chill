@@ -39,8 +39,11 @@ Makefile
 /test-driver
 
 # test driver
+test-suite.log
 /test-chill/*.test
 /test-chill/*.testcase
+/test-chill/*.log
+/test-chill/*.trs
 /test-chill/chill_testcases.mk
 /test-chill/cudachill_testcases.mk
 /examples/chill/testcases/*modified.c
