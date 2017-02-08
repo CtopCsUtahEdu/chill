@@ -1,0 +1,15 @@
+#
+# Test unroll-and-jam. The last loop adapted from the simple
+# convolution example from p463 of "Optimizing Compilers for
+# Modern Architectures", by Randy Allen and Ken Kennedy.
+#
+
+source: unrolltrap.c
+procedure: foo
+format: rose
+
+# parallelogram iteration space
+loop: 0
+original()
+unroll(0,1,2)
+print

@@ -1,0 +1,18 @@
+#
+# tiling perfect jacobi loop nest with time step, use
+# unimodular transformation first (only applicable to the
+# perfect loop nest) to make tiling legal.
+#
+
+source: jacobi1.c
+procedure: main
+format : rose
+loop: 0
+
+print dep
+
+nonsingular([[1,0],[1,1]])  # unimodular matrix, determinant is one
+tile(0,2,64)
+
+print dep
+print
