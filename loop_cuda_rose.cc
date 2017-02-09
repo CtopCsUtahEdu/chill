@@ -13,8 +13,6 @@
  31/1/11 Modified by Protonu Basu
 *****************************************************************************/
 
-#ifdef FRONTEND_ROSE
-
 #include <malloc.h>
 
 //#define TRANSFORMATION_FILE_INFO Sg_File_Info::generateDefaultFileInfoForTransformationNode()
@@ -3000,5 +2998,4 @@ void LoopCuda::printIS() {
   fflush(stdout); 
 }
 
-#endif
 

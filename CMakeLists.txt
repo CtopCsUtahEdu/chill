@@ -16,15 +16,56 @@ if (DEFINED ENV{CHILLENV})
     set(CHILLENV $ENV{CHILLENV})
 endif()
 
+if (NOT DEFINED FRONTEND)
+    set(FRONTEND "Rose")
+endif()
+
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(Rose REQUIRED)
 find_package(RoseBoost REQUIRED)
 find_package(IEGen REQUIRED)
 
+message(STATUS "Using frontend option \"${FRONTEND}\"")
+if (${FRONTEND} STREQUAL "Rose")
+    set(FRONTEND_DEFINITIONS FRONTEND_ROSE)
+
+    add_chill_module(chill_ir
+            ir_chill.cc
+            ir_rose.cc
+            ir_rose_utils.cc
+            )
+
+    chill_module_link_libraries(chill_ir
+            ${Rose_LIBS} ${RoseBoost_LIBS}
+            )
+elseif (${FRONTEND} STREQUAL "Clang")
+    set(FRONTEND_DEFINITIONS FRONTEND_CLANG)
+    find_package(LLVM REQUIRED CONFIG)
+    find_package(Clang REQUIRED)
+    add_definitions(${LLVM_DEFINITIONS})
+
+    llvm_map_components_to_libnames(llvm_libs all)
+
+    add_chill_module(chill_ir
+            ir_chill.cc
+            ir_clang.cc
+            ir_rose.cc
+            ir_rose_utils.cc
+            )
+
+    chill_module_link_libraries(chill_ir
+            ${Rose_LIBS} ${RoseBoost_LIBS} ${llvm_libs} ${CLANG_LIBS}
+            )
+
+    set(FRONTEND_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS})
+else()
+    message(FATAL_ERROR "Unrecognized frontend option ${FRONTEND}")
+endif()
+
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS
-    m rt util omega_basic omega_lib codegen codegen_chill dl
+    m rt util omega_basic omega_lib ${FRONTEND_LIBS} codegen codegen_chill dl
     ${IEGen_LIBS})
 
 add_chill_module(chill_io 
@@ -43,16 +84,6 @@ add_chill_module(chill_core
     omegatools.cc
     stencil.cc
     calculator_eval.cc
-    )
-
-add_chill_module(chill_ir
-    ir_chill.cc
-    ir_rose.cc
-    ir_rose_utils.cc
-    )
-
-chill_module_link_libraries(chill_ir
-        ${Rose_LIBS} ${RoseBoost_LIBS}
     )
 
 set(PYTHON_SRC
@@ -82,7 +113,7 @@ add_chill_module(chill_printer
 
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
-set(CMAKE_CXX_FLAGS "-DPYTHON -DFRONTEND_ROSE ${COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-DPYTHON ${COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
 
 if (DEFINED OMEGAHOME)
     link_directories(${OMEGAHOME}/lib)
@@ -124,6 +155,7 @@ include_directories(
     ${RoseBoost_INCLUDE_DIRS}
     ${Rose_INCLUDE_DIRS}
     ${IEGen_INCLUDE_DIRS}
+    ${FRONTEND_INCLUDE_DIRS}
     ${PYTHON_INCLUDE_DIRS})
 
 set(chill-libs
@@ -143,6 +175,10 @@ chill_link_libraries(chill
 
 add_dependencies(chill ${chill-libs} chill_cuda)
 
+target_compile_definitions(chill
+        PRIVATE
+        ${FRONTEND_DEFINITIONS})
+
 install(TARGETS chill
         RUNTIME DESTINATION bin)
 
@@ -160,7 +196,8 @@ add_dependencies(cuda-chill ${chill-libs} chill_cuda)
 
 target_compile_definitions(cuda-chill
         PRIVATE
-        CUDACHILL)
+        CUDACHILL
+        FRONTEND_ROSE)
 
 install(TARGETS cuda-chill
         RUNTIME DESTINATION bin)

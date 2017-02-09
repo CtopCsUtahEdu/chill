@@ -321,9 +321,6 @@ protected:
   
   std::vector<chillAST_VarDecl> entire_file_symbol_table;
   
-  // TODO yeah, these need to be associated with a sourcefile ?? 
-  std::map<std::string, chillAST_node *> defined_macros;  // TODO these need to be in a LOCATION 
-  
 public:
 
   void print() { chillfunc->print(); printf("\n"); fflush(stdout); }; 
@@ -366,17 +363,7 @@ public:
         std::map<SgVarRefExp*, IR_ScalarRef*> &write_scalars_1,
         std::vector<std::string> &index, int i, int j);
   */
-  std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
-  bool parent_is_array(IR_ArrayRef *a); // looking for nested array refs??
-  
-  IR_Block*   GetCode() const;
-  IR_Control* GetCode(omega::CG_outputRepr*) const; // what is this ??? 
-  
-  IR_OPERATION_TYPE QueryExpOperation(const omega::CG_outputRepr *repr) const;
-  IR_CONDITION_TYPE QueryBooleanExpOperation(
-                                             const omega::CG_outputRepr *repr) const;
-  std::vector<omega::CG_outputRepr *> QueryExpOperand(
-                                                      const omega::CG_outputRepr *repr) const;
+
   /*    std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> >
         FindScalarDeps(const omega::CG_outputRepr *repr1,
         const omega::CG_outputRepr *repr2, std::vector<std::string> index,
@@ -386,39 +373,11 @@ public:
   
   // Manu:: Added functions required for reduction operation
   // virtual omega::CG_outputRepr * FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B) = 0;
-  bool FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B);
-  void printStmt(const omega::CG_outputRepr *repr);
-  int getStmtType(const omega::CG_outputRepr *repr);
-  IR_OPERATION_TYPE getReductionOp(const omega::CG_outputRepr *repr);
-  IR_Control *  FromForStmt(const omega::CG_outputRepr *repr);
-  
-  // Manu:: Added functions for scalar expansion
-  // TODO   
-  IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
-                                            std::vector<omega::CG_outputRepr *> &index); 
-  void CreateDefineMacro(std::string s,std::string args,  omega::CG_outputRepr *repr);
-  void CreateDefineMacro(std::string s,std::string args, std::string repr);
-  
-  void CreateDefineMacro(std::string s,std::vector<std::string>args, omega::CG_outputRepr *repr);
-  
-  omega::CG_outputRepr *CreateArrayType(IR_CONSTANT_TYPE type, omega::CG_outputRepr* size);
-  omega::CG_outputRepr *CreatePointerType(IR_CONSTANT_TYPE type);
-  omega::CG_outputRepr *CreatePointerType(omega::CG_outputRepr *type);
-  omega::CG_outputRepr *CreateScalarType(IR_CONSTANT_TYPE type);
-  
-  //std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const; // inherit from chillcode ?? 
-  
-  
-  bool ReplaceRHSExpression(omega::CG_outputRepr *code, IR_Ref *ref);
+
+  //std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const; // inherit from chillcode ??
+
   bool ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef *ref);
-  omega::CG_outputRepr * GetRHSExpression(omega::CG_outputRepr *code);
-  omega::CG_outputRepr * GetLHSExpression(omega::CG_outputRepr *code);
-  omega::CG_outputRepr *CreateMalloc(const IR_CONSTANT_TYPE type, std::string lhs,
-                                     omega::CG_outputRepr * size_repr);
-  omega::CG_outputRepr *CreateMalloc  (omega::CG_outputRepr *type, std::string lhs,
-                                       omega::CG_outputRepr * size_repr);
-  omega::CG_outputRepr *CreateFree( omega::CG_outputRepr *exp);
-  
+
   //static int rose_pointer_counter ; // for manufactured arrays
   
   friend class IR_roseArraySymbol;

@@ -26,6 +26,8 @@
 #include "ir_code.hh"
 #ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
+#else
+#include "ir_clang.hh"
 #endif
 
 #endif
@@ -124,17 +126,19 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   }
   else {
     if (ir_code == NULL) {
-      #ifdef FRONTEND_ROSE  
-      if (procedure_name.empty())
-        procedure_name = "main";
-      #endif
-        
       #ifdef FRONTEND_ROSE
       if(dest_filename.empty()) {
         ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str());
       }
       else {
         ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
+      }
+      #else
+      if(dest_filename.empty()) {
+        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str());
+      }
+      else {
+        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
       }
       #endif
           

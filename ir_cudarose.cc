@@ -12,8 +12,6 @@
    2/2/2011 Created by Protonu Basu. 
 *****************************************************************************/
 
-#ifdef FRONTEND_ROSE 
-
 #include <typeinfo>
 #include "ir_cudarose.hh"
 #include "loop.hh"
@@ -169,5 +167,3 @@ bool IR_cudaroseCode::commit_loop(Loop *loop, int loop_num) {
 
 IR_cudaroseCode::~IR_cudaroseCode() {
 }
-
-#endif
