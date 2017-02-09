@@ -1,25 +1,19 @@
-
-
 #
-#  example from CHiLL manual page 20
+#  example from CHiLL manual page 17
 #
-#  split
+#  shift a loop 
 #
-
 from chill import *
 
-source('tile.c')
-destination('tile1modified.c')
-
+source('shift.c')
+destination('shift1modified.c')
 procedure('mm')
 
 loop(0)
 
-known('ambn > 0')
-known('an > 0')
-known('bm > 0')
+known(' ambn > 0 ')
+known(' an > 4 ')
+known(' bm > 0 ')
 
-tile( 0,2,4 )
-
-
+shift( [1], 1, 4 )
 

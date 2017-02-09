@@ -4,7 +4,7 @@
 from chill import *
 
 source('unroll2.c')
-destination('unroll2cmodified.c')
+destination('unroll2dmodified.c')
 procedure('foo')
 
 # unroll a loop (5) with known iteration count of 15.

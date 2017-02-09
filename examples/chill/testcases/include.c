@@ -10,7 +10,7 @@
 
 int main() { 
     int i;
-   for (i=0; i<100; i++) { 
+    for (i=0; i<100; i++) { 
 	// nothing to see here
 	}
    return 0; 
