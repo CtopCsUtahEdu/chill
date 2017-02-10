@@ -1,6 +1,10 @@
 
 // chill interface to python
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "chill_io.hh"
 
 #ifdef CUDACHILL
@@ -1888,6 +1892,22 @@ static PyObject* chill_make_dense(PyObject* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
+static PyObject* chill_stencil_temp(PyObject* self, PyObject* args) {
+    strict_arg_num(args, 1);
+    int                 stmt        = intArg(args, 0);
+
+    myloop->stencilASEPadded(stmt);
+    Py_RETURN_NONE;
+}
+
+static PyObject* chill_find_stencil_shape(PyObject* self, PyObject* args) {
+    strict_arg_num(args, 1);
+    int                 stmt        = intArg(args, 0);
+
+    myloop->find_stencil_shape(stmt);
+    Py_RETURN_NONE;
+}
+
 
 static PyObject *
 chill_num_statements(PyObject *self, PyObject *args)  
@@ -1973,6 +1993,8 @@ static PyMethodDef ChillMethods[] = {
   {"coalesce",            chill_flatten,                   METH_VARARGS,     "Convert a multidimentianal iteration space into a single dimensional one"},
   {"make_dense",          chill_make_dense,                METH_VARARGS,     "Convert a non-affine iteration space into an affine one to enable loop transformations"},
   {"compact",             chill_compact,                   METH_VARARGS,     "Call after make_dense to convert an affine iteration space back into a non-affine one"},
+  {"stencil_temp",        chill_stencil_temp,              METH_VARARGS,     "???"},
+  {"find_stencil_shape",  chill_find_stencil_shape,        METH_VARARGS,     "???"},
   {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},
   {NULL, NULL, 0, NULL}
 };

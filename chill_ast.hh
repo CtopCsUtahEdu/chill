@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <vector>  // std::vector 
+#include <type_traits>
 
 #include <ir_enums.hh> // for IR_CONDITION_*
 
@@ -739,17 +740,29 @@ public:
     return ptr;
   }
 
+  //! Equality operator for "not null" and "null" checks
+  bool operator==(std::nullptr_t) { return !get(); }
+
   //! Behaving like a pointer with arrow operator
   ASTNodeClass* operator ->() const { return get(); }
 
-  //! Implicit conversion to the default type
-  operator ASTNodeClass* () const { return get(); }
+  //! Implicit conversion to the default type, or base of default type
+  template<typename DestASTNodeClass,
+           typename std::enable_if<std::is_base_of<DestASTNodeClass, ASTNodeClass>::value, int>::type = 0>
+  operator DestASTNodeClass* () const {
+      return dynamic_cast<DestASTNodeClass*>(get());
+  }
 
   //! Explicit conversion to some type
   template <typename DestASTNodeClass>
   explicit operator DestASTNodeClass* () const {
     chillAST_node *p = (DestASTNodeClass*) NULL; // Constraint
     return dynamic_cast<DestASTNodeClass*>(get());
+  }
+
+  //! Boolean conversion for "not null" and "null" checks
+  operator bool () const {
+      return get() != nullptr;
   }
 
   //! Dereferencing this pointer

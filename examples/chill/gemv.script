@@ -1,0 +1,9 @@
+source: gemv.c # matrix-vector multiply
+procedure: main
+format : rose
+loop: 0
+
+
+
+original()
+print

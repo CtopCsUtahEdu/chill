@@ -5,6 +5,8 @@ AM_CFLAGS=-g
 AM_CXXFLAGS=-g -std=c++11
 EXTRA_DIST=
 
+core_cxxflags   =-g --std=c++11
+
 ## Core Libraries ##
 core_libs     = -lcodegen -lomega
 core_libs    += -lm -lrose -lrt -lutil -ldl
@@ -90,7 +92,7 @@ endif
 ## Interface ##
 # Libs/Source/Flags #
 if PYTHON_OPT
-runner_libs           = -lpython$(PYTHON_VERSION)
+runner_libs           = -lpython2.7
 runner_libdirs        = -L$(PYTHON_LIBDIR)
 runner_includes       = -I$(PYTHON_INCDIR)
 chill_runner_src      = $(chill_python_runner_src) $(chill_python_yacc_src)
@@ -153,6 +155,7 @@ parse_expr.tab.cc: $(srcdir)/parse_expr.yy
 common_cppflags         = $(core_includes) $(runner_includes)
 common_cppflags        += $(runner_flags) $(debug_flags)
 common_cppflags        += -DBUILD_ROSE -DFRONTEND_ROSE
+common_cxxflags         = $(core_cxxflags)
 common_libs             = $(core_libs) $(runner_libs)
 common_libdirs          = $(core_libdirs) $(runner_libdirs)
 
@@ -179,11 +182,13 @@ bin_PROGRAMS=chill
 endif
 
 cuda_chill_CPPFLAGS     =-DCUDACHILL $(common_cppflags)
+cuda_chill_CXXFLAGS     =-DCUDACHILL $(common_cxxflags)
 cuda_chill_LDADD        =$(common_libs)
 cuda_chill_LDFLAGS      =$(common_libdirs)
 cuda_chill_SOURCES      =$(core_src) $(cudachill_runner_src) $(cudachill_src) $(ir_cudachill_src)
 
 chill_CPPFLAGS          =$(common_cppflags) $(chill_runner_cppflags)
+chill_CXXFLAGS          =$(common_cxxflags)
 chill_LDADD             =$(common_libs)
 chill_LDFLAGS           =$(common_libdirs)
 chill_SOURCES           =$(core_src) $(chill_runner_src) $(chill_src) $(ir_chill_src)

@@ -1,0 +1,15 @@
+#
+# Test unroll
+#
+
+source: unroll1.c
+procedure: foo
+format: roseBUH   # don't want this one to actually run 
+
+# fully unroll a loop with known iteration count
+loop: 0
+original()
+unroll(0,1,0)
+print
+print space
+
