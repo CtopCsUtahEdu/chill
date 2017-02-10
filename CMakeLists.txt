@@ -21,12 +21,12 @@ if (NOT DEFINED FRONTEND)
 endif()
 
 find_package(PythonLibs 2.7 REQUIRED)
-find_package(Rose REQUIRED)
-find_package(RoseBoost REQUIRED)
 find_package(IEGen REQUIRED)
 
 message(STATUS "Using frontend option \"${FRONTEND}\"")
 if (${FRONTEND} STREQUAL "Rose")
+    find_package(Rose REQUIRED)
+    find_package(RoseBoost REQUIRED)
     set(FRONTEND_DEFINITIONS FRONTEND_ROSE)
 
     add_chill_module(chill_ir
@@ -39,9 +39,10 @@ if (${FRONTEND} STREQUAL "Rose")
             ${Rose_LIBS} ${RoseBoost_LIBS}
             )
 elseif (${FRONTEND} STREQUAL "Clang")
-    set(FRONTEND_DEFINITIONS FRONTEND_CLANG)
     find_package(LLVM REQUIRED CONFIG)
     find_package(Clang REQUIRED)
+    set(FRONTEND_DEFINITIONS FRONTEND_CLANG)
+
     add_definitions(${LLVM_DEFINITIONS})
 
     llvm_map_components_to_libnames(llvm_libs all)
@@ -49,12 +50,10 @@ elseif (${FRONTEND} STREQUAL "Clang")
     add_chill_module(chill_ir
             ir_chill.cc
             ir_clang.cc
-            ir_rose.cc
-            ir_rose_utils.cc
             )
 
     chill_module_link_libraries(chill_ir
-            ${Rose_LIBS} ${RoseBoost_LIBS} ${llvm_libs} ${CLANG_LIBS}
+            ${llvm_libs} ${CLANG_LIBS}
             )
 
     set(FRONTEND_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS})
@@ -65,7 +64,7 @@ endif()
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS
-    m rt util omega_basic omega_lib ${FRONTEND_LIBS} codegen codegen_chill dl
+    m rt util omega_basic omega_lib codegen codegen_chill dl
     ${IEGen_LIBS})
 
 add_chill_module(chill_io 
@@ -93,17 +92,6 @@ set(PYTHON_SRC
 add_chill_module(chill_ast
     chill_ast.cc
     )
-
-add_chill_module(chill_cuda
-    mem_mapping_utils.cc
-    loop_cuda.cc
-    loop_cuda_chill.cc
-    ir_cudarose.cc
-    ir_cuda_rose_utils.cc
-    )
-
-target_include_directories(chill_cuda
-    PRIVATE ${Rose_INCLUDE_DIRS})
 
 add_chill_module(chill_printer
     printer/src/generic.cpp
@@ -173,7 +161,7 @@ chill_link_libraries(chill
         ${PYTHON_LIBRARY}
         )
 
-add_dependencies(chill ${chill-libs} chill_cuda)
+add_dependencies(chill ${chill-libs})
 
 target_compile_definitions(chill
         PRIVATE
@@ -182,26 +170,38 @@ target_compile_definitions(chill
 install(TARGETS chill
         RUNTIME DESTINATION bin)
 
-add_executable(cuda-chill
-        chill_run.cc
-        ${PYTHON_SRC}
+if (${FRONTEND} STREQUAL "Rose")
+    add_chill_module(chill_cuda
+        mem_mapping_utils.cc
+        loop_cuda.cc
+        loop_cuda_chill.cc
+        ir_cudarose.cc
+        ir_cuda_rose_utils.cc
         )
 
-chill_link_libraries(cuda-chill
-        chill_cuda chill_io chill_ir chill_ast chill_core parseRel
-        ${CORE_LIBS}
-        ${PYTHON_LIBRARY})
+    target_include_directories(chill_cuda
+        PRIVATE ${Rose_INCLUDE_DIRS})
 
-add_dependencies(cuda-chill ${chill-libs} chill_cuda)
+    add_executable(cuda-chill
+            chill_run.cc
+            ${PYTHON_SRC}
+            )
 
-target_compile_definitions(cuda-chill
-        PRIVATE
-        CUDACHILL
-        FRONTEND_ROSE)
+    chill_link_libraries(cuda-chill
+            chill_cuda chill_io chill_ir chill_ast chill_core parseRel
+            ${CORE_LIBS}
+            ${PYTHON_LIBRARY})
 
-install(TARGETS cuda-chill
-        RUNTIME DESTINATION bin)
+    add_dependencies(cuda-chill ${chill-libs} chill_cuda)
 
+    target_compile_definitions(cuda-chill
+            PRIVATE
+            CUDACHILL
+            FRONTEND_ROSE)
+
+    install(TARGETS cuda-chill
+            RUNTIME DESTINATION bin)
+endif()
 add_subdirectory(omega/basic)
 add_subdirectory(omega/omega_lib)
 add_subdirectory(omega/code_gen)

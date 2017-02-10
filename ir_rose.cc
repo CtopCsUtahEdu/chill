@@ -26,9 +26,6 @@
 #include "chill_ast.hh"
 #include "ir_chill.hh"    // should be ir_chill.hh , not ir_clang.hh 
 
-int IR_Code::ir_pointer_counter = 23;  // TODO this dos nothing ??? 
-int IR_Code::ir_array_counter = 1;
-
 using namespace SageBuilder;
 using namespace SageInterface;
 using namespace omega;
@@ -2571,48 +2568,6 @@ omega::CG_outputRepr *IR_roseScalarRef::convert() {
 IR_Ref * IR_roseScalarRef::clone() const {
   if (dre) return new IR_roseScalarRef(ir_, dre); // use declrefexpr if it exists
   return new IR_roseScalarRef(ir_, chillvd); // uses vardecl
-}
-
-// ----------------------------------------------------------------------------
-// Class: IR_roseArrayRef, also FORMERLY IR_rosePointerArrayRef which was the same ???
-// ----------------------------------------------------------------------------
-omega::CG_outputRepr *IR_rosePointerArrayRef::index(int dim) const {
-  //debug_fprintf(stderr, "IR_roseArrayRef::index( %d )  \n", dim);
-  return new omega::CG_chillRepr( chillASE->getIndex(dim) );// since we may not know index, this could die ???
-}
-
-IR_PointerSymbol *IR_rosePointerArrayRef::symbol() const {  // out of ir_clang.cc
-  chillAST_node *mb = chillASE->multibase();
-  chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
-  IR_PointerSymbol *PS =  new IR_rosePointerSymbol(ir_, chillASE->basedecl);  // vd);
-  return  PS;
-}
-
-bool IR_rosePointerArrayRef::operator!=(const IR_Ref &that) const {
-  //debug_fprintf(stderr, "IR_roseArrayRef::operator!=\n");
-  bool op = (*this) == that; // opposite
-  return !op;
-}
-
-bool IR_rosePointerArrayRef::operator==(const IR_Ref &that) const {
-  const IR_rosePointerArrayRef *l_that = static_cast<const IR_rosePointerArrayRef *>(&that);
-  const chillAST_ArraySubscriptExpr* thatASE = l_that->chillASE;
-  return (*chillASE) == (*thatASE);
-}
-
-omega::CG_outputRepr *IR_rosePointerArrayRef::convert() {
-  CG_chillRepr *result = new  CG_chillRepr( chillASE->clone() );
-  // delete this;  // if you do this, and call convert twice, you're DEAD
-  return result;
-}
-
-void IR_rosePointerArrayRef::Dump() const {
-  //debug_fprintf(stderr, "IR_rosePointerArrayRef::Dump()  this 0x%x  chillASE 0x%x\n", this, chillASE);
-  chillASE->print(); printf("\n");fflush(stdout);
-}
-
-IR_Ref *IR_rosePointerArrayRef::clone() const {
-  return new IR_rosePointerArrayRef(ir_, chillASE, iswrite);
 }
 
 

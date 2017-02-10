@@ -1,4 +1,5 @@
 
+#include "ir_chill.hh"
 #include "chill_io.hh"
 #include "stencil.hh"
 

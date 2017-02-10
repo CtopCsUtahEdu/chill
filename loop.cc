@@ -26,7 +26,7 @@
 #include <math.h>
 #include <codegen.h>
 #include <code_gen/CG_utils.h>
-#include <code_gen/CG_roseBuilder.h> // Manu   bad idea.  TODO 
+#include <code_gen/CG_chillBuilder.h> // Manu   bad idea.  TODO
 #include <code_gen/CG_stringRepr.h>
 #include <code_gen/CG_chillRepr.h>   // Mark.  Bad idea.  TODO 
 #include <iostream>
@@ -5565,12 +5565,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   class_data_types.push_back(temp_arr_data_type);
   class_data_types.push_back(temp_col_type);
   throw std::runtime_error("about to use ROSE Builder in generic loop.cc");
-
   CG_outputRepr *list_type =
-    static_cast<CG_roseBuilder *>(ocg)->CreateLinkedListStruct("a_list", // after exit()
+    static_cast<CG_chillBuilder *>(ocg)->CreateLinkedListStruct("a_list", // after exit()
                                                                class_data, class_data_types);
-
-  
 
   size_repr3.push_back(
                        ocg->CreateTimes(count->clone(), ocg->CreateInt(size)));
@@ -5616,9 +5613,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   mk_data.push_back("ptr");
   mk_data_types.push_back(ir->CreatePointerType(list_type));
   
-  //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
-  exit(-1); 
-  CG_outputRepr *mk_type = static_cast<CG_roseBuilder *>(ocg)->CreateClass( // after exit();
+  throw std::runtime_error( "about to use ROSE Builder in generic loop.cc\n");
+  // TODO roseBuilder
+  CG_outputRepr *mk_type = static_cast<CG_chillBuilder *>(ocg)->CreateClass( // after exit();
                                                                            "mk", mk_data, mk_data_types);
   //mk_type = ir->CreatePointerType(mk_type);
   std::vector<CG_outputRepr *> size_repr5;
@@ -5731,15 +5728,14 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     CG_outputRepr * level_repr = most_reprs.find(level)->second;
     mark_code = ocg->StmtListAppend(mark_code, level_repr->clone());
     
-    //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
-    exit(-1); 
     CG_outputRepr *mark_assign2 =
       ocg->CreateAssignment(0,
-                            static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression( // after exit() 
+                            static_cast<CG_chillBuilder *>(ocg)->CreateDotExpression( // after exit()
                                                                                     ocg->CreateArrayRefExpression(marked2->name(),
                                                                                                                   ocg->CreateIdent(
                                                                                                                                    stmt[stmt_num].IS.set_var(level)->name())),
-                                                                                    static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                    static_cast<CG_chillBuilder *>(ocg)
+                                                                                        ->lookup_member_data(
                                                                                                                                            mk_type, "ptr",
                                                                                                                                            ocg->CreateIdent(marked2->name()))),
                             ocg->CreateInt(0));
@@ -5769,11 +5765,12 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
     exit(-1); 
     CG_outputRepr *mark_assign2 =
       ocg->CreateAssignment(0,
-                            static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression( // after exit()
+                            static_cast<CG_chillBuilder *>(ocg)->CreateDotExpression( // after exit()
                                                                                     ocg->CreateArrayRefExpression(marked2->name(),
                                                                                                                   ocg->CreateIdent(
                                                                                                                                    stmt[stmt_num].IS.set_var(level)->name())),
-                                                                                    static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                    static_cast<CG_chillBuilder *>(ocg)
+                                                                                        ->lookup_member_data(
                                                                                                                                            mk_type, "ptr",
                                                                                                                                            ocg->CreateIdent(marked2->name()))),
                             ocg->CreateInt(0));
@@ -5816,11 +5813,12 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   //debug_fprintf(stderr, "about to use ROSE Builder in generic loop.cc\n");
   exit(-1); 
   marked_check2 = ocg->CreateEQ(
-                                static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression( // after exit()
+                                static_cast<CG_chillBuilder *>(ocg)->CreateDotExpression( // after exit()
                                                                                         ocg->CreateArrayRefExpression(marked2->name(),
                                                                                                                       ocg->CreateIdent(
                                                                                                                                        stmt[stmt_num].IS.set_var(level)->name())),
-                                                                                        static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                        static_cast<CG_chillBuilder *>
+                                                                                        (ocg)->lookup_member_data(
                                                                                                                                                mk_type, "ptr", ocg->CreateIdent(marked2->name()))),
                                 ocg->CreateInt(0));
   
@@ -5852,9 +5850,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   allocate =
     ocg->StmtListAppend(allocate,
                         ocg->CreateAssignment(0,
-                                              static_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(
+                                              static_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression(
                                                                                                            ocg->CreateIdent(temp->name()),
-                                                                                                           static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                                           static_cast<CG_chillBuilder *>(ocg)->lookup_member_data(
                                                                                                                                                                   list_type, "next",
                                                                                                                                                                   ocg->CreateIdent(temp->name()))),
                                               ocg->CreateIdent(new_array_prime2->name())));
@@ -5866,27 +5864,29 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   allocate =
     ocg->StmtListAppend(allocate,
                         ocg->CreateAssignment(0,
-                                              static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression(
+                                              static_cast<CG_chillBuilder *>(ocg)->CreateDotExpression(
                                                                                                       ocg->CreateArrayRefExpression(
                                                                                                                                     marked2->name(),
                                                                                                                                     ocg->CreateIdent(
                                                                                                                                                      stmt[stmt_num].IS.set_var(
                                                                                                                                                                                level)->name())),
-                                                                                                      static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                                      static_cast<CG_chillBuilder *>(ocg)->lookup_member_data(
                                                                                                                                                              mk_type, "ptr",
                                                                                                                                                              ocg->CreateIdent(marked2->name()))),
                                               ocg->CreateIdent(new_array_prime2->name())));
   
   CG_outputRepr *data_array_ref_2 =
-    static_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(
-                                                                 static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression(
+    static_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression(
+                                                                 static_cast<CG_chillBuilder *>(ocg)
+                                                                     ->CreateDotExpression(
                                                                                                                          ocg->CreateArrayRefExpression(marked2->name(),
                                                                                                                                                        ocg->CreateIdent(
                                                                                                                                                                         stmt[stmt_num].IS.set_var(level)->name())),
-                                                                                                                         static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                                                         static_cast<CG_chillBuilder *>(ocg)->lookup_member_data(
                                                                                                                                                                                 mk_type, "ptr",
                                                                                                                                                                                 ocg->CreateIdent(marked2->name()))),
-                                                                 static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                 static_cast<CG_chillBuilder *>(ocg)
+                                                                     ->lookup_member_data(
                                                                                                                         list_type, "data",
                                                                                                                         ocg->CreateIdent(new_array_prime2->name())));
   
@@ -5951,15 +5951,17 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   */
   
   explicit_offset_assign2 =
-    static_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(
-                                                                 static_cast<CG_roseBuilder *>(ocg)->CreateDotExpression(
+    static_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression(
+                                                                 static_cast<CG_chillBuilder *>(ocg)
+                                                                     ->CreateDotExpression(
                                                                                                                          ocg->CreateArrayRefExpression(marked2->name(),
                                                                                                                                                        ocg->CreateIdent(
                                                                                                                                                                         stmt[stmt_num].IS.set_var(level)->name())),
-                                                                                                                         static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                                                                         static_cast<CG_chillBuilder *>(ocg)->lookup_member_data(
                                                                                                                                                                                 mk_type, "ptr",
                                                                                                                                                                                 ocg->CreateIdent(marked2->name()))),
-                                                                 static_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                                                 static_cast<CG_chillBuilder *>(ocg)
+                                                                     ->lookup_member_data(
                                                                                                                         list_type, "col",
                                                                                                                         ocg->CreateIdent(new_array_prime2->name())));
   explicit_offset_assign2 = ocg->CreateAssignment(0, explicit_offset_assign2,
@@ -6356,8 +6358,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   CG_outputRepr *lhs = ocg->CreateArrayRefExpression(new_array_prime->name(),
                                                      new_data_array_ref_);
   CG_outputRepr *rhs =
-    dynamic_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(new_array_prime2->name(),
-                                                                  dynamic_cast<CG_roseBuilder *>(ocg)->lookup_member_data(list_type,
+    dynamic_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression(new_array_prime2->name(),
+                                                                  dynamic_cast<CG_chillBuilder *>(ocg)
+                                                                      ->lookup_member_data(list_type,
                                                                                                                           "data",
                                                                                                                           ocg->CreateIdent(new_array_prime2->name())));
   rhs = ocg->CreateArrayRefExpression(rhs, temp2_->clone());
@@ -6367,8 +6370,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   CG_outputRepr *lhs_col = ocg->CreateArrayRefExpression(explicit_index->name(),
                                                          ocg->CreateMinus(NULL, ocg->CreateIdent(IS_ll.set_var(1)->name())));
   CG_outputRepr *rhs_col =
-    dynamic_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(new_array_prime2->name(),
-                                                                  dynamic_cast<CG_roseBuilder *>(ocg)->lookup_member_data(list_type, 
+    dynamic_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression(new_array_prime2->name(),
+                                                                  dynamic_cast<CG_chillBuilder *>(ocg)
+                                                                      ->lookup_member_data(list_type,
                                                                                                                           "col",
                                                                                                                           ocg->CreateIdent(new_array_prime2->name())));
   index_cp_stmt = ocg->CreateAssignment(0, 
@@ -6377,8 +6381,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   
   ll_inc_and_free = ocg->CreateAssignment(0, 
                                           ocg->CreateIdent(temp->name()),
-                                          dynamic_cast<CG_roseBuilder *>(ocg)->CreateArrowRefExpression(new_array_prime2->name(),
-                                                                                                        dynamic_cast<CG_roseBuilder *>(ocg)->lookup_member_data(
+                                          dynamic_cast<CG_chillBuilder *>(ocg)->CreateArrowRefExpression
+                                              (new_array_prime2->name(),
+                                                                                                        dynamic_cast<CG_chillBuilder *>(ocg)->lookup_member_data(
                                                                                                                                                                 list_type, 
                                                                                                                                                                 "next",
                                                                                                                                                                 ocg->CreateIdent(new_array_prime2->name()))));

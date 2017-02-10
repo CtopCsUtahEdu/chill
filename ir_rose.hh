@@ -62,8 +62,6 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node
 chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent );
 
 
-extern vector<chillAST_VarDecl *> VariableDeclarations; 
-extern vector<chillAST_FunctionDecl *> FunctionDeclarations; 
 
 // forward definitions. things defined in this file 
 struct IR_roseScalarSymbol; 

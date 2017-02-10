@@ -21,7 +21,10 @@ Purpose:   chill Intermediate Representation    no knowledge of the front end pa
 #include "chill_ast.hh"
 
 vector<chillAST_VarDecl *> VariableDeclarations; 
-vector<chillAST_FunctionDecl *> FunctionDeclarations; 
+vector<chillAST_FunctionDecl *> FunctionDeclarations;
+
+int IR_Code::ir_pointer_counter = 23;  // TODO this dos nothing ???
+int IR_Code::ir_array_counter = 1;
 
 using namespace omega;
 using namespace std;
@@ -310,6 +313,50 @@ IR_Ref * IR_chillScalarRef::clone() const {
   if (dre) return new IR_chillScalarRef(ir_, dre); // use declrefexpr if it exists
   return new IR_chillScalarRef(ir_, chillvd); // uses vardecl
 }
+
+// ----------------------------------------------------------------------------
+// Class: IR_chillArrayRef, also FORMERLY IR_chillPointerArrayRef which was the same ???
+// ----------------------------------------------------------------------------
+
+omega::CG_outputRepr *IR_chillPointerArrayRef::index(int dim) const {
+  //debug_fprintf(stderr, "IR_roseArrayRef::index( %d )  \n", dim);
+  return new omega::CG_chillRepr( chillASE->getIndex(dim) );// since we may not know index, this could die ???
+}
+
+IR_PointerSymbol *IR_chillPointerArrayRef::symbol() const {  // out of ir_clang.cc
+  chillAST_node *mb = chillASE->multibase();
+  chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
+  IR_PointerSymbol *PS =  new IR_chillPointerSymbol(ir_, chillASE->basedecl);  // vd);
+  return  PS;
+}
+
+bool IR_chillPointerArrayRef::operator!=(const IR_Ref &that) const {
+  //debug_fprintf(stderr, "IR_roseArrayRef::operator!=\n");
+  bool op = (*this) == that; // opposite
+  return !op;
+}
+
+bool IR_chillPointerArrayRef::operator==(const IR_Ref &that) const {
+  const IR_chillPointerArrayRef *l_that = static_cast<const IR_chillPointerArrayRef *>(&that);
+  const chillAST_ArraySubscriptExpr* thatASE = l_that->chillASE;
+  return (*chillASE) == (*thatASE);
+}
+
+omega::CG_outputRepr *IR_chillPointerArrayRef::convert() {
+  CG_chillRepr *result = new  CG_chillRepr( chillASE->clone() );
+  // delete this;  // if you do this, and call convert twice, you're DEAD
+  return result;
+}
+
+void IR_chillPointerArrayRef::Dump() const {
+  //debug_fprintf(stderr, "IR_rosePointerArrayRef::Dump()  this 0x%x  chillASE 0x%x\n", this, chillASE);
+  chillASE->print(); printf("\n");fflush(stdout);
+}
+
+IR_Ref *IR_chillPointerArrayRef::clone() const {
+  return new IR_chillPointerArrayRef(ir_, chillASE, iswrite);
+}
+
 
 
 // ----------------------------------------------------------------------------
@@ -756,7 +803,7 @@ IR_PointerArrayRef *IR_chillCode::CreatePointerArrayRef(IR_PointerSymbol *sym,
   }
 
   chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( base, indeces, NULL);
-  return new IR_rosePointerArrayRef( this, ASE,  0); // 0 means not a write so far
+  return new IR_chillPointerArrayRef( this, ASE,  0); // 0 means not a write so far
 }
 
 
@@ -905,7 +952,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
 
   if (sym->isScalar()) {
     debug_fprintf(stderr, "scalar\n");
-    IR_roseScalarSymbol *RSS = (IR_roseScalarSymbol *)sym;
+    IR_chillScalarSymbol *RSS = (IR_chillScalarSymbol *)sym;
     chillAST_VarDecl *vd = RSS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -913,7 +960,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   }
   else if (sym->isArray()) {
     debug_fprintf(stderr, "array symbol at top,  array or pointer\n");
-    IR_roseArraySymbol *RAS = (IR_roseArraySymbol *)sym;
+    IR_chillArraySymbol *RAS = (IR_chillArraySymbol *)sym;
     chillAST_VarDecl *vd = RAS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -921,7 +968,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   }
   else if (sym->isPointer()) {
     debug_fprintf(stderr, "pointer symbol at top,  array or pointer  (TODO)\n");
-    IR_rosePointerSymbol *RPS = (IR_rosePointerSymbol *)sym;
+    IR_chillPointerSymbol *RPS = (IR_chillPointerSymbol *)sym;
     chillAST_VarDecl *vd = RPS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -1211,7 +1258,7 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
     vd->print(0,stderr); debug_fprintf(stderr, "\n"); 
     vd->dump(); fflush(stdout); 
     if (vd->isPointer()) { 
-      IRPAR.push_back( new IR_rosePointerArrayRef( this, refs[i], refs[i]->imwrittento ) ); 
+      IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
     }
   }
   debug_fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
@@ -1347,7 +1394,7 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
 }
 
 bool IR_chillCode::parent_is_array(IR_ArrayRef *a) {
-  chillAST_ArraySubscriptExpr* ASE = ((IR_roseArrayRef *)a)->chillASE;
+  chillAST_ArraySubscriptExpr* ASE = ((IR_chillArrayRef *)a)->chillASE;
   chillAST_node *p = ASE->getParent();
   if (!p) return false;
   return p->isArraySubscriptExpr();

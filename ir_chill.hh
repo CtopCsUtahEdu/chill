@@ -11,7 +11,10 @@
 #include "chill_io.hh"
 
 
-void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ); 
+extern vector<chillAST_VarDecl *> VariableDeclarations;
+extern vector<chillAST_FunctionDecl *> FunctionDeclarations;
+
+void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs );
 
 extern vector<chillAST_VarDecl *> VariableDeclarations;  // a global.   TODO 
 
@@ -222,7 +225,29 @@ struct IR_chillArrayRef: public IR_ArrayRef {
   virtual void Dump() const;
 };
 
+struct IR_chillPointerArrayRef: public IR_PointerArrayRef { // exactly the same as arrayref ???
+  chillAST_ArraySubscriptExpr* chillASE;
+  int iswrite;
 
+  IR_chillPointerArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) {
+    //debug_fprintf(stderr, "IR_XXXXPointerArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write);
+    ir_ = ir;
+    chillASE = ase;
+    // dies? ase->dump(); fflush(stdout);
+
+    iswrite = write;  // ase->imwrittento;
+  }
+
+
+  bool is_write() const  { return iswrite; };
+  omega::CG_outputRepr *index(int dim) const;
+  IR_PointerSymbol *symbol() const;
+  bool operator==(const IR_Ref &that) const;
+  bool operator!=(const IR_Ref &that) const; // not the opposite logic to ==     TODO
+  omega::CG_outputRepr *convert();
+  IR_Ref *clone() const;
+  virtual void Dump() const;
+};
 
 struct IR_chillLoop: public IR_Loop {
   int step_size_;
