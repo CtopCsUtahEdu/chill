@@ -115,7 +115,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   // find the function we're modifying
   //easy, but probably risky ...   chillcode->findEnclosingFunction() 
-  IR_roseCode *IR_RC = (IR_roseCode *)ir;  // use hidden info that this is IR_roseCode;
+  IR_chillCode *IR_RC = (IR_chillCode *)ir;  // use hidden info that this is IR_roseCode;
   chillAST_FunctionDecl *fd = IR_RC->chillfunc; // the function we're modifying
   
   
@@ -237,7 +237,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   /**********************************************   A
    **********************************************/
   std::vector<CG_outputRepr *> indices;
-  IR_roseArraySymbol *rose_buffr;
+  IR_chillArraySymbol *rose_buffr;
   CG_outputRepr *buf_idx = ir->builder()->CreateIdent(init_pipeline.IS.set_var(depth)->name());
   IR_ArrayRef * buff_arr_ref ;
   
@@ -253,7 +253,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     _ofst = 0;
     int _x =r;
     
-    IR_roseScalarSymbol *rose_reg;
+    IR_chillScalarSymbol *rose_reg;
     IR_ScalarRef *rose_reg_ref;
     CG_outputRepr *reg_assignments=NULL;
     
@@ -276,7 +276,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           _idxs.push_back(i_idx);
           
           CG_outputRepr* read_var = ir->CreateArrayRefRepr(read_->symbol(),_idxs);
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]); // treg_syms is std::vector<SgVariableSymbol *> 
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]); // treg_syms is std::vector<SgVariableSymbol *>
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(), read_var->clone());
           
@@ -340,7 +340,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
             
             read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
             
-            rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+            rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
             rose_reg_ref = ir->CreateScalarRef(rose_reg);
             reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                   ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -399,7 +399,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
             
             read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
             
-            rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+            rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
             rose_reg_ref = ir->CreateScalarRef(rose_reg);
             reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                   ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -500,7 +500,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
           
           
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                 ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -548,7 +548,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
             //coeff->print(0, stderr); debug_fprintf(stderr, "\n"); 
             //coeff->dump(); printf("\n\n"); fflush(stdout);
             
-            rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+            rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
             rose_reg_ref = ir->CreateScalarRef(rose_reg);
             
             //IR_ScalarRef *scalar_cff_ref = ir->CreateScalarRef(new IR_roseScalarSymbol (ir, 
@@ -571,7 +571,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
       }
       
       //Create the buffer and its index
-      rose_buffr = new IR_roseArraySymbol(ir, buff_syms[n+radius]);
+      rose_buffr = new IR_chillArraySymbol(ir, buff_syms[n+radius]);
       CG_outputRepr *idx_offset = ocg->CreatePlus(buf_idx->clone(), ocg->CreateInt(_ofst));
       idx_offset = ocg->CreatePlus(idx_offset->clone(), ocg->CreateInt(-lower));
       _ofst++;
@@ -736,7 +736,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   //Pick the registers
   int _x =r;
-  IR_roseScalarSymbol *rose_reg;
+  IR_chillScalarSymbol *rose_reg;
   IR_ScalarRef *rose_reg_ref;
   CG_outputRepr *reg_assignments=NULL;
   int _ctr =0;
@@ -757,7 +757,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
         _idxs.push_back(i_idx);
         
         CG_outputRepr* read_var = ir->CreateArrayRefRepr(read_->symbol(),_idxs);
-        rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+        rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
         rose_reg_ref = ir->CreateScalarRef(rose_reg);
         reg_assignments = ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone());
         _ctr++;
@@ -814,7 +814,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           
           read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
           
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                 ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -864,7 +864,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           
           read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
           
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                 ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -957,7 +957,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           read_var = ocg->CreatePlus(read_var->clone(), ir->CreateArrayRefRepr(read_->symbol(), _idxs));
           
           
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           reg_assignments = ocg->StmtListAppend(reg_assignments->clone(),
                                                 ocg->CreateAssignment(0, rose_reg_ref->convert()->clone(),read_var->clone()));
@@ -998,7 +998,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
           //coeff->dump(); printf("\n\n"); fflush(stdout);
           
           
-          rose_reg = new IR_roseScalarSymbol(ir, treg_syms[_ctr]);
+          rose_reg = new IR_chillScalarSymbol(ir, treg_syms[_ctr]);
           rose_reg_ref = ir->CreateScalarRef(rose_reg);
           //IR_ScalarRef *scalar_cff_ref = ir->CreateScalarRef(new IR_roseScalarSymbol (ir, scalar_cffs_3d_array[z+radius][y+radius][n+1]));
           
@@ -1025,7 +1025,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     }
     
     //Create the buffer and it's index
-    rose_buffr = new IR_roseArraySymbol(ir, buff_syms[n+radius]);
+    rose_buffr = new IR_chillArraySymbol(ir, buff_syms[n+radius]);
     CG_outputRepr *idx_offset = ocg->CreatePlus(buf_idx->clone(), ocg->CreateInt(_ofst));
     idx_offset = ocg->CreatePlus(idx_offset->clone(), ocg->CreateInt(-lower));
     _ofst++;
@@ -1091,7 +1091,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
   init_rhs =NULL;
   for(int n=-radius; n<=radius; n++)
     {
-      rose_buffr = new IR_roseArraySymbol(ir, buff_syms[n+radius]);
+      rose_buffr = new IR_chillArraySymbol(ir, buff_syms[n+radius]);
       indices.clear();
       index2.clear();
       //indices.push_back(buf_idx->clone());
