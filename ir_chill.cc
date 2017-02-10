@@ -21,7 +21,10 @@ Purpose:   chill Intermediate Representation    no knowledge of the front end pa
 #include "chill_ast.hh"
 
 vector<chillAST_VarDecl *> VariableDeclarations; 
-vector<chillAST_FunctionDecl *> FunctionDeclarations; 
+vector<chillAST_FunctionDecl *> FunctionDeclarations;
+
+int IR_Code::ir_pointer_counter = 23;  // TODO this dos nothing ???
+int IR_Code::ir_array_counter = 1;
 
 using namespace omega;
 using namespace std;
@@ -62,12 +65,6 @@ static string unops[] = {
 
 // forward defs
 
-
-void printsourceline( const char *filename, int line  );
-
-void Indent( int level ) {
-  for (int i=0; i<level; i++) debug_fprintf(stderr, "    ");
-}
 
 namespace {
 
@@ -126,22 +123,30 @@ IR_Symbol *IR_chillScalarSymbol::clone() const {
 // ----------------------------------------------------------------------------
 
 string IR_chillArraySymbol::name() const {
-  return string( strdup( chillvd ->varname)); 
+  if (base->isMemberExpr()) {
+    debug_fprintf(stderr, "OMG WE'LL ALL BE KILLED\n");
+    return  std::string("c.i");  // TODO
+  }
+  return string(chillvd ->varname);
 }
 
 
 int IR_chillArraySymbol::elem_size() const {
-  debug_fprintf(stderr, "IR_chillArraySymbol::elem_size()  TODO\n");  exit(-1); 
-  return 8;  // TODO 
+  debug_fprintf(stderr, "var is of type %s\n", chillvd->vartype);
+  char *typ = chillvd->vartype;
+  if (!typ) {
+    throw std::runtime_error(string(__PRETTY_FUNCTION__) + ": Variable type not known");
+  }
+  if (!strcmp("int", typ)) return sizeof(int); // ??
+  if (!strcmp("float", typ)) return sizeof(float); // ??
+  if (!strcmp("double", typ)) return sizeof(double); // ??
+
+  throw std::runtime_error(string(__PRETTY_FUNCTION__) + ": Unhandled variable type of " + typ);
 }
 
 
 int IR_chillArraySymbol::n_dim() const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()\n");
-  //debug_fprintf(stderr, "variable %s %s %s\n", chillvd->vartype, chillvd->varname, chillvd->arraypart);
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim() %d\n", chillvd->numdimensions); 
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()  TODO \n"); exit(-1); 
-  return chillvd->numdimensions; 
+  return chillvd->numdimensions;
 }
 
 IR_CONSTANT_TYPE IR_chillArraySymbol::elem_type() const { 
@@ -153,28 +158,17 @@ IR_CONSTANT_TYPE IR_chillArraySymbol::elem_type() const {
 
 // TODO
 CG_outputRepr *IR_chillArraySymbol::size(int dim) const {
-  debug_fprintf(stderr, "IR_chillArraySymbol::n_size()  TODO \n"); exit(-1); 
+  throw std::runtime_error("IR_chillArraySymbol::n_size()  TODO \n");
   return NULL;
 }
 
 
 bool IR_chillArraySymbol::operator!=(const IR_Symbol &that) const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::operator!=   NOT EQUAL\n"); 
-  //chillAST_VarDecl *chillvd;
-  return chillvd != ((IR_chillArraySymbol*)&that)->chillvd ; 
+  return chillvd != ((IR_chillArraySymbol*)&that)->chillvd ;
 }
 
 bool IR_chillArraySymbol::operator==(const IR_Symbol &that) const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::operator==   EQUAL\n"); 
-  //chillAST_VarDecl *chillvd;
-  return chillvd == ((IR_chillArraySymbol*)&that)->chillvd ; 
-  /*
-  if (typeid(*this) != typeid(that))
-    return false;
-  
-  const IR_chillArraySymbol *l_that = static_cast<const IR_chillArraySymbol *>(&that);
-  return this->vd_ == l_that->vd_ && this->offset_ == l_that->offset_;
-  */
+  return chillvd == ((IR_chillArraySymbol*)&that)->chillvd ;
 }
 
 
@@ -316,6 +310,50 @@ IR_Ref * IR_chillScalarRef::clone() const {
   if (dre) return new IR_chillScalarRef(ir_, dre); // use declrefexpr if it exists
   return new IR_chillScalarRef(ir_, chillvd); // uses vardecl
 }
+
+// ----------------------------------------------------------------------------
+// Class: IR_chillArrayRef, also FORMERLY IR_chillPointerArrayRef which was the same ???
+// ----------------------------------------------------------------------------
+
+omega::CG_outputRepr *IR_chillPointerArrayRef::index(int dim) const {
+  //debug_fprintf(stderr, "IR_roseArrayRef::index( %d )  \n", dim);
+  return new omega::CG_chillRepr( chillASE->getIndex(dim) );// since we may not know index, this could die ???
+}
+
+IR_PointerSymbol *IR_chillPointerArrayRef::symbol() const {  // out of ir_clang.cc
+  chillAST_node *mb = chillASE->multibase();
+  chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
+  IR_PointerSymbol *PS =  new IR_chillPointerSymbol(ir_, chillASE->basedecl);  // vd);
+  return  PS;
+}
+
+bool IR_chillPointerArrayRef::operator!=(const IR_Ref &that) const {
+  //debug_fprintf(stderr, "IR_roseArrayRef::operator!=\n");
+  bool op = (*this) == that; // opposite
+  return !op;
+}
+
+bool IR_chillPointerArrayRef::operator==(const IR_Ref &that) const {
+  const IR_chillPointerArrayRef *l_that = static_cast<const IR_chillPointerArrayRef *>(&that);
+  const chillAST_ArraySubscriptExpr* thatASE = l_that->chillASE;
+  return (*chillASE) == (*thatASE);
+}
+
+omega::CG_outputRepr *IR_chillPointerArrayRef::convert() {
+  CG_chillRepr *result = new  CG_chillRepr( chillASE->clone() );
+  // delete this;  // if you do this, and call convert twice, you're DEAD
+  return result;
+}
+
+void IR_chillPointerArrayRef::Dump() const {
+  //debug_fprintf(stderr, "IR_rosePointerArrayRef::Dump()  this 0x%x  chillASE 0x%x\n", this, chillASE);
+  chillASE->print(); printf("\n");fflush(stdout);
+}
+
+IR_Ref *IR_chillPointerArrayRef::clone() const {
+  return new IR_chillPointerArrayRef(ir_, chillASE, iswrite);
+}
+
 
 
 // ----------------------------------------------------------------------------
@@ -745,6 +783,25 @@ IR_chillCode::~IR_chillCode() {
   }
 }
 
+// TODO this seems no different that createarrayref
+IR_PointerArrayRef *IR_chillCode::CreatePointerArrayRef(IR_PointerSymbol *sym,
+                                                       std::vector<omega::CG_outputRepr *> &index)
+{
+  IR_chillPointerSymbol *RPS = (IR_chillPointerSymbol *)sym;  // chill?
+  chillAST_VarDecl *base = RPS->chillvd;
+
+
+  std::vector<chillAST_node *> indeces;
+  for (int i = 0; i < index.size(); i++) {
+    omega::CG_chillRepr *CR = (omega::CG_chillRepr *)index[i];
+    chillAST_node *chillcode = CR->GetCode();
+    chillcode->print(0,stderr); debug_fprintf(stderr, "\n");
+    indeces.push_back( chillcode ); // TODO error check
+  }
+
+  chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( base, indeces, NULL);
+  return new IR_chillPointerArrayRef( this, ASE,  0); // 0 means not a write so far
+}
 
 
 
@@ -892,7 +949,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
 
   if (sym->isScalar()) {
     debug_fprintf(stderr, "scalar\n");
-    IR_roseScalarSymbol *RSS = (IR_roseScalarSymbol *)sym;
+    IR_chillScalarSymbol *RSS = (IR_chillScalarSymbol *)sym;
     chillAST_VarDecl *vd = RSS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -900,7 +957,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   }
   else if (sym->isArray()) {
     debug_fprintf(stderr, "array symbol at top,  array or pointer\n");
-    IR_roseArraySymbol *RAS = (IR_roseArraySymbol *)sym;
+    IR_chillArraySymbol *RAS = (IR_chillArraySymbol *)sym;
     chillAST_VarDecl *vd = RAS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -908,7 +965,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   }
   else if (sym->isPointer()) {
     debug_fprintf(stderr, "pointer symbol at top,  array or pointer  (TODO)\n");
-    IR_rosePointerSymbol *RPS = (IR_rosePointerSymbol *)sym;
+    IR_chillPointerSymbol *RPS = (IR_chillPointerSymbol *)sym;
     chillAST_VarDecl *vd = RPS->chillvd;
     debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
     debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
@@ -1198,7 +1255,7 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
     vd->print(0,stderr); debug_fprintf(stderr, "\n"); 
     vd->dump(); fflush(stdout); 
     if (vd->isPointer()) { 
-      IRPAR.push_back( new IR_rosePointerArrayRef( this, refs[i], refs[i]->imwrittento ) ); 
+      IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
     }
   }
   debug_fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
@@ -1333,6 +1390,31 @@ IR_Block *IR_chillCode::MergeNeighboringControlStructures(const vector<IR_Contro
    return CBlock; 
 }
 
+bool IR_chillCode::parent_is_array(IR_ArrayRef *a) {
+  chillAST_ArraySubscriptExpr* ASE = ((IR_chillArrayRef *)a)->chillASE;
+  chillAST_node *p = ASE->getParent();
+  if (!p) return false;
+  return p->isArraySubscriptExpr();
+}
+
+IR_OPERATION_TYPE IR_chillCode::getReductionOp(const omega::CG_outputRepr *repr)
+{
+  //debug_fprintf(stderr, "IR_roseCode::getReductionOp()\n");
+  chillAST_node *n = ((CG_chillRepr *)repr)->GetCode();
+  //debug_fprintf(stderr, "%s\n", n->getTypeString());
+  //n->print(); printf("\n"); fflush(stdout);
+
+  if (n->isBinaryOperator()) {
+    return  QueryExpOperation( repr );  // TODO chillRepr
+  }
+
+  throw std::runtime_error("IR_roseCode::getReductionOp()\n");
+}
+
+IR_Control *  IR_chillCode::FromForStmt(const omega::CG_outputRepr *repr)
+{
+  throw std::runtime_error("IR_chillCode::FromForStmt()\n");
+}
 
 IR_Block *IR_chillCode::GetCode() const {    // return IR_Block corresponding to current function?
   //debug_fprintf(stderr, "IR_chillCode::GetCode()\n"); 
@@ -1350,6 +1432,79 @@ IR_Block *IR_chillCode::GetCode() const {    // return IR_Block corresponding to
   return new IR_chillBlock(this, chillfunc ) ; 
 }
 
+IR_Control* IR_chillCode::GetCode(omega::CG_outputRepr* repr) const // what is this ???
+{
+  debug_fprintf(stderr, "IR_roseCode::GetCode(CG_outputRepr*)\n");
+
+  omega::CG_chillRepr* CR = (omega::CG_chillRepr* ) repr;
+  chillAST_node *chillcode = CR->GetCode();
+  chillcode->print(0,stderr); debug_fprintf(stderr, "\n\n");
+
+  // this routine is supposed to return an IR_Control.
+  // that can be one of 3 things: if, loop, or block
+  debug_fprintf(stderr, "chillcode is a %s\n", chillcode->getTypeString());
+  if (chillcode->isIfStmt()) {
+    return new IR_chillIf( this, chillcode );
+  }
+  if (chillcode->isLoop()) {  // ForStmt
+    return new IR_chillLoop( this, (chillAST_ForStmt *)chillcode );
+  }
+  if (chillcode->isCompoundStmt()) {
+    return new IR_chillBlock( this, (chillAST_CompoundStmt *)chillcode );
+  }
+
+  // anything else just wrap it in a compound stmt ???  TODO
+
+
+  throw std::runtime_error(std::string("Die at IR_chillCode::GetCode( repr ),  chillcode is a ") + chillcode->getTypeString());
+}
+
+bool IR_chillCode::FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B)
+{
+  // see if 2 array references are in the same statement (?)
+  chillAST_ArraySubscriptExpr* a = ((IR_chillArrayRef *)A)->chillASE;
+  chillAST_ArraySubscriptExpr* b = ((IR_chillArrayRef *)B)->chillASE;
+
+  //debug_fprintf(stderr, " IR_roseCode::FromSameStmt()\n");
+  //a->print(); printf("\n");
+  //b->print(); printf("\n");  fflush(stdout);
+
+  if (a == b) {
+    //debug_fprintf(stderr, "trivially true because they are exactly the same statement\n");
+    return true;
+  }
+
+  chillAST_node *AE = a->getEnclosingStatement();
+  chillAST_node *BE = b->getEnclosingStatement();
+  //AE->print(); printf("\n");
+  //BE->print(); printf("\n");  fflush(stdout);
+  return(AE == BE);
+}
+
+void IR_chillCode::printStmt(const omega::CG_outputRepr *repr)
+{
+  throw std::runtime_error("IR_chillCode:: printStmt()\n");
+}
+
+int IR_chillCode::getStmtType(const omega::CG_outputRepr *repr)
+{
+  // this seems to be 1 == a single statement.
+  //  sigh
+
+  chillAST_node *n = ((CG_chillRepr *)repr)->GetCode();
+  //n->print(); printf("\n"); fflush(stdout);
+  //debug_fprintf(stderr, "%s\n", n->getTypeString());
+
+  if (n->isBinaryOperator()) {
+    //debug_fprintf(stderr, "IR_roseCode::getStmtType() returning 1\n");
+    return 1;
+  }
+  if (n->isCompoundStmt()) {
+    //debug_fprintf(stderr, "IR_roseCode::getStmtType() returning 0\n");
+    return 0;
+  }
+  throw std::runtime_error("IR_chillCode::getStmtType () bailing\n");
+}
 
 void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
   fflush(stdout); 
@@ -1450,6 +1605,123 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
 }
 
 
+void IR_chillCode::CreateDefineMacro(std::string s,
+                                    std::string args,
+                                    omega::CG_outputRepr *repr)
+{
+  debug_fprintf(stderr, "ir_rose.cc  *IR_roseCode::CreateDefineMacro( string string repr)\n");
+  omega::CG_chillRepr *CR = (omega::CG_chillRepr *)repr;
+  vector<chillAST_node*> astvec = CR->getChillCode();
+
+  chillAST_node *output;
+  if (1 < astvec.size()) {
+    // make a compound node?
+    throw std::runtime_error(" IR_roseCode::CreateDefineMacro(), more than one ast???\n");
+  }
+  else output = astvec[0];
+
+  debug_fprintf(stderr, "#define %s%s ", s.c_str(), args.c_str());
+  debug_fprintf(stderr, "IR_roseCode::CreateDefineMacro(), CR chillnodes:\n");
+  CR->printChillNodes(); printf("\n"); fflush(stdout);
+  debug_fprintf(stderr, "IR_roseCode::CreateDefineMacro(), CR chillnodes DONE\n");
+
+  //what do we want ast for the macro to look like?
+  //debug_fprintf(stderr, "entire_file_AST %p\n", entire_file_AST);
+  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str(), entire_file_AST); // NULL);
+  //debug_fprintf(stderr, "args: '%s'\n", args.c_str());
+  //debug_fprintf(stderr, "output is of type %s\n", output->getTypeString());
+  //macro->addChild( output ); // setBody?
+
+  debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::CreateDefineMacro() adding macro to sourcefile\n");
+  entire_file_AST->addMacro( macro ); // ??
+  defined_macros.insert(std::pair<std::string, chillAST_node*>(s + args, output));
+
+
+  // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
+  // TODO one of these should probably go away
+  //debug_fprintf(stderr, "entire file had %d children\n",  entire_file_AST->children.size());
+  entire_file_AST->insertChild(0, macro);
+  //debug_fprintf(stderr, "entire file has %d children\n",  entire_file_AST->children.size());
+  return;
+}
+
+
+
+void IR_chillCode::CreateDefineMacro(std::string s,
+                                    std::vector<std::string> args,
+                                    omega::CG_outputRepr *repr)
+{
+  //debug_fprintf(stderr, "ir_rose.cc *IR_roseCode::CreateDefineMacro( string, VECTOR, repr )\n");
+
+  omega::CG_chillRepr *CR = (omega::CG_chillRepr *)repr;
+  vector<chillAST_node*> astvec = CR->getChillCode();
+
+  if (1 < astvec.size()) {
+    // make a compound node?
+    throw std::runtime_error(" IR_roseCode::CreateDefineMacro(), more than one ast???\n");
+  }
+  chillAST_node *sub = astvec[0]; // the thing we'll sub into
+  //debug_fprintf(stderr, "sub is of type %s\n", sub->getTypeString());
+
+  //chillAST_UnaryOperator *unary = new chillAST_UnaryOperator( "*", true, sub, entire_file_AST); // macro parent ??
+
+  //debug_fprintf(stderr, "#define %s", s.c_str());
+  //if (args.size()) {
+  //  debug_fprintf(stderr, "( ");
+  //  for (int i=0; i<args.size(); i++) {
+  //    if (i) debug_fprintf(stderr, ", ");
+  //    debug_fprintf(stderr, "%s", args[i].c_str());
+  //  }
+  //  debug_fprintf(stderr, " )");
+  //}
+  //debug_fprintf(stderr, "   ");
+  //sub->print(); printf("\n\n"); fflush(stdout);  // the body of the macro
+  //sub->dump();  printf("\n\n"); fflush(stdout);
+
+  // make the things in the output actually reference the (fake) vardecls we created for the args, so that we can do substitutions later
+
+  //what do we want ast for the macro to look like?
+  //debug_fprintf(stderr, "IR_Rosecode entire_file_AST %p\n",  entire_file_AST);
+  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str(), entire_file_AST); // NULL);
+
+
+  // create "parameters" for the #define
+  for (int i=0; i<args.size(); i++) {
+    //debug_fprintf(stderr, "'parameter' %s\n", args[i].c_str());
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "fake", args[i].c_str(), "", NULL);
+    //debug_fprintf(stderr, "adding parameter %d ", i); vd->dump(); fflush(stdout);
+    macro->addParameter( vd );
+
+    // find the references to this name in output // TODO
+    // make them point to the vardecl ..
+
+  }
+
+  macro->setBody( sub );
+
+  //debug_fprintf(stderr, "macro body is:\nprint()\n");
+  //sub->print(); printf("\ndump()\n"); fflush(stdout);
+  //sub->dump();  printf("\n"); fflush(stdout);
+
+
+  defined_macros.insert(std::pair<std::string, chillAST_node*>(s /* + args */, sub));
+
+  // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
+  // TODO one of these should probably go away
+  //debug_fprintf(stderr, "entire file had %d children\n",  entire_file_AST->children.size());
+  entire_file_AST->insertChild(0, macro);
+  //debug_fprintf(stderr, "entire file has %d children\n",  entire_file_AST->children.size());
+  return;
+}
+
+
+
+
+
+void IR_chillCode::CreateDefineMacro(std::string s,std::string args, std::string repr)
+{
+  throw std::runtime_error("IR_chillCode::CreateDefine Macro 2( string string string )\n");
+}
 
 
 void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
@@ -1513,79 +1785,98 @@ void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
 
 // TODO 
 IR_CONDITION_TYPE IR_chillCode::QueryBooleanExpOperation(const CG_outputRepr *repr) const {
-  return IR_COND_UNKNOWN;
+  CG_chillRepr *crepr = (CG_chillRepr *) repr;
+  chillAST_node *firstnode = crepr->chillnodes[0];
+  //debug_fprintf(stderr, "chillAST node type %s\n", firstnode->getTypeString());
+  //firstnode->print(); printf("\n"); fflush(stdout);
+
+  if (firstnode->isBinaryOperator()) { // the usual case
+    chillAST_BinaryOperator* BO = ( chillAST_BinaryOperator* ) firstnode;
+    const char *op = BO->op;
+
+    if (!strcmp("<", op))  return IR_COND_LT;
+    if (!strcmp("<=", op)) return IR_COND_LE;
+
+    if (!strcmp(">", op))  return IR_COND_GT;
+    if (!strcmp(">=", op)) return IR_COND_GE;
+
+    if (!strcmp("==", op)) return IR_COND_EQ;
+    if (!strcmp("!=", op)) return IR_COND_NE;
+  }
+
+  debug_fprintf(stderr, "IR_roseCode::QueryBooleanExpOperation() not a binop: %s\n", firstnode->getTypeString());
+  printf("\n\n"); firstnode->print(); printf("\n"); fflush(stdout);
+  return IR_COND_UNKNOWN; // what about if (0),  if (1)  etc?
 }
 
 
 
 IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) const {
-  //debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()\n");
+  debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()\n");
 
-  CG_chillRepr *crepr = (CG_chillRepr *) repr; 
-  chillAST_node *node = crepr->chillnodes[0];
-  //debug_fprintf(stderr, "chillAST node type %s\n", node->getTypeString());
+  CG_chillRepr *crepr = (CG_chillRepr *) repr;
+  chillAST_node *firstnode = crepr->chillnodes[0];
+  //debug_fprintf(stderr, "chillAST node type %s\n", firstnode->getTypeString());
+  //firstnode->print(0,stdout); debug_fprintf(stderr, "\n");
+  //firstnode->dump(0, stdout); debug_fprintf(stderr, "\n");
 
-  // really need to be more rigorous than this hack  // TODO 
-  if (node->isImplicitCastExpr()) node = ((chillAST_ImplicitCastExpr*)node)->subexpr;
-  if (node->isCStyleCastExpr())   node = ((chillAST_CStyleCastExpr*)  node)->subexpr;
-  if (node->isParenExpr())        node = ((chillAST_ParenExpr*)       node)->subexpr;
-
-  if (node->isIntegerLiteral() || node->isFloatingLiteral())  return IR_OP_CONSTANT;
-  else if (node->isBinaryOperator() || node->isUnaryOperator()) {
+  chillAST_node *node = firstnode;
+  if (node->isArraySubscriptExpr()) {
+    debug_fprintf(stderr, "IR_chillCode::QueryExpOperation() returning IR_OP_ARRAY_VARIABLE\n");
+    return  IR_OP_ARRAY_VARIABLE;
+  }
+  else if (node->isUnaryOperator()) {
     char *opstring;
-    if (node->isBinaryOperator()) 
-      opstring= ((chillAST_BinaryOperator*)node)->op; // TODO enum
-    else
-      opstring= ((chillAST_UnaryOperator*)node)->op; // TODO enum
-      
-    if (!strcmp(opstring, "+")) return IR_OP_PLUS;
-    if (!strcmp(opstring, "-")) return IR_OP_MINUS;
-    if (!strcmp(opstring, "*")) return IR_OP_MULTIPLY;
-    if (!strcmp(opstring, "/")) return IR_OP_DIVIDE;
-    if (!strcmp(opstring, "=")) return IR_OP_ASSIGNMENT;
+    opstring= ((chillAST_UnaryOperator*)node)->op; // TODO enum
 
-    debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperation() UNHANDLED Binary(or Unary)Operator op type (%s)\n", opstring); 
+    //debug_fprintf(stderr, "opstring '%s'\n", opstring);
+    if (!strcmp(opstring, "+"))  return IR_OP_POSITIVE;
+    if (!strcmp(opstring, "-"))  return IR_OP_NEGATIVE;
+    debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperation() UNHANDLED Binary Operator op type (%s)\n", opstring);
     exit(-1);
   }
-  else if (node->isDeclRefExpr() ) return  IR_OP_VARIABLE; // ?? 
-  //else if (node->is ) return  something;
-  else { 
-    debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()  UNHANDLED NODE TYPE %s\n", node->getTypeString());
-    exit(-1); 
+  else if (node->isBinaryOperator()) {
+    char *opstring;
+    opstring= ((chillAST_BinaryOperator*)node)->op; // TODO enum
+
+    //debug_fprintf(stderr, "opstring '%s'\n", opstring);
+    if (!strcmp(opstring, "+"))  return IR_OP_PLUS;
+    if (!strcmp(opstring, "-"))  return IR_OP_MINUS;
+    if (!strcmp(opstring, "*"))  return IR_OP_MULTIPLY;
+    if (!strcmp(opstring, "/"))  return IR_OP_DIVIDE;
+    if (!strcmp(opstring, "="))  return IR_OP_ASSIGNMENT;
+    if (!strcmp(opstring, "+=")) return IR_OP_PLUS_ASSIGNMENT;
+    if (!strcmp(opstring, "==")) return IR_OP_EQ;
+    if (!strcmp(opstring, "!=")) return IR_OP_NEQ;
+    if (!strcmp(opstring, ">=")) return IR_OP_GE;
+    if (!strcmp(opstring, "<=")) return IR_OP_LE;
+    if (!strcmp(opstring, "%"))  return IR_OP_MOD;
+
+    debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperation() UNHANDLED Binary Operator op type (%s)\n", opstring);
+    exit(-1);
   }
 
-  /* CHILL 
-  Expr *e = static_cast<const CG_chillRepr *>(repr)->GetExpression();
-  if(isa<IntegerLiteral>(e) || isa<FloatingLiteral>(e)) return IR_OP_CONSTANT;
-  else if(isa<DeclRefExpr>(e)) return IR_OP_VARIABLE;
-  else if(BinaryOperator *bop = dyn_cast<BinaryOperator>(e)) {
-    switch(bop->getOpcode()) {
-    case BO_Assign: return IR_OP_ASSIGNMENT;
-    case BO_Add: return IR_OP_PLUS;
-    case BO_Sub: return IR_OP_MINUS;
-    case BO_Mul: return IR_OP_MULTIPLY;
-    case BO_Div: return IR_OP_DIVIDE;
-    default: return IR_OP_UNKNOWN;
-    }
-  } else if(UnaryOperator *uop = dyn_cast<UnaryOperator>(e)) {
-    switch(uop->getOpcode()) {
-    case UO_Minus: return IR_OP_NEGATIVE;
-    case UO_Plus: return IR_OP_POSITIVE;
-    default: return IR_OP_UNKNOWN;
-    }
-  } else if(ConditionalOperator *cop = dyn_cast<ConditionalOperator>(e)) {
-    BinaryOperator *bop;
-    if(bop = dyn_cast<BinaryOperator>(cop->getCond())) {
-      if(bop->getOpcode() == BO_GT) return IR_OP_MAX;
-      else if(bop->getOpcode() == BO_LT) return IR_OP_MIN;
-    } else return IR_OP_UNKNOWN;
-    
-  } 
-  
-  else if(e == NULL) return IR_OP_NULL;
-  else return IR_OP_UNKNOWN;
+  // really need to be more rigorous than this hack  // TODO
+  //if (firstnode->isImplicitCastExpr()) node = ((chillAST_ImplicitCastExpr*)firstnode)->subexpr;
+  //if (firstnode->isCStyleCastExpr())   node = ((chillAST_CStyleCastExpr*)  firstnode)->subexpr;
+  //if (firstnode->isParenExpr())        node = ((chillAST_ParenExpr*)       firstnode)->subexpr;
+  node = firstnode->findref();
+  //debug_fprintf(stderr, "node type is %s\n", node->getTypeString());
+
+  if (node->isIntegerLiteral() || node->isFloatingLiteral()) {
+    debug_fprintf(stderr, "ir_rose.cc  return IR_OP_CONSTANT\n");
+    return IR_OP_CONSTANT; // but node may be one of the above operations ... ??
   }
-   END CLANG */
+  else if (node->isDeclRefExpr() ) {
+    //node->print(0, stderr); debug_fprintf(stderr, "\n");
+    debug_fprintf(stderr, "return  IR_OP_VARIABLE  ??\n");
+    return  IR_OP_VARIABLE; // ??
+  }
+  //else if (node->is ) return  something;
+  else {
+    debug_fprintf(stderr, "IR_roseCode::QueryExpOperation()  UNHANDLED NODE TYPE %s\n", node->getTypeString());
+    exit(-1);
+  }
 }
 
 
@@ -1715,3 +2006,170 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
   }
 }
 
+omega::CG_outputRepr *IR_chillCode::CreateArrayType(IR_CONSTANT_TYPE type, omega::CG_outputRepr* size)
+{
+  throw std::runtime_error("IR_roseCode::CreateArrayType()   NOT IMPLEMENTED\n");
+  //switch (type):  BUH
+  //  case IR_CONSTANT
+  //chillAST_VarDecl *vd = new chillAST_VarDecl(
+}
+
+omega::CG_outputRepr *IR_chillCode::CreatePointerType(IR_CONSTANT_TYPE type) // why no name???
+{
+  //debug_fprintf(stderr, "IR_roseCode::CreatePointerType( type )\n");
+  const char *typestr = irTypeString( type );
+
+  // pointer to something, not named
+  // ast doesnt' have a type like this, per se. TODO
+  // Use a variable decl with no name? TODO
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "", "", NULL);
+  vd->numdimensions = 1;
+  vd->knownArraySizes = false;
+
+  omega::CG_chillRepr *CR = new omega::CG_chillRepr( vd );
+  return CR;
+}
+
+omega::CG_outputRepr *IR_chillCode::CreatePointerType(omega::CG_outputRepr *type)
+{
+  throw std::runtime_error("IR_roseCode::CreatePointerType ( CG_outputRepr *type )\n");
+}
+
+omega::CG_outputRepr *IR_chillCode::CreateScalarType(IR_CONSTANT_TYPE type)
+{
+  debug_fprintf(stderr, "IR_roseCode::CreateScalarType() 1\n");
+  const char *typestr = irTypeString( type );
+
+  // Use a variable decl with no name? TODO
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "", "", NULL);
+  omega::CG_chillRepr *CR = new omega::CG_chillRepr( vd );
+  return CR;
+}
+
+// Manu:: replaces the RHS with a temporary array reference IN PLACE - part of scalar expansion
+bool  IR_chillCode::ReplaceRHSExpression(omega::CG_outputRepr *code, IR_Ref *ref){
+  //debug_fprintf(stderr, "IR_roseCode::ReplaceRHSExpression()\n");
+
+  // make sure the code has just one statement and that it is an assignment(?)
+  CG_chillRepr * CR = (CG_chillRepr * ) code;
+  int numnodes = CR->chillnodes.size();
+
+  //debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
+  for (int i=0; i<numnodes; i++) {
+    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+
+  if (numnodes == 1) {
+    chillAST_node *nodezero = CR->chillnodes[0];
+    if (nodezero-> isAssignmentOp()) {
+      chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *)nodezero;
+
+      omega::CG_chillRepr *RR =  (omega::CG_chillRepr *)(ref->convert());
+      chillAST_node * n = RR->GetCode();
+      BO->setRHS(  n );  // replace in place
+      //debug_fprintf(stderr, "binary op with replaced RHS is now\n");
+      //BO->print(0,stderr); debug_fprintf(stderr, "\n");
+      return true;
+    }
+    debug_fprintf(stderr, "IR_roseCode::ReplaceRHSExpression()  trying to replace the RHS of something that is not an assignment??\n");
+    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+  else {
+    debug_fprintf(stderr, "IR_roseCode::ReplaceRHSExpression()  trying to replace the RHS of more than one node ???\n");
+  }
+  return false; // ??
+
+}
+
+// replaces the RHS with a temporary array reference - part of scalar expansion
+omega::CG_outputRepr *  IR_chillCode::GetRHSExpression(omega::CG_outputRepr *code){
+  //debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()\n");
+
+  // make sure the code has just one statement and that it is an assignment(?)
+  CG_chillRepr * CR = (CG_chillRepr * ) code;
+  int numnodes = CR->chillnodes.size();
+  debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
+  for (int i=0; i<numnodes; i++) {
+    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+
+  if (numnodes == 1) {
+    chillAST_node *nodezero = CR->chillnodes[0];
+    if (nodezero-> isAssignmentOp()) {
+      return new CG_chillRepr(  ((chillAST_BinaryOperator *) nodezero)->rhs ); // clone??
+    }
+    debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of something that is not an assignment??\n");
+    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+  else {
+    debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of more than one node ???\n");
+  }
+
+  throw std::runtime_error("Die at IR_chillCode::GetRHSExpression");
+}
+
+
+
+omega::CG_outputRepr *  IR_chillCode::GetLHSExpression(omega::CG_outputRepr *code){
+  debug_fprintf(stderr, "IR_roseCode::GetLHSExpression()\n");
+  // make sure the code has just one statement and that it is an assignment(?)
+  CG_chillRepr * CR = (CG_chillRepr * ) code;
+  int numnodes = CR->chillnodes.size();
+  debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
+  for (int i=0; i<numnodes; i++) {
+    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+
+  if (numnodes == 1) {
+    chillAST_node *nodezero = CR->chillnodes[0];
+    if (nodezero-> isAssignmentOp()) {
+      return new CG_chillRepr(  ((chillAST_BinaryOperator *) nodezero)->lhs ); // clone??
+    }
+    debug_fprintf(stderr, "IR_roseCode::GetLHSExpression()  trying to find the LHS of something that is not an assignment??\n");
+    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
+  }
+  else {
+    debug_fprintf(stderr, "IR_roseCode::GetLHSExpression()  trying to find the LHS of more than one node ???\n");
+  }
+
+  throw std::runtime_error("Die at IR_chillCode::GetLHSExpression");
+}
+
+
+omega::CG_outputRepr *IR_chillCode::CreateMalloc(const IR_CONSTANT_TYPE type,
+                                                std::string lhs, // this is the variable to be assigned the new mwmory!
+                                                omega::CG_outputRepr * size_repr){
+
+  debug_fprintf(stderr, "IR_roseCode::CreateMalloc 1()\n");
+  char *typ = irTypeString( type );
+  debug_fprintf(stderr, "malloc  %s %s \n", typ, lhs.c_str());
+
+  chillAST_node *siz = ((CG_chillRepr *)size_repr)->GetCode();
+  //siz->print(0,stderr); debug_fprintf(stderr, "\n");
+
+  chillAST_Malloc* mal = new chillAST_Malloc( typ, siz ); // malloc( sizeof(int) * 248 )   ... no parent
+  // this is how it should be
+  // return new CG_chillRepr( mal );
+
+
+  // the rest of this function should not be here
+  chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( typ, mal );
+  // we only have the name of a variable to assign the malloc memory to. Broken
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typ, lhs.c_str(), "*", NULL );
+  chillAST_BinaryOperator *BO = new chillAST_BinaryOperator( vd, "=", CE );
+  BO->print(0, stderr);
+  return new CG_chillRepr( BO );
+
+
+
+}
+
+
+omega::CG_outputRepr *IR_chillCode::CreateMalloc (omega::CG_outputRepr *type, std::string lhs,
+                                                 omega::CG_outputRepr * size_repr) {
+  throw std::runtime_error("Die at IR_chillCode::CreateMalloc 2()\n");
+}
+
+omega::CG_outputRepr *IR_chillCode::CreateFree(  omega::CG_outputRepr *exp){
+  throw std::runtime_error("IR_roseCode::CreateFree()\n");
+}

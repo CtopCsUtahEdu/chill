@@ -1,9 +1,6 @@
 #ifndef CG_roseBuilder_h
 #define CG_roseBuilder_h
 
-// wrap the entire file in an ifdef
-#ifdef FRONTEND_ROSE 
-
 #include <basic/Tuple.h>
 #include <code_gen/rose_attributes.h>
 #include <code_gen/CG_outputBuilder.h>
@@ -241,6 +238,4 @@ std::vector<SgVarRefExp *>substitute(SgNode *tnl, const SgVariableSymbol *sym, S
 
 } // namespace
 
-#endif // BUILD ROSE 
-
-#endif // first time we've seen this header 
+#endif // first time we've seen this header

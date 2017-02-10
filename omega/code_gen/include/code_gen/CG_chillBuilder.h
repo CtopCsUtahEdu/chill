@@ -189,6 +189,37 @@ public:
   CG_outputRepr* CreatePointer(std::string  &name) const;
 	CG_outputRepr* ObtainInspectorRange(const std::string &_s, const std::string &_name) const;
 
+  CG_outputRepr *CreateLinkedListStruct(const std::string class_name,
+                                        std::vector<std::string> class_data_members,
+                                        std::vector<CG_outputRepr *> class_data_types) {
+		// TODO Implement
+    throw std::runtime_error(__PRETTY_FUNCTION__);
+  }
+
+	CG_outputRepr *CreateClass(const std::string class_name,
+			std::vector<std::string> class_data_members = std::vector<std::string>(), std::vector<CG_outputRepr *> class_data_types = std::vector<
+					CG_outputRepr *>(), std::vector<std::string> methods =
+					std::vector<std::string>(),
+			std::vector<std::vector<std::string> > method_params = std::vector<
+					std::vector<std::string> >(),
+			std::vector<CG_outputRepr *> method_return_types = std::vector<
+					CG_outputRepr *>(),
+			std::vector<CG_outputRepr *> method_bodies = std::vector<
+					CG_outputRepr *>()) {
+		// TODO Implement
+		throw std::runtime_error(__PRETTY_FUNCTION__);
+	}
+
+	CG_outputRepr* CreateArrowRefExpression(const std::string &_s,
+																					CG_outputRepr *rop) const {
+		// TODO Implement
+    throw std::runtime_error(__PRETTY_FUNCTION__);
+	}
+	CG_outputRepr* CreateArrowRefExpression(CG_outputRepr *lop,
+																					CG_outputRepr *rop) const {
+    // TODO Implement
+		throw std::runtime_error(__PRETTY_FUNCTION__);
+	}
 };
 
 } // namespace omega

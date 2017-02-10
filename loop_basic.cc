@@ -11,8 +11,6 @@
 #include "omegatools.hh"
 #include <string.h>
 
-#include "ir_rose.hh" 
-
 #include <code_gen/CG_utils.h>
 #include "iegenlib.h"
 

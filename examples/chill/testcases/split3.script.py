@@ -9,7 +9,7 @@
 from chill import *
 
 source('split.c')
-destination('split2modified.c')
+destination('split3modified.c')
 
 procedure('mm')
 

@@ -12,8 +12,6 @@
    2/2/2011 Created by Protonu Basu. 
 *****************************************************************************/
 
-#ifdef FRONTEND_ROSE 
-
 #include <typeinfo>
 #include "ir_cudarose.hh"
 #include "loop.hh"
@@ -68,9 +66,9 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
   std::string s = std::string("_P") + omega::to_string(rose_array_counter++);
   debug_fprintf(stderr, "new array name is %s\n", s.c_str()); 
   
-  if (typeid(*sym)  == typeid(IR_roseArraySymbol)) {
+  if (typeid(*sym)  == typeid(IR_chillArraySymbol)) {
     debug_fprintf(stderr, "%s is an array\n",  sym->name().c_str());
-    IR_roseArraySymbol *asym = (IR_roseArraySymbol *) sym;
+    IR_chillArraySymbol *asym = (IR_chillArraySymbol *) sym;
 
     if (asym->base->isMemberExpr()) {
       debug_fprintf(stderr, "arraySymbol is a MemberExpr  "); asym->base->print(0,stderr); debug_fprintf(stderr, "\n"); 
@@ -120,7 +118,7 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
 
     debug_fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions); 
     newarray->varname = strdup(s.c_str()); 
-    IR_roseArraySymbol *newsym = new IR_roseArraySymbol( asym->ir_, newarray );
+    IR_chillArraySymbol *newsym = new IR_chillArraySymbol( asym->ir_, newarray );
     if (sharedAnnotation == 1) { 
       debug_fprintf(stderr, "%s is SHARED\n", newarray->varname );
       newarray->isShared = true; 
@@ -169,5 +167,3 @@ bool IR_cudaroseCode::commit_loop(Loop *loop, int loop_num) {
 
 IR_cudaroseCode::~IR_cudaroseCode() {
 }
-
-#endif

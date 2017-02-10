@@ -11,7 +11,10 @@
 #include "chill_io.hh"
 
 
-void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs ); 
+extern vector<chillAST_VarDecl *> VariableDeclarations;
+extern vector<chillAST_FunctionDecl *> FunctionDeclarations;
+
+void findmanually( chillAST_node *node, char *procname, vector<chillAST_node*>& procs );
 
 extern vector<chillAST_VarDecl *> VariableDeclarations;  // a global.   TODO 
 
@@ -34,18 +37,24 @@ struct IR_chillScalarSymbol: public IR_ScalarSymbol {
 
 struct IR_chillArraySymbol: public IR_ArraySymbol {
   //int indirect_;             // what was this? 
-  int offset_;                 // what is this? 
+  int offset_;                 // what is this?
+  chillAST_node *base;          // Usually a vardecl but can be a member expression
   chillAST_VarDecl *chillvd; 
 
   IR_chillArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
-    //if ( vd == 0 ) 
-    //debug_fprintf(stderr, "IR_chillArraySymbol::IR_chillArraySymbol (%s)  vd 0x%x\n", vd->varname, vd); 
     ir_ = ir;
+    base = vd;
     chillvd = vd; 
     //indirect_ = indirect;
     offset_ = offset;
   }
-  
+
+  IR_chillArraySymbol(const IR_Code *ir, chillAST_node *n, int offset = 0) {
+    ir_ = ir;
+    base = n;
+    chillvd = n->multibase();
+    offset_ = offset;
+  }
 
   // No Fortran support!
   IR_ARRAY_LAYOUT_TYPE layout_type() const {
@@ -222,7 +231,29 @@ struct IR_chillArrayRef: public IR_ArrayRef {
   virtual void Dump() const;
 };
 
+struct IR_chillPointerArrayRef: public IR_PointerArrayRef { // exactly the same as arrayref ???
+  chillAST_ArraySubscriptExpr* chillASE;
+  int iswrite;
 
+  IR_chillPointerArrayRef(const IR_Code *ir, chillAST_ArraySubscriptExpr *ase, bool write ) {
+    //debug_fprintf(stderr, "IR_XXXXPointerArrayRef::IR_XXXXArrayRef() '%s' write %d\n\n", ase->basedecl->varname, write);
+    ir_ = ir;
+    chillASE = ase;
+    // dies? ase->dump(); fflush(stdout);
+
+    iswrite = write;  // ase->imwrittento;
+  }
+
+
+  bool is_write() const  { return iswrite; };
+  omega::CG_outputRepr *index(int dim) const;
+  IR_PointerSymbol *symbol() const;
+  bool operator==(const IR_Ref &that) const;
+  bool operator!=(const IR_Ref &that) const; // not the opposite logic to ==     TODO
+  omega::CG_outputRepr *convert();
+  IR_Ref *clone() const;
+  virtual void Dump() const;
+};
 
 struct IR_chillLoop: public IR_Loop {
   int step_size_;
@@ -369,8 +400,7 @@ struct IR_chillPointerSymbol: public IR_PointerSymbol {
 	IR_CONSTANT_TYPE elem_type() const;
 };
 
-
-class IR_chillCode: public IR_Code{   // for an entire file?  A single function? 
+class IR_chillCode: public IR_Code{   // for an entire file?  A single function?
 protected:
 
   //  
@@ -380,6 +410,9 @@ protected:
   std::vector<chillAST_VarDecl> entire_file_symbol_table;
   // loop symbol table??   for (int i=0;  ... )  ??
 
+
+  // TODO yeah, these need to be associated with a sourcefile ??
+  std::map<std::string, chillAST_node *> defined_macros;  // TODO these need to be in a LOCATION
 
 public:
   chillAST_SourceFile *entire_file_AST;
@@ -415,17 +448,32 @@ public:
   omega::CG_outputRepr*  CreateArrayRefRepr(const IR_ArraySymbol *sym,
                                             std::vector<omega::CG_outputRepr *> &index);
 
+  void CreateDefineMacro(std::string s,std::string args,  omega::CG_outputRepr *repr);
+  void CreateDefineMacro(std::string s,std::string args, std::string repr);
+
+  void CreateDefineMacro(std::string s,std::vector<std::string>args, omega::CG_outputRepr *repr);
+
   int ArrayIndexStartAt() { return 0;} // TODO FORTRAN
 
   std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
   std::vector<IR_ArrayRef *> FindArrayRef(const omega::CG_outputRepr *repr) const;
 
   std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const;
+  IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
+                                            std::vector<omega::CG_outputRepr *> &index);
 
   std::vector<IR_Control *> FindOneLevelControlStructure(const IR_Block *block) const;
   IR_Block *MergeNeighboringControlStructures(const std::vector<IR_Control *> &controls) const;
+  bool parent_is_array(IR_ArrayRef *a); // looking for nested array refs??
+
+  bool FromSameStmt(IR_ArrayRef *A, IR_ArrayRef *B);
+  void printStmt(const omega::CG_outputRepr *repr);
+  int getStmtType(const omega::CG_outputRepr *repr);
+  IR_OPERATION_TYPE getReductionOp(const omega::CG_outputRepr *repr);
+  IR_Control *  FromForStmt(const omega::CG_outputRepr *repr);
 
   IR_Block *GetCode() const;
+  IR_Control* GetCode(omega::CG_outputRepr*) const; // what is this ???
   void ReplaceCode(IR_Control *old, omega::CG_outputRepr *repr);
   void ReplaceExpression(IR_Ref *old, omega::CG_outputRepr *repr);
 
@@ -434,9 +482,20 @@ public:
   std::vector<omega::CG_outputRepr *> QueryExpOperand(const omega::CG_outputRepr *repr) const;
   IR_Ref *Repr2Ref(const omega::CG_outputRepr *) const;
 
+  omega::CG_outputRepr *CreateArrayType(IR_CONSTANT_TYPE type, omega::CG_outputRepr* size);
+  omega::CG_outputRepr *CreatePointerType(IR_CONSTANT_TYPE type);
+  omega::CG_outputRepr *CreatePointerType(omega::CG_outputRepr *type);
+  omega::CG_outputRepr *CreateScalarType(IR_CONSTANT_TYPE type);
 
+  bool ReplaceRHSExpression(omega::CG_outputRepr *code, IR_Ref *ref);
 
-
+  omega::CG_outputRepr * GetRHSExpression(omega::CG_outputRepr *code);
+  omega::CG_outputRepr * GetLHSExpression(omega::CG_outputRepr *code);
+  omega::CG_outputRepr *CreateMalloc(const IR_CONSTANT_TYPE type, std::string lhs,
+                                     omega::CG_outputRepr * size_repr);
+  omega::CG_outputRepr *CreateMalloc  (omega::CG_outputRepr *type, std::string lhs,
+                                       omega::CG_outputRepr * size_repr);
+  omega::CG_outputRepr *CreateFree( omega::CG_outputRepr *exp);
   friend class IR_chillArraySymbol;
   friend class IR_chillArrayRef;
 };

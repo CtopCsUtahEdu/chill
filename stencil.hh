@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "ir_rose.hh"
 #include "ir_chill.hh"
 #include "chill_ast.hh"
 
@@ -11,8 +10,7 @@
 
 // #include "loop.hh"
 #include "ir_code.hh"
-#include "ir_rose.hh"
-#include <ir_chill.hh>  // ?? 
+#include <ir_chill.hh>  // ??
 
 
 

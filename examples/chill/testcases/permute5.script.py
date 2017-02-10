@@ -12,7 +12,6 @@ source('permute123456.c')
 destination('permute5modified.c')
 
 procedure('mm')
-format('rose')
 
 loop(0)
 

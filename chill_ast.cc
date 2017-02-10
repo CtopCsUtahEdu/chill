@@ -50,21 +50,24 @@ const char* Chill_AST_Node_Names[] = {
 };
 
 char *parseUnderlyingType( char *sometype ) {
-  int len = strlen(sometype);
-  //debug_fprintf(stderr, "parseUnderlyingType( %s )\n", sometype); 
-  char *underlying = strdup(sometype); 
+    int len = strlen(sometype);
+  char *underlying = strdup(sometype);
   char *p;
-  char *start = underlying;
 
-  // ugly.  we want to turn "float *" into "float" but "struct abc *" into struct abc.
-  // there are probably many more cases. have an approved list?   TODO 
-  if (strstr(underlying, "struct ")) start += 7;  // (length("struct "))
-  //debug_fprintf(stderr, "sometype '%s'   start '%s'\n", sometype, start); 
-  if (p = index(start, ' ')) *p = '\0'; // end at first space     leak
-  if (p = index(start, '[')) *p = '\0'; // leak
-  if (p = index(start, '*')) *p = '\0'; // leak
-  
-  return underlying; 
+  p = &underlying[len - 1];
+
+  while (p > underlying)
+    if (*p == ' ' || *p == '*')
+      --p;
+    else if (*p == ']') {
+      while (*p != '[') --p;
+      --p;
+    }
+    else break;
+
+  *(p + 1) = '\0';
+
+  return underlying;
 }
 
 void printSymbolTable( chillAST_SymbolTable *st ) { 
@@ -267,13 +270,7 @@ char *parseArrayParts( char *sometype ) {
   return arraypart;
 }
 
-
-
-
-
-
-
-char *splitTypeInfo( char *underlyingtype ) { // return the bracketed part of a type
+char *splitTypeInfo( char *underlyingtype ) {
   char *ap = ulhack(parseArrayParts( underlyingtype ));  // return this
 
   // now need to remove all that from the underlyingtype to get 
@@ -286,15 +283,10 @@ char *splitTypeInfo( char *underlyingtype ) { // return the bracketed part of a 
     if (*(start-1) == ' ') start--;  // hack 
     *start = '\0';
 
-    // ugly. very leaky 
-    strcpy( underlyingtype, parseUnderlyingType( underlyingtype )); 
-    
-    // ulhack( arraypart ); 
+    strcpy( underlyingtype, underlyingtype);
   }
-  return ap;  // leak unless caller frees this 
+  return arraypart;  // leak unless caller frees this
 }
-
-
 
 bool isRestrict( const char *sometype ) { // does not modify sometype
   string r( "__restrict__" );
