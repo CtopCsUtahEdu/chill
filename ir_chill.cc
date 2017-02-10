@@ -123,22 +123,30 @@ IR_Symbol *IR_chillScalarSymbol::clone() const {
 // ----------------------------------------------------------------------------
 
 string IR_chillArraySymbol::name() const {
-  return string( strdup( chillvd ->varname)); 
+  if (base->isMemberExpr()) {
+    debug_fprintf(stderr, "OMG WE'LL ALL BE KILLED\n");
+    return  std::string("c.i");  // TODO
+  }
+  return string(chillvd ->varname);
 }
 
 
 int IR_chillArraySymbol::elem_size() const {
-  debug_fprintf(stderr, "IR_chillArraySymbol::elem_size()  TODO\n");  exit(-1); 
-  return 8;  // TODO 
+  debug_fprintf(stderr, "var is of type %s\n", chillvd->vartype);
+  char *typ = chillvd->vartype;
+  if (!typ) {
+    throw std::runtime_error(string(__PRETTY_FUNCTION__) + ": Variable type not known");
+  }
+  if (!strcmp("int", typ)) return sizeof(int); // ??
+  if (!strcmp("float", typ)) return sizeof(float); // ??
+  if (!strcmp("double", typ)) return sizeof(double); // ??
+
+  throw std::runtime_error(string(__PRETTY_FUNCTION__) + ": Unhandled variable type of " + typ);
 }
 
 
 int IR_chillArraySymbol::n_dim() const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()\n");
-  //debug_fprintf(stderr, "variable %s %s %s\n", chillvd->vartype, chillvd->varname, chillvd->arraypart);
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim() %d\n", chillvd->numdimensions); 
-  //debug_fprintf(stderr, "IR_chillArraySymbol::n_dim()  TODO \n"); exit(-1); 
-  return chillvd->numdimensions; 
+  return chillvd->numdimensions;
 }
 
 IR_CONSTANT_TYPE IR_chillArraySymbol::elem_type() const { 
@@ -150,28 +158,17 @@ IR_CONSTANT_TYPE IR_chillArraySymbol::elem_type() const {
 
 // TODO
 CG_outputRepr *IR_chillArraySymbol::size(int dim) const {
-  debug_fprintf(stderr, "IR_chillArraySymbol::n_size()  TODO \n"); exit(-1); 
+  throw std::runtime_error("IR_chillArraySymbol::n_size()  TODO \n");
   return NULL;
 }
 
 
 bool IR_chillArraySymbol::operator!=(const IR_Symbol &that) const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::operator!=   NOT EQUAL\n"); 
-  //chillAST_VarDecl *chillvd;
-  return chillvd != ((IR_chillArraySymbol*)&that)->chillvd ; 
+  return chillvd != ((IR_chillArraySymbol*)&that)->chillvd ;
 }
 
 bool IR_chillArraySymbol::operator==(const IR_Symbol &that) const {
-  //debug_fprintf(stderr, "IR_chillArraySymbol::operator==   EQUAL\n"); 
-  //chillAST_VarDecl *chillvd;
-  return chillvd == ((IR_chillArraySymbol*)&that)->chillvd ; 
-  /*
-  if (typeid(*this) != typeid(that))
-    return false;
-  
-  const IR_chillArraySymbol *l_that = static_cast<const IR_chillArraySymbol *>(&that);
-  return this->vd_ == l_that->vd_ && this->offset_ == l_that->offset_;
-  */
+  return chillvd == ((IR_chillArraySymbol*)&that)->chillvd ;
 }
 
 

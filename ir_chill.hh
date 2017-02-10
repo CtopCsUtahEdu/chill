@@ -37,18 +37,24 @@ struct IR_chillScalarSymbol: public IR_ScalarSymbol {
 
 struct IR_chillArraySymbol: public IR_ArraySymbol {
   //int indirect_;             // what was this? 
-  int offset_;                 // what is this? 
+  int offset_;                 // what is this?
+  chillAST_node *base;          // Usually a vardecl but can be a member expression
   chillAST_VarDecl *chillvd; 
 
   IR_chillArraySymbol(const IR_Code *ir, chillAST_VarDecl *vd, int offset = 0) {
-    //if ( vd == 0 ) 
-    //debug_fprintf(stderr, "IR_chillArraySymbol::IR_chillArraySymbol (%s)  vd 0x%x\n", vd->varname, vd); 
     ir_ = ir;
+    base = vd;
     chillvd = vd; 
     //indirect_ = indirect;
     offset_ = offset;
   }
-  
+
+  IR_chillArraySymbol(const IR_Code *ir, chillAST_node *n, int offset = 0) {
+    ir_ = ir;
+    base = n;
+    chillvd = n->multibase();
+    offset_ = offset;
+  }
 
   // No Fortran support!
   IR_ARRAY_LAYOUT_TYPE layout_type() const {
