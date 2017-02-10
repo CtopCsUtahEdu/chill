@@ -74,58 +74,54 @@ using namespace clang::driver;
 using namespace omega;
 using namespace std;
 
+namespace {
+  static string binops[] = {
+      " ", " ",             // BO_PtrMemD, BO_PtrMemI,       // [C++ 5.5] Pointer-to-member operators.
+      "*", "/", "%",        // BO_Mul, BO_Div, BO_Rem,       // [C99 6.5.5] Multiplicative operators.
+      "+", "-",             // BO_Add, BO_Sub,               // [C99 6.5.6] Additive operators.
+      "<<", ">>",           // BO_Shl, BO_Shr,               // [C99 6.5.7] Bitwise shift operators.
+      "<", ">", "<=", ">=", // BO_LT, BO_GT, BO_LE, BO_GE,   // [C99 6.5.8] Relational operators.
+      "==", "!=",           // BO_EQ, BO_NE,                 // [C99 6.5.9] Equality operators.
+      "&",                  // BO_And,                       // [C99 6.5.10] Bitwise AND operator.
+      "^",                 // BO_Xor,                       // [C99 6.5.11] Bitwise XOR operator.
+      "|",                  // BO_Or,                        // [C99 6.5.12] Bitwise OR operator.
+      "&&",                 // BO_LAnd,                      // [C99 6.5.13] Logical AND operator.
+      "||",                 // BO_LOr,                       // [C99 6.5.14] Logical OR operator.
+      "=", "*=",            // BO_Assign, BO_MulAssign,      // [C99 6.5.16] Assignment operators.
+      "/=", "%=",           // BO_DivAssign, BO_RemAssign,
+      "+=", "-=",           // BO_AddAssign, BO_SubAssign,
+      "<<=", ">>=",         // BO_ShlAssign, BO_ShrAssign,
+      "&&=", "^=",         // BO_AndAssign, BO_XorAssign,
+      "||=",                // BO_OrAssign,
+      ","};                 // BO_Comma                      // [C99 6.5.17] Comma operator.
 
-static string binops[] = {
-  " ", " ",             // BO_PtrMemD, BO_PtrMemI,       // [C++ 5.5] Pointer-to-member operators.
-  "*", "/", "%",        // BO_Mul, BO_Div, BO_Rem,       // [C99 6.5.5] Multiplicative operators.
-  "+", "-",             // BO_Add, BO_Sub,               // [C99 6.5.6] Additive operators.
-  "<<", ">>",           // BO_Shl, BO_Shr,               // [C99 6.5.7] Bitwise shift operators.
-  "<", ">", "<=", ">=", // BO_LT, BO_GT, BO_LE, BO_GE,   // [C99 6.5.8] Relational operators.
-  "==", "!=",           // BO_EQ, BO_NE,                 // [C99 6.5.9] Equality operators.
-  "&",                  // BO_And,                       // [C99 6.5.10] Bitwise AND operator.
-  "??",                 // BO_Xor,                       // [C99 6.5.11] Bitwise XOR operator.
-  "|",                  // BO_Or,                        // [C99 6.5.12] Bitwise OR operator.
-  "&&",                 // BO_LAnd,                      // [C99 6.5.13] Logical AND operator.
-  "||",                 // BO_LOr,                       // [C99 6.5.14] Logical OR operator.
-  "=", "*=",            // BO_Assign, BO_MulAssign,      // [C99 6.5.16] Assignment operators.
-  "/=", "%=",           // BO_DivAssign, BO_RemAssign,
-  "+=", "-=",           // BO_AddAssign, BO_SubAssign,
-  "???", "???",         // BO_ShlAssign, BO_ShrAssign,
-  "&&=", "???",         // BO_AndAssign, BO_XorAssign,
-  "||=",                // BO_OrAssign,
-  ","};                 // BO_Comma                      // [C99 6.5.17] Comma operator.
 
-
-static string unops[] = {
-  "++", "--",           // [C99 6.5.2.4] Postfix increment and decrement
-  "++", "--",           // [C99 6.5.3.1] Prefix increment and decrement
-  "@",  "*",            // [C99 6.5.3.2] Address and indirection
-  "+", "-",             // [C99 6.5.3.3] Unary arithmetic
-  "~", "!",             // [C99 6.5.3.3] Unary arithmetic
-  "__real", "__imag",   // "__real expr"/"__imag expr" Extension.
-  "__extension"          // __extension__ marker.
-};
+  static string unops[] = {
+      "++", "--",           // [C99 6.5.2.4] Postfix increment and decrement
+      "++", "--",           // [C99 6.5.3.1] Prefix increment and decrement
+      "@", "*",            // [C99 6.5.3.2] Address and indirection
+      "+", "-",             // [C99 6.5.3.3] Unary arithmetic
+      "~", "!",             // [C99 6.5.3.3] Unary arithmetic
+      "__real", "__imag",   // "__real expr"/"__imag expr" Extension.
+      "__extension"          // __extension__ marker.
+  };
+}
 
 // forward defs
-SourceManager * globalSRCMAN;  // ugly. shame. 
+SourceManager * globalSRCMAN;
 
 chillAST_node * ConvertVarDecl( VarDecl *D, chillAST_node *p ) {
-  //debug_fprintf(stderr, "\nConvertVarDecl()\n");
-  //debug_fprintf(stderr, "Decl has type %s\n", D->getDeclKindName()); 
-  //PrintVarDecl( D, globalSRCMAN, 0 );
-
-   bool isParm = false; 
+   bool isParm = false;
 
    QualType T0 = D->getType();
    QualType T  = T0;
-   if (ParmVarDecl *Parm = dyn_cast<ParmVarDecl>(D)) { // My GOD clang stinks
+   if (ParmVarDecl *Parm = dyn_cast<ParmVarDecl>(D)) {
      T = Parm->getOriginalType();
      isParm = true;
    }
 
   char *vartype =  strdup( T.getAsString().c_str());
   char *arraypart = splitTypeInfo(vartype);
-  vartype = parseUnderlyingType(restricthack(vartype));
 
   char *varname = strdup(D->getName().str().c_str()); 
 
@@ -188,18 +184,8 @@ chillAST_node * ConvertVarDecl( VarDecl *D, chillAST_node *p ) {
 
 chillAST_node * ConvertRecordDecl( clang::RecordDecl *RD, chillAST_node *p ) { // for structs and unions
 
-  //debug_fprintf(stderr, "ConvertRecordDecl(  )\n\nclang sees\n");
-  //RD->dump();
-  //fflush(stdout); 
-  //debug_fprintf(stderr, "\n"); 
-  
-  //debug_fprintf(stderr, "%s with name %s\n", ((clang::Decl *)RD)->getDeclKindName(), RD->getNameAsString().c_str());  
-  //const clang::ASTRecordLayout RL = RD->getASTContext().getASTRecordLayout( RD );
-  //RD->getASTContext().DumpRecordLayout( RD , cout ); 
-
   int count = 0;
   for (clang::RecordDecl::field_iterator fi = RD->field_begin(); fi != RD->field_end(); fi++) count++; 
-  //debug_fprintf(stderr, "%d fields in this struct/union\n", count); 
 
   char blurb[128];
   sprintf(blurb, "struct %s", RD->getNameAsString().c_str()); 
@@ -233,25 +219,12 @@ chillAST_node * ConvertRecordDecl( clang::RecordDecl *RD, chillAST_node *p ) { /
 }
 
 
-
-
-
-
-
 chillAST_node * ConvertTypeDefDecl( TypedefDecl *TDD, chillAST_node *p ) {
-  //debug_fprintf(stderr, "ConvertTypedefDecl(  ) \n");
-  //debug_fprintf(stderr, "TDD has type %s\n", TDD->getDeclKindName()); 
-  //TDD->dump(); debug_fprintf(stderr, "\n"); 
-
   char *under =  strdup( TDD->getUnderlyingType().getAsString().c_str());
-  //debug_fprintf(stderr, "under = '%s'\n", under); 
   char *arraypart = splitTypeInfo(under);
-  //debug_fprintf(stderr, "typedef %s %s%s;\n", under, TDD->getName().str().c_str(), arraypart);
-  //  debug_fprintf(stderr, "len arraypart = %d\n", strlen(arraypart)); 
   char *alias = strdup(TDD->getName().str().c_str());
 
-  //debug_fprintf(stderr, "underlying type %s  arraypart '%s'  name %s\n", under, arraypart, TDD->getName().str().c_str() ); 
-  chillAST_TypedefDecl *CTDD = new chillAST_TypedefDecl( under, alias, arraypart, p ); 
+  chillAST_TypedefDecl *CTDD = new chillAST_TypedefDecl( under, alias, arraypart, p );
 
   free(under);        
   free(arraypart);   
@@ -262,17 +235,10 @@ chillAST_node * ConvertTypeDefDecl( TypedefDecl *TDD, chillAST_node *p ) {
 
 
 chillAST_node * ConvertDeclStmt( DeclStmt *clangDS, chillAST_node *p ) {
-  //debug_fprintf(stderr, "ConvertDeclStmt()\n"); 
-
   chillAST_VarDecl *chillvardecl; // the thing we'll return if this is a single declaration
   
   bool multiples = !clangDS->isSingleDecl();
-  if ( multiples) { 
-    //debug_fprintf(stderr, "ir_clang.cc  multiple declarations in a single CLANG DeclStmt  not really handled! (??)\n"); 
-    // for now, try to make the multiple decls into a compoundstmt with them inside.
-    // if we don't get scoping problems, this might work
-  }
-  
+
   DeclGroupRef dgr = clangDS->getDeclGroup();
   clang::DeclGroupRef::iterator DI = dgr.begin();
   clang::DeclGroupRef::iterator DE = dgr.end();
@@ -333,26 +299,19 @@ chillAST_node * ConvertCompoundStmt( CompoundStmt *clangCS, chillAST_node *p ) {
   return chillCS;
 }
 
-
-
-
 chillAST_node * ConvertFunctionDecl( FunctionDecl *D, chillAST_node *p ) {
-  //debug_fprintf(stderr, "\nConvertFunctionDecl(  )\n");
   QualType QT = D->getReturnType();
   string ReturnTypeStr = QT.getAsString();
 
   // Function name
   DeclarationName DeclName = D->getNameInfo().getName();
   string FuncName = DeclName.getAsString();
-  //debug_fprintf(stderr, "function %s has type %s ", FuncName.c_str(),  ReturnTypeStr.c_str()); 
-  //debug_fprintf(stderr, "\n%s %s()\n", ReturnTypeStr.c_str(), FuncName.c_str());
 
   chillAST_FunctionDecl *chillFD = new chillAST_FunctionDecl( ReturnTypeStr.c_str(),  FuncName.c_str(), p, D);
   
 
   int numparams = D->getNumParams();
 
-  //debug_fprintf(stderr, "\nand %d parameters\n", numparams);
   for (int i=0; i<numparams; i++) {
     if (i) debug_fprintf(stderr, ", ");
     VarDecl *clangvardecl = D->getParamDecl(i);  // the ith parameter  (CLANG)
@@ -805,7 +764,7 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
      */
 
    } else {
-     // more work to do 
+     // more work to do his->chillvd == l_that->chillvd;
      debug_fprintf(stderr, "ir_clang.cc ConvertGenericClangAST() UNHANDLED ");
      //if (isa<Decl>(D)) debug_fprintf(stderr, "Decl of kind %s\n",  D->getDeclKindName() );
      if (isa<Stmt>(s))debug_fprintf(stderr, "Stmt of type %s\n", s->getStmtClassName()); 
@@ -855,7 +814,6 @@ aClangCompiler::aClangCompiler( char *filename ) {
   
   diagID =  new clang::DiagnosticIDs(); // private member of IR_clangCode_Global_Init
   
-  //clang::DiagnosticsEngine Diags(DiagID, &*DiagOpts, DiagClient);
   diagnosticsEngine = new clang::DiagnosticsEngine(diagID, diagnosticOptions, pTextDiagnosticPrinter);
   
   // Create the compiler invocation
@@ -863,7 +821,6 @@ aClangCompiler::aClangCompiler( char *filename ) {
   // including data such as the include paths, the code generation options, 
   // the warning flags, and so on.   
   std::unique_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
-  //CI = new clang::CompilerInvocation;
   clang::CompilerInvocation::CreateFromArgs(*CI, &args[0], &args[0] + args.size(), *diagnosticsEngine);
 
   
@@ -889,7 +846,7 @@ aClangCompiler::aClangCompiler( char *filename ) {
 
   Clang->setInvocation(CI.get()); // Replace the current invocation
 
-  Clang->createPreprocessor(TU_Complete);
+  Clang->createPreprocessor(TU_Prefix);
 
   Clang->createASTContext();                              // needs preprocessor
   astContext_ = &Clang->getASTContext();
@@ -935,60 +892,6 @@ chillAST_FunctionDecl*  aClangCompiler::findprocedurebyname( char *procname ) {
   return (chillAST_FunctionDecl *)procs[0];
 
 }
-
-
-
-#ifdef NOPE 
-IR_clangCode_Global_Init::IR_clangCode_Global_Init(char *filename  , clang::FileSystemOptions fso ) :   
-  fileManager(fso) // ,  headerSearch( headerSearchOptions, fileManager, diagengine,  languageOptions, pTargetInfo )
-{ 
-  /* CLANG Initialization */
-  diagnosticsEngine = new clang::DiagnosticsEngine( const IntrusiveRefCntPtr<DiagnosticIDs> &Diags,
-                                                    diagnosticOptionsnsa utah
-                                                    ) ; // DiagnosticConsumer *client = 0,  bool ShouldOwnClient = true)
-  pTextDiagnosticPrinter = new clang::TextDiagnosticPrinter(llvm::outs(), diagnosticOptions);
-  diagnostic = new clang::Diagnostic(pTextDiagnosticPrinter);
-  sourceManager = new clang::SourceManager(*diagnostic);
-  
-  // FIXME
-  
-  // <Warning!!> -- Platform Specific Code lives here
-  // This depends on A) that you're running linux and
-  // B) that you have the same GCC LIBs installed that
-  // I do. 
-  // Search through Clang itself for something like this,
-  // go on, you won't find it. The reason why is Clang
-  // has its own versions of std* which are installed under 
-  // /usr/local/lib/clang/<version>/include/
-  // See somewhere around Driver.cpp:77 to see Clang adding
-  // its version of the headers to its include path.
-  /*headerSearchOptions.AddPath("/usr/include/linux", clang::frontend::Angled, false, false, false);
-    headerSearchOptions.AddPath("/usr/include/c++/4.3/tr1", clang::frontend::Angled, false, false, false);
-    headerSearchOptions.AddPath("/usr/include/c++/4.3", clang::frontend::Angled, false, false, false);*/
-  // </Warning!!> -- End of Platform Specific Code
-  
-  targetOptions.Triple = llvm::sys::getHostTriple();
-  pTargetInfo = clang::TargetInfo::CreateTargetInfo(*diagnostic, targetOptions);
-  clang::ApplyHeaderSearchOptions( headerSearch, headerSearchOptions, languageOptions, pTargetInfo->getTriple());
-  preprocessor = new clang::Preprocessor(*diagnostic, languageOptions, *pTargetInfo, *sourceManager, headerSearch);
-  clang::InitializePreprocessor(*preprocessor, preprocessorOptions, headerSearchOptions, frontendOptions); 
-  const clang::FileEntry *pFile = fileManager.getFile(filename);
-  sourceManager->createMainFileID(pFile);
-  //preprocessor.EnterMainSourceFile();
-  
-  clang::TargetInfo &targetInfo = *pTargetInfo;
-  
-  idTable = new clang::IdentifierTable(languageOptions);
-  
-  builtinContext = new clang::Builtin::Context(targetInfo);
-  astContext_ = new clang::ASTContext(languageOptions, *sourceManager, targetInfo, *idTable, selTable, *builtinContext, 0); 
-  astConsumer_ = new Chill_ASTConsumer();
-  clang::Sema sema(*preprocessor, *astContext_, *astConsumer_);
-  sema.Initialize();
-  clang::ParseAST(*preprocessor, astConsumer_, *astContext_);
-}
-#endif 
-
 
 IR_clangCode_Global_Init::~IR_clangCode_Global_Init()
 {
@@ -1056,7 +959,6 @@ chillAST_node * ConvertMemberExpr( clang::MemberExpr *clangME , chillAST_node *)
   DeclarationNameInfo memnameinfo = clangME->getMemberNameInfo(); 
   DeclarationName DN = memnameinfo.getName();
   const char *member = DN.getAsString().c_str();
-  //debug_fprintf(stderr, "%s\n", DN.getAsString().c_str());  
 
   chillAST_MemberExpr *ME = new chillAST_MemberExpr( base, member, NULL, clangME ); 
 

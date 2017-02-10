@@ -27,6 +27,8 @@ char *parseArrayParts( char *sometype );
 
 bool isRestrict( const char *sometype );
 
+
+//! return the bracketed part of a type
 char *splitTypeInfo( char *underlyingtype );
 
 //! remove UL from numbers, MODIFIES the argument!

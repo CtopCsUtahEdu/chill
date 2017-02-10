@@ -26,3 +26,9 @@ TEST (helpers, restricthack) {
     EXPECT_STREQ(restricthack(orig),"int * ");
 }
 
+TEST (helpers, splitTypeInfo) {
+    char *orig = strdup("float **[100][100]");
+    EXPECT_STREQ(splitTypeInfo(orig),"[100][100]");
+    EXPECT_STREQ(orig,"float **");
+}
+
