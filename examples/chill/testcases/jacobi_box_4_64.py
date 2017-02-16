@@ -1,6 +1,7 @@
 from chill import *
 
 source('jacobi_box_4_64.c')
+destination('jacobi_box_4_64modified.c')
 procedure('smooth_box_4_64')
 
 loop(0)

@@ -7,6 +7,7 @@
 from chill import *
 
 source('jacobi1.c')
+destination('jacobi1modified.c')
 procedure('main')
 loop(0)
 
