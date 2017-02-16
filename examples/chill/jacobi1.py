@@ -8,12 +8,11 @@ from chill import *
 
 source('jacobi1.c')
 procedure('main')
-
 loop(0)
 
 print_dep()
 
-nonsingular([[1,0],[1,1]])  # unimodular matrix, determinant is one
+nonsingular([[1,0],[1,1]])
 tile(0,2,64)
 
 print_dep()

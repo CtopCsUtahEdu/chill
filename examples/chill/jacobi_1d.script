@@ -1,0 +1,21 @@
+# Tiling stencil code using example of jacobi relaxation. Compare with
+# paper "Automatic Tiling of Iterative Stencil Loops" by Zhiyuan Li and
+# Yonghong Song, TOPLAS 2004.
+
+source: jacobi_1d.sp2
+format: suif
+procedure: 0
+loop: 0
+
+original()
+
+print
+print dep
+
+shift([1], 2, 1) # L2 <- L2+1
+fuse([0,1], 2)  # optional
+skew([0,1], 2, [2,1]) # L2 <- 2*L1+L2
+tile(0, 2, 32, 1)
+
+print
+print dep

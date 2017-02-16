@@ -1,0 +1,53 @@
+# Data dependence examples from "Loop Transformations for
+# Restructuring Compilers, The Foundations" by Utpal Banerjee. It
+# shows that a complete mathematical system Omega+ subsumes previous
+# ad-hoc methods.
+
+source: dep_test.sp2
+format: suif
+# default procedure 0
+
+#
+# Example 5.6 from p133
+#
+loop: 0
+
+original()
+print space
+print dep
+
+#
+# Example 5.7 from p135 
+#
+loop: 1
+
+original()
+print space
+print dep
+
+#
+# Example 5.10 from p144
+#
+loop: 2
+
+original()
+print space
+print dep
+
+#
+# Example 5.11 from p150 
+#
+loop: 3
+
+original()
+print space
+print dep
+
+#
+# Example 5.12 from p156
+#
+loop: 4
+
+original()
+print space
+print dep

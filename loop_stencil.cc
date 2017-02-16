@@ -129,7 +129,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying
-    fd->insertChild(i, vd); // adds decl as the first staement in the function body
+    fd->getBody()->insertChild(i, vd); // adds decl as the first staement in the function body
     fd->addDecl( vd ); // adds to symbol table
     
     buff_syms.push_back( vd ); 
@@ -152,7 +152,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying
-    fd->insertChild(i, vd); // adds decl as the first staement in the function body
+    fd->getBody()->insertChild(i, vd); // adds decl as the first staement in the function body
     fd->addDecl( vd ); // adds to symbol table
     
     treg_syms.push_back( vd ); 
