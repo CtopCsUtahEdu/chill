@@ -131,8 +131,11 @@ run_chill() {
 }
 
 check_diff() {
-    local generated_file=$1
-    local correct_file=$2
+    local generated_file="$1.temp"
+    local correct_file="$2.temp"
+
+    sed 's/\(.*\)\/\/.*/\1/' $1 > $generated_file
+    sed 's/\(.*\)\/\/.*/\1/' $2 > $correct_file
     
     local diffout=`diff -qwB $generated_file $correct_file`
     if [ -n "$diffout" ]; then
@@ -140,6 +143,9 @@ check_diff() {
     else
         echo "0"
     fi
+
+    rm $generated_file
+    rm $correct_file
 }
 
 
