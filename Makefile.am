@@ -1,8 +1,6 @@
 SUBDIRS = omega/omega_lib/obj omega/code_gen/obj
 build_date = "\"`date +%m/%d/%Y`\""
 
-AM_CFLAGS=-g
-AM_CXXFLAGS=-g -std=c++11
 EXTRA_DIST=
 
 core_cxxflags   =-g --std=c++11

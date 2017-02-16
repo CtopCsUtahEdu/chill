@@ -1,0 +1,14 @@
+# Old fashion way to tile perfect jacobi loop nest with time step
+# using unimodular transformation.
+
+source: jacobi_simple.sp2
+format: suif
+loop: 0
+
+print dep
+
+nonsingular([[1,0],[1,1]])  # unimodular matrix, determinant is one
+tile(0,2,64)
+
+print
+print dep
