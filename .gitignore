@@ -71,6 +71,7 @@ test-suite.log
 /config.log
 /config.status
 /chill
+/cuda-chill
 /chill-calculator_eval.o
 /chill-chill_ast.o
 /chill-chill_io.o

@@ -161,11 +161,10 @@ common_libdirs          = $(core_libdirs) $(runner_libdirs)
 AM_TESTS_ENVIRONMENT= SRCDIR='$(srcdir)'; export SRCDIR;
 TESTS=
 
-if CUDACHILL_OPT
+
 include ./test-chill/cudachill_testcases.mk
-else
 include ./test-chill/chill_testcases.mk
-endif
+
 EXTRA_DIST += test-chill/runchilltest.sh
 test-chill/runtestchill.sh:
 	cp $(srcdir)/test-chill/runtestchill.sh test-chill/runtestchill.sh

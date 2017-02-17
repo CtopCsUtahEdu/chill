@@ -24,13 +24,6 @@ AM_PATH_PYTHON([2.7],[
     AC_SUBST([python_builds],[yes])],[
     AC_SUBST([python_builds],[no])])
 
-AC_ARG_ENABLE([cuda],
-   [AS_HELP_STRING([--enable-cuda],[builds cudachill])],
-   [AS_IF([test "x$enableval" != xno],
-       [AC_SUBST([enable_cuda],[yes])])])
-
-AM_CONDITIONAL([CUDACHILL_OPT],[test "x$enable_cuda" == xyes])
-
 
 AC_ARG_ENABLE([coverage],
    [AS_HELP_STRING([--enable-coverage],[enables coverage testing])],
