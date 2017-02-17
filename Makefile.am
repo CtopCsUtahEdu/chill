@@ -173,11 +173,7 @@ test-chill/runtestchill.sh:
 
 
 ## Binaries ##
-if CUDACHILL_OPT
-bin_PROGRAMS=cuda-chill
-else
-bin_PROGRAMS=chill
-endif
+bin_PROGRAMS=chill cuda-chill
 
 cuda_chill_CPPFLAGS     =-DCUDACHILL $(common_cppflags)
 cuda_chill_CXXFLAGS     =-DCUDACHILL $(common_cxxflags)
