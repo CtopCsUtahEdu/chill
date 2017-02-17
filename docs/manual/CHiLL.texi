@@ -483,10 +483,10 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @include examples/distribute.texi
 @page
 @include examples/fuse.texi
-@c @page
-@c @include examples/nonsingular.texi
-@c @page
-@c @include examples/original.texi
+@page
+@include examples/nonsingular.texi
+@page
+@include examples/original.texi
 @page
 @include examples/peel.texi
 @page
@@ -509,7 +509,10 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @include examples/unroll.texi
 @page
 
-@c Data operations
+@section Data operations
+@include examples/datacopy.texi
+@page
+
 @c Prefetch
 @c The prefetch command has the form:
 @c prefetch (number, number, string, expr)
