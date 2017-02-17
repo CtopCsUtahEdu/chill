@@ -1,8 +1,0 @@
-source:structs.c
-procedure:smooth_box_4_64
-format: rose
-loop:0
-
-original()
-print
-
