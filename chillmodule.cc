@@ -1677,7 +1677,7 @@ static void chill_datacopy_int(PyObject* args) {
 
 static PyObject* chill_datacopy(PyObject* self, PyObject* args) {
   // Overload 2: bool datacopy(int stmt_num, int level, const std::string &array_name, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, int memory_type = 0);
-  int nargs = strict_arg_range(args, 3, 7, "datacopy");
+  int nargs = strict_arg_range(args, 2, 7, "datacopy");
   if(PyList_CheckExact(PyTuple_GetItem(args,0)) || PyDict_CheckExact(PyTuple_GetItem(args, 0))) {
     chill_datacopy_vec(args);
   }
