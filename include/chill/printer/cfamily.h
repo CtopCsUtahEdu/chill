@@ -2,27 +2,43 @@
 // Created by ztuowen on 9/24/16.
 //
 
-#ifndef CHILL_DUMP_H
-#define CHILL_DUMP_H
+#ifndef CHILL_CFAMILY_H
+#define CHILL_CFAMILY_H
 
-#include "printer/generic.h"
+#include "generic.h"
 
 namespace chill {
   namespace printer {
     /*!
-     * \brief Dump the whole AST in Prefix format
+     * \brief Print the AST in a C-like syntax.
      *
-     * This replace the old dump function in the chillAST.
-     * Everthing is written in a Tree-like structure: (<NodeName> <Params>). No precedence calculation is needed.
+     * This replace the old print function.
+     * Custom multiplexer should not be needed. This version should calculate the correct precedence for expressions.
+     * Expression should be encapsulated in {} or () or ended with ; with heuristics at the parent node
+     *
+     * All precedence calculation taken from http://en.cppreference.com/w/cpp/language/operator_precedence
      */
-    class Dump : public GenericPrinter {
+    class CFamily : public GenericPrinter {
     protected:
+      virtual int getPrecS(chillAST_BinaryOperator *n);
+
+      virtual int getPrecS(chillAST_CallExpr *n);
+
+      virtual int getPrecS(chillAST_CStyleAddressOf *n);
+
+      virtual int getPrecS(chillAST_CStyleCastExpr *n);
+
+      virtual int getPrecS(chillAST_TernaryOperator *n);
+
+      virtual int getPrecS(chillAST_UnaryOperator *n);
+
       virtual void printS(std::string ident, chillAST_ArraySubscriptExpr *n, std::ostream &o);
 
       virtual void printS(std::string ident, chillAST_BinaryOperator *n, std::ostream &o);
 
       virtual void printS(std::string ident, chillAST_CallExpr *n, std::ostream &o);
 
+      //! Compound statement is responsible to break a new line if necessary
       virtual void printS(std::string ident, chillAST_CompoundStmt *n, std::ostream &o);
 
       virtual void printS(std::string ident, chillAST_CStyleAddressOf *n, std::ostream &o);
@@ -41,6 +57,12 @@ namespace chill {
 
       virtual void printS(std::string ident, chillAST_DeclRefExpr *n, std::ostream &o);
 
+      /*!
+       * Prints the floatpoint literal, only the showpoint flag is currently set
+       * @param ident
+       * @param n
+       * @param o
+       */
       virtual void printS(std::string ident, chillAST_FloatingLiteral *n, std::ostream &o);
 
       virtual void printS(std::string ident, chillAST_ForStmt *n, std::ostream &o);
@@ -86,17 +108,9 @@ namespace chill {
       virtual void printS(std::string ident, chillAST_VarDecl *n, std::ostream &o);
 
     public:
-      Dump() {}
-
-      /*!
-       * Just prints everything. Indent is igored due to need to limit the number of output
-       * @param ident
-       * @param n
-       * @param o
-       */
-      virtual void print(std::string ident, chillAST_node *n, std::ostream &o);
+      CFamily() {}
     };
   }
 }
 
-#endif //CHILL_DUMP_H
+#endif //CHILL_CFAMILY_H

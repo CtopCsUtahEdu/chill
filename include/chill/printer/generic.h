@@ -10,10 +10,10 @@
 #include <sstream>
 
 namespace chill {
-  /*!
-   * \brief this is a generic AST printSer that prints the code out to a C-family like syntax
-   */
   namespace printer {
+    /*!
+     * \brief this is a generic AST printSer that prints the code out to a C-family like syntax
+     */
     class GenericPrinter {
     protected:
       std::string identSpace;

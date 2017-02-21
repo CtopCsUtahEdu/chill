@@ -181,6 +181,7 @@ class chillAST_Preprocessing;
 
 typedef std::vector<chillAST_VarDecl *>         chillAST_SymbolTable;   //  typedef
 typedef std::vector<chillAST_TypedefDecl *>     chillAST_TypedefTable;  //  typedef
+typedef std::vector<chillAST_node *>     chillAST_NodeList;  //  typedef
 
 bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl 
 chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl TODO too many similar named functions
@@ -305,7 +306,7 @@ public:
 
   vector<chillAST_Preprocessing*> preprocessinginfo; 
 
-  void addChild( chillAST_node* c) {
+  virtual void addChild( chillAST_node* c) {
     c->parent = this;
     // check to see if it's already there
     for (int i = 0; i < children.size(); i++)
@@ -316,7 +317,10 @@ public:
       // assert(true || children[i] != c && "child already exist");
     children.push_back(c);
   }  // not usually useful
-
+  virtual void addChildren( chillAST_NodeList nl ) {
+    for (auto i = nl.begin(); i != nl.end(); ++i)
+      addChild(*i);
+  }
   void insertChild(int i, chillAST_node* node) {
     node->parent = this;
     children.insert( children.begin()+i, node );
@@ -772,8 +776,7 @@ public:
 class chillAST_NULL: public chillAST_node {  // NOOP?
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_NULL;}
-  chillAST_NULL(chillAST_node *p = NULL)  {  parent = p; };
-  void print( int indent=0,  FILE *fp = stderr ) { 
+  void print( int indent=0,  FILE *fp = stderr ) {
     chillindent( indent, fp );
     fprintf(fp, "/* (NULL statement); */ ");
     fflush(fp);
@@ -838,8 +841,8 @@ public:
 
   //TODO hide data, set/get type and alias
   chillAST_TypedefDecl();
-  chillAST_TypedefDecl(char *t, char *nt, chillAST_node *p);
-  chillAST_TypedefDecl(char *t, char *nt, char *a, chillAST_node *par); 
+  chillAST_TypedefDecl(char *t, char *nt);
+  chillAST_TypedefDecl(char *t, char *nt, char *a);
   
   const char* getUnderlyingType() { debug_fprintf(stderr, "TypedefDecl getUnderLyingType()\n"); return underlyingtype; }; 
   //virtual chillAST_VarDecl* getUnderlyingVarDecl() { return this; }; // ?? 
@@ -899,10 +902,10 @@ public:
   chillAST_node *getInit() { return init; };
   
   chillAST_VarDecl();
-  chillAST_VarDecl( const char *t,  const char *n, const char *a, chillAST_node *p);
-  chillAST_VarDecl( const char *t,  const char *n, const char *a, void *ptr, chillAST_node *p);
-  chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *n, const char *arraypart, chillAST_node *par); 
-  chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *n, const char *arraypart, chillAST_node *par); 
+  chillAST_VarDecl( const char *t,  const char *n, const char *a);
+  chillAST_VarDecl( const char *t,  const char *n, const char *a, void *ptr);
+  chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *n, const char *arraypart);
+  chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *n, const char *arraypart);
 
   void dump(  int indent=0,  FILE *fp = stderr );
   void print( int indent=0,  FILE *fp = stderr );
@@ -941,11 +944,11 @@ public:
 
   // constructors
   chillAST_DeclRefExpr(); 
-  chillAST_DeclRefExpr( const char *variablename, chillAST_node *p); 
-  chillAST_DeclRefExpr( const char *vartype, const char *variablename, chillAST_node *p); 
-  chillAST_DeclRefExpr( const char *vartype, const char *variablename, chillAST_node *dec, chillAST_node *p); 
-  chillAST_DeclRefExpr( chillAST_VarDecl *vd, chillAST_node *p=NULL); 
-  chillAST_DeclRefExpr( chillAST_FunctionDecl *fd, chillAST_node *p=NULL); 
+  chillAST_DeclRefExpr( const char *variablename);
+  chillAST_DeclRefExpr( const char *vartype, const char *variablename);
+  chillAST_DeclRefExpr( const char *vartype, const char *variablename, chillAST_node *dec);
+  chillAST_DeclRefExpr( chillAST_VarDecl *vd);
+  chillAST_DeclRefExpr( chillAST_FunctionDecl *fd);
   
   // other methods particular to this type of node
   bool operator!=( chillAST_DeclRefExpr &other ) { return decl != other.decl ; }; 
@@ -1073,8 +1076,8 @@ private:
   
 public:
   chillAST_RecordDecl();
-  chillAST_RecordDecl( const char *nam, chillAST_node *p ); 
-  chillAST_RecordDecl( const char *nam, const char *orig, chillAST_node *p ); 
+  chillAST_RecordDecl( const char *nam);
+  chillAST_RecordDecl( const char *nam, const char *orig);
 
   void  setName( const char *newname) { name = strdup(newname); }; 
   char *getName( ) { return name; };
@@ -1156,8 +1159,8 @@ public:
   
 
   chillAST_FunctionDecl(); //  { getType() = CHILLAST_NODETYPE_FUNCTIONDECL; numparameters = 0;};
-  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p=NULL ) ;
-  chillAST_FunctionDecl(const char *rt, const char *fname, chillAST_node *p, void *unique ) ;
+  chillAST_FunctionDecl(const char *rt, const char *fname ) ;
+  chillAST_FunctionDecl(const char *rt, const char *fname, void *unique ) ;
   
   void addParameter( chillAST_VarDecl *p); 
   chillAST_VarDecl *hasParameterNamed( const char *name ); 
@@ -1226,12 +1229,7 @@ public:
     // the function has a symbol table called "parameters" but that is a special case
 
     addSymbolToTable( getSymbolTable(), vd ); 
-    if (!vd->parent) { 
-      //debug_fprintf(stderr, "setting parent of vardecl to be the function whose symbol table it is going into\n"); // ?? 
-      vd->setParent( this );
-      insertChild(0,vd);  
-    }
-    //printSymbolTable( getSymbolTable() ); 
+    //printSymbolTable( getSymbolTable() );
     return getSymbolTable();
   }
 
@@ -1306,63 +1304,26 @@ public:
   chillAST_MacroDefinition* findMacro( const char *name ); // TODO ignores arguments
   chillAST_FunctionDecl *findFunction( const char *name ); // TODO ignores arguments
   chillAST_node *findCall( const char *name ); 
-  void addMacro(chillAST_MacroDefinition* md) {
-    macrodefinitions.push_back(md);
-  }
-  void addFunc(chillAST_FunctionDecl* fd) { 
-    bool already = false;
-    for (int i=0; i<functions.size(); i++) { 
-      if (functions[i] == fd) {
-        already = true;
+  virtual void addChild(chillAST_node *n) {
+    if (n->isMacroDefinition()) {
+      insertChild(0,n);
+      macrodefinitions.push_back((chillAST_MacroDefinition*)n);
+    } else {
+      if (n->isFunctionDecl()) {
+        bool already = false;
+        for (int i=0; i<functions.size(); i++) {
+          if (functions[i] == n) {
+            already = true;
+          }
+        }
+        if (!already) functions.push_back((chillAST_FunctionDecl*)n);
       }
+      chillAST_node::addChild(n);
     }
-    if (!already) functions.push_back(fd);
-
-    // PROBABLY fd was created with sourcefile as its parent. Don't add it twice
-    addChild( (chillAST_node *)fd); }
-
+  }
 };
 
-
-/* 
-   class chillAST_VarDecl: public chillAST_node {  // now a SINGLE DECL.  multiples in 
-   public:
-   int howmany;  // usually 1 but sometimes multiple declarations in a decl;
-   std::vector<class chillAST_SingleVarDecl*> decls;
-   
-   chillAST_VarDecl();
-   chillAST_VarDecl( char *t,  char *n, char *a);
-   void addDecl( char *t,  char *n, char *a);
-   
-   void dump(  int indent=0,  FILE *fp = stderr );
-   void print( int indent=0,  FILE *fp = stderr );
-   }; 
-*/
-
-
-/* 
-class chillAST_ParmVarDecl: public chillAST_node {  // no longer used? 
-public:
-  char *vartype; // should probably be an enum
-  char *varname;
-  char *arraypart;
-  int numdimensions; // TODO 
-  int *arraysizes;   // TODO 
-  // hasDefaultArg
-  // getDefaultArg
-  
-  chillAST_ParmVarDecl(); 
-  chillAST_ParmVarDecl( const char *type, const char *name, const char *ap, chillAST_node *p );
-  
-  void dump(  int indent=0,  FILE *fp = stderr ) { 
-    fprintf(fp, "(2VarDecl'%s' '%s' '%s')",  vartype, varname, arraypart); };
-  void print( int indent=0,  FILE *fp = stderr );
-};
-*/
-
-
-
-class chillAST_MacroDefinition: public chillAST_node { 
+class chillAST_MacroDefinition: public chillAST_node {
 private:
   chillAST_node *body; // rhs      always a compound statement? 
   chillAST_SymbolTable *symbol_table;
@@ -1380,8 +1341,8 @@ public:
   char *getRhsString() { return rhsString; }
 
   chillAST_MacroDefinition();
-  chillAST_MacroDefinition( const char *name, chillAST_node *par);
-  chillAST_MacroDefinition( const char *name, const char *rhs, chillAST_node *par);
+  chillAST_MacroDefinition( const char *name);
+  chillAST_MacroDefinition( const char *name, const char *rhs);
   
   void addParameter( chillAST_VarDecl *p);  // parameters have no TYPE ??
   chillAST_VarDecl *hasParameterNamed( const char *name ); 
@@ -1441,7 +1402,7 @@ public:
 
   // constructors
   chillAST_ForStmt();
-  chillAST_ForStmt(  chillAST_node *ini, chillAST_node *con, chillAST_node *inc, chillAST_node *bod, chillAST_node *p); 
+  chillAST_ForStmt(chillAST_node *ini, chillAST_node *con, chillAST_node *inc, chillAST_node *bod);
   
   // other methods particular to this type of node
   void addSyncs();
@@ -1536,7 +1497,7 @@ public:
 
   // constructors
   chillAST_TernaryOperator();
-  chillAST_TernaryOperator(const char *op, chillAST_node *cond, chillAST_node *lhs, chillAST_node *rhs, chillAST_node *p=NULL); 
+  chillAST_TernaryOperator(const char *op, chillAST_node *cond, chillAST_node *lhs, chillAST_node *rhs);
   
   // other methods particular to this type of node
   bool isNotLeaf() { return true; }; 
@@ -1587,7 +1548,7 @@ public:
   
   // constructors
   chillAST_BinaryOperator();
-  chillAST_BinaryOperator(chillAST_node *lhs, const char *op, chillAST_node *rhs, chillAST_node *p=NULL); 
+  chillAST_BinaryOperator(chillAST_node *lhs, const char *op, chillAST_node *rhs);
   
   // other methods particular to this type of node
   int evalAsInt();
@@ -1640,7 +1601,6 @@ public:
 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
-  void replaceChild( chillAST_node *old, chillAST_node *newchild ) ; 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); // chillAST_BinaryOperator
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
@@ -1677,8 +1637,8 @@ public:
   
   // constructors
   chillAST_ArraySubscriptExpr(); 
-  chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, chillAST_node *p, void *unique);
-  chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, chillAST_node *p, void *unique);
+  chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, void *unique);
+  chillAST_ArraySubscriptExpr( chillAST_node *bas, chillAST_node *indx, bool writtento, void *unique);
   
   chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces, chillAST_node *p); 
   
@@ -1725,7 +1685,7 @@ class chillAST_MemberExpr: public chillAST_node {
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_MEMBEREXPR;}
   // variables that are special for this type of node
-  chillAST_node *base;  // always a decl ref expr? No, can be Array Subscript Expr
+  chillAST_Child<chillAST_node> base;  // always a decl ref expr? No, can be Array Subscript Expr
   char *member; 
   char *printstring; 
 
@@ -1737,7 +1697,7 @@ public:
 
   // constructors
   chillAST_MemberExpr(); 
-  chillAST_MemberExpr( chillAST_node *bas, const char *mem, chillAST_node *p, void *unique, CHILL_MEMBER_EXP_TYPE t=CHILL_MEMBER_EXP_DOT);
+  chillAST_MemberExpr( chillAST_node *bas, const char *mem, void *unique, CHILL_MEMBER_EXP_TYPE t=CHILL_MEMBER_EXP_DOT);
   
   // other methods particular to this type of node
   bool operator!=( const chillAST_MemberExpr& ) ; 
@@ -1781,10 +1741,11 @@ class chillAST_IntegerLiteral: public chillAST_node {
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_INTEGERLITERAL;}
   // variables that are special for this type of node
+  // TODO precision limited
   int value;
   
   // constructors
-  chillAST_IntegerLiteral(int val, chillAST_node *p = NULL); 
+  chillAST_IntegerLiteral(int val);
   
   // other methods particular to this type of node
   int evalAsInt() { return value; } 
@@ -1823,11 +1784,11 @@ public:
   int precision;   // float == 1, double == 2
 
   // constructors
-  chillAST_FloatingLiteral( float  val,                                 chillAST_node *p); 
-  chillAST_FloatingLiteral( double val,                                 chillAST_node *p); 
-  chillAST_FloatingLiteral( double val, int pre,                        chillAST_node *p);
-  chillAST_FloatingLiteral( double val, const char *printable,          chillAST_node *p);
-  chillAST_FloatingLiteral( double val, int pre, const char *printable, chillAST_node *p);
+  chillAST_FloatingLiteral( float  val);
+  chillAST_FloatingLiteral( double val);
+  chillAST_FloatingLiteral( double val, int pre);
+  chillAST_FloatingLiteral( double val, const char *printable);
+  chillAST_FloatingLiteral( double val, int pre, const char *printable);
   chillAST_FloatingLiteral( chillAST_FloatingLiteral *old ); 
   
   // other methods particular to this type of node
@@ -1869,7 +1830,7 @@ public:
   chillAST_Child<chillAST_node> subexpr;
   
   // constructors
-  chillAST_UnaryOperator( const char *oper, bool pre, chillAST_node *sub, chillAST_node *p ); 
+  chillAST_UnaryOperator( const char *oper, bool pre, chillAST_node *sub );
   
   // other methods particular to this type of node
   bool isAssignmentOp() { 
@@ -1909,14 +1870,13 @@ public:
   chillAST_Child<chillAST_node> subexpr;
   
   // constructors
-  chillAST_ImplicitCastExpr(chillAST_node *sub, chillAST_node *p); 
+  chillAST_ImplicitCastExpr(chillAST_node *sub);
   
   // other methods particular to this type of node
   bool isNotLeaf() { return true; }; 
   bool isLeaf()    { return false; }; 
   
   // required methods that I can't seem to get to inherit
-  void replaceChild( chillAST_node *old, chillAST_node *newchild );
   void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   void printonly( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stderr ) { print( indent, fp); };  // print ast    in chill_ast.cc
@@ -1942,13 +1902,12 @@ public:
   char * towhat; 
   chillAST_Child<chillAST_node> subexpr;
   // constructors
-  chillAST_CStyleCastExpr(const char *to, chillAST_node *sub, chillAST_node *p=NULL); 
+  chillAST_CStyleCastExpr(const char *to, chillAST_node *sub);
   
   // other methods particular to this type of node
   
   
   // required methods that I can't seem to get to inherit
-  void replaceChild( chillAST_node *old, chillAST_node *newchild );
   void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
   chillAST_node* constantFold();
@@ -1972,7 +1931,7 @@ public:
   // variables that are special for this type of node
   chillAST_Child<chillAST_node> subexpr;
   // constructors
-  chillAST_CStyleAddressOf(chillAST_node *sub, chillAST_node *p=NULL); 
+  chillAST_CStyleAddressOf(chillAST_node *sub);
   
   // other methods particular to this type of node
   
@@ -2002,7 +1961,7 @@ public:
   chillAST_Child<chillAST_node> sizeinbytes;
 
   // constructors
-  chillAST_CudaMalloc(chillAST_node *devmemptr, chillAST_node *size, chillAST_node *p=NULL); 
+  chillAST_CudaMalloc(chillAST_node *devmemptr, chillAST_node *size);
   
   // other methods particular to this type of node
   
@@ -2031,7 +1990,7 @@ public:
   chillAST_Child<chillAST_VarDecl> variable;
 
   // constructors
-  chillAST_CudaFree(chillAST_VarDecl *var, chillAST_node *p=NULL); 
+  chillAST_CudaFree(chillAST_VarDecl *var);
   
   // other methods particular to this type of node
   
@@ -2064,8 +2023,8 @@ public:
   chillAST_Child<chillAST_node> sizeexpr;
 
   // constructors
-  chillAST_Malloc(chillAST_node *size, chillAST_node *p=NULL); 
-  chillAST_Malloc(char *thething, chillAST_node *numthings, chillAST_node *p=NULL); // malloc (sizeof(int) *1024)
+  chillAST_Malloc(chillAST_node *size);
+  chillAST_Malloc(char *thething, chillAST_node *numthings); // malloc (sizeof(int) *1024)
 
   // other methods particular to this type of node
   
@@ -2107,7 +2066,7 @@ public:
   char *cudaMemcpyKind;  // could use the actual enum
 
   // constructors
-  chillAST_CudaMemcpy(chillAST_VarDecl *d, chillAST_VarDecl *s, chillAST_node *size, char *kind, chillAST_node *p=NULL); 
+  chillAST_CudaMemcpy(chillAST_VarDecl *d, chillAST_VarDecl *s, chillAST_node *size, char *kind);
   
   // other methods particular to this type of node
   
@@ -2134,12 +2093,8 @@ public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_CUDASYNCTHREADS;}
   // variables that are special for this type of node
 
-  // constructors
-  chillAST_CudaSyncthreads(chillAST_node *p=NULL); 
-  
   // other methods particular to this type of node
-  
-  
+
   // required methods that I can't seem to get to inherit
   void print( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stderr );  // print ast    in chill_ast.cc
@@ -2170,7 +2125,7 @@ public:
   chillAST_Child<chillAST_node> returnvalue;
 
   // constructors
-  chillAST_ReturnStmt( chillAST_node *retval, chillAST_node *p ); 
+  chillAST_ReturnStmt( chillAST_node *retval );
   
   // other methods particular to this type of node
   
@@ -2194,14 +2149,14 @@ class chillAST_CallExpr: public chillAST_node {  // a function call
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_CALLEXPR;}
   // variables that are special for this type of node
-  chillAST_node *callee;   // the function declaration (what about builtins?)
+  chillAST_Child<chillAST_node> callee;   // the function declaration (what about builtins?)
   int numargs;
   std::vector<class chillAST_node*> args;
   chillAST_VarDecl *grid;
   chillAST_VarDecl *block;
 
   // constructors
-  chillAST_CallExpr(chillAST_node *function, chillAST_node *p );
+  chillAST_CallExpr(chillAST_node *function);
   void addArg(  chillAST_node *newarg  ); 
   
   // other methods particular to this type of node
@@ -2235,7 +2190,7 @@ public:
   chillAST_Child<chillAST_node> subexpr;
   
   // constructors
-  chillAST_ParenExpr( chillAST_node *sub, chillAST_node *p=NULL ); 
+  chillAST_ParenExpr( chillAST_node *sub );
   
   // other methods particular to this type of node
 
@@ -2262,7 +2217,7 @@ public:
   char *thing;  
   
   // constructors
-  chillAST_Sizeof( char *t, chillAST_node *p = NULL ); 
+  chillAST_Sizeof( char *t );
   
   // other methods particular to this type of node
 
@@ -2286,13 +2241,11 @@ public:
 class chillAST_NoOp: public chillAST_node { 
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_NOOP;}
-  chillAST_NoOp( chillAST_node *p = NULL ); //  { parent = p; };
-
   // required methods that I can't seem to get to inherit
   void print( int indent=0,  FILE *fp = stderr ) {};  // print CODE   in chill_ast.cc
   void dump(  int indent=0,  FILE *fp = stderr ) {};  // print ast    in chill_ast.cc
   chillAST_node* constantFold() {};
-  chillAST_node* clone() { return new chillAST_NoOp( parent ); }; // ?? 
+  chillAST_node* clone() { return new chillAST_NoOp( ); }; // ??
 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {};
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {};
@@ -2314,7 +2267,7 @@ public:
   
   // constructors
   chillAST_IfStmt();
-  chillAST_IfStmt( chillAST_node *c, chillAST_node *t, chillAST_node *e, chillAST_node *p); 
+  chillAST_IfStmt( chillAST_node *c, chillAST_node *t, chillAST_node *e );
   
   // other methods particular to this type of node
   chillAST_node *getCond() { return cond; };
