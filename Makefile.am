@@ -161,11 +161,10 @@ common_libdirs          = $(core_libdirs) $(runner_libdirs)
 AM_TESTS_ENVIRONMENT= SRCDIR='$(srcdir)'; export SRCDIR;
 TESTS=
 
-if CUDACHILL_OPT
+
 include ./test-chill/cudachill_testcases.mk
-else
 include ./test-chill/chill_testcases.mk
-endif
+
 EXTRA_DIST += test-chill/runchilltest.sh
 test-chill/runtestchill.sh:
 	cp $(srcdir)/test-chill/runtestchill.sh test-chill/runtestchill.sh
@@ -173,11 +172,7 @@ test-chill/runtestchill.sh:
 
 
 ## Binaries ##
-if CUDACHILL_OPT
-bin_PROGRAMS=cuda-chill
-else
-bin_PROGRAMS=chill
-endif
+bin_PROGRAMS=chill cuda-chill
 
 cuda_chill_CPPFLAGS     =-DCUDACHILL $(common_cppflags)
 cuda_chill_CXXFLAGS     =-DCUDACHILL $(common_cxxflags)
