@@ -23,13 +23,14 @@ void foo(double C[N][N]) {
     for(i = 0; i < N; i++) {
         for(j = 0; j < N; j++) {
             for(k = 0; k < N; k++) {
+                C[j][i] = C[j][i] + 1.0;
             }
         }
     }
     
     for(i = 0; i < 3; i++) {
         for(j = 0; j < 3; j++) {
-            C[i+j][4*j-2*i] = 1.0;
+            C[i+j][4*j-2*i + 3] = 1.0;
         }
     }
 }

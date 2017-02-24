@@ -1411,8 +1411,6 @@ static PyObject* chill_loop(PyObject* self, PyObject* args) {
     if(!is_interactive)
       exit(2);
   }
-  set_loop_num_start(start_num);
-  set_loop_num_end(end_num);
   init_loop(start_num, end_num);
   Py_RETURN_NONE;
 }
