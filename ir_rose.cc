@@ -1704,7 +1704,6 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
 
 chillAST_node *ConvertRoseIfStmt(SgIfStmt *ifstatement )
 {
-  debug_fprintf(stderr, "ConvertRoseIfStmt() parent %p\n", p);
   debug_fprintf(stderr, "%s", ifstatement->unparseToString().c_str());
 
   SgStatement *cond     = ifstatement->get_conditional();

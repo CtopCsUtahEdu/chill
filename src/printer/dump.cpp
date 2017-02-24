@@ -8,26 +8,26 @@ using namespace chill::printer;
 using namespace std;
 
 template<typename T>
-void dumpVector(GenericPrinter *p, string ident, vector<T *> *n, ostream &o) {
+void dumpVector(GenericPrinter *p, vector<T *> *n, std::string indent, std::ostream &o) {
   for (int i = 0; i < n->size(); ++i)
-    p->print(ident, (*n)[i], o);
+    p->run((*n)[i], indent, o);
 }
 
-void Dump::print(string ident, chillAST_node *n, ostream &o) {
+void Dump::run(chillAST_node *n, std::string indent, std::ostream &o) {
   if (!n) return;
   o << "(" << n->getTypeString() << " ";
   if (n->getSymbolTable()) {
     o << "(VarScope: ";
-    dumpVector(this, ident, n->getSymbolTable(), o);
+    dumpVector(this, n->getSymbolTable(), indent, o);
     o << ") ";
   }
   o << ": ";
   // Recurse
-  GenericPrinter::print(ident, n, o);
+  GenericPrinter::run(n, indent, o);
   o << ") ";
 }
 
-void Dump::printS(std::string ident, chillAST_ArraySubscriptExpr *n, std::ostream &o) {
+void Dump::runS(chillAST_ArraySubscriptExpr *n, std::string indent, std::ostream &o) {
   if (n->basedecl)
     o << "(" << n->basedecl->varname << ") ";
   if (n->basedecl && n->basedecl->vartype)
@@ -38,171 +38,171 @@ void Dump::printS(std::string ident, chillAST_ArraySubscriptExpr *n, std::ostrea
     else
       o << "lvalue ";
   } else o << "rvalue ";
-  print(ident, n->base, o);
-  print(ident, n->index, o);
+  run(n->base, indent, o);
+  run(n->index, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_BinaryOperator *n, std::ostream &o) {
+void Dump::runS(chillAST_BinaryOperator *n, std::string indent, std::ostream &o) {
   o << n->op << " ";
-  if (n->getLHS()) print(ident, n->getLHS(), o);
+  if (n->getLHS()) run(n->getLHS(), indent, o);
   else o << "(NULL) ";
-  if (n->getRHS()) print(ident, n->getRHS(), o);
+  if (n->getRHS()) run(n->getRHS(), indent, o);
   else o << "(NULL) ";
 }
 
-void Dump::printS(std::string ident, chillAST_CallExpr *n, std::ostream &o) {
-  dumpVector(this, ident, &(n->getChildren()), o);
+void Dump::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
+  dumpVector(this, &(n->getChildren()), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CompoundStmt *n, std::ostream &o) {
-  dumpVector(this, ident, &(n->getChildren()), o);
+void Dump::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o) {
+  dumpVector(this, &(n->getChildren()), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CStyleAddressOf *n, std::ostream &o) {
-  print(ident, n->subexpr, o);
+void Dump::runS(chillAST_CStyleAddressOf *n, std::string indent, std::ostream &o) {
+  run(n->subexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CStyleCastExpr *n, std::ostream &o) {
+void Dump::runS(chillAST_CStyleCastExpr *n, std::string indent, std::ostream &o) {
   o << n->towhat << " ";
-  print(ident, n->subexpr, o);
+  run(n->subexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CudaFree *n, std::ostream &o) {
-  print(ident, n->variable, o);
+void Dump::runS(chillAST_CudaFree *n, std::string indent, std::ostream &o) {
+  run(n->variable, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CudaKernelCall *n, std::ostream &o) {
+void Dump::runS(chillAST_CudaKernelCall *n, std::string indent, std::ostream &o) {
   chill_error_printf("Not implemented");
 }
 
-void Dump::printS(std::string ident, chillAST_CudaMalloc *n, std::ostream &o) {
-  print(ident, n->devPtr, o);
-  print(ident, n->sizeinbytes, o);
+void Dump::runS(chillAST_CudaMalloc *n, std::string indent, std::ostream &o) {
+  run(n->devPtr, indent, o);
+  run(n->sizeinbytes, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CudaMemcpy *n, std::ostream &o) {
+void Dump::runS(chillAST_CudaMemcpy *n, std::string indent, std::ostream &o) {
   o << n->cudaMemcpyKind << " ";
-  print(ident, n->dest, o);
-  print(ident, n->src, o);
-  print(ident, n->size, o);
+  run(n->dest, indent, o);
+  run(n->src, indent, o);
+  run(n->size, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_CudaSyncthreads *n, std::ostream &o) {}
+void Dump::runS(chillAST_CudaSyncthreads *n, std::string indent, std::ostream &o) {}
 
-void Dump::printS(std::string ident, chillAST_DeclRefExpr *n, std::ostream &o) {
+void Dump::runS(chillAST_DeclRefExpr *n, std::string indent, std::ostream &o) {
   chillAST_VarDecl *vd = n->getVarDecl();
   if (vd)
     if (vd->isAParameter) o << "ParmVar "; else o << "Var ";
   o << n->declarationName << " ";
   chillAST_FunctionDecl *fd = n->getFunctionDecl();
-  if (fd) dumpVector(this, ident, fd->getParameterSymbolTable(), o);
+  if (fd) dumpVector(this, fd->getParameterSymbolTable(), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_FloatingLiteral *n, std::ostream &o) {
+void Dump::runS(chillAST_FloatingLiteral *n, std::string indent, std::ostream &o) {
   if (n->precision == 1) o << "float ";
   else o << "double ";
   o << n->value;
 }
 
-void Dump::printS(std::string ident, chillAST_ForStmt *n, std::ostream &o) {
-  print(ident, n->init, o);
-  print(ident, n->cond, o);
-  print(ident, n->incr, o);
-  print(ident, n->body, o);
+void Dump::runS(chillAST_ForStmt *n, std::string indent, std::ostream &o) {
+  run(n->init, indent, o);
+  run(n->cond, indent, o);
+  run(n->incr, indent, o);
+  run(n->body, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_Free *n, std::ostream &o) {}
+void Dump::runS(chillAST_Free *n, std::string indent, std::ostream &o) {}
 
-void Dump::printS(std::string ident, chillAST_FunctionDecl *n, std::ostream &o) {
+void Dump::runS(chillAST_FunctionDecl *n, std::string indent, std::ostream &o) {
   if (n->filename) o << n->filename << " ";
   if (n->isFromSourceFile) o << "FromSourceFile" << " ";
   o << n->returnType << " " << n->functionName << " ";
-  if (n->getBody()) print(ident, n->getBody(), o);
+  if (n->getBody()) run(n->getBody(), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_IfStmt *n, std::ostream &o) {
-  print(ident, n->getCond(), o);
-  print(ident, n->getThen(), o);
+void Dump::runS(chillAST_IfStmt *n, std::string indent, std::ostream &o) {
+  run(n->getCond(), indent, o);
+  run(n->getThen(), indent, o);
   if (n->getElse())
-    print(ident, n->getElse(), o);
+    run(n->getElse(), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_IntegerLiteral *n, std::ostream &o) {
+void Dump::runS(chillAST_IntegerLiteral *n, std::string indent, std::ostream &o) {
   o << n->value << " ";
 }
 
-void Dump::printS(std::string ident, chillAST_ImplicitCastExpr *n, std::ostream &o) {
-  print(ident, n->subexpr, o);
+void Dump::runS(chillAST_ImplicitCastExpr *n, std::string indent, std::ostream &o) {
+  run(n->subexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_MacroDefinition *n, std::ostream &o) {
+void Dump::runS(chillAST_MacroDefinition *n, std::string indent, std::ostream &o) {
   o << n->macroName << " ";
-  dumpVector(this, ident, &(n->parameters), o);
-  print(ident, n->getBody(), o);
+  dumpVector(this, &(n->parameters), indent, o);
+  run(n->getBody(), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_Malloc *n, std::ostream &o) {
-  print(ident, n->sizeexpr, o);
+void Dump::runS(chillAST_Malloc *n, std::string indent, std::ostream &o) {
+  run(n->sizeexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_MemberExpr *n, std::ostream &o) {
-  print(ident, n->base, o);
+void Dump::runS(chillAST_MemberExpr *n, std::string indent, std::ostream &o) {
+  run(n->base, indent, o);
   if (n->exptype == CHILL_MEMBER_EXP_ARROW) o << "-> ";
   else o << ". ";
   o << n->member << " ";
 }
 
-void Dump::printS(std::string ident, chillAST_NULL *n, std::ostream &o) {
+void Dump::runS(chillAST_NULL *n, std::string indent, std::ostream &o) {
   o << "(NULL) ";
 }
 
-void Dump::printS(std::string ident, chillAST_NoOp *n, std::ostream &o) {}
+void Dump::runS(chillAST_NoOp *n, std::string indent, std::ostream &o) {}
 
-void Dump::printS(std::string ident, chillAST_ParenExpr *n, std::ostream &o) {
-  print(ident, n->subexpr, o);
+void Dump::runS(chillAST_ParenExpr *n, std::string indent, std::ostream &o) {
+  run(n->subexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_Preprocessing *n, std::ostream &o) {
+void Dump::runS(chillAST_Preprocessing *n, std::string indent, std::ostream &o) {
   o << "(PreProc " << n->pptype << " " << n->position << " " << n->blurb << " )";
 }
 
-void Dump::printS(std::string ident, chillAST_RecordDecl *n, std::ostream &o) {
+void Dump::runS(chillAST_RecordDecl *n, std::string indent, std::ostream &o) {
   // TODO access control
   o << n->getName() << " ";
   o << n->isAStruct() << " ";
   o << n->isAUnion() << " ";
 }
 
-void Dump::printS(std::string ident, chillAST_ReturnStmt *n, std::ostream &o) {
-  if (n->returnvalue) print(ident, n->returnvalue, o);
+void Dump::runS(chillAST_ReturnStmt *n, std::string indent, std::ostream &o) {
+  if (n->returnvalue) run(n->returnvalue, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_Sizeof *n, std::ostream &o) {
+void Dump::runS(chillAST_Sizeof *n, std::string indent, std::ostream &o) {
   o << n->thing << " ";
 }
 
-void Dump::printS(std::string ident, chillAST_SourceFile *n, std::ostream &o) {
-  dumpVector(this, ident, &(n->getChildren()), o);
+void Dump::runS(chillAST_SourceFile *n, std::string indent, std::ostream &o) {
+  dumpVector(this, &(n->getChildren()), indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_TypedefDecl *n, std::ostream &o) {
+void Dump::runS(chillAST_TypedefDecl *n, std::string indent, std::ostream &o) {
   o << n->underlyingtype << " " << n->newtype << " " << n->arraypart << " ";
 }
 
-void Dump::printS(std::string ident, chillAST_TernaryOperator *n, std::ostream &o) {
+void Dump::runS(chillAST_TernaryOperator *n, std::string indent, std::ostream &o) {
   o << n->op << " ";
-  print(ident, n->condition, o);
-  print(ident, n->lhs, o);
-  print(ident, n->rhs, o);
+  run(n->condition, indent, o);
+  run(n->lhs, indent, o);
+  run(n->rhs, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_UnaryOperator *n, std::ostream &o) {
+void Dump::runS(chillAST_UnaryOperator *n, std::string indent, std::ostream &o) {
   if (n->prefix) o << "prefix ";
   else o << "postfix ";
-  print(ident, n->subexpr, o);
+  run(n->subexpr, indent, o);
 }
 
-void Dump::printS(std::string ident, chillAST_VarDecl *n, std::ostream &o) {
+void Dump::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
   o << "\"'" << n->vartype << "' '" << n->varname << "' '" << n->arraypart << "'\" dim " << n->numdimensions << " ";
 }
 

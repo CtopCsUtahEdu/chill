@@ -3,6 +3,7 @@
 //
 
 #include "printer/cfamily.h"
+#include "printer/data.h"
 #include <iomanip>
 #include <limits>
 
@@ -11,11 +12,11 @@ using namespace std;
 using namespace chill::printer;
 
 void
-printPreProcPOS(GenericPrinter *p, string ident, vector<chillAST_Preprocessing *> &n, CHILL_PREPROCESSING_POSITION pos,
-                ostream &o) {
+printPreProcPOS(GenericPrinter *p, vector<chillAST_Preprocessing *> &n, CHILL_PREPROCESSING_POSITION pos,
+                std::string indent, std::ostream &o) {
   for (int i = 0; i < n.size(); ++i)
     if (n[i]->position == pos)
-      p->print(ident, n[i], o);
+      p->run(n[i], indent, o);
 }
 
 bool opInSet(const char *set, char *op) {
@@ -29,14 +30,6 @@ bool ifSemicolonFree(CHILL_ASTNODE_TYPE t) {
          t == CHILLAST_NODETYPE_FORSTMT || t == CHILLAST_NODETYPE_MACRODEFINITION;
 }
 
-void CFamily::printS(std::string ident, chillAST_ArraySubscriptExpr *n, std::ostream &o) {
-  print(ident, n->base, o);
-  o << "[";
-  print(ident, n->index, o);
-  o << "]";
-}
-
-//! I'm just a bit lazy to write ifs ...
 const char *binaryPrec[] = {
     " :: ",
     " . -> ",
@@ -56,27 +49,75 @@ const char *binaryPrec[] = {
     " , "
 };
 
-int CFamily::getPrecS(chillAST_BinaryOperator *n) {
+void CPrec::runS(chillAST_BinaryOperator *n, int &p) {
+  errorRun(n, p);
   for (int i = 0; i < 16; ++i)
-    if (opInSet(binaryPrec[i], n->op)) return defGetPrecS() + i + 1;
+    if (opInSet(binaryPrec[i], n->op)) {
+      p += i + 1;
+      return;
+    }
   chill_error_printf("Unrecognized binary operator: %s\n", n->op);
-  return defGetPrecS();
 }
 
-void CFamily::printS(std::string ident, chillAST_BinaryOperator *n, std::ostream &o) {
+void CPrec::runS(chillAST_CallExpr *n, int &p) {
+  errorRun(n, p);
+  p += 2;
+}
+
+void CPrec::runS(chillAST_CStyleAddressOf *n, int &p) {
+  errorRun(n, p);
+  p += 3;
+}
+
+void CPrec::runS(chillAST_CStyleCastExpr *n, int &p) {
+  errorRun(n, p);
+  p += 3;
+}
+
+void CPrec::runS(chillAST_TernaryOperator *n, int &p) {
+  errorRun(n, p);
+  p += 15;
+}
+
+const char *unaryPrec[] = {
+    "",
+    " -- ++ ",
+    " -- ++ + - ! ~ * & ",
+};
+
+void CPrec::runS(chillAST_UnaryOperator *n, int &p) {
+  errorRun(n, p);
+  if (n->prefix) {
+    for (int i = 2; i >= 0; --i)
+      if (opInSet(unaryPrec[i], n->op)) {
+        p += i + 1;
+        return;
+      }
+  } else
+    for (int i = 1; i < 3; ++i)
+      if (opInSet(unaryPrec[i], n->op)) {
+        p += i + 1;
+        return;
+      }
+}
+
+void CFamily::runS(chillAST_ArraySubscriptExpr *n, std::string indent, std::ostream &o) {
+  run(n->base, indent, o);
+  o << "[";
+  run(n->index, indent, o);
+  o << "]";
+}
+
+void CFamily::runS(chillAST_BinaryOperator *n, std::string indent, std::ostream &o) {
   int prec = getPrec(n);
-  if (n->getLHS()) printPrec(ident, n->getLHS(), o, prec);
+  if (n->getLHS()) printPrec(n->getLHS(), indent, o, prec);
   else o << "(NULL)";
   o << " " << n->op << " ";
-  if (n->getRHS()) printPrec(ident, n->getRHS(), o, prec - 1);
+  if (n->getRHS()) printPrec(n->getRHS(), indent, o, prec - 1);
   else o << "(NULL)";
 }
 
-int CFamily::getPrecS(chillAST_CallExpr *n) {
-  return defGetPrecS() + 2;
-}
-
-void CFamily::printS(std::string ident, chillAST_CallExpr *n, std::ostream &o) {
+void CFamily::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
   chillAST_FunctionDecl *FD = NULL;
   chillAST_MacroDefinition *MD = NULL;
   if (n->callee->isDeclRefExpr()) {
@@ -86,7 +127,8 @@ void CFamily::printS(std::string ident, chillAST_CallExpr *n, std::ostream &o) {
       return;
     }
     if (DRE->decl->isFunctionDecl()) FD = (chillAST_FunctionDecl *) (DRE->decl);
-    else chill_error_printf("Function DRE of type %s\n", DRE->decl->getTypeString());
+    else
+      chill_error_printf("Function DRE of type %s\n", DRE->decl->getTypeString());
   } else if (n->callee->isFunctionDecl())
     FD = (chillAST_FunctionDecl *) n->callee;
   else if (n->callee->isMacroDefinition())
@@ -94,90 +136,84 @@ void CFamily::printS(std::string ident, chillAST_CallExpr *n, std::ostream &o) {
   if (MD && n->getNumChildren() - 1)
     o << "(";
   else {
-    print(ident, n->callee, o);
+    run(n->callee, indent, o);
     if (n->grid && n->block)
       o << "<<<" << n->grid->varname << "," << n->block->varname << ">>>";
     o << "(";
   }
   for (int i = 1; i < n->getNumChildren(); ++i) {
     if (i != 1) o << ", ";
-    print(ident, n->getChild(i), o);
+    run(n->getChild(i), indent, o);
   }
   if (!MD || n->getNumChildren() - 1)
     o << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_CompoundStmt *n, std::ostream &o) {
+void CFamily::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o) {
   vector<chillAST_node *> *c = &(n->getChildren());
-  string nid = ident + identSpace;
+  string nid = indent + identSpace;
   if (c->size() > 1 || n->getParent()->isFunctionDecl()) o << "{";
   for (int i = 0; i < c->size(); ++i) {
     o << "\n" << nid;
-    printPreProcPOS(this, nid, n->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, o);
-    printPreProcPOS(this, nid, n->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, o);
-    print(nid, c->at(i), o);
+    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, indent, o);
+    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, indent, o);
+    print(c->at(i), nid, o);
     if (!ifSemicolonFree(c->at(i)->getType())) o << ";";
-    printPreProcPOS(this, nid, n->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, o);
-    printPreProcPOS(this, nid, n->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, o);
+    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, indent, o);
+    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, indent, o);
   }
-  if (c->size() > 1 || n->getParent()->isFunctionDecl()) o << "\n" << ident << "}";
+  if (c->size() > 1 || n->getParent()->isFunctionDecl()) o << "\n" << indent << "}";
 }
 
-int CFamily::getPrecS(chillAST_CStyleAddressOf *n) {
-  return defGetPrecS() + 3;
-}
 
-void CFamily::printS(std::string ident, chillAST_CStyleAddressOf *n, std::ostream &o) {
+void CFamily::runS(chillAST_CStyleAddressOf *n, std::string indent, std::ostream &o) {
   int prec = getPrec(n);
-  printPrec(ident, n->subexpr, o, prec);
+  printPrec(n->subexpr, indent, o, prec);
 }
 
-int CFamily::getPrecS(chillAST_CStyleCastExpr *n) {
-  return defGetPrecS() + 3;
-}
 
-void CFamily::printS(std::string ident, chillAST_CStyleCastExpr *n, std::ostream &o) {
+void CFamily::runS(chillAST_CStyleCastExpr *n, std::string indent, std::ostream &o) {
   o << "(" << n->towhat << ")";
-  printPrec(ident, n->subexpr, o, getPrec(n));
+  printPrec(n->subexpr, indent, o, getPrec(n));
 }
 
-void CFamily::printS(std::string ident, chillAST_CudaFree *n, std::ostream &o) {
+void CFamily::runS(chillAST_CudaFree *n, std::string indent, std::ostream &o) {
   o << "cudaFree(";
-  print(ident, n->variable, o);
+  run(n->variable, indent, o);
   o << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_CudaKernelCall *n, std::ostream &o) {
+void CFamily::runS(chillAST_CudaKernelCall *n, std::string indent, std::ostream &o) {
   chill_error_printf("Not implemented");
 }
 
-void CFamily::printS(std::string ident, chillAST_CudaMalloc *n, std::ostream &o) {
+void CFamily::runS(chillAST_CudaMalloc *n, std::string indent, std::ostream &o) {
   o << "cudaMalloc(";
-  print(ident, n->devPtr, o);
+  run(n->devPtr, indent, o);
   o << ", ";
-  print(ident, n->sizeinbytes, o);
+  run(n->sizeinbytes, indent, o);
   o << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_CudaMemcpy *n, std::ostream &o) {
+void CFamily::runS(chillAST_CudaMemcpy *n, std::string indent, std::ostream &o) {
   o << "cudaMemcpy(";
-  print(ident, n->dest, o);
+  run(n->dest, indent, o);
   o << ", ";
-  print(ident, n->src, o);
+  run(n->src, indent, o);
   o << ", ";
-  print(ident, n->size, o);
+  run(n->size, indent, o);
   o << ", " << n->cudaMemcpyKind << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_CudaSyncthreads *n, std::ostream &o) {
+void CFamily::runS(chillAST_CudaSyncthreads *n, std::string indent, std::ostream &o) {
   o << "__syncthreads()";
 }
 
-void CFamily::printS(std::string ident, chillAST_DeclRefExpr *n, std::ostream &o) {
+void CFamily::runS(chillAST_DeclRefExpr *n, std::string indent, std::ostream &o) {
   o << n->declarationName;
 }
 
-void CFamily::printS(std::string ident, chillAST_FloatingLiteral *n, std::ostream &o) {
+void CFamily::runS(chillAST_FloatingLiteral *n, std::string indent, std::ostream &o) {
   if (n->allthedigits)
     o << n->allthedigits;
   else {
@@ -195,27 +231,27 @@ void CFamily::printS(std::string ident, chillAST_FloatingLiteral *n, std::ostrea
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_ForStmt *n, std::ostream &o) {
+void CFamily::runS(chillAST_ForStmt *n, std::string indent, std::ostream &o) {
   if (n->metacomment)
-    o << "// " << n->metacomment << "\n" << ident;
+    o << "// " << n->metacomment << "\n" << indent;
   o << "for (";
-  print(ident, n->getInit(), o);
+  run(n->getInit(), indent, o);
   o << "; ";
-  print(ident, n->getCond(), o);
+  run(n->getCond(), indent, o);
   o << "; ";
-  print(ident, n->getInc(), o);
+  run(n->getInc(), indent, o);
   o << ") ";
   if (n->getBody()->isCompoundStmt()) {
-    print(ident, n->getBody(), o);
+    run(n->getBody(), indent, o);
   } else {
     chill_error_printf("Body of for loop not COMPOUNDSTMT\n");
-    print(ident, n->getBody(), o);
+    run(n->getBody(), indent, o);
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_Free *n, std::ostream &o) {}
+void CFamily::runS(chillAST_Free *n, std::string indent, std::ostream &o) {}
 
-void CFamily::printS(std::string ident, chillAST_FunctionDecl *n, std::ostream &o) {
+void CFamily::runS(chillAST_FunctionDecl *n, std::string indent, std::ostream &o) {
   if (n->isExtern()) o << "extern ";
   if (n->isFunctionGPU()) o << "__global__ ";
   o << n->returnType << " " << n->functionName << "(";
@@ -224,13 +260,13 @@ void CFamily::printS(std::string ident, chillAST_FunctionDecl *n, std::ostream &
   for (int i = 0; i < pars->size(); ++i) {
     if (i != 0)
       o << ", ";
-    print(ident, pars->at(i), o);
+    run(pars->at(i), indent, o);
   }
   o << ")";
   if (!(n->isExtern() || n->isForward())) {
     o << " ";
     if (n->getBody())
-      print(ident, n->getBody(), o);
+      run(n->getBody(), indent, o);
     else {
       chill_error_printf("Non-extern or forward function decl doesn't have a body");
       o << "{}";
@@ -240,34 +276,34 @@ void CFamily::printS(std::string ident, chillAST_FunctionDecl *n, std::ostream &
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_IfStmt *n, std::ostream &o) {
+void CFamily::runS(chillAST_IfStmt *n, std::string indent, std::ostream &o) {
   o << "if (";
-  print(ident, n->getCond(), o);
+  run(n->getCond(), indent, o);
   o << ") ";
   if (!n->getThen()) {
     chill_error_printf("If statement is without then part!");
     exit(-1);
   }
-  print(ident, n->getThen(), o);
+  run(n->getThen(), indent, o);
   if (!(n->getThen()->isCompoundStmt())) chill_error_printf("Then part is not a CompoundStmt!\n");
   if (n->getElse()) {
     if (n->getThen()->getNumChildren() == 1)
-      o << std::endl << ident;
+      o << std::endl << indent;
     else o << " ";
     o << "else ";
-    print(ident, n->getElse(), o);
+    run(n->getElse(), indent, o);
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_IntegerLiteral *n, std::ostream &o) {
+void CFamily::runS(chillAST_IntegerLiteral *n, std::string indent, std::ostream &o) {
   o << n->value;
 }
 
-void CFamily::printS(std::string ident, chillAST_ImplicitCastExpr *n, std::ostream &o) {
-  print(ident, n->subexpr, o);
+void CFamily::runS(chillAST_ImplicitCastExpr *n, std::string indent, std::ostream &o) {
+  run(n->subexpr, indent, o);
 }
 
-void CFamily::printS(std::string ident, chillAST_MacroDefinition *n, std::ostream &o) {
+void CFamily::runS(chillAST_MacroDefinition *n, std::string indent, std::ostream &o) {
   o << "#define" << n->macroName << " ";
   int np = n->parameters.size();
   if (np) {
@@ -277,18 +313,18 @@ void CFamily::printS(std::string ident, chillAST_MacroDefinition *n, std::ostrea
     o << ")";
   }
   // TODO newline for multiline macro
-  print(ident, n->getBody(), o);
+  run(n->getBody(), indent, o);
 }
 
-void CFamily::printS(std::string ident, chillAST_Malloc *n, std::ostream &o) {
+void CFamily::runS(chillAST_Malloc *n, std::string indent, std::ostream &o) {
   o << "malloc(";
-  print(ident, n->sizeexpr, o);
+  run(n->sizeexpr, indent, o);
   o << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_MemberExpr *n, std::ostream &o) {
+void CFamily::runS(chillAST_MemberExpr *n, std::string indent, std::ostream &o) {
   int prec = getPrec(n);
-  if (n->base) printPrec(ident, n->base, o, prec);
+  if (n->base) printPrec(n->base, indent, o, prec);
   else o << "(NULL)";
   if (n->exptype == CHILL_MEMBER_EXP_ARROW) o << "->";
   else o << ".";
@@ -296,27 +332,27 @@ void CFamily::printS(std::string ident, chillAST_MemberExpr *n, std::ostream &o)
   else o << "(NULL)";
 }
 
-void CFamily::printS(std::string ident, chillAST_NULL *n, std::ostream &o) {
+void CFamily::runS(chillAST_NULL *n, std::string indent, std::ostream &o) {
   o << "/* (NULL statement) */";
 }
 
-void CFamily::printS(std::string ident, chillAST_NoOp *n, std::ostream &o) {}
+void CFamily::runS(chillAST_NoOp *n, std::string indent, std::ostream &o) {}
 
-void CFamily::printS(std::string ident, chillAST_ParenExpr *n, std::ostream &o) {
+void CFamily::runS(chillAST_ParenExpr *n, std::string indent, std::ostream &o) {
   o << "(";
-  print(ident, n->subexpr, o);
+  run(n->subexpr, indent, o);
   o << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_Preprocessing *n, std::ostream &o) {
+void CFamily::runS(chillAST_Preprocessing *n, std::string indent, std::ostream &o) {
   switch (n->position) {
     // This will need to setup for the next one
     case CHILL_PREPROCESSING_LINEBEFORE:
-      o << n->blurb << "\n" << ident;
+      o << n->blurb << "\n" << indent;
       break;
       // This will setup for itself
     case CHILL_PREPROCESSING_LINEAFTER:
-      o << "\n" << ident << n->blurb << "\n" << ident;
+      o << "\n" << indent << n->blurb << "\n" << indent;
       break;
       // These will not(reside in the same line)
     case CHILL_PREPROCESSING_IMMEDIATELYBEFORE:
@@ -327,61 +363,61 @@ void CFamily::printS(std::string ident, chillAST_Preprocessing *n, std::ostream 
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_RecordDecl *n, std::ostream &o) {
+void CFamily::runS(chillAST_RecordDecl *n, std::string indent, std::ostream &o) {
   if (n->isUnnamed) return;
   if (n->isAStruct()) {
-    string nid = ident + identSpace;
+    string nid = indent + identSpace;
     o << "struct ";
     if (strncmp(n->getName(), "unnamed", 7)) o << n->getName() << " ";
     o << "{";
     chillAST_SymbolTable *sp = &(n->getSubparts());
     for (int i = 0; i < sp->size(); ++i) {
       o << "\n" << nid;
-      print(nid, sp->at(i), o);
+      print(sp->at(i), nid, o);
       o << ";";
     }
-    o << "\n" << ident << "}";
+    o << "\n" << indent << "}";
   } else {
     chill_error_printf("Encountered Unkown record type");
     exit(-1);
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_ReturnStmt *n, std::ostream &o) {
+void CFamily::runS(chillAST_ReturnStmt *n, std::string indent, std::ostream &o) {
   o << "return";
   if (n->returnvalue) {
     o << " ";
-    print(ident, n->returnvalue, o);
+    run(n->returnvalue, indent, o);
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_Sizeof *n, std::ostream &o) {
+void CFamily::runS(chillAST_Sizeof *n, std::string indent, std::ostream &o) {
   o << "sizeof(" << n->thing << ")";
 }
 
-void CFamily::printS(std::string ident, chillAST_SourceFile *n, std::ostream &o) {
+void CFamily::runS(chillAST_SourceFile *n, std::string indent, std::ostream &o) {
   o << "// this source is derived from CHILL AST originally from file '"
-    << n->SourceFileName << "' as parsed by frontend compiler " << n->frontend << "\n\n";
+       << n->SourceFileName << "' as parsed by frontend compiler " << n->frontend << "\n\n";
   int nchild = n->getChildren().size();
   for (int i = 0; i < nchild; ++i) {
     if (n->getChild(i)->isFromSourceFile) {
-      o << ident;
-      printPreProcPOS(this, ident, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, o);
-      printPreProcPOS(this, ident, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, o);
-      print(ident, n->getChild(i), o);
+      o << indent;
+      printPreProcPOS(this, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, indent, o);
+      printPreProcPOS(this, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, indent, o);
+      run(n->getChild(i), indent, o);
       if (!ifSemicolonFree(n->getChild(i)->getType())) o << ";";
-      printPreProcPOS(this, ident, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, o);
-      printPreProcPOS(this, ident, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, o);
+      printPreProcPOS(this, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, indent, o);
+      printPreProcPOS(this, n->getChild(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, indent, o);
       o << "\n";
     }
   }
 }
 
-void CFamily::printS(std::string ident, chillAST_TypedefDecl *n, std::ostream &o) {
+void CFamily::runS(chillAST_TypedefDecl *n, std::string indent, std::ostream &o) {
   if (n->isAStruct())
     o << "/* A typedef STRUCT */\n";
-  o << ident << "typedef ";
-  if (n->rd) print(ident, n->rd, o);
+  o << indent << "typedef ";
+  if (n->rd) run(n->rd, indent, o);
   else if (n->isAStruct()) {
     o << "/* no rd */ ";
     // the struct subparts
@@ -390,49 +426,30 @@ void CFamily::printS(std::string ident, chillAST_TypedefDecl *n, std::ostream &o
   o << n->newtype;
 }
 
-int CFamily::getPrecS(chillAST_TernaryOperator *n) {
-  return defGetPrecS() + 15;
-}
 
-void CFamily::printS(std::string ident, chillAST_TernaryOperator *n, std::ostream &o) {
+void CFamily::runS(chillAST_TernaryOperator *n, std::string indent, std::ostream &o) {
   int prec = getPrec(n);
-  printPrec(ident, n->getCond(), o, prec);
+  printPrec(n->getCond(), indent, o, prec);
   o << " " << n->op << " ";
-  printPrec(ident, n->getLHS(), o, prec);
+  printPrec(n->getLHS(), indent, o, prec);
   o << " : ";
-  printPrec(ident, n->getRHS(), o, prec);
+  printPrec(n->getRHS(), indent, o, prec);
 }
 
-const char *unaryPrec[] = {
-    "",
-    " -- ++ ",
-    " -- ++ + - ! ~ * & ",
-};
-
-int CFamily::getPrecS(chillAST_UnaryOperator *n) {
-  if (n->prefix) {
-    for (int i = 2; i >= 0; --i)
-      if (opInSet(unaryPrec[i], n->op)) return defGetPrecS() + i + 1;
-  } else
-    for (int i = 1; i < 3; ++i)
-      if (opInSet(unaryPrec[i], n->op)) return defGetPrecS() + i + 1;
-  return defGetPrecS();
-}
-
-void CFamily::printS(std::string ident, chillAST_UnaryOperator *n, std::ostream &o) {
+void CFamily::runS(chillAST_UnaryOperator *n, std::string indent, std::ostream &o) {
   int prec = getPrec(n);
   if (n->prefix) o << n->op;
-  printPrec(ident, n->subexpr, o, prec);
+  printPrec(n->subexpr, indent, o, prec);
   if (!n->prefix) o << n->op;
 }
 
-void CFamily::printS(std::string ident, chillAST_VarDecl *n, std::ostream &o) {
+void CFamily::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
   if (n->isDevice) o << "__device__ ";
   if (n->isShared) o << "__shared__ ";
   if (n->isRestrict) o << "__restrict__ ";
 
   if ((!n->isAParameter) && n->isAStruct() && n->vardef) {
-    print(ident, n->vardef, o);
+    run(n->vardef, indent, o);
     o << " " << n->varname;
   }
 
@@ -449,6 +466,12 @@ void CFamily::printS(std::string ident, chillAST_VarDecl *n, std::ostream &o) {
 
   if (n->init) {
     o << "= ";
-    print(ident, n->init, o);
+    run(n->init, indent, o);
   }
+}
+
+void CFamily::printPrec(chillAST_node *n, std::string indent, std::ostream &o, int prec) {
+  if (getPrec(n) > prec) o << "(";
+  run(n, indent, o);
+  if (getPrec(n) > prec) o << ")";
 }
