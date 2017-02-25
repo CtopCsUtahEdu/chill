@@ -632,35 +632,14 @@ namespace omega {
       if (list.size() == 0) { return NULL; }
       else if (list.size() == 1) { return list[1]; }
       else {
-        //debug_fprintf(stderr, "else\n"); 
-        int last = list.size()-1;
-        CG_outputRepr *CGOR; 
-        CG_chillRepr  *CGCR;
+        const char *op;
         
-        //debug_fprintf(stderr, "going to create call to %s( ", fname.c_str());
-        //for (int i=0; i<list.size(); i++) { 
-        //  CGCR = (CG_chillRepr*) list[i];
-        //  CGCR->chillnodes[0]->print(0, stderr);
-        //  if (i<(list.size()-1)) debug_fprintf(stderr, ", ");
-        //} 
-        //debug_fprintf(stderr, ")\n"); 
+        if (fname == std::string("max"))  op = ">";
+        else op = "<";
         
-        char macroname[32];
-        char op; 
-        
-        if (fname == std::string("max"))  op = '>';
-        else op = '<'; 
-        
-        // TODO >, check number of args etc 
-        chillAST_node *ternary = lessthanmacro(  ((CG_chillRepr*) list[0])->chillnodes[0], 
+        chillAST_node *ternary = minmaxTernary( op,  ((CG_chillRepr*) list[0])->chillnodes[0],
                                                  ((CG_chillRepr*) list[1])->chillnodes[0]);  
-        
-        //debug_fprintf(stderr, "just made ternary ");
-        //ternary->print(0, stdout);
-        
-        
         CG_chillRepr *repr = new CG_chillRepr( ternary );
-        //debug_fprintf(stderr, "returning callexpr with ternary\n", macroname); 
         return repr;
       }
     }

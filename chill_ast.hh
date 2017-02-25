@@ -190,7 +190,7 @@ void printSymbolTable( chillAST_SymbolTable *st ); // fwd decl
 void printSymbolTableMoreInfo( chillAST_SymbolTable *st ); // fwd decl 
 
 
-chillAST_node           *lessthanmacro( chillAST_node *left,  chillAST_node *right);  // fwd declaration 
+chillAST_node           *minmaxTernary( const char * op, chillAST_node *left,  chillAST_node *right);  // fwd declaration
 chillAST_SymbolTable    *addSymbolToTable( chillAST_SymbolTable *st, chillAST_VarDecl *vd ); // fwd decl
 chillAST_TypedefTable   *addTypedefToTable( chillAST_TypedefTable *tt, chillAST_TypedefDecl *td ); // fwd decl
 

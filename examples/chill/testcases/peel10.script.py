@@ -15,8 +15,6 @@ procedure('mm')
 
 loop(0)
 
-known('ambn > 0')
 distribute([0,1],3)
 peel(1, 3,-4)  # statement 0, loop 3 (innermost, for n), 4 statements from END
-
 

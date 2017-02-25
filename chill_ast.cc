@@ -3930,18 +3930,15 @@ bool chillAST_IfStmt::findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, b
 
   
 
-chillAST_node *lessthanmacro( chillAST_node *left, chillAST_node *right) { 
+chillAST_node *minmaxTernary(const char * op, chillAST_node *left, chillAST_node *right) {
 
-  chillAST_ParenExpr *lp1 = new chillAST_ParenExpr( left  );
-  chillAST_ParenExpr *rp1 = new chillAST_ParenExpr( right );
-  chillAST_BinaryOperator *cond = new chillAST_BinaryOperator( lp1, "<", rp1 );
-
-  chillAST_ParenExpr *lp2 = new chillAST_ParenExpr( left  );
-  chillAST_ParenExpr *rp2 = new chillAST_ParenExpr( right );
-  
+  chillAST_node *lp1 = left -> clone();
+  chillAST_node *rp1 = right -> clone();
+  chillAST_BinaryOperator *cond = new chillAST_BinaryOperator( lp1, op, rp1 );
+  chillAST_node *lp2 = left -> clone();
+  chillAST_node *rp2 = right -> clone();
   chillAST_TernaryOperator *t = new chillAST_TernaryOperator("?", cond, lp2, rp2);
-  
-  return t; 
+  return t;
 } 
 
 
