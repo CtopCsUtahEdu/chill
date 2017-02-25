@@ -20,6 +20,8 @@ History:
 #include "ir_clang.hh"
 #include "loop.hh"
 #include "chill_error.hh"
+#include "scanner/sanityCheck.h"
+#include "scanner/definitionLinker.h"
 
 #define DUMPFUNC(x, y) std::cerr << "In function " << x << "\n"; y->dump(); 
 
@@ -43,30 +45,33 @@ History:
 
 #include "chill_ast.hh"
 
+#define UNWRAP(x) ((x)[0])
+#define WRAP(x) (chillAST_NodeList(1,x))
+
 // fwd declarations
-chillAST_node * ConvertVarDecl( clang::VarDecl *D, chillAST_node * );
-chillAST_node * ConvertTypeDefDecl( clang::TypedefDecl *TDD, chillAST_node * );
-chillAST_node * ConvertRecordDecl( clang::RecordDecl *D, chillAST_node * );
-chillAST_node * ConvertDeclStmt( clang::DeclStmt *clangDS, chillAST_node * );
-chillAST_node * ConvertCompoundStmt( clang::CompoundStmt *clangCS, chillAST_node * );
-chillAST_node * ConvertFunctionDecl( clang::FunctionDecl *D , chillAST_node *);
-chillAST_node * ConvertForStmt( clang::ForStmt *clangFS, chillAST_node * );
-chillAST_node * ConvertUnaryOperator( clang::UnaryOperator * clangU, chillAST_node *O ); 
-chillAST_node * ConvertBinaryOperator( clang::BinaryOperator * clangBO, chillAST_node *B );
-chillAST_node * ConvertArraySubscriptExpr( clang::ArraySubscriptExpr *clangASE, chillAST_node * ); 
-chillAST_node * ConvertDeclRefExpr( clang::DeclRefExpr * clangDRE, chillAST_node * );
-chillAST_node * ConvertIntegerLiteral( clang::IntegerLiteral *clangIL, chillAST_node * );
-chillAST_node * ConvertFloatingLiteral( clang::FloatingLiteral *clangFL, chillAST_node * );
-chillAST_node * ConvertImplicitCastExpr( clang::ImplicitCastExpr *clangICE, chillAST_node * );
-chillAST_node * ConvertCStyleCastExpr( clang::CStyleCastExpr *clangICE, chillAST_node * );
-chillAST_node * ConvertReturnStmt( clang::ReturnStmt *clangRS, chillAST_node * );
-chillAST_node * ConvertCallExpr( clang::CallExpr *clangCE , chillAST_node *);
-chillAST_node * ConvertIfStmt( clang::IfStmt *clangIS , chillAST_node *);
-chillAST_node * ConvertMemberExpr( clang::MemberExpr *clangME , chillAST_node *);
+chillAST_NodeList ConvertVarDecl( clang::VarDecl *D );
+chillAST_NodeList ConvertTypeDefDecl( clang::TypedefDecl *TDD );
+chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *D );
+chillAST_NodeList ConvertDeclStmt( clang::DeclStmt *clangDS );
+chillAST_NodeList ConvertCompoundStmt( clang::CompoundStmt *clangCS );
+chillAST_NodeList ConvertFunctionDecl( clang::FunctionDecl *D );
+chillAST_NodeList ConvertForStmt( clang::ForStmt *clangFS );
+chillAST_NodeList ConvertUnaryOperator( clang::UnaryOperator * clangU );
+chillAST_NodeList ConvertBinaryOperator( clang::BinaryOperator * clangBO );
+chillAST_NodeList ConvertArraySubscriptExpr( clang::ArraySubscriptExpr *clangASE );
+chillAST_NodeList ConvertDeclRefExpr( clang::DeclRefExpr * clangDRE );
+chillAST_NodeList ConvertIntegerLiteral( clang::IntegerLiteral *clangIL );
+chillAST_NodeList ConvertFloatingLiteral( clang::FloatingLiteral *clangFL );
+chillAST_NodeList ConvertImplicitCastExpr( clang::ImplicitCastExpr *clangICE );
+chillAST_NodeList ConvertCStyleCastExpr( clang::CStyleCastExpr *clangICE );
+chillAST_NodeList ConvertReturnStmt( clang::ReturnStmt *clangRS );
+chillAST_NodeList ConvertCallExpr( clang::CallExpr *clangCE );
+chillAST_NodeList ConvertIfStmt( clang::IfStmt *clangIS );
+chillAST_NodeList ConvertMemberExpr( clang::MemberExpr *clangME );
 
 
 chillAST_node * ConvertTranslationUnit(  clang::TranslationUnitDecl *TUD, char *filename );
-chillAST_node * ConvertGenericClangAST( clang::Stmt *s, chillAST_node *  );
+chillAST_NodeList ConvertGenericClangAST( clang::Stmt *s );
 
 
 using namespace clang;
@@ -110,7 +115,7 @@ namespace {
 // forward defs
 SourceManager * globalSRCMAN;
 
-chillAST_node * ConvertVarDecl( VarDecl *D, chillAST_node *p ) {
+chillAST_NodeList ConvertVarDecl( VarDecl *D ) {
    bool isParm = false;
 
    QualType T0 = D->getType();
@@ -125,7 +130,7 @@ chillAST_node * ConvertVarDecl( VarDecl *D, chillAST_node *p ) {
 
   char *varname = strdup(D->getName().str().c_str()); 
 
-  chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype,  varname, arraypart, (void *)D, p /* , initializer */ );
+  chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype,  varname, arraypart, (void *)D );
 
   chillVD->isAParameter = isParm; 
 
@@ -177,12 +182,12 @@ chillAST_node * ConvertVarDecl( VarDecl *D, chillAST_node *p ) {
 
   // store this away for declrefexpr that references it! 
   VariableDeclarations.push_back(chillVD);
-  return chillVD;
+  return WRAP(chillVD);
 }
 
 
 
-chillAST_node * ConvertRecordDecl( clang::RecordDecl *RD, chillAST_node *p ) { // for structs and unions
+chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *RD ) { // for structs and unions
 
   int count = 0;
   for (clang::RecordDecl::field_iterator fi = RD->field_begin(); fi != RD->field_end(); fi++) count++; 
@@ -191,7 +196,7 @@ chillAST_node * ConvertRecordDecl( clang::RecordDecl *RD, chillAST_node *p ) { /
   sprintf(blurb, "struct %s", RD->getNameAsString().c_str()); 
   debug_fprintf(stderr, "blurb is '%s'\n", blurb); 
 
-  chillAST_TypedefDecl *astruct = new chillAST_TypedefDecl( blurb, "", p);
+  chillAST_TypedefDecl *astruct = new chillAST_TypedefDecl( blurb, "");
   astruct->setStruct( true ); 
   astruct->setStructName( RD->getNameAsString().c_str() );
 
@@ -215,30 +220,29 @@ chillAST_node * ConvertRecordDecl( clang::RecordDecl *RD, chillAST_node *p ) { /
   debug_fprintf(stderr, "I just defined a struct\n"); 
   astruct->print(0, stderr); 
 
-  return astruct; 
+  return WRAP(astruct);
 }
 
 
-chillAST_node * ConvertTypeDefDecl( TypedefDecl *TDD, chillAST_node *p ) {
+chillAST_NodeList ConvertTypeDefDecl( TypedefDecl *TDD ) {
   char *under =  strdup( TDD->getUnderlyingType().getAsString().c_str());
   char *arraypart = splitTypeInfo(under);
   char *alias = strdup(TDD->getName().str().c_str());
 
-  chillAST_TypedefDecl *CTDD = new chillAST_TypedefDecl( under, alias, arraypart, p );
+  chillAST_TypedefDecl *CTDD = new chillAST_TypedefDecl( under, alias, arraypart );
 
   free(under);        
   free(arraypart);   
 
-  return CTDD; 
+  return WRAP(CTDD);
 }
 
 
 
-chillAST_node * ConvertDeclStmt( DeclStmt *clangDS, chillAST_node *p ) {
+chillAST_NodeList ConvertDeclStmt( DeclStmt *clangDS ) {
   chillAST_VarDecl *chillvardecl; // the thing we'll return if this is a single declaration
+  chillAST_NodeList nl;
   
-  bool multiples = !clangDS->isSingleDecl();
-
   DeclGroupRef dgr = clangDS->getDeclGroup();
   clang::DeclGroupRef::iterator DI = dgr.begin();
   clang::DeclGroupRef::iterator DE = dgr.end();
@@ -262,13 +266,10 @@ chillAST_node * ConvertDeclStmt( DeclStmt *clangDS, chillAST_node *p ) {
       //debug_fprintf(stderr, "%s %s\n", td, varname); 
       char *arraypart = splitTypeInfo( vartype );
       
-      chillvardecl = new chillAST_VarDecl(vartype, varname, arraypart, (void *)D, p );
+      chillvardecl = new chillAST_VarDecl(vartype, varname, arraypart, (void *)D );
       //debug_fprintf(stderr, "DeclStmt (clang 0x%x) for %s %s%s\n", D, vartype,  varname, arraypart);
 
-      // store this away for declrefexpr that references it! 
-      VariableDeclarations.push_back(chillvardecl);
-      
-      if (multiples) p->addChild( chillvardecl ); 
+      nl.push_back(chillvardecl);
 
       // TODO 
       if (V->hasInit()) { 
@@ -278,28 +279,24 @@ chillAST_node * ConvertDeclStmt( DeclStmt *clangDS, chillAST_node *p ) {
     }
   }  // for each of possibly multiple decls 
   
-  if (multiples) return NULL;    // multiple decls added themselves already
-  return chillvardecl;  // OR a single decl
+  return nl;  // OR a single decl
 }
 
 
 
-chillAST_node * ConvertCompoundStmt( CompoundStmt *clangCS, chillAST_node *p ) {
+chillAST_NodeList ConvertCompoundStmt( CompoundStmt *clangCS ) {
   chillAST_CompoundStmt *chillCS = new chillAST_CompoundStmt;
-  chillCS->setParent(p);
   // for each clang child
   for (auto I = clangCS->child_begin(); I != clangCS->child_end(); ++I) { // ?? loop looks WRONG
     // create the chill ast for each child
     Stmt *child = *I;
-    chillAST_node *n =  ConvertGenericClangAST( child, chillCS );
-    // usually n will be a statement. We just add it as a child.
-    // SOME DeclStmts have multiple declarations. They will add themselves and return NULL
-    if (n) chillCS->addChild( n );
+    chillAST_NodeList nl =  ConvertGenericClangAST( child );
+    chillCS->addChildren( nl );
   }
-  return chillCS;
+  return WRAP(chillCS);
 }
 
-chillAST_node * ConvertFunctionDecl( FunctionDecl *D, chillAST_node *p ) {
+chillAST_NodeList ConvertFunctionDecl( FunctionDecl *D ) {
   QualType QT = D->getReturnType();
   string ReturnTypeStr = QT.getAsString();
 
@@ -307,7 +304,7 @@ chillAST_node * ConvertFunctionDecl( FunctionDecl *D, chillAST_node *p ) {
   DeclarationName DeclName = D->getNameInfo().getName();
   string FuncName = DeclName.getAsString();
 
-  chillAST_FunctionDecl *chillFD = new chillAST_FunctionDecl( ReturnTypeStr.c_str(),  FuncName.c_str(), p, D);
+  chillAST_FunctionDecl *chillFD = new chillAST_FunctionDecl( ReturnTypeStr.c_str(),  FuncName.c_str(), D);
   
 
   int numparams = D->getNumParams();
@@ -319,7 +316,7 @@ chillAST_node * ConvertFunctionDecl( FunctionDecl *D, chillAST_node *p ) {
     QualType T = pvd->getOriginalType();
     debug_fprintf(stderr, "OTYPE %s\n", T.getAsString().c_str()); 
 
-    chillAST_VarDecl *chillPVD = (chillAST_VarDecl *)ConvertVarDecl( clangvardecl, chillFD ) ; 
+    chillAST_VarDecl *chillPVD = (chillAST_VarDecl*)UNWRAP(ConvertVarDecl( clangvardecl ));
     //chillPVD->print();  fflush(stdout); 
 
     //chillPVD->isAParameter = 1;
@@ -337,78 +334,67 @@ chillAST_node * ConvertFunctionDecl( FunctionDecl *D, chillAST_node *p ) {
 
   Stmt *clangbody = D->getBody();
   if (clangbody) { // may just be fwd decl or external, without an actual body 
-    //debug_fprintf(stderr, "body of type %s\n", clangbody->getStmtClassName()); 
-    //chillAST_node *CB = ConvertCompoundStmt(  dyn_cast<CompoundStmt>(clangbody) ); // always a compound statement?
-    chillAST_node *CB = ConvertGenericClangAST( clangbody, chillFD ); 
-    //debug_fprintf(stderr, "FunctionDecl body = 0x%x of type %s\n", CB, CB->getTypeString());
-    chillFD->setBody ( CB ); 
+    chillAST_node *CB = UNWRAP(ConvertGenericClangAST( clangbody ));
+    chillFD->setBody ( CB );
   }
 
   //debug_fprintf(stderr, "adding function %s  0x%x to FunctionDeclarations\n", chillFD->functionName, chillFD); 
   FunctionDeclarations.push_back(chillFD); 
-  return  chillFD; 
+  return WRAP(chillFD);
 }
 
 
-chillAST_node * ConvertForStmt( ForStmt *clangFS, chillAST_node *p ) {
+chillAST_NodeList ConvertForStmt( ForStmt *clangFS ) {
 
   Stmt *init = clangFS->getInit();
   Expr *cond = clangFS->getCond();
   Expr *incr = clangFS->getInc();
   Stmt *body = clangFS->getBody();
 
-  chillAST_node *ini = ConvertGenericClangAST( init, NULL ); 
-  chillAST_node *con = ConvertGenericClangAST( cond, NULL); 
-  chillAST_node *inc = ConvertGenericClangAST( incr, NULL); 
-  chillAST_node *bod = ConvertGenericClangAST( body, NULL); 
+  chillAST_node *ini = UNWRAP(ConvertGenericClangAST( init ));
+  chillAST_node *con = UNWRAP(ConvertGenericClangAST( cond ));
+  chillAST_node *inc = UNWRAP(ConvertGenericClangAST( incr ));
+  chillAST_node *bod = UNWRAP(ConvertGenericClangAST( body ));
   if (bod->getType() != CHILLAST_NODETYPE_COMPOUNDSTMT) {
-    //debug_fprintf(stderr, "ForStmt body of type %s\n", bod->getTypeString()); 
     // make single statement loop bodies loop like other loops
     chillAST_CompoundStmt *cs = new chillAST_CompoundStmt( );
     cs->addChild( bod );
     bod = cs;
   }
-
-
-  chillAST_ForStmt *chill_loop = new  chillAST_ForStmt( ini, con, inc, bod, p ); 
-  ini->setParent( chill_loop );
-  con->setParent( chill_loop );
-  inc->setParent( chill_loop );
-  bod->setParent( chill_loop );
-
-  return chill_loop; 
+  chillAST_ForStmt *chill_loop = new  chillAST_ForStmt( ini, con, inc, bod );
+  return WRAP(chill_loop);
 }
 
 
-chillAST_node * ConvertIfStmt( IfStmt *clangIS, chillAST_node *p ) {
+chillAST_NodeList ConvertIfStmt( IfStmt *clangIS ) {
   Expr *cond = clangIS->getCond();
   Stmt *thenpart = clangIS->getThen();
   Stmt *elsepart = clangIS->getElse();
   
-  chillAST_node *con = ConvertGenericClangAST( cond, NULL);
+  chillAST_node *con = UNWRAP(ConvertGenericClangAST( cond ));
   chillAST_node *thn = NULL;
-  if (thenpart) thn = ConvertGenericClangAST( thenpart, NULL);
+  if (thenpart) thn = UNWRAP(ConvertGenericClangAST( thenpart ));
   chillAST_node *els = NULL;
-  if (elsepart) els = ConvertGenericClangAST( elsepart, NULL);
+  if (elsepart) els = UNWRAP(ConvertGenericClangAST( elsepart ));
   
-  chillAST_IfStmt *ifstmt = new chillAST_IfStmt( con, thn, els, NULL);
-  return ifstmt; 
+  chillAST_IfStmt *ifstmt = new chillAST_IfStmt( con, thn, els );
+  return WRAP(ifstmt);
 }
 
 
 
-chillAST_node * ConvertUnaryOperator( UnaryOperator * clangUO, chillAST_node *p ) {
+chillAST_NodeList ConvertUnaryOperator( UnaryOperator * clangUO ) {
   const char *op = unops[clangUO->getOpcode()].c_str();
   bool pre = clangUO->isPrefix();
-  chillAST_node *sub = ConvertGenericClangAST( clangUO->getSubExpr(), NULL ); 
+  chillAST_node *sub = UNWRAP(ConvertGenericClangAST( clangUO->getSubExpr()));
 
-  chillAST_UnaryOperator *chillUO = new chillAST_UnaryOperator( op, pre, sub, p ); 
+  chillAST_UnaryOperator *chillUO = new chillAST_UnaryOperator( op, pre, sub );
   sub->setParent( chillUO );
-  return chillUO; 
+  return WRAP(chillUO);
 }
 
 
-chillAST_node * ConvertBinaryOperator( BinaryOperator * clangBO, chillAST_node *p ) {
+chillAST_NodeList ConvertBinaryOperator( BinaryOperator * clangBO ) {
 
   // get the clang parts
   Expr *lhs = clangBO->getLHS();
@@ -417,121 +403,65 @@ chillAST_node * ConvertBinaryOperator( BinaryOperator * clangBO, chillAST_node *
 
 
   // convert to chill equivalents
-  chillAST_node *l = ConvertGenericClangAST( lhs, NULL ); 
+  chillAST_node *l = UNWRAP(ConvertGenericClangAST( lhs ));
   const char *opstring = binops[op].c_str();
-  chillAST_node *r = ConvertGenericClangAST( rhs, NULL ); 
+  chillAST_node *r = UNWRAP(ConvertGenericClangAST( rhs ));
   // TODO chill equivalent for numeric op. 
 
   // build up the chill Binary Op AST node
-  chillAST_BinaryOperator * binop = new chillAST_BinaryOperator( l, opstring, r, p );
-  l->setParent( binop );
-  r->setParent( binop );
+  chillAST_BinaryOperator * binop = new chillAST_BinaryOperator( l, opstring, r );
 
-  return binop; 
+  return WRAP(binop);
 }
 
 
 
 
-chillAST_node * ConvertArraySubscriptExpr( ArraySubscriptExpr *clangASE, chillAST_node *p ) { 
+chillAST_NodeList ConvertArraySubscriptExpr( ArraySubscriptExpr *clangASE ) {
 
   Expr *clangbase  = clangASE->getBase();
   Expr *clangindex = clangASE->getIdx();
   //debug_fprintf(stderr, "clang base: "); clangbase->dump(); debug_fprintf(stderr, "\n"); 
 
-  chillAST_node *bas  = ConvertGenericClangAST( clangbase, NULL ); 
-  chillAST_node *indx = ConvertGenericClangAST( clangindex, NULL ); 
+  chillAST_node *bas  = UNWRAP(ConvertGenericClangAST( clangbase));
+  chillAST_node *indx = UNWRAP(ConvertGenericClangAST( clangindex));
   
-  chillAST_ArraySubscriptExpr * chillASE = new chillAST_ArraySubscriptExpr( bas, indx, p, clangASE);
-  bas->setParent( chillASE );
-  indx->setParent( chillASE );
-  return chillASE; 
+  chillAST_ArraySubscriptExpr * chillASE = new chillAST_ArraySubscriptExpr( bas, indx, clangASE);
+  return WRAP(chillASE);
 }
 
 
 
-chillAST_node * ConvertDeclRefExpr( DeclRefExpr * clangDRE, chillAST_node *p ) { 
+chillAST_NodeList ConvertDeclRefExpr( DeclRefExpr * clangDRE ) {
   DeclarationNameInfo DNI = clangDRE->getNameInfo();
 
-  ValueDecl *vd = static_cast<ValueDecl *>(clangDRE->getDecl()); // ValueDecl ?? VarDecl ??
+  ValueDecl *vd = static_cast<ValueDecl *>(clangDRE->getDecl());
 
   QualType QT = vd->getType();
   string TypeStr = QT.getAsString();
-  //debug_fprintf(stderr, "\n\n*** type %s ***\n\n", TypeStr.c_str()); 
-  //debug_fprintf(stderr, "kind %s\n", vd->getDeclKindName()); 
 
   DeclarationName DN = DNI.getName();
   const char *varname = DN.getAsString().c_str() ; 
-  chillAST_DeclRefExpr * chillDRE = new chillAST_DeclRefExpr(TypeStr.c_str(),  varname, p ); 
+  chillAST_DeclRefExpr * chillDRE = new chillAST_DeclRefExpr(TypeStr.c_str(),  varname);
 
-  //debug_fprintf(stderr, "clang DeclRefExpr refers to declaration of %s @ 0x%x\n", varname, vd);
-  //debug_fprintf(stderr, "clang DeclRefExpr refers to declaration of %s of kind %s\n", varname, vd->getDeclKindName()); 
-  
-  // find the definition (we hope)
-  if ( (!strcmp("Var",  vd->getDeclKindName())) || (!strcmp("ParmVar",  vd->getDeclKindName()))) { 
-    // it's a variable reference 
-    int numvars = VariableDeclarations.size();
-    chillAST_VarDecl *chillvd = NULL;
-    for (int i=0; i<numvars; i++) { 
-      if (VariableDeclarations[i]->uniquePtr == vd) {
-        chillvd = VariableDeclarations[i];
-        //debug_fprintf(stderr, "found it at variabledeclaration %d of %d\n", i, numvars);
-      }
-    }
-    if (!chillvd) { 
-      debug_fprintf(stderr, "\nWARNING, ir_clang.cc clang DeclRefExpr %s refers to a declaration I can't find! at ox%x\n", varname, vd); 
-      debug_fprintf(stderr, "variables I know of are:\n");
-      for (int i=0; i<numvars; i++) { 
-        chillAST_VarDecl *adecl = VariableDeclarations[i];
-        if (adecl->isParmVarDecl()) debug_fprintf(stderr, "(parameter) ");
-        debug_fprintf(stderr, "%s %s at location 0x%x\n", adecl->vartype, adecl->varname, adecl->uniquePtr); 
-      }  
-      debug_fprintf(stderr, "\n"); 
-    }
-    
-    if (chillvd == NULL) { debug_fprintf(stderr, "chillDRE->decl = 0x%x\n", chillvd); exit(-1); }
-
-    chillDRE->decl = (chillAST_node *)chillvd; // start of spaghetti pointers ...
-  }
-  else  if (!strcmp("Function",  vd->getDeclKindName())) { 
-    //debug_fprintf(stderr, "declrefexpr of type Function\n");
-    int numfuncs = FunctionDeclarations.size();
-    chillAST_FunctionDecl *chillfd = NULL;
-    for (int i=0; i<numfuncs; i++) { 
-      if (FunctionDeclarations[i]->uniquePtr == vd) {
-        chillfd = FunctionDeclarations[i];
-        //debug_fprintf(stderr, "found it at functiondeclaration %d of %d\n", i, numfuncs);
-      }
-    }
-    if (chillfd == NULL) { debug_fprintf(stderr, "chillDRE->decl = 0x%x\n", chillfd); exit(-1); }
-
-    chillDRE->decl = (chillAST_node *)chillfd; // start of spaghetti pointers ...
-    
-  }
-  else { 
-  debug_fprintf(stderr, "clang DeclRefExpr refers to declaration of %s of kind %s\n", varname, vd->getDeclKindName()); 
-    debug_fprintf(stderr, "chillDRE->decl = UNDEFINED\n"); 
-    exit(-1); 
-  }
-
-  //debug_fprintf(stderr, "%s\n", DN.getAsString().c_str()); 
-  return chillDRE; 
+  //debug_fprintf(stderr, "%s\n", DN.getAsString().c_str());
+  return WRAP(chillDRE);
 }
 
 
 
-chillAST_node * ConvertIntegerLiteral( IntegerLiteral *clangIL, chillAST_node *p ) { 
+chillAST_NodeList ConvertIntegerLiteral( IntegerLiteral *clangIL ) {
   bool isSigned = clangIL->getType()->isSignedIntegerType();
   //int val = clangIL->getIntValue();
   const char *printable = clangIL->getValue().toString(10, isSigned).c_str(); 
   int val = atoi( printable ); 
   //debug_fprintf(stderr, "int value %s  (%d)\n", printable, val); 
-  chillAST_IntegerLiteral  *chillIL = new chillAST_IntegerLiteral( val, p );
-  return chillIL; 
+  chillAST_IntegerLiteral  *chillIL = new chillAST_IntegerLiteral( val );
+  return WRAP(chillIL);
 }
 
 
-chillAST_node * ConvertFloatingLiteral( FloatingLiteral *clangFL, chillAST_node *p ) { 
+chillAST_NodeList ConvertFloatingLiteral( FloatingLiteral *clangFL ) {
   //debug_fprintf(stderr, "\nConvertFloatingLiteral()\n"); 
   float val = clangFL->getValueAsApproximateDouble(); // TODO approx is a bad idea!
   string WHAT; 
@@ -595,91 +525,69 @@ chillAST_node * ConvertFloatingLiteral( FloatingLiteral *clangFL, chillAST_node 
   buf[len] = '\0';
   //debug_fprintf(stderr, "'%s'\n", buf);
 
-  chillAST_FloatingLiteral  *chillFL = new chillAST_FloatingLiteral( val, buf, p );
+  chillAST_FloatingLiteral  *chillFL = new chillAST_FloatingLiteral( val, buf );
   
   //chillFL->print(); printf("\n"); fflush(stdout); 
-  return chillFL; 
+  return WRAP(chillFL);
 }
 
 
-chillAST_node * ConvertImplicitCastExpr( ImplicitCastExpr *clangICE, chillAST_node *p ) {
-  //debug_fprintf(stderr, "ConvertImplicitCastExpr()\n"); 
+chillAST_NodeList ConvertImplicitCastExpr( ImplicitCastExpr *clangICE ) {
   CastExpr *CE = dyn_cast<ImplicitCastExpr>(clangICE);
-  //debug_fprintf(stderr, "implicit cast of type %s\n", CE->getCastKindName());
-  chillAST_node * sub = ConvertGenericClangAST( clangICE->getSubExpr(), p );
-  chillAST_ImplicitCastExpr *chillICE = new chillAST_ImplicitCastExpr( sub, p ); 
-  
-  //sub->setParent( chillICE ); // these 2 lines work
-  //return chillICE; 
-
-  //sub->setParent(p);         // ignore the ImplicitCastExpr !!  TODO (probably a bad idea) 
-  return sub; 
-
+  chillAST_node * sub = UNWRAP(ConvertGenericClangAST( clangICE->getSubExpr() ));
+  chillAST_ImplicitCastExpr *chillICE = new chillAST_ImplicitCastExpr( sub );
+  // ignore the ImplicitCastExpr !!  TODO (probably a bad idea)
+  return WRAP(sub);
 }
 
 
 
 
-chillAST_node * ConvertCStyleCastExpr( CStyleCastExpr *clangCSCE, chillAST_node *p ) {
-  //debug_fprintf(stderr, "ConvertCStyleCastExpr()\n"); 
-  //debug_fprintf(stderr, "C Style cast of kind ");
+chillAST_NodeList ConvertCStyleCastExpr( CStyleCastExpr *clangCSCE ) {
   CastExpr *CE = dyn_cast<CastExpr>(clangCSCE);
-  //debug_fprintf(stderr, "%s\n", CE->getCastKindName());
-  
-  //clangCSCE->getTypeAsWritten().getAsString(Policy)
+
   const char * towhat = strdup( clangCSCE->getTypeAsWritten().getAsString().c_str() );
-  //debug_fprintf(stderr, "before sub towhat (%s)\n", towhat);
 
-  chillAST_node * sub = ConvertGenericClangAST( clangCSCE->getSubExprAsWritten(), NULL );
-  //debug_fprintf(stderr, "after sub towhat (%s)\n", towhat);
-  chillAST_CStyleCastExpr *chillCSCE = new chillAST_CStyleCastExpr( towhat, sub, p ); 
-  //debug_fprintf(stderr, "after CSCE towhat (%s)\n", towhat);
+  chillAST_node * sub = UNWRAP(ConvertGenericClangAST( clangCSCE->getSubExprAsWritten()));
+  chillAST_CStyleCastExpr *chillCSCE = new chillAST_CStyleCastExpr( towhat, sub );
   sub->setParent( chillCSCE );
-  return chillCSCE; 
+  return WRAP(chillCSCE);
 }
 
 
 
 
-chillAST_node * ConvertReturnStmt( ReturnStmt *clangRS, chillAST_node *p ) {
-  chillAST_node * retval = ConvertGenericClangAST( clangRS->getRetValue(), NULL ); // NULL is handled
-  //if (retval == NULL) debug_fprintf(stderr, "return stmt returns nothing\n");
+chillAST_NodeList ConvertReturnStmt( ReturnStmt *clangRS ) {
+  chillAST_node * retval = UNWRAP(ConvertGenericClangAST( clangRS->getRetValue())); // NULL is handled
 
-  chillAST_ReturnStmt * chillRS = new chillAST_ReturnStmt( retval, p );
+  chillAST_ReturnStmt * chillRS = new chillAST_ReturnStmt( retval );
   if (retval) retval->setParent( chillRS );
-  return chillRS; 
+  return WRAP(chillRS);
 }
 
 
-chillAST_node * ConvertCallExpr( CallExpr *clangCE, chillAST_node *p ) {
-  //debug_fprintf(stderr, "ConvertCallExpr()\n"); 
+chillAST_NodeList ConvertCallExpr( CallExpr *clangCE ) {
+  chillAST_node *callee = UNWRAP(ConvertGenericClangAST( clangCE->getCallee() ));
 
-  chillAST_node *callee = ConvertGenericClangAST( clangCE->getCallee(), NULL ); 
-  //debug_fprintf(stderr, "callee is of type %s\n", callee->getTypeString()); 
-
-  //chillAST_node *next = ((chillAST_ImplicitCastExpr *)callee)->subexpr;
-  //debug_fprintf(stderr, "callee is of type %s\n", next->getTypeString()); 
-
-  chillAST_CallExpr *chillCE = new chillAST_CallExpr( callee, p ); 
+  chillAST_CallExpr *chillCE = new chillAST_CallExpr( callee );
   callee->setParent( chillCE );
 
   int numargs = clangCE->getNumArgs();
   //debug_fprintf(stderr, "CallExpr has %d args\n", numargs);
   Expr **clangargs =  clangCE->getArgs(); 
   for (int i=0; i<numargs; i++) { 
-    chillCE->addArg( ConvertGenericClangAST( clangargs[i], chillCE ) );
+    chillCE->addArg( UNWRAP(ConvertGenericClangAST( clangargs[i] )) );
   }
   
-  return chillCE; 
+  return WRAP(chillCE);
 }
 
 
-chillAST_node * ConvertParenExpr( ParenExpr *clangPE, chillAST_node *p ) {
-  chillAST_node *sub = ConvertGenericClangAST( clangPE->getSubExpr(), NULL);
-  chillAST_ParenExpr *chillPE = new chillAST_ParenExpr( sub, p); 
-  sub->setParent( chillPE );
+chillAST_NodeList ConvertParenExpr( ParenExpr *clangPE ) {
+  chillAST_node *sub = UNWRAP(ConvertGenericClangAST( clangPE->getSubExpr()));
+  chillAST_ParenExpr *chillPE = new chillAST_ParenExpr( sub );
 
-  return chillPE; 
+  return WRAP(chillPE);
 }
 
 
@@ -697,56 +605,55 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
   DeclContext::decl_iterator end   = DC->decls_end();
   for (DeclContext::decl_iterator DI=start; DI != end; ++DI) { 
     Decl *D = *DI;
-    chillAST_node *child;
+    chillAST_NodeList child;
        
     if (isa<FunctionDecl>(D))
-      child = ConvertFunctionDecl( dyn_cast<FunctionDecl>(D), topnode );
+      child = ConvertFunctionDecl( dyn_cast<FunctionDecl>(D) );
     else if (isa<VarDecl>(D))
-      child = ConvertVarDecl( dyn_cast<VarDecl>(D), topnode );
+      child = ConvertVarDecl( dyn_cast<VarDecl>(D) );
     else if (isa<TypedefDecl>(D))
-      child = ConvertTypeDefDecl( dyn_cast<TypedefDecl>(D), topnode );
+      child = ConvertTypeDefDecl( dyn_cast<TypedefDecl>(D) );
     else if (isa<RecordDecl>(D))
-      child = ConvertRecordDecl( dyn_cast<RecordDecl>(D), topnode );
+      child = ConvertRecordDecl( dyn_cast<RecordDecl>(D) );
     else if (isa<TypeAliasDecl>(D))
       throw std::runtime_error("TUD TypeAliasDecl  TODO \n");
     else
       throw std::runtime_error(std::string("TUD a declaration of type which I can't handle: ") + D->getDeclKindName());
 
-    topnode->addChild(child);
+    topnode->addChildren(child);
     if (D->isImplicit() || !globalSRCMAN->getFilename(D->getLocation()).equals(filename))
-      child->isFromSourceFile = false;
+      for (auto i = child.begin(); i != child.end(); ++i)
+        (*i)->isFromSourceFile = false;
   }
   return ( chillAST_node *)  topnode;
 }
 
 
 
- chillAST_node * ConvertGenericClangAST( Stmt *s, chillAST_node *p ) {
-   
-   if (s == NULL) return NULL;
-   //debug_fprintf(stderr, "\nConvertGenericClangAST() Stmt of type %d (%s)\n", s->getStmtClass(),s->getStmtClassName()); 
+ chillAST_NodeList ConvertGenericClangAST( Stmt *s ) {
+
+   chillAST_NodeList ret;
+   if (s == NULL) return WRAP(NULL);
+   //debug_fprintf(stderr, "\nConvertGenericClangAST() Stmt of type %d (%s)\n", s->getStmtClass(),s->getStmtClassName());
    Decl *D = (Decl *) s;
    //if (isa<Decl>(D)) debug_fprintf(stderr, "Decl of kind %d (%s)\n",  D->getKind(),D->getDeclKindName() );
-   
 
-   chillAST_node *ret = NULL;
-
-   if (isa<CompoundStmt>(s))              {ret = ConvertCompoundStmt( dyn_cast<CompoundStmt>(s),p); 
-   } else if (isa<DeclStmt>(s))           {ret = ConvertDeclStmt(dyn_cast<DeclStmt>(s),p); 
-   } else if (isa<ForStmt>(s))            {ret = ConvertForStmt(dyn_cast<ForStmt>(s),p);
-   } else if (isa<BinaryOperator>(s))     {ret = ConvertBinaryOperator(dyn_cast<BinaryOperator>(s),p);
-   } else if (isa<ArraySubscriptExpr>(s)) {ret = ConvertArraySubscriptExpr(dyn_cast<ArraySubscriptExpr>(s),p);
-   } else if (isa<DeclRefExpr>(s))        {ret = ConvertDeclRefExpr(dyn_cast<DeclRefExpr>(s),p); 
-   } else if (isa<FloatingLiteral>(s))    {ret = ConvertFloatingLiteral(dyn_cast<FloatingLiteral>(s),p);
-   } else if (isa<IntegerLiteral>(s))     {ret = ConvertIntegerLiteral(dyn_cast<IntegerLiteral>(s),p);
-   } else if (isa<UnaryOperator>(s))      {ret = ConvertUnaryOperator(dyn_cast<UnaryOperator>(s),p);
-   } else if (isa<ImplicitCastExpr>(s))   {ret = ConvertImplicitCastExpr(dyn_cast<ImplicitCastExpr>(s),p);
-   } else if (isa<CStyleCastExpr>(s))     {ret = ConvertCStyleCastExpr(dyn_cast<CStyleCastExpr>(s),p);
-   } else if (isa<ReturnStmt>(s))         {ret = ConvertReturnStmt(dyn_cast<ReturnStmt>(s),p); 
-   } else if (isa<CallExpr>(s))           {ret = ConvertCallExpr(dyn_cast<CallExpr>(s),p); 
-   } else if (isa<ParenExpr>(s))          {ret = ConvertParenExpr(dyn_cast<ParenExpr>(s),p); 
-   } else if (isa<IfStmt>(s))             {ret = ConvertIfStmt(dyn_cast<IfStmt>(s),p);
-   } else if (isa<MemberExpr>(s))         {ret = ConvertMemberExpr(dyn_cast<MemberExpr>(s),p);
+   if (isa<CompoundStmt>(s))              {ret = ConvertCompoundStmt( dyn_cast<CompoundStmt>(s));
+   } else if (isa<DeclStmt>(s))           {ret = ConvertDeclStmt(dyn_cast<DeclStmt>(s));
+   } else if (isa<ForStmt>(s))            {ret = ConvertForStmt(dyn_cast<ForStmt>(s));
+   } else if (isa<BinaryOperator>(s))     {ret = ConvertBinaryOperator(dyn_cast<BinaryOperator>(s));
+   } else if (isa<ArraySubscriptExpr>(s)) {ret = ConvertArraySubscriptExpr(dyn_cast<ArraySubscriptExpr>(s));
+   } else if (isa<DeclRefExpr>(s))        {ret = ConvertDeclRefExpr(dyn_cast<DeclRefExpr>(s));
+   } else if (isa<FloatingLiteral>(s))    {ret = ConvertFloatingLiteral(dyn_cast<FloatingLiteral>(s));
+   } else if (isa<IntegerLiteral>(s))     {ret = ConvertIntegerLiteral(dyn_cast<IntegerLiteral>(s));
+   } else if (isa<UnaryOperator>(s))      {ret = ConvertUnaryOperator(dyn_cast<UnaryOperator>(s));
+   } else if (isa<ImplicitCastExpr>(s))   {ret = ConvertImplicitCastExpr(dyn_cast<ImplicitCastExpr>(s));
+   } else if (isa<CStyleCastExpr>(s))     {ret = ConvertCStyleCastExpr(dyn_cast<CStyleCastExpr>(s));
+   } else if (isa<ReturnStmt>(s))         {ret = ConvertReturnStmt(dyn_cast<ReturnStmt>(s));
+   } else if (isa<CallExpr>(s))           {ret = ConvertCallExpr(dyn_cast<CallExpr>(s));
+   } else if (isa<ParenExpr>(s))          {ret = ConvertParenExpr(dyn_cast<ParenExpr>(s));
+   } else if (isa<IfStmt>(s))             {ret = ConvertIfStmt(dyn_cast<IfStmt>(s));
+   } else if (isa<MemberExpr>(s))         {ret = ConvertMemberExpr(dyn_cast<MemberExpr>(s));
 
 
      // these can only happen at the top level? 
@@ -786,7 +693,7 @@ class NULLASTConsumer : public ASTConsumer
 IR_clangCode_Global_Init *IR_clangCode_Global_Init::pinstance = 0;
 
 
-IR_clangCode_Global_Init *IR_clangCode_Global_Init::Instance(char **argv) {
+IR_clangCode_Global_Init *IR_clangCode_Global_Init::Instance(const char **argv) {
   debug_fprintf(stderr, "in IR_clangCode_Global_Init::Instance(), "); 
   if (pinstance == 0) {  
     //debug_fprintf(stderr, "\n\n***  making the one and only instance ***\n\n\n"); 
@@ -800,7 +707,7 @@ IR_clangCode_Global_Init *IR_clangCode_Global_Init::Instance(char **argv) {
 }
 
 
-aClangCompiler::aClangCompiler( char *filename ) {
+aClangCompiler::aClangCompiler(const char *filename ) {
   SourceFileName = strdup( filename );
 
   // Arguments to pass to the clang frontend
@@ -858,9 +765,12 @@ aClangCompiler::aClangCompiler( char *filename ) {
   ParseAST(Clang->getPreprocessor(), &TheConsumer, Clang->getASTContext());
   // Translation Unit is contents of a file
   TranslationUnitDecl *TUD = astContext_->getTranslationUnitDecl();
-  // create another AST, very similar to the clang AST but not written by idiots
-  chillAST_node *wholefile = ConvertTranslationUnit(TUD, filename);
+  chillAST_node *wholefile = ConvertTranslationUnit(TUD, SourceFileName);
   entire_file_AST = (chillAST_SourceFile *) wholefile;
+  chill::scanner::DefinitionLinker dl;
+  dl.exec(entire_file_AST);
+  chill::scanner::SanityCheck sc;
+  sc.run(entire_file_AST,std::cout);
   astContext_ = &Clang->getASTContext();
 }
 
@@ -922,7 +832,7 @@ IR_clangCode::IR_clangCode(const char *fname, const char *proc_name, const char 
   if (dest_name)
     outputname = strdup(dest_name);
   int argc = 2;
-  char *argv[2];
+  const char *argv[2];
   argv[0] = "chill";
   argv[1] = strdup(filename);
   
@@ -948,24 +858,24 @@ IR_clangCode::~IR_clangCode() {
 }
 
 
-chillAST_node * ConvertMemberExpr( clang::MemberExpr *clangME , chillAST_node *) { 
+chillAST_NodeList ConvertMemberExpr( clang::MemberExpr *clangME ) {
   debug_fprintf(stderr, "ConvertMemberExpr()\n"); 
   
   clang::Expr *E = clangME->getBase(); 
   E->dump();
 
-  chillAST_node *base = ConvertGenericClangAST( clangME->getBase(), NULL );
+  chillAST_node *base = UNWRAP(ConvertGenericClangAST( clangME->getBase() ));
 
   DeclarationNameInfo memnameinfo = clangME->getMemberNameInfo(); 
   DeclarationName DN = memnameinfo.getName();
   const char *member = DN.getAsString().c_str();
 
-  chillAST_MemberExpr *ME = new chillAST_MemberExpr( base, member, NULL, clangME ); 
+  chillAST_MemberExpr *ME = new chillAST_MemberExpr( base, member, clangME );
 
   debug_fprintf(stderr, "this is the Member Expresion\n"); 
   ME->print(); 
   debug_fprintf(stderr, "\n"); 
 
-  return ME; 
+  return WRAP(ME);
   
 } 

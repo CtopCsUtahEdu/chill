@@ -22,35 +22,35 @@
 
 // forward declarations 
 chillAST_node * ConvertRoseFile(  SgGlobal *sg, const char *filename ); // the entire file 
-chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D , chillAST_node *parent );
-chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl, chillAST_node *p );
-chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl, chillAST_node *p );
-chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl, chillAST_node *p ); // stupid name TODO 
-chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement, chillAST_node *p );
-chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement, chillAST_node *p );
-chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *binaryop, chillAST_node *p );
-chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *binaryop, chillAST_node *); // binop! a.b
-chillAST_node * ConvertRoseArrowExp  ( SgBinaryOp *binaryop, chillAST_node *); // binop! a->b
-char *          ConvertRoseMember( SgVarRefExp* memb, chillAST_node *base ); // TODO 
-chillAST_node * ConvertRoseUnaryOp( SgUnaryOp *unaryop, chillAST_node *p ); 
-chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *varrefexp, chillAST_node *p );
-chillAST_node * ConvertRoseIntVal( SgIntVal *riseintval, chillAST_node *p );
-chillAST_node * ConvertRoseFloatVal( SgFloatVal *rosefloatval, chillAST_node *p );
-chillAST_node * ConvertRoseDoubleVal( SgDoubleVal *rosecdoubleval, chillAST_node *p );
-chillAST_node * ConvertRoseBasicBlock( SgBasicBlock *bb, chillAST_node *p );
-chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp*, chillAST_node *p);
-chillAST_node * ConvertRoseReturnStmt( SgReturnStmt *rs, chillAST_node *p );
-chillAST_node * ConvertRoseArrayRefExp( SgPntrArrRefExp *roseARE, chillAST_node *p ); 
-chillAST_node * ConvertRoseCastExp( SgCastExp *roseCE, chillAST_node *p );
-chillAST_node * ConvertRoseAssignInitializer( SgAssignInitializer *roseAI, chillAST_node *p );
+chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D );
+chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl );
+chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl );
+chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl ); // stupid name TODO
+chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement );
+chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement );
+chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *binaryop );
+chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *binaryop); // binop! a.b
+chillAST_node * ConvertRoseArrowExp  ( SgBinaryOp *binaryop); // binop! a->b
+char *          ConvertRoseMember( SgVarRefExp* memb ); // TODO
+chillAST_node * ConvertRoseUnaryOp( SgUnaryOp *unaryop );
+chillAST_node * ConvertRoseVarRefExp( SgVarRefExp *varrefexp );
+chillAST_node * ConvertRoseIntVal( SgIntVal *riseintval );
+chillAST_node * ConvertRoseFloatVal( SgFloatVal *rosefloatval );
+chillAST_node * ConvertRoseDoubleVal( SgDoubleVal *rosecdoubleval );
+chillAST_node * ConvertRoseBasicBlock( SgBasicBlock *bb );
+chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp* );
+chillAST_node * ConvertRoseReturnStmt( SgReturnStmt *rs );
+chillAST_node * ConvertRoseArrayRefExp( SgPntrArrRefExp *roseARE );
+chillAST_node * ConvertRoseCastExp( SgCastExp *roseCE );
+chillAST_node * ConvertRoseAssignInitializer( SgAssignInitializer *roseAI );
 // TODO 
-chillAST_node * ConvertRoseStructDefinition( SgClassDefinition *def, chillAST_node *p );
-chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *dec, chillAST_node *p );
+chillAST_node * ConvertRoseStructDefinition( SgClassDefinition *def );
+chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *dec );
 
 
-chillAST_node * ConvertRoseIfStmt( SgIfStmt *ifstatement, chillAST_node *p); 
+chillAST_node * ConvertRoseIfStmt( SgIfStmt *ifstatement );
 
-chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node * );
+chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD );
 
 //chillAST_node * ConvertRoseRecordDecl( clang::RecordDecl *D, chillAST_node * );
 //chillAST_node * ConvertRoseDeclStmt( clang::DeclStmt *clangDS, chillAST_node * );
@@ -59,7 +59,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD, chillAST_node
 //chillAST_node * ConvertRoseDeclRefExpr( clang::DeclRefExpr * clangDRE, chillAST_node * );
 //chillAST_node * ConvertRoseCStyleCastExpr( clang::CStyleCastExpr *clangICE, chillAST_node * );
 //chillAST_node * ConvertRoseIfStmt( clang::IfStmt *clangIS , chillAST_node *);
-chillAST_node * ConvertRoseGenericAST( SgNode *n, chillAST_node *parent );
+chillAST_node * ConvertRoseGenericAST( SgNode *n );
 
 extern SgProject *OneAndOnlySageProject;  // a global
 

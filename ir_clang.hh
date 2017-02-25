@@ -74,7 +74,7 @@ public:
   char *SourceFileName; 
   chillAST_SourceFile * entire_file_AST; // TODO move out of public
 
-  aClangCompiler( char *filename ); // constructor
+  aClangCompiler(const char *filename ); // constructor
   chillAST_FunctionDecl *findprocedurebyname( char *name );   // someday, return the chill AST
   clang::FunctionDecl *FD;  
   //Chill_ASTConsumer *getASTConsumer() { return astConsumer_; }
@@ -98,7 +98,7 @@ private:
 public:
   clang::ASTContext *getASTContext() { return astContext_; }
   clang::SourceManager *getSourceManager() { return sourceManager; }; 
-  static IR_clangCode_Global_Init *Instance(char **argv);
+  static IR_clangCode_Global_Init *Instance(const char **argv);
   static IR_clangCode_Global_Init *Instance() { return pinstance; } ;
   aClangCompiler *ClangCompiler; // this is the thing we really just want one of
 

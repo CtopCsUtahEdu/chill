@@ -8,7 +8,7 @@ void f ( float **a, int n, int m ) {
 
    for (i=1; i<n; i++) { // starts at 1 
       for (j=0; j<m; j++) { // starts at 0
-         a[i][j] = a[i-1][j+1] + 1.0;
+         a[i][j] = a[i-1][j+1] + 1.0f;
       }
    }
 }

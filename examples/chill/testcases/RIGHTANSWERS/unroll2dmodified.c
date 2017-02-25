@@ -1,13 +1,8 @@
-
-
-
-// this source derived from CHILL AST originally from file 'unroll2.c' as parsed by frontend compiler rose
-
+// this source is derived from CHILL AST originally from file 'unroll2.c' as parsed by frontend compiler rose
 
 #define N 45
 
-void foo( float *y )
-{
+void foo(float *y) {
   int t2;
   for (t2 = 1; t2 <= 31; t2 += 15) {
     y[t2] = 1.0f;
@@ -17,13 +12,9 @@ void foo( float *y )
     y[t2 + 12] = 1.0f;
   }
   return;
-
 }
-
-int main(  )
-{
+int main() {
   float y[45];
   foo(y);
-  return(0);
-
+  return 0;
 }

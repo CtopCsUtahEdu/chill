@@ -1,8 +1,4 @@
-
-
-
-// this source derived from CHILL AST originally from file 'p49.c' as parsed by frontend compiler rose
-
+// this source is derived from CHILL AST originally from file 'p49.c' as parsed by frontend compiler rose
 
 #define X 3
 
@@ -12,8 +8,7 @@
 
 #define M 10
 
-void foo(  )
-{
+void foo() {
   int t2;
   float A[100];
   float F[100];
@@ -22,12 +17,8 @@ void foo(  )
     F[t2 + 1] = A[t2];
   }
   return;
-
 }
-
-int main(  )
-{
+int main() {
   foo();
-  return(0);
-
+  return 0;
 }
