@@ -1071,14 +1071,8 @@ vector<IR_ScalarRef *> IR_chillCode::FindScalarRef(const CG_outputRepr *repr) co
 
 
 IR_ScalarRef *IR_chillCode::CreateScalarRef(const IR_ScalarSymbol *sym) {
-  //debug_fprintf(stderr, "\n***** ir_chill.cc IR_chillCode::CreateScalarRef( sym %s )\n", sym->name().c_str()); 
-  //DeclRefExpr *de = new (vd->getASTContext())DeclRefExpr(static_cast<ValueDecl*>(vd), vd->getType(), SourceLocation());
-  //debug_fprintf(stderr, "sym 0x%x\n", sym); 
-
-  IR_chillScalarRef *sr = new IR_chillScalarRef(this, buildDeclRefExpr(((IR_chillScalarSymbol*)sym)->chillvd)); // uses VarDecl to mak a declrefexpr
-  //debug_fprintf(stderr, "returning ScalarRef with dre 0x%x\n", sr->dre); 
-  return sr; 
-  //return (IR_ScalarRef *)NULL;
+  IR_chillScalarRef *sr = new IR_chillScalarRef(this, new chillAST_DeclRefExpr(((IR_chillScalarSymbol*)sym)->chillvd)); // uses VarDecl to mak a declrefexpr
+  return sr;
 }
 
 

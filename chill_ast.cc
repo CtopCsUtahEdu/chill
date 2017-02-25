@@ -2539,12 +2539,6 @@ chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_FunctionDecl *fd){ // funct
   decl = fd; 
 }
 
-
-
-chillAST_DeclRefExpr *buildDeclRefExpr( chillAST_VarDecl  *vd) { 
-  chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( vd);
-}
-
 char *chillAST_DeclRefExpr::stringRep( int indent ) {
   return strdup( declarationName ); 
 }

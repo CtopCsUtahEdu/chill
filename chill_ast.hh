@@ -199,11 +199,7 @@ bool streq( const char *a, const char *b); // fwd decl
 void chillindent( int i, FILE *fp );  // fwd declaration  
 void insertNewDeclAtLocationOfOldIfNeeded( chillAST_VarDecl *newdecl, chillAST_VarDecl *olddecl); 
 
-chillAST_DeclRefExpr *buildDeclRefExpr( chillAST_VarDecl  *); 
-
-
-
-// an actual chill ast. 
+// an actual chill ast.
 // nodes based on clang AST which are in turn based on C++ 
 
 //! generic node of the actual chillAST, a multiway tree node.
