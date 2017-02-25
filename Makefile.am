@@ -28,6 +28,7 @@ core_includes  = -I$(srcdir)/omega/include
 core_includes += -I$(srcdir)/omega/basic/include
 core_includes += -I$(srcdir)/omega/code_gen/include
 core_includes += -I$(srcdir)/omega/omega_lib/include
+core_includes += -I$(srcdir)/include/chill
 core_includes += -I$(ROSEHOME)/include/rose
 core_includes += -I$(BOOSTHOME)/include
 
@@ -71,6 +72,12 @@ ir_cudachill_src += ir_rose.cc
 ir_cudachill_src += ir_rose_utils.cc
 ir_cudachill_src += ir_cudarose.cc
 ir_cudachill_src += ir_cuda_rose_utils.cc
+
+ast_scanner_src  = src/printer/cfamily.cpp
+ast_scanner_src += src/printer/dump.cpp
+ast_scanner_src += src/printer/generic.cpp
+ast_scanner_src += src/scanner/definitionLinker.cpp
+ast_scanner_src += src/scanner/sanityCheck.cpp
 
 # runner (interface) #
 #  cc
@@ -185,11 +192,11 @@ cuda_chill_CPPFLAGS     =-DCUDACHILL $(common_cppflags)
 cuda_chill_CXXFLAGS     =-DCUDACHILL $(common_cxxflags)
 cuda_chill_LDADD        =$(common_libs)
 cuda_chill_LDFLAGS      =$(common_libdirs)
-cuda_chill_SOURCES      =$(core_src) $(cudachill_runner_src) $(cudachill_src) $(ir_cudachill_src)
+cuda_chill_SOURCES      =$(core_src) $(cudachill_runner_src) $(cudachill_src) $(ir_cudachill_src) $(ast_scanner_src)
 
 chill_CPPFLAGS          =$(common_cppflags) $(chill_runner_cppflags)
 chill_CXXFLAGS          =$(common_cxxflags)
 chill_LDADD             =$(common_libs)
 chill_LDFLAGS           =$(common_libdirs)
-chill_SOURCES           =$(core_src) $(chill_runner_src) $(chill_src) $(ir_chill_src)
+chill_SOURCES           =$(core_src) $(chill_runner_src) $(chill_src) $(ir_chill_src) $(ast_scanner_src)
 

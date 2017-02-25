@@ -141,9 +141,9 @@ void CFamily::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
       o << "<<<" << n->grid->varname << "," << n->block->varname << ">>>";
     o << "(";
   }
-  for (int i = 1; i < n->getNumChildren(); ++i) {
-    if (i != 1) o << ", ";
-    run(n->getChild(i), indent, o);
+  for (int i = 0; i < n->args.size(); ++i) {
+    if (i != 0) o << ", ";
+    run(n->args.at(i), indent, o);
   }
   if (!MD || n->getNumChildren() - 1)
     o << ")";

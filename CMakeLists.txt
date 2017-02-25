@@ -151,7 +151,7 @@ add_executable(chill
     )
 
 chill_link_libraries(chill
-        chill_io chill_ir chill_ast chill_core chill_scanner parseRel
+        chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY}
         )
@@ -183,7 +183,7 @@ if (${FRONTEND} STREQUAL "Rose")
             )
 
     chill_link_libraries(cuda-chill
-            chill_cuda chill_io chill_ir chill_ast chill_core chill_scanner parseRel
+            chill_cuda chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
             ${CORE_LIBS}
             ${PYTHON_LIBRARY})
 
