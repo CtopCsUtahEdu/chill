@@ -15,12 +15,9 @@ procedure('mm')
 
 loop(0)
 
-known('an   > 0')
-known('bm   > 0')
-known('ambn > 10')
+known(' ambn > 0 ')
+known(' an > 0 ')
+known(' bm > 10 ')
 
-distribute( [0,1], 1 )
-split( 1, 3, 'L3 < 7' )
-
-
+split( 1, 2, 'L2 < 5' )
 

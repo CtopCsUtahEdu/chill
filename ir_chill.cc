@@ -817,7 +817,7 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
     
     // do we have to check to see if it's already there? 
      VariableDeclarations.push_back(vd);
-     chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ?? 
+     chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ??
      bod->insertChild(0, vd);
      //debug_fprintf(stderr, "returning ... really\n"); 
     return new IR_chillScalarSymbol( this, CSS->chillvd); // CSS->clone(); 
@@ -1071,14 +1071,8 @@ vector<IR_ScalarRef *> IR_chillCode::FindScalarRef(const CG_outputRepr *repr) co
 
 
 IR_ScalarRef *IR_chillCode::CreateScalarRef(const IR_ScalarSymbol *sym) {
-  //debug_fprintf(stderr, "\n***** ir_chill.cc IR_chillCode::CreateScalarRef( sym %s )\n", sym->name().c_str()); 
-  //DeclRefExpr *de = new (vd->getASTContext())DeclRefExpr(static_cast<ValueDecl*>(vd), vd->getType(), SourceLocation());
-  //debug_fprintf(stderr, "sym 0x%x\n", sym); 
-
-  IR_chillScalarRef *sr = new IR_chillScalarRef(this, buildDeclRefExpr(((IR_chillScalarSymbol*)sym)->chillvd)); // uses VarDecl to mak a declrefexpr
-  //debug_fprintf(stderr, "returning ScalarRef with dre 0x%x\n", sr->dre); 
-  return sr; 
-  //return (IR_ScalarRef *)NULL;
+  IR_chillScalarRef *sr = new IR_chillScalarRef(this, new chillAST_DeclRefExpr(((IR_chillScalarSymbol*)sym)->chillvd)); // uses VarDecl to mak a declrefexpr
+  return sr;
 }
 
 
@@ -1627,13 +1621,13 @@ void IR_chillCode::CreateDefineMacro(std::string s,
 
   //what do we want ast for the macro to look like?
   //debug_fprintf(stderr, "entire_file_AST %p\n", entire_file_AST);
-  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str(), entire_file_AST); // NULL);
+  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str() ); // NULL);
   //debug_fprintf(stderr, "args: '%s'\n", args.c_str());
   //debug_fprintf(stderr, "output is of type %s\n", output->getTypeString());
   //macro->addChild( output ); // setBody?
 
   debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::CreateDefineMacro() adding macro to sourcefile\n");
-  entire_file_AST->addMacro( macro ); // ??
+  entire_file_AST->addChild( macro ); // ??
   defined_macros.insert(std::pair<std::string, chillAST_node*>(s + args, output));
 
 
@@ -1682,7 +1676,7 @@ void IR_chillCode::CreateDefineMacro(std::string s,
 
   //what do we want ast for the macro to look like?
   //debug_fprintf(stderr, "IR_Rosecode entire_file_AST %p\n",  entire_file_AST);
-  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str(), entire_file_AST); // NULL);
+  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str() ); // NULL);
 
 
   // create "parameters" for the #define

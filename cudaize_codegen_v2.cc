@@ -257,7 +257,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     debug_fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
     
     // create a mult  
-    v.size_expr = new chillAST_BinaryOperator( numthings, "*", so, NULL); 
+    v.size_expr = new chillAST_BinaryOperator( numthings, "*", so);
     
     v.CPUside_param = param;
     v.in_data = 0;
@@ -368,7 +368,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     debug_fprintf(stderr, "creating int mult size expression numitems %d x sizeof( %s )\n", numitems, v.type ); 
     
     // create a mult  
-    v.size_expr = new chillAST_BinaryOperator( numthings, "*", so, NULL); // 1024 * sizeof(float)  etc
+    v.size_expr = new chillAST_BinaryOperator( numthings, "*", so ); // 1024 * sizeof(float)  etc
     
     v.CPUside_param = param;
     v.in_data = param;
@@ -429,10 +429,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
       CPUfuncbody->insertChild(0, var );  // add the CPUside variable declaration 
 
       // do the CPU side cudaMalloc 
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var );
       chillAST_CStyleAddressOf *AO = new chillAST_CStyleAddressOf( DRE );
-      chillAST_CStyleCastExpr *casttovoidptrptr = new chillAST_CStyleCastExpr( "void **", AO, NULL ); 
-      chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr, NULL); 
+      chillAST_CStyleCastExpr *casttovoidptrptr = new chillAST_CStyleCastExpr( "void **", AO );
+      chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr );
       CPUfuncbody->addChild( cmalloc );
 
       debug_fprintf(stderr, "\ncudamalloc is:\n"); 
@@ -485,7 +485,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   chillAST_FunctionDecl *dimbuiltin = new chillAST_FunctionDecl( "dim3", "dim3" );
   dimbuiltin->setBuiltin();
 
-  chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin, NULL );
+  chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin );
 
   // create ARGS ro dim3. 
   debug_fprintf(stderr, "create ARGS to dim3\n"); 
@@ -542,7 +542,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   
 
 
-  chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin, NULL );
+  chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
   CE2->addArg( new chillAST_IntegerLiteral( bs1 ));
   CE2->addArg( new chillAST_IntegerLiteral( bs2 ));
   chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "dimBlock", "", NULL );
@@ -553,7 +553,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
   // kernel call 
   debug_fprintf(stderr, "KERNEL CALL\n"); 
-  chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel,  CPUfuncbody);
+  chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel );
   kcall->grid = dimgriddecl; 
     kcall->block =  dimblockdecl; 
   debug_fprintf(stderr, "kernel function parameters\n"); 
@@ -582,7 +582,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
         //debug_fprintf(stderr, "[%d]", param->arraysizes[i]); 
         sprintf(ptr, "[%d]", param->arraysizes[i]); 
         //debug_fprintf(stderr, "i %d line '%s'\n", i, line);
-        chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( line, v, NULL );
+        chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( line, v );
         kcall->addArg( CE );
       }
       //int l = strlen(line);
@@ -596,7 +596,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
       // we just need a decl ref expr inserted as the parameter/argument
       // when it prints, it will print just the array name
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( v, NULL);
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( v );
       kcall->addArg( DRE );
     }
   }
@@ -615,7 +615,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     // Memcopy back if we have an output 
     if (arrayVars[i].out_data) {
 
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl, CPUfuncbody ); 
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl );
       chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( (chillAST_VarDecl*)arrayVars[i].out_data, // wrong info
                                                               arrayVars[i].vardecl, 
                                                               arrayVars[i].size_expr, "cudaMemcpyDeviceToHost"); 
@@ -623,8 +623,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     }
 
     // CudaFree the variable
-    chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl, CPUfuncbody ); 
-    chillAST_CudaFree *cfree = new chillAST_CudaFree( arrayVars[i].vardecl, CPUfuncbody ); 
+    chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl );
+    chillAST_CudaFree *cfree = new chillAST_CudaFree( arrayVars[i].vardecl );
     CPUfuncbody->addChild( cfree );
     
   }

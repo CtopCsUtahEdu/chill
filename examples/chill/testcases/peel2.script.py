@@ -5,7 +5,6 @@
 #
 
 ## Test Harness flags:
-#>EXFAIL
 
 from chill import *
 
@@ -20,6 +19,6 @@ known('ambn > 4')
 known('an   > 0')
 known('bm   > 0')
 
-#peel(1, 3, 4)  # statement 1, loop 3 (innermost, for n), 4 statements from END
+peel(1, 3, -4)  # statement 1, loop 3 (innermost, for n), 4 statements from END
 
 

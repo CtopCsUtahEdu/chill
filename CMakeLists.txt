@@ -94,12 +94,6 @@ add_chill_module(chill_ast
     chill_ast.cc
     )
 
-add_chill_module(chill_printer
-    printer/src/generic.cpp
-    printer/src/dump.cpp
-    printer/src/cfamily.cpp
-    )
-
 set(COMMON_FLAGS "-DCHILL_BUILD_DATE=\"${build_date}\" -DCHILL_BUILD_VERSION=\"\\\"${CHILL_VERSION}\\\"\"")
 
 set(CMAKE_CXX_FLAGS "-DPYTHON ${COMMON_FLAGS} ${CMAKE_CXX_FLAGS}")
@@ -117,7 +111,7 @@ else()
 endif()
 
 set(CHILL_INC ${CMAKE_CURRENT_SOURCE_DIR}
-              ${CMAKE_CURRENT_SOURCE_DIR}/printer/include)
+              ${CMAKE_CURRENT_SOURCE_DIR}/include/chill)
 
 find_package(BISON)
 find_package(FLEX)
@@ -157,7 +151,7 @@ add_executable(chill
     )
 
 chill_link_libraries(chill
-        chill_io chill_ir chill_ast chill_core parseRel
+        chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY}
         )
@@ -189,7 +183,7 @@ if (${FRONTEND} STREQUAL "Rose")
             )
 
     chill_link_libraries(cuda-chill
-            chill_cuda chill_io chill_ir chill_ast chill_core parseRel
+            chill_cuda chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
             ${CORE_LIBS}
             ${PYTHON_LIBRARY})
 
@@ -206,6 +200,8 @@ endif()
 add_subdirectory(omega/basic)
 add_subdirectory(omega/omega_lib)
 add_subdirectory(omega/code_gen)
+add_subdirectory(src/printer)
+add_subdirectory(src/scanner)
 
 add_subdirectory(docs)
 add_subdirectory(unittests)

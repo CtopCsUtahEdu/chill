@@ -547,7 +547,7 @@ namespace omega {
     chillAST_node *lAST = clhs->chillnodes[0]; // always just one?
     chillAST_node *rAST = crhs->chillnodes[0]; // always just one?
     
-    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "=", rAST->clone(), NULL); // clone??
+    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "=", rAST->clone() ); // clone??
     
     delete lhs; delete rhs;
     return new CG_chillRepr(bop);
@@ -570,7 +570,7 @@ namespace omega {
     chillAST_node *lAST = clhs->chillnodes[0]; // always just one?
     chillAST_node *rAST = crhs->chillnodes[0]; // always just one?
     
-    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "+=", rAST->clone(), NULL); // clone??
+    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "+=", rAST->clone() ); // clone??
     
     delete lhs; delete rhs;
     return new CG_chillRepr(bop);
@@ -632,35 +632,14 @@ namespace omega {
       if (list.size() == 0) { return NULL; }
       else if (list.size() == 1) { return list[1]; }
       else {
-        //debug_fprintf(stderr, "else\n"); 
-        int last = list.size()-1;
-        CG_outputRepr *CGOR; 
-        CG_chillRepr  *CGCR;
+        const char *op;
         
-        //debug_fprintf(stderr, "going to create call to %s( ", fname.c_str());
-        //for (int i=0; i<list.size(); i++) { 
-        //  CGCR = (CG_chillRepr*) list[i];
-        //  CGCR->chillnodes[0]->print(0, stderr);
-        //  if (i<(list.size()-1)) debug_fprintf(stderr, ", ");
-        //} 
-        //debug_fprintf(stderr, ")\n"); 
+        if (fname == std::string("max"))  op = ">";
+        else op = "<";
         
-        char macroname[32];
-        char op; 
-        
-        if (fname == std::string("max"))  op = '>';
-        else op = '<'; 
-        
-        // TODO >, check number of args etc 
-        chillAST_node *ternary = lessthanmacro(  ((CG_chillRepr*) list[0])->chillnodes[0], 
+        chillAST_node *ternary = minmaxTernary( op,  ((CG_chillRepr*) list[0])->chillnodes[0],
                                                  ((CG_chillRepr*) list[1])->chillnodes[0]);  
-        
-        //debug_fprintf(stderr, "just made ternary ");
-        //ternary->print(0, stdout);
-        
-        
         CG_chillRepr *repr = new CG_chillRepr( ternary );
-        //debug_fprintf(stderr, "returning callexpr with ternary\n", macroname); 
         return repr;
       }
     }
@@ -683,7 +662,7 @@ namespace omega {
       
       //debug_fprintf(stderr, "%s is a %s\n", name, def->getTypeString()); 
       if (def->isMacroDefinition()) { 
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def, toplevel );
+        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
         int numparams = list.size(); 
         for (int i=0; i<numparams; i++) { 
           CG_chillRepr *CR = (CG_chillRepr *) list[i];
@@ -693,7 +672,7 @@ namespace omega {
       }
       else if (def->isFunctionDecl()) { 
         // TODO are these cases exactly the same?
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def, toplevel );
+        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
         int numparams = list.size(); 
         for (int i=0; i<numparams; i++) { 
           CG_chillRepr *CR = (CG_chillRepr *) list[i];
@@ -797,7 +776,7 @@ namespace omega {
     }
     
     
-    chillAST_IfStmt *if_stmt = new chillAST_IfStmt( conditional, then_part, else_part, NULL); 
+    chillAST_IfStmt *if_stmt = new chillAST_IfStmt( conditional, then_part, else_part );
     
     delete guardList;  
     delete true_stmtList;
@@ -866,13 +845,13 @@ namespace omega {
     
     // unclear is this will always be the same 
     // TODO error checking  && incr vs decr
-    chillAST_BinaryOperator *init = new  chillAST_BinaryOperator( indexnode, "=", lowernode, NULL); 
-    chillAST_BinaryOperator *cond = new  chillAST_BinaryOperator( indexnode, "<=", uppernode, NULL); 
+    chillAST_BinaryOperator *init = new  chillAST_BinaryOperator( indexnode, "=", lowernode );
+    chillAST_BinaryOperator *cond = new  chillAST_BinaryOperator( indexnode, "<=", uppernode );
     
     //chillAST_BinaryOperator *inc  = new  chillAST_BinaryOperator( indexnode, "+", stepnode, NULL); 
-    chillAST_BinaryOperator *incr = new  chillAST_BinaryOperator( indexnode, "+=", stepnode, NULL); 
+    chillAST_BinaryOperator *incr = new  chillAST_BinaryOperator( indexnode, "+=", stepnode );
     
-    chillAST_ForStmt *loop = new chillAST_ForStmt( init, cond, incr, NULL /* NULL BODY DANGER! */, NULL); 
+    chillAST_ForStmt *loop = new chillAST_ForStmt( init, cond, incr, NULL /* NULL BODY DANGER! */);
     
     return new CG_chillRepr(loop); 
     
@@ -1001,17 +980,17 @@ namespace omega {
   //-----------------------------------------------------------------------------
   CG_outputRepr* CG_chillBuilder::CreateInt(int i) const {
     debug_fprintf(stderr, "CG_chillBuilder::CreateInt( %d )\n",i); 
-    chillAST_IntegerLiteral *il = new chillAST_IntegerLiteral(i, NULL); // parent not available
+    chillAST_IntegerLiteral *il = new chillAST_IntegerLiteral(i); // parent not available
     return new CG_chillRepr(il);
   }
   CG_outputRepr* CG_chillBuilder::CreateFloat(float f) const {
     //debug_fprintf(stderr, "CG_chillBuilder::CreateFloat( %f )\n", f); 
-    chillAST_FloatingLiteral *fl = new chillAST_FloatingLiteral(f, NULL); // parent not available
+    chillAST_FloatingLiteral *fl = new chillAST_FloatingLiteral(f); // parent not available
     return new CG_chillRepr(fl);
   }
   CG_outputRepr* CG_chillBuilder::CreateDouble(double d) const {
     //debug_fprintf(stderr, "CG_chillBuilder::CreateInt( %f )\n",d); 
-    chillAST_FloatingLiteral *dl = new chillAST_FloatingLiteral(d, NULL); // parent not available
+    chillAST_FloatingLiteral *dl = new chillAST_FloatingLiteral(d); // parent not available
     return new CG_chillRepr(dl);
   }
   
@@ -1054,7 +1033,7 @@ namespace omega {
       currentfunction->addVariableToSymbolTable( vd ); // use symtab2_  ?? 
     
       
-      chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd, NULL ); // parent not available
+      chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd ); // parent not available
       //debug_fprintf(stderr, "made a new chillRepr from "); dre->dump(); fflush(stdout);
       return new CG_chillRepr( dre );
     }
@@ -1066,7 +1045,7 @@ namespace omega {
     chillAST_VarDecl *vd = currentfunction->funcHasVariableNamed( _s.c_str() );
     //debug_fprintf(stderr, "vd %p\n", vd); 
 
-    chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd, NULL ); // parent not available
+    chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd ); // parent not available
     return new CG_chillRepr( dre );
   }
   
@@ -1087,7 +1066,7 @@ namespace omega {
     
     chillAST_node *left  = ((CG_chillRepr*)lop)->chillnodes[0]; 
     chillAST_node *right = ((CG_chillRepr*)rop)->chillnodes[0]; 
-    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator( left, "+", right, NULL ); // parent not available
+    chillAST_BinaryOperator *bop = new chillAST_BinaryOperator( left, "+", right ); // parent not available
     return new CG_chillRepr( bop );
     /*
       Expr *lhs = static_cast<CG_chillRepr*>(lop)->GetExpression();
@@ -1132,7 +1111,7 @@ namespace omega {
     if(clop == NULL) {  // this is really a unary operator ??? 
       //debug_fprintf(stderr, "CG_chillBuilder::CreateMinus()  unary\n");
       chillAST_node *rAST = crop->chillnodes[0]; // always just one?
-      chillAST_UnaryOperator *ins = new chillAST_UnaryOperator("-", true, rAST->clone(), NULL); // clone?
+      chillAST_UnaryOperator *ins = new chillAST_UnaryOperator("-", true, rAST->clone()); // clone?
       delete crop;  // ?? note: the chillRepr, not the chillAST_node 
       return new CG_chillRepr(ins);
     } else {
@@ -1142,7 +1121,7 @@ namespace omega {
       //lAST->print(); printf(" - ");
       //rAST->print(); printf("\n"); fflush(stdout); 
       
-      chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "-", rAST->clone(), NULL); // clone??
+      chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "-", rAST->clone()); // clone??
       
       delete clop; delete crop; // ?? note: the chillReprs, not the chillAST_nodes
       return new CG_chillRepr(bop);
@@ -1178,7 +1157,7 @@ namespace omega {
     rAST->print(0, stderr);
     debug_fprintf(stderr, "\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "*", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "*", rAST );
     delete lop; delete rop; // ?? 
     //debug_fprintf(stderr, "CG_chillBuilder::CreateTimes() returning a CG_chillRepr with a binop inside\n");
     return new CG_chillRepr( binop );
@@ -1218,7 +1197,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "/", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "/", rAST );
     delete lop; delete rop; // ?? 
     return new CG_chillRepr( binop );
   }
@@ -1240,7 +1219,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "/", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "/", rAST );
     return new CG_chillRepr( binop );
   }
   
@@ -1316,7 +1295,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "&&", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "&&", rAST );
     return new CG_chillRepr( binop );
   }
   
@@ -1360,7 +1339,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "<=", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "<=", rAST );
     delete lop; delete rop; // ?? 
     return new CG_chillRepr( binop );
   }
@@ -1386,7 +1365,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "==", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "==", rAST );
     delete lop; delete rop; // ?? 
     return new CG_chillRepr( binop );
   }
@@ -1413,7 +1392,7 @@ namespace omega {
     //rAST->print(0, stderr);
     //debug_fprintf(stderr, "  ??\n"); 
     
-    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "!=", rAST, NULL);
+    chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "!=", rAST );
     delete lop; delete rop; // ?? 
     return new CG_chillRepr( binop );
   }
@@ -1459,7 +1438,7 @@ namespace omega {
       debug_fprintf(stderr, "CG_chillBuilder::CreateDotExpression(), can't create base\n");
       exit(-1); 
     }
-    chillAST_MemberExpr *memexpr = new chillAST_MemberExpr( DRE, rvd->varname, NULL, NULL, CHILL_MEMBER_EXP_DOT );
+    chillAST_MemberExpr *memexpr = new chillAST_MemberExpr( DRE, rvd->varname, NULL, CHILL_MEMBER_EXP_DOT );
     
     
     //delete lop; delete rop; // ??  
@@ -1643,7 +1622,7 @@ namespace omega {
 */
 
 
-    chillAST_RecordDecl *rd = new chillAST_RecordDecl(struct_name.c_str(), toplevel);
+    chillAST_RecordDecl *rd = new chillAST_RecordDecl(struct_name.c_str());
     rd->setStruct( true ); 
     // SO FAR, struct has no members! 
 
@@ -1710,7 +1689,7 @@ namespace omega {
       chillAST_TypedefDecl *tdd = (chillAST_TypedefDecl *)n;
       //tdd->print(); printf("\n"); fflush(stdout);
       
-      chillAST_VarDecl *vd = new chillAST_VarDecl( tdd, name.c_str(), "", NULL); 
+      chillAST_VarDecl *vd = new chillAST_VarDecl( tdd, name.c_str(), "" );
       
       // we need to add this to function ??  TODO 
       //debug_fprintf(stderr, "adding typedef instance to symbolTable\n");
@@ -1730,7 +1709,7 @@ namespace omega {
       rd->print(); printf("\n"); fflush(stdout);
       rd->dump(); printf("\n");  fflush(stdout);
       
-      chillAST_VarDecl *vd = new chillAST_VarDecl( rd, name.c_str(), "", NULL);
+      chillAST_VarDecl *vd = new chillAST_VarDecl( rd, name.c_str(), "" );
 
       //debug_fprintf(stderr, "CG_chillBuilder.cc, adding struct instance to body of function's symbolTable\n");
 
@@ -1887,7 +1866,7 @@ namespace omega {
     // build up a member expression  (or a binop with dot operation?? )
     // make a declrefexpr that refers to this variable definition
     chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( thestructvd ); 
-    chillAST_MemberExpr *ME = new chillAST_MemberExpr( DRE, member.c_str(), NULL, NULL ); // uniq TODO 
+    chillAST_MemberExpr *ME = new chillAST_MemberExpr( DRE, member.c_str(), NULL ); // uniq TODO
     
     return new CG_chillRepr( ME ); 
   }
