@@ -238,7 +238,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
     int numitems = 1;
     if (param->numdimensions < 1 || 
-        param->arraysizes == NULL) { 
+        param->getNumChildren() < 1) {
       //Lookup in array_dims (the cudaize call has this info for some variables?) 
       std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
       debug_fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
@@ -247,7 +247,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     else { 
       debug_fprintf(stderr, "numdimensions = %d\n", param->numdimensions);
       for (int i=0; i<param->numdimensions; i++) { 
-        numitems *= param->arraysizes[i]; 
+        numitems *= param->getChild(i)->evalAsInt();
       }
     } 
 
@@ -344,8 +344,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     param->print(0, stderr); debug_fprintf(stderr, "\n");
 
 
-    if (param->numdimensions < 1 || 
-        param->arraysizes == NULL) { 
+    if (param->numdimensions < 1) {
       //Lookup in array_dims (the cudaize call has this info for some variables?) 
       std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
       //debug_fprintf(stderr, "it %s %d\n", (*it).first.c_str(), (*it).second);  
@@ -356,7 +355,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     else { 
       debug_fprintf(stderr, "numdimensions = %d\n", param->numdimensions);
       for (int i=0; i<param->numdimensions; i++) { 
-        numitems *= param->arraysizes[i]; 
+        numitems *= param->getChild(i)->evalAsInt();
       }
     } 
 
@@ -400,8 +399,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     else { 
       // we will not know all array sizes for the kernel definition(??)
       chillAST_VarDecl *param =  (chillAST_VarDecl *)parameterSymbols[pdsymoffset]->clone(); 
-      param->knownArraySizes = false; // ?? 
-      
+
       //debug_fprintf(stderr, "adding %s to GPUKernel parameters\n", kernelparamname);
       GPUKernel->addParameter( param );
       
@@ -418,10 +416,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
       char typ[128];
       sprintf(typ, "%s *", arrayVars[i].type); 
 
-      chillAST_VarDecl *var = new chillAST_VarDecl( typ,
-                                                    arrayVars[i].name.c_str(),
-                                                    "", // TODO
-                                                    NULL);
+      chillAST_VarDecl *var = new chillAST_VarDecl( typ, "",
+                                                    arrayVars[i].name.c_str());
       // set the array info to match
       // store variable decl where we can get it easilly later
       arrayVars[i].vardecl = var;
@@ -511,7 +507,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
   }
 
-  chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "dimGrid", "", NULL );
+  chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "", "dimGrid" );
   dimgriddecl->setInit(CE1);
   CPUfuncbody->addChild( dimgriddecl ); 
   debug_fprintf(stderr, "appending DIMGRID repr to setup code\n\n");
@@ -545,7 +541,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
   CE2->addArg( new chillAST_IntegerLiteral( bs1 ));
   CE2->addArg( new chillAST_IntegerLiteral( bs2 ));
-  chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "dimBlock", "", NULL );
+  chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "", "dimBlock" );
   dimblockdecl->setInit(CE2);
   
   CPUfuncbody->addChild( dimblockdecl ); 
@@ -571,18 +567,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     if (param->numdimensions > 1) { 
       debug_fprintf(stderr, "array Var %d %s is multidimensional\n",i, v->varname);
       //debug_fprintf(stderr, "underlying type %s\narraypart %s\n", v->underlyingtype, v->arraypart); 
-      char line[128];
-      sprintf(line, "%s (*)", v->underlyingtype ); 
+      std::ostringstream oss;
+      oss << v->underlyingtype << " (*)";
       //debug_fprintf(stderr, "line '%s'\n", line);
       // we'll pass in a cast of the variable instead of just the variable.
       for (int i=1; i<param->numdimensions; i++) { 
-        int l = strlen(line);
-        //debug_fprintf(stderr, "l %d\n", l); 
-        char *ptr = &line[l];
-        //debug_fprintf(stderr, "[%d]", param->arraysizes[i]); 
-        sprintf(ptr, "[%d]", param->arraysizes[i]); 
-        //debug_fprintf(stderr, "i %d line '%s'\n", i, line);
-        chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( line, v );
+        oss<<"[";
+        param->getChild(i)->print(0, oss);
+        oss<<"]";
+        chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( oss.str().c_str(), v );
         kcall->addArg( CE );
       }
       //int l = strlen(line);
@@ -692,7 +685,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     indexes.push_back("bx");
     chillAST_VarDecl *biddecl = addBuiltin( "blockIdx.x", "int", GPUKernel );
     chillAST_DeclRefExpr *bid = new chillAST_DeclRefExpr( biddecl ); 
-    chillAST_VarDecl *bxdecl = new chillAST_VarDecl( "int", "bx", "", GPUKernel );
+    chillAST_VarDecl *bxdecl = new chillAST_VarDecl( "int", "" , "bx" );
     GPUKernel->addDecl( bxdecl );
     chillAST_DeclRefExpr *bx = new chillAST_DeclRefExpr( bxdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( bx, "=", bid ); 
@@ -706,7 +699,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     indexes.push_back("by");
     chillAST_VarDecl *biddecl = addBuiltin( "blockIdx.y", "int", GPUKernel );
     chillAST_DeclRefExpr *bid = new chillAST_DeclRefExpr( biddecl ); 
-    chillAST_VarDecl *bydecl = new chillAST_VarDecl( "int", "by", "", GPUKernel );
+    chillAST_VarDecl *bydecl = new chillAST_VarDecl( "int", "", "by");
     GPUKernel->addDecl( bydecl );
     chillAST_DeclRefExpr *by = new chillAST_DeclRefExpr( bydecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( by, "=", bid ); 
@@ -720,7 +713,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     indexes.push_back("tx");
     chillAST_VarDecl *tiddecl = addBuiltin( "threadIdx.x", "int",     GPUKernel);
     chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( tiddecl ); 
-    chillAST_VarDecl *txdecl = new chillAST_VarDecl( "int", "tx", "", GPUKernel);
+    chillAST_VarDecl *txdecl = new chillAST_VarDecl( "int","", "tx");
     GPUKernel->addDecl( txdecl );
     chillAST_DeclRefExpr *tx = new chillAST_DeclRefExpr( txdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( tx, "=", tid ); 
@@ -733,7 +726,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     indexes.push_back("ty");
     chillAST_VarDecl *biddecl = addBuiltin( "threadIdx.y", "int", GPUKernel );
     chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( biddecl ); 
-    chillAST_VarDecl *tydecl = new chillAST_VarDecl( "int", "ty", "", GPUKernel );
+    chillAST_VarDecl *tydecl = new chillAST_VarDecl( "int","", "ty");
     GPUKernel->addDecl( tydecl );
     chillAST_DeclRefExpr *ty = new chillAST_DeclRefExpr( tydecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( ty, "=", tid ); 
@@ -746,7 +739,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
     indexes.push_back("tz");
     chillAST_VarDecl *biddecl = addBuiltin( "threadIdx.z", "int", GPUKernel );
     chillAST_DeclRefExpr *tid = new chillAST_DeclRefExpr( biddecl ); 
-    chillAST_VarDecl *tzdecl = new chillAST_VarDecl( "int", "tz", "", GPUKernel );
+    chillAST_VarDecl *tzdecl = new chillAST_VarDecl( "int", "", "tz");
     GPUKernel->addDecl( tzdecl );
     chillAST_DeclRefExpr *tz = new chillAST_DeclRefExpr( tzdecl ); 
     chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( tz, "=", tid ); 

@@ -124,54 +124,33 @@ chillAST_NodeList ConvertVarDecl( VarDecl *D ) {
      T = Parm->getOriginalType();
      isParm = true;
    }
+  ASTContext *ctx = IR_clangCode_Global_Init::Instance()->getASTContext();
+  chillAST_NodeList arr;
+  const VariableArrayType *VLA = ctx->getAsVariableArrayType(T);
+  while (VLA) {
+    Expr *SE = VLA->getSizeExpr();
+    arr.push_back(UNWRAP(ConvertGenericClangAST(SE)));
+    T = VLA->getElementType();
+    VLA = ctx->getAsVariableArrayType(T);
+  }
+  const ArrayType *AT = ctx->getAsArrayType(T);
+  while (AT) {
+    int size = (int)cast<ConstantArrayType>(AT)->getSize().getZExtValue();
+    arr.push_back(new chillAST_IntegerLiteral(size));
+    T = AT->getElementType();
+    AT = ctx->getAsArrayType(T);
+  }
+  string TypeStr = T.getAsString();
 
-  char *vartype =  strdup( T.getAsString().c_str());
-  char *arraypart = splitTypeInfo(vartype);
+  char *otype =  strdup( TypeStr.c_str());
+  char *arraypart = parseArrayParts( otype );
+  char *varname = strdup(D->getNameAsString().c_str());
+  char *vartype = parseUnderlyingType(restricthack(otype));
 
-  char *varname = strdup(D->getName().str().c_str()); 
-
-  chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype,  varname, arraypart, (void *)D );
+  chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype, arraypart,  varname, arr, (void *)D );
 
   chillVD->isAParameter = isParm; 
 
-  int numdim = 0;
-  chillVD-> knownArraySizes = true;
-  if (index(vartype, '*')) chillVD->knownArraySizes = false;  // float *a;   for example
-  if (index(arraypart, '*'))  chillVD->knownArraySizes = false;
-  
-  // note: vartype here, arraypart in next code..    is that right?
-  if (index(vartype, '*')) { 
-    for (int i = 0; i<strlen(vartype); i++) if (vartype[i] == '*') numdim++;
-    chillVD->numdimensions = numdim;
-  }
-
-  if (index(arraypart, '[')) {  // JUST [12][34][56]  no asterisks
-    char *dupe = strdup(arraypart);
-
-    int len = strlen(arraypart);
-    for (int i=0; i<len; i++) if (dupe[i] == '[') numdim++;
-
-    chillVD->numdimensions = numdim;
-    int *as =  (int *)malloc(sizeof(int *) * numdim );
-    if (!as) { 
-      debug_fprintf(stderr, "can't malloc array sizes in ConvertVarDecl()\n");
-      exit(-1);
-    }
-    chillVD->arraysizes = as; // 'as' changed later!
-
-    
-    char *ptr = dupe;
-    while (ptr = index(ptr, '[')) {
-      ptr++;
-      int dim;
-      sscanf(ptr, "%d", &dim);
-      *as++ = dim;
-      
-      ptr =  index(ptr, ']');
-    }
-    free(dupe);
-  }
-  
   Expr *Init = D->getInit();
   if (Init) {
     throw std::runtime_error(" = VARDECL HAS INIT.  (TODO) (RIGHT NOW)");
@@ -211,7 +190,7 @@ chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *RD ) { // for structs an
 
     chillAST_VarDecl *VD = NULL;
     // very clunky and incomplete
-    VD = new chillAST_VarDecl( typ, name, "", astruct ); // can't handle arrays yet 
+    VD = new chillAST_VarDecl( astruct, "", name ); // can't handle arrays yet
     
     astruct->subparts.push_back(VD); 
   }
@@ -255,21 +234,8 @@ chillAST_NodeList ConvertDeclStmt( DeclStmt *clangDS ) {
     if (!strcmp("Var", declT)) {
       VarDecl *V = dyn_cast<VarDecl>(D);
       // ValueDecl *VD = dyn_cast<ValueDecl>(D); // not needed? 
-      std::string Name = V->getNameAsString();
-      char *varname = strdup( Name.c_str()); 
-      
-      //debug_fprintf(stderr, "variable named %s\n", Name.c_str()); 
-      QualType T = V->getType();
-      string TypeStr = T.getAsString();
-      char *vartype =  strdup( TypeStr.c_str());
-      
-      //debug_fprintf(stderr, "%s %s\n", td, varname); 
-      char *arraypart = splitTypeInfo( vartype );
-      
-      chillvardecl = new chillAST_VarDecl(vartype, varname, arraypart, (void *)D );
-      //debug_fprintf(stderr, "DeclStmt (clang 0x%x) for %s %s%s\n", D, vartype,  varname, arraypart);
 
-      nl.push_back(chillvardecl);
+      nl.push_back(UNWRAP(ConvertVarDecl(V)));
 
       // TODO 
       if (V->hasInit()) { 
@@ -634,10 +600,6 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
 
    chillAST_NodeList ret;
    if (s == NULL) return WRAP(NULL);
-   //debug_fprintf(stderr, "\nConvertGenericClangAST() Stmt of type %d (%s)\n", s->getStmtClass(),s->getStmtClassName());
-   Decl *D = (Decl *) s;
-   //if (isa<Decl>(D)) debug_fprintf(stderr, "Decl of kind %d (%s)\n",  D->getKind(),D->getDeclKindName() );
-
    if (isa<CompoundStmt>(s))              {ret = ConvertCompoundStmt( dyn_cast<CompoundStmt>(s));
    } else if (isa<DeclStmt>(s))           {ret = ConvertDeclStmt(dyn_cast<DeclStmt>(s));
    } else if (isa<ForStmt>(s))            {ret = ConvertForStmt(dyn_cast<ForStmt>(s));

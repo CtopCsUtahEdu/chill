@@ -1298,7 +1298,7 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       debug_fprintf(stderr, "chillAST_ForStmt::findLoopIndexesToReplace() there is no defined variable %s\n", vname); 
 
       // make one ??  seems like this should never happen 
-      newguy = new chillAST_VarDecl( olddecl->vartype, vname, ""/*?*/, NULL );
+      newguy = new chillAST_VarDecl( olddecl->vartype, "", vname );
       // insert actual declaration in code location?   how?
 
       // find parent of the ForStmt?
@@ -2717,95 +2717,27 @@ chillAST_node* chillAST_VarDecl::clone() {
   //if (isAParameter) debug_fprintf(stderr, "old vardecl IS a parameter\n");
   //else  debug_fprintf(stderr, "old vardecl IS NOT a parameter\n");
 
-  chillAST_VarDecl *vd  = new chillAST_VarDecl( vartype, strdup(varname), arraypart, NULL);  // NULL so we don't add the variable AGAIN to the (presumably) function 
+  chillAST_VarDecl *vd  = new chillAST_VarDecl( vartype, arraypointerpart, strdup(varname), children, NULL);  // NULL so we don't add the variable AGAIN to the (presumably) function
   
   vd->typedefinition = typedefinition;
   vd->vardef = vardef; // perhaps should not do this     TODO 
 
   vd->underlyingtype = strdup(underlyingtype); 
 
-  vd->arraysizes = NULL;
-  vd->knownArraySizes = knownArraySizes; 
   vd->numdimensions = numdimensions;
   vd->arraypointerpart = NULL;
-
-  if (arraypart != NULL && NULL!=arraysizes) {  // !strcmp(arraypart, "")) { 
-    //debug_fprintf(stderr, "in chillAST_VarDecl::clone(), cloning the array info\n");
-    //debug_fprintf(stderr, "numdimensions %d     arraysizes 0x%x\n", numdimensions, arraysizes) ;
-    vd->numdimensions = numdimensions;
-
-    if (arraysizes) { 
-      vd->arraysizes = (int *)malloc( sizeof(int *) * numdimensions ); 
-      for (int i=0; i< numdimensions; i++) { 
-        //debug_fprintf(stderr, "i %d\n", i); 
-        vd->arraysizes[i] = arraysizes[i]; 
-      }
-    }
-  }
 
   if ( arraypointerpart ) { 
     //debug_fprintf(stderr, "copying arraypointerpart\n"); 
     vd->arraypointerpart = strdup( arraypointerpart);
   }
 
-  vd->isStruct = this->isStruct; 
-  //vd->insideAStruct =  this->insideAStruct; 
+  vd->isStruct = this->isStruct;
 
-  //if (vd->isStruct)  debug_fprintf(stderr, "vardecl::clone()  %s is a struct\n", varname); 
-  //else debug_fprintf(stderr, "vardecl::clone()  %s is NOT a struct\n", varname); 
-
-
-  vd->knownArraySizes = this->knownArraySizes; 
   vd->isFromSourceFile = isFromSourceFile;
   if (filename) vd->filename = strdup(filename); 
   return vd;
 }
-
-
-void chillAST_VarDecl::splitarraypart() { 
-  //debug_fprintf(stderr, "chillAST_VarDecl::splitarraypart()  ");
-  //debug_fprintf(stderr, "%p  ", arraypart);
-  //if (arraypart) debug_fprintf(stderr, "%s", arraypart); 
-  //debug_fprintf(stderr, "\n");
-
-  // split arraypart into  (leading??) asterisks and known sizes [1][2][3]
-  if (!arraypart ||  // NULL 
-      (arraypart && (*arraypart == '\0'))) { // or empty string
-
-    // parts are both empty string
-    if (arraypointerpart) free(arraypointerpart);
-    arraypointerpart = strdup("");
-    if (arraysetpart) free(arraysetpart);
-    arraysetpart = strdup(""); 
-    return;
-  }
-
-  // arraypart exists and is not empty
-  int asteriskcount = 0;
-  int fixedcount = 0;
-  for ( int i=0; i<strlen(arraypart); i++) {
-    if (this->arraypart[i] == '*') { 
-      if (!fixedcount) {
-        asteriskcount++;
-      }
-    }
-    else { // remainder is fixed? 
-      fixedcount++; 
-      // check for brackets and digits only?   TODO
-    }
-  }
-  this->arraypointerpart = (char *) calloc( asteriskcount+1, sizeof(char));
-  this->arraysetpart     = (char *) calloc( fixedcount+1,    sizeof(char));
-  
-  char *ptr = arraypart;
-  for ( int i=0; i<asteriskcount; i++)  arraypointerpart[i] = *ptr++;
-  for ( int i=0; i<fixedcount; i++)     arraysetpart[i]   = *ptr++;
-}
-
-
-
-
-
 
 chillAST_IntegerLiteral::chillAST_IntegerLiteral(int val){
   value = val; 
@@ -3285,12 +3217,12 @@ chillAST_node* chillAST_CallExpr::clone() {
 
 chillAST_VarDecl::chillAST_VarDecl() { 
   //debug_fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl()  %p\n", this); 
-  vartype = underlyingtype = varname = arraypart = arraypointerpart = arraysetpart = NULL;
+  vartype = underlyingtype = varname = arraypointerpart = arraysetpart = NULL;
   typedefinition = NULL; 
 
   //debug_fprintf(stderr, "setting underlying type NULL\n" ); 
   init = NULL;
-  numdimensions=0; arraysizes = NULL;
+  numdimensions=0;
 
   uniquePtr = NULL;
   vardef  = NULL;
@@ -3300,216 +3232,35 @@ chillAST_VarDecl::chillAST_VarDecl() {
   byreference = false;
   isABuiltin = false; 
   isRestrict = isDevice = isShared = false; // debug_fprintf(stderr, "RDS = false\n"); 
-  knownArraySizes = false;
 };
 
-
-
-chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a):chillAST_VarDecl() {
-  vartype   = strdup(t);
-
-  underlyingtype = parseUnderlyingType( vartype ); 
-  varname   = strdup(n);
-  if (a) arraypart = strdup(a);
-  else arraypart = strdup(""); 
-  splitarraypart();
-
-  //debug_fprintf(stderr, "arraypart len %d\n", strlen(a));
-  for (int i=0; i<strlen(a); i++) { 
-    if (a[i] == '[') { numdimensions++; knownArraySizes = true; } 
-    if (!knownArraySizes && a[i] == '*') numdimensions++;
-  }
-  
-  //TODO
-  // if (parent) {
-    //debug_fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl( %s ), adding to symbol table???\n", varname);
-  //  parent->addVariableToSymbolTable( this ); // should percolate up until something has a symbol table
-    
-};
-
-
-
-chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *nam, const char *array):chillAST_VarDecl() {
-  //debug_fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl( %s  %p struct ", nam, this );
-  const char *type = astruct->getName(); 
-  //debug_fprintf(stderr, "%s, name %s, arraypart %s parent ) %p\n", type, nam, array, this); // , par);
-
-  vartype = strdup(type);
-
-  // these always go together  ?? 
+chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *ap, const char *nam, chillAST_NodeList arraypart):chillAST_VarDecl(astruct->getName(), ap, nam, arraypart, NULL) {
   vardef  = astruct;// pointer to the thing that says what is inside the struct
-  isStruct = true;  // ?? wrong if it's a union  ?? TODO 
-
-  underlyingtype = parseUnderlyingType( vartype ); 
-  //debug_fprintf(stderr, "setting underlying type %s from %s\n",  underlyingtype, vartype ); 
-  varname   = strdup(nam); 
-  arraypart = strdup(array);
-  splitarraypart();
-
-  knownArraySizes = false;
-  //debug_fprintf(stderr, "arraypart len %d\n", strlen(a)); 
-  for (int i=0; i<strlen(array); i++) { 
-    if (array[i] == '[') { numdimensions++; knownArraySizes = true; } 
-    if (!knownArraySizes && array[i] == '*') numdimensions++;
-  }
-  
-  //debug_fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl( chillAST_RecordDecl *astruct, ...) MIGHT add struct to some symbol table\n");
-  //if (parent) debug_fprintf(stderr, "yep, adding it\n"); 
 };
 
-
-
-
-
-chillAST_VarDecl::chillAST_VarDecl( chillAST_TypedefDecl *tdd,  const char *n, const char *a):chillAST_VarDecl() {
-  //debug_fprintf(stderr, "chillAST_VarDecl::chillAST_VarDecl( %s  typedef ", n);
-  const char *type = tdd->getStructName();
-  //fprintf (stderr, "%s, name %s, arraypart %s parent ) %p\n", type, n, a,this); // , par);
+chillAST_VarDecl::chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *ap, const char *n, chillAST_NodeList arraypart):chillAST_VarDecl(tdd->getStructName(), ap, n, arraypart, NULL) {
   typedefinition = tdd;
-  vartype   = strdup(type); 
-  underlyingtype = parseUnderlyingType( vartype ); 
-  //debug_fprintf(stderr, "setting underlying type %s from %s\n",  underlyingtype, vartype ); 
-  varname   = strdup(n); 
-  arraypart = strdup(a);
-  splitarraypart();
-
-  //debug_fprintf(stderr, "arraypart len %d\n", strlen(a));
-  for (int i=0; i<strlen(a); i++) { 
-    if (a[i] == '[') { numdimensions++; knownArraySizes = true; } 
-    if (!knownArraySizes && a[i] == '*') numdimensions++;
-  }
-
   isStruct = tdd->isAStruct();
 };
 
-
-
-
-
-chillAST_VarDecl::chillAST_VarDecl( const char *t,  const char *n, const char *a, void *ptr):chillAST_VarDecl() {
-  debug_fprintf(stderr, "2chillAST_VarDecl::chillAST_VarDecl( type %s, name %s, arraypart '%s' ) %p\n", t, n, a, this); 
-  //debug_fprintf(stderr, "2chillAST_VarDecl::chillAST_VarDecl( type %s, name %s, arraypart %s, ptr 0x%x, parent 0x%x )\n", t, n, a, ptr, par); 
-
-
-  vartype   = strdup(t); 
+chillAST_VarDecl::chillAST_VarDecl( const char *t, const char *ap, const char *n, chillAST_NodeList arraypart,  void *ptr):chillAST_VarDecl() {
+  vartype   = strdup(t);
   underlyingtype = parseUnderlyingType( vartype );
-  //debug_fprintf(stderr, "setting underlying type %s from %s\n",  underlyingtype, vartype ); 
-  varname   = strdup(n); 
-
-  if (a) arraypart = strdup(a);
-  else arraypart = strdup(""); // should catch this earlier
-  splitarraypart();
-
+  varname   = strdup(n);
   uniquePtr = ptr;
+  arraypointerpart = strdup(ap);
 
-  //debug_fprintf(stderr, "name arraypart len %d\n", strlen(a)); 
-  //debug_fprintf(stderr, "arraypart '%s'\n", arraypart); 
-  for (int i=0; i<strlen(a); i++) { 
-    if (a[i] == '[') { numdimensions++; knownArraySizes = true; } 
-    if (!knownArraySizes && a[i] == '*') numdimensions++; // fails for  a[4000 * 4] 
-  }  
-  //if (0 == strlen(a) && numdimensions == 0) { 
-  //  for (int i=0; i<strlen(t); i++) {   // handle float * x 
-  //    if (t[i] == '[') numdimensions++;
-  //    if (t[i] == '*') numdimensions++;
-  //  }  
-  //} 
-  //debug_fprintf(stderr, "2name %s numdimensions %d\n", n, numdimensions); 
+  for (auto i = arraypart.begin(); i!= arraypart.end(); ++i)
+    addChild(*i);
 
-
-
-
-  // this is from ir_clang.cc ConvertVarDecl(), that got executed AFTER the vardecl was constructed. dumb
-  int numdim = 0;
-  //knownArraySizes = true;
-  //if (index(vartype, '*')) knownArraySizes = false;  // float *a;   for example
-  //if (index(arraypart, '*'))  knownArraySizes = false;
-  
-  // note: vartype here, arraypart in next code..    is that right?
-  if (index(vartype, '*')) { 
-    for (int i = 0; i<strlen(vartype); i++) if (vartype[i] == '*') numdim++;
-    //debug_fprintf(stderr, "numd %d\n", numd);
-    numdimensions = numdim; 
+  // This should not have any array part as parsed by the front end
+  numdimensions = arraypart.size();
+  const char * p = ap;
+  while (*p) {
+    if (*p=='*')
+      numdimensions++;
+    ++p;
   }
-  
-  if (index(arraypart, '[')) {  // JUST [12][34][56]  no asterisks
-    char *dupe = strdup(arraypart);
-
-    int len = strlen(arraypart);
-    for (int i=0; i<len; i++) if (dupe[i] == '[') numdim++;
-    
-    //debug_fprintf(stderr, "numdim %d\n", numdim);
-    
-    numdimensions = numdim; 
-    int *as =  (int *)malloc(sizeof(int *) * numdim );
-    if (!as) { 
-      debug_fprintf(stderr, "can't malloc array sizes in ConvertVarDecl()\n");
-      exit(-1);
-    }
-    arraysizes = as; // 'as' changed later!
-    
-    
-    char *ptr = dupe;
-    //debug_fprintf(stderr, "dupe '%s'\n", ptr);
-    while (ptr = index(ptr, '[')) {                   // this fails for float a[4000*4]
-      ptr++;
-      char *leak = strdup(ptr);
-      char *close = index(leak, ']');
-      if (close) *close = '\0'; 
-
-      int l = strlen(leak);
-      bool justdigits = true;
-      bool justmath = true;
-      for (int i=0; i<l; i++) { 
-        char c = leak[i]; 
-        if (!isdigit(c)) justdigits = false;
-        if (!( isdigit(c) ||
-               isblank(c) ||
-               ((c == '+') || (c == '*')  || (c == '*')  || (c == '*')) || // math
-               ((c == '(') || (c == ')')))
-               ) { 
-          //debug_fprintf(stderr, " not justmath because '%c'\n", c); 
-          justmath = false; 
-        }
-            
-      }
-
-      //debug_fprintf(stderr, "tmp '%s'\n", leak);
-      if (justdigits) { 
-        int dim;
-        sscanf(ptr, "%d", &dim);
-        //debug_fprintf(stderr, "dim %d\n", dim);
-        *as++ = dim; 
-      }
-      else { 
-        if (justmath) debug_fprintf(stderr, "JUST MATH\n");
-        debug_fprintf(stderr, "need to evaluate %s, faking with hardcoded 16000\n", leak); 
-        *as++ = 16000; // temp TODO DFL 
-      }
-      free (leak); 
-
-      ptr =  index(ptr, ']');
-      //debug_fprintf(stderr, "bottom of loop, ptr = '%s'\n", ptr); 
-    }
-    free(dupe);
-    //for (int i=0; i<numdim; i++) { 
-    //  debug_fprintf(stderr, "dimension %d = %d\n", i,  arraysizes[i]); 
-    //} 
-    
-    //debug_fprintf(stderr, "need to handle [] array to determine num dimensions\n");
-    //exit(-1); 
-  }
-  
-  
-  //insideAStruct = false; 
-  byreference = false;
-
-  //print(); printf("\n"); fflush(stdout); 
-
-  // currently this is bad, because a struct does not have a symbol table, so the 
-  // members of a struct are passed up to the func or sourcefile. 
-
-  //debug_fprintf(stderr, "2chillAST_VarDecl::chillAST_VarDecl LEAVING\n"); 
 };
 
 
