@@ -497,100 +497,12 @@ chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl )
 }
 
 
-char *ConvertSgArrayTypeToString( SgArrayType* AT ) { 
-  
-  char *arraypart = strdup(""); // leak 
-  
-  SgExpression* indexExp = AT->get_index();
-  if(indexExp) {
-    
-    //debug_fprintf(stderr, "indexExp %s\n", indexExp->unparseToString().c_str());
-    if ( SgBinaryOp *BO = isSgBinaryOp(indexExp) ) { 
-      //debug_fprintf(stderr, "Binop\n"); 
-      chillAST_BinaryOperator *cbo =  (chillAST_BinaryOperator *)ConvertRoseBinaryOp( BO );
-      int val = cbo->evalAsInt(); 
-      //cbo->print(); printf(" = %d\n", val); fflush(stdout);
-      
-      //debug_fprintf(stderr, "manufacturing binop arraypart '[%d]'\n", val);
-      char *leak = (char *)malloc( 64 * sizeof(char));
-      sprintf(leak, "[%d]\0", val);
-      arraypart = leak; 
-      
-      // fix vartype? 
-      //char *tmp = vartype;
-      //char *ind = index(tmp, '[');
-      //if (ind) { 
-      //  char *newstr = (char *)malloc( 1 + sizeof( tmp ));
-      //  *ind = '\0'; 
-      //  sprintf(newstr, "%s[%d]\0", tmp, val );
-      //  vartype = newstr;
-      //  free(tmp); 
-      //} 
-    }
-    else { 
-      //free(arraypart);
-      char *number = ulhack(strdup( indexExp->unparseToString().c_str() )) ;
-      arraypart = (char *)malloc (3 + strlen(number)); 
-      sprintf(arraypart, "[%s]\0", number);
-      free(number); 
-    }
-    //debug_fprintf(stderr, "arraypart %s\n", arraypart); 
-    //arraypart = splitTypeInfo(vartype); // do before possible mucking with vartype
-  }
-  
-  
-  SgArrayType* arraybase = isSgArrayType(AT->get_base_type());
-  if (arraybase) { 
-    char *first = ConvertSgArrayTypeToString( arraybase ); // recurse;
-    //debug_fprintf(stderr, "concatting %s %s\n", first, arraypart ); 
-    
-    // concat 
-    int lenfirst = strlen(first);
-    int lensecond = strlen(arraypart);
-    char *concatted = (char *)malloc( lenfirst + lensecond + 2 ); // could be 1?
-    strcpy(concatted, first);
-    strcat(concatted, arraypart);
-    //debug_fprintf(stderr, "concatted is %s\n", concatted); 
-    free( first );
-    free( arraypart ); 
-    arraypart = concatted;
-  }
-  
-  return arraypart;
+chillAST_NodeList ConvertSgArrayType( SgType* Typ ) {
+  chillAST_NodeList ap;
+
+
+  return ap;
 }
-
-
-chillAST_node *find_wacky_vartype( const char *typ, chillAST_node *parent ) {
-  
-  // handle most cases quickly 
-  char *t = parseUnderlyingType(strdup(typ));
-  //debug_fprintf(stderr, "underlying '%s'\n", t);
-  if ( 0 == strcmp("int",   t)  || 
-       0 == strcmp("double", t)  ||
-//       0 == strcmp("float", t)  ||
-       0 == strcmp("float", t) ) return NULL;
-
-
-  //debug_fprintf(stderr, "OK, looking for %s\n", t);
-  if (!parent) {
-    //debug_fprintf(stderr, "no parent?\n");
-    return NULL;
-  }
-  chillAST_node *buh = parent->findDatatype( t );
-
-  //if (!buh) debug_fprintf(stderr, "could not find typedef for %s\n", t);
-  //else {
-  //debug_fprintf(stderr, "buh IS "); buh->print(); fflush(stdout);
-  //}
-
-  return buh;
-
-
-
-
-}
-
-
 
 chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO probably wrong
 {
@@ -603,25 +515,28 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
   char *varname = shortenRoseStructMemberName( initname->unparseToString().c_str() ); 
   debug_fprintf(stderr, "varname '%s'\n", varname); 
   
-  //VariantT V;
-  //V = initname->variantT();
-  //debug_fprintf(stderr,"variantT %d %s\n", V, roseGlobalVariantNameList[V]);
-  
   SgType *typ = initname->get_type();
   // !! if typ->unparseToString()->c_str(), the string and therefore the pointer to char are freed before the next statement ! 
-  string really = typ->unparseToString(); 
+  chillAST_NodeList arr;
+
+  while (isSgArrayType(typ)) {
+    SgArrayType *AT = (SgArrayType*) typ;
+    SgExpression* indexExp = AT->get_index();
+    arr.push_back(ConvertRoseGenericAST(indexExp));
+    arr.back()->print(0,std::cout);
+    typ = AT->get_base_type();
+  }
+
+  string really = typ->unparseToString();
   const char *otype =   really.c_str();
-  debug_fprintf(stderr, "original vartype 0x%x '%s'\n", otype, otype);  
-  
-  
+  chill_fprintf(stderr, "original vartype 0x%x '%s'\n", otype, otype);
+
   bool restricted = isRestrict( otype );
   
-  // if this is a struct, the vartype may be a huge mess. make it nicer
-  char *vartype = parseUnderlyingType(restricthack( shortenRoseUnnamedName( otype ))); 
-  //debug_fprintf(stderr, "prettied vartype '%s'\n", vartype); 
-  char *arraypart;// = strdup(""); // leak // splitTypeInfo(vartype); // do before possible mucking with vartype
+  char *vartype = parseUnderlyingType(restricthack( shortenRoseUnnamedName( otype )));
+  char *arraypart;
   arraypart =  parseArrayParts( strdup(otype) );
-  debug_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart); 
+  chill_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart);
   
   // need underlying type to pass to constructor?  double and arraypart **, not type double ** and arraypart ** 
   
@@ -689,52 +604,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
   
   //this is wrong.  "something *"  is not being flagged as array or pointer 
   //in addition, if vartype is a typedef, I think it's being missed.
-  
-  if (isSgArrayType(typ)) { 
-    //debug_fprintf(stderr, "ARRAY TYPE\n"); 
-    //if (arraypart) debug_fprintf(stderr, "but arraypart is already '%s'\n", arraypart);
-    
-    SgArrayType *AT = (SgArrayType *)typ;
-    //if (arraypart) free(arraypart); 
-    if (!arraypart) arraypart = ConvertSgArrayTypeToString( AT ); 
-    debug_fprintf(stderr, "in convertroseinitname(), arraypart %s\n", arraypart); 
-    
-    //SgArrayType* arraybase = isSgArrayType(t->get_base_type());
-    //SgExpression* indexExp = AT->get_index();
-    //if(indexExp) { 
-    //  
-    //  debug_fprintf(stderr, "indexExp %s\n", indexExp->unparseToString().c_str());
-    //  if ( SgBinaryOp *BO = isSgBinaryOp(indexExp) ) { 
-    //    //debug_fprintf(stderr, "Binop\n"); 
-    //    chillAST_BinaryOperator *cbo =  (chillAST_BinaryOperator *)ConvertRoseBinaryOp( BO, NULL );
-    //    int val = cbo->evalAsInt(); 
-    //    //cbo->print(); printf(" = %d\n", val); fflush(stdout);
-    
-    //    //debug_fprintf(stderr, "manufacturing binop arraypart '[%d]'\n", val);
-    //    char *leak = (char *)malloc( 64 * sizeof(char));
-    //    sprintf(leak, "[%d]\0", val);
-    //    arraypart = leak; 
-    
-    // fix vartype? 
-    //char *tmp = vartype;
-    char *ind = index(vartype, '[');
-    if (ind) { 
-      //char *newstr = (char *)malloc( 1 + sizeof( tmp ));
-      *ind = '\0'; 
-      //sprintf(newstr, "%s %s\0", tmp, arraypart );
-      //vartype = newstr;
-      //free(tmp); 
-    }
-    //  }
-    //  arraypart = splitTypeInfo(vartype); // do before possible mucking with vartype
-    
-    //  debug_fprintf(stderr, "vartype = '%s'\n", vartype); 
-    //  debug_fprintf(stderr, "arraypart = '%s'\n", arraypart); 
-    
-    //}
-  }
-  
-  
+
   if (arraypart == NULL) arraypart = strdup(""); // leak
   //debug_fprintf(stderr, "vartype = '%s'\n", vartype); 
   //debug_fprintf(stderr, "arraypart = '%s'\n", arraypart); 
@@ -755,11 +625,11 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
   if (def) { 
     if (def->isRecordDecl()) {
       //debug_fprintf(stderr, "vardecl of a STRUCT\n"); 
-      chillVD =  new chillAST_VarDecl((chillAST_RecordDecl*)def,  varname, arraypart );
+      chillVD =  new chillAST_VarDecl((chillAST_RecordDecl*)def, arraypart,  varname, arr );
     }
     else if (def->isTypeDefDecl()) {
       //debug_fprintf(stderr, "vardecl of a typedef\n"); 
-      chillVD = new chillAST_VarDecl((chillAST_TypedefDecl*)def, varname, arraypart );
+      chillVD = new chillAST_VarDecl((chillAST_TypedefDecl*)def, arraypart, varname, arr );
     }
     else  { 
       debug_fprintf(stderr, "def but not a recorddecl or a typedefdecl?\n");
@@ -768,7 +638,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
   }
   else { 
     //debug_fprintf(stderr, "\n*** creating new chillAST_VarDecl ***\n"); 
-    chillVD = new chillAST_VarDecl( vartype,  varname, arraypart, (void *)initname );
+    chillVD = new chillAST_VarDecl( vartype, arraypart,  varname, arr,(void *)initname );
   }
   
   chillVD->isRestrict = restricted; // TODO nicer way 
@@ -1681,7 +1551,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
         chillAST_VarDecl *VD = NULL;
         //debug_fprintf(stderr, "(typ) %s (name) %s\n", vartype, name);
         // very clunky and incomplete
-        VD = new chillAST_VarDecl( vartype, name, "", tdd ); // can't handle arrays yet 
+        VD = new chillAST_VarDecl( vartype, "", name, chillAST_NodeList(), tdd ); // can't handle arrays yet
         tdd->subparts.push_back(VD); 
       }
       else  { 

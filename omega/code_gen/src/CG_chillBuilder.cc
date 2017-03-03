@@ -1029,7 +1029,7 @@ namespace omega {
       // this is copying roseBuilder, but is probably wrong. it is assuming 
       // that the ident is a direct child of the current function 
       
-      chillAST_VarDecl *vd = new chillAST_VarDecl( "int", _s.c_str(), "", currentfunction->getBody()); // parent not available  TODO 
+      chillAST_VarDecl *vd = new chillAST_VarDecl( "int", "", _s.c_str()); // parent not available  TODO
       currentfunction->addVariableToSymbolTable( vd ); // use symtab2_  ?? 
     
       
@@ -1646,7 +1646,7 @@ namespace omega {
 
         vd->parent = rd;  // ??
 
-        bool simplepointer = (vd->numdimensions == 1 && !vd->knownArraySizes);
+        bool simplepointer = (vd->numdimensions == 1 && vd->isPointer());
         if (simplepointer) {  
           debug_fprintf(stderr, "struct member %s is pointer to %s\n", vd->varname, vd->vartype);
           vd->arraypointerpart = strdup("*"); // ?? 
@@ -1665,7 +1665,7 @@ namespace omega {
       }
       else { 
         debug_fprintf(stderr, "int BY DEFAULT (bad idea) FIXME\n"); // TODO 
-        vd = new chillAST_VarDecl( "int", data_members[i].c_str(), "", NULL);
+        vd = new chillAST_VarDecl( "int", "", data_members[i].c_str());
       }
       rd->addSubpart( vd );
       //debug_fprintf(stderr, "\n"); 
@@ -1689,7 +1689,7 @@ namespace omega {
       chillAST_TypedefDecl *tdd = (chillAST_TypedefDecl *)n;
       //tdd->print(); printf("\n"); fflush(stdout);
       
-      chillAST_VarDecl *vd = new chillAST_VarDecl( tdd, name.c_str(), "" );
+      chillAST_VarDecl *vd = new chillAST_VarDecl( tdd, "", name.c_str());
       
       // we need to add this to function ??  TODO 
       //debug_fprintf(stderr, "adding typedef instance to symbolTable\n");
@@ -1709,7 +1709,7 @@ namespace omega {
       rd->print(); printf("\n"); fflush(stdout);
       rd->dump(); printf("\n");  fflush(stdout);
       
-      chillAST_VarDecl *vd = new chillAST_VarDecl( rd, name.c_str(), "" );
+      chillAST_VarDecl *vd = new chillAST_VarDecl( rd, "", name.c_str());
 
       //debug_fprintf(stderr, "CG_chillBuilder.cc, adding struct instance to body of function's symbolTable\n");
 
@@ -1809,7 +1809,7 @@ namespace omega {
   CG_outputRepr* CG_chillBuilder::CreatePointer(std::string  &name) const { 
     //debug_fprintf(stderr, "CG_chillBuilder::CreatePointer( %s )\n", name.c_str()); 
     
-    chillAST_VarDecl *vd = new chillAST_VarDecl( "int", name.c_str(), "*", currentfunction->getBody());
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "int", "", name.c_str());
     //vd->print(); printf("\n"); fflush(stdout); 
     //vd->dump(); printf("\n"); fflush(stdout); 
     

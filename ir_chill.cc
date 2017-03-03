@@ -87,6 +87,36 @@ namespace {
     }
     return NULL; // unreachable
   }
+
+  std::string getVarType(const IR_Symbol *sym) {
+    std::string type;
+    if (sym->isScalar()) {
+      debug_fprintf(stderr, "scalar\n");
+      IR_chillScalarSymbol *RSS = (IR_chillScalarSymbol *) sym;
+      chillAST_VarDecl *vd = RSS->chillvd;
+      debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+      debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+      type = vd->vartype;
+    } else if (sym->isArray()) {
+      debug_fprintf(stderr, "array symbol at top,  array or pointer\n");
+      IR_chillArraySymbol *RAS = (IR_chillArraySymbol *) sym;
+      chillAST_VarDecl *vd = RAS->chillvd;
+      debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+      debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+      type = vd->vartype;
+    } else if (sym->isPointer()) {
+      debug_fprintf(stderr, "pointer symbol at top,  array or pointer  (TODO)\n");
+      IR_chillPointerSymbol *RPS = (IR_chillPointerSymbol *) sym;
+      chillAST_VarDecl *vd = RPS->chillvd;
+      debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
+      debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
+      type = vd->vartype;
+    } else {
+      debug_fprintf(stderr, "unknown symbol type at top\n");
+      type = "UNKNOWN";
+    }
+    return type;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -774,8 +804,8 @@ IR_chillCode::~IR_chillCode() {
   if (!chillfunc) {
     return;
   }
-
-  chillfunc->cleanUpVarDecls(); 
+  chillfunc->constantFold();
+  chillfunc->cleanUpVarDecls();
 
   chillAST_SourceFile *src = chillfunc->getSourceFile(); 
   if (src) {
@@ -808,55 +838,11 @@ IR_PointerArrayRef *IR_chillCode::CreatePointerArrayRef(IR_PointerSymbol *sym,
 
 //TODO
 IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
-  //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol()\n");  
-  if (typeid(*sym) == typeid( IR_chillScalarSymbol ) ) {  // should be the case ??? 
-    //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from a scalar symbol\n"); 
-    //debug_fprintf(stderr, "(typeid(*sym) == typeid( IR_chillScalarSymbol )\n"); 
-    const IR_chillScalarSymbol *CSS = (IR_chillScalarSymbol*) sym;
-    chillAST_VarDecl *vd = CSS->chillvd;
-    
-    // do we have to check to see if it's already there? 
-     VariableDeclarations.push_back(vd);
-     chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ??
-     bod->insertChild(0, vd);
-     //debug_fprintf(stderr, "returning ... really\n"); 
-    return new IR_chillScalarSymbol( this, CSS->chillvd); // CSS->clone(); 
-  }
-
-  // ?? 
-  if (typeid(*sym) == typeid( IR_chillArraySymbol ) ) {  
-    //debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol() from an array symbol?\n"); 
-    const IR_chillArraySymbol *CAS = (IR_chillArraySymbol*) sym;
-    //debug_fprintf(stderr, "CAS 0x%x   chillvd = 0x%x\n", CAS, CAS->chillvd);
-    //debug_fprintf(stderr, "\nthis is the SYMBOL?: \n"); 
-    //CAS->print();
-    //CAS->dump();
-
-    chillAST_VarDecl *vd = CAS->chillvd; 
-    //debug_fprintf(stderr, "\nthis is the var decl?: "); 
-    //vd->print(); printf("\n"); 
-    //vd->dump(); printf("\n\n");
-    fflush(stdout);  
-    
-    // figure out the base type (probably float) of the array
-    char *basetype = vd->underlyingtype;
-    //debug_fprintf(stderr, "scalar will be of type SgType%s\n", basetype);   
-
-    char tmpname[128];
-    sprintf(tmpname, "newVariable%i\0", vd->chill_scalar_counter++); 
-    chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, tmpname,  "",  NULL);  // TODO parent
-    //scalarvd->print(); printf("\n"); fflush(stdout); 
-
-    //debug_fprintf(stderr, "VarDecl has parent that is a NULL\n"); 
-
-    return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd)); // CSS->clone(); 
-  }
-  
-  debug_fprintf(stderr, "IR_chillCode::CreateScalarSymbol(), passed a sym that is not a chill scalar symbol OR an array symbol???\n"); 
-  int *n = NULL;
-  n[0] = 1;
-  exit(-1); 
-  return NULL;
+  std::string type = getVarType(sym);
+  char tmpname[128];
+  sprintf(tmpname, "newVariable%i\0", chillAST_VarDecl::chill_scalar_counter++);
+  chillAST_VarDecl * scalarvd = new chillAST_VarDecl( type.c_str(), "", tmpname );
+  return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd)); // CSS->clone();
 }
 
 // TODO what is memory_type
@@ -864,7 +850,7 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(IR_CONSTANT_TYPE type, int mem
 
   char *basetype = irTypeString( type ); // float or int usually
 
-  chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, name.c_str(),  "",  NULL); // TODO parent
+  chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, "", name.c_str() );
 
   return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd));
 
@@ -878,16 +864,14 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
 
   sprintf(namestring, "_P%d\0", entire_file_AST->chill_array_counter++);
   debug_fprintf(stderr, "creating Array %s\n", namestring); 
-    
-  char arraypart[100];
-  char *s = &arraypart[0];
+
+  chillAST_NodeList arraypart;
 
   for (int i=0; i<size.size(); i++) { 
     CG_outputRepr *OR = size[i];
     CG_chillRepr * CR = (CG_chillRepr * ) OR;
-    //debug_fprintf(stderr, "%d chillnodes\n", CR->chillnodes.size()); 
-    
-    // this SHOULD be 1 chillnode of type IntegerLiteral (per dimension)
+
+    // this SHOULD be 1 chillnode per dimension
     int numnodes = CR->chillnodes.size();
     if (1 != numnodes) { 
       debug_fprintf(stderr, 
@@ -897,19 +881,12 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
     }
 
     chillAST_node *nodezero = CR->chillnodes[0];
-    if (!nodezero->isIntegerLiteral())  {
-      debug_fprintf(stderr, "IR_chillCode::CreateArraySymbol() array dimension %d not an IntegerLiteral\n", i);
-      exit(-1);
-    }
-
-    chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral *)nodezero;
-    int val = IL->value;
-    sprintf(s, "[%d]\0", val); 
-    s = &arraypart[ strlen(arraypart) ];
+    arraypart.push_back(nodezero);
   }
-  //debug_fprintf(stderr, "arraypart '%s'\n", arraypart); 
 
-  chillAST_VarDecl *vd = new chillAST_VarDecl( "float",  namestring, arraypart, NULL); // todo type from sym
+  std::string type = getVarType(sym);
+
+  chillAST_VarDecl *vd = new chillAST_VarDecl( type.c_str(), "",  namestring, arraypart); // todo type from sym
 
   // put decl in some symbol table
   VariableDeclarations.push_back(vd);
@@ -917,7 +894,7 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
   chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ?? 
   bod->insertChild(0, vd);
 
-  return new IR_chillArraySymbol( this, vd); 
+  return new IR_chillArraySymbol( this, vd);
 }
 
 omega::CG_outputRepr*  IR_chillCode::CreateArrayRefRepr(const IR_ArraySymbol *sym,
@@ -945,53 +922,18 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   debug_fprintf(stderr, "IR_roseCode::CreatePointerSymbol 2()\n");
   debug_fprintf(stderr, "symbol name %s\n", sym->name().c_str());
 
-  char *typ = NULL;
-
-  if (sym->isScalar()) {
-    debug_fprintf(stderr, "scalar\n");
-    IR_chillScalarSymbol *RSS = (IR_chillScalarSymbol *)sym;
-    chillAST_VarDecl *vd = RSS->chillvd;
-    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
-    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
-    typ = strdup(vd->vartype);
-  }
-  else if (sym->isArray()) {
-    debug_fprintf(stderr, "array symbol at top,  array or pointer\n");
-    IR_chillArraySymbol *RAS = (IR_chillArraySymbol *)sym;
-    chillAST_VarDecl *vd = RAS->chillvd;
-    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
-    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
-    typ = strdup(vd->vartype);
-  }
-  else if (sym->isPointer()) {
-    debug_fprintf(stderr, "pointer symbol at top,  array or pointer  (TODO)\n");
-    IR_chillPointerSymbol *RPS = (IR_chillPointerSymbol *)sym;
-    chillAST_VarDecl *vd = RPS->chillvd;
-    debug_fprintf(stderr, "vd vartype %s     ", vd->vartype);
-    debug_fprintf(stderr, "underlyingtype %s\n", vd->underlyingtype);
-    typ = strdup(vd->vartype);
-  }
-  else debug_fprintf(stderr, "unknown symbol type at top\n");
-
-  if (!typ) {
-    debug_fprintf(stderr, "ir_rose.cc BAD TYPE\n");
-    exit(-1);
-  }
-
-  debug_fprintf(stderr, "symbol type is %s\n", typ);
-
+  std::string type = getVarType(sym);
 
   debug_fprintf(stderr, "with %d indirections\n", (int)size_repr.size());
-  std::string asterisks = "";
-  for (int i = 0; i < size_repr.size(); i++) {
-    asterisks = asterisks + "*";
-  }
+  std::string po = "";
+  for (int i = 0; i < size_repr.size(); i++)
+    po += "*";
 
   std::string s = std::string("_P_DATA")
     + omega::to_string(getAndIncrementPointerCounter());
   debug_fprintf(stderr, "defining s %s\n", s.c_str());
 
-  chillAST_VarDecl *vd = new chillAST_VarDecl( typ, s.c_str(), asterisks.c_str(), NULL);
+  chillAST_VarDecl *vd = new chillAST_VarDecl(type.c_str(), po.c_str(), s.c_str());
   vd->print(0,stderr); debug_fprintf(stderr, "\n");
 
   // TODO parent? symbol table?
@@ -1015,7 +957,7 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
   //  float ***array;
   // it does NOT use the sizes in size_repr
 
-  char *basetype = irTypeString( type ); // float or int usually
+  std::string ty = irTypeString( type ); // float or int usually
   std::string n;
   if(name == "") {
     debug_fprintf(stderr, "creating a P_DATA name, since none was sent in\n");
@@ -1028,12 +970,11 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
 
   debug_fprintf(stderr,"*s *%s;\n",basetype, n.c_str());
 
-  char arraypart[100];
-  char *s = &arraypart[0];
-  for (int i=0; i<size_repr.size(); i++) arraypart[i] = '*';
-  arraypart[size_repr.size()] = '\0';
 
-  chillAST_VarDecl *vd = new  chillAST_VarDecl( basetype, n.c_str(), arraypart, NULL);
+  std::string pointer;
+  for (int i=0; i<size_repr.size(); i++) pointer += "*";
+
+  chillAST_VarDecl *vd = new  chillAST_VarDecl( ty.c_str(), pointer.c_str(), n.c_str() );
 
   vd->print(0, stderr); debug_fprintf(stderr, "\n");
 
@@ -1527,7 +1468,6 @@ void IR_chillCode::ReplaceCode(IR_Control *old, CG_outputRepr *repr) {
       if (decls[i] == olddecls[j])
         inthere = 1;
       if (!strcmp(decls[i]->varname, olddecls[j]->varname))
-        if (!strcmp(decls[i]->arraypart, olddecls[j]->arraypart))
           inthere = 1;
     }
     if (!inthere) {
@@ -1682,7 +1622,7 @@ void IR_chillCode::CreateDefineMacro(std::string s,
   // create "parameters" for the #define
   for (int i=0; i<args.size(); i++) {
     //debug_fprintf(stderr, "'parameter' %s\n", args[i].c_str());
-    chillAST_VarDecl *vd = new chillAST_VarDecl( "fake", args[i].c_str(), "", NULL);
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "fake", "", args[i].c_str());
     //debug_fprintf(stderr, "adding parameter %d ", i); vd->dump(); fflush(stdout);
     macro->addParameter( vd );
 
@@ -2016,9 +1956,8 @@ omega::CG_outputRepr *IR_chillCode::CreatePointerType(IR_CONSTANT_TYPE type) // 
   // pointer to something, not named
   // ast doesnt' have a type like this, per se. TODO
   // Use a variable decl with no name? TODO
-  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "", "", NULL);
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "","");
   vd->numdimensions = 1;
-  vd->knownArraySizes = false;
 
   omega::CG_chillRepr *CR = new omega::CG_chillRepr( vd );
   return CR;
@@ -2035,7 +1974,7 @@ omega::CG_outputRepr *IR_chillCode::CreateScalarType(IR_CONSTANT_TYPE type)
   const char *typestr = irTypeString( type );
 
   // Use a variable decl with no name? TODO
-  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "", "", NULL);
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typestr, "", "");
   omega::CG_chillRepr *CR = new omega::CG_chillRepr( vd );
   return CR;
 }
@@ -2149,7 +2088,7 @@ omega::CG_outputRepr *IR_chillCode::CreateMalloc(const IR_CONSTANT_TYPE type,
   // the rest of this function should not be here
   chillAST_CStyleCastExpr *CE = new chillAST_CStyleCastExpr( typ, mal );
   // we only have the name of a variable to assign the malloc memory to. Broken
-  chillAST_VarDecl *vd = new chillAST_VarDecl( typ, lhs.c_str(), "*", NULL );
+  chillAST_VarDecl *vd = new chillAST_VarDecl( typ, "*", lhs.c_str());
   chillAST_BinaryOperator *BO = new chillAST_BinaryOperator( vd, "=", CE );
   BO->print(0, stderr);
   return new CG_chillRepr( BO );

@@ -2432,7 +2432,7 @@ bool LoopCuda::cudaize_v2(std::string kernel_name,
 
 chillAST_VarDecl *addBuiltin( char *nameofbuiltin, char *typeOfBuiltin, chillAST_node *somecode) { 
   // create a builtin, like "blockIdx.x", so we can use it in assignment statements
-  chillAST_VarDecl *bi = new chillAST_VarDecl( typeOfBuiltin, nameofbuiltin, "", NULL); // somecode ); // ->getSourceFile() );
+  chillAST_VarDecl *bi = new chillAST_VarDecl( typeOfBuiltin, "", nameofbuiltin); // somecode ); // ->getSourceFile() );
   bi->isABuiltin = true;
   return bi;
 }

@@ -108,11 +108,10 @@ void Loop::stencilASEPadded(int stmt_num)   {
   
   int paddingSize = 2 * radius;
   int stencilBufferSize = 1 + paddingSize + upper - lower;
-  //debug_fprintf(stderr, "padding %d    stencilBufferSize %d\n\n", paddingSize, stencilBufferSize); 
-  char arraypart[32];
-  sprintf(arraypart, "[%d]", stencilBufferSize );  // variable arraypart
-  
-  
+  //debug_fprintf(stderr, "padding %d    stencilBufferSize %d\n\n", paddingSize, stencilBufferSize);
+  chillAST_NodeList arraypart;
+  arraypart.push_back(new chillAST_IntegerLiteral(stencilBufferSize));
+
   // find the function we're modifying
   //easy, but probably risky ...   chillcode->findEnclosingFunction() 
   IR_chillCode *IR_RC = (IR_chillCode *)ir;  // use hidden info that this is IR_roseCode;
@@ -125,7 +124,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     char vname[128];
     sprintf(vname, "buffer_%d", i); // variable name 
     
-    chillAST_VarDecl *vd = new chillAST_VarDecl( "double", vname, arraypart, NULL); 
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "double", "", vname, arraypart);
     //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying
@@ -148,7 +147,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
     debug_fprintf(stderr, "%s\n", vname);
       
 
-    chillAST_VarDecl *vd = new chillAST_VarDecl( "double", vname, "", NULL); 
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "double", "", vname );
     //vd->print(0, stderr); debug_fprintf(stderr, ";\n");
     
     // add to function we're modifying

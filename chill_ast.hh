@@ -845,7 +845,7 @@ public:
 class chillAST_VarDecl: public chillAST_node { 
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_VARDECL;}
-  char *vartype; // should probably be an enum, except it's used for unnamed structs too
+  char *vartype; //!< interchangabe with underlying type
 
   chillAST_RecordDecl  *vardef;// the thing that says what the struct looks like
   chillAST_TypedefDecl *typedefinition; // NULL for float, int, etc.
@@ -853,17 +853,13 @@ public:
 
   //bool insideAStruct;  // this variable is itself part of a struct
   
-  char *underlyingtype;
-  char *varname;
-  char *arraypart;           // [ 12 ] [ 34 ] if that is how it was defined
-  char *arraypointerpart;
+  char *underlyingtype;   //!< the base type of the variable
+  char *varname;          //!< Variable name
+  char *arraypointerpart; //!< Pointer part of the array such as '***'
   char *arraysetpart; 
-  void splitarraypart();
 
-  int numdimensions;
-  int *arraysizes;       // TODO 
-  bool knownArraySizes;  //  if this float *a or float a[128] ?  true means we know ALL dimensions
-  int cudamallocsize;      // usually specified in lua/python transformation file 
+  int numdimensions;      //!< The total number of dimensions, some might be unbounded as specified in '**'
+  int cudamallocsize;      // usually specified in lua/python transformation file
 
   bool isRestrict;  // C++ __restrict__ 
   bool isShared; // CUDA  __shared__
@@ -879,9 +875,7 @@ public:
   bool isArray() { return (numdimensions != 0); }; 
   bool isAStruct() { return (isStruct || (typedefinition && typedefinition->isAStruct())); }
   void setStruct( bool b ) {isStruct = b;/*debug_fprintf(stderr,"vardecl %s IS A STRUCT\n",varname);*/ };
-  bool isPointer() { return isArray() && !knownArraySizes; }  // 
-
-  bool knowAllDimensions() { return knownArraySizes; } ; 
+  bool isPointer() { return numdimensions > getNumChildren(); }  //
 
   chillAST_node *init;
   void setInit( chillAST_node *i ) { init = i; i->setParent(this); };
@@ -889,10 +883,17 @@ public:
   chillAST_node *getInit() { return init; };
   
   chillAST_VarDecl();
-  chillAST_VarDecl( const char *t,  const char *n, const char *a);
-  chillAST_VarDecl( const char *t,  const char *n, const char *a, void *ptr);
-  chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *n, const char *arraypart);
-  chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *n, const char *arraypart);
+  /**
+   * @brief Base constructor for VarDecl
+   * @param t the base type, such as "int"
+   * @param ap the array pointer part, such as "**"
+   * @param n the variable name
+   * @param arraypart the explicit array sizes as a vector
+   * @param ptr Unique pointer
+   */
+  chillAST_VarDecl( const char *t, const char *ap,  const char *n, chillAST_NodeList arraypart = chillAST_NodeList(), void *ptr = NULL);
+  chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *ap, const char *n, chillAST_NodeList arraypart = chillAST_NodeList());
+  chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *ap, const char *n, chillAST_NodeList arraypart = chillAST_NodeList());
 
   void printName( int indent=0,  FILE *fp = stderr );
   bool isParmVarDecl() { return( isAParameter == 1 ); };

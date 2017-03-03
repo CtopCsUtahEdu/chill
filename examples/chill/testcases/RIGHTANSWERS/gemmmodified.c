@@ -9,8 +9,8 @@ void gemm(int **A, int **B, int **C, int n) {
   int t2;
   int over2;
   int over1;
-  float _P2[8][512];
-  float _P1[512][128];
+  int _P2[8][512];
+  int _P1[512][128];
   over1 = 0;
   over2 = 0;
   for (t2 = 0; t2 <= n - 1; t2 += 512) 

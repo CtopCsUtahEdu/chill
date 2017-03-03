@@ -81,43 +81,23 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
 
     debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart); 
 
-    chillAST_VarDecl *newarray =  (chillAST_VarDecl *)vd->clone();
-    newarray->varname = strdup( s.c_str() ); // 
-    
-    chillfunc->getBody()->insertChild( 0, newarray);  // is this always the right function to add to?
-    chillfunc->addVariableToSymbolTable( newarray ); // always right? 
-
-    char arraystring[128];
-    char *aptr = arraystring;
-    
-    if (newarray->arraysizes) free(  newarray->arraysizes ); 
-    newarray->arraysizes = (int *)malloc(size.size() * sizeof(int)); 
+    chillAST_NodeList arr;
 
     for (int i=0; i<size.size(); i++) { 
       omega::CG_chillRepr *CR = (omega::CG_chillRepr *) size[i];
       chillAST_node *n = (CR->getChillCode()) [0];
-      debug_fprintf(stderr, "size[%d] is a %s\n", i, n->getTypeString()); 
-      n->print(0,stderr); debug_fprintf(stderr, "\n");
-
-      int value = n->evalAsInt(); 
-      debug_fprintf(stderr, "value is %d\n", value); 
-
 
       //chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral*) ((CR->getChillCode()) [0]);
 
       //printf("size[%d] (INTEGER LITERAL??)  '", i); IL->print(); printf("'\n"); fflush(stdout);
-      newarray->arraysizes[i] = value; // this could die if new var will have MORE dimensions than the one we're copying
-
-      sprintf(aptr, "[%d]",  value); 
-      aptr += strlen(aptr);
+      arr.push_back(n);
     }
-    debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring); 
-    newarray->arraypart = strdup(arraystring);
-    newarray->numdimensions =  size.size(); 
-
+    debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring);
+    chillAST_VarDecl *newarray = new chillAST_VarDecl(vd->underlyingtype, "", s.c_str(), arr);
+    chillfunc->getBody()->insertChild( 0, newarray);  // is this always the right function to add to?
+    chillfunc->addVariableToSymbolTable( newarray ); // always right?
 
     debug_fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions); 
-    newarray->varname = strdup(s.c_str()); 
     IR_chillArraySymbol *newsym = new IR_chillArraySymbol( asym->ir_, newarray );
     if (sharedAnnotation == 1) { 
       debug_fprintf(stderr, "%s is SHARED\n", newarray->varname );
