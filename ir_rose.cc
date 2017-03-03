@@ -1502,7 +1502,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
   //debug_fprintf(stderr, "a new type called %s\n", typedefname);
   
   // we don't know the underlying type yet ...
-  chillAST_TypedefDecl *tdd = new chillAST_TypedefDecl( "", typedefname, NULL);
+  chillAST_TypedefDecl *tdd = new chillAST_TypedefDecl( "", typedefname, "");
   //tdd->setStruct( true ); // might not be a struct? 
   tdd->setStructName( typedefname );
   

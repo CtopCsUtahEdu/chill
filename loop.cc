@@ -1271,7 +1271,7 @@ void Loop::printCode(int effort) const {
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
-  
+
   std::string repr = last_compute_cgr_->printString(
                                                     uninterpreted_symbols_stringrepr);
   debug_fprintf(stderr, "leaving Loop::printCode()\n"); 
@@ -1465,6 +1465,7 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
   std::map<ir_tree_node*, std::set<int> > sorted_by_loop;
   std::map<int, std::set<int> > sorted_by_lex_order;
   std::vector<std::set<int> > to_return;
+  std::vector<ir_tree_node*> loop_order;
   bool lex_order_already_set = false;
   for (std::set<int>::iterator it = active.begin(); it != active.end();
        it++) {
@@ -1514,10 +1515,8 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
       //while (itn->content->type() != IR_CONTROL_LOOP && itn != NULL)
       //  itn = itn->parent;
       
-      while ((itn != NULL) && (itn->payload != level - 1)) {
+      while ((itn != NULL) && (itn->payload != level - 1 || itn->content->type()!= IR_CONTROL_LOOP)) {
         itn = itn->parent;
-        while (itn != NULL && itn->content->type() != IR_CONTROL_LOOP )
-          itn = itn->parent;
       }
       
       if (itn == NULL)
@@ -1529,6 +1528,7 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
         if (it2 != sorted_by_loop.end())
           it2->second.insert(*it);
         else {
+          loop_order.push_back(itn);
           std::set<int> to_insert;
           
           to_insert.insert(*it);
@@ -1551,9 +1551,8 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
         
       }
     }
-    for (std::map<ir_tree_node*, std::set<int> >::iterator it2 =
-           sorted_by_loop.begin(); it2 != sorted_by_loop.end(); it2++)
-      to_return.push_back(it2->second);
+    for (auto itn: loop_order)
+      to_return.push_back(sorted_by_loop[itn]);
   }
   return to_return;
 }

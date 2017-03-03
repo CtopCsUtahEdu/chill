@@ -8,7 +8,11 @@
 
 std::string tmp_e();
 
-void exp2formula(IR_Code *ir, 
+/**
+ * @brief Convert expression tree to omega relation.
+ * @param destroy shallow deallocation of "repr", not freeing the actual code inside.
+ */
+void exp2formula(IR_Code *ir,
                  omega::Relation &r, 
                  omega::F_And *f_root,
                  std::vector<omega::Free_Var_Decl *> &freevars,

@@ -40,11 +40,8 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
       "invalid split loop level " + to_string(cleanup_split_level));
   
   // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+  invalidateCodeGen();
+
   int dim = 2 * level - 1;
   std::vector<int> lex = getLexicalOrder(stmt_num);
   std::set<int> same_loop = getStatements(lex, dim - 1);

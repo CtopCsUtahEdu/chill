@@ -44,11 +44,8 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                                 + to_string(outer_level));
   
   // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  apply_xform(stmt_num);  // Anand Apr 2015 
+  invalidateCodeGen();
+  apply_xform(stmt_num);  // Anand Apr 2015
 
   int dim = 2 * level - 1;
   int outer_dim = 2 * outer_level - 1;

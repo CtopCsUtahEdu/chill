@@ -124,8 +124,12 @@ Relation Hull(Tuple<Relation> &Rs,
               bool stridesAllowed = false,
               NOT_CONST Relation &knownHull = Relation::Null());
 
-// If a union of several conjuncts is a convex, their union
-// representaition can be simplified by their convex hull.
+/**
+ * @brief Simplify a union of sets/relations to a minimal (may not be optimal) number of convex regions.
+ *
+ * If a union of several conjuncts is a convex, their union
+ * representaition can be simplified by their convex hull.
+ */
 Relation ConvexRepresentation(NOT_CONST Relation &R);
 __attribute__((deprecated)) Relation CheckForConvexPairs(NOT_CONST Relation &S);
 __attribute__((deprecated)) Relation CheckForConvexRepresentation(NOT_CONST Relation &R_In);

@@ -281,7 +281,7 @@ void Loop::peel(int stmt_num, int level, int peel_amount) {
 
 
   // we just made a change to the code. invalidate the previous generated code
-  last_compute_cg_ = NULL;
+  invalidateCodeGen();
 
   debug_fprintf(stderr, "loop_extra.cc peel() DONE\n\n\n");
 

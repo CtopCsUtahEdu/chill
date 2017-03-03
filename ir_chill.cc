@@ -968,9 +968,6 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
   else
     n = name;
 
-  debug_fprintf(stderr,"*s *%s;\n",basetype, n.c_str());
-
-
   std::string pointer;
   for (int i=0; i<size_repr.size(); i++) pointer += "*";
 
