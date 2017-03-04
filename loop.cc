@@ -80,6 +80,7 @@ omega::Relation Loop::getNewIS(int stmt_num) const {
   } else {
     omega::Relation known = omega::Extend_Set(omega::copy(this->known),
                                               stmt[stmt_num].xform.n_out() - this->known.n_set());
+    known.print();
     result = omega::Intersection(
                                  omega::Range(
                                               omega::Restrict_Domain(
@@ -88,6 +89,7 @@ omega::Relation Loop::getNewIS(int stmt_num) const {
   }
   
   result.simplify(2, 4);
+  result.print();
   
   return result;
 }
@@ -726,10 +728,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
           */
         }
       }
-    
     r.setup_names();
     r.simplify();
-    
+
     // THIS IS MISSING IN PROTONU's
     for (int j = 0; j < insp_lb.size(); j++) {
       
@@ -1054,8 +1055,6 @@ Loop::Loop(const IR_Control *control) {
     
     }*/
   //end debug
-  debug_fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
-  printCode(); // this dies  TODO figure out why 
 }
 
 Loop::~Loop() {
@@ -1244,7 +1243,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
 
 
 void Loop::printCode(int effort) const {
-  debug_fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort ); 
+  debug_fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort );
   const int m = stmt.size();
   if (m == 0)
     return;

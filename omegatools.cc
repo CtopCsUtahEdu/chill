@@ -67,8 +67,7 @@ void exp2formula(IR_Code *ir,
   
   debug_fprintf(stderr, "\n*** exp2formula()\n");
   //repr->dump();  /* printf("\n"); */fflush(stdout); 
-  debug_fprintf(stderr, "repr  "); r.print(); printf("\n"); fflush(stdout); 
-  
+  debug_fprintf(stderr, "repr  ");
   
   IR_OPERATION_TYPE optype = ir->QueryExpOperation(repr);
   

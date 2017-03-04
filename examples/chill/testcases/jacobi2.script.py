@@ -6,6 +6,8 @@
 
 from chill import *
 
+#>SKIP
+
 source('jacobi2.c')
 destination('jacobi2modified.c')
 procedure('main')
