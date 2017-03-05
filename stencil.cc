@@ -19,7 +19,7 @@ void stencilInfo::walktree( chillAST_node *node,
   //debug_fprintf(stderr, "walktree %s ", node->getTypeString()); 
   //node->print(); printf("\n"); fflush(stdout);
 
-  if (node->isArraySubscriptExpr()) { 
+  if (node->isArraySubscriptExpr()) {
     // here we've encountered an array subscript expression
     // the coefficients are on a stack.
     chillAST_ArraySubscriptExpr * ASE = (chillAST_ArraySubscriptExpr *)node;
@@ -134,7 +134,9 @@ void stencilInfo::walktree( chillAST_node *node,
     }
 
   }
-  else { 
+  else if (node->isParenExpr())
+    walktree(static_cast<chillAST_ParenExpr*>(node)->subexpr, coeffstohere);
+  else {
     debug_fprintf(stderr, "\n\nnon-constant non BinaryOperator %s?\n", node->getTypeString());
     node->print(); printf("\n\n"); 
     node->dump();  printf("\n\n"); 
@@ -211,12 +213,12 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     // there should be just one. It is the destination of the stencil
     chillAST_node *outvar = NULL;
     if (1 == lhsarrayrefs.size()) { 
-      if (NULL == dstArrayVariable) dstArrayVariable = lhsarrayrefs[0]->basedecl;
+      if (NULL == dstArrayVariable) dstArrayVariable = lhsarrayrefs[0]->multibase();
       else { // make sure the statements all have the same dest 
-        if (dstArrayVariable != lhsarrayrefs[0]->basedecl) { 
+        if (dstArrayVariable != lhsarrayrefs[0]->multibase()) {
           debug_fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
           dstArrayVariable->print(); printf("\n");
-          lhsarrayrefs[0]->basedecl->print();  printf("\n\n"); 
+          lhsarrayrefs[0]->multibase()->print();  printf("\n\n");
           fflush(stdout);
           exit(-1); 
         }
@@ -286,12 +288,12 @@ stencilInfo::stencilInfo( chillAST_node *topstatement ) {
     //    ind[j]->print(); printf("\n"); 
     //  }
     //} 
-    if (NULL == srcArrayVariable) srcArrayVariable = refs[0]->basedecl;
+    if (NULL == srcArrayVariable) srcArrayVariable = refs[0]->multibase();
     else { // make sure statements are consistent
-      if (srcArrayVariable != refs[0]->basedecl) { 
+      if (srcArrayVariable != refs[0]->multibase()) {
           debug_fprintf(stderr, "statement %d of stencil does not have the same dest as previous statements\n"); 
           srcArrayVariable->print(); printf("\n");
-          refs[0]->basedecl->print();  printf("\n\n"); 
+          refs[0]->multibase()->print();  printf("\n\n");
           fflush(stdout);
           exit(-1); 
       }

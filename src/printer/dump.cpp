@@ -28,10 +28,10 @@ void Dump::run(chillAST_node *n, std::string indent, std::ostream &o) {
 }
 
 void Dump::runS(chillAST_ArraySubscriptExpr *n, std::string indent, std::ostream &o) {
-  if (n->basedecl)
-    o << "(" << n->basedecl->varname << ") ";
-  if (n->basedecl && n->basedecl->vartype)
-    o << n->basedecl->vartype;
+  if (n->multibase())
+    o << "(" << n->multibase()->varname << ") ";
+  if (n->multibase() && n->multibase()->vartype)
+    o << n->multibase()->vartype;
   if (n->imwrittento) {
     if (n->imreadfrom)
       o << "lvalue AND rvalue ";

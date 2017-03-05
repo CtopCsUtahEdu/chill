@@ -519,128 +519,48 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
   // !! if typ->unparseToString()->c_str(), the string and therefore the pointer to char are freed before the next statement ! 
   chillAST_NodeList arr;
 
-  while (isSgArrayType(typ)) {
-    SgArrayType *AT = (SgArrayType*) typ;
-    SgExpression* indexExp = AT->get_index();
-    arr.push_back(ConvertRoseGenericAST(indexExp));
-    arr.back()->print(0,std::cout);
-    typ = AT->get_base_type();
+  while (isSgArrayType(typ) || isSgPointerType(typ)) {
+    if (isSgArrayType(typ)) {
+      SgArrayType *AT = (SgArrayType *) typ;
+      SgExpression *indexExp = AT->get_index();
+      arr.push_back(ConvertRoseGenericAST(indexExp));
+      typ = AT->get_base_type();
+    } else {
+      SgPointerType *AT = (SgPointerType *) typ;
+      arr.push_back(new chillAST_NULL());
+      typ = AT->get_base_type();
+    }
   }
 
   string really = typ->unparseToString();
   const char *otype =   really.c_str();
-  chill_fprintf(stderr, "original vartype 0x%x '%s'\n", otype, otype);
+  debug_fprintf(stderr, "original vartype 0x%x '%s'\n", otype, otype);
 
   bool restricted = isRestrict( otype );
   
   char *vartype = parseUnderlyingType(restricthack( shortenRoseUnnamedName( otype )));
   char *arraypart;
   arraypart =  parseArrayParts( strdup(otype) );
-  chill_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart);
+  debug_fprintf(stderr, "HACK vartype %s arraypart %s\n", vartype, arraypart);
   
-  // need underlying type to pass to constructor?  double and arraypart **, not type double ** and arraypart ** 
-  
+  // need underlying type to pass to constructor?  double and arraypart **, not type double ** and arraypart **
+
   SgDeclarationStatement *dec = initname->get_declaration();
   SgDeclarationStatement *defdec = dec->get_definingDeclaration();
 
-  if ( !strncmp(vartype, "struct ", 7) ) {
-    debug_fprintf(stderr, "this is a struct ???\n"); 
-    //debug_fprintf(stderr, "\ndec  %s\n", dec->unparseToString().c_str());
-    std::vector< std::pair< SgNode *, std::string > > subparts = dec->returnDataMemberPointers();
-    SgClassDeclaration *CD = NULL; 
-    
-    chillAST_RecordDecl *RD = new chillAST_RecordDecl( vartype, otype );
-    int numsub =  subparts.size();
-    //RD->uniquePtr = dec;
-    
-    //debug_fprintf(stderr, "%d subparts\n", numsub); 
-    for (int i=0; i<numsub; i++) { 
-      SgNode *thing = subparts[i].first;
-      string name   = subparts[i].second;
-      //debug_fprintf(stderr, "name %s\n", name.c_str()); 
-      //debug_fprintf(stderr, "\nsubpart %2d %s\n", i, name.c_str());
-      //if (!thing) debug_fprintf(stderr, "thing NULL\n");
-      //else debug_fprintf(stderr, "ConvertRoseInitName()   thing is of type %s\n", roseGlobalVariantNameList[ thing->variantT() ]);
-      
-      if (name == string("baseTypeDefiningDeclaration")) { 
-        CD = (SgClassDeclaration *)thing;
-        //debug_fprintf(stderr, "me: %p  defining %p\n", defdecc, CD); 
-        //if (CD) 
-        //  debug_fprintf(stderr, "\ndefining  %s\n", CD->unparseToString().c_str());
-        //else
-        //  debug_fprintf(stderr, "\ndefining  (NULL)\n");
-        
-      }
-      //if (name == string("variables")) {  // apparently just the variable name?
-      //  SgInitializedName *IN = (SgInitializedName *)thing;
-      //  debug_fprintf(stderr, "variables  %s\n", IN->unparseToString().c_str()); 
-      //} 
-    }
-    
-    if (CD) { // once more with feeling
-      //debug_fprintf(stderr, "\n\n\n"); // CD: %s", CD->unparseToString()); 
-      subparts = CD->returnDataMemberPointers();
-      numsub =  subparts.size();
-      //debug_fprintf(stderr, "%d subparts\n", numsub); 
-      for (int i=0; i<numsub; i++) { 
-        SgNode *thing = subparts[i].first;
-        string name   = subparts[i].second;
-        //debug_fprintf(stderr, "\nsubpart %2d %s\n", i, name.c_str());
-        //if (!thing) debug_fprintf(stderr, "thing NULL\n");
-        //else debug_fprintf(stderr, "ConvertRoseInitName()   thing is of type %s\n", roseGlobalVariantNameList[ thing->variantT() ]);
-      }
-    }
-    
-    debug_fprintf(stderr, "OK, NOW WHAT convertroseinitname\n");
-    //die(); 
-    exit(-1); 
-  }  
-  
-  
-  // figure out if this is some non-standard typedef'd type
-  chillAST_node *def = NULL; //find_wacky_vartype( vartype, parent );
-  //if (def) debug_fprintf(stderr, "OK, this is a typedef or struct we have to account for\n");
-  //arraypart =  parseArrayParts( vartype );  // need to use decl before vartype has parts stripped out 
-  
-  //this is wrong.  "something *"  is not being flagged as array or pointer 
-  //in addition, if vartype is a typedef, I think it's being missed.
 
-  if (arraypart == NULL) arraypart = strdup(""); // leak
-  //debug_fprintf(stderr, "vartype = '%s'\n", vartype); 
-  //debug_fprintf(stderr, "arraypart = '%s'\n", arraypart); 
-  
-  //SgDeclarationStatement *DS = initname->get_declaration();
-  //V = DS->variantT();
-  //debug_fprintf(stderr,"declaration statement variantT %d %s\n", V, roseGlobalVariantNameList[V]);
-  
-  
+  // figure out if this is some non-standard typedef'd type
   char *bracket = index(vartype, '{');
-  if (bracket) {   // remove extra for structs 
+  if (bracket) {   // remove extra for structs
     *bracket = '\0';
-    if (*(bracket-1) == ' ')  *(bracket-1) = '\0'; 
+    if (*(bracket-1) == ' ')  *(bracket-1) = '\0';
   }
-  
-  //debug_fprintf(stderr,"%s %s   ", vartype, varname); debug_fprintf(stderr,"arraypart = '%s'\n", arraypart);
-  chillAST_VarDecl * chillVD = NULL;
-  if (def) { 
-    if (def->isRecordDecl()) {
-      //debug_fprintf(stderr, "vardecl of a STRUCT\n"); 
-      chillVD =  new chillAST_VarDecl((chillAST_RecordDecl*)def, arraypart,  varname, arr );
-    }
-    else if (def->isTypeDefDecl()) {
-      //debug_fprintf(stderr, "vardecl of a typedef\n"); 
-      chillVD = new chillAST_VarDecl((chillAST_TypedefDecl*)def, arraypart, varname, arr );
-    }
-    else  { 
-      debug_fprintf(stderr, "def but not a recorddecl or a typedefdecl?\n");
-      exit(-1); 
-    }
+
+  chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype, arraypart,  varname, arr,(void *)initname );
+  if ( !strncmp(vartype, "struct ", 7) ) {
+    chillVD->setStruct(true);
   }
-  else { 
-    //debug_fprintf(stderr, "\n*** creating new chillAST_VarDecl ***\n"); 
-    chillVD = new chillAST_VarDecl( vartype, arraypart,  varname, arr,(void *)initname );
-  }
-  
+
   chillVD->isRestrict = restricted; // TODO nicer way 
   chillVD->uniquePtr = defdec;
  
@@ -737,7 +657,7 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
   SgDeclarationStatement *defdecl = vardecl->get_definingDeclaration(); // unique
   debug_fprintf(stderr, "defdecl %p\n", defdecl);
   if (defdecl == NULL) defdecl = vardecl;
-  
+
   std::vector<SgInitializedName* > names = vardecl->get_variables();
   if (1 != names.size()) debug_fprintf(stderr, "%d initialized names\n", names.size()); 
   
@@ -751,54 +671,7 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
   
   // first, get the type. this may be a really ugly thing for an unnamed struct (not with more recent rose)
   SgInitializedName* iname =  names[0];
-  SgType *typ = iname->get_type();
-  
-  char *ovarname = strdup(iname->unparseToString().c_str()); // original 
-  char *otype    = strdup(typ->unparseToString().c_str());   // original
-  //this otype is useless, as it does not deal with unnamed structs well 
-  
-  debug_fprintf(stderr, "entiredecl: '%s'\n", entiredecl); 
-  debug_fprintf(stderr, "original vartype '%s'\n", otype); 
-  debug_fprintf(stderr, "original varname '%s'\n", ovarname);
-
-
-  
-  char *shorttype = otype; // shortenRoseUnnamedName( otype ); // this used to be REALLY LONG for unnamed structs
-
-  bool restricted = isRestrict( otype ) ; // is __restrict__ in there? 
-  //if (restricted) debug_fprintf(stderr, "RESTRICTED\n"); 
-  //else debug_fprintf(stderr, "NOT RESTRICTED\n");
-
-
-
-  //char *fixedtype = fixUnnamedStructType( otype, entiredecl ); 
-  
-  //debug_fprintf(stderr, "SHORT TYPE IS %s\n", shorttype);
-          
-  otype = restricthack( otype); // remove  __restrict__
-  
-  char *vartype   = fixUnnamedStructType( otype, entiredecl ); 
-  char *arraypart = splitTypeInfo(vartype);
-  char *varname   = shortenRoseStructMemberName( ovarname );
-  if (strlen(arraypart) > 1) 
-    debug_fprintf(stderr, "vartype: %s\nvarname: %s\narraypart %s\n\n", vartype, varname, arraypart);
-  else 
-    debug_fprintf(stderr, "vartype: %s\nvarname: %s\n\n", vartype, varname);
-
-  bool unnamedstruct = false; // ususally not
-  char *nameOfStruct = vartype;
-  
-  if ( !strncmp( vartype, "struct ", 7)) { 
-    debug_fprintf(stderr, "it is a struct of type '%s' \n", vartype);
-    
-    nameOfStruct = &vartype[7];
-    debug_fprintf(stderr, "struct name is '%s'\n", nameOfStruct);
-    if ('{' == nameOfStruct[0]) {
-      debug_fprintf(stderr, "it's an unnamed struct\n");
-      unnamedstruct = true; 
-    }
-  }
-
+  chillAST_VarDecl* vd = (chillAST_VarDecl*)ConvertRoseInitName(iname);
 
   // this if handles structs  DEFINITIONS (and typedefs?)
   // things like
@@ -808,94 +681,56 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
 
   chillAST_RecordDecl *RD = NULL;
   SgDeclarationStatement *defining = NULL;
-  
+
   if (vardecl->get_variableDeclarationContainsBaseTypeDefiningDeclaration()) {
-    //struct { 
+    //struct {
     //  struct { a,b,c} d,e;
-    //} 
+    //}
     // d willhave a defining decl.  e will not
-    
+
 
     debug_fprintf(stderr, "in ConvertRoseVarDecl(), there is a defining declaration  (a struct or typedef?)\n");
     SgDeclarationStatement *DS = vardecl->get_baseTypeDefiningDeclaration();
     //debug_fprintf(stderr, "DS type %s\n", roseGlobalVariantNameList[DS->variantT()]);
-    
-    if (SgClassDeclaration *CD = isSgClassDeclaration(DS)) { 
-      debug_fprintf(stderr, "it's a ClassDeclaration\n"); 
-      SgClassDeclaration::class_types class_type = CD->get_class_type(); 
-      if (class_type == SgClassDeclaration::e_struct) { 
-        debug_fprintf(stderr, "it's a ClassDeclaration of a struct\n"); 
-        
+
+    if (SgClassDeclaration *CD = isSgClassDeclaration(DS)) {
+      debug_fprintf(stderr, "it's a ClassDeclaration\n");
+      SgClassDeclaration::class_types class_type = CD->get_class_type();
+      if (class_type == SgClassDeclaration::e_struct) {
+        debug_fprintf(stderr, "it's a ClassDeclaration of a struct\n");
+
         // RD should be the RecordDecl that says what's in the struct
         RD = (chillAST_RecordDecl *) ConvertRoseStructDeclaration( CD );
-        
-        debug_fprintf(stderr, "\nhere is the struct definition:\n"); RD->print(); printf("\n"); fflush(stdout); 
-        
-        //debug_fprintf(stderr, "we need to declare a variable of this STRUCT type named %s\n", varname); 
+
+        debug_fprintf(stderr, "\nhere is the struct definition:\n"); RD->print(); printf("\n"); fflush(stdout);
+
+        //debug_fprintf(stderr, "we need to declare a variable of this STRUCT type named %s\n", varname);
 
         // do we need to remember this struct type somewhere in case there are more of them?
-        
+
       }
     }
   }
 
-  
-  if ( !strncmp( vartype, "struct ", 7)) { 
-    debug_fprintf(stderr, "it is a struct of type '%s' \n", vartype);
-    
-    if (RD) {
-      debug_fprintf(stderr, "we know what the struct definition looks like because it was part of this vardecl\n"); 
-      
-      chillAST_VarDecl *vd = new chillAST_VarDecl( RD, varname, "" );
-      //parent->addChild( vd ); // ?? 
-      vd->setStruct( true );
-      RD->setUnnamed ( unnamedstruct ) ;
-      vd->uniquePtr = defdecl; // ??
-      debug_fprintf(stderr, "dammit setting %s uniquePtr to %p the SgVariableDeclaration that defined it?\n", vd->varname, vd->uniquePtr); 
-      
-      //debug_fprintf(stderr, "setting that it IS A STRUCT\n");
-      //if (vd->isAStruct()) debug_fprintf(stderr, "yes, it is!\n"); else debug_fprintf(stderr, "no, it isn't!\n"); 
-      vd->isRestrict = restricted;
 
-      debug_fprintf(stderr, "STORING vardecl %s in global VariableDeclarations %d\n", vd->varname, VariableDeclarations.size()); 
-      VariableDeclarations.push_back( vd );
-      return vd; 
-    }
-    
-    debug_fprintf(stderr, "we will have to find the recorddecl for %s\n", nameOfStruct);
+  if (RD) {
+    debug_fprintf(stderr, "we know what the struct definition looks like because it was part of this vardecl\n");
 
-    {
-      debug_fprintf(stderr, "could not find recordDecl named %s\n", nameOfStruct);
-      exit(-1);
-    }
-    
-    RD->print();
-
-    // make a variable with recorddecl    duplicated code.  rethink.  TODO
-    chillAST_VarDecl *vd = new chillAST_VarDecl( RD, varname, "");
+    vd->vardef = RD;
+    //parent->addChild( vd ); // ??
     vd->setStruct( true );
-    vd->isRestrict = restricted; 
-    VariableDeclarations.push_back( vd );
-    return vd; 
+    vd->uniquePtr = defdecl; // ??
+    debug_fprintf(stderr, "dammit setting %s uniquePtr to %p the SgVariableDeclaration that defined it?\n", vd->varname, vd->uniquePtr);
+
+    debug_fprintf(stderr, "STORING vardecl %s in global VariableDeclarations %d\n", vd->varname, VariableDeclarations.size());
   }
-  
-  
-  
-  //debug_fprintf(stderr, "there WAS NO defining declaration, so an int or float or something\n");
-  // OR  we had   struct { a,b,c }  d,e;  
-  // and this is e 
-  
-  
-  // call the  ConvertRoseInitName() that takes a SgInitializedName
-  chillAST_VarDecl * chillVD = (chillAST_VarDecl *) ConvertRoseInitName( iname );
-  
-  chillVD->isRestrict = restricted; 
-  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  chillVD->uniquePtr ); 
+
+  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  chillVD->uniquePtr );
   
   // store this away for declrefexpr that references it! 
   // since we called ConvertRoseInitName() which added it already, don't do that again.  
   //VariableDeclarations.push_back(chillVD);
-  return chillVD;
+  return vd;
 }
 
 
@@ -1446,7 +1281,7 @@ chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC )  //
   debug_fprintf(stderr, "ConvertRoseStructDeclaration( CLASSDEC )\n");
 
   const char *origname = strdup( CLASSDEC->get_name().str());
-  debug_fprintf(stderr, "struct name is '%s'\n", origname); 
+  chill_fprintf(stderr, "struct name is '%s'\n", origname);
   
   // temp  TODO   DANGER
   char *name = shortenRoseUnnamedName( origname );
@@ -1502,7 +1337,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
   //debug_fprintf(stderr, "a new type called %s\n", typedefname);
   
   // we don't know the underlying type yet ...
-  chillAST_TypedefDecl *tdd = new chillAST_TypedefDecl( "", typedefname, NULL);
+  chillAST_TypedefDecl *tdd = new chillAST_TypedefDecl( "", typedefname, "");
   //tdd->setStruct( true ); // might not be a struct? 
   tdd->setStructName( typedefname );
   
@@ -1521,7 +1356,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
         chillAST_RecordDecl *rd = (chillAST_RecordDecl *)ConvertRoseStructDeclaration( CLASSDEC ); // parent is the TYPEDEF
         debug_fprintf(stderr, "now have recorddecl\n");
         tdd->setStructInfo( rd );
-        return tdd; 
+        return tdd;
       }
       else { 
         debug_fprintf(stderr, "uhoh, subpart %d %s is a %s, not an SgClassDeclaration\n", name.c_str(), roseGlobalVariantNameList[ thing->variantT() ]); 

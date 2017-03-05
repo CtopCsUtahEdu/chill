@@ -16,11 +16,8 @@ void Loop::stencilASEPadded(int stmt_num)   {
   //for(int i=0; i<stmt_num; i++) debug_fprintf(stderr, "stmt %d  UNIN SYM map size %d\n", i,  uninterpreted_symbols[i].size()); 
   
   //First things first
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+  invalidateCodeGen();
+
   // find the stencil shape  
   find_stencil_shape( stmt_num ); 
   debug_fprintf(stderr, "found stencil shape\n\n"); 

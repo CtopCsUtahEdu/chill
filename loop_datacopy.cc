@@ -321,13 +321,8 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
     }
   // OK, parameter sanity checked
 
-  
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+  invalidateCodeGen();
+
   // build iteration spaces for all reads and for all writes separately
   //debug_fprintf(stderr, "dp3: before apply_xform() ARRAY REFS\n"); 
   //for (int i = 0; i < stmt_refs.size(); i++) {

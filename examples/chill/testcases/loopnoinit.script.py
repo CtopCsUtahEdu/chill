@@ -1,5 +1,7 @@
 from chill import *
 
+#>SKIP
+
 source('loopnoinit.c')
 destination('loopnoinitmodified.c')
 

@@ -685,12 +685,15 @@ public:
   }
 
   virtual chillAST_node *getEnclosingStatement( int level = 0 );
+   /**
+   * @brief Find the base declaration that this node refers to
+   *
+   * This will step through:
+   *    * ArraySubscriptExpression
+   *    * MemberExpression
+   */
   virtual chillAST_VarDecl *multibase() { 
     debug_fprintf(stderr,"(%s) forgot to implement multibase()\n", Chill_AST_Node_Names[getType()]);
-    exit(-1);
-  }
-  virtual chillAST_node *multibase2() {  
-    debug_fprintf(stderr,"(%s) forgot to implement multibase2()\n", Chill_AST_Node_Names[getType()]);
     exit(-1);
   }
 
@@ -1590,7 +1593,9 @@ public:
 
 
 
-class chillAST_ArraySubscriptExpr: public chillAST_node { 
+class chillAST_ArraySubscriptExpr: public chillAST_node {
+private:
+  chillAST_VarDecl *basedecl; //<! the vardecl that this refers to
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR;}
   // variables that are special for this type of node
@@ -1598,7 +1603,6 @@ public:
   chillAST_Child<chillAST_node> index;
   bool imwrittento;
   bool imreadfrom; // WARNING: ONLY used when both writtento and readfrom are true  x += 1 and so on
-  chillAST_VarDecl *basedecl; // the vardecl that this refers to
   void *uniquePtr;  // DO NOT REFERENCE THROUGH THIS!
   
   // constructors
@@ -1610,9 +1614,9 @@ public:
   
   // other methods particular to this type of node
   bool operator!=( const chillAST_ArraySubscriptExpr& ) ; 
-  bool operator==( const chillAST_ArraySubscriptExpr& ) ; 
-  chillAST_VarDecl *multibase();  // method for finding the basedecl 
-  chillAST_node *multibase2() { return  base->multibase2();  }
+  bool operator==( const chillAST_ArraySubscriptExpr& ) ;
+
+  chillAST_VarDecl *multibase();
 
   chillAST_node *getIndex(int dim);
   void gatherIndeces( std::vector< chillAST_node * > &ind ); 
@@ -1644,7 +1648,9 @@ public:
 
 
 
-class chillAST_MemberExpr: public chillAST_node { 
+class chillAST_MemberExpr: public chillAST_node {
+private:
+  chillAST_VarDecl *basedecl; //!< the vardecl that this refers to
 public:
   virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_MEMBEREXPR;}
   // variables that are special for this type of node
@@ -1652,7 +1658,6 @@ public:
   char *member; 
   char *printstring; 
 
-  chillAST_VarDecl *basedecl; // the vardecl that this refers to
   void *uniquePtr;  // DO NOT REFERENCE THROUGH THIS!
 
   CHILL_MEMBER_EXP_TYPE exptype; 
@@ -1692,8 +1697,7 @@ public:
   CHILL_MEMBER_EXP_TYPE getType( CHILL_MEMBER_EXP_TYPE t ) { return exptype; };
 
   chillAST_VarDecl* multibase();   // this one will return the member decl 
-  chillAST_node*    multibase2();  // this one will return the member expression
-}; 
+};
 
 
 
