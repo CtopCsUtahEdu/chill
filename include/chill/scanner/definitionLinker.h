@@ -14,6 +14,12 @@ namespace chill {
      */
     class DefinitionLinker : public Scanner<void *> {
     protected:
+      //! Add type definition to scope
+      virtual void runS(chillAST_TypedefDecl *n, void *o);
+
+      //! Add type definition to scope
+      virtual void runS(chillAST_RecordDecl *n, void *o);
+
       //! Extract function parameters add function decl
       virtual void runS(chillAST_FunctionDecl *n, void *o);
 

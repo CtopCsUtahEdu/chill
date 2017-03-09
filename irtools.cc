@@ -364,8 +364,7 @@ test_data_dependences(IR_Code *ir,
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
           debug_fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
           Relation r = arrays2relation(ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr);
-          helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout); 
-
+          helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);
 
           debug_fprintf(stderr, "1\n"); 
           std::pair<std::vector<DependenceVector>,

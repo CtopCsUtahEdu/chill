@@ -353,7 +353,7 @@ omega::CG_outputRepr *IR_chillPointerArrayRef::index(int dim) const {
 IR_PointerSymbol *IR_chillPointerArrayRef::symbol() const {  // out of ir_clang.cc
   chillAST_node *mb = chillASE->multibase();
   chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
-  IR_PointerSymbol *PS =  new IR_chillPointerSymbol(ir_, chillASE->basedecl);  // vd);
+  IR_PointerSymbol *PS =  new IR_chillPointerSymbol(ir_, chillASE->multibase());  // vd);
   return  PS;
 }
 
@@ -967,9 +967,6 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
   }
   else
     n = name;
-
-  debug_fprintf(stderr,"*s *%s;\n",basetype, n.c_str());
-
 
   std::string pointer;
   for (int i=0; i<size_repr.size(); i++) pointer += "*";
@@ -1743,7 +1740,16 @@ IR_CONDITION_TYPE IR_chillCode::QueryBooleanExpOperation(const CG_outputRepr *re
   return IR_COND_UNKNOWN; // what about if (0),  if (1)  etc?
 }
 
-
+namespace {
+  chillAST_node * getBaseExpr(chillAST_node * node){
+    while (node->isCStyleCastExpr() || node->isImplicitCastExpr() || node->isParenExpr()) {
+      if (node->isCStyleCastExpr()) node = static_cast<chillAST_CStyleCastExpr*>(node)->subexpr;
+      if (node->isImplicitCastExpr()) node = static_cast<chillAST_ImplicitCastExpr*>(node)->subexpr;
+      if (node->isParenExpr()) node = static_cast<chillAST_ParenExpr*>(node)->subexpr;
+    }
+    return node;
+  }
+}
 
 IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) const {
   debug_fprintf(stderr, "IR_chillCode::QueryExpOperation()\n");
@@ -1754,7 +1760,7 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
   //firstnode->print(0,stdout); debug_fprintf(stderr, "\n");
   //firstnode->dump(0, stdout); debug_fprintf(stderr, "\n");
 
-  chillAST_node *node = firstnode;
+  chillAST_node *node = getBaseExpr(firstnode);
   if (node->isArraySubscriptExpr()) {
     debug_fprintf(stderr, "IR_chillCode::QueryExpOperation() returning IR_OP_ARRAY_VARIABLE\n");
     return  IR_OP_ARRAY_VARIABLE;
@@ -1814,106 +1820,67 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
 }
 
 
-vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr) const { 
-  //debug_fprintf(stderr, "IR_chillCode::QueryExpOperand() chill\n"); 
-  vector<CG_outputRepr *> v;
-  
-  CG_chillRepr *crepr = (CG_chillRepr *) repr; 
-  //Expr *e = static_cast<const CG_chillRepr *>(repr)->GetExpression(); wrong.. CLANG
-  chillAST_node *e = crepr->chillnodes[0]; // ?? 
-  //e->print(); printf("\n"); fflush(stdout); 
+vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr) const {
+  std::vector<omega::CG_outputRepr *> v;
 
-  // really need to be more rigorous than this hack  // TODO 
-  if (e->isImplicitCastExpr()) e = ((chillAST_ImplicitCastExpr*)e)->subexpr;
-  if (e->isCStyleCastExpr())   e = ((chillAST_CStyleCastExpr*)  e)->subexpr;
-  if (e->isParenExpr())        e = ((chillAST_ParenExpr*)       e)->subexpr;
+  CG_chillRepr *crepr = (CG_chillRepr *) repr;
 
+  chillAST_node *e = crepr->chillnodes[0]; // ??
+  //e->print(); printf("\n"); fflush(stdout);
+
+  // really need to be more rigorous than this hack  // TODO
+  e = getBaseExpr(e);
 
   //if(isa<IntegerLiteral>(e) || isa<FloatingLiteral>(e) || isa<DeclRefExpr>(e)) {
-  if (e->isIntegerLiteral() || e->isFloatingLiteral() || e->isDeclRefExpr() ) { 
-    //debug_fprintf(stderr, "it's a constant\n"); 
-    CG_chillRepr *repr = new CG_chillRepr(e);
+  if (e->isIntegerLiteral() || e->isFloatingLiteral() || e->isDeclRefExpr() ) {
+    //debug_fprintf(stderr, "it's a constant\n");
+    omega::CG_chillRepr *repr = new omega::CG_chillRepr(e);
     v.push_back(repr);
-    //} else if(BinaryOperator *bop = dyn_cast<BinaryOperator>(e)) {
-  } else if (e->isBinaryOperator()) { 
-    //debug_fprintf(stderr, "ir_chill.cc BOP TODO\n"); exit(-1); // 
+  } else if (e->isBinaryOperator()) {
+    //debug_fprintf(stderr, "binary\n");
+
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator*)e;
     char *op = bop->op;  // TODO enum for operator types
-    if (streq(op, "=")) { 
-      v.push_back(new CG_chillRepr( bop->rhs ));  // for assign, return RHS
+    if (streq(op, "=")) {
+      v.push_back(new omega::CG_chillRepr( bop->rhs ));  // for assign, return RHS
     }
-    else if (streq(op, "+") || streq(op, "-") || streq(op, "*") || streq(op, "/") ) {
-      v.push_back(new CG_chillRepr( bop->lhs ));  // for +*-/ return both lhs and rhs
-      v.push_back(new CG_chillRepr( bop->rhs )); 
+    else if (streq(op, "+") || streq(op, "-") || streq(op, "*") || streq(op, "/") || streq(op, "%") ||
+             streq(op, "==") || streq(op, "!=") ||
+             streq(op, "<") || streq(op, "<=") ||
+             streq(op, ">") || streq(op, ">=")
+
+        ) {
+      //debug_fprintf(stderr, "op\n");
+      v.push_back(new omega::CG_chillRepr( bop->lhs ));  // for +*-/ == return both lhs and rhs
+      v.push_back(new omega::CG_chillRepr( bop->rhs ));
     }
-    else { 
-      debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Binary Operator  UNHANDLED op (%s)\n", op); 
+    else {
+      debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() Binary Operator  UNHANDLED op (%s)\n", op);
       exit(-1);
     }
   } // BinaryOperator
-  else if  (e->isUnaryOperator()) { 
-    CG_chillRepr *repr;
+
+  else if  (e->isUnaryOperator()) {
+    //debug_fprintf(stderr, "unary\n");
+    omega::CG_chillRepr *repr;
     chillAST_UnaryOperator *uop = (chillAST_UnaryOperator*)e;
     char *op = uop->op; // TODO enum
     if (streq(op, "+") || streq(op, "-")) {
-      v.push_back( new CG_chillRepr( uop->subexpr ));
+      v.push_back( new omega::CG_chillRepr( uop->subexpr ));
     }
-    else { 
-      debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() Unary Operator  UNHANDLED op (%s)\n", op); 
+    else {
+      debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() Unary Operator  UNHANDLED op (%s)\n", op);
       exit(-1);
     }
   } // unaryoperator
-  else { 
-    debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString()); 
-    exit(-1); 
-  }
-    
 
-    /*   
-  Expr *op1, *op2;
-    switch(bop->getOpcode()) {
-    case BO_Assign:
-      op2 = bop->getRHS();
-      repr = new CG_chillRepr(op2);
-      v.push_back(repr);
-      break;
-    case BO_Add:
-    case BO_Sub:
-    case BO_Mul:
-    case BO_Div:
-      op1 = bop->getLHS();
-      repr = new CG_chillRepr(op1);
-      v.push_back(repr);
-      op2 = bop->getRHS();
-      repr = new CG_chillRepr(op2);
-      v.push_back(repr);
-      break;
-    default:
-      throw ir_error("operation not supported");
-    }
-    */
-    //} else if(UnaryOperator *uop = dyn_cast<UnaryOperator>(e)) {
-    //} else if(e->isUnaryOperator()) { 
-    /* 
-    CG_chillRepr *repr;
-    
-    switch(uop->getOpcode()) {
-    case UO_Minus:
-    case UO_Plus:
-      op1 = uop->getSubExpr();
-      repr = new CG_chillRepr(op1);
-      v.push_back(repr);
-      break;
-    default:
-      throw ir_error("operation not supported");
-    }
-    */
-    //} else if(ConditionalOperator *cop = dyn_cast<ConditionalOperator>(e)) {
-    //CG_chillRepr *repr;
-    
-    // TODO: Handle conditional operator here
-    //} else  throw ir_error("operand type UNsupported");
-  
+  else if (e->isArraySubscriptExpr() ) {
+    v.push_back(new omega::CG_chillRepr( ((chillAST_ArraySubscriptExpr*)e) ));
+  }
+  else {
+    debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString());
+    exit(-1);
+  }
   return v;
 }
 

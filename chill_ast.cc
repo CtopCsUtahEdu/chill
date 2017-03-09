@@ -1904,7 +1904,7 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   if (indx->isImplicitCastExpr()) index = ((chillAST_ImplicitCastExpr*)indx)->subexpr; // probably wrong
   else index = indx;
   uniquePtr = unique;
-  basedecl = multibase();//debug_fprintf(stderr, "%p  ASE 1 basedecl = %p\n",this,basedecl);
+  //! basedecl = multibase();//debug_fprintf(stderr, "%p  ASE 1 basedecl = %p\n",this,basedecl);
 }
 
 
@@ -1916,7 +1916,7 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
   else index = indx;
   imwrittento = writtento; // ??
   uniquePtr = unique;
-  basedecl = multibase();
+  //! basedecl = multibase();
  }
 
 
@@ -2035,101 +2035,8 @@ void chillAST_ArraySubscriptExpr::printonly( int indent, FILE *fp ) {
 }
 
 chillAST_VarDecl *chillAST_ArraySubscriptExpr::multibase() {
-  // return the VARDECL of the thing the subscript is an index into
-  //this should probably be a chillAST_node function instead of having all these ifs
-  //print(); printf("\n"); fflush(stdout); 
-  //base->print();  printf("\n"); fflush(stdout); 
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::multibase()  base of type %s\n", base->getTypeString()); 
-  
-  return base->multibase();  
-
-  // this will be used to SET basedecl
-  //basedecl = NULL; // do this so we don't confuse ourselves looking at uninitialized basedecl
-
-  chillAST_node *b = base; 
-  //debug_fprintf(stderr, "base is of type %s\n", b->getTypeString());
-
-  if (!b) return NULL; // just in case ??
-
-  if (base->getType() == CHILLAST_NODETYPE_IMPLICITCASTEXPR) { // bad coding
-    b = ((chillAST_ImplicitCastExpr*)b)->subexpr;
-  }
-
-  if (b->getType() == CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR) { // multidimensional array!
-    // recurse
-    return ((chillAST_ArraySubscriptExpr *)b)->multibase();
-  }
-
-  if (b->getType() == CHILLAST_NODETYPE_DECLREFEXPR) return(((chillAST_DeclRefExpr*)b)->getVarDecl());
-
-  
-  if (b->isBinaryOperator()) { 
-    // presumably a dot or pointer ref that resolves to an array
-    chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *) b;
-    if ( strcmp(BO->op, ".") ) { 
-      debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::multibase(), UNHANDLED case:\n");
-      debug_fprintf(stderr, "base is binary operator, of type %s\n", BO->op); 
-      exit(-1);
-    }
-
-    chillAST_node *l = BO->lhs;
-    chillAST_node *r = BO->rhs;
-    printf("L %s\nR %s\n", l->getTypeString(), r->getTypeString()); 
-    exit(-1); 
-
-    return NULL; // TODO do checks?
-  }
-
-  if (b->isMemberExpr()) { 
-    //c.i[c.count]    we want i member of inspector
-
-    chillAST_MemberExpr *ME = (chillAST_MemberExpr *) b;
-    //debug_fprintf(stderr, "multibase() Member Expression "); ME->print(); printf("\n"); fflush(stdout); 
-
-    chillAST_node *n = ME->base; //  WRONG   want the MEMBER
-    //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::multibase()  Member Expression base of type %s\n", n->getTypeString());
-    //debug_fprintf(stderr, "base is "); ME->base->dump(); 
-
-    // NEED to be able to get lowest level recorddecl or typedef from this base
-
-    debug_fprintf(stderr, "chillast.cc, L2315, bailing??\n"); 
-    exit(0); 
-
-    if (!n->isDeclRefExpr()) { 
-      debug_fprintf(stderr, "MemberExpr member is not chillAST_DeclRefExpr\n");
-      exit(-1);
-    }
-    chillAST_DeclRefExpr *DRE = (chillAST_DeclRefExpr *)n;
-    n = DRE->decl;
-    //debug_fprintf(stderr, "DRE decl is of type %s\n", n->getTypeString()); 
-    assert( n->isVarDecl() );
-    chillAST_VarDecl *vd = (chillAST_VarDecl *) n;
-    vd->print(); printf("\n"); fflush(stdout); 
-
-    chillAST_TypedefDecl *tdd = vd->typedefinition; 
-    chillAST_RecordDecl  *rd  = vd->vardef; 
-    //debug_fprintf(stderr, "tdd %p    rd %p\n", tdd, rd); 
-    
-    print(); printf("\n"); 
-    dump();  printf("\n"); fflush(stdout);
-
-    assert( tdd != NULL || rd != NULL );
-    
-    chillAST_VarDecl *sub;
-    if (tdd) sub = tdd->findSubpart( ME->member ); 
-    if (rd)  sub =  rd->findSubpart( ME->member ); 
-
-    //debug_fprintf(stderr, "subpart is "); sub->print(); printf("\n"); fflush(stdout); 
-    
-    return sub; // what if the sub is an array ??  TODO 
-  }
-
-
-  debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::multibase(), UNHANDLED case %s\n", 
-          b->getTypeString()); 
-  print(); printf("\n"); fflush(stdout);
-  debug_fprintf(stderr, "base is: "); b->print(); printf("\n"); fflush(stdout);
-  segfault(); 
+  if (basedecl) return basedecl;
+  return basedecl = base->multibase();
 }
 
 
@@ -2319,6 +2226,7 @@ bool chillAST_ArraySubscriptExpr::operator==( const chillAST_ArraySubscriptExpr 
 
 
 chillAST_MemberExpr::chillAST_MemberExpr():base(this,0) {
+  basedecl = NULL;
   member = NULL;
   exptype = CHILL_MEMBER_EXP_DOT;
 }
@@ -2447,9 +2355,7 @@ void chillAST_MemberExpr::replaceChild( chillAST_node *old, chillAST_node *newch
   }
 } 
 
-chillAST_node  *chillAST_MemberExpr::multibase2() {  /*debug_fprintf(stderr, "ME MB2\n" );*/ return (chillAST_node *)this; } 
-
-chillAST_VarDecl* chillAST_MemberExpr::getUnderlyingVarDecl() { 
+chillAST_VarDecl* chillAST_MemberExpr::getUnderlyingVarDecl() {
   debug_fprintf(stderr, "chillAST_MemberExpr:getUnderlyingVarDecl()\n");
   print(); printf("\n"); fflush(stdout);
   exit(-1); 
@@ -2461,42 +2367,24 @@ chillAST_VarDecl* chillAST_MemberExpr::getUnderlyingVarDecl() {
 
 
 chillAST_VarDecl *chillAST_MemberExpr::multibase() {
-  //c.i[c.count]    we want i member of c 
-  //debug_fprintf(stderr, "ME MB\n" ); 
+  if (basedecl) return basedecl;
+  chillAST_VarDecl *vd = base->multibase(); // ??
 
-  //debug_fprintf(stderr, "chillAST_MemberExpr::multibase()\n");
-  //print(); printf("\n"); fflush(stdout);
-  //debug_fprintf(stderr, "MemberExpr base is type %s,  member %s\n", base->getTypeString(), member);
-  
-  //chillAST_VarDecl *vd = base->getUnderlyingVarDecl(); // this is the only thing that ever calls this ??? 
-  chillAST_VarDecl *vd = base->multibase(); // ?? 
-
-
-  //debug_fprintf(stderr, "vd "); vd->print(); printf("\n"); fflush(stdout);
-    
   chillAST_RecordDecl *rd = vd->getStructDef();
-  if (!rd) { 
-    debug_fprintf(stderr, "chillAST_MemberExpr::multibase() vardecl is not a struct??\n");
-    debug_fprintf(stderr, "vd "); vd->print(); printf("\n"); fflush(stdout);
-    debug_fprintf(stderr, "vd "); vd->dump();  printf("\n"); fflush(stdout);
-    exit(-1);
-  }
+  if (!rd)
+    throw std::runtime_error("chillAST_MemberExpr::multibase() vardecl is not a struct??");
 
   // OK, we have the recorddecl that defines the structure
   // now find the member with the correct name
-  chillAST_VarDecl *sub = rd->findSubpart( member );
-  //debug_fprintf(stderr, "sub %s:\n", member);
-  if (!sub) { 
+  basedecl = rd->findSubpart( member );
+
+  if (!basedecl) {
     debug_fprintf(stderr, "can't find member %s in \n", member);
-    rd->print(); 
+    rd->print();
   }
-  //sub->print(); printf("\n");  fflush(stdout);
-  //sub->dump() ; printf("\n");  fflush(stdout);
 
-  return sub; 
+  return basedecl;
   //find vardecl of member in def of base
-
-  
 }
 
 

@@ -460,12 +460,20 @@ void CFamily::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
     o << n->arraypointerpart;
   if (n->byreference)
     o << "&";
-  o << n->varname;
+  string def = n->varname;
+  bool paren = false;
   for (int i = 0; i < (n->getNumChildren()); ++i) {
-    o << "[";
-    run(n->getChild(i), indent, o);
-    o << "]";
+    if (n->getChild(i)->isNull()) {
+      def = "*" + def;
+      paren = true;
+    } else {
+      if (paren)
+        def = "(" + def + ")";
+      paren = false;
+      def += "[" + print(n->getChild(i), indent) + "]";
+    }
   }
+  o<<def;
 
   if (n->init) {
     o << "= ";

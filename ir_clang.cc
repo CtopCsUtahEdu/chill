@@ -126,19 +126,27 @@ chillAST_NodeList ConvertVarDecl( VarDecl *D ) {
    }
   ASTContext *ctx = IR_clangCode_Global_Init::Instance()->getASTContext();
   chillAST_NodeList arr;
-  const VariableArrayType *VLA = ctx->getAsVariableArrayType(T);
-  while (VLA) {
-    Expr *SE = VLA->getSizeExpr();
-    arr.push_back(UNWRAP(ConvertGenericClangAST(SE)));
-    T = VLA->getElementType();
-    VLA = ctx->getAsVariableArrayType(T);
-  }
-  const ArrayType *AT = ctx->getAsArrayType(T);
-  while (AT) {
-    int size = (int)cast<ConstantArrayType>(AT)->getSize().getZExtValue();
-    arr.push_back(new chillAST_IntegerLiteral(size));
-    T = AT->getElementType();
-    AT = ctx->getAsArrayType(T);
+  bool restrict = T.isRestrictQualified();
+  while (isa<PointerType>(T) || ctx->getAsVariableArrayType(T) || ctx->getAsArrayType(T)) {
+    while (isa<PointerType>(T)) {
+      const PointerType *PTR = cast<PointerType>(T);
+      arr.push_back(new chillAST_NULL());
+      T = PTR->getPointeeType();
+    }
+    const VariableArrayType *VLA = ctx->getAsVariableArrayType(T);
+    while (VLA) {
+      Expr *SE = VLA->getSizeExpr();
+      arr.push_back(UNWRAP(ConvertGenericClangAST(SE)));
+      T = VLA->getElementType();
+      VLA = ctx->getAsVariableArrayType(T);
+    }
+    const ArrayType *AT = ctx->getAsArrayType(T);
+    while (AT) {
+      int size = (int) cast<ConstantArrayType>(AT)->getSize().getZExtValue();
+      arr.push_back(new chillAST_IntegerLiteral(size));
+      T = AT->getElementType();
+      AT = ctx->getAsArrayType(T);
+    }
   }
   string TypeStr = T.getAsString();
 
@@ -149,12 +157,12 @@ chillAST_NodeList ConvertVarDecl( VarDecl *D ) {
 
   chillAST_VarDecl * chillVD = new chillAST_VarDecl( vartype, arraypart,  varname, arr, (void *)D );
 
-  chillVD->isAParameter = isParm; 
+  chillVD->isAParameter = isParm;
+  chillVD->isRestrict = restrict;
 
   Expr *Init = D->getInit();
-  if (Init) {
-    throw std::runtime_error(" = VARDECL HAS INIT.  (TODO) (RIGHT NOW)");
-  }
+  if (Init)
+    chillVD->setInit(UNWRAP(ConvertGenericClangAST(Init)));
 
   free (vartype);
   free (varname);
@@ -233,15 +241,7 @@ chillAST_NodeList ConvertDeclStmt( DeclStmt *clangDS ) {
     
     if (!strcmp("Var", declT)) {
       VarDecl *V = dyn_cast<VarDecl>(D);
-      // ValueDecl *VD = dyn_cast<ValueDecl>(D); // not needed? 
-
       nl.push_back(UNWRAP(ConvertVarDecl(V)));
-
-      // TODO 
-      if (V->hasInit()) { 
-        debug_fprintf(stderr, " ConvertDeclStmt()  UNHANDLED initialization\n");
-        exit(-1); 
-      }
     }
   }  // for each of possibly multiple decls 
   

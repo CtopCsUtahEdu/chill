@@ -128,6 +128,12 @@ protected:
   std::vector<int> getLexicalOrder(int stmt_num) const;
   int getLexicalOrder(int stmt_num, int level) const;
   std::set<int> getStatements(const std::vector<int> &lex, int dim) const;
+  /**
+   * @brief Shift the Lexical order of the statements
+   *
+   * Shift only when <dim have the same lexical order and when amount >= 0, all the statment after lex or when amount
+   * <= 0, all the statement before lex
+   */
   void shiftLexicalOrder(const std::vector<int> &lex, int dim, int amount);
   void setLexicalOrder(int dim, const std::set<int> &active, int starting_order = 0, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >());
   void apply_xform(int stmt_num);
@@ -145,7 +151,18 @@ public:
   omega::CG_outputRepr *getCode(int effort = 3) const; // TODO was 1
   //chillAST_node* LoopCuda::getCode(int effort, std::set<int> stmts) const;
 
-  void stencilASEPadded(int stmt_num); 
+  void stencilASEPadded(int stmt_num);
+  /**
+   * @brief invalidate saved codegen computation
+   *
+   * Must be called whenever changes are made to the IS, even with auxiliary loop indices.
+   */
+  void invalidateCodeGen() {
+    delete last_compute_cgr_;
+    last_compute_cgr_ = NULL;
+    delete last_compute_cg_;
+    last_compute_cg_ = NULL;
+  }
   
   void printCode(int effort = 3) const;
   void addKnown(const omega::Relation &cond);

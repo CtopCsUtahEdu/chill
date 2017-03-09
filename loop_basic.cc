@@ -30,6 +30,7 @@ void Loop::original() {
   for (int i = 0; i < stmt.size(); i++)
     active.insert(i);
   setLexicalOrder(0, active);
+  invalidateCodeGen();
   //apply_xform();
 }
 void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
@@ -64,13 +65,9 @@ void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
     if (level + pi.size() - 1 > stmt[*i].loop_level.size())
       throw std::invalid_argument(
         "invalid permutation for statement " + to_string(*i));
-  
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+
+  invalidateCodeGen();
+
   // Update transformation relations
   for (std::set<int>::iterator i = active.begin(); i != active.end(); i++) {
     int n = stmt[*i].xform.n_out();
@@ -299,12 +296,9 @@ void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
             "permuted loops must have the same loop level types");
     }
   }
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+
+  invalidateCodeGen();
+
   // Update transformation relations
   for (std::set<int>::iterator i = active.begin(); i != active.end(); i++) {
     int n = stmt[*i].xform.n_out();
@@ -932,13 +926,9 @@ void Loop::skew(const std::set<int> &stmt_nums, int level,
       if (skew_amount[j] != 0)
         throw std::invalid_argument("invalid skewing formula");
   }
-  
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+
+  invalidateCodeGen();
+
   // set trasformation relations
   for (std::set<int>::const_iterator i = stmt_nums.begin();
        i != stmt_nums.end(); i++) {
@@ -1100,13 +1090,9 @@ void Loop::shift(const std::set<int> &stmt_nums, int level, int shift_amount) {
   // do nothing
   if (shift_amount == 0)
     return;
-  
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+
+  invalidateCodeGen();
+
   // set trasformation relations
   for (std::set<int>::const_iterator i = stmt_nums.begin();
        i != stmt_nums.end(); i++) {
@@ -1183,13 +1169,9 @@ void Loop::reverse(const std::set<int> &stmt_nums, int level) {
 void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   if (stmt_nums.size() == 0 || stmt_nums.size() == 1)
     return;
-  
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
-  
+
+  invalidateCodeGen();
+
   int dim = 2 * level - 1;
   // check for sanity of parameters
   std::vector<int> ref_lex;
@@ -1275,7 +1257,6 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   std::set<int> same_loop = getStatements(ref_lex, dim - 3);
   
   std::vector<std::set<int> > s = sort_by_same_loops(same_loop, level);
-  
   std::vector<bool> s2;
 
   for (int i = 0; i < s.size(); i++) {
@@ -1294,8 +1275,8 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
     
     //Dependence Check for Ordering Constraint
     //Graph<std::set<int>, bool> dummy = construct_induced_graph_at_level(s5,
-    //    dep, dep_dim);
-    
+    //    dep, dep_dim)
+
     Graph<std::set<int>, bool> g = construct_induced_graph_at_level(s, dep,
                                                                     dep_dim);
     std::cout << g;
@@ -1428,12 +1409,7 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
     return;
   debug_fprintf(stderr, "Loop::distribute()\n");
 
-
-  // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
+  invalidateCodeGen();
   int dim = 2 * level - 1;
   int ref_stmt_num;
   // check for sanity of parameters
@@ -1559,11 +1535,16 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
     }
   // set lexicographical order after distribution
   int order = ref_lex[dim - 1];
+  int shift = 0;
   shiftLexicalOrder(ref_lex, dim - 1, s3.size() - 1);
   for (std::vector<std::set<int> >::iterator i = s3.begin(); i != s3.end();
        i++) {
+    ref_lex[dim-1] = order;
     for (std::set<int>::iterator j = (*i).begin(); j != (*i).end(); j++)
       assign_const(stmt[*j].xform, dim - 1, order);
+    ref_lex[dim+1] = INT32_MAX;
+    shiftLexicalOrder(ref_lex, dim+1, -shift);
+    shift += i->size();
     order++;
   }
   // no need to update dependence graph

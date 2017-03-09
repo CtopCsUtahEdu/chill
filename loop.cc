@@ -80,6 +80,7 @@ omega::Relation Loop::getNewIS(int stmt_num) const {
   } else {
     omega::Relation known = omega::Extend_Set(omega::copy(this->known),
                                               stmt[stmt_num].xform.n_out() - this->known.n_set());
+    known.print();
     result = omega::Intersection(
                                  omega::Range(
                                               omega::Restrict_Domain(
@@ -88,6 +89,7 @@ omega::Relation Loop::getNewIS(int stmt_num) const {
   }
   
   result.simplify(2, 4);
+  result.print();
   
   return result;
 }
@@ -726,10 +728,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
           */
         }
       }
-    
     r.setup_names();
     r.simplify();
-    
+
     // THIS IS MISSING IN PROTONU's
     for (int j = 0; j < insp_lb.size(); j++) {
       
@@ -1054,8 +1055,6 @@ Loop::Loop(const IR_Control *control) {
     
     }*/
   //end debug
-  debug_fprintf(stderr, "                                                  at bottom of Loop::Loop, printCode\n");
-  printCode(); // this dies  TODO figure out why 
 }
 
 Loop::~Loop() {
@@ -1244,7 +1243,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
 
 
 void Loop::printCode(int effort) const {
-  debug_fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort ); 
+  debug_fprintf(stderr,"\nloop.cc Loop::printCode(  effort %d )\n", effort );
   const int m = stmt.size();
   if (m == 0)
     return;
@@ -1271,7 +1270,7 @@ void Loop::printCode(int effort) const {
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
-  
+
   std::string repr = last_compute_cgr_->printString(
                                                     uninterpreted_symbols_stringrepr);
   debug_fprintf(stderr, "leaving Loop::printCode()\n"); 
@@ -1465,6 +1464,7 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
   std::map<ir_tree_node*, std::set<int> > sorted_by_loop;
   std::map<int, std::set<int> > sorted_by_lex_order;
   std::vector<std::set<int> > to_return;
+  std::vector<ir_tree_node*> loop_order;
   bool lex_order_already_set = false;
   for (std::set<int>::iterator it = active.begin(); it != active.end();
        it++) {
@@ -1514,10 +1514,8 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
       //while (itn->content->type() != IR_CONTROL_LOOP && itn != NULL)
       //  itn = itn->parent;
       
-      while ((itn != NULL) && (itn->payload != level - 1)) {
+      while ((itn != NULL) && (itn->payload != level - 1 || itn->content->type()!= IR_CONTROL_LOOP)) {
         itn = itn->parent;
-        while (itn != NULL && itn->content->type() != IR_CONTROL_LOOP )
-          itn = itn->parent;
       }
       
       if (itn == NULL)
@@ -1529,6 +1527,7 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
         if (it2 != sorted_by_loop.end())
           it2->second.insert(*it);
         else {
+          loop_order.push_back(itn);
           std::set<int> to_insert;
           
           to_insert.insert(*it);
@@ -1551,9 +1550,8 @@ std::vector<std::set<int> > Loop::sort_by_same_loops(std::set<int> active,
         
       }
     }
-    for (std::map<ir_tree_node*, std::set<int> >::iterator it2 =
-           sorted_by_loop.begin(); it2 != sorted_by_loop.end(); it2++)
-      to_return.push_back(it2->second);
+    for (auto itn: loop_order)
+      to_return.push_back(sorted_by_loop[itn]);
   }
   return to_return;
 }

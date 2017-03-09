@@ -181,7 +181,7 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   }
   IR_Block *block = ir_code->MergeNeighboringControlStructures(parm);
   myloop = new Loop(block);
-  delete block;  
+  delete block;
   //if (is_interactive) printf("%s ", PROMPT_STRING);
 }
 #endif
