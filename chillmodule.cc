@@ -273,7 +273,7 @@ static bool tostringintmapvector(PyObject* args, int index, std::vector<std::map
   return true;
 }
 
-static bool tointvector(PyObject* seq, std::vector<int>& vec) {
+static bool to_int_vector(PyObject* seq, std::vector<int>& vec) {
   //TODO: Typecheck
   int seq_len = PyList_Size(seq);
   for(int i = 0; i < seq_len; i++) {
@@ -283,7 +283,7 @@ static bool tointvector(PyObject* seq, std::vector<int>& vec) {
   return true;
 }
 
-static bool tostringvector(PyObject* seq, std::vector<std::string>& vec) {
+static bool to_string_vector(PyObject* seq, std::vector<std::string>& vec) {
     int seq_len = PyList_Size(seq);
     for(int i = 0; i < seq_len; i++) {
         PyObject* item = PyList_GetItem(seq, i);
@@ -292,21 +292,21 @@ static bool tostringvector(PyObject* seq, std::vector<std::string>& vec) {
     return true;
 }
 
-static bool tointvector(PyObject* args, int index, std::vector<int>& vec) {
+static bool to_int_vector(PyObject* args, int index, std::vector<int>& vec) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq = PyTuple_GetItem(args, index);
-  return tointvector(seq, vec);
+  return to_int_vector(seq, vec);
 }
 
-static bool tostringvector(PyObject* args, int index, std::vector<std::string>& vec) {
+static bool to_string_vector(PyObject* args, int index, std::vector<std::string>& vec) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq = PyTuple_GetItem(args, index);
-  return tostringvector(seq, vec);
+  return to_string_vector(seq, vec);
 }
 
-static bool tointset(PyObject* args, int index, std::set<int>& set) {
+static bool to_int_set(PyObject* args, int index, std::set<int>& set) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq = PyTuple_GetItem(args, index);
@@ -318,7 +318,7 @@ static bool tointset(PyObject* args, int index, std::set<int>& set) {
   }
   return true;
 }
-static bool tointmatrix(PyObject* args, int index, std::vector<std::vector<int> >& mat) {
+static bool to_int_matrix(PyObject* args, int index, std::vector<std::vector<int> >& mat) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq_one = PyTuple_GetItem(args, index);
@@ -477,67 +477,15 @@ chill_rename_index(PyObject *self, PyObject *args)
 static PyObject *
 chill_permute_v2(PyObject *self, PyObject *args)
 {
-  //DEBUG_PRINT("C       permute_v2()\n"); 
-  //int tot = sizeof(args);
-  //int things = tot / sizeof(PyObject *);
-  //DEBUG_PRINT("tot %d bytes, %d things\n", tot, things);   
+  strict_arg_num(args, 2, "permute");
   
-  int sstmt = -123;
-  PyObject *pyObj;
-  
-  //if (!PyArg_ParseTuple( args, "iO", &sstmt, &pyObj)) {
-  //if (!PyArg_ParseTuple( args, "i", &sstmt)) {
-  if (!PyArg_ParseTuple( args, "O", &pyObj)) { // everything on a single tuple
-    debug_fprintf(stderr, "failed to parse tuple\n");
-    exit(-1);
-  }
-  Py_XINCREF(pyObj);
-  
-  // the ONLY arg is a tuple. figure out how big it is 
-  int tupleSize = PyTuple_Size(pyObj);
-  //DEBUG_PRINT("%d things in order tuple\n", tupleSize); 
-  
-  // first has to be the statement number
-  PyObject *tupleItem = PyTuple_GetItem(pyObj, 0); 
-  Py_XINCREF(tupleItem);
-  if (PyInt_Check( tupleItem )) sstmt = PyInt_AsLong( tupleItem );
-  else {
-    fflush(stdout);
-    debug_fprintf(stderr, "first tuple item in chill_permute_v2 is not an int?\n");
-    exit(-1);
-  }
-  
-  //DEBUG_PRINT("stmt %d\n", sstmt);
-  
-  char **strings;
   std::vector<std::string> order;
-  std::string *cppstrptr;
-  std::string cppstr;
-  
-  strings = (char **) malloc( sizeof(char *) * tupleSize ) ; // too big
-  for (int i=1; i<tupleSize; i++) {
-    tupleItem = PyTuple_GetItem(pyObj, i);
-    Py_XINCREF(tupleItem);
-    int im1 = i-1;  // offset needed for the actual string vector
-    if (PyString_Check( tupleItem))  {
-      strings[im1] = strdup(PyString_AsString(tupleItem));
-      //DEBUG_PRINT("item %d = '%s'\n", i, strings[im1]);
-      //cppstrptr = new std::string( strings[im1] );
-      //order.push_back(  &(new std::string( strings[im1] )));
-      //order.push_back(  &cppstrptr );
-      
-      cppstr = strings[im1];
-      order.push_back(  cppstr );
-    }
-    else {
-      debug_fprintf(stderr, "later parameter was not a string?\n");
-      exit(-1);
-    }
-    
-  }
-  
-  myloop->permute_cuda(sstmt,order);
+  int stmt = intArg(args, 0);
+  to_string_vector(args, 1, order);
+  myloop->permute_cuda(stmt, order);
+
   //DEBUG_PRINT("returned from permute_cuda()\n"); 
+
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
 
@@ -1125,7 +1073,7 @@ static PyObject* chill_flatten(PyObject* self, PyObject* args) {
     std::vector<int>    loop_levels;
     std::string         inspector_name      = strArg(args, 3);
 
-    tointvector(args, 2, loop_levels);
+    to_int_vector(args, 2, loop_levels);
     
     myloop->flatten_cuda(stmt, idxs, loop_levels, inspector_name);
     Py_RETURN_NONE;
@@ -1241,13 +1189,13 @@ static PyObject* chill_cudaize_v3(PyObject *self, PyObject *args)
   
   
   std::vector<std::string> blockIdxs;
-  tostringvector(args, 3, blockIdxs);
+  to_string_vector(args, 3, blockIdxs);
   
   std::vector<std::string> threadIdxs;
-  tostringvector(args, 4, threadIdxs);
+  to_string_vector(args, 4, threadIdxs);
   
   std::vector<std::string> kernel_parameters;
-  tostringvector(args, 5, kernel_parameters);
+  to_string_vector(args, 5, kernel_parameters);
   
   
   myloop->cudaize_v3(stmt_num, kernel_name, array_sizes, blockIdxs, threadIdxs, kernel_parameters);
@@ -1534,7 +1482,7 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
   if(nargs == 1) {
     // premute ( vector )
      std::vector<int> pi;
-    if(!tointvector(args, 0, pi))
+    if(!to_int_vector(args, 0, pi))
       throw std::runtime_error("first arg in permute(pi) must be an int vector");
     myloop->permute(pi);
   }
@@ -1542,9 +1490,9 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
     // permute ( set, vector )
     std::set<int> active;
     std::vector<int> pi;
-    if(!tointset(args, 0, active))
+    if(!to_int_set(args, 0, active))
       throw std::runtime_error("the first argument in permute(active, pi) must be an int set");
-    if(!tointvector(args, 1, pi))
+    if(!to_int_vector(args, 1, pi))
       throw std::runtime_error("the second argument in permute(active, pi) must be an int vector");
      myloop->permute(active, pi);
   }
@@ -1552,7 +1500,7 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
     int stmt_num = intArg(args, 0);
     int level = intArg(args, 1);
     std::vector<int> pi;
-    if(!tointvector(args, 2, pi))
+    if(!to_int_vector(args, 2, pi))
       throw std::runtime_error("the third argument in permute(stmt_num, level, pi) must be an int vector");
     myloop->permute(stmt_num, level, pi);
   }
@@ -1634,7 +1582,7 @@ static void chill_datacopy_vec(PyObject* args) {
       PyObject* tup = PyList_GetItem(list, i);
       int index = PyLong_AsLong(PyTuple_GetItem(tup, 0));
       std::vector<int> vec;
-      tointvector(PyTuple_GetItem(tup, 1), vec);
+      to_int_vector(PyTuple_GetItem(tup, 1), vec);
       array_ref_nums.push_back(std::pair<int, std::vector<int> >(index, vec));
     }
   }
@@ -1644,7 +1592,7 @@ static void chill_datacopy_vec(PyObject* args) {
     for(int ki = 0; ki < PyList_Size(klist); ki++) {
       PyObject* index = PyList_GetItem(klist, ki);
       std::vector<int> vec;
-      tointvector(PyDict_GetItem(dict,index), vec);
+      to_int_vector(PyDict_GetItem(dict,index), vec);
       array_ref_nums.push_back(std::pair<int, std::vector<int> >(PyLong_AsLong(index), vec));
     }
     Py_DECREF(klist);
@@ -1692,7 +1640,7 @@ static PyObject* chill_datacopy_privatized(PyObject* self, PyObject* args) {
   int level = intArg(args, 1);
   std::string array_name = strArg(args, 2);
   std::vector<int> privatized_levels;
-  tointvector(args, 3, privatized_levels);
+  to_int_vector(args, 3, privatized_levels);
   bool allow_extra_read = boolArg(args, 4, false);
   int fastest_changing_dimension = intArg(args, 5, -1);
   int padding_stride = intArg(args, 6, 1);
@@ -1770,7 +1718,7 @@ static PyObject* chill_split(PyObject* self, PyObject* args) {
 
 static PyObject* chill_nonsingular(PyObject* self, PyObject* args) {
   std::vector< std::vector<int> > mat;
-  tointmatrix(args, 0, mat);
+  to_int_matrix(args, 0, mat);
   myloop->nonsingular(mat);
   Py_RETURN_NONE;
 }
@@ -1779,8 +1727,8 @@ static PyObject* chill_skew(PyObject* self, PyObject* args) {
   std::set<int> stmt_nums;
   std::vector<int> skew_amounts;
   int level = intArg(args, 1);
-  tointset(args, 0, stmt_nums);
-  tointvector(args, 2, skew_amounts);
+  to_int_set(args, 0, stmt_nums);
+  to_int_vector(args, 2, skew_amounts);
   myloop->skew(stmt_nums, level, skew_amounts);
   Py_RETURN_NONE;
 }
@@ -1790,7 +1738,7 @@ static PyObject* chill_scale(PyObject* self, PyObject* args) {
   std::set<int> stmt_nums;
   int level = intArg(args, 1);
   int scale_amount = intArg(args, 2);
-  tointset(args, 0, stmt_nums);
+  to_int_set(args, 0, stmt_nums);
   myloop->scale(stmt_nums, level, scale_amount);
   Py_RETURN_NONE;
 }
@@ -1799,7 +1747,7 @@ static PyObject* chill_reverse(PyObject* self, PyObject* args) {
   strict_arg_num(args, 2);
   std::set<int> stmt_nums;
   int level = intArg(args, 1);
-  tointset(args, 0, stmt_nums);
+  to_int_set(args, 0, stmt_nums);
   myloop->reverse(stmt_nums, level);
   Py_RETURN_NONE;
 }
@@ -1809,7 +1757,7 @@ static PyObject* chill_shift(PyObject* self, PyObject* args) {
   std::set<int> stmt_nums;
   int level = intArg(args, 1);
   int shift_amount = intArg(args, 2);
-  tointset(args, 0, stmt_nums);
+  to_int_set(args, 0, stmt_nums);
   myloop->shift(stmt_nums, level, shift_amount);
   Py_RETURN_NONE;
 }
@@ -1837,7 +1785,7 @@ static PyObject* chill_fuse(PyObject* self, PyObject* args) {
     strict_arg_num(args, 2);
     std::set<int> stmt_nums;
     int level = intArg(args, 1);
-    tointset(args, 0, stmt_nums);
+    to_int_set(args, 0, stmt_nums);
     myloop->fuse(stmt_nums, level);
     Py_RETURN_NONE;
 }
@@ -1846,7 +1794,7 @@ static PyObject* chill_distribute(PyObject* self, PyObject* args) {
     strict_arg_num(args, 2);
     std::set<int> stmts;
     int level = intArg(args, 1);
-    tointset(args, 0, stmts);
+    to_int_set(args, 0, stmts);
     myloop->distribute(stmts, level);
     Py_RETURN_NONE;
 }
@@ -1860,7 +1808,7 @@ static PyObject* chill_flatten(PyObject* self, PyObject* args) {
     std::vector<int>    loop_levels;
     std::string         inspector_name  = strArg(args, 3);
     
-    tointvector(args, 2, loop_levels);
+    to_int_vector(args, 2, loop_levels);
     
     myloop->flatten(stmt_num, idxs, loop_levels, inspector_name);
     Py_RETURN_NONE;
