@@ -208,17 +208,14 @@ def tile_by_index( tile_indices, sizes, index_names, final_order, tile_method):
     #print "tile_index_names:",
     #print tile_index_names
 
-    control_index_names = {} # a dictionary?
-    tile_index_map =  {}
+    control_index_names = dict()
+    tile_index_map = dict()
     
     #print "index_names: "
     #print index_names
 
-    for pair in index_names:
+    for control, name in index_names.items():
         valid = False
-        control = pair[0]
-        name    = pair[1]
-        #print "control %s   name  %s" % ( control, name )
         
         if control[0] == "l" and control[1].isdigit():
             if control.endswith("_control"):
@@ -256,9 +253,8 @@ def tile_by_index( tile_indices, sizes, index_names, final_order, tile_method):
     #print cur_order,
     #print "})"
 
-    cur_order.insert(0, stmt)
-    #print cur_order
-    chill.permute( tuple( cur_order)) 
+    print cur_order
+    chill.permute(stmt, list(cur_order)) 
     #print "in cudaize.py, returned from C code chill.permute()\n"
 
     for i in range(len(tile_indices)):
@@ -306,8 +302,7 @@ def tile_by_index( tile_indices, sizes, index_names, final_order, tile_method):
 
         #  print("permute("..stmt..", {"..list_to_string(cur_order).."})")
         topermute = cur_order
-        topermute.insert(0, stmt)
-        chill.permute( tuple(topermute) ) 
+        chill.permute(stmt, list(topermute)) 
         #print "\nafter permute(), code is:"
         #print_code()
 

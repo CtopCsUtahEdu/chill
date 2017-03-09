@@ -53,6 +53,8 @@ extern IR_Code  *ir_code;
 extern std::vector<IR_Control *> ir_controls;
 extern std::vector<int> loops;
 
+std::string dest_filename;
+
 #else
 
 extern Loop *myloop;
@@ -336,10 +338,22 @@ static bool to_int_matrix(PyObject* args, int index, std::vector<std::vector<int
   return true;
 }
 
+
+
+
+
+
 #ifdef CUDACHILL
 // ------------------------------ //
 // Cuda CHiLL interface functions //
 // ------------------------------ //
+
+static PyObject *
+chill_destination(PyObject *self, PyObject* args) {
+  strict_arg_num(args, 1, "destination");
+  ((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
+  Py_RETURN_NONE;
+}
 
 static PyObject *
 chill_print_code(PyObject *self, PyObject *args)
@@ -1253,7 +1267,7 @@ chill_init(PyObject *self, PyObject *args)
   
   debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
   debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
-  ir_code = new IR_cudaroseCode(filename, procname); //this produces 15000 lines of output 
+  ir_code = new IR_cudaroseCode(filename, procname, NULL); //this produces 15000 lines of output
   fflush(stdout); 
   
   
@@ -1329,7 +1343,7 @@ static PyObject* chill_procedure(PyObject* self, PyObject* args) {
 static PyObject *
 chill_destination(PyObject *self, PyObject* args) {
   strict_arg_num(args, 1, "destination");
-  dest_filename = strArg(args, 0);
+  ((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
   Py_RETURN_NONE;
 }
 
@@ -1869,6 +1883,7 @@ chill_num_statements(PyObject *self, PyObject *args)
 static PyMethodDef ChillMethods[] = { 
   
   // python name            C routine              parameter passing         comment
+  {"destination",         chill_destination,         METH_VARARGS,    "set output filename"},
   {"print_code",          chill_print_code,          METH_VARARGS,    "print the code at this point"},
   {"print_ri",            chill_print_ri  ,          METH_VARARGS,    "print Runtime Info          "},
   {"print_idx",           chill_print_idx ,          METH_VARARGS,    "print indices               "},

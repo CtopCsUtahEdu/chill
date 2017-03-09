@@ -19,7 +19,7 @@ class IR_cudaroseCode : public IR_roseCode{
 public:
   
   
-  IR_cudaroseCode(const char *filename, const char* proc_name);
+  IR_cudaroseCode(const char *filename, const char* proc_name, const char* dest_name);
   
   std::string cudaFileToWrite;
 

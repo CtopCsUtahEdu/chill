@@ -864,14 +864,14 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
     if (!isdeclared) { 
       debug_fprintf(stderr, "declaration for %s needs to be added\n", vd->varname);
-      GPUKernel->addChild( vd ); 
+      GPUKernel->getBody()->addChild( vd );
     }
   }  
 
 
 
   // take contents of CS and stuff it into GPUKernel, at the end after the declarations we might have just added 
-  GPUKernel->addChild( CS ) ; // ?? could do each statement
+  GPUKernel->getBody()->addChild( CS ) ; // ?? could do each statement
 
   //debug_fprintf(stderr, "\nGPU side func is \n");
   //GPUKernel->print();
