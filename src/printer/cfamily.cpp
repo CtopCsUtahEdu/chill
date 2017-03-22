@@ -152,7 +152,7 @@ void CFamily::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
 void CFamily::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o) {
   vector<chillAST_node *> *c = &(n->getChildren());
   string nid = indent + identSpace;
-  if (c->size() > 1 || n->getParent()->isFunctionDecl()) o << "{";
+  if (c->size() > 1 || (n->getParent() && n->getParent()->isFunctionDecl())) o << "{";
   for (int i = 0; i < c->size(); ++i) {
     o << "\n" << nid;
     printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, indent, o);
@@ -162,7 +162,7 @@ void CFamily::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o
     printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, indent, o);
     printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, indent, o);
   }
-  if (c->size() > 1 || n->getParent()->isFunctionDecl()) o << "\n" << indent << "}";
+  if (c->size() > 1 || (n->getParent() && n->getParent()->isFunctionDecl())) o << "\n" << indent << "}";
 }
 
 

@@ -23,8 +23,8 @@
 using namespace SageBuilder;
 using namespace SageInterface;
 
-IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name) :
-  IR_roseCode(filename, proc_name, NULL) {
+IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name, const char* dest_name) :
+  IR_roseCode(filename, proc_name, dest_name) {
   
   debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n"); 
   //std::string file_suffix = StringUtility::fileNameSuffix(filename);

@@ -871,7 +871,7 @@ void chillAST_FunctionDecl::cleanUpVarDecls() {
     if (!definedandused) { 
       //debug_fprintf(stderr, "%s is used but not defined?\n", used[j]->varname); 
       // add it to the beginning of the function
-      insertChild(0, used[j]); 
+      body->insertChild(0, used[j]);
     }
   }
   
