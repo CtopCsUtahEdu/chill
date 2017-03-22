@@ -18,7 +18,7 @@ find_program(texi2pdf texi2pdf)
 
 if(texi2pdf)
     add_custom_target(man-pdf
-        ${texi2pdf} CHiLL.texi --output=${CMAKE_CURRENT_BINARY_DIR}/chill.pdf
+        ${texi2pdf} CHiLL.texi -t "@set CHILLVERSION ${CHILL_VERSION}" --output=${CMAKE_CURRENT_BINARY_DIR}/chill.pdf
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/manual"
         COMMENT "Generating manual (pdf) (with texi2pdf)" VERBATIM)
 else()
@@ -29,7 +29,7 @@ find_program(makeinfo makeinfo)
 
 if(makeinfo)
     add_custom_target(man-info
-        ${makeinfo} CHiLL.texi --output=${CMAKE_CURRENT_BINARY_DIR}/chill.info
+        ${makeinfo} CHiLL.texi -D "CHILLVERSION ${CHILLVERSION}" --output=${CMAKE_CURRENT_BINARY_DIR}/chill.info
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/manual"
         COMMENT "Generating manual (info) (with makeinfo)" VERBATIM)
 else()
