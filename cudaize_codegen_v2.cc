@@ -481,7 +481,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   chillAST_FunctionDecl *dimbuiltin = new chillAST_FunctionDecl( "dim3", "dim3" );
   dimbuiltin->setBuiltin();
 
-  chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin );
+  chillAST_CallExpr *CE1 = new chillAST_CallExpr(new chillAST_DeclRefExpr(dimbuiltin));
 
   // create ARGS ro dim3. 
   debug_fprintf(stderr, "create ARGS to dim3\n"); 
@@ -538,7 +538,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   
 
 
-  chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
+  chillAST_CallExpr *CE2 = new chillAST_CallExpr(new chillAST_DeclRefExpr(dimbuiltin));
   CE2->addArg( new chillAST_IntegerLiteral( bs1 ));
   CE2->addArg( new chillAST_IntegerLiteral( bs2 ));
   chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "", "dimBlock" );
@@ -549,7 +549,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
 
   // kernel call 
   debug_fprintf(stderr, "KERNEL CALL\n"); 
-  chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel );
+  chillAST_CallExpr *kcall = new chillAST_CallExpr(new chillAST_DeclRefExpr(GPUKernel));
   kcall->grid = dimgriddecl; 
     kcall->block =  dimblockdecl; 
   debug_fprintf(stderr, "kernel function parameters\n"); 

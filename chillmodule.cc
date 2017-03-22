@@ -1342,8 +1342,9 @@ static PyObject* chill_procedure(PyObject* self, PyObject* args) {
 
 static PyObject *
 chill_destination(PyObject *self, PyObject* args) {
-  strict_arg_num(args, 1, "destination");
-  ((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
+  //strict_arg_num(args, 1, "destination");
+  //((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
+  dest_filename = strArg(args, 0);
   Py_RETURN_NONE;
 }
 
