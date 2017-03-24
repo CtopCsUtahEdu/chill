@@ -1,9 +1,9 @@
 @unnumberedsubsec Unroll
 @c Unroll
 @deftypefn {Transform} {} unroll (int @var{stmt}, int @var{loop}, int @var{unroll_amount}, int @var{cleanup_split_level})
-The @code{unroll} transformation unrolls a specified number of iterations of a statement inside the loop at level @var{loop}.
 @deftypefnx {Transform} {} unroll_extra (int @var{stmt}, int @var{loop}, int @var{unroll_amount}, int @var{cleanup_split_level})
-It is the same as unroll except the cleanup loop is fully unrolled whenever possible
+The @code{unroll} transformation unrolls a specified number of iterations of a statement inside the loop at level @var{loop}.
+@code{unroll_extra} is the same as unroll except the cleanup loop is fully unrolled whenever possible
 @end deftypefn
 
 @c The unroll command has four forms:
@@ -29,8 +29,6 @@ It is the same as unroll except the cleanup loop is fully unrolled whenever poss
 @c                  whenever possible
 @c                cleanup code splitted at loop level
 @c                  (default to unroll loop level)
-
-@end deftypefn
 @multitable @columnfractions .50 .50 
 @item
 @b{Python Script}

@@ -96,20 +96,18 @@ if (bm >= 1) {
 void mm( float **A, float **B, float **C,
     int ambn, int an, int bm )
 {
-  int t6;
   float newVariable0;
-  int t4;
-  int t2;
+  int i, j, n;
   if (1 <= bm) {
-    for (t2 = 0; t2 <= (an - 1); t2 += 1)
-    for (t4 = 0; t4 <= (bm - 1); t4 += 1) {
+    for (i = 0; i <= (an - 1); i += 1)
+    for (j = 0; j <= (bm - 1); j += 1) {
       newVariable0 = 0.0f;
-      newVariable0 += (A[t2][0] * B[0][t4]);
-      for (t6 = 1; t6 <= (ambn - 1);
-                            t6 += 1)
-        newVariable0 += A[t2][t6]
-                            * B[t6][t4];
-      C[t2][t4] = newVariable0;
+      newVariable0 += (A[i][0] * B[0][j]);
+      for (n = 1; n <= (ambn - 1);
+                            n += 1)
+        newVariable0 += A[i][n]
+                            * B[n][j];
+      C[i][j] = newVariable0;
     }
   }
 }
