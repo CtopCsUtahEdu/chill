@@ -79,7 +79,7 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
     vd->print(); printf("\n"); fflush(stdout); 
 
 
-    debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart); 
+    //debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart);
 
     chillAST_NodeList arr;
 
@@ -92,7 +92,7 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
       //printf("size[%d] (INTEGER LITERAL??)  '", i); IL->print(); printf("'\n"); fflush(stdout);
       arr.push_back(n);
     }
-    debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring);
+    //debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring);
     chillAST_VarDecl *newarray = new chillAST_VarDecl(vd->underlyingtype, "", s.c_str(), arr);
     chillfunc->getBody()->insertChild( 0, newarray);  // is this always the right function to add to?
     chillfunc->addVariableToSymbolTable( newarray ); // always right?

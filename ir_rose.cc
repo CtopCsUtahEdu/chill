@@ -725,7 +725,7 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
     debug_fprintf(stderr, "STORING vardecl %s in global VariableDeclarations %d\n", vd->varname, VariableDeclarations.size());
   }
 
-  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  chillVD->uniquePtr );
+  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  vd->uniquePtr );
   
   // store this away for declrefexpr that references it! 
   // since we called ConvertRoseInitName() which added it already, don't do that again.  

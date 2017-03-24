@@ -71,8 +71,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {
   // change name of GPU side function 
   int which = p->findChild( origfunction ); 
   debug_fprintf(stderr, "func is child %d of srcfile\n", which);
-  p->insertChild( which,  GPUKernel );
   p->insertChild( which,  CPUsidefunc );
+  p->insertChild( which,  GPUKernel );
 
 
   //which = p->findChild( CPUsidefunc ); 

@@ -1904,7 +1904,6 @@ static PyMethodDef ChillMethods[] = {
   {"coalesce",            chill_flatten,             METH_VARARGS,    "Convert a multidimentianal iteration space into a single dimensional one"},
   {"make_dense",          chill_make_dense,          METH_VARARGS,    "Convert a non-affine iteration space into an affine one to enable loop transformations"},
   {"compact",             chill_compact,             METH_VARARGS,    "Call after make_dense to convert an affine iteration space back into a non-affine one"},
-//{"cudaize",             chill_cudaize_v2,          METH_VARARGS,    "dunno"},
   {"cudaize",             chill_cudaize_v3,          METH_VARARGS,    "dunno"},
   {"datacopy_privatized", chill_datacopy_privatized, METH_VARARGS,    "dunno"},
   
