@@ -277,14 +277,15 @@ test_data_dependences(IR_Code *ir,
                       std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
                       std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr) {
 
-  debug_fprintf(stderr, "\nirtools.cc test_data_dependences()  %d freevars\n", freevar.size()); 
-  debug_fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout); 
-  debug_fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout); 
-
-  for (int i=0; i<index.size(); i++) debug_fprintf(stderr, "index %d %s\n", i, index[i].c_str()); 
-  Relation *helper = new Relation(IS1); debug_fprintf(stderr, "IS1  "); helper->print(); fflush(stdout); 
-  helper = new Relation(IS2); debug_fprintf(stderr, "IS2  "); helper->print(); fflush(stdout); 
-
+  Relation * helper;
+  debug_begin
+    debug_fprintf(stderr, "\nirtools.cc test_data_dependences()  %d freevars\n", freevar.size());
+    debug_fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout);
+    debug_fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout);
+    for (int i=0; i<index.size(); i++) debug_fprintf(stderr, "index %d %s\n", i, index[i].c_str());
+    helper = new Relation(IS1); debug_fprintf(stderr, "IS1  "); helper->print(); fflush(stdout);
+    helper = new Relation(IS2); debug_fprintf(stderr, "IS2  "); helper->print(); fflush(stdout);
+  debug_end
 
   //for (int i=0; i<freevar.size(); i++) {
   //  std::string shit = (const std::string)(freevar[i]->base_name()); 
@@ -295,9 +296,11 @@ test_data_dependences(IR_Code *ir,
   std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > result;
   
   if (repr1 == repr2) {
-    debug_fprintf(stderr, "repr1 == repr2\nrepr1->dump()\n"); 
-    repr1->dump(); 
-    fflush(stdout);
+    debug_begin
+      debug_fprintf(stderr, "repr1 == repr2\nrepr1->dump()\n");
+      repr1->dump();
+      fflush(stdout);
+    debug_end
 
     std::vector<IR_ArrayRef *> access = ir->FindArrayRef(repr1);
     debug_fprintf(stderr, "access of size %d\n", access.size()); 
@@ -364,7 +367,9 @@ test_data_dependences(IR_Code *ir,
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
           debug_fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
           Relation r = arrays2relation(ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr);
-          helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);
+          debug_begin
+            helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);
+          debug_end
 
           debug_fprintf(stderr, "1\n"); 
           std::pair<std::vector<DependenceVector>,

@@ -801,6 +801,7 @@ IR_chillCode::IR_chillCode(const char *fname, char *proc_name, char *script_name
 
 
 IR_chillCode::~IR_chillCode() {
+  debug_fprintf(stderr, "printing as part of the destructor\n");
   if (!chillfunc) {
     return;
   }
@@ -1016,9 +1017,6 @@ IR_ScalarRef *IR_chillCode::CreateScalarRef(const IR_ScalarSymbol *sym) {
 
 
 IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_outputRepr *> &index) {
-  //debug_fprintf(stderr, "IR_chillCode::CreateArrayRef()   ir_chill.cc\n"); 
-  //debug_fprintf(stderr, "sym->n_dim() %d   index.size() %d\n", sym->n_dim(), index.size()); 
-
   int t;
   if(sym->n_dim() != index.size()) {
     throw invalid_argument("incorrect array symbol dimensionality   dim != size    ir_chill.cc L2359");
@@ -1028,8 +1026,7 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
   chillAST_VarDecl *vd = c_sym->chillvd;
   vector<chillAST_node *> inds;
 
-  //debug_fprintf(stderr, "%d array indeces\n", sym->n_dim()); 
-  for (int i=0; i< index.size(); i++) { 
+  for (int i=0; i< index.size(); i++) {
     CG_chillRepr *CR = (CG_chillRepr *)index[i];
    
     int numnodes = CR->chillnodes.size();
@@ -1041,20 +1038,6 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
     }
 
     inds.push_back( CR->chillnodes[0] );
-
-    /* 
-       chillAST_node *nodezero = CR->chillnodes[0];
-    if (!nodezero->isIntegerLiteral())  {
-      debug_fprintf(stderr,"IR_chillCode::CreateArrayRef() array dimension %d not an IntegerLiteral\n",i);
-      debug_fprintf(stderr, "it is a %s\n", nodezero->getTypeString()); 
-      nodezero->print(); printf("\n"); fflush(stdout); 
-      exit(-1);
-    }
-
-    chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral *)nodezero;
-    int val = IL->value;
-    inds.push_back( val );
-    */
   }
 
   // now we've got the vardecl AND the indeces to make a chillAST that represents the array reference
@@ -1661,7 +1644,6 @@ void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
     //debug_fprintf(stderr, "expressions is IR_chillArrayRef\n"); 
     IR_chillArrayRef *CAR = (IR_chillArrayRef *)old;
     chillAST_ArraySubscriptExpr* CASE = CAR->chillASE;
-    printf("\nreplacing old ASE %p   ", CASE); CASE->print(); printf("\n"); fflush(stdout);
 
     CG_chillRepr *crepr = (CG_chillRepr *)repr;
     if (crepr->chillnodes.size() != 1) { 
@@ -1670,37 +1652,11 @@ void IR_chillCode::ReplaceExpression(IR_Ref *old, CG_outputRepr *repr) {
     }
     
     chillAST_node *newthing = crepr->chillnodes[0]; 
-    debug_fprintf(stderr, "with new "); newthing->print(); printf("\n\n"); fflush(stdout);
 
-    if (!CASE->parent) { 
-      debug_fprintf(stderr, "IR_chillCode::ReplaceExpression()  old has no parent ??\n"); 
-      exit(-1); 
-    }
+    if (!CASE->parent)
+      throw std::runtime_error("IR_chillCode::ReplaceExpression()  old has no parent ??");
 
-    debug_fprintf(stderr, "OLD parent = "); // of type %s\n", CASE->parent->getTypeString()); 
-    if (CASE->parent->isImplicitCastExpr()) CASE->parent->parent->print(); 
-    else CASE->parent->print(); 
-    printf("\n"); fflush(stdout); 
-
-    //CASE->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->parent->print(); printf("\n"); fflush(stdout); 
-
-    CASE->parent->replaceChild( CASE, newthing ); 
-
-    debug_fprintf(stderr, "after (chill) replace parent is "); // of type %s\n", CASE->parent->getTypeString()); 
-    if (CASE->parent->isImplicitCastExpr()) CASE->parent->parent->print(); 
-    else CASE->parent->print(); 
-    printf("\n\n"); fflush(stdout); 
-
-
-
-    //CASE->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->print(); printf("\n"); fflush(stdout); 
-    //CASE->parent->parent->parent->print(); printf("\n"); fflush(stdout); 
-
+    CASE->parent->replaceChild( CASE, newthing );
 
   }
   else  if (typeid(*old) == typeid(IR_chillScalarRef)) {
