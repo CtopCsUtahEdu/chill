@@ -506,7 +506,8 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
   cond2 = EQs_to_GEQs(cond2);
   Conjunct *c = cond2.single_conjunct();
   int cur_lex = lex[dim - 1];
-  
+  bool shifted = false;
+
   for (GEQ_Iterator gi(c->GEQs()); gi; gi++) {
     int max_level = (*gi).max_tuple_pos();
     Relation single_cond(max_level);
@@ -524,8 +525,6 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
     
     bool temp_place_after;      // = place_after;
     bool assigned = false;
-    int part1_to_part2;
-    int part2_to_part1;
     // original statements with split condition,
     // new statements with complement of split condition
     int old_num_stmt = stmt.size();
@@ -813,7 +812,17 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
         
         stmt_nesting_level_.push_back(stmt_nesting_level_[*i]);
         
-        
+        if (!shifted) {
+          shifted = true;
+          // make adjacent lexical number available for new statements
+          if (place_after) {
+            lex[dim - 1] = cur_lex + 1;
+            shiftLexicalOrder(lex, dim - 1, 1);
+          } else {
+            lex[dim - 1] = cur_lex - 1;
+            shiftLexicalOrder(lex, dim - 1, -1);
+          }
+        }
         if (place_after)
           assign_const(new_stmt.xform, dim - 1, cur_lex + 1);
         else
@@ -830,14 +839,6 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
           result.insert(stmt.size() - 1);
       }
       
-    }
-    // make adjacent lexical number available for new statements
-    if (place_after) {
-      lex[dim - 1] = cur_lex + 1;
-      shiftLexicalOrder(lex, dim - 1, 1);
-    } else {
-      lex[dim - 1] = cur_lex - 1;
-      shiftLexicalOrder(lex, dim - 1, -1);
     }
     // update dependence graph
     int dep_dim = get_dep_dim_of(stmt_num, level);
