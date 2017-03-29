@@ -56,8 +56,8 @@ do
         
         
         
-        echo "TESTS += $run_test_file"                      >> $make_test_file
-        echo "TESTS += $diff_test_file"                     >> $make_test_file
+        echo "TESTS += $run_test_tile"                      ## make_test_file
+        echo "TESTS += $diff_test_file"                     ## make_test_file
         
     fi
 done
