@@ -343,7 +343,7 @@ struct IR_chillIf: public IR_If {
     if (!i->isIfStmt()) { 
       debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_node ) node is not an ifstmt\n");
       debug_fprintf(stderr, "it is a %s\n", i->getTypeString());
-      i->print(0, stderr); debug_fprintf(stderr, "\n\n");
+      i->print(0, std::cerr); debug_fprintf(stderr, "\n\n");
     }
     chillif = (chillAST_IfStmt *)i;
   }
@@ -355,7 +355,7 @@ struct IR_chillIf: public IR_If {
     if (!i->isIfStmt()) { 
       debug_fprintf(stderr, "IR_chillIf::IR_chillIf( ir, chillast_IfStmt ) node is not an ifstmt\n");
       debug_fprintf(stderr, "it is a %s\n", i->getTypeString());
-      i->print(0, stderr); debug_fprintf(stderr, "\n\n");
+      i->print(0, std::cerr); debug_fprintf(stderr, "\n\n");
     }
     chillif = i;
   }

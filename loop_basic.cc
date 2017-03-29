@@ -506,7 +506,8 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
   cond2 = EQs_to_GEQs(cond2);
   Conjunct *c = cond2.single_conjunct();
   int cur_lex = lex[dim - 1];
-  
+  bool shifted = false;
+
   for (GEQ_Iterator gi(c->GEQs()); gi; gi++) {
     int max_level = (*gi).max_tuple_pos();
     Relation single_cond(max_level);
@@ -524,8 +525,6 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
     
     bool temp_place_after;      // = place_after;
     bool assigned = false;
-    int part1_to_part2;
-    int part2_to_part1;
     // original statements with split condition,
     // new statements with complement of split condition
     int old_num_stmt = stmt.size();
@@ -813,7 +812,17 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
         
         stmt_nesting_level_.push_back(stmt_nesting_level_[*i]);
         
-        
+        if (!shifted) {
+          shifted = true;
+          // make adjacent lexical number available for new statements
+          if (place_after) {
+            lex[dim - 1] = cur_lex + 1;
+            shiftLexicalOrder(lex, dim - 1, 1);
+          } else {
+            lex[dim - 1] = cur_lex - 1;
+            shiftLexicalOrder(lex, dim - 1, -1);
+          }
+        }
         if (place_after)
           assign_const(new_stmt.xform, dim - 1, cur_lex + 1);
         else
@@ -830,14 +839,6 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
           result.insert(stmt.size() - 1);
       }
       
-    }
-    // make adjacent lexical number available for new statements
-    if (place_after) {
-      lex[dim - 1] = cur_lex + 1;
-      shiftLexicalOrder(lex, dim - 1, 1);
-    } else {
-      lex[dim - 1] = cur_lex - 1;
-      shiftLexicalOrder(lex, dim - 1, -1);
     }
     // update dependence graph
     int dep_dim = get_dep_dim_of(stmt_num, level);
@@ -1279,7 +1280,6 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
 
     Graph<std::set<int>, bool> g = construct_induced_graph_at_level(s, dep,
                                                                     dep_dim);
-    std::cout << g;
     s = typed_fusion(g, s2);
   } catch (const loop_error &e) {
     
@@ -1290,7 +1290,19 @@ void Loop::fuse(const std::set<int> &stmt_nums, int level) {
   
   int order = 0;
   for (int i = 0; i < s.size(); i++) {
+    int adj = 0;
+    int lex = INT16_MIN;
+    int llex = 0;
     for (std::set<int>::iterator it = s[i].begin(); it != s[i].end(); it++) {
+      int nlex = get_const(stmt[*it].xform, 2 * level - 2, Output_Var);
+      int nnlex = get_const(stmt[*it].xform, 2 * level, Output_Var);
+      if (nlex != lex) {
+        if (lex > INT16_MIN)
+          adj = llex + 1 - nnlex;
+        lex = nlex;
+      }
+      llex = nnlex + adj;
+      assign_const(stmt[*it].xform, 2 * level, llex);
       assign_const(stmt[*it].xform, 2 * level - 2, order);
     }
     order++;

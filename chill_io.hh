@@ -31,12 +31,18 @@ bool debug_isdefined(char* symbol);
 #define debug_cond_fprintf(s, f, ...)       do { if(debug_isdefined(s)) { debug_fprintf(f, __VA_ARGS__); } } while (0)
 #define debug_cond_printf(s, ...)           do { if(debug_isdefined(s)) { debug_printf(__VA_ARGS__); } } while (0)
 
+#define debug_begin                         if(debug_isenabled()) {
+#define debug_end                           }
+
 #else
 
 #define debug_enable(...)                   do {} while (0)
 #define debug_define(...)                   do {} while (0)
 #define debug_fprintf(...)                  do {} while (0)
 #define debug_printf(...)                   do {} while (0)
+
+#define debug_begin                         if (0){
+#define debug_end                           }
 
 #endif
 
