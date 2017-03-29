@@ -9,8 +9,8 @@ examples_cuda_chill=examples/cuda-chill/testcases
 answers_chill=$examples_chill/RIGHTANSWERS
 answers_cuda_chill=$examples_cuda_chill/RIGHTANSWERS
 
-./test-chill/make_chill_testcases.sh  chill      $examples_chill      $answers_chill        >> ./test-chill/chill_testcases.mk
-./test-chill/make_chill_testcases.sh  cuda-chill $examples_cuda_chill $answers_cuda_chill   >> ./test-chill/cudachill_testcases.mk
+./test-chill/make_chill_testcases.sh  chill      $examples_chill      $answers_chill        > ./test-chill/chill_testcases.mk
+./test-chill/make_chill_testcases.sh  cuda-chill $examples_cuda_chill $answers_cuda_chill   > ./test-chill/cudachill_testcases.mk
 
 autoreconf -if
 
