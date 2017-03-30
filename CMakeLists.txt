@@ -215,14 +215,14 @@ add_custom_command(OUTPUT ${TD_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test-chill ${CMAKE_BINARY_DIR}/test-chill
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/examples ${CMAKE_BINARY_DIR}/tests/e2e
     COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh chill      tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS > /dev/null
-    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh cuda-chill tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS > /dev/null
+    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh cuda-chill tests/e2e/cuda-chill/testcases tests/e2e/cuda-chill/testcases/RIGHTANSWERS > /dev/null
     DEPENDS UnitTests
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
 add_custom_target(check-all
     COMMAND ${CMAKE_COMMAND} -E env "SRCDIR=${CMAKE_BINARY_DIR}" ${TD_PATH} ${CMAKE_BINARY_DIR}/tests/unittests ${CMAKE_BINARY_DIR}/test-chill
-    DEPENDS ${TD_PATH} chill
+    DEPENDS ${TD_PATH} chill cuda-chill
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
 
