@@ -1255,7 +1255,7 @@ static void texmapArrayRefs(texture_memory_mapping* texture, std::vector<IR_Arra
 chillAST_node* LoopCuda::cudaize_codegen_v2() {
   debug_fprintf(stderr, "cudaize codegen V2 (ROSE)\n");
   for(std::map<std::string, int>::iterator it = array_dims.begin(); it != array_dims.end(); it++)  {
-    debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second)
+    debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second);
   }
 
   //protonu--adding an annote to track texture memory type
@@ -1323,8 +1323,8 @@ chillAST_node* LoopCuda::cudaize_codegen_v2() {
   // change name of GPU side function 
   int which = p->findChild( origfunction ); 
   debug_fprintf(stderr, "func is child %d of srcfile\n", which);
-  p->insertChild( which,  GPUKernel );
   p->insertChild( which,  CPUsidefunc );
+  p->insertChild( which,  GPUKernel );
 
 
   //which = p->findChild( CPUsidefunc ); 

@@ -1600,4 +1600,3 @@ bool  IR_roseCode::ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef 
   die(); 
   exit(-1);
 }
-

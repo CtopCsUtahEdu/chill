@@ -343,9 +343,9 @@ int main( int argc, char* argv[] )
     //---
     // Run a CHiLL interpreter
     //---
-    chill_printf("CHiLL v0.2.3 (built on %s)\n", CHILL_BUILD_DATE);
+    chill_printf("CHiLL v%s (built on %s)\n", CHILL_BUILD_VERSION, CHILL_BUILD_DATE);
     chill_printf("Copyright (C) 2008 University of Southern California\n");
-    chill_printf("Copyright (C) 2009-2016 University of Utah\n");
+    chill_printf("Copyright (C) 2009-2017 University of Utah\n");
     //is_interactive = true; // let the lua interpreter know.
     fflush(stdout);
     // TODO: read lines of python code.

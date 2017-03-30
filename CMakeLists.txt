@@ -214,7 +214,8 @@ set(EE_PATH ${CMAKE_BINARY_DIR}/tests/e2e)
 add_custom_command(OUTPUT ${TD_PATH}
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test-chill ${CMAKE_BINARY_DIR}/test-chill
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/examples ${CMAKE_BINARY_DIR}/tests/e2e
-    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS
+    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh chill      tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS > /dev/null
+    COMMAND ${CMAKE_BINARY_DIR}/test-chill/make_chill_testcases.sh cuda-chill tests/e2e/chill/testcases tests/e2e/chill/testcases/RIGHTANSWERS > /dev/null
     DEPENDS UnitTests
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     )
