@@ -7,10 +7,10 @@
 @c %**end of header
 
 @copying
-This manual describes CHiLL (version 0.2.4 November 2016), a source-to-source translator for optimizing loop based calculations. 
+This manual describes CHiLL (version @value{CHILLVERSION}), a source-to-source translator for optimizing loop based calculations. 
 
 Copyright @copyright{} 2008 University of Southern California @*
-Copyright @copyright{} 2009-2016 University of Utah
+Copyright @copyright{} 2009-2017 University of Utah
 
 @c quotation
 Permission is granted to copy, distribute and/or modify this document 
@@ -30,7 +30,7 @@ Compiler Technology to Optimize Performance Research Group@*
 @titlepage
 @title CHiLL
 @subtitle The Composable High Level Loop Source-to-Source Translator
-@subtitle For version 0.2.4, November 2016
+@subtitle For version @value{CHILLVERSION}
 
 @page
 @vskip 0pt plus 1filll
@@ -42,7 +42,7 @@ Compiler Technology to Optimize Performance Research Group@*
 @node Top
 @top The Composable High Level Loop Source-to-Source Translator
 
-This manual is for The Composable High Level Loop Source-to-Source Translator, aka CHiLL (version 0.2.4).
+This manual is for The Composable High Level Loop Source-to-Source Translator, aka CHiLL (version @value{CHILLVERSION}).
 @end ifnottex
 
 @menu
@@ -480,37 +480,37 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 
 @page
 @section Transformations
-@include examples/distribute.texi
+@include functions/distribute.texi
 @page
-@include examples/fuse.texi
+@include functions/fuse.texi
 @page
-@include examples/nonsingular.texi
+@include functions/nonsingular.texi
 @page
-@include examples/original.texi
+@include functions/original.texi
 @page
-@include examples/peel.texi
+@include functions/peel.texi
 @page
-@include examples/permute.texi
+@include functions/permute.texi
 @page
-@include examples/reverse.texi
+@include functions/reverse.texi
 @page
-@include examples/scale.texi
+@include functions/scale.texi
 @page
-@include examples/shift.texi
+@include functions/shift.texi
 @page
-@include examples/shift_to.texi
+@include functions/shift_to.texi
 @page
-@include examples/skew.texi
+@include functions/skew.texi
 @page
-@include examples/split.texi
+@include functions/split.texi
 @page
-@include examples/tile.texi
+@include functions/tile.texi
 @page
-@include examples/unroll.texi
+@include functions/unroll.texi
 @page
 
 @section Data operations
-@include examples/datacopy.texi
+@include functions/datacopy.texi
 @page
 
 @c Prefetch

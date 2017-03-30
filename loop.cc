@@ -80,17 +80,13 @@ omega::Relation Loop::getNewIS(int stmt_num) const {
   } else {
     omega::Relation known = omega::Extend_Set(omega::copy(this->known),
                                               stmt[stmt_num].xform.n_out() - this->known.n_set());
-    known.print();
     result = omega::Intersection(
                                  omega::Range(
                                               omega::Restrict_Domain(
                                                                      omega::copy(stmt[stmt_num].xform),
                                                                      omega::copy(stmt[stmt_num].IS))), known);
   }
-  
   result.simplify(2, 4);
-  result.print();
-  
   return result;
 }
 
@@ -448,18 +444,11 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       }
       //static_cast<IR_Loop *>(itn->content)->index()->name());
     }
-    debug_fprintf(stderr, "Relation r   "); r.print(); fflush(stdout); 
-    //debug_fprintf(stderr, "f_root   "); f_root->print(stderr); debug_fprintf(stderr, "\n"); 
-    
-    /*while (itn->parent != NULL) {
-      itn = itn->parent;
-      if (itn->content->type() == IR_CONTROL_LOOP)
-      r.name_set_var(itn->payload+1, static_cast<IR_Loop *>(itn->content)->index()->name());
-      }*/
-    
-    
-    
-    
+    debug_begin
+      printf("Relation r   ");
+      r.print();
+    debug_end
+
     debug_fprintf(stderr, "extract information from loop/if structures\n"); 
     // extract information from loop/if structures
     std::vector<bool> processed(n_dim, false);
@@ -484,18 +473,11 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
           //debug_fprintf(stderr, "step size %d\n", c); 
           if (c > 0) {
             CG_outputRepr *lb = lp->lower_bound();
-            debug_fprintf(stderr, "loop.cc, got the lower bound. it is:\n"); 
-            lb->dump(); printf("\n"); fflush(stdout); 
-            
             exp2formula(ir, r, f_root, freevar, lb, v, 's',
                         IR_COND_GE, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
             
             CG_outputRepr *ub = lp->upper_bound();
-            //debug_fprintf(stderr, "loop.cc, got the upper bound. it is:\n");
-            //ub->dump(); printf("\n"); fflush(stdout); 
-            
-            
-            
+
             IR_CONDITION_TYPE cond = lp->stop_cond();
             if (cond == IR_COND_LT || cond == IR_COND_LE)
               exp2formula(ir, r, f_root, freevar, ub, v, 's',
@@ -791,13 +773,8 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     debug_fprintf(stderr, "loop.cc before extract\n"); 
     CG_outputRepr *code =
       static_cast<IR_Block *>(ir_stmt[loc]->content)->extract();
-    debug_fprintf(stderr, "code =  ocg->CreateSubstitutedStmt(...)\n");
-    ((CG_chillRepr *)code)->Dump(); fflush(stdout);
-    
     code = ocg->CreateSubstitutedStmt(0, code, vars_to_be_reversed,
                                       reverse_expr);
-    debug_fprintf(stderr, "stmt\n");
-    ((CG_chillRepr *)code)->Dump(); fflush(stdout);
 
     stmt[loc].code = code;
     stmt[loc].IS = r;
@@ -820,8 +797,10 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     
     stmt_nesting_level[loc] = -1;
   }
-  dump();
-  debug_fprintf(stderr, "                                        loop.cc   Loop::init_loop() END\n\n");
+  debug_begin
+    dump();
+    debug_fprintf(stderr, "                                        loop.cc   Loop::init_loop() END\n\n");
+  debug_end
 
   return true;
 }
@@ -859,9 +838,6 @@ Loop::Loop(const IR_Control *control) {
   //debug_fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
   
   int count = 0;
-  //debug_fprintf(stderr, "before init_loops, %d freevar\n", freevar.size()); 
-  //debug_fprintf(stderr, "count %d\n", count++); 
-  //debug_fprintf(stderr, "loop.cc before init_loop, %ld statements\n",  stmt.size()); 
   while (!init_loop(ir_tree, ir_stmt)) {
     //debug_fprintf(stderr, "count %d\n", count++); 
   }
@@ -886,13 +862,10 @@ Loop::Loop(const IR_Control *control) {
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
   
-  debug_fprintf(stderr, "this really REALLY needs some comments\n"); 
   // this really REALLY needs some comments
   for (int i = 0; i < stmt.size(); i++) {
-    debug_fprintf(stderr, "i %d\n", i); 
     stmt[i].reduction = 0; // Manu -- initialization
     for (int j = i; j < stmt.size(); j++) {
-      debug_fprintf(stderr, "j %d\n", j); 
       std::pair<std::vector<DependenceVector>,
                 std::vector<DependenceVector> > dv = test_data_dependences(
                                                                            ir, 
@@ -1198,13 +1171,13 @@ CG_outputRepr *Loop::getCode(int effort) const {
       IS[i] = stmt[i].IS;
       xforms[i] = stmt[i].xform;
     }
-    
-    debugRelations(); 
-    
-    
+
     Relation known = Extend_Set(copy(this->known), n - this->known.n_set());
-    printf("\nknown:\n"); known.print(); printf("\n\n"); fflush(stdout); 
-    
+    debug_begin
+      debugRelations();
+      printf("\nknown:\n"); known.print(); printf("\n\n"); fflush(stdout);
+    debug_end
+
     last_compute_cg_ = new CodeGen(xforms, IS, known);
     delete last_compute_cgr_;
     last_compute_cgr_ = NULL;
@@ -2288,7 +2261,6 @@ void Loop::apply_xform(int stmt_num) {
 }
 
 void Loop::apply_xform(std::set<int> &active) {
-  fflush(stdout); 
   debug_fprintf(stderr, "loop.cc apply_xform( set )\n");
   
   int max_n = 0;
@@ -2320,8 +2292,10 @@ void Loop::apply_xform(std::set<int> &active) {
                               + omega::to_string(
                                                  tmp_loop_var_name_counter + j - 1));
     mapping.setup_names();
-    mapping.print();   //   "{[I] -> [_t1] : I = _t1 }
-    fflush(stdout); 
+    debug_begin
+      mapping.print();   //   "{[I] -> [_t1] : I = _t1 }
+      fflush(stdout);
+    debug_end
     
     omega::Relation known = Extend_Set(copy(this->known),
                                        mapping.n_out() - this->known.n_set());

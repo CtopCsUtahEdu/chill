@@ -2655,7 +2655,9 @@ namespace omega {
     }
     
     Relation then_cond = find_best_guard(R, loops, start, end);
-    debug_fprintf(stderr, "then_cond  "); then_cond.print(stderr); 
+    debug_begin
+      debug_fprintf(stderr, "then_cond  "); then_cond.print(stderr);
+    debug_end
     assert(!then_cond.is_obvious_tautology());
     Relation else_cond = Complement(copy(then_cond));
     else_cond.simplify();

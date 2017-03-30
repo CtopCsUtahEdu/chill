@@ -13,13 +13,13 @@ t_{n1}&t_{n2}&\ldots&t_{nn}&c_{n,{n+1}}\cr} \pmatrix{i_1\cr i_2\cr \vdots\cr i_n
 This transform has the ability to simultaneously compose the transforms of permutation, skew, reverse and shift. For example ...
 
 @math{\pmatrix{0&0&1\cr1&0&0\cr0&1&0}} is equivalent to @code{permute(}@dots{}@code{, [3,1,2])}
-@sp1
+@sp 1
 @math{\pmatrix{1&0&0\cr1&1&0\cr0&0&1}} is equivalent to @code{skew(}@dots{}@code{, 2, [1,1,0])}
-@sp1
+@sp 1
 @math{\pmatrix{1&0&0\cr0&-1&0\cr0&0&1}} is equivalent to @code{reverse(}@dots{}@code{, 2)}
-@sp1
+@sp 1
 @math{\pmatrix{1&0&0&0\cr0&1&0&4\cr0&0&1&0}} is equivalent to @code{shift(}@dots{}@code{, 2, 4)}
-@sp1
+@sp 1
 The difference between @code{nonsingular} and @code{permute}, @code{skew}, @code{reverse} and @code{shift} is that @code{nonsingular} can apply combinations of all of the above transformations simultaneously but it must be applied to all statements in the nest. The individual transformations accept a set of statements depicted above with ``@dots{}''.
 
 Python stores arrays in row major order (like C and unlike Fortran) so@/
