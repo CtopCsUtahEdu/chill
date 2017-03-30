@@ -1922,32 +1922,13 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_node *bas, ch
 
 
 chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<chillAST_node *> indeces,  chillAST_node *par):chillAST_ArraySubscriptExpr() {
-  //debug_fprintf(stderr, "\nchillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr() 4\n"); 
-  //debug_fprintf(stderr,"chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, std::vector<int> indeces)\n");
   parent = par;
-  //if (parent == NULL) { 
-  //  debug_fprintf(stderr, "dammit.  ASE %p has no parent\n", this); 
-  //} 
-
 
   int numindeces = indeces.size();
-  for (int i=0; i<numindeces; i++) { 
-    debug_fprintf(stderr, "ASE index %d  ", i); indeces[i]->print(0,stderr); debug_fprintf(stderr, "\n"); 
-  //  printf("[");
-  //  indeces[i]->print();
-  //  printf("]");
-  } 
-  //fflush(stdout); 
-  //debug_fprintf(stderr, "\n");
-  
+
   chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( v->vartype, v->varname, v);
   basedecl = v; // ?? 
-  //debug_fprintf(stderr, "%p  ASE 3 basedecl = %p   ", this, basedecl); 
-  //debug_fprintf(stderr, "of type %s\n", basedecl->getTypeString()); 
-  //basedecl->print(); printf("\n");
-  //basedecl->dump(); printf("\n"); fflush(stdout); 
-  //debug_fprintf(stderr, "basedecl varname %s\n", basedecl->varname); 
-  
+
   chillAST_ArraySubscriptExpr *rent = this; // parent for subnodes
   
   // these are on the top level ASE that we're creating here 

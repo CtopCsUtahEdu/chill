@@ -8,5 +8,7 @@ using namespace chill::scanner;
 
 void SanityCheck::runS(chillAST_DeclRefExpr *n, std::ostream &o) {
   if (n->decl == NULL)
-    o << "DeclRef to " << n->declarationName << " of type " << n->declarationType << " is not linked" << std::endl;
+    debug_begin
+      o << "DeclRef to " << n->declarationName << " of type " << n->declarationType << " is not linked" << std::endl;
+    debug_end
 }

@@ -86,8 +86,7 @@ bool Loop::datacopy(const std::vector<std::pair<int, std::vector<int> > > &array
 bool Loop::datacopy(int stmt_num, int level, const std::string &array_name,
                     bool allow_extra_read, int fastest_changing_dimension, int padding_stride, int padding_alignment, int memory_type) {
 
-  fflush(stdout); 
-  //debug_fprintf(stderr, "Loop::datacopy2()\n"); 
+  //debug_fprintf(stderr, "Loop::datacopy2()\n");
   //debug_fprintf(stderr, "array name %s   stmt num %d\n", array_name.c_str(), stmt_num);
 
   // check for sanity of parameters
@@ -114,29 +113,9 @@ bool Loop::datacopy(int stmt_num, int level, const std::string &array_name,
       selected_refs.push_back(std::make_pair(*i, t)); 
   }
 
-  //debug_fprintf(stderr, "selected refs:\n"); 
-  //for (int i=0; i<selected_refs.size(); i++) { 
-  //  //debug_fprintf(stderr, "%d  0x%x  ", selected_refs[i].first, selected_refs[i].second[0]); 
-  //  selected_refs[i].second[0]->Dump(); printf("\n"); fflush(stdout); 
-  //} 
-
   if (selected_refs.size() == 0)
     throw std::invalid_argument("found no array references with name " + to_string(array_name) + " to copy");
-  
-  IR_ArrayRef *AR = selected_refs[0].second[0];
-  //IR_roseArrayRef *RAR = (IR_roseArrayRef *)AR; 
-  //debug_fprintf(stderr, "before datacopy_privatized,   ");
-  //AR->Dump();
-  
-  // do the copy
-  //debug_fprintf(stderr, "\nLoop::datacopy2 calling privatized\n"); 
-
   bool whatever =  datacopy_privatized(selected_refs, level, std::vector<int>(), allow_extra_read, fastest_changing_dimension, padding_stride, padding_alignment, memory_type);
-
-  //AR = selected_refs[0].second[0];
-  //debug_fprintf(stderr, "after datacopy_privatized,   ");
-  //AR->Dump();
-  
   return whatever;
 }
 
@@ -324,38 +303,9 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
   invalidateCodeGen();
 
   // build iteration spaces for all reads and for all writes separately
-  //debug_fprintf(stderr, "dp3: before apply_xform() ARRAY REFS\n"); 
-  //for (int i = 0; i < stmt_refs.size(); i++) {
-  //  for (int j = 0; j < stmt_refs[i].second.size(); j++) {
-  //    IR_ArrayRef *AR = stmt_refs[i].second[j];
-  //    debug_fprintf(stderr, "array ref ij %d %d   ", i, j); AR->Dump(); debug_fprintf(stderr, "\n"); 
-  //  }
-  //} 
-  //for (int i=0; i<stmt.size(); i++) {
-  //  debug_fprintf(stderr, "stmt %d = ", i);
-  //  stmt[i].code->dump(); 
-  //  debug_fprintf(stderr, "\n"); 
-  //} 
 
   apply_xform(active);
-  //debug_fprintf(stderr, "dp3: back from apply_xform() ARRAY REFS\n"); 
 
-  //for (int i = 0; i < stmt_refs.size(); i++) {
-  //  for (int j = 0; j < stmt_refs[i].second.size(); j++) {
-  //    IR_ArrayRef *AR = stmt_refs[i].second[j];
-  //    debug_fprintf(stderr, "array ref ij %d %d   ", i, j);
-  //    AR->Dump();
-  //    debug_fprintf(stderr, "\n"); 
-  //  }
-  //} 
-
-  //for (int i=0; i<stmt.size(); i++) {
-  //  debug_fprintf(stderr, "stmt %d = ", i);
-  //  stmt[i].code->dump(); 
-  //  debug_fprintf(stderr, "\n"); 
-  //} 
-
-  
   bool has_write_refs = false;
   bool has_read_refs = false;
   Relation wo_copy_is = Relation::False(level-1+privatized_levels.size()+n_dim);
@@ -374,7 +324,9 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
       for (int k = 1; k <= mapping.n_inp(); k++)
         mapping.name_input_var(k, stmt[stmt_num].IS.set_var(k)->name());
       mapping.setup_names();
-      mapping.print();  fflush(stdout);  //   "{[I] -> [_t1] : I = _t1 }
+      debug_begin
+        mapping.print();  fflush(stdout);  //   "{[I] -> [_t1] : I = _t1 }
+      debug_end
 
       F_And *f_root = mapping.add_and();
       for (int k = 1; k <= level-1; k++) {
@@ -389,13 +341,8 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
       }
       for (int k = 0; k < n_dim; k++) {
         IR_ArrayRef *AR = stmt_refs[i].second[j];
-        //debug_fprintf(stderr, "array ref ");
-        AR->Dump();
-
         CG_outputRepr *repr = stmt_refs[i].second[j]->index(k);
-        //debug_fprintf(stderr, "k %d  j %d   repr  ", k, j); repr->dump(); fflush(stdout); 
-
-        exp2formula(ir, 
+        exp2formula(ir,
                     mapping, 
                     f_root, 
                     freevar, 
@@ -414,19 +361,15 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
         has_write_refs = true;
         wo_copy_is = Union(wo_copy_is, r);
         wo_copy_is.simplify(2, 4);
-        
-        
       }
       else {
         has_read_refs = true;
         ro_copy_is = Union(ro_copy_is, r);
         ro_copy_is.simplify(2, 4);
-        
       }
     }
   }
   
-  //debug_fprintf(stderr, "dp3: simplify\n"); 
   // simplify read and write footprint iteration space
   {
     if (allow_extra_read)

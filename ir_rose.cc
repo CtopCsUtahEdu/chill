@@ -69,15 +69,6 @@ void ConvertRosePreprocessing(  SgNode *sg, chillAST_node *n ) { // add preproce
     
     if (comments != NULL) {
       debug_fprintf(stderr, "\nhey! comments! on a %s\n", n->getTypeString()); 
-      printf ("-----------------------------------------------\n");
-      printf ("Found a %s with preprocessing Info attached:\n", n->getTypeString());
-      printf ("(memory address: %p Sage type: %s) in file \n%s (line %d column %d) \n",
-              locatedNode, 
-              locatedNode->class_name ().c_str (),
-              (locatedNode->get_file_info ()->get_filenameString ()).c_str (),
-              locatedNode->get_file_info ()->get_line(),
-              locatedNode->get_file_info ()->get_col()         );
-      fflush(stdout); 
 
       AttachedPreprocessingInfoType::iterator i;
       int counter = 0;
@@ -86,27 +77,17 @@ void ConvertRosePreprocessing(  SgNode *sg, chillAST_node *n ) { // add preproce
       
       counter = 0;
       for (i = comments->begin (); i != comments->end (); i++){
-        printf("-------------PreprocessingInfo #%d ----------- : \n",counter++);
-        //printf("classification = %s:\n String format = %s\n",
-        //       PreprocessingInfo::directiveTypeName((*i)->getTypeOfDirective ()). c_str (), 
-        //       (*i)->getString ().c_str ());
-
-        // this logic seems REALLY WRONG 
+        // this logic seems REALLY WRONG
         CHILL_PREPROCESSING_POSITION p = CHILL_PREPROCESSING_POSITIONUNKNOWN;
-        printf ("relative position is = ");
-        if ((*i)->getRelativePosition () == PreprocessingInfo::inside) { 
-          printf ("inside\n");
-          // ??? t = 
+        if ((*i)->getRelativePosition () == PreprocessingInfo::inside) {
+          // ??? t =
         }
         else if ((*i)->getRelativePosition () == PreprocessingInfo::before) { 
-          printf ("before\n"); 
           p =  CHILL_PREPROCESSING_LINEBEFORE;
         }
         else if ((*i)->getRelativePosition () == PreprocessingInfo::after) {
-          printf ("after\n"); 
           p =  CHILL_PREPROCESSING_TOTHERIGHT;
         }
-        fflush(stdout); 
 
         char *blurb = strdup( (*i)->getString().c_str() ); 
         chillAST_node *pre;
@@ -132,10 +113,8 @@ void ConvertRosePreprocessing(  SgNode *sg, chillAST_node *n ) { // add preproce
 
 
       } // for each comment attached to a node 
-      fflush(stdout); 
     } // comments != NULL
-    fflush(stdout); 
-  } // located node   
+  } // located node
 } // ConvertRosePreprocessing 
 
 
@@ -341,8 +320,6 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
   } // for each top level node 
 
   
-  //debug_fprintf(stderr, "ConvertRoseFile(), returning topnode\n"); 
-  topnode->dump(); 
   return topnode;
 }
 
@@ -725,7 +702,8 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
     debug_fprintf(stderr, "STORING vardecl %s in global VariableDeclarations %d\n", vd->varname, VariableDeclarations.size());
   }
 
-  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  SgInitializedName\n", entiredecl,  vd->uniquePtr );
+  debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  "
+      "SgInitializedName\n", entiredecl,  vd->uniquePtr );
   
   // store this away for declrefexpr that references it! 
   // since we called ConvertRoseInitName() which added it already, don't do that again.  
@@ -1508,16 +1486,8 @@ IR_roseCode::IR_roseCode(const char *file_name, const char* proc_name, const cha
   argv[0] = strdup( "rose" );
   argv[1] = strdup( file_name ); 
   
-  // project = (IR_roseCode_Global_Init::Instance(argv))->project;
-  //debug_fprintf(stderr, "IR_roseCode::IR_roseCode  actually parsing %s using rose?\n", file_name); 
   project = OneAndOnlySageProject = frontend(2,argv);// this builds the Rose AST
-  
-  //debug_fprintf(stderr, "IR_roseCode::IR_roseCode()  project defined. file parsed by Rose\n"); 
-  
-  
   // here we would turn the rose AST into chill AST (right?) maybe not just yet
-  
-  
   firstScope = getFirstGlobalScope(project);
   SgFilePtrList& file_list = project->get_fileList();
   
@@ -1527,21 +1497,13 @@ IR_roseCode::IR_roseCode(const char *file_name, const char* proc_name, const cha
        it++) {
     filecount++;
   }
-  //debug_fprintf(stderr, "%d files\n", filecount); 
-  
-  
+
   for (SgFilePtrList::iterator it=file_list.begin(); it!=file_list.end();it++) {
     file = isSgSourceFile(*it);
     if (file->get_outputLanguage() == SgFile::e_Fortran_output_language)
       is_fortran_ = true;
     else
       is_fortran_ = false;
-    
-    // Manu:: debug
-    // if (is_fortran_)
-    //   std::cout << "Input is a fortran file\n";
-    // else
-    //     std::cout << "Input is a C file\n";
     
     root = file->get_globalScope();
     toplevel = (SgNode *) root; 
@@ -1579,42 +1541,21 @@ IR_roseCode::IR_roseCode(const char *file_name, const char* proc_name, const cha
   
   
   // OK, here we definitely can walk the tree. starting at root
-  //debug_fprintf(stderr, "creating chillAST from Rose AST\n");
-  //debug_fprintf(stderr, "\nroot is %s  %p\n", root->class_name().c_str(), root ); 
-  
-  //chillAST_node * 
-  //entire_file_AST = (chillAST_SourceFile *)ConvertRoseFile((SgNode *) root , file_name); 
+
   entire_file_AST = (chillAST_SourceFile *)ConvertRoseFile((SgNode *) firstScope , file_name);
-  entire_file_AST->print(0, stdout);
   chill::scanner::DefinitionLinker dl;
   dl.exec(entire_file_AST);
   chill::scanner::SanityCheck sc;
   sc.run(entire_file_AST, std::cout);
   vector<chillAST_node*> functions;
   chillAST_FunctionDecl *localFD = findFunctionDecl(  entire_file_AST, proc_name );
-  //debug_fprintf(stderr, "local Function Definition %p\n", localFD); 
-  //localFD->print(); printf("\n\n"); fflush(stdout); 
   chillfunc =  localFD;
-  
-  //fflush(stdout);
-  //debug_fprintf(stderr, "printing whole file\n"); 
-  //fprintf(stdout, "\n\n" );   fflush(stdout);
-  //entire_file_AST->print();
-  //entire_file_AST->dump(); 
-  //fflush(stdout);
-  
-  //debug_fprintf(stderr, "need to create symbol tables?\n"); 
   symtab2_ = func->get_definition()->get_symbol_table();
   symtab3_ = func->get_definition()->get_body()->get_symbol_table();
-  
-  //debug_fprintf(stderr, "\nir_rose.cc, calling new CG_chillBuilder()\n"); 
   ocg_ = new omega::CG_chillBuilder(entire_file_AST, chillfunc); // transition - use chillAST based builder
-  
   i_ = 0; /*i_ handling may need revision */
-  
   free(argv[1]);
   free(argv[0]);
-  
 }
 
 IR_roseCode::~IR_roseCode() {
@@ -1630,20 +1571,6 @@ void IR_roseCode::finalizeRose() {
   // -- Causes coredump. commented out for now -- //
   // processes attributes left in Rose Ast
   //postProcessRoseCodeInsertion(project);
-  
-  debug_fprintf(stderr, "printing as part of the destructor??\n"); 
-  //project->unparse();
-  //backend((IR_roseCode_Global_Init::Instance(NULL))->project);
-  
-  debug_fprintf(stderr, "IR_roseCode::finalizeRose() before cleanup\n"); 
-  chillfunc->print(); 
-  
-  // clean up a bit (TODO this is poorly implemented)
-  chillfunc->constantFold(); 
-  chillfunc->cleanUpVarDecls(); 
-  
-  debug_fprintf(stderr, "IR_roseCode::finalizeRose() after cleanup\n"); 
-  chillfunc->print(); 
 }
 
 bool  IR_roseCode::ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef *ref){
@@ -1673,4 +1600,3 @@ bool  IR_roseCode::ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef 
   die(); 
   exit(-1);
 }
-
