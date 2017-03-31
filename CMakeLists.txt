@@ -196,6 +196,8 @@ if (${FRONTEND} STREQUAL "Rose")
 
     install(TARGETS cuda-chill
             RUNTIME DESTINATION bin)
+else()
+    add_custom_target(cuda-chill)
 endif()
 add_subdirectory(omega/basic)
 add_subdirectory(omega/omega_lib)
