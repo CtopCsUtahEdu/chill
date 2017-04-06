@@ -982,31 +982,25 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
     }
     
     // reset lexical order for the unrolled loop body
-    std::set<int> new_same_loop;
-    
-    int count = 0;
-    
+    int midx=INT16_MAX,madx=INT16_MIN;
+
+    for (std::map<int, std::vector<int> >::iterator i =
+        what_stmt_num.begin(); i != what_stmt_num.end(); i++) {
+      int st = get_const(stmt[i->first].xform, dim+1, Output_Var);
+      midx = min(st,midx);
+      madx = max(st,madx);
+    }
+    midx = madx - midx + 1;
     for (std::map<int, std::vector<int> >::iterator i =
            what_stmt_num.begin(); i != what_stmt_num.end(); i++) {
-      
-      new_same_loop.insert(i->first);
-      for (int k = dim + 1; k < stmt[i->first].xform.n_out(); k += 2)
-        assign_const(stmt[i->first].xform, k,
-                     get_const(stmt[(what_stmt_num.begin())->first].xform, k,
-                               Output_Var) + count);
+      int count = 0;
+      int st = get_const(stmt[i->first].xform, dim+1, Output_Var);
       count++;
       for (int j = 0; j < i->second.size(); j++) {
-        new_same_loop.insert(i->second[j]);
-        for (int k = dim + 1; k < stmt[i->second[j]].xform.n_out(); k +=
-               2)
-          assign_const(stmt[i->second[j]].xform, k,
-                       get_const(
-                         stmt[(what_stmt_num.begin())->first].xform,
-                         k, Output_Var) + count);
+        assign_const(stmt[i->second[j]].xform, dim+1, st + count*midx);
         count++;
       }
     }
-    setLexicalOrder(dim + 1, new_same_loop, 0, idxNames);
   } else {
     for (std::set<int>::iterator i = same_loop.begin();
          i != same_loop.end(); i++)

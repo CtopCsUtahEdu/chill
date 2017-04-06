@@ -125,7 +125,16 @@ protected:
   int get_last_dep_dim_before(int stmt, int level) const;
   std::vector<omega::Relation> getNewIS() const;
   omega::Relation getNewIS(int stmt_num) const;
+  /**
+   * @brief Get the lexical order of a statment as a vector
+   * @return a 2*level+1 vector with real Loop set to 0
+   */
   std::vector<int> getLexicalOrder(int stmt_num) const;
+  /**
+   * @brief Get the lexical ordering of the statement at level
+   * @param level loop level starting with 1
+   * @return
+   */
   int getLexicalOrder(int stmt_num, int level) const;
   std::set<int> getStatements(const std::vector<int> &lex, int dim) const;
   /**
@@ -135,6 +144,14 @@ protected:
    * <= 0, all the statement before lex
    */
   void shiftLexicalOrder(const std::vector<int> &lex, int dim, int amount);
+  /**
+   * @brief Assign the lexical order of statements according to dependences
+   *
+   * @param dim The dimension to set starting with 0
+   * @param active Set of statements to set order
+   * @param starting_order
+   * @param idxNames
+   */
   void setLexicalOrder(int dim, const std::set<int> &active, int starting_order = 0, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >());
   void apply_xform(int stmt_num);
   void apply_xform(std::set<int> &active);

@@ -88,7 +88,7 @@ template<typename VertexType, typename EdgeType>
 std::ostream& operator<<(std::ostream &os, const Graph<VertexType, EdgeType> &g) {
   for (int i = 0; i < g.vertex.size(); i++)
     for (typename Graph<VertexType,EdgeType>::EdgeList::const_iterator j = g.vertex[i].second.begin(); j != g.vertex[i].second.end(); j++) {
-      os << i+1 << "->" << j->first+1 << ":";
+      os << i << "->" << j->first << ":";
       for (typename std::vector<EdgeType>::const_iterator k = j->second.begin(); k != j->second.end(); k++)
         os << " " << *k;
       os << std::endl;

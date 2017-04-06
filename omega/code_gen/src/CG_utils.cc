@@ -2691,11 +2691,15 @@ namespace omega {
     else if (j == i && end > j) {
       int new_indent = (guard_repr==NULL)?indent:indent+1;
       Relation new_guard = Intersection(copy(guard), copy(then_cond));
-      new_guard.print(stderr); 
-      new_guard.print_with_subs(stderr); 
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
       new_guard.simplify();
-      new_guard.print(stderr); 
-      new_guard.print_with_subs(stderr); 
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
 
       debug_fprintf(stderr,"CG_utils.cc loop_print_repr recursive 3\n"); 
       CG_outputRepr *stmt_list = loop_print_repr(active, 
