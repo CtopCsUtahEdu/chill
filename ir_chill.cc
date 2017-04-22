@@ -1853,13 +1853,13 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
   } else if(node->isFloatingLiteral()) { 
     float val = ((chillAST_FloatingLiteral*)node)->value; 
     return new IR_chillConstantRef(this, val );
-  } else if(node->isDeclRefExpr()) { 
+  } else if(node->isDeclRefExpr()) {
     //debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::Repr2Ref()  declrefexpr TODO\n"); exit(-1); 
-    return new IR_chillScalarRef(this, (chillAST_DeclRefExpr*)node);  // uses DRE
-  } else  { 
-    debug_fprintf(stderr, "ir_chill.cc IR_chillCode::Repr2Ref() UNHANDLED node type %s\n", node->getTypeString()); 
-    exit(-1); 
-    //assert(0);
+    return new IR_chillScalarRef(this, (chillAST_DeclRefExpr *) node);  // uses DRE
+  } else  {
+    string err = "IR_chillCode::Repr2Ref() UNHANDLED node type ";
+    err = err + node->getTypeString();
+    throw runtime_error(err.c_str());
   }
 }
 
