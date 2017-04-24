@@ -1192,7 +1192,7 @@ void Loop::stencilASEPadded(int stmt_num)   {
       
       
       std::pair<std::vector<DependenceVector>,
-                std::vector<DependenceVector> > dv = test_data_dependences(ir, 
+                std::vector<DependenceVector> > dv = test_data_dependences(this, ir,
                                                                            stmt[i].code, 
                                                                            stmt[i].IS, 
                                                                            stmt[j].code, 
@@ -1202,7 +1202,8 @@ void Loop::stencilASEPadded(int stmt_num)   {
                                                                            stmt_nesting_level_[i],
                                                                            stmt_nesting_level_[j],
                                                                            uninterpreted_symbols[ i ],  // ??? 
-                                                                           uninterpreted_symbols_stringrepr[ i ]); // ??? 
+                                                                           uninterpreted_symbols_stringrepr[ i ],unin_rel[i], dep_relation);
+      // TODO dep_relation is out-dated: from Anand's
       
       for (int k = 0; k < dv.first.size(); k++) {
         

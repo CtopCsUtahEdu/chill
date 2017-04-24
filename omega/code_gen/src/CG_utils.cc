@@ -976,7 +976,7 @@ namespace omega {
                                                     Variable_ID v, 
                                                     std::set<Variable_ID> excluded_floor_vars) {
     Conjunct *c = const_cast<Relation &>(R).single_conjunct();
-    
+
     excluded_floor_vars.insert(v);
     for (GEQ_Iterator e = c->GEQs(); e; e++) {
       coef_t a = (*e).get_coef(v);
@@ -1915,7 +1915,7 @@ namespace omega {
     bool is_mapping = false;
     if (r.n_out() > 0)
       is_mapping = true;
-    
+
     std::set<Variable_ID> excluded_floor_vars;
     std::set<Variable_ID> excluded_floor_vars2;
     std::stack<Variable_ID> to_fill;

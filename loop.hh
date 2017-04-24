@@ -92,7 +92,7 @@ protected:
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
-  
+
 public:
   void debugRelations() const;
   IR_Code *ir;
@@ -105,6 +105,7 @@ public:
   std::set<std::string> reduced_write_refs;
   std::map<std::string, int> array_dims;
   DependenceGraph dep;
+  std::vector<omega::Relation> dep_relation; // TODO What is this for: Anand's
   int num_dep_dim;
   omega::Relation known;
   omega::CG_outputRepr *init_code;
@@ -112,8 +113,12 @@ public:
   std::map<int, std::vector<omega::Free_Var_Decl *> > overflow;
   std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > > uninterpreted_symbols;
   std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >uninterpreted_symbols_stringrepr;
-  
-  
+  // Need for sparse
+  std::vector<std::map<std::string, std::vector<omega::Relation > > >unin_rel;
+  std::map<std::string, std::set<std::string > > unin_symbol_args;
+  std::map<std::string, std::string > unin_symbol_for_iegen;
+  std::vector<std::pair<std::string, std::string > > dep_rel_for_iegen;
+
 protected:
   mutable omega::CodeGen *last_compute_cg_;
   mutable omega::CG_result *last_compute_cgr_;
@@ -158,6 +163,7 @@ protected:
   void apply_xform();
   std::set<int> getSubLoopNest(int stmt_num, int level) const;
   int  getMinLexValue(std::set<int> stmts, int level);
+  omega::Relation parseExpWithWhileToRel(omega::CG_outputRepr *repr, omega::Relation &R, int loc);
  
   
 public:
@@ -188,6 +194,11 @@ public:
   int num_statement() const { return stmt.size(); }
   void printIterationSpace() const;
   void printDependenceGraph() const;
+  //! Print dependence with uninterpreted function symbols
+  /*!
+   * Adapted from *reorder_by_inspector*
+   */
+  void printDependenceUFs(int stmt_num, int level);
   void removeDependence(int stmt_num_from, int stmt_num_to);
   void dump() const;
   

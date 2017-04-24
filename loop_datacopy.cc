@@ -342,7 +342,8 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
       for (int k = 0; k < n_dim; k++) {
         IR_ArrayRef *AR = stmt_refs[i].second[j];
         CG_outputRepr *repr = stmt_refs[i].second[j]->index(k);
-        exp2formula(ir,
+        exp2formula(this,
+                    ir,
                     mapping, 
                     f_root, 
                     freevar, 
@@ -352,7 +353,9 @@ bool Loop::datacopy_privatized(const std::vector<std::pair<int, std::vector<IR_A
                     IR_COND_EQ, 
                     false,
                     uninterpreted_symbols[stmt_num],
-                    uninterpreted_symbols_stringrepr[stmt_num]);
+                    uninterpreted_symbols_stringrepr[stmt_num],
+                    unin_rel[stmt_num]
+        );
         repr->clear();
         delete repr;
       }

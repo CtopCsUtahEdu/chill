@@ -1046,6 +1046,45 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
   return new IR_chillArrayRef( this, ASE, 0 ); 
 }
 
+omega::CG_outputRepr *IR_chillCode::RetrieveMacro(std::string s) {
+  std::map<std::string, chillAST_node*>::iterator it =
+      defined_macros.find(s);
+  if (it!=defined_macros.end())
+    return new CG_chillRepr(it->second);
+  else
+    return new CG_chillRepr(NULL);
+}
+
+std::vector<IR_Loop *> IR_chillCode::FindLoops(omega::CG_outputRepr *repr) {
+  std::vector<IR_Loop*> ret;
+  chillAST_NodeList nl = static_cast<CG_chillRepr *>(repr)->getChillCode();
+  int paths = 0;
+  for (auto node : nl) {
+    std::vector<IR_Loop*> l;
+    if (node->isForStmt()) {
+      auto fst = static_cast<chillAST_ForStmt*>(node);
+      ret.push_back(new IR_chillLoop(this, fst));
+      l = FindLoops(new CG_chillRepr(fst->body));
+    } else if (node->isCompoundStmt()) {
+      l = FindLoops(new CG_chillRepr(node->getChildren()));
+    } else if (node->isIfStmt()) {
+      auto fst = static_cast<chillAST_IfStmt*>(node);
+      l = FindLoops(new CG_chillRepr(fst->thenpart));
+      if (l.size() > 0)
+        paths++;
+      std::copy(l.begin(), l.end(), back_inserter(ret));
+      l = FindLoops(new CG_chillRepr(fst->elsepart));
+    }
+    // Original code handled while as well
+    if (l.size() > 0)
+      paths++;
+    if (paths > 1)
+      return std::vector<IR_Loop*>();
+    std::copy(l.begin(), l.end(), back_inserter(ret));
+  }
+
+  return ret;
+}
 
 
 // find all array references ANYWHERE in this block of code  ?? 

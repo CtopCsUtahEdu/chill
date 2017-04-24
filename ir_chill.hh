@@ -425,8 +425,9 @@ public:
   IR_chillCode(const char *filename, char *proc_name, char *script_name);
   ~IR_chillCode();
 
-  void setOutputName( const char *name ) { outputname = strdup(name); } 
+  void setOutputName( const char *name ) { outputname = strdup(name); }
 
+  virtual omega::CG_outputRepr *RetrieveMacro(std::string s);
   IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int i);
   IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
 
@@ -457,7 +458,7 @@ public:
 
   std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
   std::vector<IR_ArrayRef *> FindArrayRef(const omega::CG_outputRepr *repr) const;
-
+  virtual std::vector<IR_Loop *> FindLoops(omega::CG_outputRepr *repr);
   std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const;
   IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
                                             std::vector<omega::CG_outputRepr *> &index);

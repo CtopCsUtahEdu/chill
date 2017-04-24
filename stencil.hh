@@ -5,7 +5,6 @@
 #include "chill_ast.hh"
 
 //#include <omega.h>
-#include <omegatools.hh>
 #include "code_gen/CG_chillRepr.h"
 
 // #include "loop.hh"

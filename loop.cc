@@ -303,20 +303,20 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
                      std::vector<ir_tree_node *> &ir_stmt) {
   
   debug_fprintf(stderr, "\n                                                  Loop::init_loop()\n");
-  
+
   debug_fprintf(stderr, "extract_ir_stmts()\n");
-  debug_fprintf(stderr, "ir_tree has %d statements\n", ir_tree.size()); 
+  debug_fprintf(stderr, "ir_tree has %d statements\n", ir_tree.size());
 
   ir_stmt = extract_ir_stmts(ir_tree);
-  
+
   debug_fprintf(stderr,"nesting level stmt size = %d\n", (int)ir_stmt.size());
   stmt_nesting_level_.resize(ir_stmt.size());
-  
+
   std::vector<int> stmt_nesting_level(ir_stmt.size());
   
-  debug_fprintf(stderr, "%d statements?\n", (int)ir_stmt.size()); 
-  
-  // find out how deeply nested each statement is.  (how can these be different?) 
+  debug_fprintf(stderr, "%d statements?\n", (int)ir_stmt.size());
+
+  // find out how deeply nested each statement is.  (how can these be different?)
   for (int i = 0; i < ir_stmt.size(); i++) {
     debug_fprintf(stderr, "i %d\n", i); 
     ir_stmt[i]->payload = i;
@@ -340,13 +340,14 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
   
   uninterpreted_symbols =             std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >(ir_stmt.size());
   uninterpreted_symbols_stringrepr =  std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >(ir_stmt.size());
+  unin_rel = std::vector<std::map<std::string, std::vector<omega::Relation> > >(ir_stmt.size());
   
   int n_dim = -1;
   int max_loc;
   //std::vector<std::string> index;
   for (int i = 0; i < ir_stmt.size(); i++) {
     int max_nesting_level = -1;
-    int loc;
+    int loc = -1;
     
     // find the max nesting level and remember the statement that was at that level
     for (int j = 0; j < ir_stmt.size(); j++) {
@@ -429,21 +430,15 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     
     debug_fprintf(stderr, "Relation r(%d)\n", n_dim); 
     Relation r(n_dim);
+    std::vector<string> insp_lb;
+    std::vector<string> insp_ub;
     F_And *f_root = r.add_and();
     itn = ir_stmt[loc];
     int temp_depth = depth;
-    while (itn->parent != NULL) {
-      
-      itn = itn->parent;
-      if (itn->content->type() == IR_CONTROL_LOOP) {
-        debug_fprintf(stderr, "it's a loop.  temp_depth %d\n", temp_depth); 
-        debug_fprintf(stderr, "r.name_set_var( %d, %s )\n", itn->payload + 1, index[temp_depth].c_str());
-        r.name_set_var(itn->payload + 1, index[temp_depth]);
-        
-        temp_depth--;
-      }
-      //static_cast<IR_Loop *>(itn->content)->index()->name());
-    }
+
+    for (int i =1; i<= n_dim; ++i)
+      r.name_set_var(i, index[i - 1]);
+
     debug_begin
       printf("Relation r   ");
       r.print();
@@ -453,11 +448,8 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     // extract information from loop/if structures
     std::vector<bool> processed(n_dim, false);
     std::vector<std::string> vars_to_be_reversed;
-    
-    std::vector<std::string> insp_lb;
-    std::vector<std::string> insp_ub;
-    
     itn = ir_stmt[loc];
+
     while (itn->parent != NULL) { // keep heading upward 
       itn = itn->parent;
       
@@ -473,15 +465,21 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
           //debug_fprintf(stderr, "step size %d\n", c); 
           if (c > 0) {
             CG_outputRepr *lb = lp->lower_bound();
-            exp2formula(ir, r, f_root, freevar, lb, v, 's',
-                        IR_COND_GE, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
-            
+
+            exp2formula(this, ir, r, f_root, freevar, lb, v, 's',
+                        IR_COND_GE, true, uninterpreted_symbols[loc],
+                        uninterpreted_symbols_stringrepr[loc],
+                        unin_rel[loc]);
+            // TODO Anand's return a vector - Usage?
             CG_outputRepr *ub = lp->upper_bound();
 
             IR_CONDITION_TYPE cond = lp->stop_cond();
             if (cond == IR_COND_LT || cond == IR_COND_LE)
-              exp2formula(ir, r, f_root, freevar, ub, v, 's',
-                          cond, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+              exp2formula(this, ir, r, f_root, freevar, ub,
+                          v, 's', cond, true,
+                          uninterpreted_symbols[loc],
+                          uninterpreted_symbols_stringrepr[loc],
+                          unin_rel[loc]);
             else
               throw ir_error("loop condition not supported");
             
@@ -497,40 +495,42 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
               std::vector<CG_outputRepr *> v =
                 ir->QueryExpOperand(lp->lower_bound());
               IR_ArrayRef *ref =
-                static_cast<IR_ArrayRef *>(ir->Repr2Ref(
-                                                        v[0]));
+                static_cast<IR_ArrayRef *>(ir->Repr2Ref(v[0]));
               std::string s0 = ref->name();
               std::vector<CG_outputRepr *> v2 =
                 ir->QueryExpOperand(lp->upper_bound());
               IR_ArrayRef *ref2 =
-                static_cast<IR_ArrayRef *>(ir->Repr2Ref(
-                                                        v2[0]));
+                static_cast<IR_ArrayRef *>(ir->Repr2Ref(v2[0]));
               std::string s1 = ref2->name();
               
               if (s0 == s1) {
                 insp_lb.push_back(s0);
                 insp_ub.push_back(s1);
-                
               }
-              
             }
-            
-            
           } else if (c < 0) {
             CG_outputBuilder *ocg = ir->builder();
             CG_outputRepr *lb = lp->lower_bound();
             lb = ocg->CreateMinus(NULL, lb);
-            exp2formula(ir, r, f_root, freevar, lb, v, 's',
-                        IR_COND_GE, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+            exp2formula(this, ir, r, f_root, freevar, lb, v, 's',
+                        IR_COND_GE, true, uninterpreted_symbols[loc],
+                        uninterpreted_symbols_stringrepr[loc],
+                        unin_rel[loc]);
             CG_outputRepr *ub = lp->upper_bound();
             ub = ocg->CreateMinus(NULL, ub);
             IR_CONDITION_TYPE cond = lp->stop_cond();
             if (cond == IR_COND_GE)
-              exp2formula(ir, r, f_root, freevar, ub, v, 's',
-                          IR_COND_LE, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+              exp2formula(this, ir, r, f_root, freevar, ub, v,
+                          's', IR_COND_LE, true,
+                          uninterpreted_symbols[loc],
+                          uninterpreted_symbols_stringrepr[loc],
+                          unin_rel[loc]);
             else if (cond == IR_COND_GT)
-              exp2formula(ir, r, f_root, freevar, ub, v, 's',
-                          IR_COND_LT, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+              exp2formula(this, ir, r, f_root, freevar, ub, v,
+                          's', IR_COND_LT, true,
+                          uninterpreted_symbols[loc],
+                          uninterpreted_symbols_stringrepr[loc],
+                          unin_rel[loc]);
             else
               throw ir_error("loop condition not supported");
             
@@ -560,8 +560,10 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
             h.update_coef(e, -1);
           h.update_coef(v, -1);
           CG_outputRepr *lb = lp->lower_bound();
-          exp2formula(ir, r, f_and, freevar, lb, e, 's', IR_COND_EQ,
-                      true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+          exp2formula(this, ir, r, f_and, freevar, lb, e, 's',
+                      IR_COND_EQ, true, uninterpreted_symbols[loc],
+                      uninterpreted_symbols_stringrepr[loc],
+                      unin_rel[loc]);
         }
         
         processed[itn->payload] = true;
@@ -578,11 +580,17 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         
         try {
           if (itn->payload % 2 == 1)
-            exp2constraint(ir, r, f_root, freevar, cond, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+            exp2constraint(this, ir, r, f_root, freevar, cond, true,
+                           uninterpreted_symbols[loc],
+                           uninterpreted_symbols_stringrepr[loc],
+                           unin_rel[loc]);
           else {
             F_Not *f_not = f_root->add_not();
             F_And *f_and = f_not->add_and();
-            exp2constraint(ir, r, f_and, freevar, cond, true,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
+            exp2constraint(this, ir, r, f_and, freevar, cond, true,
+                           uninterpreted_symbols[loc],
+                           uninterpreted_symbols_stringrepr[loc],
+                           unin_rel[loc]);
           }
         } catch (const ir_error &e) {
           std::vector<ir_tree_node *> *t;
@@ -639,75 +647,23 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
           
           CG_outputRepr *lb =
             static_cast<IR_Loop *>(itn->content)->lower_bound();
-          
-          exp2formula(ir, r, f_root, freevar, lb, v, 's', IR_COND_EQ,
-                      false,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
-          
-          /*    if (ir->QueryExpOperation(
-                static_cast<IR_Loop *>(itn->content)->lower_bound())
-                == IR_OP_VARIABLE) {
-                IR_ScalarRef *ref =
-                static_cast<IR_ScalarRef *>(ir->Repr2Ref(
-                static_cast<IR_Loop *>(itn->content)->lower_bound()));
-                std::string name_ = ref->name();
-                
-                for (int i = 0; i < index.size(); i++)
-                if (index[i] == name_) {
-                exp2formula(ir, r, f_root, freevar, lb, v, 's',
-                IR_COND_GE, false);
-                
-                CG_outputRepr *ub =
-                static_cast<IR_Loop *>(itn->content)->upper_bound();
-                IR_CONDITION_TYPE cond =
-                static_cast<IR_Loop *>(itn->content)->stop_cond();
-                if (cond == IR_COND_LT || cond == IR_COND_LE)
-                exp2formula(ir, r, f_root, freevar, ub, v,
-                's', cond, false);
-                
-                
-                
-                }
-                
-                }
-          */
-          
+
+          exp2formula(this, ir, r, f_root, freevar, lb, v, 's',
+                      IR_COND_EQ, false, uninterpreted_symbols[loc],
+                      uninterpreted_symbols_stringrepr[loc],
+                      unin_rel[loc]);
+
         } else { // loc > max_loc
           
           CG_outputBuilder *ocg = ir->builder();
           CG_outputRepr *ub =
             static_cast<IR_Loop *>(itn->content)->upper_bound();
-          
-          exp2formula(ir, r, f_root, freevar, ub, v, 's', IR_COND_EQ,
-                      false,uninterpreted_symbols[i],uninterpreted_symbols_stringrepr[i]);
-          /*if (ir->QueryExpOperation(
-            static_cast<IR_Loop *>(itn->content)->upper_bound())
-            == IR_OP_VARIABLE) {
-            IR_ScalarRef *ref =
-            static_cast<IR_ScalarRef *>(ir->Repr2Ref(
-            static_cast<IR_Loop *>(itn->content)->upper_bound()));
-            std::string name_ = ref->name();
-            
-            for (int i = 0; i < index.size(); i++)
-            if (index[i] == name_) {
-            
-            CG_outputRepr *lb =
-            static_cast<IR_Loop *>(itn->content)->lower_bound();
-            
-            exp2formula(ir, r, f_root, freevar, lb, v, 's',
-            IR_COND_GE, false);
-            
-            CG_outputRepr *ub =
-            static_cast<IR_Loop *>(itn->content)->upper_bound();
-            IR_CONDITION_TYPE cond =
-            static_cast<IR_Loop *>(itn->content)->stop_cond();
-            if (cond == IR_COND_LT || cond == IR_COND_LE)
-            exp2formula(ir, r, f_root, freevar, ub, v,
-            's', cond, false);
-            
-            
-            }
-            }
-          */
+
+          exp2formula(this, ir, r, f_root, freevar, ub, v, 's',
+                      IR_COND_EQ, false, uninterpreted_symbols[loc],
+                      uninterpreted_symbols_stringrepr[loc],
+                      unin_rel[loc]);
+
         }
       }
     r.setup_names();
@@ -764,11 +720,142 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     debug_fprintf(stderr, "loop.cc L441 insert the statement\n");
     // insert the statement
     CG_outputBuilder *ocg = ir->builder();
+    CG_stringBuilder ocg_s = ir->builder_s();
     std::vector<CG_outputRepr *> reverse_expr;
     for (int j = 1; j <= vars_to_be_reversed.size(); j++) {
       CG_outputRepr *repl = ocg->CreateIdent(vars_to_be_reversed[j]);
       repl = ocg->CreateMinus(NULL, repl);
-      reverse_expr.push_back(repl);
+      reverse_expr.push_back(repl->clone());
+      CG_outputRepr *repl_ = ocg_s.CreateIdent(vars_to_be_reversed[j]);
+      repl_ = ocg_s.CreateMinus(NULL, repl_);
+      std::vector<CG_outputRepr *> reverse_;
+
+      reverse_.push_back(repl_->clone());
+      int pos;
+      for (int k = 1; k <= r.n_set(); k++)
+        if (vars_to_be_reversed[j] == r.set_var(k)->name())
+          pos = k;
+
+//			for(int k =0; k < ir_stmt.size(); k++ ){
+      for (std::map<std::string, std::vector<omega::CG_outputRepr *> >::iterator it =
+          uninterpreted_symbols[loc].begin();
+           it != uninterpreted_symbols[loc].end(); it++) {
+
+        for (int l = 0; l < freevar.size(); l++) {
+          int arity;
+          if (freevar[l]->base_name() == it->first) {
+            arity = freevar[l]->arity();
+            if (arity >= pos) {
+              std::vector<CG_outputRepr *> tmp = it->second;
+              std::vector<CG_outputRepr *> reverse;
+              reverse.push_back(repl->clone());
+              std::vector<std::string> tmp2;
+              tmp2.push_back(vars_to_be_reversed[j]);
+              tmp[pos - 1] = ocg->CreateSubstitutedStmt(0,
+                                                        tmp[pos - 1]->clone(), tmp2, reverse);
+
+              it->second = tmp;
+              break;
+            }
+          }
+
+        }
+
+      }
+
+      for (std::map<std::string, std::vector<omega::Relation> >::iterator it =
+          unin_rel[loc].begin(); it != unin_rel[loc].end(); it++) {
+
+        if (it->second.size() > 0) {
+          for (int l = 0; l < freevar.size(); l++) {
+            int arity;
+            if (freevar[l]->base_name() == it->first) {
+              arity = freevar[l]->arity();
+              if (arity >= pos) {
+
+                break;
+
+                std::vector<omega::Relation> reprs_ = it->second;
+                std::vector<omega::Relation> reprs_2;
+                //					for (int k = 0; k < reprs_.size(); k++) {
+                omega::Relation r(reprs_[pos - 1].n_inp(), 1);
+
+                omega::F_And *root = r.add_and();
+                omega::EQ_Handle h1 = root->add_EQ();
+
+                h1.update_coef(r.output_var(1), 1);
+                for (omega::EQ_Iterator e(
+                    reprs_[pos - 1].single_conjunct()->EQs());
+                     e; e++) {
+                  for (omega::Constr_Vars_Iter c(*e); c;
+                       c++) {
+
+                    if ((*e).get_const() > 0)
+                      h1.update_const((*e).get_const());
+                    else
+                      h1.update_const(
+                          -((*e).get_const()));
+
+                    omega::Variable_ID v = c.curr_var();
+                    switch (v->kind()) {
+                      case omega::Input_Var: {
+                        int coef = c.curr_coef();
+                        if (coef < 0)
+                          coef *= (-1);
+                        h1.update_coef(
+                            r.input_var(
+                                v->get_position()),
+                            coef);
+
+                        break;
+                      }
+                      case omega::Wildcard_Var: {
+                        omega::F_Exists *f_exists =
+                            root->add_exists();
+                        int coef = c.curr_coef();
+                        if (coef < 0)
+                          coef *= (-1);
+                        std::map<omega::Variable_ID,
+                            omega::Variable_ID> exists_mapping;
+                        omega::Variable_ID v2 =
+                            replicate_floor_definition(
+                                copy(
+                                    reprs_[pos
+                                           - 1]),
+                                v, r, f_exists,
+                                root,
+                                exists_mapping);
+                        h1.update_coef(v2, coef);
+                        break;
+                      }
+                      default:
+                        break;
+
+                        //h1.update_const(result1.first.get_const());
+
+                    }
+
+                    //	}
+
+                    //}
+
+                  }
+
+                  reprs_[pos - 1] = r;
+                  break;
+                  //}
+
+                  it->second = reprs_;
+
+                }
+              }
+
+            }
+
+          }
+
+        }
+      }
     }
     debug_fprintf(stderr, "loop.cc before extract\n"); 
     CG_outputRepr *code =
@@ -792,6 +879,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
       stmt[loc].loop_level[ii].type = LoopLevelOriginal;
       stmt[loc].loop_level[ii].payload = ii;
       stmt[loc].loop_level[ii].parallel_level = 0;
+      stmt[loc].loop_level[ii].segreducible = false;
     }
     debug_fprintf(stderr, "whew\n"); 
     
@@ -818,7 +906,7 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "2set last_compute_cg_ = NULL; \n"); 
 
   ir = const_cast<IR_Code *>(control->ir_); // point to the CHILL IR that this loop came from
-  if (ir == 0) { 
+  if (!ir) {
     debug_fprintf(stderr, "ir gotten from control = 0x%x\n", (long)ir);
     debug_fprintf(stderr, "loop.cc GONNA DIE SOON *******************************\n\n");
   }
@@ -837,7 +925,6 @@ Loop::Loop(const IR_Control *control) {
   //    std::vector<ir_tree_node *> ir_stmt;
   //debug_fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
   
-  int count = 0;
   while (!init_loop(ir_tree, ir_stmt)) {
     //debug_fprintf(stderr, "count %d\n", count++); 
   }
@@ -852,6 +939,10 @@ Loop::Loop(const IR_Control *control) {
       stmt[i].code = it->second;
     else
       stmt[i].code = stmt[i].code;
+
+    // TODO replace_set_var_as_another_set_var
+    // Relation r = parseExpWithWhileToRel(stmt[i].code, stmt[i].IS, i);
+    // r.simplify();
   }
   
   if (stmt.size() != 0)
@@ -862,12 +953,11 @@ Loop::Loop(const IR_Control *control) {
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
   
-  // this really REALLY needs some comments
   for (int i = 0; i < stmt.size(); i++) {
     stmt[i].reduction = 0; // Manu -- initialization
     for (int j = i; j < stmt.size(); j++) {
       std::pair<std::vector<DependenceVector>,
-                std::vector<DependenceVector> > dv = test_data_dependences(
+                std::vector<DependenceVector> > dv = test_data_dependences(this,
                                                                            ir, 
                                                                            stmt[i].code, 
                                                                            stmt[i].IS, 
@@ -877,8 +967,8 @@ Loop::Loop(const IR_Control *control) {
                                                                            index, 
                                                                            stmt_nesting_level_[i],
                                                                            stmt_nesting_level_[j],
-                                                                           uninterpreted_symbols[ i ],
-                                                                           uninterpreted_symbols_stringrepr[ i ]);
+                                                                           uninterpreted_symbols[i],
+                                                                           uninterpreted_symbols_stringrepr[i], unin_rel[i], dep_relation);
       
       debug_fprintf(stderr, "dv.first.size() %d\n", (int)dv.first.size()); 
       for (int k = 0; k < dv.first.size(); k++) {
@@ -916,16 +1006,16 @@ Loop::Loop(const IR_Control *control) {
     if (!dep.hasEdge(i, i)) {
       continue;
     }
-    debug_fprintf(stderr, "dep.hasEdge(%d, %d)\n", i, i); 
+    debug_fprintf(stderr, "dep.hasEdge(%d, %d)\n", i, i);
 
     // for each statement check if it has all the three dependences (RAW, WAR, WAW)
     // If there is such a statement, it is a reduction candidate. Mark all reduction candidates.
     std::vector<DependenceVector> tdv = dep.getEdge(i, i);
-    debug_fprintf(stderr, "tdv size %d\n", tdv.size()); 
+    debug_fprintf(stderr, "tdv size %d\n", tdv.size());
     for (int j = 0; j < tdv.size(); j++) {
-      debug_fprintf(stderr, "ij %d %d\n", i, j); 
-      if (tdv[j].is_reduction_cand) { 
-        debug_fprintf(stderr, "reducCand.insert( %d )\n", i); 
+      debug_fprintf(stderr, "ij %d %d\n", i, j);
+      if (tdv[j].is_reduction_cand) {
+        debug_fprintf(stderr, "reducCand.insert( %d )\n", i);
         reducCand.insert(i);
       }
     }
@@ -936,19 +1026,16 @@ Loop::Loop(const IR_Control *control) {
   std::set<int>::iterator it;
   int counter = 0; 
   for (it = reducCand.begin(); it != reducCand.end(); it++) {
-    debug_fprintf(stderr, "counter %d\n", counter); 
     reduc = true;
     for (int j = 0; j < stmt.size(); j++) {
       debug_fprintf(stderr, "j %d\n", j); 
       if ((*it != j)
           && (stmt_nesting_level_[*it] < stmt_nesting_level_[j])) {
         if (dep.hasEdge(*it, j) || dep.hasEdge(j, *it)) {
-          debug_fprintf(stderr, "counter %d j %d  reduc = false\n", counter, j); 
           reduc = false;
           break;
         }
       }
-      counter += 1;
     }
     
     if (reduc) {
@@ -993,9 +1080,7 @@ Loop::Loop(const IR_Control *control) {
   }
   // cleanup the IR tree
   
-  debug_fprintf(stderr, "init dumb transformation relations\n"); 
-
-  // init dumb transformation relations e.g. [i, j] -> [ 0, i, 0, j, 0]
+  // init transformations adding auxiliary indices e.g. [i, j] -> [ 0, i, 0, j, 0]
   for (int i = 0; i < stmt.size(); i++) {
     int n = stmt[i].IS.n_set();
     stmt[i].xform = Relation(n, 2 * n + 1);
@@ -4492,10 +4577,10 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
         h.update_coef(mapping.output_var(k), -1);
       }
       
-      exp2formula(ir, mapping, f_root, freevar, repr->clone(),
+      exp2formula(this, ir, mapping, f_root, freevar, repr->clone(),
                   mapping.output_var(stmt[stmt_num].IS.n_set() + 1), 'w',
                   IR_COND_EQ, false, uninterpreted_symbols[stmt_num],
-                  uninterpreted_symbols_stringrepr[stmt_num]);
+                  uninterpreted_symbols_stringrepr[stmt_num], unin_rel[stmt_num]);
       
       Relation r = omega::Range(
                                 Restrict_Domain(mapping,
@@ -4710,9 +4795,9 @@ void Loop::compact(int stmt_num, int level, std::string new_array, int zero,
   }
   F_And *f_root_ = r.and_with_and();
   std::vector<omega::Free_Var_Decl*> freevars;
-  exp2constraint(ir, r, f_root_, freevars, guards[0]->clone(), true,
+  exp2constraint(this, ir, r, f_root_, freevars, guards[0]->clone(), true,
                  uninterpreted_symbols[stmt_num],
-                 uninterpreted_symbols_stringrepr[stmt_num]);
+                 uninterpreted_symbols_stringrepr[stmt_num], unin_rel[stmt_num]);
   r.simplify();
   if (_DEBUG_)
     r.print();

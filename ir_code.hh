@@ -34,6 +34,7 @@
 
 #include <code_gen/CG_outputRepr.h>
 #include <code_gen/CG_outputBuilder.h>
+#include <code_gen/CG_stringBuilder.h>
 
 /*!
  * \file
@@ -83,6 +84,10 @@ struct IR_ScalarSymbol: public IR_Symbol {
   bool isScalar() const { return true; }
 };
 
+struct IR_FunctionSymbol: public IR_Symbol {
+  virtual ~IR_FunctionSymbol() {}
+  int n_dim() const { return 0; }
+};
 
 struct IR_ArraySymbol: public IR_Symbol {
   virtual ~IR_ArraySymbol() {}
@@ -155,6 +160,17 @@ struct IR_ScalarRef: public IR_Ref {
   }
 };
 
+struct IR_FunctionRef: public IR_Ref {
+  virtual ~IR_FunctionRef() {}
+  int n_dim() const { return 0; }
+  virtual IR_FunctionSymbol *symbol() const = 0;
+  std::string name() const {
+    IR_FunctionSymbol *sym = symbol();
+    std::string s = sym->name();
+    delete sym;
+    return s;
+  }
+};
 
 struct IR_ArrayRef: public IR_Ref {
   virtual ~IR_ArrayRef() {}
@@ -276,6 +292,8 @@ class IR_Code {
 protected:
   // the only data members in IR_Code are Omega classes
   omega::CG_outputBuilder *ocg_;    // Omega Code Gen
+  // TODO does stringBuilder have internal state that needs to be global?
+  omega::CG_stringBuilder ocgs;
   omega::CG_outputRepr *init_code_;
   omega::CG_outputRepr *cleanup_code_;
 
@@ -300,7 +318,7 @@ public:
   virtual ~IR_Code() { delete ocg_; delete init_code_; delete cleanup_code_; } /* the content of init and cleanup code have already been released in derived classes */
   
   omega::CG_outputRepr* init_code(){ return init_code_; }
-
+  virtual omega::CG_outputRepr *RetrieveMacro(std::string s) = 0;
   /*!
    * \param memory_type is for differentiating the location of
    *    where the new memory is allocated. this is useful for
@@ -359,6 +377,7 @@ public:
   virtual std::vector<IR_ArrayRef *> FindArrayRef(const omega::CG_outputRepr *repr) const = 0;
   virtual std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const = 0 ;
   virtual std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const = 0;
+  virtual std::vector<IR_Loop *> FindLoops(omega::CG_outputRepr *repr)= 0;
   virtual bool parent_is_array(IR_ArrayRef *a)=0;
 
   // If there is no sub structure interesting inside the block, return empty,
@@ -406,6 +425,7 @@ public:
 
   //---------------------------------------------------------------------------
   omega::CG_outputBuilder *builder() const { return ocg_;}
+  omega::CG_stringBuilder builder_s() const { return ocgs; }
 
 };
 
