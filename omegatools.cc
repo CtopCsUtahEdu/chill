@@ -197,8 +197,7 @@ namespace {
         v.push_back(to_push);
         break;
       }
-      // TODO case IR_OP_MACRO:
-      {
+      case IR_OP_MACRO: {
         std::vector<CG_outputRepr *> v_ = ir->QueryExpOperand(repr_src);
         IR_ScalarRef *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v_[0]));
         LinearTerm to_push;
@@ -436,14 +435,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
                  std::map<std::string, std::vector<omega::Relation> > &index_variables) {
-
-// void exp2formula(IR_Code *ir, Relation &r, F_And *f_root, std::vector<Free_Var_Decl*> &freevars,
-//                   CG_outputRepr *repr, Variable_ID lhs, char side, char rel, bool destroy) {
-
   switch (ir->QueryExpOperation(repr)) {
 
-    // case IR_OP_MACRO:
-    {
+    case IR_OP_MACRO: {
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       IR_FunctionRef *ref = static_cast<IR_FunctionRef *>(ir->Repr2Ref(v[0]));
       std::string s = ref->name();
@@ -451,14 +445,11 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       bool exists = false;
       for (int i = 0; i < freevars.size(); i++)
         if (freevars[i]->base_name() == s) {
-
           e = r.get_local(freevars[i], Input_Tuple);
-
+          exists = true;
         }
-      exists = true;
       if (!exists) {
         Free_Var_Decl *t = new Free_Var_Decl(s, 1);
-
         e = r.get_local(t, Input_Tuple);
       }
 
