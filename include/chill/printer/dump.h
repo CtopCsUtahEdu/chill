@@ -45,6 +45,8 @@ namespace chill {
 
       virtual void runS(chillAST_ForStmt *n, std::string indent, std::ostream &o);
 
+      virtual void runS(chillAST_WhileStmt *n, std::string indent, std::ostream &o);
+
       virtual void runS(chillAST_Free *n, std::string indent, std::ostream &o);
 
       virtual void runS(chillAST_FunctionDecl *n, std::string indent, std::ostream &o);

@@ -723,11 +723,11 @@ chillAST_node * ConvertRoseForStatement( SgForStatement *fs )
     throw std::runtime_error("ConvertRoseForStatement (ir_rose.cc) more than a single statement in the init, not handled\n");
   SgStatement *roseinit = inits[0];
   
-  SgExpression *rosecond  = fs->get_test_expr(); 
+  SgExpression *rosecond  = fs->get_test_expr();
   SgStatement  *rosecond2 = fs->get_test();
   
   SgExpression *roseincr  = fs->get_increment(); 
-  SgStatement  *rosebody  = fs->get_loop_body(); 
+  SgStatement  *rosebody  = fs->get_loop_body();
 
   // create the 4 components of a for statement
   chillAST_node *init = ConvertRoseGenericAST( roseinit );
@@ -745,6 +745,21 @@ chillAST_node * ConvertRoseForStatement( SgForStatement *fs )
   return chill_loop;
 }
 
+chillAST_node * ConvertRoseWhileStmt( SgWhileStmt *whilestmt ) {
+  SgStatement *rosecond  = whilestmt->get_condition();
+  SgStatement *rosebody  = whilestmt->get_body();
+
+  chillAST_node *cond = ConvertRoseGenericAST( rosecond );
+  chillAST_node *body = ConvertRoseGenericAST( rosebody );
+
+  if (!body->isCompoundStmt()) {
+    chillAST_CompoundStmt *cs = new chillAST_CompoundStmt();
+    cs->addChild(body);
+    body = cs;
+  }
+  chillAST_WhileStmt *chill_loop = new chillAST_WhileStmt(cond, body);
+  return chill_loop;
+}
 
 
 chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement )
@@ -754,11 +769,8 @@ chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement )
   SgExpression *expr = exprstatement->get_expression();
   //if (isSgExprListExp(expr)) debug_fprintf(stderr, "ExprListExpr\n");
   //if (isSgCommaOpExp(expr))  debug_fprintf(stderr, "commaop expr\n"); // a special kind of Binary op
-  if (isSgBinaryOp(expr)) {
-    SgBinaryOp *bo = (SgBinaryOp *) expr;
-    //if (isSgCommaOpExp(bo))   { debug_fprintf(stderr, "commaop binop\n");  }
-    ret = ConvertRoseBinaryOp( bo );
-  }
+  if (isSgBinaryOp(expr)) ret = ConvertRoseBinaryOp( (SgBinaryOp *) expr );
+  else if ( isSgUnaryOp(expr)     ) ret = ConvertRoseUnaryOp ((SgUnaryOp *)expr );
   else if ( isSgIntVal(expr)     ) ret = ConvertRoseIntVal   ((SgIntVal *)expr );
   else if ( isSgFloatVal(expr)   ) ret = ConvertRoseFloatVal   ((SgFloatVal *)expr );
   else if ( isSgDoubleVal(expr)  ) ret = ConvertRoseDoubleVal ((SgDoubleVal *)expr );
@@ -1415,6 +1427,7 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n )
   } else if ( isSgInitializedName(n)     ) { /*debug_fprintf(stderr, "(1)\n"); */ret = ConvertRoseInitName         ((SgInitializedName *)n );    // param?
   } else if ( isSgVariableDeclaration(n) ) { /*debug_fprintf(stderr, "(2)\n"); */ret = ConvertRoseVarDecl(       (SgVariableDeclaration *)n );
   } else if ( isSgForStatement(n)        ) { ret = ConvertRoseForStatement    ((SgForStatement *)n );
+  } else if ( isSgWhileStmt(n)           ) { ret = ConvertRoseWhileStmt       ((SgWhileStmt *)n);
   } else if ( isSgExprStatement(n)       ) { ret = ConvertRoseExprStatement   ((SgExprStatement *)n ); // expression hidden inside exprstatement
     
   } else if ( isSgIntVal(n)              ) { ret = ConvertRoseIntVal          ((SgIntVal *)n );        //
@@ -1440,7 +1453,8 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n )
   } else if ( isSgReturnStmt(n)          ) { ret = ConvertRoseReturnStmt      ((SgReturnStmt *)n );
   } else if ( isSgIfStmt(n)              ) { ret = ConvertRoseIfStmt          ((SgIfStmt *)n );
   } else if ( isSgAssignInitializer(n)   ) { ret = ConvertRoseAssignInitializer((SgAssignInitializer *)n);
-  } else if ( isSgNullExpression(n)      ) {  //  ignore ?? 
+  } else if ( isSgWhileStmt(n)           ) { ret = ConvertRoseWhileStmt       ((SgWhileStmt *)n);
+  } else if ( isSgNullExpression(n)      ) {  //  ignore ??
       //return the NULL
   }
   else if ( isSgNullStatement(n)      ) {
@@ -1449,9 +1463,9 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n )
   //} else if ( isSgLessOrEqualOp(n)       ) { ret = ConvertRoseExprStatement((SgLessOrEqualOp *)n, parent ); // binary 
     //} else if ( isSgPlusPlusOp(n)       ) { ret = ConvertRoseExprStatement((SgPlusPlusOp *)n, parent );       // unary  
     
-  else { 
-    debug_fprintf(stderr, "ConvertRoseGenericAST(), unhandled node of type %s   '%s'\n", n->class_name().c_str(), n->unparseToString().c_str()); 
-    exit(-1);
+  else {
+    std::string s = "ConvertRoseGenericAST(), unhandled node of type " + n->class_name() + " " + n->unparseToString();
+    throw std::runtime_error(s.c_str());
   }
 
   ConvertRosePreprocessing( n, ret );  // check for comments, defines, etc attached to this node

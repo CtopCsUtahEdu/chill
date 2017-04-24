@@ -55,6 +55,7 @@ enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_COMPOUNDSTMT,
   CHILLAST_NODETYPE_LOOP,               // AKA ForStmt
   CHILLAST_NODETYPE_FORSTMT = CHILLAST_NODETYPE_LOOP,
+  CHILLAST_NODETYPE_WHILESTMT,
   CHILLAST_NODETYPE_TERNARYOPERATOR,
   CHILLAST_NODETYPE_BINARYOPERATOR,
   CHILLAST_NODETYPE_UNARYOPERATOR,
@@ -154,6 +155,9 @@ class chillAST_CompoundStmt;
 //! a for loop
 class chillAST_ForStmt;
 
+//! a while loop
+class chillAST_WhileStmt;
+
 class chillAST_TernaryOperator; 
 class chillAST_BinaryOperator; 
 class chillAST_ArraySubscriptExpr;
@@ -222,6 +226,7 @@ public:
   bool isCompoundStmt()       { return (getType() == CHILLAST_NODETYPE_COMPOUNDSTMT); };
   bool isLoop()               { return (getType() == CHILLAST_NODETYPE_LOOP); };    // AKA ForStmt
   bool isForStmt()            { return (getType() == CHILLAST_NODETYPE_LOOP); };    // AKA Loop
+  bool isWhileStmt()          { return (getType() == CHILLAST_NODETYPE_WHILESTMT); };
   bool isIfStmt()             { return (getType() == CHILLAST_NODETYPE_IFSTMT); };
   bool isTernaryOperator()    { return (getType() == CHILLAST_NODETYPE_TERNARYOPERATOR);};
   bool isBinaryOperator()     { return (getType() == CHILLAST_NODETYPE_BINARYOPERATOR); };
@@ -1459,6 +1464,26 @@ public:
 }; 
 
 
+class chillAST_WhileStmt: public chillAST_node {
+public:
+  virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_WHILESTMT;}
+  // variables that are special for this type of node
+  chillAST_Child<chillAST_node> cond, body;
+
+  // constructors
+  chillAST_WhileStmt():cond(this, 0), body(this, 1) {};
+  chillAST_WhileStmt(chillAST_node *cond, chillAST_node *body);
+
+  // required methods that I can't seem to get to inherit
+  chillAST_node* constantFold() {return this;}
+  chillAST_node* clone();
+
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
+  void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
+  void loseLoopWithLoopVar( char *var ){};
+};
+
 
 class chillAST_TernaryOperator: public chillAST_node { 
 public:
@@ -1493,8 +1518,8 @@ public:
   void printonly( int indent=0,  FILE *fp = stderr );
 
   chillAST_node* constantFold();
-  chillAST_node* clone(); 
-  void replaceChild( chillAST_node *old, chillAST_node *newchild ) ; 
+  chillAST_node* clone();
+  void replaceChild( chillAST_node *old, chillAST_node *newchild ) ;
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
@@ -1502,9 +1527,9 @@ public:
 
   void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
-  void loseLoopWithLoopVar( char *var ){}; // ternop can't have loop as child? 
-}; 
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
+  void loseLoopWithLoopVar( char *var ){}; // ternop can't have loop as child
+};
 
 
 

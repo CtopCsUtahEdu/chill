@@ -42,6 +42,7 @@ chillAST_NodeList ConvertDeclStmt( clang::DeclStmt *clangDS );
 chillAST_NodeList ConvertCompoundStmt( clang::CompoundStmt *clangCS );
 chillAST_NodeList ConvertFunctionDecl( clang::FunctionDecl *D );
 chillAST_NodeList ConvertForStmt( clang::ForStmt *clangFS );
+chillAST_NodeList ConvertWhileStmt( clang::WhileStmt *clangWS );
 chillAST_NodeList ConvertUnaryOperator( clang::UnaryOperator * clangU );
 chillAST_NodeList ConvertBinaryOperator( clang::BinaryOperator * clangBO );
 chillAST_NodeList ConvertArraySubscriptExpr( clang::ArraySubscriptExpr *clangASE );
@@ -317,6 +318,16 @@ chillAST_NodeList ConvertForStmt( ForStmt *clangFS ) {
   return WRAP(chill_loop);
 }
 
+chillAST_NodeList ConvertWhileStmt( WhileStmt *clangWS ) {
+  Expr *cond = clangWS->getCond();
+  Stmt *body = clangWS->getBody();
+
+  chillAST_node *cnd = UNWRAP(ConvertGenericClangAST( cond ));
+  chillAST_node *bod = UNWRAP(ConvertGenericClangAST( body ));
+  chillAST_WhileStmt *chill_loop = new  chillAST_WhileStmt( cnd, bod );
+  return WRAP(chill_loop);
+}
+
 
 chillAST_NodeList ConvertIfStmt( IfStmt *clangIS ) {
   Expr *cond = clangIS->getCond();
@@ -525,6 +536,7 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
    if (isa<CompoundStmt>(s))              {ret = ConvertCompoundStmt( dyn_cast<CompoundStmt>(s));
    } else if (isa<DeclStmt>(s))           {ret = ConvertDeclStmt(dyn_cast<DeclStmt>(s));
    } else if (isa<ForStmt>(s))            {ret = ConvertForStmt(dyn_cast<ForStmt>(s));
+   } else if (isa<WhileStmt>(s))          {ret = ConvertWhileStmt(dyn_cast<WhileStmt>(s));
    } else if (isa<BinaryOperator>(s))     {ret = ConvertBinaryOperator(dyn_cast<BinaryOperator>(s));
    } else if (isa<ArraySubscriptExpr>(s)) {ret = ConvertArraySubscriptExpr(dyn_cast<ArraySubscriptExpr>(s));
    } else if (isa<DeclRefExpr>(s))        {ret = ConvertDeclRefExpr(dyn_cast<DeclRefExpr>(s));

@@ -21,6 +21,7 @@ const char* Chill_AST_Node_Names[] = {
   "MacroDefinition", 
   "CompoundStmt",
   "ForStmt",
+  "WhileStmt",
   "TernaryOperator",
   "BinaryOperator",
   "UnaryOperator",
@@ -1536,8 +1537,29 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
 
 }
 
+chillAST_WhileStmt::chillAST_WhileStmt(chillAST_node *cond, chillAST_node *body):chillAST_WhileStmt() {
+  this->cond = cond;
+  this->body = body;
+}
 
+chillAST_node* chillAST_WhileStmt::clone() {
+  chillAST_node* c = cond->clone();
+  chillAST_node* b = body->clone();
+  chillAST_WhileStmt *ws =  new chillAST_WhileStmt( c, b );
+  ws->isFromSourceFile = isFromSourceFile;
+  if (filename) ws->filename = strdup(filename);
+  return ws;
+}
 
+void chillAST_WhileStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*>  &refs, bool w ) {
+  cond->gatherArrayRefs( refs, false );
+  body->gatherArrayRefs( refs, false );
+}
+
+void chillAST_WhileStmt::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
+  cond->gatherScalarRefs( refs, false );
+  body->gatherScalarRefs( refs, false );
+}
 
 
 chillAST_BinaryOperator::chillAST_BinaryOperator():lhs(this,0),rhs(this,1) {
