@@ -494,7 +494,8 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
-      std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr->clone());
+      std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
+      repr->dump();
       IR_Ref *ref = ir->Repr2Ref(v[0]);
 
       std::string s = ref->name();
@@ -1053,7 +1054,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 //if(vars.size() > 0){
         if (need_new_fsymbol) {
           ir->CreateDefineMacro(s, args,
-                                ir->builder()->CreateArrayRefExpression(ref->name(),
+                                ir->builder()->CreateArrayRefExpression(ref->convert(),
                                                                         curr_repr));
         }
 
@@ -1078,7 +1079,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
         if (need_new_fsymbol2) {
           if (curr_repr_no_const != NULL)
             ir->CreateDefineMacro(s1, args,
-                                  ir->builder()->CreateArrayRefExpression(ref->name(),
+                                  ir->builder()->CreateArrayRefExpression(ref->convert(),
                                                                           curr_repr_no_const));
         }
         if (curr_repr_no_const != NULL) {

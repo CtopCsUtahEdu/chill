@@ -470,12 +470,8 @@ CG_outputRepr *IR_chillArrayRef::index(int dim) const {
 
 
 IR_ArraySymbol *IR_chillArrayRef::symbol() const {
-  //debug_fprintf(stderr, "IR_chillArrayRef::symbol()\n"); 
-  //chillASE->print(); printf("\n"); fflush(stdout); 
-  //debug_fprintf(stderr, "base:  ");  chillASE->base->print();  printf("\n"); fflush(stdout); 
 
-  
-  chillAST_node *mb = chillASE->multibase(); 
+  chillAST_node *mb = chillASE->multibase();
   chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
   //debug_fprintf(stderr, "symbol: '%s'\n", vd->varname);
 
@@ -1252,12 +1248,8 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
   // now look for ones where the base is an array with unknowns sizes  int *i;
   vector<IR_PointerArrayRef *> IRPAR;
   int numrefs = refs.size();
-  for (int i=0; i<numrefs; i++) { 
-    chillAST_VarDecl *vd = refs[i]->multibase();
-    if (vd->isPointer()) {
-      IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
-    }
-  }
+  for (int i=0; i<numrefs; i++)
+    IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
   debug_fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
 
   return IRPAR; 
@@ -1632,7 +1624,7 @@ void IR_chillCode::CreateDefineMacro(std::string s,
 
   debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::CreateDefineMacro() adding macro to sourcefile\n");
   entire_file_AST->addChild( macro ); // ??
-  defined_macros.insert(std::pair<std::string, chillAST_node*>(s + args, output));
+  defined_macros.insert(std::pair<std::string, chillAST_node*>(s/* + args*/, output));
 
 
   // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
@@ -1916,8 +1908,8 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
     return new IR_chillScalarRef(this, dre);  // uses DRE
   } else if(node->isArraySubscriptExpr()) {
     bool write = false;
-    if (node->getParent()->isAssignmentOp()) {
-      if (node->getParent()->findChild(node) == 0)
+    if (node->getParent()) {
+      if (node->getParent()->isAssignmentOp() && node->getParent()->findChild(node) == 0)
         write = true;
     }
     return new IR_chillArrayRef(this, static_cast<chillAST_ArraySubscriptExpr*>(node), write);

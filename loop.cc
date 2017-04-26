@@ -722,7 +722,7 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
     CG_outputBuilder *ocg = ir->builder();
     CG_stringBuilder ocg_s = ir->builder_s();
     std::vector<CG_outputRepr *> reverse_expr;
-    for (int j = 1; j <= vars_to_be_reversed.size(); j++) {
+    for (int j = 0; j < vars_to_be_reversed.size(); j++) {
       CG_outputRepr *repl = ocg->CreateIdent(vars_to_be_reversed[j]);
       repl = ocg->CreateMinus(NULL, repl);
       reverse_expr.push_back(repl->clone());

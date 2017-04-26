@@ -1259,12 +1259,12 @@ namespace omega {
   
   CG_outputRepr* CG_chillBuilder::CreateArrayRefExpression(const std::string &_s,
                                                            CG_outputRepr *rop) const {
-    debug_fprintf(stderr, "CG_chillBuilder::CreateArrayRefExpression()  DIE\n");
-    debug_fprintf(stderr, "string s  '%s'\n", _s.c_str());
-    rop->dump(); 
+    throw std::runtime_error("create");
+    chillAST_node *l = new chillAST_DeclRefExpr(_s.c_str());
+    chillAST_node *r = ((CG_chillRepr *)rop)->GetCode();
 
-    int *i=0; int j = i[0]; 
-    exit(-1);
+    chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( l, r, NULL, 0); // unique TODO
+    return new CG_chillRepr( ASE );
   }
   
   
@@ -1273,7 +1273,7 @@ namespace omega {
     
     chillAST_node *l = ((CG_chillRepr *)left)->GetCode();
     chillAST_node *r = ((CG_chillRepr *)right)->GetCode();
-    
+
     chillAST_node *base = NULL; 
     
     if (l->isDeclRefExpr()) base = l;
@@ -1282,6 +1282,8 @@ namespace omega {
       // make a declRefExpr that uses VarDecl l
       base = (chillAST_node *) new chillAST_DeclRefExpr( (chillAST_VarDecl *)l );
     }
+    if (l->isArraySubscriptExpr())
+      base = new chillAST_DeclRefExpr(l->multibase());
     
     if (!base)  {
       debug_fprintf(stderr, "CG_chillBuilder::CreateArrayRefExpression(), left is %s\n", l->getTypeString()); 
@@ -1291,8 +1293,8 @@ namespace omega {
     
     
     
-    chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( base, r, NULL, 0); // unique TODO 
-    return new CG_chillRepr( ASE ); 
+    chillAST_ArraySubscriptExpr *ASE = new chillAST_ArraySubscriptExpr( base, r, NULL, 0); // unique TODO
+    return new CG_chillRepr( ASE );
   }
   
   
