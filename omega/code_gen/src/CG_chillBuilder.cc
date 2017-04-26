@@ -857,9 +857,6 @@ namespace omega {
     if(rop == NULL) {
       debug_fprintf(stderr, "CG_chillBuilder::CreateMinus(), right side is NULL\n"); 
       return lop; // from protonu's version. 
-
-      int *i = 0;
-      int j = i[0]; // segfault 
     }
     
     CG_chillRepr *clop = (CG_chillRepr *) lop;
@@ -907,12 +904,6 @@ namespace omega {
     
     chillAST_node *lAST = clop->chillnodes[0]; // always just one?
     chillAST_node *rAST = crop->chillnodes[0]; // always just one?
-    
-    debug_fprintf(stderr, "building "); 
-    lAST->print(0, stderr); 
-    debug_fprintf(stderr, " * ");
-    rAST->print(0, stderr);
-    debug_fprintf(stderr, "\n"); 
     
     chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "*", rAST );
     delete lop; delete rop; // ?? 

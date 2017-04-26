@@ -1600,16 +1600,12 @@ bool  IR_roseCode::ReplaceLHSExpression(omega::CG_outputRepr *code, IR_ArrayRef 
 
   if (numnodes == 1) { 
     chillAST_node *nodezero = CR->chillnodes[0];
-    if (nodezero-> isAssignmentOp()) {
+    if (nodezero-> isAssignmentOp())
       return new CG_chillRepr(  ((chillAST_BinaryOperator *) nodezero)->rhs ); // clone??
-    }
     debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of something that is not an assignment??\n");
-    nodezero->print(0,stderr); debug_fprintf(stderr, "\n"); 
   }
-  else { 
+  else
     debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of more than one node ???\n");
-  }
-
 
   die(); 
   exit(-1);

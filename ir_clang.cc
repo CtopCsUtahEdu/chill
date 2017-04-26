@@ -190,10 +190,6 @@ chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *RD ) { // for structs an
     astruct->subparts.push_back(VD); 
   }
 
-
-  debug_fprintf(stderr, "I just defined a struct\n"); 
-  astruct->print(0, stderr); 
-
   return WRAP(astruct);
 }
 
