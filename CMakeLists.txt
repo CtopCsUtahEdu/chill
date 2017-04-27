@@ -81,6 +81,7 @@ add_chill_module(chill_core
     loop_tile.cc
     loop_unroll.cc
     loop_stencil.cc
+    loop_ghostcells.cc
     loop_sparse.cc
     omegatools.cc
     stencil.cc

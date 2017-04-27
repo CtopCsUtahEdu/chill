@@ -737,7 +737,7 @@ bool checkIfEqual(Relation &r, Relation s) {
             Global_Var_ID g = v->get_global_var();
             gv.insert(
                 std::pair<int, std::string>(cvi.curr_coef(),
-                                            g->base_name()));
+                                            (const char *)(g->base_name())));
 
             break;
           }
@@ -787,7 +787,7 @@ bool checkIfEqual(Relation &r, Relation s) {
             Global_Var_ID g = v->get_global_var();
             gv.insert(
                 std::pair<int, std::string>(cvi.curr_coef(),
-                                            g->base_name()));
+                                            (const char *)(g->base_name())));
 
             break;
           }
