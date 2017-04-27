@@ -55,6 +55,7 @@ enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_COMPOUNDSTMT,
   CHILLAST_NODETYPE_LOOP,               // AKA ForStmt
   CHILLAST_NODETYPE_FORSTMT = CHILLAST_NODETYPE_LOOP,
+  CHILLAST_NODETYPE_WHILESTMT,
   CHILLAST_NODETYPE_TERNARYOPERATOR,
   CHILLAST_NODETYPE_BINARYOPERATOR,
   CHILLAST_NODETYPE_UNARYOPERATOR,
@@ -154,6 +155,9 @@ class chillAST_CompoundStmt;
 //! a for loop
 class chillAST_ForStmt;
 
+//! a while loop
+class chillAST_WhileStmt;
+
 class chillAST_TernaryOperator; 
 class chillAST_BinaryOperator; 
 class chillAST_ArraySubscriptExpr;
@@ -222,6 +226,7 @@ public:
   bool isCompoundStmt()       { return (getType() == CHILLAST_NODETYPE_COMPOUNDSTMT); };
   bool isLoop()               { return (getType() == CHILLAST_NODETYPE_LOOP); };    // AKA ForStmt
   bool isForStmt()            { return (getType() == CHILLAST_NODETYPE_LOOP); };    // AKA Loop
+  bool isWhileStmt()          { return (getType() == CHILLAST_NODETYPE_WHILESTMT); };
   bool isIfStmt()             { return (getType() == CHILLAST_NODETYPE_IFSTMT); };
   bool isTernaryOperator()    { return (getType() == CHILLAST_NODETYPE_TERNARYOPERATOR);};
   bool isBinaryOperator()     { return (getType() == CHILLAST_NODETYPE_BINARYOPERATOR); };
@@ -248,9 +253,7 @@ public:
   bool isCudaMemcpy()         { return (getType() == CHILLAST_NODETYPE_CUDAMEMCPY); };
   bool isCudaKERNELCALL()     { return (getType() == CHILLAST_NODETYPE_CUDAKERNELCALL); };
   bool isCudaSYNCTHREADS()    { return (getType() == CHILLAST_NODETYPE_CUDASYNCTHREADS); };
-
   bool isDeclStmt()           { return (getType() == CHILLAST_NODETYPE_DECLSTMT); }; // doesn't exist
-  
   bool isConstant()           { return (getType() == CHILLAST_NODETYPE_INTEGERLITERAL) || (getType() == CHILLAST_NODETYPE_FLOATINGLITERAL); }
     
 
@@ -276,8 +279,6 @@ public:
 
   chillAST_RecordDecl *findRecordDeclNamed( const char *name ); // recursive
   
-  // void addDecl( chillAST_VarDecl *vd); // recursive, adds to first  symbol table it can find 
-
   // TODO decide how to hide some data
 
   //! this Node's parent
@@ -286,9 +287,6 @@ public:
   bool isFromSourceFile;
   //! the name of file this node from
   char *filename;
-
-  // FIXME: should not call this one, either exit(-1) or throw an exception
-  void segfault() { debug_fprintf(stderr, "segfaulting on purpose\n"); int *i=0; int j = i[0]; }; // seg fault
 
   int getNumChildren() { return children.size(); }; 
   vector<chillAST_node*> children;
@@ -338,12 +336,16 @@ public:
     if (pos >= 0) setChild(pos,newchild);
     assert(true && "Replacing a non-child");
   };
-  
-  virtual void loseLoopWithLoopVar( char *var ) { 
-    // walk tree. If a loop has this loop variable, replace the loop with the loop body, 
-    // removing the loop.  The loop will be spread across a bunch of cores that will each
-    // calculate their own loop variable.
 
+  /**
+   * @brief Replace the loop with the loop body, if loop is with this variable.
+   *
+   * The loop will be spread across a bunch of cores that will each
+   * calculate their own loop variable.
+   *
+   * @param var
+   */
+  virtual void loseLoopWithLoopVar( char *var ) { 
     // things that can not have loops as substatements can have a null version of this method
     // things that have more complicated sets of "children" will have specialized versions
 
@@ -352,43 +354,22 @@ public:
     // potentially change the children vector, which is not the simple array it might appear.
     // so you have to make a copy of the vector to traverse
     
-    vector<chillAST_node*> dupe = children; // simple enough?
-    //debug_fprintf(stderr, "node XXX has %d children\n", dupe.size()); 
-    //debug_fprintf(stderr, "generic node %s has %d children\n", getTypeString(), dupe.size()); 
+    vector<chillAST_node*> dupe = children;
     for (int i=0; i<dupe.size(); i++) {  // recurse on all children
       dupe[i]->loseLoopWithLoopVar( var );
     }
   }
 
   virtual int evalAsInt() { 
-    debug_fprintf(stderr,"(%s) can't be evaluated as an integer??\n", Chill_AST_Node_Names[getType()]);
-    print(); debug_fprintf(stderr, "\n"); 
-    segfault(); 
+    throw std::runtime_error(std::string("EvalAsInt called on node ") + getTypeString());
   }
 
-  virtual const char* getUnderlyingType() { 
-    debug_fprintf(stderr,"(%s) forgot to implement getUnderlyingType()\n", Chill_AST_Node_Names[getType()]);
-    dump();
-    print();
-    debug_fprintf(stderr, "\n\n"); 
-    segfault(); 
-  }; 
+  virtual const char* getUnderlyingType() {
+    throw std::runtime_error(std::string("getUnderlyingType called on node ") + getTypeString());
+  };
 
-  virtual chillAST_VarDecl* getUnderlyingVarDecl() { 
-    debug_fprintf(stderr,"(%s) forgot to implement getUnderlyingVarDecl()\n", Chill_AST_Node_Names[getType()]);
-    dump();
-    print();
-    debug_fprintf(stderr, "\n\n"); 
-    segfault();
-  }; 
-
-
-  virtual chillAST_node *findref(){// find the SINGLE constant or data reference at this node or below
-    debug_fprintf(stderr,"(%s) forgot to implement findref()\n" ,Chill_AST_Node_Names[getType()]);
-    dump();
-    print();
-    debug_fprintf(stderr, "\n\n"); 
-    segfault();
+  virtual chillAST_VarDecl* getUnderlyingVarDecl() {
+    throw std::runtime_error(std::string("getUnderlyingVarDecl called on node ") + getTypeString());
   };
 
   virtual void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {
@@ -409,31 +390,17 @@ public:
   //! recursively walking parent links, looking for loops and grabbing the declRefExpr in the loop init and cond
   virtual void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces ) {
     // you can quit when you get to certain nodes
-
-    //debug_fprintf(stderr, "%s::gatherLoopIndeces()\n", getTypeString()); 
-    
     if (isSourceFile() || isFunctionDecl() ) return; // end of the line
-
-    // just for debugging 
-    //if (parent) {
-    //  debug_fprintf(stderr, "%s has parent of type %s\n", getTypeString(), parent->getTypeString()); 
-    //} 
-    //else debug_fprintf(stderr, "this %s %p has no parent???\n", getTypeString(), this);
-
 
     if (!parent) return; // should not happen, but be careful
 
     // for most nodes, this just recurses upwards
-    //debug_fprintf(stderr, "%s::gatherLoopIndeces() %p recursing up\n", this); 
     parent->gatherLoopIndeces( indeces );
   }
 
 
   //! recursively walking parent links, looking for loops
   chillAST_ForStmt* findContainingLoop() {
-    //debug_fprintf(stderr, "%s::findContainingLoop()   ", getTypeString());
-    //if (parent) debug_fprintf(stderr, "parents is a %s\n", parent->getTypeString()); 
-    //else debug_fprintf(stderr, "no parent\n"); 
     // do not check SELF type, as we may want to find the loop containing a loop
     if (!parent) return NULL;
     if (parent->isForStmt()) return (chillAST_ForStmt*)parent;
@@ -551,41 +518,17 @@ public:
       chill_error_printf("Printing to somewhere other than stderr/stdout using deprecated print");
   }
 
-  virtual void printName( int indent=0,  FILE *fp = stderr ) { 
-    fflush(fp); 
-    //debug_fprintf(stderr, "generic chillAST_node::printName() called!\n"); 
-    //debug_fprintf(stderr, "getType() is %d\n", getType());
-    fprintf(fp, "\n");
-    chillindent(indent, fp); 
-    fprintf(fp,"(%s) forgot to implement printName()\n" ,Chill_AST_Node_Names[getType()]);
-  };// print CODE 
-
-  virtual char *stringRep(int indent=0 ) {  // the ast's print version
-    fflush(stdout);
-    // chillindent(indent, fp);  TODO 
-    debug_fprintf(stderr,"(%s) forgot to implement stringRep()\n" ,Chill_AST_Node_Names[getType()]);
-    segfault(); 
-  }
-
-
-  virtual void printonly( int indent=0,  std::ostream &o = std::cerr ) { print( indent, o); };
-  virtual void printonly( int indent,  FILE *fp ) __attribute_deprecated__ { print( indent, fp); };
-
-  //virtual void printString( std::string &s ) { 
-  //  debug_fprintf(stderr,"(%s) forgot to implement printString()\n" ,Chill_AST_Node_Names[getType()]);
-  //}
+  //! the ast's print version
+  std::string stringRep(int indent=0 );
 
 
   virtual void get_top_level_loops( std::vector<chillAST_ForStmt *> &loops) {
     int n = children.size();
-    //debug_fprintf(stderr, "get_top_level_loops of a %s with %d children\n", getTypeString(), n); 
-    for (int i=0; i<n; i++) { 
-      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
+    for (int i=0; i<n; i++) {
       if (children[i]->isForStmt()) {
         loops.push_back( ((chillAST_ForStmt *)(children[i])) );
       }
     }
-    //debug_fprintf(stderr, "found %d top level loops\n", loops.size()); 
   }
 
   virtual void repairParentChild() {  // for nodes where all subnodes are children
@@ -598,30 +541,15 @@ public:
     }
   }
 
-
-
-  virtual void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // this is probably broken - returns ALL loops under it
-    int n = children.size();
-    //debug_fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
-    for (int i=0; i<n; i++) { 
-      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
-      children[i]->get_deep_loops( loops ); 
-    }
-    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
-  }
-
-
   //! generic for chillAST_node with children
   virtual void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) { // returns DEEPEST nesting of loops 
     // TODO hide implementation
     std::vector<chillAST_ForStmt *>deepest; // deepest below here 
     
     int n = children.size(); 
-    //debug_fprintf(stderr, "find_deepest_loops of a %s with %d children\n", getTypeString(), n); 
-    for (int i=0; i<n; i++) { 
+    for (int i=0; i<n; i++) {
       std::vector<chillAST_ForStmt *> subloops;  // loops below here among a child of mine 
       
-      //debug_fprintf(stderr, "child %d is a %s\n", i, children[i]->getTypeString()); 
       children[i]->find_deepest_loops( subloops );
       
       if (subloops.size() > deepest.size()) { 
@@ -629,17 +557,9 @@ public:
       }
     }
     
-    // append deepest we see at this level to loops 
-    for ( int i=0; i<deepest.size(); i++) { 
-      loops.push_back( deepest[i] );
-    }
-
-    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
-    
+    // append deepest we see at this level to loops
+    std::copy(deepest.begin(), deepest.end(), std::back_inserter(loops));
   }
-
-
-
 
   const char *getTypeString() { return Chill_AST_Node_Names[getType()]; } ;
   virtual CHILL_ASTNODE_TYPE getType() { return CHILLAST_NODETYPE_UNKNOWN; };
@@ -674,16 +594,6 @@ public:
     parent->addTypedefToTypedefTable( tdd ); // default, defer to parent 
   }
 
-  void walk_parents() { 
-    debug_fprintf(stderr, "wp: (%s)  ", getTypeString()); 
-    print(); printf("\n");  fflush(stdout); 
-    if (isSourceFile()) { debug_fprintf(stderr, "(top sourcefile)\n\n"); return;}
-
-    if (parent) parent->walk_parents();
-    else debug_fprintf(stderr, "UHOH, %s has no parent??\n", getTypeString());
-    return; 
-  }
-
   virtual chillAST_node *getEnclosingStatement( int level = 0 );
    /**
    * @brief Find the base declaration that this node refers to
@@ -706,14 +616,12 @@ public:
   }
 
 
-  virtual bool isSameAs( chillAST_node *other ){  // for tree comparison 
+  virtual bool isSameAs( chillAST_node *other ) {  // for tree comparison
     debug_fprintf(stderr,"(%s) forgot to implement isSameAs()\n" ,Chill_AST_Node_Names[getType()]);
     dump(); fflush(stdout); 
     print();
-    debug_fprintf(stderr, "\n\n");   }
-
-  void printPreprocBEFORE( int indent, FILE *fp );
-  void printPreprocAFTER( int indent, FILE *fp );
+    debug_fprintf(stderr, "\n\n");
+  }
 
   //! Base constructor for all inherited class
   chillAST_node() {
@@ -898,7 +806,6 @@ public:
   chillAST_VarDecl( chillAST_TypedefDecl *tdd, const char *ap, const char *n, chillAST_NodeList arraypart = chillAST_NodeList());
   chillAST_VarDecl( chillAST_RecordDecl *astruct, const char *ap, const char *n, chillAST_NodeList arraypart = chillAST_NodeList());
 
-  void printName( int indent=0,  FILE *fp = stderr );
   bool isParmVarDecl() { return( isAParameter == 1 ); };
   bool isBuiltin()     { return( isABuiltin == 1 ); };  // designate variable as a builtin
   void setLocation( void *ptr ) { uniquePtr = ptr; } ; 
@@ -958,8 +865,6 @@ public:
   }; 
   
   // required methods that I can't seem to get to inherit
-  char *stringRep(int indent=0 );
-
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ) {}; // do nothing
@@ -977,8 +882,7 @@ public:
   void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ); 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
-  chillAST_node *findref(){return this;}// find the SINGLE constant or data reference at this node or below
-  
+
   const char* getUnderlyingType() {debug_fprintf(stderr, "DeclRefExpr getUnderLyingType()\n"); return decl->getUnderlyingType();}; 
 
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { return decl->getUnderlyingVarDecl(); } // functions?? TODO 
@@ -1411,21 +1315,7 @@ public:
   void gatherLoopIndeces( std::vector<chillAST_VarDecl*> &indeces );
   void gatherLoopVars(  std::vector<std::string> &loopvars );  // gather as strings ??
 
-  void get_deep_loops( std::vector<chillAST_ForStmt *> &loops) { // chillAST_ForStmt version 
-    // ADD MYSELF!
-    loops.push_back( this );
-
-    int n = body->children.size(); 
-    //debug_fprintf(stderr, "get_deep_loops of a %s with %d children\n", getTypeString(), n); 
-    for (int i=0; i<n; i++) { 
-      //debug_fprintf(stderr, "child %d is a %s\n", i, body->children[i]->getTypeString()); 
-      body->children[i]->get_deep_loops( loops ); 
-    }
-    //debug_fprintf(stderr, "found %d deep loops\n", loops.size()); 
-  }
-
-
-  void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) { 
+  void find_deepest_loops( std::vector<chillAST_ForStmt *> &loops) {
     std::vector<chillAST_ForStmt *> b; // deepest loops below me
 
     int n = body->children.size(); 
@@ -1459,6 +1349,26 @@ public:
 }; 
 
 
+class chillAST_WhileStmt: public chillAST_node {
+public:
+  virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_WHILESTMT;}
+  // variables that are special for this type of node
+  chillAST_Child<chillAST_node> cond, body;
+
+  // constructors
+  chillAST_WhileStmt():cond(this, 0), body(this, 1) {};
+  chillAST_WhileStmt(chillAST_node *cond, chillAST_node *body);
+
+  // required methods that I can't seem to get to inherit
+  chillAST_node* constantFold() {return this;}
+  chillAST_node* clone();
+
+  void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
+  void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
+  void loseLoopWithLoopVar( char *var ){};
+};
+
 
 class chillAST_TernaryOperator: public chillAST_node { 
 public:
@@ -1490,11 +1400,9 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void printonly( int indent=0,  FILE *fp = stderr );
-
   chillAST_node* constantFold();
-  chillAST_node* clone(); 
-  void replaceChild( chillAST_node *old, chillAST_node *newchild ) ; 
+  chillAST_node* clone();
+  void replaceChild( chillAST_node *old, chillAST_node *newchild ) ;
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
@@ -1502,9 +1410,9 @@ public:
 
   void gatherVarLHSUsage( vector<chillAST_VarDecl*> &decls );
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
-  void loseLoopWithLoopVar( char *var ){}; // ternop can't have loop as child? 
-}; 
+  bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
+  void loseLoopWithLoopVar( char *var ){}; // ternop can't have loop as child
+};
 
 
 
@@ -1523,7 +1431,6 @@ public:
   
   // other methods particular to this type of node
   int evalAsInt();
-  chillAST_IntegerLiteral *evalAsIntegerLiteral(); 
 
   bool isNotLeaf() { return true; }; 
   bool isLeaf()    { return false; }; 
@@ -1565,9 +1472,6 @@ public:
   
   
   // required methods that I can't seem to get to inherit
-  void printonly( int indent=0,  FILE *fp = stderr );
-  char *stringRep(int indent=0 );
-
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento ); // chillAST_BinaryOperator
@@ -1624,12 +1528,8 @@ public:
   void replaceChild( chillAST_node *old, chillAST_node *newchild ); // will examine index
 
   // required methods that I can't seem to get to inherit
-  void printonly( int indent=0,  FILE *fp = stderr );
-  char *stringRep(int indent=0 );
-
   chillAST_node* constantFold();
   chillAST_node* clone(); 
-  chillAST_node *findref(){return this;}// find the SINGLE constant or data reference at this node or below
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
 
@@ -1672,9 +1572,6 @@ public:
   bool operator==( const chillAST_MemberExpr& ) ; 
   
   // required methods that I can't seem to get to inherit
-  void printonly( int indent=0,  FILE *fp = stderr );
-  char *stringRep( int indent = 0);
- 
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1731,9 +1628,7 @@ public:
   void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ) {};  // does nothing 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl) {};
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
-
-  chillAST_node *findref(){return this;}// find the SINGLE constant or data reference at this node or below
-}; 
+};
 
 
 class chillAST_FloatingLiteral: public chillAST_node { 
@@ -1774,9 +1669,7 @@ public:
   void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs ){}; // does nothing 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl){};
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here 
-  chillAST_node *findref(){return this;};// find the SINGLE constant or data reference at this node or below
-
- bool isSameAs( chillAST_node *other ); 
+  bool isSameAs( chillAST_node *other );
 }; 
 
 
@@ -1836,7 +1729,6 @@ public:
   bool isLeaf()    { return false; }; 
   
   // required methods that I can't seem to get to inherit
-  void printonly( int indent=0,  FILE *fp = stderr );  // print CODE   in chill_ast.cc
   chillAST_node* constantFold();
   chillAST_node* clone(); 
   void gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*> &refs, bool writtento );
@@ -1875,9 +1767,7 @@ public:
   void gatherVarDeclsMore  ( vector<chillAST_VarDecl*> &decls ) { gatherVarDecls(decls); } ;
 
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
-  chillAST_node *findref(){return subexpr;};// find the SINGLE constant or data reference at this node or below
-
-}; 
+};
 
 
 class chillAST_CStyleAddressOf: public chillAST_node { 

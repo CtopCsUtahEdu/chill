@@ -21,6 +21,7 @@ const char* Chill_AST_Node_Names[] = {
   "MacroDefinition", 
   "CompoundStmt",
   "ForStmt",
+  "WhileStmt",
   "TernaryOperator",
   "BinaryOperator",
   "UnaryOperator",
@@ -73,22 +74,19 @@ char *parseUnderlyingType( char *sometype ) {
   return underlying;
 }
 
-void printSymbolTable( chillAST_SymbolTable *st ) { 
-  //printf("%d entries\n", st->size()); 
+void printSymbolTable( chillAST_SymbolTable *st ) {
   if (!st) return;
-  for (int i=0; i<st->size(); i++) {  printf("%d  ", i ); (*st)[i]->printName(); printf("\n"); } 
+  for (int i=0; i<st->size(); i++) {  printf("%d  %s", i , (*st)[i]->varname); printf("\n"); }
   if (st->size() )printf("\n");
-  fflush(stdout); 
+  fflush(stdout);
 }
 
-void printSymbolTableMoreInfo( chillAST_SymbolTable *st ) { 
-  //printf("%d entries\n", st->size()); 
+void printSymbolTableMoreInfo( chillAST_SymbolTable *st ) {
   if (!st) return;
-  for (int i=0; i<st->size(); i++) { printf("%d  ", i ); (*st)[i]->print(); printf("\n"); } 
+  for (int i=0; i<st->size(); i++) {  printf("%d  %s", i , (*st)[i]->stringRep().c_str()); printf("\n"); }
   if (st->size() )printf("\n");
-  fflush(stdout); 
+  fflush(stdout);
 }
-
 
 bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name ) {
   if (!table) return false; // ?? 
@@ -317,6 +315,14 @@ void chillAST_node::dump( int indent,  std::ostream& o ) {
   c.print(this, ind, o);
 }
 
+std::string chillAST_node::stringRep(int indent) {
+  std::string ind = "";
+  while (indent-- > 0)
+    ind += "  ";
+  chill::printer::CFamily c;
+  return c.print(this, ind);
+}
+
 chillAST_VarDecl * chillAST_node::findVariableNamed( const char *name ) { // recursive
   if (hasSymbolTable()) { // look in my symbol table if I have one
     chillAST_VarDecl *vd = symbolTableFindVariableNamed( getSymbolTable(), name);
@@ -349,34 +355,6 @@ chillAST_RecordDecl * chillAST_node::findRecordDeclNamed( const char *name ) { /
   // recurse upwards
   return parent->findRecordDeclNamed( name ); 
 }
-
-
-  void chillAST_node::printPreprocBEFORE( int indent, FILE *fp ) { 
-    int numstmts = preprocessinginfo.size(); 
-    //if (0 != numstmts) { 
-    //  fprintf(fp, "chillAST_node::printPreprocBEFORE()  %d statements\n", numstmts); 
-    //} 
-
-
-    for (int i=0; i< numstmts; i++) { 
-      //fprintf(fp, "stmt %d   %d\n", i, preprocessinginfo[i]->position); 
-      if (preprocessinginfo[i]->position == CHILL_PREPROCESSING_LINEBEFORE || 
-          preprocessinginfo[i]->position == CHILL_PREPROCESSING_IMMEDIATELYBEFORE) {
-        //debug_fprintf(stderr, "before %d\n", preprocessinginfo[i]->position); 
-        preprocessinginfo[i]->print(indent, fp); 
-      }
-    }
-  }
-
-  void chillAST_node::printPreprocAFTER( int indent, FILE *fp ) { 
-    for (int i=0; i< preprocessinginfo.size(); i++) { 
-      if (preprocessinginfo[i]->position == CHILL_PREPROCESSING_LINEAFTER || 
-          preprocessinginfo[i]->position ==  CHILL_PREPROCESSING_TOTHERIGHT) { 
-        //debug_fprintf(stderr, "after %d\n", preprocessinginfo[i]->position); 
-        preprocessinginfo[i]->print(indent, fp); 
-      }
-    }
-  }
 
 
 chillAST_SourceFile::chillAST_SourceFile() {
@@ -945,7 +923,7 @@ void chillAST_MacroDefinition::setBody( chillAST_node * bod ) {
   debug_fprintf(stderr, "%s chillAST_MacroDefinition::setBody( 0x%x )\n", macroName, bod); 
   body = bod;
   debug_fprintf(stderr, "body is:\n"); body->print(0,stderr); debug_fprintf(stderr, "\n\n");
-  rhsString = body->stringRep(); 
+  rhsString = strdup(body->stringRep().c_str());
   bod->setParent( this );  // well, ... 
 }
 
@@ -1437,17 +1415,10 @@ void chillAST_ForStmt::gatherLoopVars(  std::vector<std::string> &loopvars ) {
 
 
 void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) { 
-
-  //debug_fprintf(stderr, "\nchillAST_ForStmt::loseLoopWithLoopVar(  %s )\n", var ); 
-
-  // now recurse (could do first, I suppose) 
+  // now recurse (could do first, I suppose)
   // if you DON'T do this first, you may have already replaced yourself with this loop body
   // the body will no longer have this forstmt as parent, it will have the forstmt's parent as its parent
-  //debug_fprintf(stderr, "forstmt 0x%x, recursing loseLoop to body 0x%x of type %s with parent 0x%x of type %s\n", this, body,  body->getTypeString(), body->parent, body->parent->getTypeString()); 
-  body->loseLoopWithLoopVar( var ) ; 
-
-
-
+  body->loseLoopWithLoopVar( var ) ;
 
   // if *I* am a loop to be replaced, tell my parent to replace me with my loop body
 
@@ -1465,17 +1436,8 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
     exit(-1); 
   }
   
-  //debug_fprintf(stderr, "my loop var %s, looking for %s\n", loopvars[0].c_str(), var );
-  if (!strcmp(var,  loopvars[0].c_str())) { 
-    //debug_fprintf(stderr, "OK, trying to lose myself!    for (");
-    //init->print(0, stderr);
-    //debug_fprintf(stderr, "; ");
-    //cond->print(0, stderr);
-    //debug_fprintf(stderr, "; ");
-    //incr->print(0, stderr);
-    //debug_fprintf(stderr, ")\n" );   
-
-    if (!parent) { 
+  if (!strcmp(var,  loopvars[0].c_str())) {
+    if (!parent) {
       debug_fprintf(stderr, "chillAST_ForStmt::loseLoopWithLoopVar()  I have no parent!\n");
       exit(-1);
     }
@@ -1498,16 +1460,13 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
         chillAST_TernaryOperator *TO = (chillAST_TernaryOperator *)BO->rhs;
         chillAST_BinaryOperator *C =  (chillAST_BinaryOperator *)TO->condition;
         
-        //debug_fprintf(stderr, "loop condition RHS  is ternary\nCondition RHS");
-        C->print(); printf("\n"); fflush(stdout); 
+        C->print(); printf("\n"); fflush(stdout);
         chillAST_node *l = C->lhs;
         if (l->isParenExpr()) l = ((chillAST_ParenExpr *)l)->subexpr; 
         chillAST_node *r = C->rhs;
         if (r->isParenExpr()) r = ((chillAST_ParenExpr *)r)->subexpr; 
 
-        //debug_fprintf(stderr, "lhs is %s     rhs is %s\n", l->getTypeString(), r->getTypeString()); 
-        
-        chillAST_node *ifcondrhs = NULL; 
+        chillAST_node *ifcondrhs = NULL;
         if (!(l->isConstant())) ifcondrhs = l;
         else if (!(r->isConstant())) ifcondrhs = r;
         else { 
@@ -1526,18 +1485,35 @@ void chillAST_ForStmt::loseLoopWithLoopVar( char *var ) {
       }
     }
 
-    //debug_fprintf(stderr, "forstmt 0x%x has parent 0x%x  of type %s\n", this, parent, parent->getTypeString()); 
-    //debug_fprintf(stderr, "forstmt will be replaced by\n");
-    //newstmt->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
-
     parent->replaceChild( this, newstmt );
   }
 
 
 }
 
+chillAST_WhileStmt::chillAST_WhileStmt(chillAST_node *cond, chillAST_node *body):chillAST_WhileStmt() {
+  this->cond = cond;
+  this->body = body;
+}
 
+chillAST_node* chillAST_WhileStmt::clone() {
+  chillAST_node* c = cond->clone();
+  chillAST_node* b = body->clone();
+  chillAST_WhileStmt *ws =  new chillAST_WhileStmt( c, b );
+  ws->isFromSourceFile = isFromSourceFile;
+  if (filename) ws->filename = strdup(filename);
+  return ws;
+}
 
+void chillAST_WhileStmt::gatherArrayRefs( std::vector<chillAST_ArraySubscriptExpr*>  &refs, bool w ) {
+  cond->gatherArrayRefs( refs, false );
+  body->gatherArrayRefs( refs, false );
+}
+
+void chillAST_WhileStmt::gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) {
+  cond->gatherScalarRefs( refs, false );
+  body->gatherScalarRefs( refs, false );
+}
 
 
 chillAST_BinaryOperator::chillAST_BinaryOperator():lhs(this,0),rhs(this,1) {
@@ -1577,35 +1553,11 @@ int chillAST_BinaryOperator::evalAsInt() {
   if (!strcmp("-", op)) return lhs->evalAsInt() - rhs->evalAsInt(); 
   if (!strcmp("*", op)) return lhs->evalAsInt() * rhs->evalAsInt(); 
   if (!strcmp("/", op)) return lhs->evalAsInt() / rhs->evalAsInt(); 
-  
-  debug_fprintf(stderr, "chillAST_BinaryOperator::evalAsInt() unhandled op '%s'\n", op); 
-  segfault(); 
+
+  throw std::runtime_error(std::string("chillAST_BinaryOperator::evalAsInt() unhandled op ") + op);
 }
 
-chillAST_IntegerLiteral *chillAST_BinaryOperator::evalAsIntegerLiteral() { 
-  return new chillAST_IntegerLiteral( evalAsInt() ); // ?? 
-}
-
-char *chillAST_BinaryOperator::stringRep(int indent ) { 
-  std::string s = string( lhs->stringRep() ) + " " + op + " " +  string(lhs->stringRep() );
-  return strdup( s.c_str() ); 
-}
-
-
-
-void chillAST_BinaryOperator::printonly( int indent, FILE *fp ) {
-
-  lhs->printonly( indent, fp );
-  fprintf( fp, " %s ", op);
-  rhs->printonly( 0, fp );
-  fflush(fp); 
-
-
-
-}
-
-
-class chillAST_node* chillAST_BinaryOperator::constantFold() { 
+class chillAST_node* chillAST_BinaryOperator::constantFold() {
   //debug_fprintf(stderr, "\nchillAST_BinaryOperator::constantFold()  ");
   //print(0,stderr); debug_fprintf(stderr, "\n");
 
@@ -1788,19 +1740,7 @@ void chillAST_TernaryOperator::replaceVarDecls( chillAST_VarDecl *olddecl, chill
   rhs->replaceVarDecls( olddecl, newdecl ); 
 }
 
-void chillAST_TernaryOperator::printonly( int indent, FILE *fp ) {
-  fprintf(fp, "(");
-  condition->printonly(0,fp);
-  fprintf(fp, "%s", op); 
-  lhs->printonly(0,fp);
-  fprintf(fp, ":");
-  rhs->printonly(0,fp);
-  fprintf(fp, ")");
-  fflush(fp);
-}
-
-
-class chillAST_node* chillAST_TernaryOperator::constantFold() { 
+class chillAST_node* chillAST_TernaryOperator::constantFold() {
   condition = condition->constantFold();
   lhs = lhs->constantFold();
   rhs = rhs->constantFold();
@@ -1979,10 +1919,7 @@ chillAST_node *chillAST_node::getEnclosingStatement( int level ) {  // TODO do f
     return NULL;
   }
 
-  debug_fprintf(stderr, "getEnclosingStatement() level %d type %s, returning NULL\n", level, getTypeString()); 
-  segfault(); 
-
-  return NULL;
+  throw std::runtime_error("getEnclosingStatement() returning NULL\n");
 }
 
 
@@ -1990,29 +1927,6 @@ chillAST_node *chillAST_node::getEnclosingStatement( int level ) {  // TODO do f
 void chillAST_ArraySubscriptExpr::gatherIndeces(std::vector<chillAST_node*>&ind) { 
   if (base->isArraySubscriptExpr()) ((chillAST_ArraySubscriptExpr *)base)->gatherIndeces( ind );
   ind.push_back( index );
-}
-
-char *chillAST_ArraySubscriptExpr::stringRep(int indent ) {
-  debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::stringRep\n"); 
-
-  char *blurb;
-  char *b = base->stringRep(0); 
-  char *i = index->stringRep(0); 
-  // combine.  shoudl be using strings. much cleaner  TODO
-  std::string s = string(b) + "[" + string(i) + "]";
-  debug_fprintf(stderr, "ASE stringrep %s\n", s.c_str()); 
-  return strdup( s.c_str()); 
-  
-
-}
-
-
-void chillAST_ArraySubscriptExpr::printonly( int indent, FILE *fp ) {
-  base->printonly( indent, fp );
-  fprintf(fp, "[");
-  index->printonly(0, fp); 
-  fprintf(fp, "]");
-  fflush(fp); 
 }
 
 chillAST_VarDecl *chillAST_ArraySubscriptExpr::multibase() {
@@ -2174,12 +2088,11 @@ void chillAST_ArraySubscriptExpr::replaceChild( chillAST_node *old, chillAST_nod
     return;
   }
   
-  debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::replaceChild() old is not base or index\n"); 
   print(0,stderr); debug_fprintf(stderr, "\nchild: ");
   if (!old) debug_fprintf(stderr, "oldchild NULL!\n");
   old->print(0,stderr); debug_fprintf(stderr, "\nnew: "); 
-  newchild->print(0,stderr); debug_fprintf(stderr, "\n"); 
-  segfault(); // make easier for gdb
+  newchild->print(0,stderr); debug_fprintf(stderr, "\n");
+  throw std::runtime_error("chillAST_ArraySubscriptExpr::replaceChild() old is not base or index");
 };
 
 
@@ -2191,15 +2104,7 @@ bool chillAST_ArraySubscriptExpr::operator!=( const chillAST_ArraySubscriptExpr 
 
 
 bool chillAST_ArraySubscriptExpr::operator==( const chillAST_ArraySubscriptExpr &other) {
-  //debug_fprintf(stderr, "chillAST_ArraySubscriptExpr::operator==\n");
-  //debug_fprintf(stderr, "this->basedecl 0x%x     other.basedecl 0x%x\n", this->basedecl, other.basedecl);
-  //this->basedecl->print(); printf("\n\n");
-  //other.basedecl->print(); printf("\n"); fflush(stdout);
-
-  //this->print(); printf(" 0x%x  == 0x%x ",this->uniquePtr, other.uniquePtr ); other.print(); printf(" ??  "); fflush(stdout); 
-  //if ( this->uniquePtr == other.uniquePtr) debug_fprintf(stderr, "t\n"); 
-  //else debug_fprintf(stderr, "f\n"); 
-  return this->uniquePtr == other.uniquePtr; 
+  return this->uniquePtr == other.uniquePtr;
 }
 
 
@@ -2218,54 +2123,10 @@ chillAST_MemberExpr::chillAST_MemberExpr( chillAST_node *bas, const char *mem, v
   uniquePtr = unique;
   exptype = t;
 
-  return;  // ignore tests below ?? TODO ?? 
-
-
-  // base needs to RESOLVE to a decl ref expr but may not BE one
-  //   A.b . c   lhs is a binop or memberexpr
-
-  if (bas->isBinaryOperator()) { 
-    //debug_fprintf(stderr, "checking binop to see if it resolved to a declrefexpr\n");
-    // cheat for now or just remove the check below
-    return; 
-  }
-
-  if (! ( bas->isDeclRefExpr() || bas->isArraySubscriptExpr() )) { 
-    debug_fprintf(stderr, "chillAST_MemberExpr::chillAST_MemberExpr(), base is of type %s\n", bas->getTypeString());
-    debug_fprintf(stderr, "chillAST_MemberExpr::chillAST_MemberExpr(), base is not DeclRefExpr\n");
-    
-    base->print();  printf(".%s\n", mem); fflush(stdout);  
-    segfault(); 
-  }
+  return;
 }
 
-void chillAST_MemberExpr::printonly( int indent, FILE *fp ) {
-  base->print( indent, fp );
-  if (exptype == CHILL_MEMBER_EXP_ARROW) fprintf(fp, "->");
-  else fprintf(fp, "."); 
-  fprintf(fp, "%s", member);
-  fflush(fp); 
-}
-
-char *chillAST_MemberExpr::stringRep( int indent ) { // char pointer to what we'd print
-  debug_fprintf(stderr, "*chillAST_MemberExpr::stringRep()\n"); 
-  if (base->isDeclRefExpr()) { // 
-    chillAST_VarDecl *vd =  (chillAST_VarDecl *) ((chillAST_DeclRefExpr *)base)->decl;
-    char *leak = (char *)malloc(128);
-    if (exptype == CHILL_MEMBER_EXP_ARROW) sprintf(leak, "%s->%s", vd->varname, member);
-    else sprintf(leak, "%s.%s", vd->varname, member);
-    printstring = leak; 
-    return leak;
-  }
-
-
-  // else 
-    // TODO
-    return strdup("chillAST_MemberExpr::getStringRep()hadanerror");
-}
-
-
-class chillAST_node* chillAST_MemberExpr::constantFold() { 
+class chillAST_node* chillAST_MemberExpr::constantFold() {
   base  =  base->constantFold();
   //member = member->constantFold();
   return this;
@@ -2406,10 +2267,6 @@ chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_FunctionDecl *fd){ // funct
   declarationType = strdup(fd->returnType);
   declarationName = strdup(fd->functionName); 
   decl = fd; 
-}
-
-char *chillAST_DeclRefExpr::stringRep( int indent ) {
-  return strdup( declarationName ); 
 }
 
 
@@ -2760,12 +2617,10 @@ class chillAST_node* chillAST_UnaryOperator::clone() {
 int chillAST_UnaryOperator::evalAsInt() { 
   if (!strcmp("+", op)) return subexpr->evalAsInt();
   if (!strcmp("-", op)) return -subexpr->evalAsInt();
-  if (!strcmp("++", op)) return 1 + subexpr->evalAsInt();
-  if (!strcmp("--", op)) return subexpr->evalAsInt() - 1;
+  if (!strcmp("++", op)) return (prefix?1:0) + subexpr->evalAsInt();
+  if (!strcmp("--", op)) return subexpr->evalAsInt() - (prefix?1:0);
 
-  debug_fprintf(stderr, "chillAST_UnaryOperator::evalAsInt() unhandled op '%s'\n", op); 
-  segfault(); 
-
+  throw std::runtime_error(std::string("chillAST_UnaryOperator::evalAsInt() unhandled op ") + op);
 }
 
 bool chillAST_UnaryOperator::isSameAs( chillAST_node *other ){
@@ -2780,13 +2635,7 @@ chillAST_ImplicitCastExpr::chillAST_ImplicitCastExpr( chillAST_node *sub):subexp
   subexpr = sub;
 }
 
-void chillAST_ImplicitCastExpr::printonly(  int indent, FILE *fp) {
-  // No need to print anything, simply forward to the sub expression.
-  subexpr->printonly( indent, fp );
-  fflush(fp); 
-};
-
-class chillAST_node* chillAST_ImplicitCastExpr::constantFold() { 
+class chillAST_node* chillAST_ImplicitCastExpr::constantFold() {
   chillAST_node *child = subexpr->constantFold();
   child->setParent( parent ) ; // remove myself !! probably a bad idea. TODO 
   return child; 
@@ -3133,21 +2982,11 @@ chillAST_VarDecl::chillAST_VarDecl( const char *t, const char *ap, const char *n
 };
 
 
-void chillAST_VarDecl::printName( int in, FILE *fp ) {
-  chillindent(in, fp);
-  fprintf(fp, "%s", varname);
-};
-
-
-
 chillAST_RecordDecl * chillAST_VarDecl::getStructDef() {
   if (vardef) return vardef;
   if (typedefinition) return typedefinition->getStructDef();
   return NULL; 
 }
-
-
-
 
 
 chillAST_CompoundStmt::chillAST_CompoundStmt() {

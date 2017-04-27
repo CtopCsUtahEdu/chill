@@ -111,6 +111,11 @@ void Dump::runS(chillAST_ForStmt *n, std::string indent, std::ostream &o) {
   run(n->body, indent, o);
 }
 
+void Dump::runS(chillAST_WhileStmt *n, std::string indent, std::ostream &o) {
+  run(n->cond, indent, o);
+  run(n->body, indent, o);
+}
+
 void Dump::runS(chillAST_Free *n, std::string indent, std::ostream &o) {}
 
 void Dump::runS(chillAST_FunctionDecl *n, std::string indent, std::ostream &o) {

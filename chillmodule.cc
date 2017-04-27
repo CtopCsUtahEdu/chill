@@ -1878,6 +1878,15 @@ chill_num_statements(PyObject *self, PyObject *args)
   //DEBUG_PRINT("C num_statement() = %d\n", num); 
   return Py_BuildValue( "i", num ); // BEWARE "d" is DOUBLE, not int
 }
+
+static PyObject *
+chill_print_dep_ufs(PyObject *self, PyObject *args) {
+  strict_arg_num(args, 2);
+  int stmt = intArg(args, 0);
+  int level = intArg(args, 1);
+  myloop->printDependenceUFs(stmt, level);
+  Py_RETURN_NONE;
+}
 #endif
 
 #ifdef CUDACHILL
@@ -1957,6 +1966,7 @@ static PyMethodDef ChillMethods[] = {
   {"stencil_temp",        chill_stencil_temp,              METH_VARARGS,     "???"},
   {"find_stencil_shape",  chill_find_stencil_shape,        METH_VARARGS,     "???"},
   {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},
+  {"print_dep_ufs",       chill_print_dep_ufs,             METH_VARARGS,     "..."},
   {NULL, NULL, 0, NULL}
 };
 #endif

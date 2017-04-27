@@ -98,7 +98,7 @@ public:
   void printsyms() { 
     fflush(stdout); 
 
-    printf("\nparameter_symtab has %d entries\n", CPUparamSymtab->size()); 
+    printf("\nparameter_symtab has %d entries\n", CPUparamSymtab->size());
     printSymbolTable( CPUparamSymtab ); 
     printf("\n"); fflush(stdout); 
 

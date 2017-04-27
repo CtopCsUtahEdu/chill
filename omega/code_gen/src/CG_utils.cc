@@ -976,7 +976,7 @@ namespace omega {
                                                     Variable_ID v, 
                                                     std::set<Variable_ID> excluded_floor_vars) {
     Conjunct *c = const_cast<Relation &>(R).single_conjunct();
-    
+
     excluded_floor_vars.insert(v);
     for (GEQ_Iterator e = c->GEQs(); e; e++) {
       coef_t a = (*e).get_coef(v);
@@ -1915,7 +1915,7 @@ namespace omega {
     bool is_mapping = false;
     if (r.n_out() > 0)
       is_mapping = true;
-    
+
     std::set<Variable_ID> excluded_floor_vars;
     std::set<Variable_ID> excluded_floor_vars2;
     std::stack<Variable_ID> to_fill;
@@ -2691,11 +2691,15 @@ namespace omega {
     else if (j == i && end > j) {
       int new_indent = (guard_repr==NULL)?indent:indent+1;
       Relation new_guard = Intersection(copy(guard), copy(then_cond));
-      new_guard.print(stderr); 
-      new_guard.print_with_subs(stderr); 
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
       new_guard.simplify();
-      new_guard.print(stderr); 
-      new_guard.print_with_subs(stderr); 
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
 
       debug_fprintf(stderr,"CG_utils.cc loop_print_repr recursive 3\n"); 
       CG_outputRepr *stmt_list = loop_print_repr(active, 

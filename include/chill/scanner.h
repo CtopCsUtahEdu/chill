@@ -51,6 +51,8 @@ namespace chill {
 
     virtual void runS(chillAST_ForStmt *n, Ts... args) { errorRun(n, args...); }
 
+    virtual void runS(chillAST_WhileStmt *n, Ts... args) { errorRun(n, args...); }
+
     virtual void runS(chillAST_Free *n, Ts... args) { errorRun(n, args...); }
 
     virtual void runS(chillAST_FunctionDecl *n, Ts... args) { errorRun(n, args...); }
@@ -130,6 +132,8 @@ namespace chill {
         case CHILLAST_NODETYPE_LOOP:
 //      case CHILLAST_NODETYPE_FORSTMT:
           return runS(dynamic_cast<chillAST_ForStmt *>(n), args...);
+        case CHILLAST_NODETYPE_WHILESTMT:
+          return runS(dynamic_cast<chillAST_WhileStmt *>(n), args...);
         case CHILLAST_NODETYPE_FREE:
           return runS(dynamic_cast<chillAST_Free *>(n), args...);
         case CHILLAST_NODETYPE_FUNCTIONDECL:

@@ -6,7 +6,6 @@
 #include "printer/data.h"
 #include "scanner.h"
 #include <sstream>
-#include <include/chill/scanner.h>
 
 using namespace chill::printer;
 

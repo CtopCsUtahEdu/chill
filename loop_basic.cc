@@ -2068,8 +2068,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
         r.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
       Variable_ID v = r.output_var(1);
       exp2formula(
-        ir, r, f_root, freevar, index, v, 'w', IR_COND_EQ,
-                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num]);
+        this, ir, r, f_root, freevar, index, v, 'w', IR_COND_EQ,
+                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num], unin_rel[stmt_num]);
       r.setup_names();
       r.simplify(2, 4);
       s = r.print_with_subs_to_string();
@@ -2097,8 +2097,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
       for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)
         r.name_input_var(j, stmt[stmt_num].IS.set_var(j)->name());
       Variable_ID v = r.output_var(1);
-      exp2formula(ir, r, f_root, freevar, index2, v, 'w', IR_COND_EQ,
-                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num]);
+      exp2formula(this, ir, r, f_root, freevar, index2, v, 'w', IR_COND_EQ,
+                  true,uninterpreted_symbols[stmt_num],uninterpreted_symbols_stringrepr[stmt_num], unin_rel[stmt_num]);
       r.setup_names();
       r.simplify(2, 4);
       std::string output_var = r.print_outputs_with_subs_to_string();

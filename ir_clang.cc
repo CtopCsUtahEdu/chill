@@ -23,27 +23,13 @@ History:
 #include "scanner/sanityCheck.h"
 #include "scanner/definitionLinker.h"
 
-#define DUMPFUNC(x, y) std::cerr << "In function " << x << "\n"; y->dump(); 
-
-#include "clang/Frontend/FrontendActions.h"
-#include <clang/CodeGen/CodeGenAction.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Frontend/CompilerInvocation.h>
-#include <clang/Basic/DiagnosticOptions.h>
-#include <clang/Frontend/TextDiagnosticPrinter.h>
-#include <clang/AST/ASTContext.h>
 #include <clang/AST/RecordLayout.h>
-#include <clang/AST/Decl.h>
+#include <clang/Lex/Lexer.h>
 #include <clang/Parse/ParseAST.h>
 #include <clang/Basic/TargetInfo.h>
+#include <clang/Basic/Version.h>
 
-#include <llvm/ADT/IntrusiveRefCntPtr.h>
-#include <llvm/Support/Host.h>
-
-#include "code_gen/CG_chillRepr.h"
 #include "code_gen/CG_chillBuilder.h"
-
-#include "chill_ast.hh"
 
 #define UNWRAP(x) ((x)[0])
 #define WRAP(x) (chillAST_NodeList(1,x))
@@ -56,6 +42,7 @@ chillAST_NodeList ConvertDeclStmt( clang::DeclStmt *clangDS );
 chillAST_NodeList ConvertCompoundStmt( clang::CompoundStmt *clangCS );
 chillAST_NodeList ConvertFunctionDecl( clang::FunctionDecl *D );
 chillAST_NodeList ConvertForStmt( clang::ForStmt *clangFS );
+chillAST_NodeList ConvertWhileStmt( clang::WhileStmt *clangWS );
 chillAST_NodeList ConvertUnaryOperator( clang::UnaryOperator * clangU );
 chillAST_NodeList ConvertBinaryOperator( clang::BinaryOperator * clangBO );
 chillAST_NodeList ConvertArraySubscriptExpr( clang::ArraySubscriptExpr *clangASE );
@@ -203,10 +190,6 @@ chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *RD ) { // for structs an
     astruct->subparts.push_back(VD); 
   }
 
-
-  debug_fprintf(stderr, "I just defined a struct\n"); 
-  astruct->print(0, stderr); 
-
   return WRAP(astruct);
 }
 
@@ -331,6 +314,16 @@ chillAST_NodeList ConvertForStmt( ForStmt *clangFS ) {
   return WRAP(chill_loop);
 }
 
+chillAST_NodeList ConvertWhileStmt( WhileStmt *clangWS ) {
+  Expr *cond = clangWS->getCond();
+  Stmt *body = clangWS->getBody();
+
+  chillAST_node *cnd = UNWRAP(ConvertGenericClangAST( cond ));
+  chillAST_node *bod = UNWRAP(ConvertGenericClangAST( body ));
+  chillAST_WhileStmt *chill_loop = new  chillAST_WhileStmt( cnd, bod );
+  return WRAP(chill_loop);
+}
+
 
 chillAST_NodeList ConvertIfStmt( IfStmt *clangIS ) {
   Expr *cond = clangIS->getCond();
@@ -418,82 +411,19 @@ chillAST_NodeList ConvertDeclRefExpr( DeclRefExpr * clangDRE ) {
 
 chillAST_NodeList ConvertIntegerLiteral( IntegerLiteral *clangIL ) {
   bool isSigned = clangIL->getType()->isSignedIntegerType();
-  //int val = clangIL->getIntValue();
-  const char *printable = clangIL->getValue().toString(10, isSigned).c_str(); 
-  int val = atoi( printable ); 
-  //debug_fprintf(stderr, "int value %s  (%d)\n", printable, val); 
+  const char *printable = clangIL->getValue().toString(10, isSigned).c_str();
+  int val = atoi( printable );
   chillAST_IntegerLiteral  *chillIL = new chillAST_IntegerLiteral( val );
   return WRAP(chillIL);
 }
 
 
 chillAST_NodeList ConvertFloatingLiteral( FloatingLiteral *clangFL ) {
-  //debug_fprintf(stderr, "\nConvertFloatingLiteral()\n"); 
-  float val = clangFL->getValueAsApproximateDouble(); // TODO approx is a bad idea!
-  string WHAT; 
-  SmallString<16> Str;
-  clangFL->getValue().toString( Str );
-  const char *printable = Str.c_str(); 
-  //debug_fprintf(stderr, "literal %s\n", printable); 
+  double val = clangFL->getValue().convertToDouble();
 
-  SourceLocation sloc = clangFL->getLocStart();
-  SourceLocation eloc = clangFL->getLocEnd();
+  string lit = Lexer::getSourceText(CharSourceRange::getTokenRange(clangFL->getSourceRange()), *globalSRCMAN , LangOptions());
 
-  std::string start = sloc.printToString( *globalSRCMAN ); 
-  std::string end   = eloc.printToString( *globalSRCMAN ); 
-  //debug_fprintf(stderr, "literal try2 start %s end %s\n", start.c_str(), end.c_str()); 
-  //printlines( sloc, eloc, globalSRCMAN ); 
-  unsigned int startlineno = globalSRCMAN->getPresumedLineNumber( sloc );
-  unsigned int   endlineno = globalSRCMAN->getPresumedLineNumber( eloc ); ;
-  const char     *filename = globalSRCMAN->getBufferName( sloc );
-
-  std::string  fname = globalSRCMAN->getFilename( sloc );
-  //debug_fprintf(stderr, "fname %s\n", fname.c_str()); 
-
-  if (filename && strlen(filename) > 0) {} // debug_fprintf(stderr, "literal file '%s'\n", filename);
-  else { 
-    debug_fprintf(stderr, "\nConvertFloatingLiteral() filename is NULL?\n"); 
-
-    //sloc =  globalSRCMAN->getFileLoc( sloc );  // should get spelling loc? 
-    sloc =  globalSRCMAN->getSpellingLoc( sloc );  // should get spelling loc? 
-    //eloc =  globalSRCMAN->getFileLoc( eloc );
-
-    start = sloc.printToString( *globalSRCMAN ); 
-    //end   = eloc.printToString( *globalSRCMAN );  
-    //debug_fprintf(stderr, "literal try3 start %s end %s\n", start.c_str(), end.c_str()); 
-   
-    startlineno = globalSRCMAN->getPresumedLineNumber( sloc );
-    //endlineno = globalSRCMAN->getPresumedLineNumber( eloc ); ;    
-    //debug_fprintf(stderr, "start, end line numbers %d %d\n", startlineno, endlineno); 
-    
-    filename = globalSRCMAN->getBufferName( sloc );
-
-    //if (globalSRCMAN->isMacroBodyExpansion( sloc )) { 
-    //  debug_fprintf(stderr, "IS MACRO\n");
-    //} 
-  }
-  
-  unsigned int  offset = globalSRCMAN->getFileOffset( sloc );
-  //debug_fprintf(stderr, "literal file offset %d\n", offset); 
-
-  FILE *fp = fopen (filename, "r");
-  fseek(fp, offset, SEEK_SET); // go to the part of the file where the float is defined
-  
-  char buf[10240];
-  fgets (buf, sizeof(buf), fp); // read a line starting where the float starts
-  fclose(fp);
-
-  // buf has the line we want   grab the float constant out of it
-  //debug_fprintf(stderr, "\nbuf '%s'\n", buf);
-  char *ptr = buf;
-  if (*ptr == '-') ptr++; // ignore possible minus sign
-  int len = strspn(ptr, ".-0123456789f"); 
-  buf[len] = '\0';
-  //debug_fprintf(stderr, "'%s'\n", buf);
-
-  chillAST_FloatingLiteral  *chillFL = new chillAST_FloatingLiteral( val, buf );
-  
-  //chillFL->print(); printf("\n"); fflush(stdout); 
+  chillAST_FloatingLiteral  *chillFL = new chillAST_FloatingLiteral( val, lit.c_str() );
   return WRAP(chillFL);
 }
 
@@ -539,8 +469,7 @@ chillAST_NodeList ConvertCallExpr( CallExpr *clangCE ) {
   callee->setParent( chillCE );
 
   int numargs = clangCE->getNumArgs();
-  //debug_fprintf(stderr, "CallExpr has %d args\n", numargs);
-  Expr **clangargs =  clangCE->getArgs(); 
+  Expr **clangargs =  clangCE->getArgs();
   for (int i=0; i<numargs; i++) { 
     chillCE->addArg( UNWRAP(ConvertGenericClangAST( clangargs[i] )) );
   }
@@ -603,6 +532,7 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
    if (isa<CompoundStmt>(s))              {ret = ConvertCompoundStmt( dyn_cast<CompoundStmt>(s));
    } else if (isa<DeclStmt>(s))           {ret = ConvertDeclStmt(dyn_cast<DeclStmt>(s));
    } else if (isa<ForStmt>(s))            {ret = ConvertForStmt(dyn_cast<ForStmt>(s));
+   } else if (isa<WhileStmt>(s))          {ret = ConvertWhileStmt(dyn_cast<WhileStmt>(s));
    } else if (isa<BinaryOperator>(s))     {ret = ConvertBinaryOperator(dyn_cast<BinaryOperator>(s));
    } else if (isa<ArraySubscriptExpr>(s)) {ret = ConvertArraySubscriptExpr(dyn_cast<ArraySubscriptExpr>(s));
    } else if (isa<DeclRefExpr>(s))        {ret = ConvertDeclRefExpr(dyn_cast<DeclRefExpr>(s));
@@ -643,8 +573,7 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
    return ret; 
  }
 
-class NULLASTConsumer : public ASTConsumer
-{
+class NULLASTConsumer : public ASTConsumer {
 };
 
 
@@ -658,13 +587,11 @@ IR_clangCode_Global_Init *IR_clangCode_Global_Init::pinstance = 0;
 IR_clangCode_Global_Init *IR_clangCode_Global_Init::Instance(const char **argv) {
   debug_fprintf(stderr, "in IR_clangCode_Global_Init::Instance(), "); 
   if (pinstance == 0) {  
-    //debug_fprintf(stderr, "\n\n***  making the one and only instance ***\n\n\n"); 
     // this is the only way to create an IR_clangCode_Global_Init
     pinstance = new IR_clangCode_Global_Init; 
     pinstance->ClangCompiler = new aClangCompiler( argv[1] );
 
   }
-  //debug_fprintf(stderr, "leaving  IR_clangCode_Global_Init::Instance()\n"); 
   return pinstance;
 }
 
@@ -689,13 +616,11 @@ aClangCompiler::aClangCompiler(const char *filename ) {
   // This class is designed to represent an abstract "invocation" of the compiler, 
   // including data such as the include paths, the code generation options, 
   // the warning flags, and so on.   
-  std::unique_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
+  std::shared_ptr<clang::CompilerInvocation> CI(new clang::CompilerInvocation);
   clang::CompilerInvocation::CreateFromArgs(*CI, &args[0], &args[0] + args.size(), *diagnosticsEngine);
 
-  
   // Create the compiler instance
   Clang = new clang::CompilerInstance();  // TODO should have a better name ClangCompilerInstance
-
 
   // Get ready to report problems
   Clang->createDiagnostics(nullptr, true);
@@ -713,7 +638,12 @@ aClangCompiler::aClangCompiler(const char *filename ) {
   sourceManager = &SourceMgr; // ?? aclangcompiler copy
   globalSRCMAN = &SourceMgr; //  TODO   global bad
 
-  Clang->setInvocation(CI.get()); // Replace the current invocation
+  // Replace the current invocation
+#if CLANG_VERSION_MAJOR > 3
+  Clang->setInvocation(CI);
+#else
+  Clang->setInvocation(CI.get());
+#endif
 
   Clang->createPreprocessor(TU_Prefix);
 
@@ -736,20 +666,11 @@ aClangCompiler::aClangCompiler(const char *filename ) {
   astContext_ = &Clang->getASTContext();
 }
 
-
-
-
 chillAST_FunctionDecl*  aClangCompiler::findprocedurebyname( char *procname ) {
-
-  //debug_fprintf(stderr, "searching through files in the clang AST\n\n");
-  //debug_fprintf(stderr, "astContext_  0x%x\n", astContext_);
-
   vector<chillAST_node*> procs;
   findmanually( entire_file_AST, procname, procs );
 
-  //debug_fprintf(stderr, "procs has %d members\n", procs.size());
-
-  if ( procs.size() == 0 ) { 
+  if ( procs.size() == 0 ) {
     debug_fprintf(stderr, "could not find function named '%s' in AST from file %s\n", procname, SourceFileName);
     exit(-1);
   }
@@ -762,7 +683,6 @@ chillAST_FunctionDecl*  aClangCompiler::findprocedurebyname( char *procname ) {
 
   debug_fprintf(stderr, "found the procedure named %s\n", procname); 
   return (chillAST_FunctionDecl *)procs[0];
-
 }
 
 IR_clangCode_Global_Init::~IR_clangCode_Global_Init()

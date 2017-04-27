@@ -33,7 +33,18 @@ struct IR_chillScalarSymbol: public IR_ScalarSymbol {
   IR_Symbol *clone() const;
 };
 
+struct IR_chillFunctionSymbol: public IR_FunctionSymbol {
+  chillAST_FunctionDecl* fs_;
 
+  IR_chillFunctionSymbol(const IR_Code *ir, chillAST_FunctionDecl *fs ) {
+    ir_ = ir;
+    fs_ = fs;
+  }
+
+  std::string name() const;
+  bool operator==(const IR_Symbol &that) const;
+  IR_Symbol *clone() const;
+};
 
 struct IR_chillArraySymbol: public IR_ArraySymbol {
   //int indirect_;             // what was this? 
@@ -116,7 +127,7 @@ struct IR_chillScalarRef: public IR_ScalarRef {
   
   IR_chillScalarRef(const IR_Code *ir, chillAST_BinaryOperator *ins, OP_POSITION pos) {
     debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, ins, pos ) *****\n\n"); 
-    exit(-1); 
+    exit(-1);
     // this constructor takes a binary operation and an indicator of which side of the op to use,
     // and finds the scalar in the lhs or rhs of the binary op. 
     ir_ = ir;
@@ -154,35 +165,19 @@ struct IR_chillScalarRef: public IR_ScalarRef {
   }
 
   IR_chillScalarRef(const IR_Code *ir, chillAST_DeclRefExpr *d) { 
-    // debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, REF EXPR sym %s ) *****\n\n", d->getVarDecl()->varname); 
-    //debug_fprintf(stderr, "new IR_chillScalarRef with a DECLREFEXPR  (has dre) \n"); 
+    debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, REF EXPR sym %s ) *****\n\n", d->getVarDecl()->varname);
     ir_ = ir;
     dre = d;
-    //bop = NULL;
-    chillvd = d->getVarDecl(); 
+    chillvd = d->getVarDecl();
     op_pos_ = OP_UNKNOWN; 
-
-    //debug_fprintf(stderr, "\nScalarRef has:\n"); peel5
-    //debug_fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
-    //debug_fprintf(stderr, "ins_pos %d\n", ins_pos_); 
-    //debug_fprintf(stderr, "op_pos %d\n", op_pos_); 
-    //debug_fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
   }
 
   IR_chillScalarRef(const IR_Code *ir, chillAST_VarDecl *vardecl) { 
     debug_fprintf(stderr, "\n*****                         new IR_xxxxScalarRef( ir, sym 0x1234567 ) ***** THIS SHOULD NEVER HAPPEN\n\n"); 
-    debug_fprintf(stderr, "vardecl %s\n", vardecl->varname); 
     ir_ = ir;
-    dre = NULL;  debug_fprintf(stderr, "new IR_chillScalarRef with a vardecl but no dre\n"); 
-    //bop = NULL;
-    chillvd = vardecl; 
+    dre = NULL;
+    chillvd = vardecl;
     op_pos_ = OP_UNKNOWN; 
-
-    //debug_fprintf(stderr, "\nScalarRef has:\n"); 
-    //debug_fprintf(stderr, "assignment op  DOESNT EXIST\n"); 
-    //debug_fprintf(stderr, "ins_pos %d\n", ins_pos_); 
-    //debug_fprintf(stderr, "op_pos %d\n", op_pos_); 
-    //debug_fprintf(stderr, "ref expr dre = 0x%x\n", dre); 
   }
 
   
@@ -193,7 +188,23 @@ struct IR_chillScalarRef: public IR_ScalarRef {
   IR_Ref *clone() const;
 };
 
+struct IR_chillFunctionRef: public IR_FunctionRef {
 
+  chillAST_DeclRefExpr *vs_;
+
+  int is_write_;
+
+  IR_chillFunctionRef(const IR_Code *ir, chillAST_DeclRefExpr *ins) {
+    ir_ = ir;
+    vs_ = ins;
+    is_write_ = 0;
+  }
+  bool is_write() const;
+  IR_FunctionSymbol *symbol() const;
+  bool operator==(const IR_Ref &that) const;
+  omega::CG_outputRepr *convert();
+  IR_Ref *clone() const;
+};
 
 struct IR_chillArrayRef: public IR_ArrayRef {
   //DeclRefExpr *as_; 
@@ -425,8 +436,9 @@ public:
   IR_chillCode(const char *filename, char *proc_name, char *script_name);
   ~IR_chillCode();
 
-  void setOutputName( const char *name ) { outputname = strdup(name); } 
+  void setOutputName( const char *name ) { outputname = strdup(name); }
 
+  virtual omega::CG_outputRepr *RetrieveMacro(std::string s);
   IR_ScalarSymbol *CreateScalarSymbol(const IR_Symbol *sym, int i);
   IR_ScalarSymbol *CreateScalarSymbol(IR_CONSTANT_TYPE type, int memory_type = 0, std::string name = "");
 
@@ -457,7 +469,7 @@ public:
 
   std::vector<IR_ScalarRef *> FindScalarRef(const omega::CG_outputRepr *repr) const;
   std::vector<IR_ArrayRef *> FindArrayRef(const omega::CG_outputRepr *repr) const;
-
+  virtual std::vector<IR_Loop *> FindLoops(omega::CG_outputRepr *repr);
   std::vector<IR_PointerArrayRef *> FindPointerArrayRef(const omega::CG_outputRepr *repr) const;
   IR_PointerArrayRef *CreatePointerArrayRef(IR_PointerSymbol *sym,
                                             std::vector<omega::CG_outputRepr *> &index);

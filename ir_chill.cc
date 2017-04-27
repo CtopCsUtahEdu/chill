@@ -207,6 +207,29 @@ IR_Symbol *IR_chillArraySymbol::clone() const {
 }
 
 // ----------------------------------------------------------------------------
+// Class: IR_chillFunctionSymbol
+// ----------------------------------------------------------------------------
+
+std::string IR_chillFunctionSymbol::name() const {
+
+  return fs_->functionName;
+
+}
+
+bool IR_chillFunctionSymbol::operator==(const IR_Symbol &that) const {
+  if (typeid(*this) != typeid(that))
+    return false;
+
+  const IR_chillFunctionSymbol *l_that =
+      static_cast<const IR_chillFunctionSymbol *>(&that);
+  return this->fs_ == l_that->fs_;
+}
+
+IR_Symbol *IR_chillFunctionSymbol::clone() const {
+  return NULL;
+}
+
+// ----------------------------------------------------------------------------
 // Class: IR_chillPointerSymbol
 // ----------------------------------------------------------------------------
 
@@ -342,6 +365,38 @@ IR_Ref * IR_chillScalarRef::clone() const {
 }
 
 // ----------------------------------------------------------------------------
+// Class: IR_chillFunctionRef
+// ----------------------------------------------------------------------------
+
+bool IR_chillFunctionRef::is_write() const {
+  return is_write_ == 1;
+}
+
+IR_FunctionSymbol *IR_chillFunctionRef::symbol() const {
+  return new IR_chillFunctionSymbol(ir_, vs_->getFunctionDecl());
+}
+
+bool IR_chillFunctionRef::operator==(const IR_Ref &that) const {
+  if (typeid(*this) != typeid(that))
+    return false;
+
+  const IR_chillFunctionRef *l_that =
+      static_cast<const IR_chillFunctionRef *>(&that);
+
+  return this->vs_ == l_that->vs_;
+}
+
+omega::CG_outputRepr *IR_chillFunctionRef::convert() {
+  omega::CG_chillRepr *result = new omega::CG_chillRepr(vs_);
+  delete this;
+  return result;
+}
+
+IR_Ref * IR_chillFunctionRef::clone() const {
+  return new IR_chillFunctionRef(ir_, vs_);
+}
+
+// ----------------------------------------------------------------------------
 // Class: IR_chillArrayRef, also FORMERLY IR_chillPointerArrayRef which was the same ???
 // ----------------------------------------------------------------------------
 
@@ -415,12 +470,8 @@ CG_outputRepr *IR_chillArrayRef::index(int dim) const {
 
 
 IR_ArraySymbol *IR_chillArrayRef::symbol() const {
-  //debug_fprintf(stderr, "IR_chillArrayRef::symbol()\n"); 
-  //chillASE->print(); printf("\n"); fflush(stdout); 
-  //debug_fprintf(stderr, "base:  ");  chillASE->base->print();  printf("\n"); fflush(stdout); 
 
-  
-  chillAST_node *mb = chillASE->multibase(); 
+  chillAST_node *mb = chillASE->multibase();
   chillAST_VarDecl *vd = (chillAST_VarDecl*)mb;
   //debug_fprintf(stderr, "symbol: '%s'\n", vd->varname);
 
@@ -734,9 +785,7 @@ CG_outputRepr *IR_chillIf::condition() const {
 }
 
 IR_Block *IR_chillIf::then_body() const {
-  debug_fprintf(stderr, "IR_chillIf::then_body() making a block with then part\n");
-  chillif->thenpart->print(0, stderr); debug_fprintf(stderr, "\n"); 
-  return new IR_chillBlock(ir_, chillif->thenpart); 
+  return new IR_chillBlock(ir_, chillif->thenpart);
 }
 
 IR_Block *IR_chillIf::else_body() const {
@@ -826,7 +875,6 @@ IR_PointerArrayRef *IR_chillCode::CreatePointerArrayRef(IR_PointerSymbol *sym,
   for (int i = 0; i < index.size(); i++) {
     omega::CG_chillRepr *CR = (omega::CG_chillRepr *)index[i];
     chillAST_node *chillcode = CR->GetCode();
-    chillcode->print(0,stderr); debug_fprintf(stderr, "\n");
     indeces.push_back( chillcode ); // TODO error check
   }
 
@@ -935,7 +983,6 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   debug_fprintf(stderr, "defining s %s\n", s.c_str());
 
   chillAST_VarDecl *vd = new chillAST_VarDecl(type.c_str(), po.c_str(), s.c_str());
-  vd->print(0,stderr); debug_fprintf(stderr, "\n");
 
   // TODO parent? symbol table?
   chillfunc->getBody()->insertChild( 0, vd);  // is this always the right function to add to?
@@ -973,8 +1020,6 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
   for (int i=0; i<size_repr.size(); i++) pointer += "*";
 
   chillAST_VarDecl *vd = new  chillAST_VarDecl( ty.c_str(), pointer.c_str(), n.c_str() );
-
-  vd->print(0, stderr); debug_fprintf(stderr, "\n");
 
   // put this in current function?  (seems wrong)  TODO
   return new IR_chillPointerSymbol( this, vd );
@@ -1046,6 +1091,45 @@ IR_ArrayRef *IR_chillCode::CreateArrayRef(const IR_ArraySymbol *sym, vector<CG_o
   return new IR_chillArrayRef( this, ASE, 0 ); 
 }
 
+omega::CG_outputRepr *IR_chillCode::RetrieveMacro(std::string s) {
+  std::map<std::string, chillAST_node*>::iterator it =
+      defined_macros.find(s);
+  if (it!=defined_macros.end())
+    return new CG_chillRepr(it->second);
+  else
+    return new CG_chillRepr(NULL);
+}
+
+std::vector<IR_Loop *> IR_chillCode::FindLoops(omega::CG_outputRepr *repr) {
+  std::vector<IR_Loop*> ret;
+  chillAST_NodeList nl = static_cast<CG_chillRepr *>(repr)->getChillCode();
+  int paths = 0;
+  for (auto node : nl) {
+    std::vector<IR_Loop*> l;
+    if (node->isForStmt()) {
+      auto fst = static_cast<chillAST_ForStmt*>(node);
+      ret.push_back(new IR_chillLoop(this, fst));
+      l = FindLoops(new CG_chillRepr(fst->body));
+    } else if (node->isCompoundStmt()) {
+      l = FindLoops(new CG_chillRepr(node->getChildren()));
+    } else if (node->isIfStmt()) {
+      auto fst = static_cast<chillAST_IfStmt*>(node);
+      l = FindLoops(new CG_chillRepr(fst->thenpart));
+      if (l.size() > 0)
+        paths++;
+      std::copy(l.begin(), l.end(), back_inserter(ret));
+      l = FindLoops(new CG_chillRepr(fst->elsepart));
+    }
+    // Original code handled while as well
+    if (l.size() > 0)
+      paths++;
+    if (paths > 1)
+      return std::vector<IR_Loop*>();
+    std::copy(l.begin(), l.end(), back_inserter(ret));
+  }
+
+  return ret;
+}
 
 
 // find all array references ANYWHERE in this block of code  ?? 
@@ -1164,15 +1248,8 @@ vector<IR_PointerArrayRef *> IR_chillCode::FindPointerArrayRef(const CG_outputRe
   // now look for ones where the base is an array with unknowns sizes  int *i;
   vector<IR_PointerArrayRef *> IRPAR;
   int numrefs = refs.size();
-  for (int i=0; i<numrefs; i++) { 
-    refs[i]->print(0,stderr); debug_fprintf(stderr, "\n"); 
-    chillAST_VarDecl *vd = refs[i]->multibase(); 
-    vd->print(0,stderr); debug_fprintf(stderr, "\n"); 
-    vd->dump(); fflush(stdout); 
-    if (vd->isPointer()) { 
-      IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
-    }
-  }
+  for (int i=0; i<numrefs; i++)
+    IRPAR.push_back( new IR_chillPointerArrayRef( this, refs[i], refs[i]->imwrittento ) );
   debug_fprintf(stderr, "%d pointer array refs\n", IRPAR.size());
 
   return IRPAR; 
@@ -1353,7 +1430,6 @@ IR_Control* IR_chillCode::GetCode(omega::CG_outputRepr* repr) const // what is t
 
   omega::CG_chillRepr* CR = (omega::CG_chillRepr* ) repr;
   chillAST_node *chillcode = CR->GetCode();
-  chillcode->print(0,stderr); debug_fprintf(stderr, "\n\n");
 
   // this routine is supposed to return an IR_Control.
   // that can be one of 3 things: if, loop, or block
@@ -1548,7 +1624,7 @@ void IR_chillCode::CreateDefineMacro(std::string s,
 
   debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::CreateDefineMacro() adding macro to sourcefile\n");
   entire_file_AST->addChild( macro ); // ??
-  defined_macros.insert(std::pair<std::string, chillAST_node*>(s + args, output));
+  defined_macros.insert(std::pair<std::string, chillAST_node*>(s/* + args*/, output));
 
 
   // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
@@ -1712,16 +1788,11 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
 
   CG_chillRepr *crepr = (CG_chillRepr *) repr;
   chillAST_node *firstnode = crepr->chillnodes[0];
-  //debug_fprintf(stderr, "chillAST node type %s\n", firstnode->getTypeString());
-  //firstnode->print(0,stdout); debug_fprintf(stderr, "\n");
-  //firstnode->dump(0, stdout); debug_fprintf(stderr, "\n");
 
   chillAST_node *node = getBaseExpr(firstnode);
   if (node->isArraySubscriptExpr()) {
-    debug_fprintf(stderr, "IR_chillCode::QueryExpOperation() returning IR_OP_ARRAY_VARIABLE\n");
     return  IR_OP_ARRAY_VARIABLE;
-  }
-  else if (node->isUnaryOperator()) {
+  } else if (node->isUnaryOperator()) {
     char *opstring;
     opstring= ((chillAST_UnaryOperator*)node)->op; // TODO enum
 
@@ -1730,7 +1801,7 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
     if (!strcmp(opstring, "-"))  return IR_OP_NEGATIVE;
     debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperation() UNHANDLED Binary Operator op type (%s)\n", opstring);
     exit(-1);
-  }
+  } else if (node->isCallExpr()) return IR_OP_MACRO;
   else if (node->isBinaryOperator()) {
     char *opstring;
     opstring= ((chillAST_BinaryOperator*)node)->op; // TODO enum
@@ -1750,25 +1821,10 @@ IR_OPERATION_TYPE IR_chillCode::QueryExpOperation(const CG_outputRepr *repr) con
 
     debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperation() UNHANDLED Binary Operator op type (%s)\n", opstring);
     exit(-1);
-  }
-
-  // really need to be more rigorous than this hack  // TODO
-  //if (firstnode->isImplicitCastExpr()) node = ((chillAST_ImplicitCastExpr*)firstnode)->subexpr;
-  //if (firstnode->isCStyleCastExpr())   node = ((chillAST_CStyleCastExpr*)  firstnode)->subexpr;
-  //if (firstnode->isParenExpr())        node = ((chillAST_ParenExpr*)       firstnode)->subexpr;
-  node = firstnode->findref();
-  //debug_fprintf(stderr, "node type is %s\n", node->getTypeString());
-
-  if (node->isIntegerLiteral() || node->isFloatingLiteral()) {
+  } else if (node->isIntegerLiteral() || node->isFloatingLiteral()) {
     debug_fprintf(stderr, "ir_rose.cc  return IR_OP_CONSTANT\n");
     return IR_OP_CONSTANT; // but node may be one of the above operations ... ??
-  }
-  else if (node->isDeclRefExpr() ) {
-    //node->print(0, stderr); debug_fprintf(stderr, "\n");
-    debug_fprintf(stderr, "return  IR_OP_VARIABLE  ??\n");
-    return  IR_OP_VARIABLE; // ??
-  }
-  //else if (node->is ) return  something;
+  } else if (node->isDeclRefExpr() ) return  IR_OP_VARIABLE; // ??
   else {
     debug_fprintf(stderr, "IR_roseCode::QueryExpOperation()  UNHANDLED NODE TYPE %s\n", node->getTypeString());
     exit(-1);
@@ -1782,18 +1838,13 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
   CG_chillRepr *crepr = (CG_chillRepr *) repr;
 
   chillAST_node *e = crepr->chillnodes[0]; // ??
-  //e->print(); printf("\n"); fflush(stdout);
 
-  // really need to be more rigorous than this hack  // TODO
   e = getBaseExpr(e);
 
-  //if(isa<IntegerLiteral>(e) || isa<FloatingLiteral>(e) || isa<DeclRefExpr>(e)) {
   if (e->isIntegerLiteral() || e->isFloatingLiteral() || e->isDeclRefExpr() ) {
-    //debug_fprintf(stderr, "it's a constant\n");
     omega::CG_chillRepr *repr = new omega::CG_chillRepr(e);
     v.push_back(repr);
   } else if (e->isBinaryOperator()) {
-    //debug_fprintf(stderr, "binary\n");
 
     chillAST_BinaryOperator *bop = (chillAST_BinaryOperator*)e;
     char *op = bop->op;  // TODO enum for operator types
@@ -1828,12 +1879,11 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
       debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() Unary Operator  UNHANDLED op (%s)\n", op);
       exit(-1);
     }
-  } // unaryoperator
-
-  else if (e->isArraySubscriptExpr() ) {
-    v.push_back(new omega::CG_chillRepr( ((chillAST_ArraySubscriptExpr*)e) ));
-  }
-  else {
+  } else if (e->isArraySubscriptExpr() ) {
+    v.push_back(new omega::CG_chillRepr(e));
+  } else if (e->isCallExpr()) {
+    v.push_back(new omega::CG_chillRepr(e));
+  } else {
     debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString());
     exit(-1);
   }
@@ -1844,22 +1894,29 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
   CG_chillRepr *crepr = (CG_chillRepr *) repr; 
   chillAST_node *node = crepr->chillnodes[0]; 
   
-  //Expr *e = static_cast<const CG_chillRep *>(repr)->GetExpression();
-
-  if(node->isIntegerLiteral()) { 
+  if(node->isIntegerLiteral()) {
     // FIXME: Not sure if it'll work in all cases (long?)
     int val = ((chillAST_IntegerLiteral*)node)->value; 
     return new IR_chillConstantRef(this, static_cast<coef_t>(val) ); 
   } else if(node->isFloatingLiteral()) { 
-    float val = ((chillAST_FloatingLiteral*)node)->value; 
+    double val = ((chillAST_FloatingLiteral*)node)->value;
     return new IR_chillConstantRef(this, val );
-  } else if(node->isDeclRefExpr()) { 
-    //debug_fprintf(stderr, "ir_chill.cc  IR_chillCode::Repr2Ref()  declrefexpr TODO\n"); exit(-1); 
-    return new IR_chillScalarRef(this, (chillAST_DeclRefExpr*)node);  // uses DRE
-  } else  { 
-    debug_fprintf(stderr, "ir_chill.cc IR_chillCode::Repr2Ref() UNHANDLED node type %s\n", node->getTypeString()); 
-    exit(-1); 
-    //assert(0);
+  } else if(node->isDeclRefExpr()) {
+    chillAST_DeclRefExpr* dre = static_cast<chillAST_DeclRefExpr*>(node);
+    if (dre->getFunctionDecl())
+      return new IR_chillFunctionRef(this, dre);
+    return new IR_chillScalarRef(this, dre);  // uses DRE
+  } else if(node->isArraySubscriptExpr()) {
+    bool write = false;
+    if (node->getParent()) {
+      if (node->getParent()->isAssignmentOp() && node->getParent()->findChild(node) == 0)
+        write = true;
+    }
+    return new IR_chillArrayRef(this, static_cast<chillAST_ArraySubscriptExpr*>(node), write);
+  } else {
+    string err = "IR_chillCode::Repr2Ref() UNHANDLED node type ";
+    err = err + node->getTypeString();
+    throw runtime_error(err.c_str());
   }
 }
 
@@ -1910,25 +1967,16 @@ bool  IR_chillCode::ReplaceRHSExpression(omega::CG_outputRepr *code, IR_Ref *ref
   CG_chillRepr * CR = (CG_chillRepr * ) code;
   int numnodes = CR->chillnodes.size();
 
-  //debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
-  for (int i=0; i<numnodes; i++) {
-    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
-  }
-
   if (numnodes == 1) {
     chillAST_node *nodezero = CR->chillnodes[0];
     if (nodezero-> isAssignmentOp()) {
       chillAST_BinaryOperator *BO = (chillAST_BinaryOperator *)nodezero;
-
       omega::CG_chillRepr *RR =  (omega::CG_chillRepr *)(ref->convert());
       chillAST_node * n = RR->GetCode();
       BO->setRHS(  n );  // replace in place
-      //debug_fprintf(stderr, "binary op with replaced RHS is now\n");
-      //BO->print(0,stderr); debug_fprintf(stderr, "\n");
       return true;
     }
     debug_fprintf(stderr, "IR_roseCode::ReplaceRHSExpression()  trying to replace the RHS of something that is not an assignment??\n");
-    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
   }
   else {
     debug_fprintf(stderr, "IR_roseCode::ReplaceRHSExpression()  trying to replace the RHS of more than one node ???\n");
@@ -1945,21 +1993,14 @@ omega::CG_outputRepr *  IR_chillCode::GetRHSExpression(omega::CG_outputRepr *cod
   CG_chillRepr * CR = (CG_chillRepr * ) code;
   int numnodes = CR->chillnodes.size();
   debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
-  for (int i=0; i<numnodes; i++) {
-    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
-  }
-
   if (numnodes == 1) {
     chillAST_node *nodezero = CR->chillnodes[0];
-    if (nodezero-> isAssignmentOp()) {
+    if (nodezero-> isAssignmentOp())
       return new CG_chillRepr(  ((chillAST_BinaryOperator *) nodezero)->rhs ); // clone??
-    }
     debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of something that is not an assignment??\n");
-    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
   }
-  else {
+  else
     debug_fprintf(stderr, "IR_roseCode::GetRHSExpression()  trying to find the RHS of more than one node ???\n");
-  }
 
   throw std::runtime_error("Die at IR_chillCode::GetRHSExpression");
 }
@@ -1972,21 +2013,14 @@ omega::CG_outputRepr *  IR_chillCode::GetLHSExpression(omega::CG_outputRepr *cod
   CG_chillRepr * CR = (CG_chillRepr * ) code;
   int numnodes = CR->chillnodes.size();
   debug_fprintf(stderr, "%d chillAST nodes\n", numnodes);
-  for (int i=0; i<numnodes; i++) {
-    CR->chillnodes[i]->print(0,stderr); debug_fprintf(stderr, "\n");
-  }
-
   if (numnodes == 1) {
     chillAST_node *nodezero = CR->chillnodes[0];
-    if (nodezero-> isAssignmentOp()) {
+    if (nodezero-> isAssignmentOp())
       return new CG_chillRepr(  ((chillAST_BinaryOperator *) nodezero)->lhs ); // clone??
-    }
     debug_fprintf(stderr, "IR_roseCode::GetLHSExpression()  trying to find the LHS of something that is not an assignment??\n");
-    nodezero->print(0,stderr); debug_fprintf(stderr, "\n");
   }
-  else {
+  else
     debug_fprintf(stderr, "IR_roseCode::GetLHSExpression()  trying to find the LHS of more than one node ???\n");
-  }
 
   throw std::runtime_error("Die at IR_chillCode::GetLHSExpression");
 }
@@ -2013,10 +2047,7 @@ omega::CG_outputRepr *IR_chillCode::CreateMalloc(const IR_CONSTANT_TYPE type,
   // we only have the name of a variable to assign the malloc memory to. Broken
   chillAST_VarDecl *vd = new chillAST_VarDecl( typ, "*", lhs.c_str());
   chillAST_BinaryOperator *BO = new chillAST_BinaryOperator( vd, "=", CE );
-  BO->print(0, stderr);
   return new CG_chillRepr( BO );
-
-
 
 }
 

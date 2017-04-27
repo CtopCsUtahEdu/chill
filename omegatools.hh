@@ -5,6 +5,7 @@
 #include <omega.h>
 #include "dep.hh"
 #include "ir_code.hh"
+#include "loop.hh"
 
 std::string tmp_e();
 
@@ -12,33 +13,33 @@ std::string tmp_e();
  * @brief Convert expression tree to omega relation.
  * @param destroy shallow deallocation of "repr", not freeing the actual code inside.
  */
-void exp2formula(IR_Code *ir,
-                 omega::Relation &r, 
-                 omega::F_And *f_root,
-                 std::vector<omega::Free_Var_Decl *> &freevars,
-                 omega::CG_outputRepr *repr, 
-                 omega::Variable_ID lhs, 
-                 char side,
-                 IR_CONDITION_TYPE rel, 
-                 bool destroy,  
-                 std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
-                 std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
+void exp2formula(Loop *loop, IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
+                 std::vector<omega::Free_Var_Decl*> &freevars, omega::CG_outputRepr *repr,
+                 omega::Variable_ID lhs, char side, IR_CONDITION_TYPE rel, bool destroy,
+                 std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
+                 std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
+                 std::map<std::string, std::vector<omega::Relation> > &index_variables);
 
-omega::Relation arrays2relation(IR_Code *ir, std::vector<omega::Free_Var_Decl*> &freevars,
-                                const IR_ArrayRef *ref_src, const omega::Relation &IS_w,
-                                const IR_ArrayRef *ref_dst, const omega::Relation &IS_r,  
-                                std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
-                                std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
+omega::Relation arrays2relation(Loop *loop, IR_Code *ir,
+                         std::vector<omega::Free_Var_Decl*> &freevars, const IR_ArrayRef *ref_src,
+                         const omega::Relation &IS_w, const IR_ArrayRef *ref_dst, const omega::Relation &IS_r,
+                         std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
+                         std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
+                         std::map<std::string, std::vector<omega::Relation> > &unin_rel);
 
 std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > relation2dependences(
                                                                                               const IR_ArrayRef *ref_src, const IR_ArrayRef *ref_dst, const omega::Relation &r);
 
-void exp2constraint(IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
-                    std::vector<omega::Free_Var_Decl *> &freevars,
-                    omega::CG_outputRepr *repr, bool destroy,  
-                    std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
-                    std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
-
+/**
+ * @brief Convert a boolean expression to omega relation.
+ * "destroy" means shallow deallocation of "repr", not freeing the actual code inside.
+ */
+void exp2constraint(Loop *loop, IR_Code *ir, omega::Relation &r, omega::F_And *f_root,
+                    std::vector<omega::Free_Var_Decl *> &freevars, omega::CG_outputRepr *repr,
+                    bool destroy,
+                    std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
+                    std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
+                    std::map<std::string, std::vector<omega::Relation> > &index_variables);
 
 bool is_single_iteration(const omega::Relation &r, int dim);
 void assign_const(omega::Relation &r, int dim, int val);
@@ -66,7 +67,15 @@ omega::CG_outputRepr * construct_int_floor(omega::CG_outputBuilder * ocg, const 
 //    std::map<std::string, std::vector<omega::CG_outputRepr *> > unin);
 std::pair<omega::Relation, bool> replace_set_var_as_existential(const omega::Relation &R,int pos, std::vector<omega::Relation> &bound);
 omega::Relation replace_set_var_as_Global(const omega::Relation &R,int pos,std::vector<omega::Relation> &bound);
+//! Return names of global vars with arity 0
+std::set<std::string> get_global_vars(const omega::Relation &r);
+//! Replicates old_relation's bounds for set var at old_pos into new_relation at new_pos
+/**
+ * position's bounds must involve constants, only supports GEQs
+ */
 omega::Relation replace_set_var_as_another_set_var(const omega::Relation &old_relation, const omega::Relation &new_relation, int old_pos, int new_pos);
+// TODO Merge Anand's
+omega::Relation replace_set_var_as_another_set_var(const omega::Relation &new_relation, const omega::Relation &old_relation, int new_pos, int old_pos, std::map<int, int> &pos_mapping);
 omega::Relation extract_upper_bound(const omega::Relation &R, omega::Variable_ID v1);
 
 // void adjust_loop_bound(Relation &r, int dim, int adjustment);

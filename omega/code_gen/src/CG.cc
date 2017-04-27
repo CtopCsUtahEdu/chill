@@ -66,11 +66,8 @@ namespace omega {
     // check for an error that happened once
     int num_unin = uninterpreted_symbols.size();
     int num_active =  active_.size();
-    if (num_unin < num_active) {
-      debug_fprintf(stderr, "CG.cc CG_result::printRepr(), not enough uninterpreted symbols (%d) for active "
-          "statements (%d)\n",  num_unin,  num_active);
-      exit(-1);
-    }
+    if (num_unin < num_active)
+      throw std::runtime_error(std::string("CG_result::printRepr(), not enough uninterpreted symbols for active statement"));
 
     std::vector<std::pair<CG_outputRepr *, int> > aotf = std::vector<
       std::pair<CG_outputRepr *, int> >(2 * num_level(),

@@ -92,7 +92,7 @@ protected:
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
-  
+
 public:
   void debugRelations() const;
   IR_Code *ir;
@@ -105,6 +105,7 @@ public:
   std::set<std::string> reduced_write_refs;
   std::map<std::string, int> array_dims;
   DependenceGraph dep;
+  std::vector<omega::Relation> dep_relation; // TODO What is this for: Anand's
   int num_dep_dim;
   omega::Relation known;
   omega::CG_outputRepr *init_code;
@@ -112,8 +113,12 @@ public:
   std::map<int, std::vector<omega::Free_Var_Decl *> > overflow;
   std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > > uninterpreted_symbols;
   std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >uninterpreted_symbols_stringrepr;
-  
-  
+  // Need for sparse
+  std::vector<std::map<std::string, std::vector<omega::Relation > > >unin_rel;
+  std::map<std::string, std::set<std::string > > unin_symbol_args;
+  std::map<std::string, std::string > unin_symbol_for_iegen;
+  std::vector<std::pair<std::string, std::string > > dep_rel_for_iegen;
+
 protected:
   mutable omega::CodeGen *last_compute_cg_;
   mutable omega::CG_result *last_compute_cgr_;
@@ -125,7 +130,16 @@ protected:
   int get_last_dep_dim_before(int stmt, int level) const;
   std::vector<omega::Relation> getNewIS() const;
   omega::Relation getNewIS(int stmt_num) const;
+  /**
+   * @brief Get the lexical order of a statment as a vector
+   * @return a 2*level+1 vector with real Loop set to 0
+   */
   std::vector<int> getLexicalOrder(int stmt_num) const;
+  /**
+   * @brief Get the lexical ordering of the statement at level
+   * @param level loop level starting with 1
+   * @return
+   */
   int getLexicalOrder(int stmt_num, int level) const;
   std::set<int> getStatements(const std::vector<int> &lex, int dim) const;
   /**
@@ -135,12 +149,21 @@ protected:
    * <= 0, all the statement before lex
    */
   void shiftLexicalOrder(const std::vector<int> &lex, int dim, int amount);
+  /**
+   * @brief Assign the lexical order of statements according to dependences
+   *
+   * @param dim The dimension to set starting with 0
+   * @param active Set of statements to set order
+   * @param starting_order
+   * @param idxNames
+   */
   void setLexicalOrder(int dim, const std::set<int> &active, int starting_order = 0, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >());
   void apply_xform(int stmt_num);
   void apply_xform(std::set<int> &active);
   void apply_xform();
   std::set<int> getSubLoopNest(int stmt_num, int level) const;
   int  getMinLexValue(std::set<int> stmts, int level);
+  omega::Relation parseExpWithWhileToRel(omega::CG_outputRepr *repr, omega::Relation &R, int loc);
  
   
 public:
@@ -171,6 +194,11 @@ public:
   int num_statement() const { return stmt.size(); }
   void printIterationSpace() const;
   void printDependenceGraph() const;
+  //! Print dependence with uninterpreted function symbols
+  /*!
+   * Adapted from *reorder_by_inspector*
+   */
+  void printDependenceUFs(int stmt_num, int level);
   void removeDependence(int stmt_num_from, int stmt_num_to);
   void dump() const;
   

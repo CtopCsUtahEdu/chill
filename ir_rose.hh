@@ -27,6 +27,7 @@ chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl );
 chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl );
 chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl ); // stupid name TODO
 chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement );
+chillAST_node * ConvertRoseWhileStatement( SgWhileStmt *whilestmt );
 chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement );
 chillAST_node * ConvertRoseBinaryOp( SgBinaryOp *binaryop );
 chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *binaryop); // binop! a.b

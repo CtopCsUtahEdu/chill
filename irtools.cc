@@ -264,57 +264,18 @@ std::vector<omega::CG_outputRepr *> collect_loop_inductive_and_conditionals(
 // positive. The first vector in returned pair is dependences from the
 // first statement to the second statement and the second vector in
 // returned pair is in reverse order.
-std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > 
-test_data_dependences(IR_Code *ir, 
-                      const CG_outputRepr *repr1, 
-                      const Relation &IS1,
-                      const CG_outputRepr *repr2, 
-                      const Relation &IS2,
-                      std::vector<Free_Var_Decl*> &freevar, 
-                      std::vector<std::string> index,
-                      int nestLeveli, 
-                      int nestLevelj, 
-                      std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
-                      std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr) {
-
-  Relation * helper;
-  debug_begin
-    debug_fprintf(stderr, "\nirtools.cc test_data_dependences()  %d freevars\n", freevar.size());
-    debug_fprintf(stderr, "\nrepr1  %p    ", repr1); repr1->dump(); fflush(stdout);
-    debug_fprintf(stderr, "\nrepr2  %p    ", repr2); repr2->dump(); fflush(stdout);
-    for (int i=0; i<index.size(); i++) debug_fprintf(stderr, "index %d %s\n", i, index[i].c_str());
-    helper = new Relation(IS1); debug_fprintf(stderr, "IS1  "); helper->print(); fflush(stdout);
-    helper = new Relation(IS2); debug_fprintf(stderr, "IS2  "); helper->print(); fflush(stdout);
-  debug_end
-
-  //for (int i=0; i<freevar.size(); i++) {
-  //  std::string shit = (const std::string)(freevar[i]->base_name()); 
-  
-  //  debug_fprintf(stderr, "freevar %d %s\n", i, shit.c_str()); 
-  //} 
-  
+std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > test_data_dependences(Loop *loop,
+                                                                                               IR_Code *ir, const CG_outputRepr *repr1, const Relation &IS1,
+                                                                                               const CG_outputRepr *repr2, const Relation &IS2,
+                                                                                               std::vector<Free_Var_Decl*> &freevar, std::vector<std::string> index,
+                                                                                               int nestLeveli, int nestLevelj, std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
+                                                                                               std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr,
+                                                                                               std::map<std::string, std::vector<omega::Relation > > &unin_rel,
+                                                                                               std::vector<omega::Relation> &dep_relation) {
   std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > result;
-  
-  if (repr1 == repr2) {
-    debug_begin
-      debug_fprintf(stderr, "repr1 == repr2\nrepr1->dump()\n");
-      repr1->dump();
-      fflush(stdout);
-    debug_end
 
+  if (repr1 == repr2) {
     std::vector<IR_ArrayRef *> access = ir->FindArrayRef(repr1);
-    debug_fprintf(stderr, "access of size %d\n", access.size()); 
-    for (int i = 0; i < access.size(); i++) {
-      IR_ArrayRef *a = access[i];
-      
-      if (a->is_write()) { 
-        debug_fprintf(stderr, "WRITE  array access %d = %s\n", i, a->name().c_str()); 
-      } 
-      else { 
-        debug_fprintf(stderr, "       array access %d = %s\n", i, a->name().c_str()); 
-      } 
-    } 
-    debug_fprintf(stderr, "that was the list\n\n"); 
 
     // Manu:: variables/structures added to identify dependence vectors related to reduction operation
     tempResultMap trMap;
@@ -329,60 +290,35 @@ test_data_dependences(IR_Code *ir,
     for (int i = 0; i < access.size(); i++) {
       ref2Stmt[i] = -1;
     }
-    
+
     // Manu -- changes for identifying possible reduction operation
     // The below loop nest is used to classify array references into different statements
-    debug_fprintf(stderr, "\nbefore mapRefstoStatements()\n"); 
     mapRefstoStatements(ir,access,ref2Stmt,rMap,tnrStmts,nrStmts);
-    debug_fprintf(stderr, "after mapRefstoStatements()\n\n"); 
-
     //-------------------------------------------------------------
-    omega::coef_t lbound[3], ubound[3];   // for each  kind of dependence. We can potentially have reduction only if all
+    omega::coef_t lbound[3], ubound[3]; 	// for each  kind of dependence. We can potentially have reduction only if all
     // lbounds match and all ubounds match. At present, we only check the last loop level.
     lbound[0] = lbound[1] = lbound[2] = LLONG_MAX;
     ubound[0] = ubound[1] = ubound[2] = LLONG_MIN;
     //-------------------------------------------------------------
-    
+
     for (int i = 0; i < access.size(); i++) {
-      debug_fprintf(stderr, "i %d\n", i); 
+
       IR_ArrayRef *a = access[i];
       IR_ArraySymbol *sym_a = a->symbol();
-      debug_fprintf(stderr, "sym_a = %s\n", a->name().c_str()); 
+
+      //Anand changing j= i into j=i+1
       for (int j = i; j < access.size(); j++) {
-        debug_fprintf(stderr, "irtools.cc j %d\n", j); 
         IR_ArrayRef *b = access[j];
         IR_ArraySymbol *sym_b = b->symbol();
-        debug_fprintf(stderr, "sym_b = %s\n", b->name().c_str()); 
-        
-        debug_fprintf(stderr, "irtools.cc ij %d %d\n", i, j); 
-        
-        if  (*sym_a == *sym_b) debug_fprintf(stderr, "*sym_a == *sym_b\n");
-        else debug_fprintf(stderr, "*sym_a NOT == *sym_b\n");
-
-        if ( a->is_write()) debug_fprintf(stderr, "%d a->is_write()\n", i); 
-        else debug_fprintf(stderr, "%d a->is_NOT_write()\n", i); 
-        if ( b->is_write()) debug_fprintf(stderr, "%d b->is_write()\n", j); 
-        else debug_fprintf(stderr, "%d b->is_NOT_write()\n", j); 
 
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
-          debug_fprintf(stderr, "\nirtools.cc ij %d %d   SYMBOL A == SYMBOL B and one is a write\n", i, j); 
-          Relation r = arrays2relation(ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr);
-          debug_begin
-            helper = new Relation(r); debug_fprintf(stderr, "r    "); helper->print(); fflush(stdout);
-          debug_end
+          Relation r = arrays2relation(loop, ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr, unin_rel);
+          r.simplify();
+          dep_relation.push_back(copy(r));
 
-          debug_fprintf(stderr, "1\n"); 
           std::pair<std::vector<DependenceVector>,
-            std::vector<DependenceVector> > dv =
-            relation2dependences(a, b, r);
-          debug_fprintf(stderr, "\nirtools.cc ij %d %d dv.first %d   dv.second %d\n", i, j, dv.first.size(), dv.second.size()); 
-          debug_fprintf(stderr, "2"); 
-          result.first.insert(result.first.end(), dv.first.begin(), 
-                              dv.first.end());
-          debug_fprintf(stderr, "3"); 
-          result.second.insert(result.second.end(), dv.second.begin(),
-                               dv.second.end());
-          debug_fprintf(stderr, "4"); 
+              std::vector<DependenceVector> > dv =
+              relation2dependences(a, b, r);
 
           // Manu:: check if the array references belong to the same statement
           // If yes, set the flag in the dependence vector
@@ -390,7 +326,7 @@ test_data_dependences(IR_Code *ir,
           if(DEP_DEBUG){
             std::cout << "Size of the dependence vector '" << a->name().c_str() << "'  -- " << dv.first.size() << "\n";
             std::cout << "------------ Printing dependence vector START ---------------\n";
-            
+
             for (std::vector<DependenceVector>::iterator itd = dv.first.begin(); itd != dv.first.end(); itd++){
               if (itd->type == DEP_R2W)
                 std::cout<<"WAR\n";
@@ -398,7 +334,7 @@ test_data_dependences(IR_Code *ir,
                 std::cout<<"RAW\n";
               else if (itd->type == DEP_W2W)
                 std::cout<<"WAW\n";
-              
+
               std::vector<omega::coef_t>::iterator itu = itd->ubounds.begin();
               for (std::vector<omega::coef_t>::iterator itl = itd->lbounds.begin(); itl != itd->lbounds.end(); itl++){
                 std::cout << "(" << *itl << ", " << *itu << ")\n";
@@ -413,7 +349,7 @@ test_data_dependences(IR_Code *ir,
                 std::cout<<"RAW\n";
               else if (itd->type == DEP_W2W)
                 std::cout<<"WAW\n";
-              
+
               std::vector<omega::coef_t>::iterator itu = itd->ubounds.begin();
               for (std::vector<omega::coef_t>::iterator itl = itd->lbounds.begin(); itl != itd->lbounds.end(); itl++){
                 std::cout << "(" << *itl << ", " << *itu << ")\n";
@@ -424,8 +360,8 @@ test_data_dependences(IR_Code *ir,
           }
           checkReductionDependence(i,j,nestLeveli,lbound,ubound,ref2Stmt,rMap,dv,trMap,nrStmts);
           //----------------------------------------------
-          
-//           // Manu:: original code without the condition
+
+//					 // Manu:: original code without the condition
           if (((rMap.find(ref2Stmt[i])->second).size() != 3) || (lbound[0] != lbound[1]) || (lbound[1] != lbound[2]) ||
               (lbound[0] != lbound[2]) || (ubound[0] != ubound[1]) || (ubound[1] != ubound[2]) || (ubound[0] != ubound[2])) { // Manu:: original code without the condition
             result.first.insert(result.first.end(),
@@ -433,14 +369,12 @@ test_data_dependences(IR_Code *ir,
             result.second.insert(result.second.end(),
                                  dv.second.begin(), dv.second.end());
           }
-
-
         }
         delete sym_b;
       }
       delete sym_a;
     }
-    
+
     // Manu
     for (ittrMap = trMap.begin(); ittrMap != trMap.end(); ittrMap++) {
       DVPair tdv = ittrMap->second;
@@ -449,29 +383,27 @@ test_data_dependences(IR_Code *ir,
       result.second.insert(result.second.end(), tdv.second.begin(),
                            tdv.second.end());
     }
-    
+
     for (int i = 0; i < access.size(); i++)
       delete access[i];
   } else {
-    debug_fprintf(stderr, "\nrepr1 != repr2\n"); 
-
     std::vector<IR_ArrayRef *> access1 = ir->FindArrayRef(repr1);
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(repr2);
-    
+
     for (int i = 0; i < access1.size(); i++) {
-      debug_fprintf(stderr, "i %d\n", i); 
       IR_ArrayRef *a = access1[i];
       IR_ArraySymbol *sym_a = a->symbol();
-      
+
       for (int j = 0; j < access2.size(); j++) {
         IR_ArrayRef *b = access2[j];
         IR_ArraySymbol *sym_b = b->symbol();
         if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
-          Relation r = arrays2relation(ir, freevar, a, IS1, b, IS2, uninterpreted_symbols,uninterpreted_symbols_stringrepr);
+          Relation r = arrays2relation(loop, ir, freevar, a, IS1, b, IS2,uninterpreted_symbols,uninterpreted_symbols_stringrepr, unin_rel);
+          dep_relation.push_back(copy(r));
           std::pair<std::vector<DependenceVector>,
-            std::vector<DependenceVector> > dv =
-            relation2dependences(a, b, r);
-          
+              std::vector<DependenceVector> > dv =
+              relation2dependences(a, b, r);
+
           result.first.insert(result.first.end(), dv.first.begin(),
                               dv.first.end());
           result.second.insert(result.second.end(), dv.second.begin(),
@@ -481,28 +413,13 @@ test_data_dependences(IR_Code *ir,
       }
       delete sym_a;
     }
-    
+
     for (int i = 0; i < access1.size(); i++)
       delete access1[i];
     for (int i = 0; i < access2.size(); i++)
       delete access2[i];
   }
-  /*std::pair<std::vector<DependenceVector>,
-    std::vector<DependenceVector> > dv =
-    ir->FindScalarDeps(repr1, repr2, index, i, j);
-    
-    
-    result.first.insert(result.first.end(), dv.first.begin(),
-    dv.first.end());
-    result.second.insert(result.second.end(), dv.second.begin(),
-    dv.second.end());*/
-  /*result.first.insert(result.first.end(), dv.first.begin(),
-    dv.first.end());
-    result.second.insert(result.second.end(), dv.second.begin(),
-    dv.second.end());
-  */
-  
-  debug_fprintf(stderr, "LEAVING test_data_dependences()  first size %d    second size %d\n\n",  result.first.size(), result.second.size()); 
+
   return result;
 }
 

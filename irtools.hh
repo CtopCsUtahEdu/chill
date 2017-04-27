@@ -33,6 +33,8 @@ struct ir_tree_node {
     delete content;
   }
 };
+
+class Loop; // Forward definition for test_data_dependences
 /*!
  * @brief Build IR tree from the source code
  *
@@ -63,6 +65,7 @@ bool is_dependence_valid(ir_tree_node *src_node, ir_tree_node *dst_node,
  * The first statement in parameter must be lexically before the second statement in parameter.
  * Returned dependences are all lexicographically positive
  *
+ * @param loop
  * @param ir
  * @param repr1
  * @param IS1
@@ -70,19 +73,22 @@ bool is_dependence_valid(ir_tree_node *src_node, ir_tree_node *dst_node,
  * @param IS2
  * @param freevar
  * @param index
- * @param i
- * @param j
+ * @param nestLeveli
+ * @param nestLevelj
  * @param uninterpreted_symbols
  * @param uninterpreted_symbols_stringrepr
+ * @param unin_rel
+ * @param dep_relation
  * @return
  */
-std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > test_data_dependences(
-  IR_Code *ir, const omega::CG_outputRepr *repr1,
-  const omega::Relation &IS1, const omega::CG_outputRepr *repr2,
-  const omega::Relation &IS2, std::vector<omega::Free_Var_Decl*> &freevar,
-  std::vector<std::string> index, int i, int j, 
-  std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
-  std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr);
+std::pair<std::vector<DependenceVector>, std::vector<DependenceVector> > test_data_dependences(Loop *loop,
+                                                                                               IR_Code *ir, const omega::CG_outputRepr *repr1, const omega::Relation &IS1,
+                                                                                               const omega::CG_outputRepr *repr2, const omega::Relation &IS2,
+                                                                                               std::vector<omega::Free_Var_Decl*> &freevar, std::vector<std::string> index,
+                                                                                               int nestLeveli, int nestLevelj, std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols,
+                                                                                               std::map<std::string, std::vector<omega::CG_outputRepr * > > &uninterpreted_symbols_stringrepr,
+                                                                                               std::map<std::string, std::vector<omega::Relation > > &unin_rel,
+                                                                                               std::vector<omega::Relation> &dep_relation);
 
 std::vector<omega::CG_outputRepr *> collect_loop_inductive_and_conditionals(ir_tree_node * stmt_node);
 

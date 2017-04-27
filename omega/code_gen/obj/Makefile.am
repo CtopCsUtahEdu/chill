@@ -3,6 +3,7 @@ noinst_LIBRARIES =libcodegen.a
 
 codegen_includes =-I$(srcdir)/../../..
 codegen_includes+=-I$(srcdir)/../include
+codegen_includes+=-I$(srcdir)/../../../include/chill
 codegen_includes+=-I$(srcdir)/../../omega_lib/include
 codegen_includes+=-I$(srcdir)/../../basic/include
 codegen_includes+=-I$(ROSEHOME)/include/rose

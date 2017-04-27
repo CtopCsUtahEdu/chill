@@ -249,6 +249,18 @@ void CFamily::runS(chillAST_ForStmt *n, std::string indent, std::ostream &o) {
   }
 }
 
+void CFamily::runS(chillAST_WhileStmt *n, std::string indent, std::ostream &o) {
+  o << "while (";
+  run(n->cond, indent, o);
+  o << ") ";
+  if (n->body->isCompoundStmt()) {
+    run(n->body, indent, o);
+  } else {
+    chill_error_printf("Body of while loop not COMPOUNDSTMT\n");
+    run(n->body, indent, o);
+  }
+}
+
 void CFamily::runS(chillAST_Free *n, std::string indent, std::ostream &o) {}
 
 void CFamily::runS(chillAST_FunctionDecl *n, std::string indent, std::ostream &o) {

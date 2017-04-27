@@ -11,16 +11,8 @@
 #include "omegatools.hh"
 #include <string.h>
 #include <code_gen/CG_outputRepr.h>
-#include <code_gen/CG_roseRepr.h>
-#include <code_gen/CG_roseBuilder.h>
-#include "ir_rose.hh"
-#include "ir_rose_utils.hh"
-#include "rose.h"
-#define TRANSFORMATION_FILE_INFO Sg_File_Info::generateDefaultFileInfoForTransformationNode()
 
 using namespace omega;
-using namespace SageBuilder;
-using namespace SageInterface;
 
 bool is_in(int n, std::vector<int> v_);
 
@@ -750,12 +742,11 @@ void Loop::generate_ghostcells_v2(std::vector<int> stmt_num, int level, int ghos
 	for (int i = 0; i < stmt.size(); i++)
     for (int j = i; j < stmt.size(); j++) {
       std::pair<std::vector<DependenceVector>,
-                std::vector<DependenceVector> > dv = test_data_dependences(
-                                                                           ir, stmt[i].code, stmt[i].IS, stmt[j].code, stmt[j].IS,
+                std::vector<DependenceVector> > dv = test_data_dependences(this, ir, stmt[i].code, stmt[i].IS, stmt[j].code, stmt[j].IS,
                                                                            freevar, index, stmt_nesting_level_[i],
                                                                            stmt_nesting_level_[j],
                                                                            uninterpreted_symbols[ i ],  // ??? 
-                                                                           uninterpreted_symbols_stringrepr[ i ]); // ??? );
+                                                                           uninterpreted_symbols_stringrepr[ i ], unin_rel[i], dep_relation); // ??? );
       
       
 
@@ -1537,28 +1528,7 @@ CG_outputRepr *Loop::add_omp_parallel_for(CG_outputRepr *repr)const
 */
 
 
-
-std::vector<SgVariableSymbol *> vec_loop_indices;
-
-
-
-
-
-//checks if index alread exists
-bool inVecIndices(int indx)
-{
-	for (int i=0; i<indx; i++)
-	{
-		if (strcmp(vec_loop_indices[i]->get_name().str(), vec_loop_indices[indx]->get_name().str()) == 0)
-			return true;
-	}
-
-	return false;
-}
-
-
-
-/*  OMP  
+/*  OMP
 void Loop::scrape_loop_indices(CG_outputRepr *repr)const
 {
 

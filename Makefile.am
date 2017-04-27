@@ -47,6 +47,7 @@ core_src += loop_datacopy.cc
 core_src += loop_extra.cc
 core_src += loop_ghostcells.cc
 core_src += loop_stencil.cc
+core_src += loop_sparse.cc
 core_src += loop_tile.cc
 core_src += loop_unroll.cc
 core_src += omegatools.cc
