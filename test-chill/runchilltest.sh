@@ -61,18 +61,34 @@ chill_answers_path=`realpath $3`
 shift 3
 
 chill_generated_source=$chill_script_path/$(get_destination $chill_script_path/$chill_script)
+chill_generated_stdout=$chill_script_path/$(basename $chill_script).stdout
+chill_generated_stderr=$chill_script_path/$(basename $chill_script).stderr
 chill_correct_source=$chill_answers_path/$(basename $chill_generated_source)
+chill_correct_stdout=$chill_answers_path/$(basename $chill_generated_stdout)
+chill_correct_stderr=$chill_answers_path/$(basename $chill_generated_stderr)
 
 echo "CHiLL script path:     $chill_script_path"
 echo "CHiLL script name:     $chill_script"
 echo "Generated source file: $chill_generated_source"
 echo "Correct source file:   $chill_correct_source"
 
-## remove generated file if it exists
+## remove generated files if they exist
 if [ -e $chill_generated_source ]; then
     pushd $chill_script_path >/dev/null
     rm $chill_generated_source
     popd >/dev/null
+fi
+
+if [ -e $chill_generated_stdout ]; then
+    pushd $chill_script_path >/dev/null
+    rm $chill_generated_stdout
+    popd
+fi
+
+if [ -e $chill_generated_stderr ]; then
+    pushd $chill_script_path >/dev/null
+    rm $chill_generated_stderr
+    popd
 fi
 
 
@@ -165,6 +181,28 @@ case $test_type in
             err=`run_chill /dev/null /dev/null 77`
             maybe_exit_with_skip_code $err
             err=`check_diff $chill_generated_source $chill_correct_source`
+            exit_with_passfail_code $err
+        ;;
+    check-stdout)
+            tmp=`pwd`/tmp
+            err=`run_chill $tmp /dev/null 77`
+            if [ $err == 77 ]; then
+                rm -f $tmp
+            fi
+            maybe_exit_with_skip_code $err
+            err=`check_diff $chill_generated_stdout $chill_correct_stdout`
+            rm -f $tmp
+            exit_with_passfail_code $err
+        ;;
+    check-stderr)
+            tmp=`pwd`/tmp
+            err=`run_chill $tmp /dev/null 77`
+            if [ $err == 77 ]; then
+                rm -f $tmp
+            fi
+            maybe_exit_with_skip_code $err
+            err=`check_diff $chill_generated_stderr $chill_correct_stderr`
+            rm -f $tmp
             exit_with_passfail_code $err
         ;;
 esac
