@@ -761,6 +761,18 @@ chillAST_node * ConvertRoseWhileStmt( SgWhileStmt *whilestmt ) {
   return chill_loop;
 }
 
+chillAST_node * ConvertRoseConditionalExp( SgConditionalExp *condexp ) {
+  SgExpression *rosecond  = condexp->get_conditional_exp();
+  SgExpression *rosetrue  = condexp->get_true_exp();
+  SgExpression *rosefalse  = condexp->get_false_exp();
+
+  chillAST_node *cond = ConvertRoseGenericAST( rosecond );
+  chillAST_node *trueexpr = ConvertRoseGenericAST( rosetrue );
+  chillAST_node *falseexpr = ConvertRoseGenericAST( rosefalse );
+
+  chillAST_TernaryOperator *chill_ternary = new chillAST_TernaryOperator("?", cond, trueexpr, falseexpr);
+  return chill_ternary;
+}
 
 chillAST_node * ConvertRoseExprStatement( SgExprStatement *exprstatement )
 {
@@ -1453,7 +1465,7 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n )
   } else if ( isSgReturnStmt(n)          ) { ret = ConvertRoseReturnStmt      ((SgReturnStmt *)n );
   } else if ( isSgIfStmt(n)              ) { ret = ConvertRoseIfStmt          ((SgIfStmt *)n );
   } else if ( isSgAssignInitializer(n)   ) { ret = ConvertRoseAssignInitializer((SgAssignInitializer *)n);
-  } else if ( isSgWhileStmt(n)           ) { ret = ConvertRoseWhileStmt       ((SgWhileStmt *)n);
+  } else if ( isSgConditionalExp(n)      ) { ret = ConvertRoseConditionalExp  ((SgConditionalExp *)n);
   } else if ( isSgNullExpression(n)      ) {  //  ignore ??
       //return the NULL
   }

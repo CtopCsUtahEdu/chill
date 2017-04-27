@@ -1803,10 +1803,7 @@ class chillAST_node* chillAST_TernaryOperator::clone() {
   chillAST_node* c = condition->clone();
   chillAST_node* l = lhs->clone();
   chillAST_node* r = rhs->clone();
-  chillAST_TernaryOperator *to =  new chillAST_TernaryOperator( op, l, r, parent ); 
-  c->setParent( to ); 
-  l->setParent( to );
-  r->setParent( to );
+  chillAST_TernaryOperator *to =  new chillAST_TernaryOperator( op, c, l, r );
   to->isFromSourceFile = isFromSourceFile;
   return to;
 }

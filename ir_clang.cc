@@ -55,6 +55,7 @@ chillAST_NodeList ConvertReturnStmt( clang::ReturnStmt *clangRS );
 chillAST_NodeList ConvertCallExpr( clang::CallExpr *clangCE );
 chillAST_NodeList ConvertIfStmt( clang::IfStmt *clangIS );
 chillAST_NodeList ConvertMemberExpr( clang::MemberExpr *clangME );
+chillAST_NodeList ConvertConditionalOperator( clang::ConditionalOperator * clangCO );
 
 
 chillAST_node * ConvertTranslationUnit(  clang::TranslationUnitDecl *TUD, char *filename );
@@ -485,6 +486,15 @@ chillAST_NodeList ConvertParenExpr( ParenExpr *clangPE ) {
   return WRAP(chillPE);
 }
 
+chillAST_NodeList ConvertConditionalOperator( clang::ConditionalOperator * clangCO ) {
+  chillAST_node *cond = UNWRAP(ConvertGenericClangAST(clangCO->getCond()));
+  chillAST_node *trueExpr = UNWRAP(ConvertGenericClangAST(clangCO->getTrueExpr()));
+  chillAST_node *falseExpr = UNWRAP(ConvertGenericClangAST(clangCO->getFalseExpr()));
+  chillAST_TernaryOperator *chillTO = new chillAST_TernaryOperator("?", cond, trueExpr, falseExpr);
+
+  return WRAP(chillTO);
+}
+
 
 chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filename ) {
   // TUD derived from Decl and DeclContext
@@ -546,6 +556,7 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
    } else if (isa<ParenExpr>(s))          {ret = ConvertParenExpr(dyn_cast<ParenExpr>(s));
    } else if (isa<IfStmt>(s))             {ret = ConvertIfStmt(dyn_cast<IfStmt>(s));
    } else if (isa<MemberExpr>(s))         {ret = ConvertMemberExpr(dyn_cast<MemberExpr>(s));
+   } else if (isa<ConditionalOperator>(s)){ret = ConvertConditionalOperator(dyn_cast<ConditionalOperator>(s));
 
 
      // these can only happen at the top level? 
@@ -563,11 +574,9 @@ chillAST_node * ConvertTranslationUnit(  TranslationUnitDecl *TUD, char *filenam
      */
 
    } else {
-     // more work to do his->chillvd == l_that->chillvd;
-     debug_fprintf(stderr, "ir_clang.cc ConvertGenericClangAST() UNHANDLED ");
-     //if (isa<Decl>(D)) debug_fprintf(stderr, "Decl of kind %s\n",  D->getDeclKindName() );
-     if (isa<Stmt>(s))debug_fprintf(stderr, "Stmt of type %s\n", s->getStmtClassName()); 
-     exit(-1); 
+     std::string err = "ConvertGenericClangAST() UNHANDLED";
+     if (isa<Stmt>(s)) err = err + "Stmt of type " + s->getStmtClassName();
+     throw std::runtime_error(err.c_str());
    }
    
    return ret; 
