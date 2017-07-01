@@ -9,11 +9,15 @@
 
 #ifdef CUDACHILL
 
-#include "rose.h"                              // ?? 
 #include "loop_cuda_chill.hh"
+
+#ifdef FRONTEND_ROSE
 #include "ir_rose.hh"
 #include "ir_cudarose.hh"
-
+#else
+#include "ir_clang.hh"
+#include "ir_cudaclang.hh"
+#endif
 #include <vector>
 
 #else
@@ -351,7 +355,7 @@ static bool to_int_matrix(PyObject* args, int index, std::vector<std::vector<int
 static PyObject *
 chill_destination(PyObject *self, PyObject* args) {
   strict_arg_num(args, 1, "destination");
-  ((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
+  dest_filename = strArg(args, 0);
   Py_RETURN_NONE;
 }
 
@@ -1267,12 +1271,24 @@ chill_init(PyObject *self, PyObject *args)
   
   debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
   debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
-  ir_code = new IR_cudaroseCode(filename, procname, NULL); //this produces 15000 lines of output
-  fflush(stdout); 
-  
-  
-  
-  
+  #ifdef FRONTEND_ROSE
+  if(dest_filename.empty()) {
+    ir_code = new IR_cudaroseCode(filename, procname, NULL);
+  }
+  else {
+    ir_code = new IR_cudaroseCode(filename, procname, dest_filename.c_str());
+  }
+  #else
+  if(dest_filename.empty()) {
+    ir_code = new IR_cudaclangCode(filename, procname, NULL);
+  }
+  else {
+    ir_code = new IR_cudaclangCode(filename, procname, dest_filename.c_str());
+  }
+  #endif
+
+  fflush(stdout);
+
   //protonu--here goes my initializations
   //A lot of this code was lifted from Chun's parser.yy
   //the plan is now to create the LoopCuda object directly

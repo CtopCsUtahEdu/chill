@@ -26,9 +26,11 @@
 
 #ifdef CUDACHILL
 
-#ifdef FRONTEND_ROSE
 #include "loop_cuda_chill.hh"
+#ifdef FRONTEND_ROSE
 #include "ir_cudarose.hh"
+#else
+#include "ir_cudaclang.hh"
 #endif
 
 typedef LoopCuda loop_t;

@@ -15,120 +15,124 @@
 #include <typeinfo>
 #include "ir_cudaclang.hh"
 #include "loop.hh"
-#include "loop_cuda_clang.hh"
+#include "loop_cuda_chill.hh"
 
 
 
-IR_cudaclangCode::IR_cudaclangCode(const char *paramfilename, const char* proc_name) :
-  IR_clangCode(paramfilename, strdup(proc_name)) {
-  
-  // filename and procedurename are internal to IR_clangcode and therefore part of IR_cudaclangcode
-  debug_fprintf(stderr, "IR_cudaxxxxCode::IR_cudaxxxxCode( %s, %s )\n", filename, procedurename); // proc_name );
-
-  char *fname = strdup(paramfilename);
+IR_cudaclangCode::IR_cudaclangCode(const char *paramfilename, const char* proc_name, const char* dest_name) :
+  IR_clangCode(paramfilename, strdup(proc_name), dest_name) {
+  debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n");
+  char *fname = strdup(filename);
   char *f = fname;
   char *ptr = rindex(fname, '/');
   if (ptr) fname = ptr + 1;
-  
-  std::string orig_name(fname); 
-  
-  char *dot = index(fname, '.'); 
+
+  std::string orig_name(fname);
+
+  char *dot = index(fname, '.');
   if (dot) *dot = '\0';
 
   std::string naked_name( fname );
-  cudaFileToWrite = "clang_" + naked_name + ".cu";
-  //debug_fprintf(stderr, "will write file %s\n",  cudaFileToWrite.c_str()); 
-  chillfunc->getSourceFile()->setFileToWrite( strdup( cudaFileToWrite.c_str()) ); 
-  func_defn = chillfunc;  
-  
-  debug_fprintf(stderr, "IR_cudaxxxxCode::IR_cudaxxxxCode()  DONE\n"); 
+  //file->set_unparse_output_filename("rose_" + naked_name + ".cu");
+  cudaFileToWrite = "rose_" + naked_name + ".cu";
+  chillfunc->getSourceFile()->setFileToWrite( strdup( cudaFileToWrite.c_str()));
+
+  // these are from when there were Rose (Sg*) internals
+  //gsym_ = root;
+  //first_scope = firstScope;
+  //parameter = symtab2_;
+  //body = symtab3_;
+  //defn = func->get_definition()->get_body();
+  func_defn = chillfunc;  // func->get_definition();
 }
-
-
 
 IR_ArraySymbol *IR_cudaclangCode::CreateArraySymbol(const IR_Symbol *sym,
-                                                    std::vector<omega::CG_outputRepr *> &size, 
-                                                    int sharedAnnotation) {
-  debug_fprintf(stderr, "IR_cudaclangCode::CreateArraySymbol( sym = %s )\n", sym->name().c_str());
-  debug_fprintf(stderr, "size.size() %d\n", size.size()); 
+                                                   std::vector<omega::CG_outputRepr *> &size,
+                                                   int sharedAnnotation) {
 
-  static int clang_array_counter = 1;
-  std::string s = std::string("_P") + omega::to_string(clang_array_counter++);
-  debug_fprintf(stderr, "new array name is %s\n", s.c_str()); 
+  debug_fprintf(stderr, "\nCUDAROSECODE IR_cudaXXXXCode::CreateArraySymbol( sym = %s )\n", sym->name().c_str());
+  debug_fprintf(stderr, "size.size() %d\n", size.size());
 
-  if (typeid(*sym)  == typeid(IR_clangArraySymbol)) {
-    //debug_fprintf(stderr, "%s is an array\n",  sym->name().c_str());
-    IR_clangArraySymbol *asym = (IR_clangArraySymbol *) sym;
+  static int rose_array_counter = 1;
+  std::string s = std::string("_P") + omega::to_string(rose_array_counter++);
+  debug_fprintf(stderr, "new array name is %s\n", s.c_str());
 
-    chillAST_VarDecl *vd = asym->chillvd;  // ((const IR_clangArraySymbol *)sym)->chillvd;
-    vd->print(); printf("\n"); fflush(stdout); 
-    debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart); 
+  if (typeid(*sym)  == typeid(IR_chillArraySymbol)) {
+    debug_fprintf(stderr, "%s is an array\n",  sym->name().c_str());
+    IR_chillArraySymbol *asym = (IR_chillArraySymbol *) sym;
 
-    chillAST_VarDecl *newarray =  (chillAST_VarDecl *)vd->clone();
+    if (asym->base->isMemberExpr()) {
+      debug_fprintf(stderr, "arraySymbol is a MemberExpr  "); asym->base->print(0,stderr); debug_fprintf(stderr, "\n");
+    }
 
-    char arraystring[128];
-    char *aptr = arraystring;
-    for (int i=0; i<size.size(); i++) { 
+    chillAST_VarDecl *vd = asym->chillvd;  // ((const IR_roseArraySymbol *)sym)->chillvd;
+    debug_fprintf(stderr, "vd is a %s\n", vd->getTypeString());
+    vd->print(); printf("\n"); fflush(stdout);
+
+
+    //debug_fprintf(stderr, "%s %s   %d dimensions    arraypart '%s'\n", vd->vartype, vd->varname, vd->numdimensions, vd->arraypart);
+
+    chillAST_NodeList arr;
+
+    for (int i=0; i<size.size(); i++) {
       omega::CG_chillRepr *CR = (omega::CG_chillRepr *) size[i];
-      chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral *) ( (CR->getChillCode()) [0]);
-      printf("size[%d]  ", i); IL->print(); printf("\n"); fflush(stdout);
-      newarray->arraysizes[i] = IL->value; // this could die if new var will have MORE dimensions than the one we're copying
+      chillAST_node *n = (CR->getChillCode()) [0];
 
-      sprintf(aptr, "[%d]",  IL->value); 
-      aptr += strlen(aptr);
+      //chillAST_IntegerLiteral *IL = (chillAST_IntegerLiteral*) ((CR->getChillCode()) [0]);
+
+      //printf("size[%d] (INTEGER LITERAL??)  '", i); IL->print(); printf("'\n"); fflush(stdout);
+      arr.push_back(n);
     }
-    debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring); 
-    newarray->arraypart = strdup(arraystring);
-    newarray->numdimensions =  size.size(); 
+    //debug_fprintf(stderr, "arraypart WAS %s  now %s\n", newarray->arraypart, arraystring);
+    chillAST_VarDecl *newarray = new chillAST_VarDecl(vd->underlyingtype, "", s.c_str(), arr);
+    chillfunc->getBody()->insertChild( 0, newarray);  // is this always the right function to add to?
+    chillfunc->addVariableToSymbolTable( newarray ); // always right?
 
-
-    debug_fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions); 
-    newarray->varname = strdup(s.c_str()); 
-    IR_clangArraySymbol *newsym = new IR_clangArraySymbol( asym->ir_, newarray, asym->offset_ );
-    if (sharedAnnotation == 1) { 
+    debug_fprintf(stderr, "newarray numdimensions %d\n", newarray->numdimensions);
+    IR_chillArraySymbol *newsym = new IR_chillArraySymbol( asym->ir_, newarray );
+    if (sharedAnnotation == 1) {
       debug_fprintf(stderr, "%s is SHARED\n", newarray->varname );
-      newarray->isShared = true; 
+      newarray->isShared = true;
     }
-    debug_fprintf(stderr, "done making a new array symbol\n"); 
-    return newsym; 
+    debug_fprintf(stderr, "done making a new array symbol\n");
+    return newsym;
   }
-  debug_fprintf(stderr, "IR_cudaclangCode::CreateArraySymbol() but old symbol is not an array???\n"); 
+  debug_fprintf(stderr, "IR_cudaroseCode::CreateArraySymbol() but old symbol is not an array???\n");
   exit(-1);
 
-  IR_ArraySymbol *smb = new IR_clangArraySymbol(this, NULL);
-  debug_fprintf(stderr, "done making a new array symbol\n\n");
-  return smb;
+  return NULL; // can't get to here
 }
-
-
 
 bool IR_cudaclangCode::commit_loop(Loop *loop, int loop_num) {
+  debug_fprintf(stderr, "IR_cudaROSECode::commit_loop()\n");
+
   if (loop == NULL)
     return true;
-  
-  debug_fprintf(stderr, " IR_cudaxxxxCode::commit_loop()\n");
-  loop->printCode(); 
-  debug_fprintf(stderr, "loop->printCode done\n\n"); 
 
+  //loop->printCode();
+  //debug_fprintf(stderr, "loop->printCode done\n\n");
 
   LoopCuda *cu_loop = (LoopCuda *) loop;
+
+  debug_fprintf(stderr, "IR_cudaxxxxCode::commit_loop() calling cu_loop->codegen()\n");
   chillAST_node * loopcode = cu_loop->codegen();
+  debug_fprintf(stderr, "IR_cudaxxxxCode::commit_loop()   codegen DONE\n");
+
   if (!loopcode)
     return false;
-  
-  debug_fprintf(stderr, "IR_cudaxxxxCode::commit_loop()   codegen DONE\n");
+
   debug_fprintf(stderr, "loopcode is\n");
   loopcode->print(); fflush(stdout);
-  debug_fprintf(stderr, "(END LOOPCODE)\n\n\n"); 
-  
+  debug_fprintf(stderr, "(END LOOPCODE)\n\n\n");
+
 
   // put "loopcode" into GPUside ?? easier in codegen
-  
+  if (NULL == entire_file_AST) {
+    debug_fprintf(stderr, "IR_cudaroseCode::commit_loop(),  entire_file_AST == NULL!\n");
+    exit(-1);
+  }
   entire_file_AST->print();
 
-  return NULL;
-}
-
-IR_cudaclangCode::~IR_cudaclangCode() {
+  return true;
 }
 

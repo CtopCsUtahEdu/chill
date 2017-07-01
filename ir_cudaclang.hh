@@ -4,15 +4,14 @@
 #include "chill_io.hh"
 #include "ir_clang.hh"
 #include "loop.hh"
-#include "loop_cuda_clang.hh"
 
 
 
 class IR_cudaclangCode : public IR_clangCode{
   
 public:
-  IR_cudaclangCode(const char *filename, const char* proc_name);
-  
+  IR_cudaclangCode(const char *paramfilename, const char* proc_name, const char* dest_name = NULL);
+
   std::string cudaFileToWrite;
   
   chillAST_node *globalSymbolTable;  // TODO a vector?
@@ -23,7 +22,7 @@ public:
 
   bool commit_loop(Loop *loop, int loop_num);
 
-  ~IR_cudaclangCode();
+  ~IR_cudaclangCode() {};
   
 };
 
