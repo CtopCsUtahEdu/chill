@@ -11,13 +11,8 @@
 
 #include "loop_cuda_chill.hh"
 
-#ifdef FRONTEND_ROSE
-#include "ir_rose.hh"
-#include "ir_cudarose.hh"
-#else
-#include "ir_clang.hh"
-#include "ir_cudaclang.hh"
-#endif
+#include "ir_cudachill.hh"
+
 #include <vector>
 
 #else
@@ -32,14 +27,11 @@
 #include <omega.h>
 #include "loop.hh"
 #include "ir_code.hh"
-#ifdef FRONTEND_ROSE
-#include "ir_rose.hh"
-#else
-#include "ir_clang.hh"
-#endif
 
 #endif
 
+#include "parser/clang.h"
+#include "parser/rose.h"
 #include "chillmodule.hh"
 
 // TODO 
@@ -78,7 +70,10 @@ extern std::vector<int> loops;
 
 #endif
 
-int effort;
+namespace {
+  chill::Parser *parser;
+  int effort;
+}
 
 // ----------------------- //
 // CHiLL support functions //
@@ -136,22 +131,14 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   }
   else {
     if (ir_code == NULL) {
-      #ifdef FRONTEND_ROSE
+
       if(dest_filename.empty()) {
-        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str());
+        ir_code = new IR_chillCode(parser, source_filename.c_str(), procedure_name.c_str(), NULL);
       }
       else {
-        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
+        ir_code = new IR_chillCode(parser, source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
       }
-      #else
-      if(dest_filename.empty()) {
-        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str());
-      }
-      else {
-        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
-      }
-      #endif
-          
+
       IR_Block *block = ir_code->GetCode();
       ir_controls = ir_code->FindOneLevelControlStructure(block);
       for (int i = 0; i < ir_controls.size(); i++) {
@@ -1085,21 +1072,12 @@ chill_init(PyObject *self, PyObject *args)
   
   debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
   debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
-  #ifdef FRONTEND_ROSE
   if(dest_filename.empty()) {
-    ir_code = new IR_cudaroseCode(filename, procname, NULL);
+    ir_code = new IR_cudaChillCode(parser, filename, procname, NULL);
   }
   else {
-    ir_code = new IR_cudaroseCode(filename, procname, dest_filename.c_str());
+    ir_code = new IR_cudaChillCode(parser, filename, procname, dest_filename.c_str());
   }
-  #else
-  if(dest_filename.empty()) {
-    ir_code = new IR_cudaclangCode(filename, procname, NULL);
-  }
-  else {
-    ir_code = new IR_cudaclangCode(filename, procname, dest_filename.c_str());
-  }
-  #endif
 
   fflush(stdout);
 
@@ -1824,4 +1802,9 @@ initchill(void)    // pass C methods to python
   PyObject* m = Py_InitModule("chill", ChillMethods);
   effort = 3; // Set the initial value
   register_globals(m);
+  #ifdef FRONTEND_ROSE
+    parser = new chill::parser::Rose();
+  #else
+    parser = new chill::parser::Clang();
+  #endif
 }

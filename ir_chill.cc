@@ -812,42 +812,21 @@ IR_Control *IR_chillIf::clone() const {
 // Class: IR_chillCode
 // ----------------------------------------------------------------------------
 
-IR_chillCode::IR_chillCode() { 
-  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode() NO PARAMETERS\n"); 
-  filename = NULL; 
-  procedurename = strdup("hellifiknow"); // NULL; 
-  //scriptname = NULL; 
-  outputname = NULL;
-  entire_file_AST = NULL;
-  chillfunc = NULL; 
-  ir_pointer_counter = 0;
-  ir_array_counter = 0;
-}
-
-IR_chillCode::IR_chillCode(const char *fname, char *proc_name): IR_Code() {
-  //debug_fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
-  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s )\n", filename, proc_name);
-  
+IR_chillCode::IR_chillCode(chill::Parser *parser, const char *fname, const char *proc_name, const char * dest_name): parser(parser) {
   filename = strdup(fname); // filename is internal to IR_chillCode
   procedurename = strdup(proc_name);
-  //scriptname = NULL;
-  outputname = NULL;
-  entire_file_AST = NULL;
-  chillfunc = NULL; 
+  parser->parse(fname, proc_name);
+  entire_file_AST = parser->entire_file_AST;
+  if (dest_name != NULL)  setOutputName( dest_name );
+  else {
+    char buf[1024];
+    sprintf(buf, "rose_%s\0", fname);
+    setOutputName( buf );
+  }
+  chillAST_FunctionDecl *localFD = findFunctionDecl(  entire_file_AST, proc_name );
+  chillfunc =  localFD;
+  ocg_ = new omega::CG_chillBuilder(entire_file_AST, chillfunc); // transition - use chillAST based builder
 }
-
-IR_chillCode::IR_chillCode(const char *fname, char *proc_name, char *script_name): IR_Code() {
-  //debug_fprintf(stderr, "\nIR_chillCode::IR_chillCode()\n\n"); 
-  //debug_fprintf(stderr, "IR_chillCode::IR_chillCode( filename %s, procedure %s, script %s )\n", fname, proc_name, script_name);
-  
-  filename = strdup(fname); // filename is internal to IR_chillCode
-  procedurename = strdup(proc_name);
-  //scriptname = strdup(script_name); 
-  outputname = NULL;
-  entire_file_AST = NULL;
-  chillfunc = NULL; 
-}
-
 
 IR_chillCode::~IR_chillCode() {
   debug_fprintf(stderr, "printing as part of the destructor\n");

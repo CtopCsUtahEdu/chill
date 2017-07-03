@@ -27,18 +27,10 @@
 #ifdef CUDACHILL
 
 #include "loop_cuda_chill.hh"
-#ifdef FRONTEND_ROSE
-#include "ir_cudarose.hh"
-#else
-#include "ir_cudaclang.hh"
-#endif
+#include "ir_cudachill.hh"
 
 typedef LoopCuda loop_t;
 #else // not defined(CUDACHILL)
-
-#ifdef FRONTEND_ROSE
-#include "ir_rose.hh"
-#endif
 
 typedef Loop loop_t;
 #endif // not defined(CUDACHILL)
@@ -420,11 +412,7 @@ int main( int argc, char* argv[] )
     #else
     lnum = get_loop_num( L );
     #endif
-    #ifdef FRONTEND_ROSE
-    debug_fprintf(stderr, "calling commit_loop()\n"); 
-    ((IR_cudaroseCode *)(ir_code))->commit_loop(myloop, lnum);
-    ((IR_roseCode*)(ir_code))->finalizeRose();
-    #endif
+    ((IR_cudaChillCode*)ir_code)->commit_loop(myloop, lnum);
 #else
     debug_fprintf(stderr, "CUDACHILL IS NOT DEFINED\n"); 
     int lnum_start;
@@ -440,9 +428,6 @@ int main( int argc, char* argv[] )
     #endif
     
     finalize_loop(lnum_start, lnum_end);
-    #ifdef FRONTEND_ROSE
-    ((IR_roseCode*)(ir_code))->finalizeRose();
-    #endif
 #endif
     delete ir_code;
   }

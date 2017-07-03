@@ -1,13 +1,26 @@
 cmake_minimum_required(VERSION 3.1)
 
 project(chill)
+
 file(STRINGS ${CMAKE_SOURCE_DIR}/CHILL_VERSION CHILL_VERSION)
-
 set(CMAKE_CXX_STANDARD 11)
-
 message(STATUS "Configuring for chill ${CHILL_VERSION}")
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+if (NOT DEFINED FRONTEND)
+    set(FRONTEND "Rose")
+endif ()
+
+if (${FRONTEND} STREQUAL "Rose")
+    find_package(Rose REQUIRED)
+    find_package(RoseBoost REQUIRED)
+elseif (${FRONTEND} STREQUAL "Clang")
+    find_package(LLVM CONFIG REQUIRED)
+    find_package(Clang REQUIRED)
+else ()
+    message(FATAL_ERROR "Unrecognized frontend option ${FRONTEND}")
+endif()
 
 include(GTest)
 include(CHiLLModule)
@@ -16,69 +29,8 @@ if (DEFINED ENV{CHILLENV})
     set(CHILLENV $ENV{CHILLENV})
 endif ()
 
-if (NOT DEFINED FRONTEND)
-    set(FRONTEND "Rose")
-endif ()
-
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(IEGen REQUIRED)
-
-message(STATUS "Using frontend option \"${FRONTEND}\"")
-if (${FRONTEND} STREQUAL "Rose")
-    find_package(Rose REQUIRED)
-    find_package(RoseBoost REQUIRED)
-    set(FRONTEND_DEFINITIONS FRONTEND_ROSE)
-
-    add_chill_module(chill_ir
-            ir_chill.cc
-            ir_rose.cc
-            ir_rose_utils.cc
-            )
-
-    chill_module_link_libraries(chill_ir
-            ${Rose_LIBS} ${RoseBoost_LIBS}
-            )
-
-    add_chill_module(chill_cuda
-            mem_mapping_utils.cc
-            loop_cuda.cc
-            loop_cuda_chill.cc
-            ir_cudarose.cc
-            ir_cuda_rose_utils.cc
-            )
-
-    target_include_directories(chill_cuda
-            PRIVATE ${Rose_INCLUDE_DIRS})
-elseif (${FRONTEND} STREQUAL "Clang")
-    find_package(LLVM REQUIRED CONFIG)
-    find_package(Clang REQUIRED)
-    set(FRONTEND_DEFINITIONS FRONTEND_CLANG)
-
-    add_definitions(${LLVM_DEFINITIONS})
-
-    llvm_map_components_to_libnames(llvm_libs all)
-
-    add_chill_module(chill_ir
-            ir_chill.cc
-            ir_clang.cc
-            )
-
-    chill_module_link_libraries(chill_ir
-            ${llvm_libs} ${CLANG_LIBS}
-            )
-
-    set(FRONTEND_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS})
-
-    add_chill_module(chill_cuda
-            mem_mapping_utils.cc
-            loop_cuda.cc
-            loop_cuda_chill.cc
-            ir_cudaclang.cc
-            ir_cuda_rose_utils.cc
-            )
-else ()
-    message(FATAL_ERROR "Unrecognized frontend option ${FRONTEND}")
-endif ()
 
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
@@ -105,6 +57,17 @@ add_chill_module(chill_core
         omegatools.cc
         stencil.cc
         calculator_eval.cc
+        )
+
+add_chill_module(chill_ir
+        ir_chill.cc
+        )
+
+add_chill_module(chill_cuda
+        mem_mapping_utils.cc
+        loop_cuda.cc
+        loop_cuda_chill.cc
+        ir_cudachill.cc
         )
 
 set(PYTHON_SRC
@@ -159,12 +122,23 @@ include_directories(
         ${RoseBoost_INCLUDE_DIRS}
         ${Rose_INCLUDE_DIRS}
         ${IEGen_INCLUDE_DIRS}
-        ${FRONTEND_INCLUDE_DIRS}
         ${PYTHON_INCLUDE_DIRS})
 
 set(chill-libs
         parseRel omega_basic omega_lib codegen codegen_chill
-        chill_core chill_ir chill_ast chill_printer chill_io)
+        chill_core chill_ir chill_parser chill_ast chill_printer chill_io)
+
+add_subdirectory(omega/basic)
+add_subdirectory(omega/omega_lib)
+add_subdirectory(omega/code_gen)
+add_subdirectory(src/printer)
+add_subdirectory(src/scanner)
+add_subdirectory(src/parser)
+
+add_subdirectory(docs)
+add_subdirectory(unittests)
+
+# Executables
 
 add_executable(chill
         chill_run.cc
@@ -172,7 +146,7 @@ add_executable(chill
         )
 
 chill_link_libraries(chill
-        chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
+        chill_io chill_ir chill_ast chill_parser chill_core chill_printer chill_scanner parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY}
         )
@@ -192,7 +166,7 @@ add_executable(cuda-chill
         )
 
 chill_link_libraries(cuda-chill
-        chill_cuda chill_io chill_ir chill_ast chill_core chill_printer chill_scanner parseRel
+        chill_cuda chill_io chill_ir chill_ast chill_parser chill_core chill_printer chill_scanner parseRel
         ${CORE_LIBS}
         ${PYTHON_LIBRARY})
 
@@ -205,15 +179,6 @@ target_compile_definitions(cuda-chill
 
 install(TARGETS cuda-chill
         RUNTIME DESTINATION bin)
-
-add_subdirectory(omega/basic)
-add_subdirectory(omega/omega_lib)
-add_subdirectory(omega/code_gen)
-add_subdirectory(src/printer)
-add_subdirectory(src/scanner)
-
-add_subdirectory(docs)
-add_subdirectory(unittests)
 
 # setup tests
 
