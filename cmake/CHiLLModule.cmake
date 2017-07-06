@@ -3,13 +3,13 @@
 # Usage: add_chill_module(<module_name> <sourcefiles>)
 function(add_chill_module mname)
     add_library(${mname} ${ARGN})
-    set(${mname}_IS_CHILL_MODULE YES PARENT_SCOPE)
+    set(${mname}_IS_CHILL_MODULE YES CACHE INTERNAL "INTERNAL: if it is a chill module")
 endfunction()
 
 # Specify what EXTERNAL libraries that a module depends upon
 # Usage: chill_module_link_libraries(<module_name> <external_libraries>)
 function(chill_module_link_libraries mname)
-    set(${mname}_LINK_LIBRARIES ${ARGN} ${${mname}_LINK_LIBRARIES} PARENT_SCOPE)
+    set(${mname}_LINK_LIBRARIES ${ARGN} CACHE INTERNAL "INTERNAL: the libraries to link")
 endfunction()
 
 # Link libraries to a CHiLL executable, if libraries linked are CHiLL's 

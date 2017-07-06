@@ -13,18 +13,14 @@
 *****************************************************************************/
 
 #include <typeinfo>
-#include "ir_cudarose.hh"
+#include "ir_cudachill.hh"
 #include "loop.hh"
 
 // these are very similar (the same?) 
 #include "loop_cuda_chill.hh"
 
-
-using namespace SageBuilder;
-using namespace SageInterface;
-
-IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name, const char* dest_name) :
-  IR_roseCode(filename, proc_name, dest_name) {
+IR_cudaChillCode::IR_cudaChillCode(chill::Parser *parser, const char *filename, const char* proc_name, const char* dest_name) :
+  IR_chillCode(parser ,filename, proc_name, dest_name) {
   
   debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()\n"); 
   //std::string file_suffix = StringUtility::fileNameSuffix(filename);
@@ -43,19 +39,12 @@ IR_cudaroseCode::IR_cudaroseCode(const char *filename, const char* proc_name, co
   cudaFileToWrite = "rose_" + naked_name + ".cu";
   chillfunc->getSourceFile()->setFileToWrite( strdup( cudaFileToWrite.c_str())); 
 
-  // these are from when there were Rose (Sg*) internals
-  //gsym_ = root;
-  //first_scope = firstScope;
-  //parameter = symtab2_;
-  //body = symtab3_;
-  //defn = func->get_definition()->get_body();
   func_defn = chillfunc;  // func->get_definition();
-  debug_fprintf(stderr, "IR_cudaroseCode::IR_cudaroseCode()  func_defn=%p\n", func_defn); 
 }
 
 
 
-IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
+IR_ArraySymbol *IR_cudaChillCode::CreateArraySymbol(const IR_Symbol *sym,
                                                    std::vector<omega::CG_outputRepr *> &size, 
                                                    int sharedAnnotation) {
 
@@ -112,7 +101,7 @@ IR_ArraySymbol *IR_cudaroseCode::CreateArraySymbol(const IR_Symbol *sym,
   return NULL; // can't get to here 
 }
 
-bool IR_cudaroseCode::commit_loop(Loop *loop, int loop_num) {
+bool IR_cudaChillCode::commit_loop(Loop *loop, int loop_num) {
   debug_fprintf(stderr, "IR_cudaROSECode::commit_loop()\n");
 
   if (loop == NULL)
@@ -143,7 +132,4 @@ bool IR_cudaroseCode::commit_loop(Loop *loop, int loop_num) {
   entire_file_AST->print();
 
   return true;
-}
-
-IR_cudaroseCode::~IR_cudaroseCode() {
 }

@@ -9,10 +9,9 @@
 
 #ifdef CUDACHILL
 
-#include "rose.h"                              // ?? 
 #include "loop_cuda_chill.hh"
-#include "ir_rose.hh"
-#include "ir_cudarose.hh"
+
+#include "ir_cudachill.hh"
 
 #include <vector>
 
@@ -28,14 +27,11 @@
 #include <omega.h>
 #include "loop.hh"
 #include "ir_code.hh"
-#ifdef FRONTEND_ROSE
-#include "ir_rose.hh"
-#else
-#include "ir_clang.hh"
-#endif
 
 #endif
 
+#include "parser/clang.h"
+#include "parser/rose.h"
 #include "chillmodule.hh"
 
 // TODO 
@@ -74,7 +70,10 @@ extern std::vector<int> loops;
 
 #endif
 
-int effort;
+namespace {
+  chill::Parser *parser;
+  int effort;
+}
 
 // ----------------------- //
 // CHiLL support functions //
@@ -132,22 +131,14 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   }
   else {
     if (ir_code == NULL) {
-      #ifdef FRONTEND_ROSE
+
       if(dest_filename.empty()) {
-        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str());
+        ir_code = new IR_chillCode(parser, source_filename.c_str(), procedure_name.c_str(), NULL);
       }
       else {
-        ir_code = new IR_roseCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
+        ir_code = new IR_chillCode(parser, source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
       }
-      #else
-      if(dest_filename.empty()) {
-        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str());
-      }
-      else {
-        ir_code = new IR_clangCode(source_filename.c_str(), procedure_name.c_str(), dest_filename.c_str());
-      }
-      #endif
-          
+
       IR_Block *block = ir_code->GetCode();
       ir_controls = ir_code->FindOneLevelControlStructure(block);
       for (int i = 0; i < ir_controls.size(); i++) {
@@ -351,7 +342,7 @@ static bool to_int_matrix(PyObject* args, int index, std::vector<std::vector<int
 static PyObject *
 chill_destination(PyObject *self, PyObject* args) {
   strict_arg_num(args, 1, "destination");
-  ((IR_roseCode*)ir_code)->setOutputName(strArg(args, 0).c_str());
+  dest_filename = strArg(args, 0);
   Py_RETURN_NONE;
 }
 
@@ -579,201 +570,15 @@ chill_cur_indices(PyObject *self, PyObject *args)
     exit(-1);
   }
   
-  char formatstring[1024];
-  for (int i=0; i<1024; i++) formatstring[i] = '\0';
-  
   int num = myloop->idxNames[stmt_num].size();
-  for(int i=0; i<num; i++){
-    //DEBUG_PRINT("myloop->idxNames[%d] index %d = '%s'\n", 
-    //stmt_num, i, myloop->idxNames[stmt_num][i].c_str()); 
-    
-    // backwards, works because all entries are the same  
-    //sprintf(formatstring, "i %s", formatstring); 
-    strcat( formatstring, "s ");
-    // put this in a list or something to pass back to python
+
+  PyObject *pylist, *item;
+  pylist = PyList_New(num);
+  for (int i=0; i<num; i++) {
+    item = PyString_FromString(myloop->idxNames[stmt_num][i].c_str());
+    PyList_SetItem(pylist, i, item);
   }
-  
-  int l = strlen(formatstring);
-  if (l > 0) formatstring[l-1] = '\0';
-  
-  //DEBUG_PRINT("%d current indices, format string '%s'\n\n",num,formatstring);  
-  //DEBUG_PRINT("%d current indices\n\n",  num);  
-  
-  //return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),myloop->idxNames[stmt_num][1].c_str() );
-  
-  // I don't know a clean way to do this. 
-  if (num == 2) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str());
-  if (num == 3) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str());  
-  if (num == 4) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str()); 
-  if (num == 5) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str(),
-                                     myloop->idxNames[stmt_num][4].c_str()); 
-  if (num == 6) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str(),
-                                     myloop->idxNames[stmt_num][4].c_str(),
-                                     myloop->idxNames[stmt_num][5].c_str()); 
-  if (num == 7) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str(),
-                                     myloop->idxNames[stmt_num][4].c_str(),
-                                     myloop->idxNames[stmt_num][5].c_str(),
-                                     myloop->idxNames[stmt_num][6].c_str()); 
-  if (num == 8) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str(),
-                                     myloop->idxNames[stmt_num][4].c_str(),
-                                     myloop->idxNames[stmt_num][5].c_str(),
-                                     myloop->idxNames[stmt_num][6].c_str(),
-                                     myloop->idxNames[stmt_num][7].c_str()); 
-  if (num == 9) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                     myloop->idxNames[stmt_num][1].c_str(),
-                                     myloop->idxNames[stmt_num][2].c_str(),
-                                     myloop->idxNames[stmt_num][3].c_str(),
-                                     myloop->idxNames[stmt_num][4].c_str(),
-                                     myloop->idxNames[stmt_num][5].c_str(),
-                                     myloop->idxNames[stmt_num][6].c_str(),
-                                     myloop->idxNames[stmt_num][7].c_str(),
-                                     myloop->idxNames[stmt_num][8].c_str()); 
-  if (num == 10) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str()); 
-  if (num == 11) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str()); 
-  if (num == 12) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str()); 
-  if (num == 13) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str()); 
-  if (num == 14) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str(),
-                                      myloop->idxNames[stmt_num][13].c_str()); 
-  if (num == 15) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str(),
-                                      myloop->idxNames[stmt_num][13].c_str(),
-                                      myloop->idxNames[stmt_num][14].c_str()); 
-  if (num == 16) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str(),
-                                      myloop->idxNames[stmt_num][13].c_str(),
-                                      myloop->idxNames[stmt_num][14].c_str(),
-                                      myloop->idxNames[stmt_num][15].c_str()); 
-  if (num == 17) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str(),
-                                      myloop->idxNames[stmt_num][13].c_str(),
-                                      myloop->idxNames[stmt_num][14].c_str(),
-                                      myloop->idxNames[stmt_num][15].c_str(),
-                                      myloop->idxNames[stmt_num][16].c_str()); 
-  if (num == 18) return Py_BuildValue(formatstring, myloop->idxNames[stmt_num][0].c_str(),
-                                      myloop->idxNames[stmt_num][1].c_str(),
-                                      myloop->idxNames[stmt_num][2].c_str(),
-                                      myloop->idxNames[stmt_num][3].c_str(),
-                                      myloop->idxNames[stmt_num][4].c_str(),
-                                      myloop->idxNames[stmt_num][5].c_str(),
-                                      myloop->idxNames[stmt_num][6].c_str(),
-                                      myloop->idxNames[stmt_num][7].c_str(),
-                                      myloop->idxNames[stmt_num][8].c_str(),
-                                      myloop->idxNames[stmt_num][9].c_str(),
-                                      myloop->idxNames[stmt_num][10].c_str(),
-                                      myloop->idxNames[stmt_num][11].c_str(),
-                                      myloop->idxNames[stmt_num][12].c_str(),
-                                      myloop->idxNames[stmt_num][13].c_str(),
-                                      myloop->idxNames[stmt_num][14].c_str(),
-                                      myloop->idxNames[stmt_num][15].c_str(),
-                                      myloop->idxNames[stmt_num][16].c_str(),
-                                      myloop->idxNames[stmt_num][17].c_str()); 
-  
-  debug_fprintf(stderr, "going to die horribly,  num=%d\n", num); 
+  return pylist;
 }
 
 
@@ -1267,12 +1072,15 @@ chill_init(PyObject *self, PyObject *args)
   
   debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
   debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
-  ir_code = new IR_cudaroseCode(filename, procname, NULL); //this produces 15000 lines of output
-  fflush(stdout); 
-  
-  
-  
-  
+  if(dest_filename.empty()) {
+    ir_code = new IR_cudaChillCode(parser, filename, procname, NULL);
+  }
+  else {
+    ir_code = new IR_cudaChillCode(parser, filename, procname, dest_filename.c_str());
+  }
+
+  fflush(stdout);
+
   //protonu--here goes my initializations
   //A lot of this code was lifted from Chun's parser.yy
   //the plan is now to create the LoopCuda object directly
@@ -1994,4 +1802,9 @@ initchill(void)    // pass C methods to python
   PyObject* m = Py_InitModule("chill", ChillMethods);
   effort = 3; // Set the initial value
   register_globals(m);
+  #ifdef FRONTEND_ROSE
+    parser = new chill::parser::Rose();
+  #else
+    parser = new chill::parser::Clang();
+  #endif
 }

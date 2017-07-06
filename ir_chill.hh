@@ -9,6 +9,7 @@
 #include "chill_error.hh"
 #include "chill_ast.hh"
 #include "chill_io.hh"
+#include "parser.h"
 
 
 extern vector<chillAST_VarDecl *> VariableDeclarations;
@@ -417,6 +418,7 @@ protected:
   //  
   char *filename;
   char *outputname;    // so we can output different results from one source, using different scripts
+  chill::Parser *parser;
 
   std::vector<chillAST_VarDecl> entire_file_symbol_table;
   // loop symbol table??   for (int i=0;  ... )  ??
@@ -431,9 +433,7 @@ public:
 
   char *procedurename;
 
-  IR_chillCode(); 
-  IR_chillCode(const char *filename, char *proc_name);
-  IR_chillCode(const char *filename, char *proc_name, char *script_name);
+  IR_chillCode(chill::Parser *parser, const char *filename, const char *proc_name, const char * dest_name);
   ~IR_chillCode();
 
   void setOutputName( const char *name ) { outputname = strdup(name); }
