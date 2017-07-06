@@ -54,16 +54,12 @@ namespace omega {
 
 
   CG_outputRepr* CG_chillRepr::clone() const {  // make a deep/shallow  COPY of all the nodes
-    //debug_fprintf(stderr, "CG_chillRepr::clone()  %d chill nodes\n", chillnodes.size()); 
-    //for (int i=0; i<chillnodes.size(); i++) { chillnodes[i]->print(); printf("\n"); } fflush(stdout);
-
     CG_chillRepr *newrepr = new  CG_chillRepr(); // empty
     
-    // deep ( nothing is the same as in the source )
-    for (int i=0; i<chillnodes.size(); i++) newrepr->addStatement( chillnodes[i]->clone() ); 
+    for (int i=0; i<chillnodes.size(); i++) newrepr->addStatement( chillnodes[i]->clone() );
 
-    // shallow (the submembers are the same ) 
-    //for (int i=0; i<chillnodes.size(); i++) newrepr->addStatement( chillnodes[i] ); 
+    // shallow (the submembers are the same )
+    //for (int i=0; i<chillnodes.size(); i++) newrepr->addStatement( chillnodes[i] );
     //debug_fprintf(stderr, "done cloning\n"); 
     return newrepr; 
   }

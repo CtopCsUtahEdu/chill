@@ -270,9 +270,7 @@ namespace omega {
         }
         chillAST_node *node = nodes[0]; // always just one? 
         
-        for (int i=0; i<oldnodes.size(); i++) { 
-          //debug_fprintf(stderr, "   statement %d    ", i);
-          //oldnodes[i]->print();  printf("\n\n"); fflush(stdout); 
+        for (int i=0; i<oldnodes.size(); i++) {
           oldnodes[i] = substituteChill( vars[j].c_str(), CRSub, oldnodes[i]);
         }
       }

@@ -1,29 +1,23 @@
-#ifndef IR_CUDA_CHILL_HH
-#define IR_CUDA_CHILL_HH
+#ifndef IR_CUDAROSE_HH
+#define IR_CUDAROSE_HH
 
 #include "chill_io.hh"
-#include "ir_chill.hh"
 #include "loop.hh"
+#include "parser.h"
+
 #include "loop_cuda_chill.hh"
 
-
-
-class IR_cudachillCode : public IR_chillCode{
+class IR_cudaChillCode : public IR_chillCode{
   
 public:
-  IR_cudachillCode(const char *filename, const char* proc_name);
+  IR_cudaChillCode(chill::Parser *parser, const char *filename, const char* proc_name, const char* dest_name);
   
   std::string cudaFileToWrite;
-  
-  chillAST_node *globalSymbolTable;  // TODO a vector?
-  
-  // WHY would this be here ?     TODO  WHY vector of outputRepr and not ints?
+
   IR_ArraySymbol *CreateArraySymbol(const IR_Symbol *sym, std::vector<omega::CG_outputRepr *> &size,int sharedAnnotation = 1);
 
   bool commit_loop(Loop *loop, int loop_num);
 
-  ~IR_cudachillCode();
-  
 };
 
 

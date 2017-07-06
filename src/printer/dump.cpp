@@ -208,7 +208,7 @@ void Dump::runS(chillAST_UnaryOperator *n, std::string indent, std::ostream &o) 
 }
 
 void Dump::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
-  o << "\"'" << n->vartype << " " << n->arraypointerpart <<"' '" << n->varname << "' '" << std::endl;
+  o << "\"'" << n->vartype << " " << n->arraypointerpart <<"' '" << n->varname << "' '" <<std::flush;
   dumpVector(this, &(n->getChildren()), indent, o);
   o << "'\" dim " << n->numdimensions << " ";
 }

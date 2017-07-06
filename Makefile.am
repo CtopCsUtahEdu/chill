@@ -62,15 +62,12 @@ cudachill_src += loop_cuda_chill.cc
 # IR #
 #  chill
 ir_chill_src      = ir_chill.cc
-ir_chill_src     += ir_rose.cc
-ir_chill_src     += ir_rose_utils.cc
+ir_chill_src     += src/parser/rose.cpp
 
 #  cudachill
 ir_cudachill_src  = ir_chill.cc
-ir_cudachill_src += ir_rose.cc
-ir_cudachill_src += ir_rose_utils.cc
-ir_cudachill_src += ir_cudarose.cc
-ir_cudachill_src += ir_cuda_rose_utils.cc
+ir_cudachill_src += ir_cudachill.cc
+ir_cudachill_src += src/parser/rose.cpp
 
 ast_scanner_src  = src/printer/cfamily.cpp
 ast_scanner_src += src/printer/dump.cpp
