@@ -104,14 +104,15 @@ enum CHILL_PREPROCESSING_TYPE {
   CHILL_PREPROCESSING_POUNDDEFINE,
   CHILL_PREPROCESSING_POUNDINCLUDE,
   CHILL_PREPROCESSING_PRAGMA  // unused so far
-}; 
+};
 
-enum CHILL_PREPROCESSING_POSITION { // when tied to another statement
+//! When tied to another statement
+enum CHILL_PREPROCESSING_POSITION {
   CHILL_PREPROCESSING_POSITIONUNKNOWN = 0,
-  CHILL_PREPROCESSING_LINEBEFORE,       // previous line 
-  CHILL_PREPROCESSING_LINEAFTER,        // next line 
-  CHILL_PREPROCESSING_TOTHERIGHT,       // for this kind of comment, on same line
-  CHILL_PREPROCESSING_IMMEDIATELYBEFORE // on same line 
+  CHILL_PREPROCESSING_LINEBEFORE,       //!< previous line
+  CHILL_PREPROCESSING_LINEAFTER,        //!< next line
+  CHILL_PREPROCESSING_TOTHERIGHT,       //!< for this kind of comment, on same line
+  CHILL_PREPROCESSING_IMMEDIATELYBEFORE //!< on same line
 }; 
 
 
@@ -519,7 +520,7 @@ public:
   }
 
   //! the ast's print version
-  std::string stringRep(int indent=0 );
+  virtual std::string stringRep(int indent=0 );
 
 
   virtual void get_top_level_loops( std::vector<chillAST_ForStmt *> &loops) {
@@ -746,8 +747,8 @@ public:
 
   //TODO hide data, set/get type and alias
   chillAST_TypedefDecl();
-  chillAST_TypedefDecl(char *t, char *nt);
-  chillAST_TypedefDecl(char *t, char *nt, char *a);
+  chillAST_TypedefDecl(const char *t, const char *nt);
+  chillAST_TypedefDecl(const char *t, const char *nt, const char *a);
   
   const char* getUnderlyingType() { debug_fprintf(stderr, "TypedefDecl getUnderLyingType()\n"); return underlyingtype; }; 
 };
