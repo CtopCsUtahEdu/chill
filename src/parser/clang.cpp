@@ -469,7 +469,7 @@ chillAST_NodeList ConvertIntegerLiteral( IntegerLiteral *clangIL ) {
 
 
 chillAST_NodeList ConvertFloatingLiteral( FloatingLiteral *clangFL ) {
-  double val = clangFL->getValue().convertToDouble();
+  double val = clangFL->getValueAsApproximateDouble();
 
   auto sr = clangFL->getSourceRange();
   auto pr = llvm::APFloat::getSizeInBits(clangFL->getValue().getSemantics());
