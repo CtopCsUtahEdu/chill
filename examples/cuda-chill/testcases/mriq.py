@@ -7,8 +7,8 @@
 from chill import *
 execfile("cudaize.py")
 
-read_IR("mriq.c", "ComputeQCPU")
 destination("mriqmodified.cu")
+read_IR("mriq.c", "ComputeQCPU")
 
 N=32768
 M=3072
@@ -31,7 +31,7 @@ normalize_index("i")
 
 cudaize(0, "Kernel_GPU", {'x':N,'y':N,'z':N,'Qr':N,'Qi':N,'kVals':M}, ["jj"], ["j"], [])
 
-copy_to_shared("tx","kVals",1)
+##copy_to_shared("tx","kVals",1)
 #--copy_to_shared("tx","x",1)
 #--copy_to_shared("tx","y",1)
 #--copy_to_shared("tx","z",1)
