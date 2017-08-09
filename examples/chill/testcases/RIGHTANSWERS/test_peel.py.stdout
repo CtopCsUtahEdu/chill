@@ -1,0 +1,99 @@
+Unhandled case in scanner: SourceFile
+Looking for def float
+Looking for def float
+Looking for def float
+Looking for def int
+Looking for def int
+Looking for def int
+Looking for def int
+Looking for def int
+Looking for def int
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: SourceFile
+Unhandled case in scanner: FunctionDecl
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Relation r   {[i,j,n] : TRUE }
+Relation r   {[i,j,n] : TRUE }
+s1: (dim:0) (dim:1) (dim:2) 
+s2: (dim:0) (dim:1) (dim:2) 
+{[i,j,n] -> [chill_t1,chill_t2,chill_t3] : i = chill_t1 && j = chill_t2 && n = chill_t3 }
+{[i,j,n] -> [chill_t1,chill_t2,chill_t3] : i = chill_t1 && j = chill_t2 && n = chill_t3 }
+{[chill_t1,chill_t2,chill_t3] -> [chill_t4,chill_t5,chill_t6] : chill_t1 = chill_t4 && chill_t2 = chill_t5 && chill_t3 = chill_t6 }
+{[chill_t1,chill_t2,chill_t3] -> [chill_t4,chill_t5,chill_t6] : chill_t1 = chill_t4 && chill_t2 = chill_t5 && chill_t3 = chill_t6 }
+{[chill_t4,chill_t5,chill_t6] -> [chill_t7,chill_t8,chill_t9] : chill_t4 = chill_t7 && chill_t5 = chill_t8 && chill_t6 = chill_t9 }
+{[chill_t4,chill_t5,chill_t6] -> [chill_t7,chill_t8,chill_t9] : chill_t4 = chill_t7 && chill_t5 = chill_t8 && chill_t6 = chill_t9 }
+{[chill_t7,chill_t8,chill_t9] -> [chill_t10,chill_t11,chill_t12] : chill_t7 = chill_t10 && chill_t8 = chill_t11 && chill_t9 = chill_t12 }
+{[chill_t7,chill_t8,chill_t9] -> [chill_t10,chill_t11,chill_t12] : chill_t7 = chill_t10 && chill_t8 = chill_t11 && chill_t9 = chill_t12 }
+for(t2 = 0; t2 <= an-1; t2++) {
+  for(t4 = 0; t4 <= bm-1; t4++) {
+    s2(t2,t4,0);
+    s3(t2,t4,0);
+    s4(t2,t4,1);
+    s5(t2,t4,2);
+    s6(t2,t4,3);
+    for(t6 = 4; t6 <= ambn-1; t6++) {
+      s1(t2,t4,t6);
+    }
+  }
+}
+
+

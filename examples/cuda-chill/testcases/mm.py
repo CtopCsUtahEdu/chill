@@ -1,8 +1,8 @@
 from chill import *
 execfile("cudaize.py")
 
-read_IR("mm.c", "normalMM")
 destination("mmmodified.cu")
+read_IR("mm.c", "normalMM")
 
 N=1024
 Ti=128

@@ -58,10 +58,12 @@ do
         echo "#!/bin/bash"                                      >  $stdout_test_file # make new file
         echo "$run_chill_exec check-stdout $run_chill_flags"    >> $stdout_test_file
         echo "exit \$?"                                         >> $stdout_test_file
+        chmod +x $stdout_test_file
 
         echo "#!/bin/bash"                                      >  $stderr_test_file # make new file
         echo "$run_chill_exec check-stderr $run_chill_flags"    >> $stderr_test_file
         echo "exit \$?"                                         >> $stderr_test_file
+        chmod +x $stderr_test_file
         
         
         echo "TESTS += $run_test_file"                      ## make_test_file

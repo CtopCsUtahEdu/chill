@@ -1,0 +1,104 @@
+Unhandled case in scanner: SourceFile
+Looking for def int
+Looking for def int
+Looking for def float
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ReturnStmt
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: SourceFile
+Unhandled case in scanner: FunctionDecl
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ReturnStmt
+Unhandled case in scanner: IntegerLiteral
+Relation r   {[t,i] : TRUE }
+s1: (dim:0) (dim:1) 
+dependence graph:
+0->0: a:flow(1, 1) a:flow(1, 0) a:flow(1, -1)
+{[t,i] -> [chill_t1,chill_t2] : chill_t1+i = chill_t2 && t = chill_t1 }
+dependence graph:
+0->0: a:flow(1, 2) a:flow(1, 1) a:flow(1, 0)
+for(t2 = 4; t2 <= 580; t2 += 64) {
+  for(t4 = max(2,t2-511); t4 <= min(100,t2+61); t4++) {
+    for(t6 = max(t4+2,t2); t6 <= min(t2+63,t4+511); t6++) {
+      s0(t4,t6);
+    }
+  }
+}
+
+

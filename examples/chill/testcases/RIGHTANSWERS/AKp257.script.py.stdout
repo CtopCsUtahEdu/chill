@@ -1,0 +1,67 @@
+Unhandled case in scanner: SourceFile
+Looking for def float
+Looking for def float
+Looking for def float
+Looking for def float
+Looking for def float
+Looking for def int
+Looking for def int
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ReturnStmt
+Unhandled case in scanner: SourceFile
+Unhandled case in scanner: FunctionDecl
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ReturnStmt
+Relation r   {[i] : TRUE }
+Relation r   {[i] : TRUE }
+s1: (dim:0) 
+s2: (dim:0) 
+{[i] -> [chill_t1] : i = chill_t1 }
+{[i] -> [chill_t1] : i = chill_t1 }

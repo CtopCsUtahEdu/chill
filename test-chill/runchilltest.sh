@@ -192,7 +192,7 @@ case $test_type in
                 rm -f $tmp
             fi
             maybe_exit_with_skip_code $err
-            err=`check_diff $chill_generated_stdout $chill_correct_stdout`
+            err=`check_diff $tmp $chill_correct_stdout`
             rm -f $tmp
             exit_with_passfail_code $err
         ;;
@@ -203,7 +203,7 @@ case $test_type in
                 rm -f $tmp
             fi
             maybe_exit_with_skip_code $err
-            err=`check_diff $chill_generated_stderr $chill_correct_stderr`
+            err=`check_diff $tmp $chill_correct_stderr`
             rm -f $tmp
             exit_with_passfail_code $err
         ;;

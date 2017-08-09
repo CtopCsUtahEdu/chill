@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "cudaize_mm_4.py", line 5, in <module>
+    read_IR("mm.c", "normalMM")
+NameError: name 'read_IR' is not defined

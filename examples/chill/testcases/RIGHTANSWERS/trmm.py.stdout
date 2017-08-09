@@ -1,0 +1,96 @@
+Unhandled case in scanner: SourceFile
+Looking for def double
+Looking for def double
+Looking for def double
+Looking for def int
+Looking for def int
+Looking for def int
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: SourceFile
+Unhandled case in scanner: FunctionDecl
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Relation r   {[k,i,j] : TRUE }
+s1: (dim:0) (dim:1) (dim:2) 
+{[k,i,j] -> [chill_t1,chill_t2,chill_t3] : k = chill_t1 && i = chill_t2 && j = chill_t3 }
+{[chill_t1,chill_t2,chill_t3] -> [chill_t4,chill_t5,chill_t6] : chill_t1 = chill_t4 && chill_t2 = chill_t5 && chill_t3 = chill_t6 }
+{[chill_t4,chill_t5,chill_t6] -> [chill_t7,chill_t8,chill_t9] : chill_t4 = chill_t7 && chill_t5 = chill_t8 && chill_t6 = chill_t9 }
+{[chill_t7,chill_t8,chill_t9] -> [chill_t10,chill_t11,chill_t12] : chill_t7 = chill_t10 && chill_t8 = chill_t11 && chill_t9 = chill_t12 }
+{[chill_t7,chill_t8,chill_t9] -> [chill_t10,chill_t11,chill_t12] : chill_t7 = chill_t10 && chill_t8 = chill_t11 && chill_t9 = chill_t12 }
+{[chill_t10,chill_t11,chill_t12] -> [chill_t13,chill_t14,chill_t15] : chill_t10 = chill_t13 && chill_t11 = chill_t14 && chill_t12 = chill_t15 }
+{[chill_t10,chill_t11,chill_t12] -> [chill_t13,chill_t14,chill_t15] : chill_t10 = chill_t13 && chill_t11 = chill_t14 && chill_t12 = chill_t15 }
+{[chill_t13,chill_t14,chill_t15] -> [chill_t16,chill_t17,chill_t18] : chill_t13 = chill_t16 && chill_t14 = chill_t17 && chill_t15 = chill_t18 }
+{[chill_t13,chill_t14,chill_t15] -> [chill_t16,chill_t17,chill_t18] : chill_t13 = chill_t16 && chill_t14 = chill_t17 && chill_t15 = chill_t18 }
+for(t2 = 0; t2 <= 1023; t2++) {
+  for(t4 = 0; t4 <= 1022; t4 += 2) {
+    for(t6 = 0; t6 <= 1022; t6 += 2) {
+      s0(t2,t4,t6);
+      s1(t2,t4,t6);
+      s2(t2,t4,t6);
+    }
+  }
+}
+
+
