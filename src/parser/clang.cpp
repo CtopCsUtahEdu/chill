@@ -474,11 +474,8 @@ chillAST_NodeList ConvertFloatingLiteral( FloatingLiteral *clangFL ) {
   auto sr = clangFL->getSourceRange();
   auto pr = llvm::APFloat::getSizeInBits(clangFL->getValue().getSemantics());
   string lit = Lexer::getSourceText(CharSourceRange::getTokenRange(sr), *globalSRCMAN, LangOptions());
-  if (sr.isValid() && lit != "")
-    return WRAP(new chillAST_FloatingLiteral(val, lit.c_str()));
-  else {
-    return WRAP(new chillAST_FloatingLiteral(val, pr/32));
-  }
+
+  return WRAP(new chillAST_FloatingLiteral(val, pr/32, lit.empty()? NULL:lit.c_str()));
 }
 
 

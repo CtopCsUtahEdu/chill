@@ -2584,8 +2584,8 @@ chillAST_node* chillAST_UnaryOperator::constantFold() {
       else { 
         chillAST_FloatingLiteral *FL = (chillAST_FloatingLiteral*)subexpr;
         chillAST_FloatingLiteral *F = new chillAST_FloatingLiteral( FL ); // clone
-        F->parent = FL->parent;
         F->value = -F->value;
+        F->allthedigits = NULL;
         returnval = F;
       }
     }
