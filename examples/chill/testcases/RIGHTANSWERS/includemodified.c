@@ -10,7 +10,8 @@
 
 int main() {
   int t2;
+  int j = 0;
   for (t2 = 0; t2 <= 99; t2 += 1) 
-    ;
+    j = j + 1;
   return 0;
 }

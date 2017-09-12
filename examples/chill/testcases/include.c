@@ -9,9 +9,9 @@
 #include "included.c"  // local 
 
 int main() { 
-    int i;
+    int i, j = 0;
     for (i=0; i<100; i++) { 
-	// nothing to see here
+        j = j+1;
 	}
    return 0; 
 }

@@ -11,31 +11,38 @@ build-cmake:
         - make $CMAKEBUILD
     only:
         - master
+    artifacts:
+        paths:
+            - build/
+        expire_in: 1 week
 
 build-automake:
     stage: build
     script:
         - ./bootstrap
-        - ./configure
+        - ./configure --disable-debug
         - make
     only:
         - master
+    artifacts:
+        untracked: true
+        expire_in: 1 week
 
 test-cmake:
     stage: test
+    dependencies:
+        - build-cmake
     script:
-        - mkdir build
         - cd build
-        - cmake ..
         - make check-all
     only:
         - master
 
 test-automake:
     stage: test
+    dependencies:
+        - build-automake
     script:
-        - ./bootstrap
-        - ./configure --disable-debug
         - make
         - make check
     only:

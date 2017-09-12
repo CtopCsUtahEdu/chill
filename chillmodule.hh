@@ -16,12 +16,25 @@
 
 //static PyMethodDef ChillMethods[] ; 
 
-#ifndef CUDACHILL
+#ifdef CUDACHILL
+#include "loop_cuda_chill.hh"
+#include "ir_cudachill.hh"
+
+typedef LoopCuda loop_t;
+#else // not defined(CUDACHILL)
+#include "loop.hh"
 void finalize_loop(int loop_num_start, int loop_num_end);
 int get_loop_num_start();
 int get_loop_num_end();
-#endif
+
+typedef Loop loop_t;
+#endif // not defined(CUDACHILL)
 
 //! pass C methods to python
 PyMODINIT_FUNC initchill() ;   // pass C methods to python
+
+extern loop_t *myloop;
+extern IR_Code *ir_code;
+extern bool is_interactive;
+
 #endif
