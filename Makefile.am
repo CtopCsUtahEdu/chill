@@ -69,6 +69,7 @@ ir_cudachill_src  = ir_chill.cc
 ir_cudachill_src += ir_cudachill.cc
 ir_cudachill_src += src/parser/rose.cpp
 
+# AST #
 ast_scanner_src  = src/printer/cfamily.cpp
 ast_scanner_src += src/printer/dump.cpp
 ast_scanner_src += src/printer/generic.cpp

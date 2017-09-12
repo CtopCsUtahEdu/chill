@@ -30,7 +30,7 @@ AC_ARG_ENABLE([coverage],
    [AS_IF(["x$enableval" != xno],
        [AC_SUBST([enable_coverage],[yes])
         AC_SUBST([CFLAGS],["-g -fprofile-arcs -ftest-coverage"])
-        AC_SUBST([CPPFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
+        AC_SUBST([CXXFLAGS],["-g -fprofile-arcs -ftest-coverage"])],[])])
 
 AC_ARG_ENABLE([debug],
    [AS_HELP_STRING([--enable-debug],[Enable debug messages])],
@@ -39,7 +39,9 @@ AC_ARG_ENABLE([debug],
 
 AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug" != xyes])
 AS_IF([test "x$enable_debug" == xyes],
-    [AC_DEFINE([DEBUGCHILL], [], [Enable CHiLL debug messages])],
+    [AC_DEFINE([DEBUGCHILL], [], [Enable CHiLL debug messages])
+     AC_SUBST([CFLAGS],["-g2 -O0"])
+     AC_SUBST([CXXFLAGS],["-g2 -O0"])],
     [AC_DEFINE([NO_DEBUGCHILL], [], [Disable CHiLL debug messages])])
 
 AC_ARG_WITH([rose],

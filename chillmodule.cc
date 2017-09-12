@@ -605,12 +605,12 @@ static int find_cur_level(int stmt, std::string idx) {
 }
 
 template<typename T>
-static inline bool in(std::vector<T>& vec, T val) {
+static inline bool in(const std::vector<T>& vec, T val) {
     return std::find(std::begin(vec), std::end(vec), val) != vec.end();
 }
 
 template<typename T>
-static inline int index_of(std::vector<T>& vec, T val) {
+static inline int indexof(const std::vector<T>& vec, T val) {
     for(int i = 0; i < vec.size(); i++) {
         if(vec[i] == val) return i;
     }
@@ -712,8 +712,8 @@ static PyObject* chill_copy_to_registers(PyObject* self, PyObject* args) {
     }
 
     int start_level = find_cur_level(stmt, start_loop);
-    std::vector<std::string> blocks;  block_indices(blocks);
-    std::vector<std::string> threads; thread_indices(threads);
+    std::vector<std::string> blocks;  block_indices(blocks);        // block index names
+    std::vector<std::string> threads; thread_indices(threads);      // thread index names
 
     std::vector<int> privatized_levels;
     for(auto idx: blocks) {
@@ -744,118 +744,139 @@ static PyObject* chill_copy_to_shared(PyObject* self, PyObject* args) {
      */
 
     strict_arg_num(args, 3, "copy_to_shared");
-    std::string              start_loop             = strArg(args, 0);
-    int                      start_level            = find_cur_level(0, start_loop);
-    std::string              array_name             = strArg(args, 1);
-    int                      alignment              = intArg(args, 2);
-
-    std::vector<std::string> copy_loop_idx_names    = {"tmp1", "tmp2"};
+    int                     stmt                    = 0;
+    std::string             start_loop              = strArg(args, 0);
+    int                     start_level             = find_cur_level(stmt, start_loop);
+    std::string             array_name              = strArg(args, 1);
+    int                     alignment               = intArg(args, 2);
 
     int                     old_num_stmts           = myloop->stmt.size();
 
-    myloop->datacopy_cuda(0, start_level, array_name, copy_loop_idx_names, 0, 0, 1, alignment, 1);
-    myloop->addSync(0, start_loop);
+    myloop->datacopy_cuda(stmt, start_level, array_name, {"tmp1", "tmp2"}, 0, 0, 1, alignment, 1);
+    myloop->addSync(stmt, start_loop);
 
     int                     new_num_stmts           = myloop->stmt.size();
 
-    for(int stmt = old_num_stmts; stmt < new_num_stmts; stmt++) {
-        int tmp2_level = find_cur_level(stmt, "tmp2");
-        if(tmp2_level != -1) {
-            // cudaize.py:628
-            myloop->tile_cuda(stmt, tmp2_level, tmp2_level);
-            int upper, lower;
-            myloop->extractCudaUB(stmt, tmp2_level, upper, lower);
-            int tmp1_level = find_cur_level(stmt, "tmp1");
+    // Foreach new stmt added from by data copy & sync...
+    for(int new_stmt = old_num_stmts; new_stmt < new_num_stmts; new_stmt++) {
+        int level_tmp2 = find_cur_level(new_stmt, "tmp2");
+        if(level_tmp2 != -1) {
+            // --------------------------- //
+            // datacopy created two levels //
+            // --------------------------- //
+            int upper_bound, lower_bound;
 
-            int tx = myloop->cu_tx;
-            int ty = myloop->cu_ty;
+            myloop->tile_cuda(new_stmt, level_tmp2, level_tmp2);
+            myloop->extractCudaUB(new_stmt, level_tmp2, upper_bound, lower_bound);
 
-            if((tx == upper + 1) && (ty == 1)) {
-                // cudaize.py:651
-                myloop->tile_cuda(stmt, tmp2_level, 1, tmp1_level, "tx", "tx", TilingMethodType::CountedTile);
+            int level_tmp1 = find_cur_level(new_stmt, "tmp1");
+                level_tmp2 = find_cur_level(new_stmt, "tmp2");
+            if(upper_bound + 1 == myloop->cu_tx && myloop->cu_ty == 1) {
+                // Upper bound and tx are the same AND only single thread dimensions
+
+                // just move 2nd loop up
+                myloop->tile_cuda(new_stmt, level_tmp2, 1, level_tmp1, "tx", "tx", TilingMethodType::CountedTile);
             }
             else {
-                std::string new_ctrl;
-                if(ty == 1) {   new_ctrl = "tmp3"; }
-                else        {   new_ctrl = "ty";   }
+                // Upper bound and tx are not the same OR multi thread dimensions
 
-                // cudaize.py:674
-                myloop->tile_cuda(stmt, tmp2_level, 1, tmp1_level, "tx", "tx", TilingMethodType::CountedTile);
+                // move 2nd loop up
+                myloop->tile_cuda(new_stmt, level_tmp2, 1, level_tmp1, "tx", "tx", TilingMethodType::CountedTile);
 
-                tmp1_level = find_cur_level(stmt, "tmp1");
-                myloop->extractCudaUB(stmt, tmp2_level, upper, lower);
-                auto tx_level = find_cur_level(stmt, "tx");
-                int tx_upper, tx_lower;
-                myloop->extractCudaUB(stmt, tx_level, tx_upper, tx_lower);
+                // update parapmeters
+                int upper_bound_tx,   lower_bound_tx;
+                int upper_bound_tmp1, lower_bound_tmp1;
+                    level_tmp1 = find_cur_level(new_stmt, "tmp1");
+                    level_tmp2 = find_cur_level(new_stmt, "tmp2");
+                int level_tx   = find_cur_level(new_stmt, "tx");
+                myloop->extractCudaUB(new_stmt, level_tmp1, upper_bound_tmp1, lower_bound_tmp1);
+                myloop->extractCudaUB(new_stmt, level_tx,   upper_bound_tx,   lower_bound_tx);
 
-                if(std::ceil((float)(tx_upper + 1)/(float)tx) > 1) {
-                    myloop->tile_cuda(stmt, tx_level, tx, tx_level, "tx", "tmp_tx", TilingMethodType::CountedTile);
-                    auto repeat = find_cur_level(stmt, "tx");
-                    myloop->tile_cuda(stmt, repeat, repeat);
+                // Handle tx thread
 
-                    if(find_cur_level(stmt, "tx") > find_cur_level(stmt, "tmp_tx")) {
-                        myloop->tile_cuda(stmt, find_cur_level(stmt, "tx"), find_cur_level(stmt, "tmp_tx"));
+                if(upper_bound_tx + 1 > myloop->cu_tx) {
+                    myloop->tile_cuda(new_stmt, level_tx, myloop->cu_tx, level_tx, "tx", "tmp_tx", TilingMethodType::CountedTile);
+
+                    auto repeat = find_cur_level(new_stmt, "tx");
+                    myloop->tile_cuda(new_stmt, repeat, repeat);
+
+                    if(find_cur_level(new_stmt, "tx") > find_cur_level(new_stmt, "tmp_tx")) {
+                        myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "tx"), find_cur_level(new_stmt, "tmp_tx"));
                     }
                 }
 
-                // cudaize.py: 710
-                auto ty_level = find_cur_level(stmt, "tmp1");
-                int ty_upper, ty_lower;
-                myloop->extractCudaUB(stmt, ty_level, ty_upper, ty_lower);
+                myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "tmp1"), find_cur_level(new_stmt, "tmp1"));
 
-                tx_level = find_cur_level(stmt, "tx");
-                myloop->extractCudaUB(stmt, tx_level, tx_upper, tx_lower);
+                // update parameters
+                int upper_bound_ty, lower_bound_ty;
+                int level_ty = find_cur_level(new_stmt, "tmp1");
+                    level_tx = find_cur_level(new_stmt, "tx");
+                myloop->extractCudaUB(new_stmt, level_ty, upper_bound_ty, lower_bound_ty);
+                myloop->extractCudaUB(new_stmt, level_tx, upper_bound_tx, lower_bound_tx);
 
-                if(std::ceil(((float) (ty_upper + 1)/(float) ty)) > 1) {
-                    myloop->tile_cuda(stmt, ty_level, ty, ty_level, "ty", "tmp_ty", TilingMethodType::CountedTile);
-                    myloop->tile_cuda(stmt, find_cur_level(stmt, "ty"), find_cur_level(stmt, "ty"));
+                // Handle ty thread
+
+                if(upper_bound_ty + 1 > myloop->cu_ty) {
+                    myloop->tile_cuda(new_stmt, level_ty, myloop->cu_ty, level_ty, "ty", "tmp_ty", TilingMethodType::CountedTile);
+                    myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "ty"));
+
                     std::vector<std::string> cur_idxs;
-                    cur_indices(stmt, cur_idxs);
-                    //cudaize.py: 743
+                    cur_indices(new_stmt, cur_idxs);
 
-                    auto idx_flag = -1;
-                    if(in(cur_idxs, std::string("tmp_tx"))) {
-                        idx_flag = 1 + index_of(cur_idxs, std::string("tmp_tx"));
+                    // Put ty before any tmp_tx
+                    if(in<std::string>(cur_idxs, "tmp_tx")) {
+                        if(find_cur_level(new_stmt, "ty") > find_cur_level(new_stmt, "tmp_tx")) {
+                            // Swap level of ty and tmp_ty (I think)
+                            myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tmp_tx"));
+                        }
                     }
 
-                    if(idx_flag >= 0 && find_cur_level(stmt, "ty") > find_cur_level(stmt, "tmp_ty")) {
-                        //cudaize.py: 752
-                        myloop->tile_cuda(stmt, find_cur_level(stmt, "ty"), find_cur_level(stmt, "tmp_ty"));
+                    // Put ty before any tmp_ty
+                    if(in<std::string>(cur_idxs, "tmp_ty")) {
+                        if(find_cur_level(new_stmt, "ty") > find_cur_level(new_stmt, "tmp_ty")) {
+                            myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tmp_ty"));
+                        }
                     }
                 }
                 else {
-                    //cudaize.py: 779
-                    myloop->tile_cuda(stmt, ty_level, 1, ty_level, "ty", "ty", TilingMethodType::CountedTile);
-                    myloop->tile_cuda(stmt, find_cur_level(stmt, "ty"), find_cur_level(stmt, "ty") + 1);
+                    myloop->tile_cuda(new_stmt, level_ty, 1, level_ty, "ty", "ty", TilingMethodType::CountedTile);
+                    myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tx") + 1);
                 }
             }
         }
         else {
-            //cudaize.py: 815
-            int tmp1_level = find_cur_level(stmt, "tmp1");
-            myloop->tile_cuda(stmt, tmp1_level, tmp1_level);
+            // -------------------------- //
+            // datacopy created one level //
+            // -------------------------- //
+            int level_tmp1          = find_cur_level(new_stmt, "tmp1");         // first level
+            int lower_bound, upper_bound;
 
-            int tx = myloop->cu_tx;
-            int ty = myloop->cu_ty;
-            int upper, lower;
-            myloop->extractCudaUB(stmt, tmp1_level, upper, lower);
+            myloop->tile_cuda(new_stmt, level_tmp1, level_tmp1);
+            myloop->extractCudaUB(new_stmt, level_tmp1, upper_bound, lower_bound);
 
-            if(upper + 1 == tx) {
-                myloop->renameIndex(stmt, "tmp1", "tx");
+            if(upper_bound + 1 == myloop->cu_tx) {
+                // Same upper bound as thread tx
+                myloop->renameIndex(new_stmt, "tmp1", "tx");
             }
             else {
-                myloop->tile_cuda(stmt, tmp1_level, tx, tmp1_level, "tx", "tmp_tx", TilingMethodType::CountedTile);
-                myloop->tile_cuda(stmt, tmp1_level + 1, 1, tmp1_level + 1, "tx", "tx", TilingMethodType::CountedTile);
-                myloop->tile_cuda(stmt, tmp1_level + 1, tmp1_level);
-                if(ty > 1) {
-                    myloop->extractCudaUB(stmt, tmp1_level + 1, upper, lower);
-                    auto bound = (int) std::ceil((float) upper/ (float) ty);
-                    myloop->tile_cuda(stmt, tmp1_level + 1, bound, tmp1_level, "tmp_ty", "ty", TilingMethodType::CountedTile);
+                // Different upper bound as thread tx, so will require some tiling
+                myloop->tile_cuda(new_stmt, level_tmp1,     myloop->cu_tx, level_tmp1,     "tx", "tmp_tx", TilingMethodType::CountedTile);
+                myloop->tile_cuda(new_stmt, level_tmp1 + 1, 1,             level_tmp1 + 1, "tx", "tx",     TilingMethodType::CountedTile);
+                myloop->tile_cuda(new_stmt, level_tmp1 + 1, level_tmp1);
+
+                if(myloop->cu_ty > 1) {
+                    myloop->extractCudaUB(new_stmt, level_tmp1 + 1, upper_bound, lower_bound);
+                    auto bound = (int) std::ceil((float) (upper_bound + 1) / (float) myloop->cu_ty);
+                    myloop->tile_cuda(new_stmt, level_tmp1 + 1, bound, level_tmp1 + 1, "tmp_ty", "ty", TilingMethodType::CountedTile);
+
+                    //TODO: tz ???
                 }
             }
+
         }
-        myloop->addSync(stmt, start_loop);
+        myloop->addSync(new_stmt, start_loop);
     }
+
     Py_RETURN_NONE;
 }
 

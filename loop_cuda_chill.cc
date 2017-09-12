@@ -152,13 +152,44 @@ enum Type {
 };
 
 
-int wrapInIfFromMinBound(chillAST_node* then_part, 
+// Helper function for wrapInIfFromMinBound
+static chillAST_node* getInitBound(chillAST_BinaryOperator* assignOp) {
+    assert(assignOp->isAssignmentOp());
+
+    chillAST_node* condition = nullptr;
+
+    if(assignOp->lhs->isBinaryOperator() && assignOp->lhs->isRemOp()) {
+        auto rhs   = assignOp->rhs->as<chillAST_node>();
+        auto remOp = assignOp->lhs->as<chillAST_BinaryOperator>();
+
+        // lower bound condition for x = a % b:
+
+        auto a         = remOp->lhs->as<chillAST_node>();
+        auto b         = remOp->rhs->as<chillAST_node>();
+        auto zero      = new chillAST_IntegerLiteral(0);
+        condition = new chillAST_BinaryOperator(
+                new chillAST_BinaryOperator(
+                        new chillAST_BinaryOperator(
+                                assignOp->lhs,
+                                "-",
+                                a),
+                        "%",
+                        b),
+                "==",
+                zero);
+
+    }
+
+    assignOp->rhs = new chillAST_IntegerLiteral(0);
+    return condition;
+}
+
+chillAST_node* wrapInIfFromMinBound(
+                         chillAST_node* then_part,
                          chillAST_ForStmt* loop,
                          chillAST_node *symtab,    
                          chillAST_node* bound_sym) {
-  debug_fprintf(stderr, "wrapInIfFromMinBound()\n"); exit(-1);    // DFL 
-
-  return 0; 
+  debug_fprintf(stderr, "wrapInIfFromMinBound()\n");
   /*
   SgBinaryOp* test_expr = isSgBinaryOp(loop->get_test_expr());
   SgExpression* upperBound;
@@ -199,7 +230,48 @@ int wrapInIfFromMinBound(chillAST_node* then_part,
     
     }
 */
-  //return then_part;
+
+  // Handle loop init stmts
+  chillAST_node* condition = nullptr;
+  auto for_init_stmt = loop->getInit();
+  if(for_init_stmt->isCompoundStmt()) {
+      //TODO: do we even support this ???
+      for(auto stmt: for_init_stmt->as<chillAST_CompoundStmt>()->getChildren()) {
+          condition = getInitBound(stmt->as<chillAST_BinaryOperator>());
+      }
+  }
+  else {
+      condition = getInitBound(for_init_stmt->as<chillAST_BinaryOperator>());
+  }
+
+  // Handle loop increment stmts
+
+  auto for_incr_expr = loop->getInc();
+  int stepsize = 1;
+  if(for_incr_expr->isBinaryOperator()) {
+      if(!strcmp(for_incr_expr->as<chillAST_BinaryOperator>()->op, "+=")) {
+          stepsize = for_incr_expr->as<chillAST_BinaryOperator>()->rhs->as<chillAST_IntegerLiteral>()->value;
+
+          if(stepsize > 1) {
+              auto ti = new chillAST_IfStmt(condition, loop->body, nullptr);
+              loop->body = ti;
+              then_part = ti;
+          }
+      }
+  }
+
+  // Handle loop test case stmts
+  auto for_test_expr = loop->getCond()->as<chillAST_BinaryOperator>();
+  auto upper_bound = for_test_expr->lhs->as<chillAST_node>();
+
+  if(upper_bound->isCallExpr()) {
+      auto upper_bound_call = upper_bound->as<chillAST_CallExpr>();
+
+      //TODO: if is call to __rose_lt...
+  }
+
+
+  return then_part;
 }
 
 /**
@@ -389,13 +461,15 @@ bool LoopCuda::cudaize_v3(int stmt_num,
              level, lb, ub);
     fflush(stdout);
 
+    // bx
     if (i == 0) {                                          // bx
       debug_fprintf(stderr, "blockIdxs i == 0, therefore bx?\n"); 
       block_level = level;
       if (ubrepr == NULL) {
         Vcu_bx.push_back(ub + 1); // a constant int ub + 1
         Vcu_bx_repr.push_back(NULL);
-        VbxAst.push_back( new chillAST_IntegerLiteral( ub + 1 )); 
+        VbxAst.push_back( new chillAST_IntegerLiteral( ub + 1 ));
+        cu_bx   = ub + 1;
       } else {
         Vcu_bx.push_back(0);  
         Vcu_bx_repr.push_back( // NON constant ub + 1 
@@ -409,12 +483,15 @@ bool LoopCuda::cudaize_v3(int stmt_num,
       }
       debug_fprintf(stderr, "setting idxNames[%d][%d] to bx\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "bx";
-    } else if (i == 1) {                                // by
+    }
+    // by
+    else if (i == 1) {                                // by
       debug_fprintf(stderr, "blockIdxs i == 1, therefore by?\n"); 
       if (ubrepr == NULL) {
         Vcu_by.push_back(ub + 1); // constant 
         Vcu_by_repr.push_back(NULL);
-        VbyAst.push_back( new chillAST_IntegerLiteral( ub + 1 )); 
+        VbyAst.push_back( new chillAST_IntegerLiteral( ub + 1 ));
+        cu_by   = ub + 1;
       } else {
         Vcu_by.push_back(0);
         Vcu_by_repr.push_back( // NON constant ub + 1
@@ -516,7 +593,8 @@ bool LoopCuda::cudaize_v3(int stmt_num,
       if (ubrepr == NULL) {
         Vcu_tx.push_back(ub + 1); // a constant int ub + 1
         Vcu_tx_repr.push_back(NULL);
-        VtxAst.push_back( new chillAST_IntegerLiteral( ub + 1 )); 
+        VtxAst.push_back( new chillAST_IntegerLiteral( ub + 1 ));
+        cu_tx   = ub + 1;
       } else {
         Vcu_tx.push_back(0);
         Vcu_tx_repr.push_back(// NON constant ub + 1 
@@ -531,12 +609,14 @@ bool LoopCuda::cudaize_v3(int stmt_num,
       debug_fprintf(stderr, "setting idxNames[%d][%d] to tx\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "tx";
       
-    } else if (i == 1) {                                               // ty
+    }
+    else if (i == 1) {                                               // ty
       thread_level2 = level;
       if (ubrepr == NULL) {
         Vcu_ty.push_back(ub + 1); // a constant int ub + 1
         Vcu_ty_repr.push_back(NULL);
-        VtyAst.push_back( new chillAST_IntegerLiteral( ub + 1 )); 
+        VtyAst.push_back( new chillAST_IntegerLiteral( ub + 1 ));
+        cu_ty   = ub + 1;
       } else {                      // NON constant ub + 1 
         Vcu_ty.push_back(0);
         Vcu_ty_repr.push_back(
@@ -551,11 +631,13 @@ bool LoopCuda::cudaize_v3(int stmt_num,
       debug_fprintf(stderr, "setting idxNames[%d][%d] to ty\n", stmt_num, level-1); 
       idxNames[stmt_num][level - 1] = "ty";
       
-    } else if (i == 2) {                                               // tz
+    }
+    else if (i == 2) {                                               // tz
       if (ubrepr == NULL) {
         Vcu_tz.push_back(ub + 1); // constant ub + 1
         Vcu_tz_repr.push_back(NULL);
-        VtzAst.push_back( new chillAST_IntegerLiteral( ub + 1 )); 
+        VtzAst.push_back( new chillAST_IntegerLiteral( ub + 1 ));
+        cu_tz   = ub + 1;
       } else {
         Vcu_tz.push_back(0);
         Vcu_tz_repr.push_back( // NON constant ub + 1

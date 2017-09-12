@@ -566,7 +566,7 @@ def __copy_to_registers( start_loop, array_name ):
 '''
 Deprecated
 '''
-def copy_to_shared( start_loop, array_name, alignment ):
+def __copy_to_shared( start_loop, array_name, alignment ):
     #print "\nstarting copy to shared( %s, %s, %d)" % (start_loop, array_name, alignment ) 
     #print "copy_to_shared( %s, %s, %d) in cudaize.py" % ( start_loop, array_name, alignment )
     stmt = 0 # assume statement 0

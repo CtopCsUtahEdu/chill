@@ -266,7 +266,8 @@ public:
   virtual bool isPlusOp()       { return false; }; 
   virtual bool isMinusOp()      { return false; }; 
   virtual bool isPlusMinusOp()  { return false; }; 
-  virtual bool isMultDivOp()    { return false; }; 
+  virtual bool isMultDivOp()    { return false; };
+  virtual bool isRemOp()        { return false; };
 
   virtual bool isAStruct() { return false; }; 
   virtual bool isAUnion()  { return false; };
@@ -631,6 +632,10 @@ public:
     filename = NULL;
   }
 
+  template<typename ASTDestClass>
+  ASTDestClass* as() {
+      return dynamic_cast<ASTDestClass*>(this);
+  }
 };
 
 /**
@@ -792,6 +797,10 @@ public:
   void setInit( chillAST_node *i ) { init = i; i->setParent(this); };
   bool hasInit() { return init != NULL; };
   chillAST_node *getInit() { return init; };
+  int  getArrayDimensions() { return this->getChildren().size(); }
+  chillAST_node *getArraySize(int i)                   { return this->getChild(i); }
+  int            getArraySizeAsInt(int i)              { return this->getArraySize(i)->evalAsInt(); }
+  void           setArraySize(int i, chillAST_node* s) { this->setChild(i, s); }
   
   chillAST_VarDecl();
   /**
@@ -808,7 +817,7 @@ public:
 
   bool isParmVarDecl() { return( isAParameter == 1 ); };
   bool isBuiltin()     { return( isABuiltin == 1 ); };  // designate variable as a builtin
-  void setLocation( void *ptr ) { uniquePtr = ptr; } ; 
+  void setLocation( void *ptr ) { uniquePtr = ptr; } ;
 
 
   void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
@@ -1467,6 +1476,7 @@ public:
   bool isMinusOp() { return (!strcmp(op,"-")); };
   bool isPlusMinusOp() { return (!strcmp(op,"+")) || (!strcmp(op,"-")); };
   bool isMultDivOp()   { return (!strcmp(op,"*")) || (!strcmp(op,"/")); };
+  bool isRemOp()       { return (!strcmp(op,"&")); }
   
   bool isStructOp() { return (!strcmp(op,".")) || (!strcmp(op,"->")); }; 
   

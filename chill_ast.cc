@@ -1290,7 +1290,7 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       debug_fprintf(stderr, "containing non-loop is a %s\n", contain->getTypeString()); 
 
       contain->print(0,stderr);
-      contain->insertChild( 0, newguy ); // ugly order TODO
+      //contain->insertChild( 0, newguy ); // ugly order TODO
       contain->addVariableToSymbolTable( newguy ); // adds to first enclosing symbolTable
       
       if (!  symbolTableHasVariableNamed( contain->getSymbolTable(), vname )) { 
@@ -2994,34 +2994,15 @@ chillAST_CompoundStmt::chillAST_CompoundStmt() {
 
 
 void chillAST_CompoundStmt::replaceChild( chillAST_node *old, chillAST_node *newchild ){
-  //debug_fprintf(stderr, "chillAST_CompoundStmt::replaceChild( old %s, new %s)\n", old->getTypeString(), newchild->getTypeString() ); 
-   vector<chillAST_node*> dupe = children; 
-   int numdupe = dupe.size();
-  int any = 0; 
-  
-  for (int i=0; i<numdupe; i++) { 
 
-    //debug_fprintf(stderr, "\ni %d\n",i); 
-    //for (int j=0; j<numdupe; j++) { 
-    //  debug_fprintf(stderr, "this 0x%x   children[%d/%d] = 0x%x type %s\n", this, j, children.size(), children[j], children[j]->getTypeString()); 
-    //}
-
-
-    if (dupe[i] == old) { 
-      //debug_fprintf(stderr, "replacing child %d of %d\n", i, numdupe); 
-      //debug_fprintf(stderr, "was \n"); print();
-      children[i] = newchild;
-      newchild->setParent( this );
-      //debug_fprintf(stderr, "is  \n");  print(); debug_fprintf(stderr, "\n\n"); 
-      // old->parent = NULL; 
-      any = 1;
+    for (int i=0; i<this->children.size(); i++) {
+        if(this->getChild(i) == old) {
+            this->setChild(i, newchild);
+        }
+        else {
+            this->getChild(i)->replaceChild(old, newchild);
+        }
     }
-  }
-
-  if (!any) { 
-    debug_fprintf(stderr, "chillAST_CompoundStmt::replaceChild(), could not find old\n");
-    exit(-1); 
-  }
 }
 
 
