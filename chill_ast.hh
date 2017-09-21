@@ -325,6 +325,15 @@ public:
     children.erase( children.begin()+i );
   };
   
+  /**
+   * @brief prepend a statement to the begining of a block, the body of a loop, or the body of a function
+   */
+  virtual void prependStatement(chillAST_node* stmt) { /* TODO: not implemented error */}
+  /**
+   * @brief append a statement to the end of a block, the body of a loop, or the body of a function
+   */
+  virtual void appendStatement(chillAST_node* stmt) { /* TODO: not implemented error */}
+
   int findChild(  chillAST_node *c )  {   
     for (int i=0; i<children.size(); i++) { 
       if (children[i] == c) return i;
@@ -801,6 +810,7 @@ public:
   chillAST_node *getArraySize(int i)                   { return this->getChild(i); }
   int            getArraySizeAsInt(int i)              { return this->getArraySize(i)->evalAsInt(); }
   void           setArraySize(int i, chillAST_node* s) { this->setChild(i, s); }
+  void           convertArrayToPointer();
   
   chillAST_VarDecl();
   /**
@@ -1011,7 +1021,7 @@ private:
   CHILL_FUNCTION_TYPE function_type;  // CHILL_FUNCTION_CPU or  CHILL_FUNCTION_GPU
   bool externfunc;   // function is external 
   bool builtin;      // function is a builtin
-  bool forwarddecl; 
+  bool forwarddecl;  // function is a forward declaration
 
 public:
   char *returnType;
@@ -1133,6 +1143,14 @@ public:
 
   void replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
     body->replaceChild( old, newchild ); 
+  }
+
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
   }
 };  // end FunctionDecl 
 
@@ -1355,6 +1373,14 @@ public:
   bool lowerBound( int &l ); 
   bool upperBound( int &u );
 
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
+  }
+
 }; 
 
 
@@ -1376,6 +1402,14 @@ public:
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
   void loseLoopWithLoopVar( char *var ){};
+
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
+  }
+
 };
 
 

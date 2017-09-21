@@ -5,6 +5,7 @@
 #include "printer/dump.h"
 #include "printer/cfamily.h"
 #include <fstream>
+#include <cstring>
 
 int chillAST_node::chill_scalar_counter = 0;
 int chillAST_node::chill_array_counter  = 1;
@@ -1290,7 +1291,7 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       debug_fprintf(stderr, "containing non-loop is a %s\n", contain->getTypeString()); 
 
       contain->print(0,stderr);
-      //contain->insertChild( 0, newguy ); // ugly order TODO
+      contain->prependStatement( newguy );
       contain->addVariableToSymbolTable( newguy ); // adds to first enclosing symbolTable
       
       if (!  symbolTableHasVariableNamed( contain->getSymbolTable(), vname )) { 
@@ -2406,6 +2407,27 @@ void chillAST_VarDecl::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) 
   }
   //debug_fprintf(stderr, "adding vardecl for %s to decls\n", varname); 
   decls.push_back( this ); 
+}
+
+
+void chillAST_VarDecl::convertArrayToPointer() {
+
+    if (numdimensions == 0) {
+        // not an array
+        // TODO: this is an error
+    }
+
+    // Array dimensions sizes are stored in the nodes children
+    //   so kick the first one out
+    this->removeChild(0);
+
+    auto ln = strlen(this->arraypointerpart);
+    char* new_arraypointerpart = (char*) malloc(sizeof(char) * ln + 2);
+    memcpy(new_arraypointerpart, this->arraypointerpart, ln);
+    new_arraypointerpart[ln    ] = '*';
+    new_arraypointerpart[ln + 1] = '\0';
+    free(this->arraypointerpart);
+    this->arraypointerpart = new_arraypointerpart;
 }
 
 

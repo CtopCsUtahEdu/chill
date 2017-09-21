@@ -26,6 +26,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   int numparams = origfunction->parameters.size();
   const char *fname = origfunction->functionName;
   chillAST_node *p = origfunction->getParent();
+  int origfunction_location = p->findChild( origfunction );
   chillAST_SourceFile *srcfile = origfunction->getSourceFile();
   
   // make a new function that will be the CPU side cuda code
@@ -714,7 +715,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //debug_fprintf(stderr, "newparam numdimensions %d\n", newparam->numdimensions );
         // TODO need to remove topmost size? 
         if (newparam->getArrayDimensions() > 0) {
-          newparam->setArraySize(0, new chillAST_IntegerLiteral(0)); // set first size now unknown
+          newparam->convertArrayToPointer(); // set first size now unknown
           //newparam->knownArraySizes = false;
           debug_fprintf(stderr, "[]");
           for (int i=1; i<newparam->numdimensions; i++) { 
@@ -800,7 +801,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       // debug_fprintf(stderr, "func is child %d of srcfile\n", which);
 
       // GPUKernel was created with parent p, so it is already there
-      //p->insertChild(originalfunctionlocation,  GPUKernel );
+      p->insertChild(origfunction_location,  GPUKernel );
       debug_fprintf(stderr, "\n\nkernel named %s\n", GPUKernel->functionName); 
       
       
@@ -1204,7 +1205,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
                                       arrayVars[i].name.c_str());
 
         debug_fprintf(stderr, "adding decl for %s to CPUsidefunc %s\n", var->varname, CPUsidefunc->functionName); 
-          //CPUsidefunc->insertChild(0, var ); // adds the decl to body code
+          CPUsidefunc->prependStatement( var ); // adds the decl to body code
           CPUsidefunc->addDecl( var ); // also adds to and CHANGES symbol table 
         }
       
@@ -1252,8 +1253,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           
           // do the CPU side cudaMemcpy, CPU to GPU("device")
           //DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
-          chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( var, 
-                                                                  (chillAST_VarDecl*)(arrayVars[i].in_data), 
+          chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( var,
+                                                                  arrayVars[i].in_data->as<chillAST_VarDecl>(),
                                                                   arrayVars[i].size_expr, "cudaMemcpyHostToDevice"); 
           
           debug_fprintf(stderr, "cudamemcpy is:\n");
@@ -1296,7 +1297,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       VbyAst[what]->print(0,stderr); debug_fprintf(stderr, " )\n"); 
       
-      chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin );
+      chillAST_CallExpr *CE1 = new chillAST_CallExpr( new chillAST_DeclRefExpr(dimbuiltin) );
       CE1->addArg(VbxAst[what]);
       CE1->addArg(VbyAst[what]);
       chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "", gridName);
@@ -1315,7 +1316,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         // there is a 3rd tz to be used
         debug_fprintf(stderr, "tx, ty, and tz\n");
-        chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
+        chillAST_CallExpr *CE2 = new chillAST_CallExpr( new chillAST_DeclRefExpr(dimbuiltin) );
         CE2->addArg(VtxAst[what]);
         CE2->addArg(VtyAst[what]);
         CE2->addArg(VtzAst[what]);
@@ -1326,7 +1327,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       else if (VtyAst.size() > what &&
                VtyAst[what]) { // no tz
         debug_fprintf(stderr, "tx and ty\n");
-        chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
+        chillAST_CallExpr *CE2 = new chillAST_CallExpr( new chillAST_DeclRefExpr(dimbuiltin) );
         CE2->addArg(VtxAst[what]);
         CE2->addArg(VtyAst[what]);
         dimblockdecl = new chillAST_VarDecl( "dim3", "", blockName );
@@ -1335,7 +1336,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       }
       else {
         debug_fprintf(stderr, "tx only\n");
-        chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin );
+        chillAST_CallExpr *CE2 = new chillAST_CallExpr( new chillAST_DeclRefExpr(dimbuiltin) );
         CE2->addArg(VtxAst[what]);
         dimblockdecl = new chillAST_VarDecl( "dim3", "", blockName );
         dimblockdecl->setInit(CE2);
@@ -1352,7 +1353,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       //debug_fprintf(stderr, "\nkernel named\n");GPUKernel->print(0,stderr); debug_fprintf(stderr, "\n"); 
       
-      chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel );
+      chillAST_CallExpr *kcall = new chillAST_CallExpr( new chillAST_DeclRefExpr(GPUKernel) );
       kcall->grid = dimgriddecl; 
       kcall->block =  dimblockdecl; 
       debug_fprintf(stderr, "kernel function parameters\n"); 
@@ -1420,8 +1421,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         if (arrayVars[i].out_data) {
           debug_fprintf(stderr, "Memcopy back if we have an output\n"); 
           chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl );
-          chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( (chillAST_VarDecl*)arrayVars[i].out_data, // wrong info
-                                                                  arrayVars[i].vardecl, 
+          chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( arrayVars[i].out_data->as<chillAST_VarDecl>(), // wrong info
+                                                                  arrayVars[i].vardecl,
                                                                   arrayVars[i].size_expr, "cudaMemcpyDeviceToHost"); 
           CPUfuncbody->addChild( cmemcpy );
         }
@@ -1518,7 +1519,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           bxdecl= new chillAST_VarDecl( "int", "", "bx");
           GPUKernel->addDecl( bxdecl ); // to symbol table
           // if it was there, we shouldn't do this? 
-          //GPUKernel->insertChild(beforecode++, bxdecl);
+          GPUKernel->prependStatement( bxdecl );
         }
         else debug_fprintf(stderr, "bx WAS defined in GPUKernel before\n"); 
         bxdecl->setInit( bid );  // add init
@@ -1551,7 +1552,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           debug_fprintf(stderr, "by was NOT defined in GPUKernel before\n"); 
           bydecl= new chillAST_VarDecl( "int", "", "by");
           GPUKernel->addDecl( bydecl ); // to symbol table
-          //GPUKernel->insertChild(beforecode++, bydecl);
+          GPUKernel->prependStatement( bydecl );
         }
         else debug_fprintf(stderr, "by WAS defined in GPUKernel before\n"); 
         bydecl->setInit( bid ); // add init
@@ -1578,7 +1579,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           debug_fprintf(stderr, "tx was NOT defined in GPUKernel before\n"); 
           txdecl= new chillAST_VarDecl( "int", "", "tx");
           GPUKernel->addDecl( txdecl ); // to symbol table
-          //GPUKernel->insertChild(beforecode++, txdecl);
+          GPUKernel->prependStatement( txdecl );
         }
         else debug_fprintf(stderr, "tx WAS defined in GPUKernel before\n"); 
         txdecl->setInit( tid ); // add init
@@ -1600,7 +1601,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
           tydecl= new chillAST_VarDecl( "int", "", "ty");
           GPUKernel->addDecl( tydecl ); // to symbol table
-          //GPUKernel->insertChild(beforecode++, tydecl);
+          GPUKernel->prependStatement( tydecl );
         }
         else debug_fprintf(stderr, "ty WAS defined in GPUKernel before\n"); 
         tydecl->setInit( tid ); // add init
@@ -1619,6 +1620,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           debug_fprintf(stderr, "tz was NOT defined in GPUKernel before\n"); 
           tzdecl= new chillAST_VarDecl( "int", "", "tz");
           GPUKernel->addDecl( tzdecl ); // to symbol table
+          GPUKernel->prependStatement( tzdecl );
           //GPUKernel->insertChild(beforecode++, tzdecl);
         }
         else debug_fprintf(stderr, "tz WAS defined in GPUKernel before\n"); 
@@ -1815,13 +1817,13 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       // store variable decl where we can get it easilly later
       arrayVars[i].vardecl = var;
       
-      //CPUfuncbody->insertChild(0, var );  // add the CPUside variable declaration
+      CPUfuncbody->insertChild(0, var );  // add the CPUside variable declaration
       
       // do the CPU side cudaMalloc 
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var, CPUfuncbody ); 
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var );
       chillAST_CStyleAddressOf *AO = new chillAST_CStyleAddressOf( DRE );
-      chillAST_CStyleCastExpr *casttovoidptrptr = new chillAST_CStyleCastExpr( "void **", AO, NULL ); 
-      chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr, NULL); 
+      chillAST_CStyleCastExpr *casttovoidptrptr = new chillAST_CStyleCastExpr( "void **", AO );
+      chillAST_CudaMalloc *cmalloc = new chillAST_CudaMalloc( casttovoidptrptr, arrayVars[i].size_expr );
       CPUfuncbody->addChild( cmalloc );
       
       debug_fprintf(stderr, "\ncudamalloc is:\n"); 
@@ -1849,9 +1851,32 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   debug_fprintf(stderr, "\nBuild dimGrid and dimBlock dim3 variables based on loop dimensions and ti/tj\n"); 
   //Build dimGrid dim3 variables based on loop dimensions and ti/tj
+  char blockD1[120];
+  char blockD2[120];
+  int dim1 = 0;            // TODO 
+  if (dim1) {
+     debug_fprintf(stderr,"cu_tx, cu_ty    CASE NOT HANDLED\n"); 
+     exit(-1); 
+#ifdef NOTYET
+   snprintf(blockD1, 120, "%s/%d",
+             dim1->get_declaration()->get_name().getString().c_str(), cu_tx);
+    snprintf(blockD2, 120, "%s/%d",
+             dim2->get_declaration()->get_name().getString().c_str(), cu_ty);
+#endif
+  } else {
+    debug_fprintf(stderr,"cu_bx, cu_by\n"); 
+    snprintf(blockD1, 120, "%d", cu_bx);
+    snprintf(blockD2, 120, "%d", cu_by);
+    //snprintf(blockD1, 120, "%d/%d", cu_nx, cu_tx);
+    //snprintf(blockD2, 120, "%d/%d", cu_ny, cu_ty);
+  }
+  debug_fprintf(stderr, "blockD1 '%s'\n", blockD1); 
+  debug_fprintf(stderr, "blockD2 '%s'\n", blockD2); 
   
+  chillAST_FunctionDecl *dimbuiltin = new chillAST_FunctionDecl( "dim3", "dim3" );
+  dimbuiltin->setBuiltin();
   
-  chillAST_CallExpr *CE1 = new chillAST_CallExpr( dimbuiltin, NULL );
+  chillAST_CallExpr *CE1 = new chillAST_CallExpr(new chillAST_DeclRefExpr(dimbuiltin));
   
   // create ARGS to dim3. 
   debug_fprintf(stderr, "create ARGS for dim3 dimGrid\n"); 
@@ -1879,7 +1904,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     
   }
   
-  chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "", "dimGrid");
+  chillAST_VarDecl *dimgriddecl = new chillAST_VarDecl( "dim3", "", "dimGrid" );
   dimgriddecl->setInit(CE1);
   CPUfuncbody->addChild( dimgriddecl ); 
   debug_fprintf(stderr, "appending DIMGRID repr to setup code\n\n");
@@ -1910,10 +1935,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   
   
-  chillAST_CallExpr *CE2 = new chillAST_CallExpr( dimbuiltin, NULL );
+  chillAST_CallExpr *CE2 = new chillAST_CallExpr(new chillAST_DeclRefExpr(dimbuiltin));
   CE2->addArg( new chillAST_IntegerLiteral( bs1 ));
   CE2->addArg( new chillAST_IntegerLiteral( bs2 ));
-  chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "", "dimBlock");
+  chillAST_VarDecl *dimblockdecl = new chillAST_VarDecl( "dim3", "", "dimBlock" );
   dimblockdecl->setInit(CE2);
   
   CPUfuncbody->addChild( dimblockdecl ); 
@@ -1921,7 +1946,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // kernel call 
   debug_fprintf(stderr, "KERNEL CALL\n"); 
-  chillAST_CallExpr *kcall = new chillAST_CallExpr( GPUKernel,  CPUfuncbody);
+  chillAST_CallExpr *kcall = new chillAST_CallExpr(new chillAST_DeclRefExpr(GPUKernel));
   kcall->grid = dimgriddecl; 
   kcall->block =  dimblockdecl; 
   debug_fprintf(stderr, "kernel function parameters\n"); 
@@ -1965,7 +1990,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       // we just need a decl ref expr inserted as the parameter/argument
       // when it prints, it will print just the array name
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( v, NULL);
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( v );
       kcall->addArg( DRE );
     }
   }
@@ -1982,7 +2007,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     // Memcopy back if we have an output 
     if (arrayVars[i].out_data) {
       
-      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl, CPUfuncbody ); 
+      chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl );
       chillAST_CudaMemcpy *cmemcpy = new chillAST_CudaMemcpy( (chillAST_VarDecl*)arrayVars[i].out_data, // wrong info
                                                               arrayVars[i].vardecl, 
                                                               arrayVars[i].size_expr, "cudaMemcpyDeviceToHost"); 
@@ -1990,8 +2015,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     }
     
     // CudaFree the variable
-    chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl, CPUfuncbody ); 
-    chillAST_CudaFree *cfree = new chillAST_CudaFree( arrayVars[i].vardecl, CPUfuncbody ); 
+    chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( arrayVars[i].vardecl );
+    chillAST_CudaFree *cfree = new chillAST_CudaFree( arrayVars[i].vardecl );
     CPUfuncbody->addChild( cfree );
     
   }
@@ -2003,16 +2028,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   debug_fprintf(stderr, "BUILD THE KERNEL\n"); 
   
   //Extract out kernel loop  (somewhat misnamed. This is NOT the body of the GPUKernel YET) 
-  chillAST_node *CPUsideloop = getCode(  );  // chill based getCode
+  chillAST_node *kernelloop = getCode(  ); 
+  debug_fprintf(stderr, "loop_cuda_clang.cc L1669 returned from getCode()\n");
   
-  debug_fprintf(stderr, "loop_cuda_chill.cc L1669 returned from getCode()\n");
-  
-  //debug_fprintf(stderr, "loop_cuda_chill.cc L1685  CPUsideloop =\n");
+  //debug_fprintf(stderr, "loop_cuda_clang.cc L1685  kernelloop =\n");
   //GPUKernel->getBody()->print(); fflush(stdout);
   //debug_fprintf(stderr, "\n\n"); 
   
-  debug_fprintf(stderr, "loop_cuda_chill.cc L1685   CPUsideloop = \n");
-  CPUsideloop->print(); 
+  debug_fprintf(stderr, "loop_cuda_clang.cc L1685   kernelloop = \n");
+  kernelloop->print(); 
   debug_fprintf(stderr, "\n\n"); 
   
   debug_fprintf(stderr, "%d arrayvars\n", arrayVars.size());  
@@ -2036,7 +2060,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   
   // find all variables used in the function
   vector<chillAST_VarDecl*> decls;
-  CPUsideloop->gatherVarDecls( decls );
+  kernelloop->gatherVarDecls( decls );
   debug_fprintf(stderr, "%d variables in kernel\n", decls.size()); 
   for (int i=0; i<decls.size(); i++) { 
     debug_fprintf(stderr, "%s\n", decls[i]->varname); 
@@ -2077,7 +2101,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     chillAST_VarDecl *bydecl = new chillAST_VarDecl( "int", "", "by");
     GPUKernel->addDecl( bydecl );
     chillAST_DeclRefExpr *by = new chillAST_DeclRefExpr( bydecl ); 
-    chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( by, "=",bid); 
+    chillAST_BinaryOperator *assign = new chillAST_BinaryOperator( by, "=", bid ); 
     assign->print(0,stderr); debug_fprintf(stderr, "\n"); 
     
     GPUKernel->addChild(bydecl); 
@@ -2149,10 +2173,10 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   debug_fprintf(stderr, "DONE WITH replace indexes ... (and add syncs)\n"); 
   
   debug_fprintf(stderr, "\nswapped 2\nshould have syncs\nshould have indexes replaced by bx, tx, etc \n\n"); 
-  CPUsideloop->print();
+  kernelloop->print();
   
-  // now remove loops that will be done by spreading the loop count across cores
-  // these are loops that have our indeces gathered above as loop variables
+  // now remove loops that will be done by spreaking the loop count across cores
+  // these are loops that have out indeces gathered above aas loop variables
   debug_fprintf(stderr, "removing loops for variables that will be determined by core index\n"); 
   chillAST_CompoundStmt *CS = new chillAST_CompoundStmt();
   
@@ -2242,14 +2266,14 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     
     if (!isdeclared) { 
       debug_fprintf(stderr, "declaration for %s needs to be added\n", vd->varname);
-      GPUKernel->addChild( vd ); 
+      GPUKernel->getBody()->addChild( vd );
     }
   }  
   
   
   
   // take contents of CS and stuff it into GPUKernel, at the end after the declarations we might have just added 
-  GPUKernel->addChild( CS ) ; // ?? could do each statement
+  GPUKernel->getBody()->addChild( CS ) ; // ?? could do each statement
   
   //debug_fprintf(stderr, "\nGPU side func is \n");
   //GPUKernel->print();
