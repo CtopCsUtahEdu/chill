@@ -1,0 +1,144 @@
+Unhandled case in scanner: SourceFile
+Looking for def double
+Looking for def double
+Looking for def int
+Looking for def int
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: SourceFile
+Unhandled case in scanner: FunctionDecl
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: VarDecl
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: FloatingLiteral
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ForStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: IntegerLiteral
+Unhandled case in scanner: UnaryOperator
+Unhandled case in scanner: CompoundStmt
+Unhandled case in scanner: BinaryOperator
+Unhandled case in scanner: ArraySubscriptExpr
+Unhandled case in scanner: ArraySubscriptExpr
+Relation r   {[t,i] : TRUE }
+Relation r   {[t,i] : TRUE }
+s1: (dim:0) (dim:1) 
+s2: (dim:0) (dim:1) 
+for(t2 = 1; t2 <= 1023; t2++) {
+  for(t4 = 1; t4 <= 1022; t4++) {
+    s0(t2,t4);
+  }
+  for(t4 = 1; t4 <= 1022; t4++) {
+    s1(t2,t4);
+  }
+}
+
+
+dependence graph:
+0->0: B:output(1~1022, 0)
+0->1: B:flow(1~1022, 0) B:flow(0, 0) A:anti(1~1022, -1) A:anti(1~1022, 1) A:anti(0, 1) A:anti(1~1022, 0) A:anti(0, 0) A:_quasianti(0, -1)
+1->0: B:anti(1~1022, 0) A:flow(1~1022, 1) A:flow(1~1022, -1) A:flow(1~1022, 0)
+1->1: A:output(1~1022, 0)
+{[t,i] -> [chill_t1,chill_t2] : t = chill_t1 && i = chill_t2 }
+{[t,i] -> [chill_t1,chill_t2] : t = chill_t1 && 1+i = chill_t2 }
+{[chill_t1,chill_t2] -> [chill_t3,chill_t4] : chill_t1 = chill_t3 && 2chill_t3+chill_t2 = chill_t4 }
+for(t2 = 3; t2 <= 3043; t2 += 32) {
+  for(t4 = max(1,intCeil(t2-1023,2)); t4 <= min(1023,intFloor(t2-993,2)); t4++) {
+    for(t6 = t2; t6 <= 2*t4+1022; t6++) {
+      s0(t4,t6);
+      s1(t4,-2*t4+t6);
+    }
+    s1(t4,-2*t4+2*t4+1023);
+  }
+  for(t4 = max(1,intCeil(t2-991,2)); t4 <= min(1023,intFloor(t2-3,2)); t4++) {
+    for(t6 = t2; t6 <= t2+31; t6++) {
+      s0(t4,t6);
+      s1(t4,-2*t4+t6);
+    }
+  }
+  for(t4 = intCeil(t2-1,2); t4 <= min(intFloor(t2+29,2),1023); t4++) {
+    s0(t4,2*t4+1);
+    for(t6 = 2*t4+2; t6 <= t2+31; t6++) {
+      s0(t4,t6);
+      s1(t4,-2*t4+t6);
+    }
+  }
+}
+
+
+dependence graph:
+0->0: B:output(1~1022, 2~2044)
+0->1: B:flow(1~1022, 3~2045) B:flow(0, 1) A:anti(1~1022, 2~2044) A:anti(1~1022, 4~2046) A:anti(0, 2) A:anti(1~1022, 3~2045) A:anti(0, 1) A:_quasianti(0, 0)
+1->0: B:anti(1~1022, 1~2043) A:flow(1~1022, 2~2044) A:flow(1~1022, 0~2042) A:flow(1~1022, 1~2043)
+1->1: A:output(1~1022, 2~2044)

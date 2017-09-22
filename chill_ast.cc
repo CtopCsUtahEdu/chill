@@ -5,6 +5,7 @@
 #include "printer/dump.h"
 #include "printer/cfamily.h"
 #include <fstream>
+#include <cstring>
 
 int chillAST_node::chill_scalar_counter = 0;
 int chillAST_node::chill_array_counter  = 1;
@@ -1290,7 +1291,7 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       debug_fprintf(stderr, "containing non-loop is a %s\n", contain->getTypeString()); 
 
       contain->print(0,stderr);
-      contain->insertChild( 0, newguy ); // ugly order TODO
+      contain->prependStatement( newguy );
       contain->addVariableToSymbolTable( newguy ); // adds to first enclosing symbolTable
       
       if (!  symbolTableHasVariableNamed( contain->getSymbolTable(), vname )) { 
@@ -2409,6 +2410,27 @@ void chillAST_VarDecl::gatherScalarVarDecls( vector<chillAST_VarDecl*> &decls ) 
 }
 
 
+void chillAST_VarDecl::convertArrayToPointer() {
+
+    if (numdimensions == 0) {
+        // not an array
+        // TODO: this is an error
+    }
+
+    // Array dimensions sizes are stored in the nodes children
+    //   so kick the first one out
+    this->removeChild(0);
+
+    auto ln = strlen(this->arraypointerpart);
+    char* new_arraypointerpart = (char*) malloc(sizeof(char) * ln + 2);
+    memcpy(new_arraypointerpart, this->arraypointerpart, ln);
+    new_arraypointerpart[ln    ] = '*';
+    new_arraypointerpart[ln + 1] = '\0';
+    free(this->arraypointerpart);
+    this->arraypointerpart = new_arraypointerpart;
+}
+
+
 void chillAST_VarDecl::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
   //debug_fprintf(stderr, "chillAST_VarDecl::gatherScalarVarDecls(), %s numdimensions %d\n", varname, numdimensions); 
 
@@ -2990,34 +3012,15 @@ chillAST_CompoundStmt::chillAST_CompoundStmt() {
 
 
 void chillAST_CompoundStmt::replaceChild( chillAST_node *old, chillAST_node *newchild ){
-  //debug_fprintf(stderr, "chillAST_CompoundStmt::replaceChild( old %s, new %s)\n", old->getTypeString(), newchild->getTypeString() ); 
-   vector<chillAST_node*> dupe = children; 
-   int numdupe = dupe.size();
-  int any = 0; 
-  
-  for (int i=0; i<numdupe; i++) { 
 
-    //debug_fprintf(stderr, "\ni %d\n",i); 
-    //for (int j=0; j<numdupe; j++) { 
-    //  debug_fprintf(stderr, "this 0x%x   children[%d/%d] = 0x%x type %s\n", this, j, children.size(), children[j], children[j]->getTypeString()); 
-    //}
-
-
-    if (dupe[i] == old) { 
-      //debug_fprintf(stderr, "replacing child %d of %d\n", i, numdupe); 
-      //debug_fprintf(stderr, "was \n"); print();
-      children[i] = newchild;
-      newchild->setParent( this );
-      //debug_fprintf(stderr, "is  \n");  print(); debug_fprintf(stderr, "\n\n"); 
-      // old->parent = NULL; 
-      any = 1;
+    for (int i=0; i<this->children.size(); i++) {
+        if(this->getChild(i) == old) {
+            this->setChild(i, newchild);
+        }
+        else {
+            this->getChild(i)->replaceChild(old, newchild);
+        }
     }
-  }
-
-  if (!any) { 
-    debug_fprintf(stderr, "chillAST_CompoundStmt::replaceChild(), could not find old\n");
-    exit(-1); 
-  }
 }
 
 

@@ -1,0 +1,120 @@
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+"/home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c", line 3: warning: 
+          return type of function "main" must be "int"
+  void main( )
+       ^
+
+"/home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c", line 5: warning: 
+          variable "A" was set but never used
+     float A[ 48 ];
+           ^
+
+ConvertRoseFile(  SgGlobal *sg, filename loopnoinit.c );
+TOPMOST located node
+sourcefile is '/home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c'
+425 top nodes
+
+functiondecl                     main blurb declarations
+nodefile   /home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c
+sourcefile /home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c
+SAME FILE
+
+ConvertRoseFunctionDecl( main )
+got body
+3 statements in FunctionDecl body
+chillCS is 0x2e1f080
+
+statement 0     float A[48];
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+
+ConvertRoseVarDecl() 
+defdecl (nil)
+
+
+***  ConvertRoseInitName()  A
+initname A
+varname 'A'
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+original vartype 0x777db830 'float'
+HACK vartype float arraypart 
+ConvertRoseInitName()  storing variable declaration 'A' with unique value (nil)
+ConvertRoseVarDecl() storing variable declaration 'float A[48];' with unique value (nil) from  SgInitializedName
+
+statement 1     int i = 0;
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+
+ConvertRoseVarDecl() 
+defdecl (nil)
+
+
+***  ConvertRoseInitName()  i
+initname i
+varname 'i'
+original vartype 0x777db830 'int'
+HACK vartype int arraypart 
+ConvertRoseInitName()  storing variable declaration 'i' with unique value (nil)
+i gets initialized
+ConvertRoseGenericAST(),  rose AST node of type SgAssignInitializer
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseVarDecl() storing variable declaration 'int i = 0;' with unique value (nil) from  SgInitializedName
+
+hey! comments! on a VarDecl
+1 preprocessing info
+
+a comment  // test loop with no init 
+
+
+statement 2     for(;i < 48;i++) {A[i] = i;}
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+ConvertRoseForStatement()  parent 0x7fcfe2ad9290
+for(;i < 48;i++) {A[i] = i;}
+ConvertRoseGenericAST(),  rose AST node of type SgNullStatement
+ConvertRoseGenericAST(),  rose AST node of type SgLessThanOp
+
+ConvertRoseBinaryOp()
+i < 48
+op is <
+LHS is i
+RHS is 48
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgBasicBlock
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement A[i] = i;
+
+ConvertRoseBinaryOp()
+A[i] = i
+op is =
+LHS is A[i]
+RHS is i
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgCastExp
+ConvertRoseCastExp()  casttype 2 = C Style    ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+top node 419/425    SgSymbolTable  (IGNORING)
+unhandled top node 420/425 of type SgTypeTable
+topnode 421 of 425, first == NULL??  blurb numeric_label
+top node 422/425    Sg_File_Info
+file /home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c  line 0   col 0
+top node 423/425    Sg_File_Info
+file /home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c  line 0   col 0
+unhandled top node 424/425 of type SgSourceFile
+(top)node has 1 children
+node of type SourceFile is recursing to child 0 of type FunctionDecl
+child 0 is functiondecl main
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+ir_chill.cc, malformed loop init or cond:
+for (/* (NULL statement) */; i < 48; i++) 
+  A[i] = (float)i;

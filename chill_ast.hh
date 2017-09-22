@@ -267,7 +267,8 @@ public:
   virtual bool isPlusOp()       { return false; }; 
   virtual bool isMinusOp()      { return false; }; 
   virtual bool isPlusMinusOp()  { return false; }; 
-  virtual bool isMultDivOp()    { return false; }; 
+  virtual bool isMultDivOp()    { return false; };
+  virtual bool isRemOp()        { return false; };
 
   virtual bool isAStruct() { return false; }; 
   virtual bool isAUnion()  { return false; };
@@ -325,6 +326,15 @@ public:
     children.erase( children.begin()+i );
   };
   
+  /**
+   * @brief prepend a statement to the begining of a block, the body of a loop, or the body of a function
+   */
+  virtual void prependStatement(chillAST_node* stmt) { /* TODO: not implemented error */}
+  /**
+   * @brief append a statement to the end of a block, the body of a loop, or the body of a function
+   */
+  virtual void appendStatement(chillAST_node* stmt) { /* TODO: not implemented error */}
+
   int findChild(  chillAST_node *c )  {   
     for (int i=0; i<children.size(); i++) { 
       if (children[i] == c) return i;
@@ -632,6 +642,10 @@ public:
     filename = NULL;
   }
 
+  template<typename ASTDestClass>
+  ASTDestClass* as() {
+      return dynamic_cast<ASTDestClass*>(this);
+  }
 };
 
 /**
@@ -793,6 +807,11 @@ public:
   void setInit( chillAST_node *i ) { init = i; i->setParent(this); };
   bool hasInit() { return init != NULL; };
   chillAST_node *getInit() { return init; };
+  int  getArrayDimensions() { return this->getChildren().size(); }
+  chillAST_node *getArraySize(int i)                   { return this->getChild(i); }
+  int            getArraySizeAsInt(int i)              { return this->getArraySize(i)->evalAsInt(); }
+  void           setArraySize(int i, chillAST_node* s) { this->setChild(i, s); }
+  void           convertArrayToPointer();
   
   chillAST_VarDecl();
   /**
@@ -809,7 +828,7 @@ public:
 
   bool isParmVarDecl() { return( isAParameter == 1 ); };
   bool isBuiltin()     { return( isABuiltin == 1 ); };  // designate variable as a builtin
-  void setLocation( void *ptr ) { uniquePtr = ptr; } ; 
+  void setLocation( void *ptr ) { uniquePtr = ptr; } ;
 
 
   void gatherVarDecls      ( vector<chillAST_VarDecl*> &decls );
@@ -1003,7 +1022,7 @@ private:
   CHILL_FUNCTION_TYPE function_type;  // CHILL_FUNCTION_CPU or  CHILL_FUNCTION_GPU
   bool externfunc;   // function is external 
   bool builtin;      // function is a builtin
-  bool forwarddecl; 
+  bool forwarddecl;  // function is a forward declaration
 
 public:
   char *returnType;
@@ -1125,6 +1144,14 @@ public:
 
   void replaceChild( chillAST_node *old, chillAST_node *newchild ) { 
     body->replaceChild( old, newchild ); 
+  }
+
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
   }
 };  // end FunctionDecl 
 
@@ -1347,6 +1374,14 @@ public:
   bool lowerBound( int &l ); 
   bool upperBound( int &u );
 
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
+  }
+
 }; 
 
 
@@ -1368,6 +1403,14 @@ public:
   void gatherScalarRefs( std::vector<chillAST_DeclRefExpr*> &refs, bool writtento ) ;
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; // no loops under here
   void loseLoopWithLoopVar( char *var ){};
+
+  void prependStatement(chillAST_node* stmt) {
+      this->body->insertChild(0, stmt);
+  }
+  void appendStatement(chillAST_node* stmt) {
+      this->body->addChild(stmt);
+  }
+
 };
 
 
@@ -1468,6 +1511,7 @@ public:
   bool isMinusOp() { return (!strcmp(op,"-")); };
   bool isPlusMinusOp() { return (!strcmp(op,"+")) || (!strcmp(op,"-")); };
   bool isMultDivOp()   { return (!strcmp(op,"*")) || (!strcmp(op,"/")); };
+  bool isRemOp()       { return (!strcmp(op,"&")); }
   
   bool isStructOp() { return (!strcmp(op,".")) || (!strcmp(op,"->")); }; 
   

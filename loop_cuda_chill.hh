@@ -237,6 +237,14 @@ int findCurLevel(int stmt, std::string idx);
   bool cudaize_v2(std::string kernel_name, std::map<std::string, int> array_dims,
                   std::vector<std::string> blockIdxs, std::vector<std::string> threadIdxs);
 
+  /**
+   * @param stmt_num The statement to cudaize
+   * @param kernel_name Name of the generated kernel function
+   * @param array_dims
+   * @param blockIdxs Block index names
+   * @param threadIdxs Thread index names
+   * @param kernel_params
+   */
   bool cudaize_v3(int stmt_num,    // 5 args, starting with stmt number
                   std::string kernel_name,
                   std::map<std::string, int> array_dims,

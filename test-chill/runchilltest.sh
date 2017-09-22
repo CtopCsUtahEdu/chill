@@ -46,8 +46,8 @@ exit_with_skip_code() {
 
 
 ## Get the destination filename from the script
-get_destination() {   
-    cmd="sed -n \"s/destination('\(.*\)')/\1/p\" $1"
+get_destination() {
+    cmd="sed -n \"s/destination(\\\"\(.*\)\\\")/\1/p\" $1"
     echo `eval $cmd`
 }
 
@@ -57,16 +57,18 @@ call_path=$(dirname `realpath $0`)
 chill_exec=`realpath $1`
 chill_script_path=$(dirname `realpath $2`)
 chill_script=$(basename $2)
+chill_dest=`get_destination $2`
 chill_answers_path=`realpath $3`
 shift 3
 
-chill_generated_source=$chill_script_path/$(get_destination $chill_script_path/$chill_script)
+chill_generated_source=$chill_script_path/$chill_dest
 chill_generated_stdout=$chill_script_path/$(basename $chill_script).stdout
 chill_generated_stderr=$chill_script_path/$(basename $chill_script).stderr
 chill_correct_source=$chill_answers_path/$(basename $chill_generated_source)
 chill_correct_stdout=$chill_answers_path/$(basename $chill_generated_stdout)
 chill_correct_stderr=$chill_answers_path/$(basename $chill_generated_stderr)
 
+echo "CHiLL exec:            $chill_exec"
 echo "CHiLL script path:     $chill_script_path"
 echo "CHiLL script name:     $chill_script"
 echo "Generated source file: $chill_generated_source"
@@ -190,7 +192,7 @@ case $test_type in
                 rm -f $tmp
             fi
             maybe_exit_with_skip_code $err
-            err=`check_diff $chill_generated_stdout $chill_correct_stdout`
+            err=`check_diff $tmp $chill_correct_stdout`
             rm -f $tmp
             exit_with_passfail_code $err
         ;;
@@ -201,7 +203,7 @@ case $test_type in
                 rm -f $tmp
             fi
             maybe_exit_with_skip_code $err
-            err=`check_diff $chill_generated_stderr $chill_correct_stderr`
+            err=`check_diff $tmp $chill_correct_stderr`
             rm -f $tmp
             exit_with_passfail_code $err
         ;;

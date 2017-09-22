@@ -1,0 +1,75 @@
+(CallExpr : (DeclRefExpr : sqrtf (VarDecl : "'float ' '' ''" dim 0 ) ) ) sqrtf(dx * dx + dy * dy + dz * dz)4001float atoms[16000]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+  __shared__ float _P1[4001];
+  int i;
+  int j;
+  int n;
+  float dx;
+  float dy;
+  float dz;
+  for (j = 0; j < 512; j++) 
+    for (i = 0; i < 512; i++) 
+      for (n = 0; n < 4000; n += 4) {
+        dx = (float)(0.10000000000000001 * (double)chill_t65 - (double)_P1[chill_t67 - 0]);
+        dy = (float)(0.10000000000000001 * (double)chill_t63 - (double)_P1[chill_t67 + 1 - 0]);
+        dz = z - _P1[chill_t67 + 2 - 0];
+        newVariable0 += _P1[chill_t67 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+      }
+}// this source is derived from CHILL AST originally from file 'cp.c' as parsed by frontend compiler rose
+
+#define N 1
+
+#define VOLSIZEY 512
+
+#define VOLSIZEX 512
+
+#define VOLSIZEZ 1
+
+#define ATOMCOUNT 4000
+
+#define ATOMCOUNTTIMES4 16000
+
+#define GRIDSPACING 0.1
+
+#define zDim 0
+
+float sqrtf(float );
+void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}
+void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}dx = (float)(0.10000000000000001 * (double)chill_t65 - (double)_P1[chill_t67 - 0])dy = (float)(0.10000000000000001 * (double)chill_t63 - (double)_P1[chill_t67 + 1 - 0])dz = z - _P1[chill_t67 + 2 - 0]newVariable0 += _P1[chill_t67 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz)_P1[chill_t56 - 0] = atoms[chill_t56]newVariable0 = energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61]energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61] = newVariable0// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 15; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 31; t4 += 1) {
+    // ~cuda~ preferredIdx: tx sync
+    for (t6 = 0; t6 <= 3999; t6 += 1) 
+      _P1[t6 - 0] = atoms[t6];
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        newVariable0 = energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4];
+    // ~cuda~ threadLoop preferredIdx: tx sync
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t14 = 0; t14 <= 3996; t14 += 4) {
+          dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+          dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)_P1[t14 + 1 - 0]);
+          dz = z - _P1[t14 + 2 - 0];
+          newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4] = newVariable0;
+  }_P1[t6 - 0]atoms[t6]energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]_P1[t14 - 0]_P1[t14 + 1 - 0]_P1[t14 + 2 - 0]_P1[t14 + 3 - 0]energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}{
+}float atoms[16000]float atoms[16000]float *atomsatoms[t6]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}{
+}float *energyfloat *energyfloat *energyenergy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}{
+}float *energyfloat *energyfloat *energyfloat atoms[16000]16000 * sizeof(float)float *energyterminate called after throwing an instance of 'std::runtime_error'
+  what():  EvalAsInt called on node fake2
+Aborted (core dumped)

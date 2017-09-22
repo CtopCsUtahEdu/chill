@@ -179,7 +179,7 @@ void CFamily::runS(chillAST_CStyleCastExpr *n, std::string indent, std::ostream 
 
 void CFamily::runS(chillAST_CudaFree *n, std::string indent, std::ostream &o) {
   o << "cudaFree(";
-  run(n->variable, indent, o);
+  run(new chillAST_DeclRefExpr(n->variable), indent, o);
   o << ")";
 }
 
@@ -197,9 +197,9 @@ void CFamily::runS(chillAST_CudaMalloc *n, std::string indent, std::ostream &o) 
 
 void CFamily::runS(chillAST_CudaMemcpy *n, std::string indent, std::ostream &o) {
   o << "cudaMemcpy(";
-  run(n->dest, indent, o);
+  run(new chillAST_DeclRefExpr(n->dest), indent, o);
   o << ", ";
-  run(n->src, indent, o);
+  run(new chillAST_DeclRefExpr(n->src), indent, o);
   o << ", ";
   run(n->size, indent, o);
   o << ", " << n->cudaMemcpyKind << ")";

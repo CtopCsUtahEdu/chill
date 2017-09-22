@@ -2,60 +2,73 @@
 
 float sinf(float );
 float cosf(float );
-__global__ void Kernel_GPU(float Qr[32768], float Qi[32768], struct kValues kVals[3072], float x[32768], float y[32768], float z[32768]) {
-  int t2;
-  int t4;
-  int t6;
-  int t10;
-  float expArg;
-  float cosArg;
-  float sinArg;
-  float phi;
-  
-    // ~cuda~ preferredIdx: bx
-    for (t2 = 0; t2 <= 255; t2 += 1) 
-      // ~cuda~ preferredIdx: ii
-      for (t4 = 0; t4 <= 23; t4 += 1) 
-        // ~cuda~ preferredIdx: tx
-        for (t6 = 0; t6 <= 127; t6 += 1) 
-          // ~cuda~ preferredIdx: i
-          for (t10 = 0; t10 <= 127; t10 += 1) {
-            expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * x[128 * t2 + t6] + kVals[128 * t4 + t10].Ky * y[128 * t2 + t6] + kVals[128 * t4 + t10].Kz * z[128 * t2 + t6]);
-            cosArg = cosf(expArg);
-            sinArg = sinf(expArg);
-            phi = kVals[128 * t4 + t10].PhiMag;
-            Qr[128 * t2 + t6] += phi * cosArg;
-            Qi[128 * t2 + t6] += phi * sinArg;
-          };
+__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int by = blockIdx.y;
+  int i;
+  int ii;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  {
+    {
+      newVariable0 = x[tx + 128 * bx];
+    }
+    {
+      newVariable1 = y[128 * bx + tx];
+    }
+    {
+      newVariable2 = z[tx + 128 * bx];
+    }
+    {
+      newVariable3 = Qi[128 * bx + tx];
+    }
+    {
+      newVariable4 = Qr[tx + 128 * bx];
+    }
+    for (ii = 0; ii <= 23; ii += 1) 
+      {
+        for (i = 0; i <= 127; i += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + i].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+      }
+    {
+      Qr[tx + 128 * bx] = newVariable4;
+    }
+    {
+      Qi[128 * bx + tx] = newVariable3;
+    }
+  }
 }
 void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+  struct kValues * devI6Ptr;
+  float * devI5Ptr;
   float * devI4Ptr;
   float * devI3Ptr;
   float * devI2Ptr;
-  struct kValues * devI1Ptr;
-  float * devO2Ptr;
-  float * devO1Ptr;
-  cudaMalloc((void **)devO1Ptr, 32768 * sizeof(float));
-  cudaMemcpy(float * devO1Ptr, float Qr[32768], 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devO2Ptr, 32768 * sizeof(float));
-  cudaMemcpy(float * devO2Ptr, float Qi[32768], 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI1Ptr, 3072 * sizeof(struct kValues));
-  cudaMemcpy(struct kValues * devI1Ptr, struct kValues kVals[3072], 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice);
+  float * devI1Ptr;
+  cudaMalloc((void **)devI1Ptr, 32768 * sizeof(float));
+  cudaMemcpy(devI1Ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice);
   cudaMalloc((void **)devI2Ptr, 32768 * sizeof(float));
-  cudaMemcpy(float * devI2Ptr, float x[32768], 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(devI2Ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice);
   cudaMalloc((void **)devI3Ptr, 32768 * sizeof(float));
-  cudaMemcpy(float * devI3Ptr, float y[32768], 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(devI3Ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice);
   cudaMalloc((void **)devI4Ptr, 32768 * sizeof(float));
-  cudaMemcpy(float * devI4Ptr, float z[32768], 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  dim3 dimGrid= dim3(1, 1);
-  dim3 dimBlock= dim3(1, 1);
-  Kernel_GPU<<<dimGrid,dimBlock>>>(devO1Ptr, devO2Ptr, devI1Ptr, devI2Ptr, devI3Ptr, devI4Ptr);
-  cudaMemcpy(float Qr[32768], float * devO1Ptr, 32768 * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaFree(float * devO1Ptr);
-  cudaMemcpy(float Qi[32768], float * devO2Ptr, 32768 * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaFree(float * devO2Ptr);
-  cudaFree(struct kValues * devI1Ptr);
-  cudaFree(float * devI2Ptr);
-  cudaFree(float * devI3Ptr);
-  cudaFree(float * devI4Ptr);
+  cudaMemcpy(devI4Ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)devI5Ptr, 32768 * sizeof(float));
+  cudaMemcpy(devI5Ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)devI6Ptr, 3072 * sizeof(struct kValues));
+  cudaMemcpy(devI6Ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice);
+  dim3 dimGrid0 = dim3(256, 1);
+  dim3 dimBlock0 = dim3(128);
+  Kernel_GPU<<<dimGrid0,dimBlock0>>>(devI1Ptr, devI2Ptr, devI3Ptr, devI4Ptr, devI5Ptr, devI6Ptr);
+  cudaFree(devI1Ptr);
+  cudaFree(devI2Ptr);
+  cudaFree(devI3Ptr);
+  cudaFree(devI4Ptr);
+  cudaFree(devI5Ptr);
+  cudaFree(devI6Ptr);
 }

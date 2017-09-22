@@ -316,7 +316,10 @@ def is_in_indices( stmt, idx):
     cur = chill.cur_indices(stmt)
     return idx in cur
 
-def copy_to_registers( start_loop, array_name ):
+'''
+Deprecated
+'''
+def __copy_to_registers( start_loop, array_name ):
     #print "\n\n****** starting copy to registers"
     #sys.stdout.flush()
 
@@ -560,8 +563,10 @@ def copy_to_registers( start_loop, array_name ):
 #            chill.unroll(stmt,level+1,0)
 
 
-
-def copy_to_shared( start_loop, array_name, alignment ):
+'''
+Deprecated
+'''
+def __copy_to_shared( start_loop, array_name, alignment ):
     #print "\nstarting copy to shared( %s, %s, %d)" % (start_loop, array_name, alignment ) 
     #print "copy_to_shared( %s, %s, %d) in cudaize.py" % ( start_loop, array_name, alignment )
     stmt = 0 # assume statement 0
@@ -578,10 +583,10 @@ def copy_to_shared( start_loop, array_name, alignment ):
     
 
     # Now, we give it indices for up to two dimensions for copy loop
-    copy_loop_idxs = ["tmp1","tmp2"]
+    copy_loop_idxs = ["tmp1", "tmp2"]
     #chill.datacopy_9arg(stmt, start_level, array_name, copy_loop_idxs, False, 0, 1, alignment,True)
-    passtoC = [stmt, start_level, array_name]   # a list
-    passtoC.append( len(copy_loop_idxs))
+    passtoC = [stmt, start_level, array_name]
+    passtoC.append(len(copy_loop_idxs))
     for i in copy_loop_idxs:
         passtoC.append(i)
     passtoC.append( 0 ) # False
@@ -589,14 +594,6 @@ def copy_to_shared( start_loop, array_name, alignment ):
     passtoC.append( 1 )
     passtoC.append( alignment )
     passtoC.append( 1 )   # True
-    #print "\n[DataCopy]datacopy( ",
-    #print passtoC,
-    #print ")"
-
-    #if array_name == "b":
-    #    chill.cheat(1)
-    #if array_name == "c":
-    #    chill.cheat(2)
     
     chill.datacopy_9arg( tuple( passtoC ))
 
@@ -1035,8 +1032,4 @@ def unroll_to_depth( max_depth ):
         if old_num_statements == new_num_statements:
             break  # exit infinite loop
 
-
-#  all other calls to C have a routine in this file   (?)
-def unroll( statement, level, unroll_amount ):
-    chill.unroll( statement, level, unroll_amount )
 

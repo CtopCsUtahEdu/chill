@@ -1,0 +1,118 @@
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+  int i;
+  int j;
+  int k;
+  for (i = 0; i < 1024; i++) 
+    for (j = 0; j < 1024; j++) 
+      for (k = 0; k < 1024; k++) 
+        c[j][i] = c[j][i] + a[k][i] * b[j][k];
+}// this source is derived from CHILL AST originally from file 'mm.c' as parsed by frontend compiler rose
+
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}c[j][i] = c[j][i] + a[k][i] * b[j][k]// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];c[t4][t2]c[t4][t2]a[t6][t2]b[t4][t6]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float c[1024][1024]float *c[1024]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float c[1024][1024]float *c[1024]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float a[1024][1024]float a[1024][1024]float *a[1024]a[t6][t2]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float b[1024][1024]float b[1024][1024]float *b[1024]b[t4][t6]1048576 * sizeof(float)1048576 * sizeof(float)float a[1024][1024]1048576 * sizeof(float)float b[1024][1024]1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI1Ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice)10241024dim3 dimBlock0= dim3(1024)float c[1024][1024]float a[1024][1024]float b[1024][1024]kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])float * devO1Ptr, (float (*)[1024])float * devI1Ptr, (float (*)[1024])float * devI2Ptr)// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];
+}// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];
+}t2 = 0t2 <= 1023t2 += 1bx = 0bx <= 1023bx += 1// ~cuda~ blockLoop preferredIdx: bx
+for (bx = 0; bx <= 1023; bx += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][bx] = c[t4][bx] + a[t6][bx] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int bx;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][bx] = c[t4][bx] + a[t6][bx] * b[t4][t6];
+}t4 = 0t4 <= 1023t4 += 1by = 0by <= 1023by += 1// ~cuda~ preferredIdx: by
+for (by = 0; by <= 1023; by += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 1023; t6 += 1) 
+    c[by][bx] = c[by][bx] + a[t6][bx] * b[by][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int by;
+  int bx;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (by = 0; by <= 1023; by += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[by][bx] = c[by][bx] + a[t6][bx] * b[by][t6];
+}t6 = 0t6 <= 1023t6 += 1tx = 0tx <= 1023tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 1023; tx += 1) 
+  c[by][bx] = c[by][bx] + a[tx][bx] * b[by][tx];int bxint byint txfloat c[1024][1024]float a[1024][1024]float b[1024][1024]float c[1024][1024]float c[1024][1024]float a[1024][1024]float b[1024][1024]__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (by = 0; by <= 1023; by += 1) 
+      for (tx = 0; tx <= 1023; tx += 1) 
+        c[by][bx] = c[by][bx] + a[tx][bx] * b[by][tx];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (by = 0; by <= 1023; by += 1) 
+      for (tx = 0; tx <= 1023; tx += 1) 
+        c[by][bx] = c[by][bx] + a[tx][bx] * b[by][tx];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (by = 0; by <= 1023; by += 1) 
+      for (tx = 0; tx <= 1023; tx += 1) 
+        c[by][bx] = c[by][bx] + a[tx][bx] * b[by][tx];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int bx= blockIdx.x;
+  
+    
+      
+        c[by][bx] = c[by][bx] + a[tx][bx] * b[by][tx];;;;
+}c[j][i] = c[j][i] + a[k][i] * b[j][k]

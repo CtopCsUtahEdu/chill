@@ -1,0 +1,189 @@
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "smooth_fused_64.script", line 1
+    source:smooth_fused_64.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "split1.script", line 10
+    source: split.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "unroll2c.script", line 5
+    source: unroll2.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "permute3.script", line 10
+    source: permute123456.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "permute1.script", line 10
+    source: permute123456.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "permute8.script", line 10
+    source: permute8910.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "reverse3.script", line 10
+    source: reverse.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "AKp256hack.script", line 6
+    source: AKp256hack.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "permute6.script", line 10
+    source: permute123456.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "peel9.script", line 7
+    source: peel9101112.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "p46.script", line 6
+    source: p46.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "peel1.script", line 7
+    source: peel1234.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "shift1.script", line 10
+    source: shift.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "peel6.script", line 8
+    source: peel5678.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "peel8.script", line 8
+    source: peel5678.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "p49.script", line 6
+    source: p49.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "permute4.script", line 10
+    source: permute123456.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "unroll1b.script", line 5
+    source: unroll1.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "split2.script", line 10
+    source: split.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+  File "AKp257.script", line 6
+    source: AKp257.c
+          ^
+SyntaxError: invalid syntax
+BIG IF
+fail 0
+big if FALSE
+Traceback (most recent call last):
+  File "regression1.py", line 84, in <module>
+    statstruct = os.stat( dest )
+OSError: [Errno 2] No such file or directory: 'AKp257modified.c'
+BIG IF
+fail 0
+big if FALSE

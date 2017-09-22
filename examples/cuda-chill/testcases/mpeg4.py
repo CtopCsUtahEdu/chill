@@ -1,8 +1,8 @@
 from chill import *
 execfile("cudaize.py")
 
-read_IR("mpeg4.c", "mpeg4_cpu")
 destination("mpeg4modified.cu")
+read_IR("mpeg4.c", "mpeg4_cpu")
 
 N=4096
 M=4096

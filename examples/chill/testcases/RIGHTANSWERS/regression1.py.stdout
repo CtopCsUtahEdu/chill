@@ -1,0 +1,263 @@
+
+
+smooth_fused_64.script
+source 'smooth_fused_64.c'
+dest   'smooth_fused_64modified.c'
+
+
+before   1502306670.37
+../../../chill smooth_fused_64.script
+now   1502306670.39
+smooth_fused_64.script succeeded?   status 0
+smooth_fused_64modified.c exists and has 3282 bytes
+1501870924.56
+elapsed 435745.829450
+
+split1.script
+source 'split.c'
+dest   'split1modified.c'
+
+
+before   1502306670.39
+../../../chill split1.script
+now   1502306670.42
+split1.script succeeded?   status 0
+split1modified.c exists and has 702 bytes
+1501870925.1
+elapsed 435745.323274
+
+unroll2c.script
+source 'unroll2.c'
+dest   'unroll2cmodified.c'
+
+
+before   1502306670.42
+../../../chill unroll2c.script
+now   1502306670.44
+unroll2c.script succeeded?   status 0
+unroll2cmodified.c exists and has 447 bytes
+1501870929.04
+elapsed 435741.400160
+
+permute3.script
+source 'permute123456.c'
+dest   'permute3modified.c'
+
+
+before   1502306670.44
+../../../chill permute3.script
+now   1502306670.47
+permute3.script succeeded?   status 0
+permute3modified.c exists and has 547 bytes
+1502306666.52
+elapsed 3.947256
+
+permute1.script
+source 'permute123456.c'
+dest   'permute1modified.c'
+
+
+before   1502306670.47
+../../../chill permute1.script
+now   1502306670.49
+permute1.script succeeded?   status 0
+permute1modified.c exists and has 581 bytes
+1502306665.81
+elapsed 4.683266
+
+permute8.script
+source 'permute8910.c'
+dest   'permute8modified.c'
+
+
+before   1502306670.49
+../../../chill permute8.script
+now   1502306670.52
+permute8.script succeeded?   status 0
+permute8modified.c exists and has 548 bytes
+1502306667.56
+elapsed 2.954685
+
+knowngood RIGHTANSWERS/permute8modified.c
+18 lines vs 18 lines
+permute8modified.c is the same as RIGHTANSWERS/permute8modified.c
+
+
+reverse3.script
+source 'reverse.c'
+dest   'reverse3modified.c'
+
+
+before   1502306670.52
+../../../chill reverse3.script
+now   1502306670.54
+reverse3.script succeeded?   status 0
+reverse3modified.c exists and has 534 bytes
+1501870919.58
+elapsed 435750.963617
+
+AKp256hack.script
+source 'AKp256hack.c'
+dest   'AKp256hackmodified.c'
+
+
+before   1502306670.54
+../../../chill AKp256hack.script
+now   1502306670.56
+AKp256hack.script succeeded?   status 0
+AKp256hackmodified.c exists and has 295 bytes
+1502306651.98
+elapsed 18.585334
+
+permute6.script
+source 'permute123456.c'
+dest   'permute6modified.c'
+
+
+before   1502306670.56
+../../../chill permute6.script
+now   1502306670.59
+permute6.script succeeded?   status 0
+permute6modified.c exists and has 501 bytes
+1502306667.13
+elapsed 3.468502
+
+peel9.script
+source 'peel9101112.c'
+dest   'peel9modified.c'
+
+
+before   1502306670.59
+../../../chill peel9.script
+now   1502306670.64
+peel9.script succeeded?   status 0
+peel9modified.c exists and has 1665 bytes
+1502306665.57
+elapsed 5.071856
+
+p46.script
+source 'p46.c'
+dest   'p46modified.c'
+
+
+before   1502306670.64
+../../../chill p46.script
+now   1502306670.68
+p46.script succeeded?   status 0
+p46modified.c exists and has 432 bytes
+1502306661.67
+elapsed 9.009291
+
+peel1.script
+source 'peel1234.c'
+dest   'peel1modified.c'
+
+
+before   1502306670.68
+../../../chill peel1.script
+now   1502306670.72
+peel1.script succeeded?   status 0
+peel1modified.c exists and has 615 bytes
+1502306662.7
+elapsed 8.015822
+
+shift1.script
+source 'shift.c'
+dest   'shift1modified.c'
+
+
+before   1502306670.72
+../../../chill shift1.script
+now   1502306670.76
+shift1.script succeeded?   status 0
+shift1modified.c exists and has 850 bytes
+1501870921.78
+elapsed 435748.976285
+
+peel6.script
+source 'peel5678.c'
+dest   'peel6modified.c'
+
+
+before   1502306670.76
+../../../chill peel6.script
+now   1502306670.8
+peel6.script succeeded?   status 0
+peel6modified.c exists and has 633 bytes
+1502306664.9
+elapsed 5.896458
+
+peel8.script
+source 'peel5678.c'
+dest   'peel8modified.c'
+
+
+before   1502306670.8
+../../../chill peel8.script
+now   1502306670.83
+peel8.script succeeded?   status 0
+peel8modified.c exists and has 1026 bytes
+1502306665.39
+elapsed 5.446039
+
+p49.script
+source 'p49.c'
+dest   'p49modified.c'
+
+
+before   1502306670.83
+../../../chill p49.script
+now   1502306670.86
+p49.script succeeded?   status 0
+p49modified.c exists and has 350 bytes
+1502306662.53
+elapsed 8.328903
+
+permute4.script
+source 'permute123456.c'
+dest   'permute4modified.c'
+
+
+before   1502306670.86
+../../../chill permute4.script
+now   1502306670.91
+permute4.script succeeded?   status 0
+permute4modified.c exists and has 501 bytes
+1502306666.75
+elapsed 4.156029
+
+unroll1b.script
+source 'unroll1.c'
+dest   'unroll1bmodified.c'
+
+
+before   1502306670.91
+../../../chill unroll1b.script
+now   1502306670.94
+unroll1b.script succeeded?   status 0
+unroll1bmodified.c exists and has 566 bytes
+1501870927.05
+elapsed 435743.894702
+
+split2.script
+source 'split.c'
+dest   'split2modified.c'
+
+
+before   1502306670.94
+../../../chill split2.script
+now   1502306670.98
+split2.script succeeded?   status 0
+split2modified.c exists and has 583 bytes
+1501870925.47
+elapsed 435745.504542
+
+AKp257.script
+source 'AKp257.c'
+dest   'AKp257modified.c'
+
+
+before   1502306670.98
+../../../chill AKp257.script
+now   1502306671.01
+AKp257.script succeeded?   status 0

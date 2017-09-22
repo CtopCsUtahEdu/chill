@@ -1,0 +1,834 @@
+Omega initialized
+in C, initchill() to set up C methods to be called from python
+ConvertRoseFile(  SgGlobal *sg, filename trmm.c );
+TOPMOST located node
+sourcefile is '/home/derick/dev/chill/chill-src/examples/chill/testcases/trmm.c'
+425 top nodes
+
+functiondecl                     trmm blurb declarations
+nodefile   /home/derick/dev/chill/chill-src/examples/chill/testcases/trmm.c
+sourcefile /home/derick/dev/chill/chill-src/examples/chill/testcases/trmm.c
+SAME FILE
+
+ConvertRoseFunctionDecl( trmm )
+
+hey! comments! on a FunctionDecl
+1 preprocessing info
+
+a #define #define N       1024
+
+
+
+***  ConvertRoseInitName()  A
+initname A
+varname 'A'
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+original vartype 0x34e546b0 'double'
+HACK vartype double arraypart 
+ConvertRoseInitName()  storing variable declaration 'A' with unique value (nil)
+new parameter:
+trmm chillAST_FunctionDecl::addParameter( 0x1352650  param A)   total of 1 parameters
+
+
+***  ConvertRoseInitName()  B
+initname B
+varname 'B'
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+original vartype 0x34e546b0 'double'
+HACK vartype double arraypart 
+ConvertRoseInitName()  storing variable declaration 'B' with unique value (nil)
+new parameter:
+trmm chillAST_FunctionDecl::addParameter( 0x12dd890  param B)   total of 2 parameters
+
+
+***  ConvertRoseInitName()  C
+initname C
+varname 'C'
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+original vartype 0x34e546b0 'double'
+HACK vartype double arraypart 
+ConvertRoseInitName()  storing variable declaration 'C' with unique value (nil)
+new parameter:
+trmm chillAST_FunctionDecl::addParameter( 0x12db380  param C)   total of 3 parameters
+got body
+4 statements in FunctionDecl body
+chillCS is 0x13ac630
+
+statement 0     int i;
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+
+ConvertRoseVarDecl() 
+defdecl (nil)
+
+
+***  ConvertRoseInitName()  i
+initname i
+varname 'i'
+original vartype 0x34e54590 'int'
+HACK vartype int arraypart 
+ConvertRoseInitName()  storing variable declaration 'i' with unique value (nil)
+ConvertRoseVarDecl() storing variable declaration 'int i;' with unique value (nil) from  SgInitializedName
+
+statement 1     int j;
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+
+ConvertRoseVarDecl() 
+defdecl (nil)
+
+
+***  ConvertRoseInitName()  j
+initname j
+varname 'j'
+original vartype 0x34e54590 'int'
+HACK vartype int arraypart 
+ConvertRoseInitName()  storing variable declaration 'j' with unique value (nil)
+ConvertRoseVarDecl() storing variable declaration 'int j;' with unique value (nil) from  SgInitializedName
+
+statement 2     int k;
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgVariableDeclaration
+
+ConvertRoseVarDecl() 
+defdecl (nil)
+
+
+***  ConvertRoseInitName()  k
+initname k
+varname 'k'
+original vartype 0x34e54590 'int'
+HACK vartype int arraypart 
+ConvertRoseInitName()  storing variable declaration 'k' with unique value (nil)
+ConvertRoseVarDecl() storing variable declaration 'int k;' with unique value (nil) from  SgInitializedName
+
+statement 3     for(k = 0;k < 1024;k++) {for(i = 0;i < 1024;i++) {for(j = 0;j < 1024;j++) {C[j][i] = C[j][i] + A[k][i] * B[j][k];}}}
+calling ConvertRoseGenericAST
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+ConvertRoseForStatement()  parent 0x7f70a08f9290
+for(k = 0;k < 1024;k++) {for(i = 0;i < 1024;i++) {for(j = 0;j < 1024;j++) {C[j][i] = C[j][i] + A[k][i] * B[j][k];}}}
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement k = 0;
+
+ConvertRoseBinaryOp()
+k = 0
+op is =
+LHS is k
+RHS is 0
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessThanOp
+
+ConvertRoseBinaryOp()
+k < 1024
+op is <
+LHS is k
+RHS is 1024
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgBasicBlock
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+ConvertRoseForStatement()  parent 0x7f70a08f9290
+for(i = 0;i < 1024;i++) {for(j = 0;j < 1024;j++) {C[j][i] = C[j][i] + A[k][i] * B[j][k];}}
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement i = 0;
+
+ConvertRoseBinaryOp()
+i = 0
+op is =
+LHS is i
+RHS is 0
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessThanOp
+
+ConvertRoseBinaryOp()
+i < 1024
+op is <
+LHS is i
+RHS is 1024
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgBasicBlock
+ConvertRoseGenericAST(),  rose AST node of type SgForStatement
+
+ConvertRoseForStatement()  parent 0x7f70a08f9290
+for(j = 0;j < 1024;j++) {C[j][i] = C[j][i] + A[k][i] * B[j][k];}
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement j = 0;
+
+ConvertRoseBinaryOp()
+j = 0
+op is =
+LHS is j
+RHS is 0
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgLessThanOp
+
+ConvertRoseBinaryOp()
+j < 1024
+op is <
+LHS is j
+RHS is 1024
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgIntVal
+ConvertRoseGenericAST(),  rose AST node of type SgPlusPlusOp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgBasicBlock
+ConvertRoseGenericAST(),  rose AST node of type SgExprStatement
+ConvertRoseExprStatement() exprstatement C[j][i] = C[j][i] + A[k][i] * B[j][k];
+
+ConvertRoseBinaryOp()
+C[j][i] = C[j][i] + A[k][i] * B[j][k]
+op is =
+LHS is C[j][i]
+RHS is C[j][i] + A[k][i] * B[j][k]
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgAddOp
+
+ConvertRoseBinaryOp()
+C[j][i] + A[k][i] * B[j][k]
+op is +
+LHS is C[j][i]
+RHS is A[k][i] * B[j][k]
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgMultiplyOp
+
+ConvertRoseBinaryOp()
+A[k][i] * B[j][k]
+op is *
+LHS is A[k][i]
+RHS is B[j][k]
+ir_rose.cc L1357, making a binop with no LHS no RHS but a parent
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgPntrArrRefExp
+ConvertRoseArrayRefExp()
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+ConvertRoseGenericAST(),  rose AST node of type SgVarRefExp
+top node 419/425    SgSymbolTable  (IGNORING)
+unhandled top node 420/425 of type SgTypeTable
+topnode 421 of 425, first == NULL??  blurb numeric_label
+top node 422/425    Sg_File_Info
+file /home/derick/dev/chill/chill-src/examples/chill/testcases/trmm.c  line 0   col 0
+top node 423/425    Sg_File_Info
+file /home/derick/dev/chill/chill-src/examples/chill/testcases/trmm.c  line 0   col 0
+unhandled top node 424/425 of type SgSourceFile
+(top)node has 1 children
+node of type SourceFile is recursing to child 0 of type FunctionDecl
+child 0 is functiondecl trmm
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+IR_chillCode::MergeNeighboringControlStructures  1 controls
+control 0 is IR_CONTROL_LOOP
+
+Loop::Loop(const IR_Control *control)
+control type is 3   IR_CONTROL_BLOCK
+2set last_compute_cg_ = NULL; 
+in Loop::Loop, calling  build_ir_tree()
+
+loop.cc, Loop::Loop() about to clone control
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+irtools.cc BACK FROM FindOneLevelControlStructure()  1 controls
+controls.size() == 1  (NONZERO)
+controls[0] is IR_CONTROL_LOOP
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+irtools.cc BACK FROM FindOneLevelControlStructure()  1 controls
+controls.size() == 1  (NONZERO)
+controls[0] is IR_CONTROL_LOOP
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+irtools.cc BACK FROM FindOneLevelControlStructure()  1 controls
+controls.size() == 1  (NONZERO)
+controls[0] is IR_CONTROL_LOOP
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+irtools.cc BACK FROM FindOneLevelControlStructure()  1 controls
+controls.size() == 1  (NONZERO)
+controls[0] is IR_CONTROL_BLOCK
+irtools.cc, build_ir_tree( control, parent)   building a CHILL IR tree 
+irtools.cc L31   case IR_CONTROL_BLOCK
+
+IR_chillCode::FindOneLevelControlStructure() yep CHILLcode
+irtools.cc BACK FROM FindOneLevelControlStructure()  0 controls
+controls.size() == 0
+build_ir_tree()  vector result has 1 parts
+build_ir_tree()  vector result has 1 parts
+build_ir_tree()  vector result has 1 parts
+build_ir_tree()  vector result has 1 parts
+build_ir_tree()  vector result has 1 parts
+
+                                                  Loop::init_loop()
+extract_ir_stmts()
+ir_tree has 1 statements
+extract_ir_stmts()   ir_tree.size() 1
+IR_CONTROL_LOOP( recursing )
+extract_ir_stmts()   ir_tree.size() 1
+IR_CONTROL_LOOP( recursing )
+extract_ir_stmts()   ir_tree.size() 1
+IR_CONTROL_LOOP( recursing )
+extract_ir_stmts()   ir_tree.size() 1
+IR_CONTROL_BLOCK
+nesting level stmt size = 1
+1 statements?
+i 0
+stmt_nesting_level[0] = 3
+in init_loop, made 1 stmts
+max nesting level 3 at location 0
+loop.cc L356  n_dim now max_nesting_level 3
+itn = stmt[0]
+parent
+IR_CONTROL_LOOP  cur_dim 2
+making CHILL scalar symbol j
+index[2] = 'j'
+parent
+IR_CONTROL_LOOP  cur_dim 1
+making CHILL scalar symbol i
+index[1] = 'i'
+parent
+IR_CONTROL_LOOP  cur_dim 0
+making CHILL scalar symbol k
+index[0] = 'k'
+align loops by names,
+
+set relation variable names                      ****
+Relation r(3)
+extract information from loop/if structures
+loop.cc l 462  IR_CONTROL_LOOP
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+loop.cc l 462  IR_CONTROL_LOOP
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+loop.cc l 462  IR_CONTROL_LOOP
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+IR_chillCode::QueryExpOperation()
+ir_rose.cc  return IR_OP_CONSTANT
+loop.cc L441 insert the statement
+loop.cc before extract
+loop.cc stmt[0].loop_level has size n_dim 3
+for int i < n_dim(3)
+whew
+                                        loop.cc   Loop::init_loop() END
+
+after init_loop, 0 freevar
+loop.cc after init_loop, 1 statements
+IR_chillArrayRef::IR_chillArrayRef()  write 1
+IR_chillArrayRef::IR_chillArrayRef()  write 0
+IR_chillArrayRef::IR_chillArrayRef()  write 0
+IR_chillArrayRef::IR_chillArrayRef()  write 0
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym j ) *****
+
+making CHILL scalar symbol j
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym j ) *****
+
+making CHILL scalar symbol j
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym i ) *****
+
+making CHILL scalar symbol i
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym i ) *****
+
+making CHILL scalar symbol i
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym j ) *****
+
+making CHILL scalar symbol j
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym j ) *****
+
+making CHILL scalar symbol j
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym i ) *****
+
+making CHILL scalar symbol i
+IR_chillCode::QueryExpOperation()
+
+*****                         new IR_xxxxScalarRef( ir, REF EXPR sym i ) *****
+
+making CHILL scalar symbol i
+dv.first.size() 3
+k1 0
+k1 1
+k1 2
+k2 0
+
+
+*** LOTS OF REDUCTIONS ***
+
+
+i range 1
+i 0
+dep.hasEdge(0, 0)
+tdv size 4
+ij 0 0
+ij 0 1
+ij 0 2
+ij 0 3
+loop.cc reducCand.size() 0
+loop.cc canReduce.size() 0
+Loop::setLexicalOrder()  0 idxNames     active size 1  starting_order 0
+Loop:setLexicalOrder() recursing
+Loop::setLexicalOrder()  0 idxNames     active size 1  starting_order 0
+Loop:setLexicalOrder() recursing
+Loop::setLexicalOrder()  0 idxNames     active size 1  starting_order 0
+Loop:setLexicalOrder() recursing
+Loop::setLexicalOrder()  0 idxNames     active size 1  starting_order 0
+LEAVING Loop::setLexicalOrder()  0 idxNames
+LEAVING Loop::setLexicalOrder()  0 idxNames
+LEAVING Loop::setLexicalOrder()  0 idxNames
+LEAVING Loop::setLexicalOrder()  0 idxNames
+loop.cc apply_xform( set )
+loop vars 0 k
+loop vars 1 i
+loop vars 2 j
+1 uninterpreted symbols
+loop vars 0 k
+loop vars 1 i
+loop vars 2 j
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+loop vars 0 chill_t1
+loop vars 1 chill_t2
+loop vars 2 chill_t3
+1 uninterpreted symbols
+loop vars 0 chill_t1
+loop vars 1 chill_t2
+loop vars 2 chill_t3
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+loop vars 0 chill_t4
+loop vars 1 chill_t5
+loop vars 2 chill_t6
+1 uninterpreted symbols
+loop vars 0 chill_t4
+loop vars 1 chill_t5
+loop vars 2 chill_t6
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+chill_t8 was already defined in the function body
+OLD STMT DOES NOT HAVE INSPECTOR
+loop_unroll.cc L1083 adding stmt 1
+loop.cc apply_xform( set )
+loop vars 0 chill_t7
+loop vars 1 chill_t8
+loop vars 2 chill_t9
+2 uninterpreted symbols
+loop vars 0 chill_t7
+loop vars 1 chill_t8
+loop vars 2 chill_t9
+loop.cc stmt[*i].code =
+loop vars 0 chill_t7
+loop vars 1 chill_t8
+loop vars 2 chill_t9
+chill_t10 was already defined in the function body
+chill_t11 was already defined in the function body
+chill_t12 was already defined in the function body
+2 uninterpreted symbols
+loop vars 0 chill_t7
+loop vars 1 chill_t8
+loop vars 2 chill_t9
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+loop vars 0 chill_t10
+loop vars 1 chill_t11
+loop vars 2 chill_t12
+2 uninterpreted symbols
+loop vars 0 chill_t10
+loop vars 1 chill_t11
+loop vars 2 chill_t12
+loop.cc stmt[*i].code =
+loop vars 0 chill_t10
+loop vars 1 chill_t11
+loop vars 2 chill_t12
+chill_t13 was already defined in the function body
+chill_t14 was already defined in the function body
+chill_t15 was already defined in the function body
+2 uninterpreted symbols
+loop vars 0 chill_t10
+loop vars 1 chill_t11
+loop vars 2 chill_t12
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+loop.cc apply_xform( set )
+loop vars 0 chill_t13
+loop vars 1 chill_t14
+loop vars 2 chill_t15
+2 uninterpreted symbols
+loop vars 0 chill_t13
+loop vars 1 chill_t14
+loop vars 2 chill_t15
+loop.cc stmt[*i].code =
+loop vars 0 chill_t13
+loop vars 1 chill_t14
+loop vars 2 chill_t15
+chill_t16 was already defined in the function body
+chill_t17 was already defined in the function body
+chill_t18 was already defined in the function body
+2 uninterpreted symbols
+loop vars 0 chill_t13
+loop vars 1 chill_t14
+loop vars 2 chill_t15
+loop.cc stmt[*i].code =
+loop.cc LEAVING apply_xform( set )
+
+chill_t18 was already defined in the function body
+chill_t18 was already defined in the function body
+OLD STMT DOES NOT HAVE INSPECTOR
+loop_unroll.cc L1083 adding stmt 2
+
+loop.cc Loop::printCode(  effort 3 )
+Loop::printCode(), last_compute_cg_ == NULL
+leaving Loop::printCode()
+BIG IF
+fail 0
+big if true
+CUDACHILL IS NOT DEFINED
+calling ROSE code gen?    loop num 0 - 0
+
+loop.cc Loop::getCode(  effort 3 )
+Loop::getCode() last_compute_cg_ NOT NULL
+3 stmts
+calling last_compute_cgr_->printRepr()
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+t2 was already defined in the function body
+t4 was already defined in the function body
+t6 was already defined in the function body
+
+loop.cc Loop::getCode( effort 3 )   DONE
+IR_chillCode::ReplaceCode( old, *repr)
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(UnaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(UnaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(UnaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+printing as part of the destructor
+(FunctionDecl) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(ForStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(ArraySubscriptExpr) forgot to implement gatherVarUsage()
+(BinaryOperator) forgot to implement gatherVarUsage()
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(ForStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(CompoundStmt) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(ArraySubscriptExpr) uses default gatherVarDecls()
+(BinaryOperator) uses default gatherVarDecls()

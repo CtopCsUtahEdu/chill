@@ -1,0 +1,1488 @@
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 0 entries
+
+for(t2 = 0; t2 <= 511; t2++) {
+  for(t4 = 0; t4 <= 511; t4++) {
+    for(t6 = 0; t6 <= 3996; t6 += 4) {
+      s0(t2,t4,t6);
+    }
+  }
+}
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 0 entries
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 0 entries
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 3 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 3 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+
+
+['j', 'i', 'n']
+curOrder: j,i,n
+idxNames: j,i,n,
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 3 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 6 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+
+
+curOrder: jj,j,i,n
+idxNames: jj,j,i,n,
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 6 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 10 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+
+
+curOrder: jj,ii,j,i,n
+idxNames: jj,ii,j,i,n,
+for(t2 = 0; t2 <= 15; t2++) {
+  for(t4 = 0; t4 <= 31; t4++) {
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      for(t8 = 16*t4; t8 <= 16*t4+15; t8++) {
+        for(t10 = 0; t10 <= 3996; t10 += 4) {
+          s0(t2,t6,t8,t10,t10);
+        }
+      }
+    }
+  }
+}
+
+
+jj,ii
+thread= j,i
+
+jj,ii,j,i,n,
+// ~cuda~ preferredIdx: jj
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: ii
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 16*t4; t8 <= 16*t4+15; t8++) {
+        // ~cuda~ preferredIdx: n
+        for(t10 = 0; t10 <= 3996; t10 += 4) {
+          s0(t2,t6,t8,t10,t10);
+        }
+      }
+    }
+  }
+}
+
+block idx jj level 1 lb: 0 ub 15
+bx,ii,j,i,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: ii
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 16*t4; t8 <= 16*t4+15; t8++) {
+        // ~cuda~ preferredIdx: n
+        for(t10 = 0; t10 <= 3996; t10 += 4) {
+          s0(t2,t6,t8,t10,t10);
+        }
+      }
+    }
+  }
+}
+
+block idx ii level 2 lb: 0 ub 31
+bx,by,j,i,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 16*t4; t8 <= 16*t4+15; t8++) {
+        // ~cuda~ preferredIdx: n
+        for(t10 = 0; t10 <= 3996; t10 += 4) {
+          s0(t2,t6,t8,t10,t10);
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 3 to try and normalize lower bounds
+bx,by,j,,i,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 16*t4; t10 <= 16*t4+15; t10++) {
+        // ~cuda~ preferredIdx: n
+        for(t12 = 0; t12 <= 3996; t12 += 4) {
+          s0(t2,t4,t6+32*t2,t10,t12,t12);
+        }
+      }
+    }
+  }
+}
+
+thread idx j level 3 lb: 0 ub 31
+bx,by,tx,,i,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 16*t4; t10 <= 16*t4+15; t10++) {
+        // ~cuda~ preferredIdx: n
+        for(t12 = 0; t12 <= 3996; t12 += 4) {
+          s0(t2,t4,t6+32*t2,t10,t12,t12);
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 5 to try and normalize lower bounds
+bx,by,tx,,i,,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 0; t10 <= 15; t10++) {
+        // ~cuda~ preferredIdx: n
+        for(t14 = 0; t14 <= 3996; t14 += 4) {
+          s0(t2,t4,t6,32*t2+t6,t10+16*t4,t14,t14);
+        }
+      }
+    }
+  }
+}
+
+thread idx i level 5 lb: 0 ub 15
+Codegen: current names: bx,by,tx,,ty,,n,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 0; t10 <= 15; t10++) {
+        // ~cuda~ preferredIdx: n
+        for(t14 = 0; t14 <= 3996; t14 += 4) {
+          s0(t2,t4,t6,32*t2+t6,t10+16*t4,t14,t14);
+        }
+      }
+    }
+  }
+}
+
+
+before datacopy:
+ printing statement:0
+{[chill_t33,chill_t34,chill_t35,chill_t36,chill_t37,chill_t38,chill_t39] : exists ( alpha : chill_t39 = chill_t38 && 32chill_t33+chill_t35 = chill_t36 && chill_t38 = 4alpha && 32chill_t33, 0 <= chill_t36 <= 32chill_t33+31, 511 && 16chill_t34, 0 <= chill_t37 <= 16chill_t34+15, 511 && 0 <= chill_t33 <= 15 && 0 <= chill_t34 <= 31 && 0 <= chill_t38 <= 3996) }
+
+
+after datacopy:
+ printing statement:0
+{[chill_t45,chill_t46,chill_t47,chill_t48,chill_t49,chill_t50,chill_t51,chill_t52] : exists ( alpha : chill_t48 = 32chill_t45+chill_t47 && chill_t52 = chill_t51 && 16chill_t46+chill_t49 = chill_t50 && chill_t51 = 4alpha && 0, -32chill_t45 <= chill_t47 <= 31, -32chill_t45+511 && 16chill_t46, 0 <= chill_t50 <= 16chill_t46+15, 511 && 0 <= chill_t45 <= 15 && 0 <= chill_t46 <= 31 && 0 <= chill_t51 <= 3996) }
+ printing statement:1
+{[chill_t45,chill_t46,chill_t53] : 0 <= chill_t53 <= 3999 && 0 <= chill_t46 <= 31 && 0 <= chill_t45 <= 15 }
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 32 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 32 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 35 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+
+
+
+parameter_symtab has 3 entries
+0  atoms
+1  energy
+2  z
+
+
+body_symtab has 35 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+
+
+bx,by,tx,,ty,,n,
+bx,by,tmp1,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 15; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 31; t4++) {
+    // ~cuda~ preferredIdx: tmp1
+    for(t6 = 0; t6 <= 3999; t6++) {
+      s1(t2,t4,t6);
+    }
+    // ~cuda~ threadLoop preferredIdx: tx sync
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: ty
+      for(t10 = 0; t10 <= 15; t10++) {
+        // ~cuda~ preferredIdx: n
+        for(t14 = 0; t14 <= 3996; t14 += 4) {
+          s0(t2,t4,t6,32*t2+t6,t10,16*t4+t10,t14,t14);
+        }
+      }
+    }
+  }
+}
+
+before datacopy_privatized:
+ printing statement:0
+{[chill_t45,chill_t46,chill_t47,chill_t48,chill_t49,chill_t50,chill_t51,chill_t52] : exists ( alpha : chill_t48 = 32chill_t45+chill_t47 && chill_t52 = chill_t51 && 16chill_t46+chill_t49 = chill_t50 && chill_t51 = 4alpha && 0, -32chill_t45 <= chill_t47 <= 31, -32chill_t45+511 && 16chill_t46, 0 <= chill_t50 <= 16chill_t46+15, 511 && 0 <= chill_t45 <= 15 && 0 <= chill_t46 <= 31 && 0 <= chill_t51 <= 3996) }
+ printing statement:1
+{[chill_t54,chill_t55,chill_t56] : 0 <= chill_t54 <= 15 && 0 <= chill_t56 <= 3999 && 0 <= chill_t55 <= 31 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t60,chill_t61,chill_t62,chill_t63,chill_t64,chill_t65,chill_t66,chill_t67] : exists ( alpha : 32chill_t60+chill_t62 = chill_t63 && chill_t65 = chill_t64+16chill_t61 && chill_t67 = chill_t66 && chill_t66 = 4alpha && 0, -16chill_t61 <= chill_t64 <= 15, -16chill_t61+511 && 32chill_t60, 0 <= chill_t63 <= 32chill_t60+31, 511 && 0 <= chill_t60 <= 15 && 0 <= chill_t61 <= 31 && 0 <= chill_t66 <= 3996) }
+ printing statement:1
+{[chill_t54,chill_t55,chill_t56] : 0 <= chill_t54 <= 15 && 0 <= chill_t56 <= 3999 && 0 <= chill_t55 <= 31 }
+ printing statement:2
+{[chill_t60,chill_t61,chill_t62,chill_t64] : 0 <= chill_t64 <= 15 && 0 <= chill_t60 <= 15 && 0 <= chill_t62 <= 31 && 0 <= chill_t61 <= 31 }
+ printing statement:3
+{[chill_t60,chill_t61,chill_t62,chill_t64] : 0 <= chill_t64 <= 15 && 0 <= chill_t60 <= 15 && 0 <= chill_t62 <= 31 && 0 <= chill_t61 <= 31 }
+for(t2 = 0; t2 <= 15; t2++) {
+  for(t4 = 0; t4 <= 31; t4++) {
+    for(t6 = 0; t6 <= 3999; t6++) {
+      s1(t2,t4,t6);
+    }
+    for(t6 = 0; t6 <= 31; t6++) {
+      for(t8 = 0; t8 <= 15; t8++) {
+        s2(t2,t4,t6,t8);
+      }
+    }
+    for(t6 = 0; t6 <= 31; t6++) {
+      for(t10 = 0; t10 <= 15; t10++) {
+        for(t14 = 0; t14 <= 3996; t14 += 4) {
+          s0(t2,t4,t6,32*t2+t6,t10,16*t4+t10,t14,t14);
+        }
+      }
+    }
+    for(t6 = 0; t6 <= 31; t6++) {
+      for(t8 = 0; t8 <= 15; t8++) {
+        s3(t2,t4,t6,t8);
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+
+
+
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+atoms wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+
+energy wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+energy wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t5
+5  chill_t7
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t12
+10  t2
+11  chill_t19
+12  chill_t21
+13  chill_t22
+14  chill_t23
+15  chill_t24
+16  t4
+17  chill_t33
+18  chill_t34
+19  chill_t36
+20  chill_t37
+21  chill_t38
+22  chill_t39
+23  chill_t45
+24  chill_t46
+25  chill_t47
+26  chill_t48
+27  chill_t50
+28  chill_t51
+29  chill_t52
+30  _P1
+31  chill_t53
+32  chill_t54
+33  chill_t55
+34  chill_t56
+35  chill_t60
+36  chill_t61
+37  chill_t62
+38  chill_t63
+39  chill_t64
+40  chill_t65
+41  chill_t66
+42  chill_t67
+43  t6
+44  t8
+45  t10
+46  t12
+47  t14
+48  t16
+
+0  atoms
+1  energy
+2  z
+
+
+
+reading from array 'atoms' 'energy' and writing to array 
+0  atoms
+1  energy
+2  z
+

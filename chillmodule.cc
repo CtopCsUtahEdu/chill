@@ -528,6 +528,324 @@ chill_tile_v2_7arg( PyObject *self, PyObject *args)
 }
 
 
+// --------------- //
+// From cudaize.py //
+// --------------- //
+static void cur_indices(int stmt, std::vector<std::string>& indices) {
+    indices.clear();
+    int num = myloop->idxNames[stmt].size();
+    for(int i = 0; i < num; i++) {
+        indices.push_back(myloop->idxNames[stmt][i]);
+    }
+}
+
+static void block_indices(std::vector<std::string>& idxs) {
+    idxs.clear();
+    if(myloop->cu_bx > 1) {
+        idxs.push_back("bx");
+    }
+    if(myloop->cu_by > 1) {
+        idxs.push_back("by");
+    }
+}
+
+static void thread_indices(std::vector<std::string>& idxs) {
+    idxs.clear();
+    if(myloop->cu_tx > 1) { idxs.push_back("tx"); }
+    if(myloop->cu_ty > 1) { idxs.push_back("ty"); }
+    if(myloop->cu_tz > 1) { idxs.push_back("tz"); }
+}
+
+static int find_cur_level(int stmt, std::string idx) {
+    std::vector<std::string> cur;
+    cur_indices(stmt, cur);
+
+    int index = 1;
+    for(auto c: cur) {
+        if(c == idx) {
+            return index;
+        }
+        index++;
+    }
+    return -1; // Not found
+}
+
+template<typename T>
+static inline bool in(const std::vector<T>& vec, T val) {
+    return std::find(std::begin(vec), std::end(vec), val) != vec.end();
+}
+
+template<typename T>
+static inline int indexof(const std::vector<T>& vec, T val) {
+    for(int i = 0; i < vec.size(); i++) {
+        if(vec[i] == val) return i;
+    }
+    return -1;
+}
+
+static PyObject* chill_copy_to_registers(PyObject* self, PyObject* args) {
+    /*
+     *  From cudaize.py
+     *  def copy_to_shared(start_loop: str, array_name:str, alignment: int)
+     */
+
+    strict_arg_num(args, 2, "copy_to_registers");
+    int                         stmt                    = 0;
+    auto                        start_loop              = strArg(args, 0);
+    auto                        array_name              = strArg(args, 1);
+    std::vector<std::string>    cur_idxs;
+    cur_indices(stmt, cur_idxs);
+
+    int                         level_tx                = find_cur_level(stmt, "tx");
+    int                         level_ty                = find_cur_level(stmt, "ty");
+
+    std::string                 ty_lookup_idx           = "";
+
+    //               //
+    // Find ty index //
+    //               //
+    if(level_ty > -1 && !cur_idxs[level_ty].empty()) {
+        ty_lookup_idx = cur_idxs[level_ty];
+        myloop->tile_cuda(stmt, level_ty, level_tx + 1);
+    }
+    else {
+        // Not sure if correct
+        ty_lookup_idx = cur_idxs[cur_idxs.size() - 1];
+    }
+
+    cur_indices(stmt, cur_idxs);
+
+    //               //
+    // Find tx index //
+    //               //
+    level_tx = find_cur_level(stmt, "tx");
+
+    //                 //
+    // ReFind ty index //
+    //                 //
+    if(!ty_lookup_idx.empty()) {
+        level_ty = find_cur_level(stmt, ty_lookup_idx.c_str());
+    }
+
+    // Do something //
+    int idx_flag = -1;
+    if(!ty_lookup_idx.empty()) {
+        for(int n = level_ty; n < cur_idxs.size(); n++) {
+            if(!cur_idxs[n].empty()) {
+                idx_flag = find_cur_level(stmt, cur_idxs[n]);
+                break;
+            }
+        }
+    }
+
+    int how_many_levels = 0;
+    int start_idx = idx_flag;
+    if(idx_flag == -1) {
+        start_idx = 0;
+    }
+    for(int ch_lev = start_idx; ch_lev < cur_idxs.size(); ch_lev++) {
+        if(!cur_idxs[ch_lev].empty()) {
+            how_many_levels++;
+        }
+    }
+
+    if(how_many_levels == 0) {
+        while(idx_flag >= 0) {
+            for(int n = level_ty + 1; n < cur_idxs.size(); n++) {
+                if(!cur_idxs[n].empty()) {
+                    std::string idx = cur_idxs[n];
+                    auto idx_level = find_cur_level(stmt, idx);
+
+                    myloop->tile_cuda(stmt, idx_level, idx_level);
+
+                    idx_level = find_cur_level(stmt, idx);
+                    myloop->tile_cuda(stmt, idx_level, idx_level);
+
+                    cur_indices(stmt, cur_idxs);
+                    level_tx = find_cur_level(stmt, "tx");
+                    level_ty = find_cur_level(stmt, ty_lookup_idx);
+                    idx_flag = -1;
+
+                    for(int n2 = level_ty; n2 < cur_idxs.size(); n2++) {
+                        if(!cur_idxs[n2].empty()) {
+                            idx_flag = find_cur_level(stmt, cur_idxs[n2]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int start_level = find_cur_level(stmt, start_loop);
+    std::vector<std::string> blocks;  block_indices(blocks);        // block index names
+    std::vector<std::string> threads; thread_indices(threads);      // thread index names
+
+    std::vector<int> privatized_levels;
+    for(auto idx: blocks) {
+        auto block_level = find_cur_level(stmt, idx);
+        if(block_level >= start_level) {
+            privatized_levels.push_back(block_level);
+        }
+    }
+
+    for(auto idx: threads) {
+        auto thread_level = find_cur_level(stmt, idx);
+        if(thread_level >= start_level) {
+            privatized_levels.push_back(thread_level);
+        }
+    }
+
+    myloop->datacopy_privatized_cuda(
+            stmt, start_level, array_name, privatized_levels, false, -1, 1, 1, false);
+
+
+    Py_RETURN_NONE;
+}
+
+static PyObject* chill_copy_to_shared(PyObject* self, PyObject* args) {
+    /*
+     *  From cudaize.py
+     *  def copy_to_shared(start_loop: str, array_name:str, alignment: int)
+     */
+
+    strict_arg_num(args, 3, "copy_to_shared");
+    int                     stmt                    = 0;
+    std::string             start_loop              = strArg(args, 0);
+    int                     start_level             = find_cur_level(stmt, start_loop);
+    std::string             array_name              = strArg(args, 1);
+    int                     alignment               = intArg(args, 2);
+
+    int                     old_num_stmts           = myloop->stmt.size();
+
+    myloop->datacopy_cuda(stmt, start_level, array_name, {"tmp1", "tmp2"}, 0, 0, 1, alignment, 1);
+    myloop->addSync(stmt, start_loop);
+
+    int                     new_num_stmts           = myloop->stmt.size();
+
+    // Foreach new stmt added from by data copy & sync...
+    for(int new_stmt = old_num_stmts; new_stmt < new_num_stmts; new_stmt++) {
+        int level_tmp2 = find_cur_level(new_stmt, "tmp2");
+        if(level_tmp2 != -1) {
+            // --------------------------- //
+            // datacopy created two levels //
+            // --------------------------- //
+            int upper_bound, lower_bound;
+
+            myloop->tile_cuda(new_stmt, level_tmp2, level_tmp2);
+            myloop->extractCudaUB(new_stmt, level_tmp2, upper_bound, lower_bound);
+
+            int level_tmp1 = find_cur_level(new_stmt, "tmp1");
+                level_tmp2 = find_cur_level(new_stmt, "tmp2");
+            if(upper_bound + 1 == myloop->cu_tx && myloop->cu_ty == 1) {
+                // Upper bound and tx are the same AND only single thread dimensions
+
+                // just move 2nd loop up
+                myloop->tile_cuda(new_stmt, level_tmp2, 1, level_tmp1, "tx", "tx", TilingMethodType::CountedTile);
+            }
+            else {
+                // Upper bound and tx are not the same OR multi thread dimensions
+
+                // move 2nd loop up
+                myloop->tile_cuda(new_stmt, level_tmp2, 1, level_tmp1, "tx", "tx", TilingMethodType::CountedTile);
+
+                // update parapmeters
+                int upper_bound_tx,   lower_bound_tx;
+                int upper_bound_tmp1, lower_bound_tmp1;
+                    level_tmp1 = find_cur_level(new_stmt, "tmp1");
+                    level_tmp2 = find_cur_level(new_stmt, "tmp2");
+                int level_tx   = find_cur_level(new_stmt, "tx");
+                myloop->extractCudaUB(new_stmt, level_tmp1, upper_bound_tmp1, lower_bound_tmp1);
+                myloop->extractCudaUB(new_stmt, level_tx,   upper_bound_tx,   lower_bound_tx);
+
+                // Handle tx thread
+
+                if(upper_bound_tx + 1 > myloop->cu_tx) {
+                    myloop->tile_cuda(new_stmt, level_tx, myloop->cu_tx, level_tx, "tx", "tmp_tx", TilingMethodType::CountedTile);
+
+                    auto repeat = find_cur_level(new_stmt, "tx");
+                    myloop->tile_cuda(new_stmt, repeat, repeat);
+
+                    if(find_cur_level(new_stmt, "tx") > find_cur_level(new_stmt, "tmp_tx")) {
+                        myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "tx"), find_cur_level(new_stmt, "tmp_tx"));
+                    }
+                }
+
+                myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "tmp1"), find_cur_level(new_stmt, "tmp1"));
+
+                // update parameters
+                int upper_bound_ty, lower_bound_ty;
+                int level_ty = find_cur_level(new_stmt, "tmp1");
+                    level_tx = find_cur_level(new_stmt, "tx");
+                myloop->extractCudaUB(new_stmt, level_ty, upper_bound_ty, lower_bound_ty);
+                myloop->extractCudaUB(new_stmt, level_tx, upper_bound_tx, lower_bound_tx);
+
+                // Handle ty thread
+
+                if(upper_bound_ty + 1 > myloop->cu_ty) {
+                    myloop->tile_cuda(new_stmt, level_ty, myloop->cu_ty, level_ty, "ty", "tmp_ty", TilingMethodType::CountedTile);
+                    myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "ty"));
+
+                    std::vector<std::string> cur_idxs;
+                    cur_indices(new_stmt, cur_idxs);
+
+                    // Put ty before any tmp_tx
+                    if(in<std::string>(cur_idxs, "tmp_tx")) {
+                        if(find_cur_level(new_stmt, "ty") > find_cur_level(new_stmt, "tmp_tx")) {
+                            // Swap level of ty and tmp_ty (I think)
+                            myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tmp_tx"));
+                        }
+                    }
+
+                    // Put ty before any tmp_ty
+                    if(in<std::string>(cur_idxs, "tmp_ty")) {
+                        if(find_cur_level(new_stmt, "ty") > find_cur_level(new_stmt, "tmp_ty")) {
+                            myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tmp_ty"));
+                        }
+                    }
+                }
+                else {
+                    myloop->tile_cuda(new_stmt, level_ty, 1, level_ty, "ty", "ty", TilingMethodType::CountedTile);
+                    myloop->tile_cuda(new_stmt, find_cur_level(new_stmt, "ty"), find_cur_level(new_stmt, "tx") + 1);
+                }
+            }
+        }
+        else {
+            // -------------------------- //
+            // datacopy created one level //
+            // -------------------------- //
+            int level_tmp1          = find_cur_level(new_stmt, "tmp1");         // first level
+            int lower_bound, upper_bound;
+
+            myloop->tile_cuda(new_stmt, level_tmp1, level_tmp1);
+            myloop->extractCudaUB(new_stmt, level_tmp1, upper_bound, lower_bound);
+
+            if(upper_bound + 1 == myloop->cu_tx) {
+                // Same upper bound as thread tx
+                myloop->renameIndex(new_stmt, "tmp1", "tx");
+            }
+            else {
+                // Different upper bound as thread tx, so will require some tiling
+                myloop->tile_cuda(new_stmt, level_tmp1,     myloop->cu_tx, level_tmp1,     "tx", "tmp_tx", TilingMethodType::CountedTile);
+                myloop->tile_cuda(new_stmt, level_tmp1 + 1, 1,             level_tmp1 + 1, "tx", "tx",     TilingMethodType::CountedTile);
+                myloop->tile_cuda(new_stmt, level_tmp1 + 1, level_tmp1);
+
+                if(myloop->cu_ty > 1) {
+                    myloop->extractCudaUB(new_stmt, level_tmp1 + 1, upper_bound, lower_bound);
+                    auto bound = (int) std::ceil((float) (upper_bound + 1) / (float) myloop->cu_ty);
+                    myloop->tile_cuda(new_stmt, level_tmp1 + 1, bound, level_tmp1 + 1, "tmp_ty", "ty", TilingMethodType::CountedTile);
+
+                    //TODO: tz ???
+                }
+            }
+
+        }
+        myloop->addSync(new_stmt, start_loop);
+    }
+
+    Py_RETURN_NONE;
+}
+
 static PyObject *
 chill_cur_indices(PyObject *self, PyObject *args)
 {
@@ -1018,14 +1336,9 @@ chill_copy_to_texture(PyObject *self, PyObject *args)
 
 
 
-
-
-
 static PyObject *
 chill_init(PyObject *self, PyObject *args)
 {
-  debug_fprintf(stderr, "C chill_init() called from python as read_IR()\n");
-  debug_fprintf(stderr, "C init( ");  
   const char *filename;
   const char *procname;
   if (!PyArg_ParseTuple(args, "ss", &filename, &procname)){
@@ -1034,11 +1347,6 @@ chill_init(PyObject *self, PyObject *args)
   }
   
   int loop_num = 0;
-  
-  debug_fprintf(stderr, "%s, 0, 0 )\n", filename);  
-  
-  debug_fprintf(stderr, "GETTING IR CODE in chill_init() in chillmodule.cc\n");
-  debug_fprintf(stderr, "ir_code = new IR_cudaroseCode(%s, %s);\n",filename, procname);
   if(dest_filename.empty()) {
     ir_code = new IR_cudaChillCode(parser, filename, procname, NULL);
   }
@@ -1673,9 +1981,9 @@ static PyMethodDef ChillMethods[] = {
   {"permute",             chill_permute_v2,          METH_VARARGS,    "change the order of loops?"},
   {"tile3",               chill_tile_v2_3arg,        METH_VARARGS,    "something to do with tile"},
   {"tile7",               chill_tile_v2_7arg,        METH_VARARGS,    "something to do with tile"},
-  {"thread_dims",         thread_dims,               METH_VARARGS,    "tx, ty, tz "},
+  {"thread_dims",         thread_dims,               METH_VARARGS,    "tx, ty, tz"},
   {"block_dims",          block_dims,                METH_VARARGS,    "bx, by"},
-  {"thread_indices",      chill_thread_indices,      METH_VARARGS,    "bx, by"},
+  {"thread_indices",      chill_thread_indices,      METH_VARARGS,    "tx, ty, tz"},
   {"block_indices",       chill_block_indices,       METH_VARARGS,    "bx, by"},
   {"hard_loop_bounds",    chill_hard_loop_bounds,    METH_VARARGS,    "lower, upper"},
   {"unroll",              chill_unroll,              METH_VARARGS,    "unroll a loop"},
@@ -1690,6 +1998,9 @@ static PyMethodDef ChillMethods[] = {
   {"read_IR",             chill_init,                METH_VARARGS,    "read an Intermediate Representation file"}, 
   {"cur_indices",         chill_cur_indices,         METH_VARARGS,    "currently active indices"},
   {"num_statements",      chill_num_statements,      METH_VARARGS,    "number of statements in ... something"},
+
+  {"copy_to_shared",      chill_copy_to_shared,      METH_VARARGS,    ""},
+  {"copy_to_registers",   chill_copy_to_registers,   METH_VARARGS,    ""},
   {NULL, NULL, 0, NULL}        /* Sentinel */
   
   //{"copy_to_constant",    chill_copy_to_constant,    METH_VARARGS,  "copy to constant mem"},

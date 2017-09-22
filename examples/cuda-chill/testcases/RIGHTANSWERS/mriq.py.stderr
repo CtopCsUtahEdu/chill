@@ -1,0 +1,556 @@
+"/home/derick/dev/chill/chill-src/examples/cuda-chill/testcases/mriq.c", line 13: warning: 
+          parameter "numK" was set but never used
+  ComputeQCPU(int numK, int numX,struct kValues kVals[M],float x[N], float y[N], float z[N],float Qr[N], float Qi[N]) {
+                  ^
+
+"/home/derick/dev/chill/chill-src/examples/cuda-chill/testcases/mriq.c", line 13: warning: 
+          parameter "numX" was set but never used
+  ComputeQCPU(int numK, int numX,struct kValues kVals[M],float x[N], float y[N], float z[N],float Qr[N], float Qi[N]) {
+                            ^
+
+struct name is 'kValues'
+(CallExpr : (DeclRefExpr : cosf (VarDecl : "'float ' '' ''" dim 0 ) ) ) cosf(expArg)(CallExpr : (DeclRefExpr : sinf (VarDecl : "'float ' '' ''" dim 0 ) ) ) sinf(expArg)kVals[i].KxkVals[i].KykVals[i].KzkVals[i].PhiMagkVals[chill_t14].KxkVals[chill_t14].KykVals[chill_t14].KzkVals[chill_t14].PhiMagkVals[chill_t24].KxkVals[chill_t24].KykVals[chill_t24].KzkVals[chill_t24].PhiMagkVals[chill_t31].KxkVals[chill_t31].KykVals[chill_t31].KzkVals[chill_t31].PhiMagkVals[chill_t38].KxkVals[chill_t38].KykVals[chill_t38].KzkVals[chill_t38].PhiMagkVals[chill_t45].KxkVals[chill_t45].KykVals[chill_t45].KzkVals[chill_t45].PhiMagvoid ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+  float expArg;
+  float cosArg;
+  float sinArg;
+  float phi;
+  int i;
+  int j;
+  numK = 3072;
+  numX = 32768;
+  for (i = 0; i < 3072; i++) 
+    for (j = 0; j < 32768; j++) {
+      expArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2);
+      cosArg = cosf(expArg);
+      sinArg = sinf(expArg);
+      phi = kVals[chill_t52].PhiMag;
+      newVariable4 += phi * cosArg;
+      newVariable3 += phi * sinArg;
+    }
+}// this source is derived from CHILL AST originally from file 'mriq.c' as parsed by frontend compiler rose
+
+float sinf(float );
+float cosf(float );
+void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}
+void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}expArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2)cosArg = cosf(expArg)sinArg = sinf(expArg)phi = kVals[chill_t52].PhiMagnewVariable4 += phi * cosArgnewVariable3 += phi * sinArgkVals[chill_t52].KxkVals[chill_t52].KykVals[chill_t52].KzkVals[chill_t52].PhiMagnewVariable0 = x[chill_t21 + 128 * chill_t19]newVariable1 = y[128 * chill_t26 + chill_t28]newVariable2 = z[chill_t35 + 128 * chill_t33]newVariable3 = Qi[128 * chill_t40 + chill_t42]Qi[128 * chill_t40 + chill_t42] = newVariable3newVariable4 = Qr[chill_t49 + 128 * chill_t47]Qr[chill_t49 + 128 * chill_t47] = newVariable4// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 255; t2 += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable0 = x[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable1 = y[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable2 = z[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable3 = Qi[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable4 = Qr[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: ii
+  for (t4 = 0; t4 <= 23; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 127; t6 += 1) 
+      // ~cuda~ preferredIdx: i
+      for (t10 = 0; t10 <= 127; t10 += 1) {
+        expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+        cosArg = cosf(expArg);
+        sinArg = sinf(expArg);
+        phi = kVals[128 * t4 + t10].PhiMag;
+        newVariable4 += phi * cosArg;
+        newVariable3 += phi * sinArg;
+      }
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qr[t4 + 128 * t2] = newVariable4;
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qi[128 * t2 + t4] = newVariable3;
+}kVals[128 * t4 + t10].KxkVals[128 * t4 + t10].KykVals[128 * t4 + t10].KzkVals[128 * t4 + t10].PhiMagx[t4 + 128 * t2]y[128 * t2 + t4]z[t4 + 128 * t2]Qi[128 * t2 + t4]Qr[t4 + 128 * t2]kVals[128 * t4 + t10]kVals[128 * t4 + t10]kVals[128 * t4 + t10]kVals[128 * t4 + t10]Qr[t4 + 128 * t2]Qi[128 * t2 + t4]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float x[32768]float x[32768]float *xx[t4 + 128 * t2]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float y[32768]float y[32768]float *yy[128 * t2 + t4]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float z[32768]float z[32768]float *zz[t4 + 128 * t2]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float Qi[32768]float Qi[32768]float *QiQi[128 * t2 + t4]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float Qr[32768]float Qr[32768]float *QrQr[t4 + 128 * t2]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValskVals[128 * t4 + t10]void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float Qr[32768]float Qr[32768]float *Qrvoid ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}{
+}float Qi[32768]float Qi[32768]float *Qifloat x[32768]32768 * sizeof(float)float y[32768]32768 * sizeof(float)float z[32768]32768 * sizeof(float)float Qi[32768]32768 * sizeof(float)float Qr[32768]32768 * sizeof(float)struct kValues kVals[3072]3072 * sizeof(struct kValues)32768 * sizeof(float)32768 * sizeof(float)cudaMemcpy(devI1Ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)32768 * sizeof(float)cudaMemcpy(devI2Ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)32768 * sizeof(float)cudaMemcpy(devI3Ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)32768 * sizeof(float)cudaMemcpy(devI4Ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)32768 * sizeof(float)cudaMemcpy(devI5Ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice)3072 * sizeof(struct kValues)3072 * sizeof(struct kValues)cudaMemcpy(devI6Ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice)2561dim3 dimBlock0= dim3(128)Kernel_GPU<<<dimGrid0,dimBlock0>>>(devI1Ptr, devI2Ptr, devI3Ptr, devI4Ptr, devI5Ptr, devI6Ptr)// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 255; t2 += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable0 = x[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable1 = y[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable2 = z[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable3 = Qi[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable4 = Qr[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: ii
+  for (t4 = 0; t4 <= 23; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 127; t6 += 1) 
+      // ~cuda~ preferredIdx: i
+      for (t10 = 0; t10 <= 127; t10 += 1) {
+        expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+        cosArg = cosf(expArg);
+        sinArg = sinf(expArg);
+        phi = kVals[128 * t4 + t10].PhiMag;
+        newVariable4 += phi * cosArg;
+        newVariable3 += phi * sinArg;
+      }
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qr[t4 + 128 * t2] = newVariable4;
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qi[128 * t2 + t4] = newVariable3;
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 255; t2 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable0 = x[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable1 = y[128 * t2 + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable2 = z[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable3 = Qi[128 * t2 + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable4 = Qr[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: ii
+    for (t4 = 0; t4 <= 23; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 127; t6 += 1) 
+        // ~cuda~ preferredIdx: i
+        for (t10 = 0; t10 <= 127; t10 += 1) {
+          expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * t4 + t10].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qr[t4 + 128 * t2] = newVariable4;
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qi[128 * t2 + t4] = newVariable3;
+  }
+}// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 255; t2 += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable0 = x[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable1 = y[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable2 = z[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable3 = Qi[128 * t2 + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable4 = Qr[t4 + 128 * t2];
+  // ~cuda~ preferredIdx: ii
+  for (t4 = 0; t4 <= 23; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 127; t6 += 1) 
+      // ~cuda~ preferredIdx: i
+      for (t10 = 0; t10 <= 127; t10 += 1) {
+        expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+        cosArg = cosf(expArg);
+        sinArg = sinf(expArg);
+        phi = kVals[128 * t4 + t10].PhiMag;
+        newVariable4 += phi * cosArg;
+        newVariable3 += phi * sinArg;
+      }
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qr[t4 + 128 * t2] = newVariable4;
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qi[128 * t2 + t4] = newVariable3;
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 255; t2 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable0 = x[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable1 = y[128 * t2 + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable2 = z[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable3 = Qi[128 * t2 + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable4 = Qr[t4 + 128 * t2];
+    // ~cuda~ preferredIdx: ii
+    for (t4 = 0; t4 <= 23; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 127; t6 += 1) 
+        // ~cuda~ preferredIdx: i
+        for (t10 = 0; t10 <= 127; t10 += 1) {
+          expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * t4 + t10].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qr[t4 + 128 * t2] = newVariable4;
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qi[128 * t2 + t4] = newVariable3;
+  }
+}t2 = 0t2 <= 255t2 += 1bx = 0bx <= 255bx += 1// ~cuda~ preferredIdx: bx
+for (bx = 0; bx <= 255; bx += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable0 = x[t4 + 128 * bx];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable1 = y[128 * bx + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable2 = z[t4 + 128 * bx];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable3 = Qi[128 * bx + t4];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    newVariable4 = Qr[t4 + 128 * bx];
+  // ~cuda~ preferredIdx: ii
+  for (t4 = 0; t4 <= 23; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 127; t6 += 1) 
+      // ~cuda~ preferredIdx: i
+      for (t10 = 0; t10 <= 127; t10 += 1) {
+        expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+        cosArg = cosf(expArg);
+        sinArg = sinf(expArg);
+        phi = kVals[128 * t4 + t10].PhiMag;
+        newVariable4 += phi * cosArg;
+        newVariable3 += phi * sinArg;
+      }
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qr[t4 + 128 * bx] = newVariable4;
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 127; t4 += 1) 
+    Qi[128 * bx + t4] = newVariable3;
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int bx;
+  for (bx = 0; bx <= 255; bx += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable0 = x[t4 + 128 * bx];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable1 = y[128 * bx + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable2 = z[t4 + 128 * bx];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable3 = Qi[128 * bx + t4];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      newVariable4 = Qr[t4 + 128 * bx];
+    // ~cuda~ preferredIdx: ii
+    for (t4 = 0; t4 <= 23; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 127; t6 += 1) 
+        // ~cuda~ preferredIdx: i
+        for (t10 = 0; t10 <= 127; t10 += 1) {
+          expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * t4 + t10].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qr[t4 + 128 * bx] = newVariable4;
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qi[128 * bx + t4] = newVariable3;
+  }
+}t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  newVariable0 = x[tx + 128 * bx];t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  newVariable1 = y[128 * bx + tx];t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  newVariable2 = z[tx + 128 * bx];t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  newVariable3 = Qi[128 * bx + tx];t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  newVariable4 = Qr[tx + 128 * bx];__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int tx;
+  int bx;
+  for (bx = 0; bx <= 255; bx += 1) {
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable0 = x[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable1 = y[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable2 = z[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable3 = Qi[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable4 = Qr[tx + 128 * bx];
+    // ~cuda~ preferredIdx: ii
+    for (t4 = 0; t4 <= 23; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 127; t6 += 1) 
+        // ~cuda~ preferredIdx: i
+        for (t10 = 0; t10 <= 127; t10 += 1) {
+          expArg = 6.28318548f * (kVals[128 * t4 + t10].Kx * newVariable0 + kVals[128 * t4 + t10].Ky * newVariable1 + kVals[128 * t4 + t10].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * t4 + t10].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qr[t4 + 128 * bx] = newVariable4;
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qi[128 * bx + t4] = newVariable3;
+  }
+}t4 = 0t4 <= 23t4 += 1ii = 0ii <= 23ii += 1// ~cuda~ preferredIdx: ii
+for (ii = 0; ii <= 23; ii += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 127; t6 += 1) 
+    // ~cuda~ preferredIdx: i
+    for (t10 = 0; t10 <= 127; t10 += 1) {
+      expArg = 6.28318548f * (kVals[128 * ii + t10].Kx * newVariable0 + kVals[128 * ii + t10].Ky * newVariable1 + kVals[128 * ii + t10].Kz * newVariable2);
+      cosArg = cosf(expArg);
+      sinArg = sinf(expArg);
+      phi = kVals[128 * ii + t10].PhiMag;
+      newVariable4 += phi * cosArg;
+      newVariable3 += phi * sinArg;
+    }t6 = 0t6 <= 127t6 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  // ~cuda~ preferredIdx: i
+  for (t10 = 0; t10 <= 127; t10 += 1) {
+    expArg = 6.28318548f * (kVals[128 * ii + t10].Kx * newVariable0 + kVals[128 * ii + t10].Ky * newVariable1 + kVals[128 * ii + t10].Kz * newVariable2);
+    cosArg = cosf(expArg);
+    sinArg = sinf(expArg);
+    phi = kVals[128 * ii + t10].PhiMag;
+    newVariable4 += phi * cosArg;
+    newVariable3 += phi * sinArg;
+  }__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int ii;
+  int tx;
+  int bx;
+  for (bx = 0; bx <= 255; bx += 1) {
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable0 = x[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable1 = y[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable2 = z[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable3 = Qi[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable4 = Qr[tx + 128 * bx];
+    for (ii = 0; ii <= 23; ii += 1) 
+      for (tx = 0; tx <= 127; tx += 1) 
+        // ~cuda~ preferredIdx: i
+        for (t10 = 0; t10 <= 127; t10 += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + t10].Kx * newVariable0 + kVals[128 * ii + t10].Ky * newVariable1 + kVals[128 * ii + t10].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + t10].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qr[t4 + 128 * bx] = newVariable4;
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 127; t4 += 1) 
+      Qi[128 * bx + t4] = newVariable3;
+  }
+}t10 = 0t10 <= 127t10 += 1i = 0i <= 127i += 1// ~cuda~ preferredIdx: i
+for (i = 0; i <= 127; i += 1) {
+  expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+  cosArg = cosf(expArg);
+  sinArg = sinf(expArg);
+  phi = kVals[128 * ii + i].PhiMag;
+  newVariable4 += phi * cosArg;
+  newVariable3 += phi * sinArg;
+}t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  Qr[tx + 128 * bx] = newVariable4;t4 = 0t4 <= 127t4 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 127; tx += 1) 
+  Qi[128 * bx + tx] = newVariable3;int bxint txfloat newVariable0float x[32768]float newVariable1float y[32768]float newVariable2float z[32768]float newVariable3float Qi[32768]float newVariable4float Qr[32768]int iiint ifloat expArgstruct kValues kVals[3072]float cosArgfloat sinArgfloat phikVals[128 * ii + i].KxkVals[128 * ii + i].KykVals[128 * ii + i].KzkVals[128 * ii + i].PhiMagfloat x[32768]float y[32768]float z[32768]float Qi[32768]float Qr[32768]struct kValues kVals[3072]struct kValues kVals[3072]struct kValues kVals[3072]struct kValues kVals[3072]float Qr[32768]float Qi[32768]__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int by= blockIdx.y;
+  int i;
+  int ii;
+  int tx= threadIdx.x;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 255; bx += 1) {
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable0 = x[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable1 = y[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable2 = z[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable3 = Qi[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable4 = Qr[tx + 128 * bx];
+    for (ii = 0; ii <= 23; ii += 1) 
+      for (tx = 0; tx <= 127; tx += 1) 
+        for (i = 0; i <= 127; i += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + i].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qr[tx + 128 * bx] = newVariable4;
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qi[128 * bx + tx] = newVariable3;
+  }
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int by= blockIdx.y;
+  int i;
+  int ii;
+  int tx= threadIdx.x;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 255; bx += 1) {
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable0 = x[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable1 = y[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable2 = z[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable3 = Qi[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable4 = Qr[tx + 128 * bx];
+    for (ii = 0; ii <= 23; ii += 1) 
+      for (tx = 0; tx <= 127; tx += 1) 
+        for (i = 0; i <= 127; i += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + i].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qr[tx + 128 * bx] = newVariable4;
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qi[128 * bx + tx] = newVariable3;
+  }
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int by= blockIdx.y;
+  int i;
+  int ii;
+  int tx= threadIdx.x;
+  int bx= blockIdx.x;
+  for (bx = 0; bx <= 255; bx += 1) {
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable0 = x[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable1 = y[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable2 = z[tx + 128 * bx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable3 = Qi[128 * bx + tx];
+    for (tx = 0; tx <= 127; tx += 1) 
+      newVariable4 = Qr[tx + 128 * bx];
+    for (ii = 0; ii <= 23; ii += 1) 
+      for (tx = 0; tx <= 127; tx += 1) 
+        for (i = 0; i <= 127; i += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + i].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        }
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qr[tx + 128 * bx] = newVariable4;
+    for (tx = 0; tx <= 127; tx += 1) 
+      Qi[128 * bx + tx] = newVariable3;
+  }
+}__global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  int by= blockIdx.y;
+  int i;
+  int ii;
+  int tx= threadIdx.x;
+  int bx= blockIdx.x;
+  {
+    
+      newVariable0 = x[tx + 128 * bx];;
+    
+      newVariable1 = y[128 * bx + tx];;
+    
+      newVariable2 = z[tx + 128 * bx];;
+    
+      newVariable3 = Qi[128 * bx + tx];;
+    
+      newVariable4 = Qr[tx + 128 * bx];;
+    for (ii = 0; ii <= 23; ii += 1) 
+      
+        for (i = 0; i <= 127; i += 1) {
+          expArg = 6.28318548f * (kVals[128 * ii + i].Kx * newVariable0 + kVals[128 * ii + i].Ky * newVariable1 + kVals[128 * ii + i].Kz * newVariable2);
+          cosArg = cosf(expArg);
+          sinArg = sinf(expArg);
+          phi = kVals[128 * ii + i].PhiMag;
+          newVariable4 += phi * cosArg;
+          newVariable3 += phi * sinArg;
+        };
+    
+      Qr[tx + 128 * bx] = newVariable4;;
+    
+      Qi[128 * bx + tx] = newVariable3;;
+  };
+}kVals[chill_t52].KxkVals[chill_t52].KykVals[chill_t52].KzkVals[chill_t52].PhiMagexpArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2)cosArg = cosf(expArg)sinArg = sinf(expArg)phi = kVals[chill_t52].PhiMagnewVariable4 += phi * cosArgnewVariable3 += phi * sinArgnewVariable0 = x[chill_t21 + 128 * chill_t19]newVariable1 = y[128 * chill_t26 + chill_t28]newVariable2 = z[chill_t35 + 128 * chill_t33]newVariable3 = Qi[128 * chill_t40 + chill_t42]Qi[128 * chill_t40 + chill_t42] = newVariable3newVariable4 = Qr[chill_t49 + 128 * chill_t47]Qr[chill_t49 + 128 * chill_t47] = newVariable4
