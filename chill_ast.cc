@@ -472,14 +472,14 @@ chillAST_TypedefDecl::chillAST_TypedefDecl() {
 };
 
 
-chillAST_TypedefDecl::chillAST_TypedefDecl(char *t, char *nt):chillAST_TypedefDecl() {
+chillAST_TypedefDecl::chillAST_TypedefDecl(const char *t, const char *nt):chillAST_TypedefDecl() {
   //debug_fprintf(stderr, "chillAST_TypedefDecl::chillAST_TypedefDecl( underlying type %s, newtype %s )\n", t, nt); 
   underlyingtype = strdup(t); 
   newtype = strdup(nt);
 };
 
 
-chillAST_TypedefDecl::chillAST_TypedefDecl(char *t, char *a, char *p):chillAST_TypedefDecl() {
+chillAST_TypedefDecl::chillAST_TypedefDecl(const char *t, const char *a, const char *p):chillAST_TypedefDecl() {
   underlyingtype = strdup(t); 
   newtype = strdup(a);  // the new named type ?
 
@@ -2606,12 +2606,8 @@ chillAST_node* chillAST_UnaryOperator::constantFold() {
       else { 
         chillAST_FloatingLiteral *FL = (chillAST_FloatingLiteral*)subexpr;
         chillAST_FloatingLiteral *F = new chillAST_FloatingLiteral( FL ); // clone
-        F->parent = FL->parent;
-
         F->value = -F->value;
-
-        F->print(); debug_fprintf(stderr, "\n"); 
-        
+        F->allthedigits = NULL;
         returnval = F;
       }
     }
@@ -2622,7 +2618,7 @@ chillAST_node* chillAST_UnaryOperator::constantFold() {
 
 
 class chillAST_node* chillAST_UnaryOperator::clone() { 
-  chillAST_UnaryOperator *UO = new chillAST_UnaryOperator( op, prefix, subexpr->clone() );
+  chillAST_UnaryOperator *UO = new chillAST_UnaryOperator( op, prefix, subexpr );
   UO->isFromSourceFile = isFromSourceFile; 
   if (filename) UO->filename = strdup(filename); 
   return UO; 
@@ -3203,7 +3199,7 @@ chillAST_node* chillAST_ParenExpr::constantFold() {
 
 
 chillAST_node* chillAST_ParenExpr::clone() {
-  chillAST_ParenExpr *PE = new chillAST_ParenExpr( subexpr->clone() );
+  chillAST_ParenExpr *PE = new chillAST_ParenExpr( subexpr );
   PE->isFromSourceFile = isFromSourceFile; 
   if (filename) PE->filename = strdup(filename); 
   return PE; 

@@ -25,6 +25,7 @@ History:
 #include <clang/Frontend/TextDiagnosticPrinter.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/AST/RecordLayout.h>
+#include <clang/AST/Stmt.h>
 #include <clang/Lex/Lexer.h>
 #include <clang/Parse/ParseAST.h>
 #include <clang/Basic/TargetInfo.h>
@@ -226,7 +227,6 @@ chillAST_NodeList ConvertRecordDecl( clang::RecordDecl *RD ) { // for structs an
 
   for (clang::RecordDecl::field_iterator fi = RD->field_begin(); fi != RD->field_end(); fi++) {
     clang::FieldDecl *FD = (*fi);
-    FD->dump(); printf(";\n"); fflush(stdout);
     string TypeStr = FD->getType().getAsString();
 
     const char *typ  = TypeStr.c_str();
@@ -394,7 +394,7 @@ chillAST_NodeList ConvertIfStmt( IfStmt *clangIS ) {
 
 chillAST_NodeList ConvertUnaryOperator( UnaryOperator * clangUO ) {
   const char *op = unops[clangUO->getOpcode()].c_str();
-  bool pre = clangUO->isPrefix();
+  bool pre = !(clangUO->isPostfix());
   chillAST_node *sub = UNWRAP(ConvertGenericClangAST( clangUO->getSubExpr()));
 
   chillAST_UnaryOperator *chillUO = new chillAST_UnaryOperator( op, pre, sub );
@@ -469,12 +469,13 @@ chillAST_NodeList ConvertIntegerLiteral( IntegerLiteral *clangIL ) {
 
 
 chillAST_NodeList ConvertFloatingLiteral( FloatingLiteral *clangFL ) {
-  double val = clangFL->getValue().convertToDouble();
+  double val = clangFL->getValueAsApproximateDouble();
 
-  string lit = Lexer::getSourceText(CharSourceRange::getTokenRange(clangFL->getSourceRange()), *globalSRCMAN , LangOptions());
+  auto sr = clangFL->getSourceRange();
+  auto pr = llvm::APFloat::getSizeInBits(clangFL->getValue().getSemantics());
+  string lit = Lexer::getSourceText(CharSourceRange::getTokenRange(sr), *globalSRCMAN, LangOptions());
 
-  chillAST_FloatingLiteral  *chillFL = new chillAST_FloatingLiteral( val, lit.c_str() );
-  return WRAP(chillFL);
+  return WRAP(new chillAST_FloatingLiteral(val, pr/32, lit.empty()? NULL:lit.c_str()));
 }
 
 
@@ -742,9 +743,6 @@ IR_clangCode_Global_Init::~IR_clangCode_Global_Init()
 chillAST_NodeList ConvertMemberExpr( clang::MemberExpr *clangME ) {
   debug_fprintf(stderr, "ConvertMemberExpr()\n");
 
-  clang::Expr *E = clangME->getBase();
-  E->dump();
-
   chillAST_node *base = UNWRAP(ConvertGenericClangAST( clangME->getBase() ));
 
   DeclarationNameInfo memnameinfo = clangME->getMemberNameInfo();
@@ -753,12 +751,7 @@ chillAST_NodeList ConvertMemberExpr( clang::MemberExpr *clangME ) {
 
   chillAST_MemberExpr *ME = new chillAST_MemberExpr( base, member, clangME );
 
-  debug_fprintf(stderr, "this is the Member Expresion\n");
-  ME->print();
-  debug_fprintf(stderr, "\n");
-
   return WRAP(ME);
-
 }
 
 

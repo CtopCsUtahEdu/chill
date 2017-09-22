@@ -7,30 +7,6 @@
 
 #include "chill_io.hh"
 
-#ifdef CUDACHILL
-
-#include "loop_cuda_chill.hh"
-
-#include "ir_cudachill.hh"
-
-#include <cmath>
-#include <vector>
-
-#else
-
-#include "chill_run_util.hh"
-
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <omega.h>
-#include "loop.hh"
-#include "ir_code.hh"
-
-#endif
-
 #include "parser/clang.h"
 #include "parser/rose.h"
 #include "chillmodule.hh"
@@ -38,38 +14,28 @@
 // TODO 
 #undef _POSIX_C_SOURCE
 #undef _XOPEN_SOURCE
-#include <Python.h>
 
 using namespace omega;
 
+loop_t *myloop = nullptr;
+IR_Code *ir_code = nullptr;
+bool is_interactive = false;
+
 // -- Cuda CHiLL global variables --
-#ifdef CUDACHILL
-
-extern LoopCuda *myloop;
-extern IR_Code  *ir_code;
-extern std::vector<IR_Control *> ir_controls;
-extern std::vector<int> loops;
-
-std::string dest_filename;
-
-#else
-
-extern Loop *myloop;
-extern IR_Code *ir_code;
-extern bool is_interactive;
-extern bool repl_stop;
+#ifndef CUDACHILL
+#include "chill_run_util.hh"
 
 std::string procedure_name;
 std::string source_filename;
-std::string dest_filename;
 
 int loop_start_num;
 int loop_end_num;
-
-extern std::vector<IR_Control *> ir_controls;
-extern std::vector<int> loops;
-
 #endif
+
+std::string dest_filename;
+
+std::vector<IR_Control *> ir_controls;
+std::vector<int> loops;
 
 namespace {
   chill::Parser *parser;
@@ -1540,12 +1506,6 @@ static PyObject* chill_print_space(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-static PyObject* chill_exit(PyObject* self, PyObject* args) {
-  strict_arg_num(args, 0, "exit");
-  repl_stop = true;
-  Py_RETURN_NONE;
-}
-
 static void add_known(std::string cond_expr) {
   int num_dim = myloop->known.n_set();
   std::vector<std::map<std::string, int> >* cond;
@@ -2058,7 +2018,6 @@ static PyMethodDef ChillMethods[] = {
   {"print_code",          chill_print_code,                METH_VARARGS,     "print generated code"},
   {"print_dep",           chill_print_dep,                 METH_VARARGS,     "print the dependencies graph"},
   {"print_space",         chill_print_space,               METH_VARARGS,     "print space"},
-  {"exit",                chill_exit,                      METH_VARARGS,     "exit the interactive consule"},
   {"known",               chill_known,                     METH_VARARGS,     "knwon"},
   {"remove_dep",          chill_remove_dep,                METH_VARARGS,     "remove dependency i suppose"},
   {"original",            chill_original,                  METH_VARARGS,     "original"},
@@ -2112,8 +2071,15 @@ initchill(void)    // pass C methods to python
 {
   debug_fprintf(stderr, "in C, initchill() to set up C methods to be called from python\n");
   PyObject* m = Py_InitModule("chill", ChillMethods);
-  effort = 3; // Set the initial value
   register_globals(m);
+
+  //Operate on a single global IR_Code and Loop instance
+  ir_code = NULL;
+  myloop = NULL;
+  omega::initializeOmega();
+  debug_fprintf(stderr, "Omega initialized\n");
+
+  effort = 3; // Set the initial value
   #ifdef FRONTEND_ROSE
     parser = new chill::parser::Rose();
   #else

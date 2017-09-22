@@ -27,7 +27,8 @@ bool opInSet(const char *set, char *op) {
 
 bool ifSemicolonFree(CHILL_ASTNODE_TYPE t) {
   return t == CHILLAST_NODETYPE_FUNCTIONDECL || t == CHILLAST_NODETYPE_IFSTMT ||
-         t == CHILLAST_NODETYPE_FORSTMT || t == CHILLAST_NODETYPE_MACRODEFINITION;
+         t == CHILLAST_NODETYPE_FORSTMT || t == CHILLAST_NODETYPE_MACRODEFINITION ||
+         t == CHILLAST_NODETYPE_COMPOUNDSTMT;
 }
 
 const char *binaryPrec[] = {
@@ -122,21 +123,18 @@ void CFamily::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
   chillAST_MacroDefinition *MD = NULL;
   if (n->callee->isDeclRefExpr()) {
     chillAST_DeclRefExpr *DRE = (chillAST_DeclRefExpr *) (n->callee);
-    if (!(DRE->decl)) {
-      o << DRE->declarationName;
-      return;
-    }
-    if (DRE->decl->isFunctionDecl()) FD = (chillAST_FunctionDecl *) (DRE->decl);
-    else
-      chill_error_printf("Function DRE of type %s\n", DRE->decl->getTypeString());
+    if (DRE->decl)
+      if (DRE->decl->isFunctionDecl()) FD = (chillAST_FunctionDecl *) (DRE->decl);
+      else
+        chill_error_printf("Function DRE of type %s\n", DRE->decl->getTypeString());
   } else if (n->callee->isFunctionDecl())
     FD = (chillAST_FunctionDecl *) n->callee;
   else if (n->callee->isMacroDefinition())
     MD = (chillAST_MacroDefinition *) n->callee;
+  run(n->callee, indent, o);
   if (MD && n->getNumChildren() - 1)
     o << "(";
   else {
-    run(n->callee, indent, o);
     if (n->grid && n->block)
       o << "<<<" << n->grid->varname << "," << n->block->varname << ">>>";
     o << "(";
@@ -152,17 +150,19 @@ void CFamily::runS(chillAST_CallExpr *n, std::string indent, std::ostream &o) {
 void CFamily::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o) {
   vector<chillAST_node *> *c = &(n->getChildren());
   string nid = indent + identSpace;
-  if (c->size() > 1 || (n->getParent() && n->getParent()->isFunctionDecl())) o << "{";
+  if (!n->getParent() || c->size() > 1 || n->getParent()->isFunctionDecl() || n->getParent()->isCompoundStmt())
+    o << "{";
   for (int i = 0; i < c->size(); ++i) {
     o << "\n" << nid;
-    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, indent, o);
-    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, indent, o);
+    printPreProcPOS(this, c->at(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEBEFORE, nid, o);
+    printPreProcPOS(this, c->at(i)->preprocessinginfo, CHILL_PREPROCESSING_IMMEDIATELYBEFORE, nid, o);
     print(c->at(i), nid, o);
     if (!ifSemicolonFree(c->at(i)->getType())) o << ";";
-    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, indent, o);
-    printPreProcPOS(this, n->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, indent, o);
+    printPreProcPOS(this, c->at(i)->preprocessinginfo, CHILL_PREPROCESSING_TOTHERIGHT, nid, o);
+    printPreProcPOS(this, c->at(i)->preprocessinginfo, CHILL_PREPROCESSING_LINEAFTER, nid, o);
   }
-  if (c->size() > 1 || (n->getParent() && n->getParent()->isFunctionDecl())) o << "\n" << indent << "}";
+  if (!n->getParent() || c->size() > 1 || n->getParent()->isFunctionDecl() || n->getParent()->isCompoundStmt())
+    o << "\n" << indent << "}";
 }
 
 
@@ -409,7 +409,7 @@ void CFamily::runS(chillAST_Sizeof *n, std::string indent, std::ostream &o) {
 
 void CFamily::runS(chillAST_SourceFile *n, std::string indent, std::ostream &o) {
   o << "// this source is derived from CHILL AST originally from file '"
-       << n->SourceFileName << "' as parsed by frontend compiler " << n->frontend << "\n\n";
+    << n->SourceFileName << "' as parsed by frontend compiler " << n->frontend << "\n\n";
   int nchild = n->getChildren().size();
   for (int i = 0; i < nchild; ++i) {
     if (n->getChild(i)->isFromSourceFile) {
@@ -485,10 +485,10 @@ void CFamily::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
       def += "[" + print(n->getChild(i), indent) + "]";
     }
   }
-  o<<def;
+  o << def;
 
   if (n->init) {
-    o << "= ";
+    o << " = ";
     run(n->init, indent, o);
   }
 }
