@@ -1,0 +1,3913 @@
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 0 entries
+
+['i', 'j', 'k', 'l']
+curOrder: i,j,k,l
+idxNames: i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 0 entries
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 4 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+
+
+curOrder: ii,i,j,k,l
+idxNames: ii,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 4 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 8 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+
+
+curOrder: ii,jj,i,j,k,l
+idxNames: ii,jj,i,j,k,l
+['ii', 'jj', 'i', 'j', 'k', 'l']
+curOrder: ii,jj,i,j,k,l
+idxNames: ii,jj,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 8 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 13 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+
+
+curOrder: ii,jj,iii,i,j,k,l
+idxNames: ii,jj,iii,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 13 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 19 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+
+
+curOrder: ii,jj,iii,i,jjj,j,k,l
+idxNames: ii,jj,iii,i,jjj,j,k,l
+ii,jj
+thread= i,j
+
+ii,jj,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: ii
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: jj
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+block idx ii level 1 lb: 0 ub 127
+bx,jj,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: jj
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+block idx jj level 2 lb: 0 ub 127
+bx,by,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 4 to try and normalize lower bounds
+bx,by,iii,i,,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 32*t4+16*t12; t14 <= 32*t4+16*t12+15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t16 = 0; t16 <= 15; t16++) {
+              // ~cuda~ preferredIdx: l
+              for(t18 = 0; t18 <= 15; t18++) {
+                s0(t2,t4,t6,16*t6+t8+32*t2,t12,t14,t16,t18);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+thread idx i level 4 lb: 0 ub 15
+bx,by,iii,tx,,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 32*t4+16*t12; t14 <= 32*t4+16*t12+15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t16 = 0; t16 <= 15; t16++) {
+              // ~cuda~ preferredIdx: l
+              for(t18 = 0; t18 <= 15; t18++) {
+                s0(t2,t4,t6,16*t6+t8+32*t2,t12,t14,t16,t18);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 7 to try and normalize lower bounds
+bx,by,iii,tx,,jjj,j,,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,16*t12+t14+32*t4,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+thread idx j level 7 lb: 0 ub 15
+Codegen: current names: bx,by,iii,tx,,jjj,ty,,k,l
+before datacopy:
+ printing statement:0
+{[chill_t49,chill_t50,chill_t51,chill_t52,chill_t53,chill_t54,chill_t55,chill_t56,chill_t57] : 32chill_t49+16chill_t51+chill_t52 = chill_t53 && 0, 32chill_t49 <= chill_t53 <= 4095, 32chill_t49+31 && 32chill_t50, 0 <= chill_t55 <= 32chill_t50+31, 4095 && 0 <= chill_t49 <= 127 && 0 <= chill_t57 <= 15 && 0 <= chill_t50 <= 127 && 0 <= chill_t54 <= 1 && 0 <= chill_t51 <= 1 && 0 <= chill_t56 <= 15 && 32chill_t49+16chill_t51 <= chill_t53 && chill_t53 <= 15+32chill_t49+16chill_t51 && 32chill_t50+16chill_t54 <= chill_t55 && chill_t55 <= 15+32chill_t50+16chill_t54 }
+
+
+
+after datacopy:
+ printing statement:0
+{[chill_t65,chill_t66,chill_t67,chill_t68,chill_t69,chill_t70,chill_t71,chill_t72,chill_t73,chill_t74] : chill_t69 = 32chill_t65+16chill_t67+chill_t68 && 16chill_t70+32chill_t66+chill_t71 = chill_t72 && 0, 32chill_t66 <= chill_t72 <= 4095, 32chill_t66+31 && 0, -16chill_t67 <= chill_t68 <= 15, -16chill_t67+31 && 0 <= chill_t65 <= 127 && 0 <= chill_t70 <= 1 && 0 <= chill_t66 <= 127 && 0 <= chill_t74 <= 15 && 0 <= chill_t67 <= 1 && 0 <= chill_t73 <= 15 && 16chill_t70+32chill_t66 <= chill_t72 && chill_t72 <= 15+16chill_t70+32chill_t66 && 32chill_t65+16chill_t67+chill_t68 <= 4095 && 0 <= 32chill_t65+16chill_t67+chill_t68 }
+ printing statement:1
+{[chill_t65,chill_t66,chill_t75,chill_t76] : 32chill_t66 <= chill_t76 <= 32chill_t66+46 && 0 <= chill_t65 <= 127 && 32chill_t65 <= chill_t75 <= 32chill_t65+46 && 0 <= chill_t66 <= 127 }
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 50 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 50 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 54 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 54 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tmp1,tmp2,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tmp1
+    for(t6 = 32*t2; t6 <= 32*t2+46; t6++) {
+      // ~cuda~ preferredIdx: tmp2
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t4);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 54 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 32*t2; t8 <= 32*t2+46; t8++) {
+        s1(t2,t4,t8,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 32*t2; t8 <= 32*t2+46; t8++) {
+        s1(t2,t4,t8,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 63 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 63 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t2,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t2,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 63 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 69 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 69 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 69 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 76 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 76 entries
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+
+
+before datacopy_privatized:
+ printing statement:0
+{[chill_t65,chill_t66,chill_t67,chill_t68,chill_t69,chill_t70,chill_t71,chill_t72,chill_t73,chill_t74] : chill_t69 = 32chill_t65+16chill_t67+chill_t68 && 16chill_t70+32chill_t66+chill_t71 = chill_t72 && 0, 32chill_t66 <= chill_t72 <= 4095, 32chill_t66+31 && 0, -16chill_t67 <= chill_t68 <= 15, -16chill_t67+31 && 0 <= chill_t65 <= 127 && 0 <= chill_t70 <= 1 && 0 <= chill_t66 <= 127 && 0 <= chill_t74 <= 15 && 0 <= chill_t67 <= 1 && 0 <= chill_t73 <= 15 && 16chill_t70+32chill_t66 <= chill_t72 && chill_t72 <= 15+16chill_t70+32chill_t66 && 32chill_t65+16chill_t67+chill_t68 <= 4095 && 0 <= 32chill_t65+16chill_t67+chill_t68 }
+ printing statement:1
+{[chill_t117,chill_t118,chill_t119,chill_t120,chill_t121,chill_t122,chill_t123,chill_t124] : chill_t123 = chill_t119 && chill_t122 = 32chill_t117+chill_t121 && chill_t124 = 32chill_t118+chill_t119 && chill_t120 = chill_t121 && 0 <= chill_t117 <= 127 && 0 <= chill_t121 <= 46 && 0 <= chill_t118 <= 127 && 0 <= chill_t119 <= 46 }
+
+
+after datacopy_privatized:
+ printing statement:0
+{[chill_t125,chill_t126,chill_t127,chill_t128,chill_t129,chill_t130,chill_t131,chill_t132,chill_t133,chill_t134] : 32chill_t125+16chill_t127+chill_t128 = chill_t129 && chill_t132 = 16chill_t130+32chill_t126+chill_t131 && 0, -16chill_t130 <= chill_t131 <= 15, -16chill_t130+31 && 0, 32chill_t125 <= chill_t129 <= 4095, 32chill_t125+31 && 0 <= chill_t125 <= 127 && 0 <= chill_t130 <= 1 && 0 <= chill_t126 <= 127 && 0 <= chill_t134 <= 15 && 0 <= chill_t127 <= 1 && 0 <= chill_t133 <= 15 && 32chill_t125+16chill_t127 <= chill_t129 && chill_t129 <= 15+32chill_t125+16chill_t127 && 16chill_t130+32chill_t126+chill_t131 <= 4095 && 0 <= 16chill_t130+32chill_t126+chill_t131 }
+ printing statement:1
+{[chill_t117,chill_t118,chill_t119,chill_t120,chill_t121,chill_t122,chill_t123,chill_t124] : chill_t123 = chill_t119 && chill_t122 = 32chill_t117+chill_t121 && chill_t124 = 32chill_t118+chill_t119 && chill_t120 = chill_t121 && 0 <= chill_t117 <= 127 && 0 <= chill_t121 <= 46 && 0 <= chill_t118 <= 127 && 0 <= chill_t119 <= 46 }
+ printing statement:2
+{[chill_t125,chill_t126,chill_t127,chill_t128,chill_t129,chill_t131,chill_t136] : exists ( alpha : chill_t131+16alpha = chill_t136 && 32chill_t125+16chill_t127+chill_t128 = chill_t129 && 0, chill_t136-4080 <= chill_t131 <= 15 && 0 <= chill_t125 <= 127 && 0 <= chill_t127 <= 1 && 32chill_t125+16chill_t127 <= chill_t129 && chill_t129 <= 15+32chill_t125+16chill_t127 && 32chill_t126+chill_t131 <= chill_t136 && chill_t136 <= 16+32chill_t126+chill_t131 && 0 <= chill_t126) }
+ printing statement:3
+{[chill_t125,chill_t126,chill_t127,chill_t128,chill_t129,chill_t131,chill_t136] : exists ( alpha : chill_t131+16alpha = chill_t136 && 32chill_t125+16chill_t127+chill_t128 = chill_t129 && 0, chill_t136-4080 <= chill_t131 <= 15 && 0 <= chill_t125 <= 127 && 0 <= chill_t127 <= 1 && 32chill_t125+16chill_t127 <= chill_t129 && chill_t129 <= 15+32chill_t125+16chill_t127 && 32chill_t126+chill_t131 <= chill_t136 && chill_t136 <= 16+32chill_t126+chill_t131 && 0 <= chill_t126) }
+
+
+unroll_to_depth(2)
+SYNC UP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+
+
+
+
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+prev wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+
+_P2 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+result wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+
+_P2 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+_P1 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+curr wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+
+result wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+_P2 wo 
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  result
+1  prev
+2  curr
+
+
+
+reading from array 'prev' 'result' 'curr' and writing to array 
+0  result
+1  prev
+2  curr
+
+0  chill_t1
+1  chill_t2
+2  chill_t3
+3  chill_t4
+4  chill_t6
+5  chill_t7
+6  chill_t8
+7  chill_t9
+8  chill_t10
+9  chill_t12
+10  chill_t13
+11  chill_t14
+12  chill_t15
+13  chill_t16
+14  chill_t17
+15  chill_t19
+16  chill_t20
+17  chill_t21
+18  chill_t22
+19  t2
+20  t6
+21  chill_t30
+22  chill_t31
+23  chill_t32
+24  chill_t33
+25  chill_t35
+26  chill_t36
+27  chill_t37
+28  t4
+29  t12
+30  chill_t49
+31  chill_t50
+32  chill_t51
+33  chill_t53
+34  chill_t54
+35  chill_t55
+36  chill_t56
+37  chill_t57
+38  chill_t65
+39  chill_t66
+40  chill_t67
+41  chill_t68
+42  chill_t69
+43  chill_t70
+44  chill_t72
+45  chill_t73
+46  chill_t74
+47  _P1
+48  chill_t76
+49  chill_t75
+50  chill_t77
+51  chill_t78
+52  chill_t79
+53  chill_t80
+54  chill_t85
+55  chill_t86
+56  chill_t87
+57  chill_t89
+58  chill_t97
+59  chill_t98
+60  chill_t100
+61  chill_t101
+62  chill_t102
+63  chill_t110
+64  chill_t111
+65  chill_t112
+66  chill_t114
+67  chill_t115
+68  chill_t116
+69  chill_t117
+70  chill_t118
+71  chill_t119
+72  chill_t121
+73  chill_t122
+74  chill_t123
+75  chill_t124
+76  chill_t125
+77  chill_t126
+78  chill_t127
+79  chill_t128
+80  chill_t129
+81  chill_t130
+82  chill_t131
+83  chill_t132
+84  chill_t133
+85  chill_t134
+86  _P2
+87  chill_t136
+88  t8
+89  t10
+90  t14
+91  t16
+92  t18
+93  t20
+
+0  int bx= blockIdx.x
+1  int by= blockIdx.y
+2  int tx= threadIdx.x
+3  int ty= threadIdx.y
+4  int iii
+5  int k
+6  int l
+7  int jjj
+
+
+
+
+

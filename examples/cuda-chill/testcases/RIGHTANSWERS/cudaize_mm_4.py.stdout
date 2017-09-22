@@ -1,0 +1,190 @@
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 0 entries
+
+i,j
+thread= 
+
+i,j,k
+// ~cuda~ preferredIdx: i
+for(t2 = 0; t2 <= 1023; t2++) {
+  // ~cuda~ preferredIdx: j
+  for(t4 = 0; t4 <= 1023; t4++) {
+    // ~cuda~ preferredIdx: k
+    for(t6 = 0; t6 <= 1023; t6++) {
+      s0(t2,t4,t6);
+    }
+  }
+}
+
+block idx i level 1 lb: 0 ub 1023
+bx,j,k
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 1023; t2++) {
+  // ~cuda~ preferredIdx: j
+  for(t4 = 0; t4 <= 1023; t4++) {
+    // ~cuda~ preferredIdx: k
+    for(t6 = 0; t6 <= 1023; t6++) {
+      s0(t2,t4,t6);
+    }
+  }
+}
+
+block idx j level 2 lb: 0 ub 1023
+Codegen: current names: bx,by,k
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+c wo 
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+c wo 
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+a wo 
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+
+b wo 
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  c
+1  a
+2  b
+
+
+
+
+reading from array 'a' 'b' and writing to array 'c' 
+0  c
+1  a
+2  b
+
+0  t2
+1  t4
+2  t6
+
+0  int bx= blockIdx.x
+1  int by= blockIdx.y
+2  int k
+3  int tx= threadIdx.x
+
+

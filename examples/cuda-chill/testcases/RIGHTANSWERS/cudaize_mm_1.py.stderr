@@ -1,4 +1,135 @@
-Traceback (most recent call last):
-  File "cudaize_mm_1.py", line 5, in <module>
-    read_IR("mm.c", "normalMM")
-NameError: name 'read_IR' is not defined
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+  int i;
+  int j;
+  int k;
+  for (i = 0; i < 1024; i++) 
+    for (j = 0; j < 1024; j++) 
+      for (k = 0; k < 1024; k++) 
+        c[j][i] = c[j][i] + a[k][i] * b[j][k];
+}// this source is derived from CHILL AST originally from file 'mm.c' as parsed by frontend compiler rose
+
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}
+void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}c[j][i] = c[j][i] + a[k][i] * b[j][k]// ~cuda~ preferredIdx: i
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: bx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: k
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];c[t4][t2]c[t4][t2]a[t6][t2]b[t4][t6]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float c[1024][1024]float *c[1024]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float c[1024][1024]float *c[1024]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float a[1024][1024]float a[1024][1024]float *a[1024]a[t6][t2]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float b[1024][1024]float b[1024][1024]float *b[1024]b[t4][t6]1048576 * sizeof(float)1048576 * sizeof(float)float a[1024][1024]1048576 * sizeof(float)float b[1024][1024]1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI1Ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice)10241dim3 dimBlock0= dim3(1)float c[1024][1024]float a[1024][1024]float b[1024][1024]kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])float * devO1Ptr, (float (*)[1024])float * devI1Ptr, (float (*)[1024])float * devI2Ptr)// ~cuda~ preferredIdx: i
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: bx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: k
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ preferredIdx: i
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: bx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: k
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];
+}// ~cuda~ preferredIdx: i
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: bx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: k
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ preferredIdx: i
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: bx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: k
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][t2] = c[t4][t2] + a[t6][t2] * b[t4][t6];
+}t2 = 0t2 <= 1023t2 += 1i = 0i <= 1023i += 1// ~cuda~ preferredIdx: i
+for (i = 0; i <= 1023; i += 1) 
+  // ~cuda~ preferredIdx: bx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    // ~cuda~ preferredIdx: k
+    for (t6 = 0; t6 <= 1023; t6 += 1) 
+      c[t4][i] = c[t4][i] + a[t6][i] * b[t4][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    // ~cuda~ preferredIdx: bx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      // ~cuda~ preferredIdx: k
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[t4][i] = c[t4][i] + a[t6][i] * b[t4][t6];
+}t4 = 0t4 <= 1023t4 += 1bx = 0bx <= 1023bx += 1// ~cuda~ preferredIdx: bx
+for (bx = 0; bx <= 1023; bx += 1) 
+  // ~cuda~ preferredIdx: k
+  for (t6 = 0; t6 <= 1023; t6 += 1) 
+    c[bx][i] = c[bx][i] + a[t6][i] * b[bx][t6];__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int bx;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    for (bx = 0; bx <= 1023; bx += 1) 
+      // ~cuda~ preferredIdx: k
+      for (t6 = 0; t6 <= 1023; t6 += 1) 
+        c[bx][i] = c[bx][i] + a[t6][i] * b[bx][t6];
+}t6 = 0t6 <= 1023t6 += 1k = 0k <= 1023k += 1// ~cuda~ preferredIdx: k
+for (k = 0; k <= 1023; k += 1) 
+  c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];int iint bxint kfloat c[1024][1024]float a[1024][1024]float b[1024][1024]__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int by= blockIdx.y;
+  int k;
+  int bx= blockIdx.x;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    for (bx = 0; bx <= 1023; bx += 1) 
+      for (k = 0; k <= 1023; k += 1) 
+        c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];
+}float c[1024][1024]float c[1024][1024]float a[1024][1024]float b[1024][1024]__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int k;
+  int bx= blockIdx.x;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    for (bx = 0; bx <= 1023; bx += 1) 
+      for (k = 0; k <= 1023; k += 1) 
+        c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int k;
+  int bx= blockIdx.x;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    for (bx = 0; bx <= 1023; bx += 1) 
+      for (k = 0; k <= 1023; k += 1) 
+        c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int k;
+  int bx= blockIdx.x;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    for (bx = 0; bx <= 1023; bx += 1) 
+      for (k = 0; k <= 1023; k += 1) 
+        c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];
+}__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx= threadIdx.x;
+  int by= blockIdx.y;
+  int k;
+  int bx= blockIdx.x;
+  int i;
+  for (i = 0; i <= 1023; i += 1) 
+    
+      for (k = 0; k <= 1023; k += 1) 
+        c[bx][i] = c[bx][i] + a[k][i] * b[bx][k];;
+}c[j][i] = c[j][i] + a[k][i] * b[j][k]

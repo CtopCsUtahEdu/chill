@@ -1,0 +1,2938 @@
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 0 entries
+
+curOrder: j,i
+idxNames: i,j
+['j', 'i']
+curOrder: j,i
+idxNames: j,i
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 0 entries
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 2 entries
+0  chill_t2
+1  chill_t1
+
+
+curOrder: jj,j,i
+idxNames: jj,j,i
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 2 entries
+0  chill_t2
+1  chill_t1
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 4 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+
+
+curOrder: jj,ii,j,i
+idxNames: jj,ii,j,i
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 4 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 4 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 7 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 7 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 7 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 7 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 11 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+
+
+
+parameter_symtab has 8 entries
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+body_symtab has 11 entries
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+
+
+jj
+thread= j
+
+jj,ii,j,,i,
+// ~cuda~ preferredIdx: jj
+for(t2 = 0; t2 <= 255; t2++) {
+  // ~cuda~ preferredIdx: ii
+  for(t4 = 0; t4 <= 23; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 0; t6 <= 127; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 0; t10 <= 127; t10++) {
+        s0(t2,t4,t6,128*t2+t6,128*t4+t10);
+      }
+    }
+  }
+}
+
+block idx jj level 1 lb: 0 ub 255
+bx,ii,j,,i,
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 255; t2++) {
+  // ~cuda~ preferredIdx: ii
+  for(t4 = 0; t4 <= 23; t4++) {
+    // ~cuda~ preferredIdx: j
+    for(t6 = 0; t6 <= 127; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t10 = 0; t10 <= 127; t10++) {
+        s0(t2,t4,t6,128*t2+t6,128*t4+t10);
+      }
+    }
+  }
+}
+
+thread idx j level 3 lb: 0 ub 127
+Codegen: current names: bx,ii,tx,,i,
+before datacopy_privatized:
+ printing statement:0
+{[chill_t10,chill_t11,chill_t12,chill_t13,chill_t14] : 128chill_t10+chill_t12 = chill_t13 && 128chill_t11, 0 <= chill_t14 <= 128chill_t11+127, 3071 && 128chill_t10, 0 <= chill_t13 <= 128chill_t10+127, 32767 && 0 <= chill_t10 <= 255 && 0 <= chill_t11 <= 23 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t19,chill_t20,chill_t21,chill_t22,chill_t23,chill_t24] : chill_t22 = 128chill_t19+chill_t21 && 128chill_t20+chill_t23 = chill_t24 && 0, -128chill_t19 <= chill_t21 <= 127, -128chill_t19+32767 && 128chill_t20, 0 <= chill_t24 <= 128chill_t20+127, 3071 && 0 <= chill_t19 <= 255 && 0 <= chill_t20 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+before datacopy_privatized:
+ printing statement:0
+{[chill_t19,chill_t20,chill_t21,chill_t22,chill_t23,chill_t24] : chill_t22 = 128chill_t19+chill_t21 && 128chill_t20+chill_t23 = chill_t24 && 0, -128chill_t19 <= chill_t21 <= 127, -128chill_t19+32767 && 128chill_t20, 0 <= chill_t24 <= 128chill_t20+127, 3071 && 0 <= chill_t19 <= 255 && 0 <= chill_t20 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t26,chill_t27,chill_t28,chill_t29,chill_t30,chill_t31] : 128chill_t26+chill_t28 = chill_t29 && chill_t31 = 128chill_t27+chill_t30 && 128chill_t26, 0 <= chill_t29 <= 128chill_t26+127, 32767 && 0, -128chill_t27 <= chill_t30 <= 127, -128chill_t27+3071 && 0 <= chill_t26 <= 255 && 0 <= chill_t27 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+before datacopy_privatized:
+ printing statement:0
+{[chill_t26,chill_t27,chill_t28,chill_t29,chill_t30,chill_t31] : 128chill_t26+chill_t28 = chill_t29 && chill_t31 = 128chill_t27+chill_t30 && 128chill_t26, 0 <= chill_t29 <= 128chill_t26+127, 32767 && 0, -128chill_t27 <= chill_t30 <= 127, -128chill_t27+3071 && 0 <= chill_t26 <= 255 && 0 <= chill_t27 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t33,chill_t34,chill_t35,chill_t36,chill_t37,chill_t38] : chill_t36 = 128chill_t33+chill_t35 && 128chill_t34+chill_t37 = chill_t38 && 0, -128chill_t33 <= chill_t35 <= 127, -128chill_t33+32767 && 128chill_t34, 0 <= chill_t38 <= 128chill_t34+127, 3071 && 0 <= chill_t33 <= 255 && 0 <= chill_t34 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+ printing statement:3
+{[chill_t33,chill_t35] : 0 <= chill_t35 <= 127 && 0 <= chill_t33 <= 255 }
+before datacopy_privatized:
+ printing statement:0
+{[chill_t33,chill_t34,chill_t35,chill_t36,chill_t37,chill_t38] : chill_t36 = 128chill_t33+chill_t35 && 128chill_t34+chill_t37 = chill_t38 && 0, -128chill_t33 <= chill_t35 <= 127, -128chill_t33+32767 && 128chill_t34, 0 <= chill_t38 <= 128chill_t34+127, 3071 && 0 <= chill_t33 <= 255 && 0 <= chill_t34 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+ printing statement:3
+{[chill_t33,chill_t35] : 0 <= chill_t35 <= 127 && 0 <= chill_t33 <= 255 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t40,chill_t41,chill_t42,chill_t43,chill_t44,chill_t45] : 128chill_t40+chill_t42 = chill_t43 && chill_t45 = 128chill_t41+chill_t44 && 128chill_t40, 0 <= chill_t43 <= 128chill_t40+127, 32767 && 0, -128chill_t41 <= chill_t44 <= 127, -128chill_t41+3071 && 0 <= chill_t40 <= 255 && 0 <= chill_t41 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+ printing statement:3
+{[chill_t33,chill_t35] : 0 <= chill_t35 <= 127 && 0 <= chill_t33 <= 255 }
+ printing statement:4
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+ printing statement:5
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+before datacopy_privatized:
+ printing statement:0
+{[chill_t40,chill_t41,chill_t42,chill_t43,chill_t44,chill_t45] : 128chill_t40+chill_t42 = chill_t43 && chill_t45 = 128chill_t41+chill_t44 && 128chill_t40, 0 <= chill_t43 <= 128chill_t40+127, 32767 && 0, -128chill_t41 <= chill_t44 <= 127, -128chill_t41+3071 && 0 <= chill_t40 <= 255 && 0 <= chill_t41 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+ printing statement:3
+{[chill_t33,chill_t35] : 0 <= chill_t35 <= 127 && 0 <= chill_t33 <= 255 }
+ printing statement:4
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+ printing statement:5
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t47,chill_t48,chill_t49,chill_t50,chill_t51,chill_t52] : chill_t50 = 128chill_t47+chill_t49 && 128chill_t48+chill_t51 = chill_t52 && 0, -128chill_t47 <= chill_t49 <= 127, -128chill_t47+32767 && 128chill_t48, 0 <= chill_t52 <= 128chill_t48+127, 3071 && 0 <= chill_t47 <= 255 && 0 <= chill_t48 <= 23 }
+ printing statement:1
+{[chill_t19,chill_t21] : 0 <= chill_t21 <= 127 && 0 <= chill_t19 <= 255 }
+ printing statement:2
+{[chill_t26,chill_t28] : -128chill_t26, 0 <= chill_t28 <= -128chill_t26+32767, 127 }
+ printing statement:3
+{[chill_t33,chill_t35] : 0 <= chill_t35 <= 127 && 0 <= chill_t33 <= 255 }
+ printing statement:4
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+ printing statement:5
+{[chill_t40,chill_t42] : -128chill_t40, 0 <= chill_t42 <= -128chill_t40+32767, 127 }
+ printing statement:6
+{[chill_t47,chill_t49] : 0 <= chill_t49 <= 127 && 0 <= chill_t47 <= 255 }
+ printing statement:7
+{[chill_t47,chill_t49] : 0 <= chill_t49 <= 127 && 0 <= chill_t47 <= 255 }
+for(t2 = 0; t2 <= 255; t2++) {
+  for(t4 = 0; t4 <= 127; t4++) {
+    s1(t2,t4);
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s2(t2,t4);
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s3(t2,t4);
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s4(t2,t4);
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s6(t2,t4);
+  }
+  for(t4 = 0; t4 <= 23; t4++) {
+    for(t6 = 0; t6 <= 127; t6++) {
+      for(t10 = 0; t10 <= 127; t10++) {
+        s0(t2,t4,t6,128*t2+t6,t10,128*t4+t10);
+      }
+    }
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s7(t2,t4);
+  }
+  for(t4 = 0; t4 <= 127; t4++) {
+    s5(t2,t4);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+
+
+
+
+
+
+
+x wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+y wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+z wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+Qi wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+Qr wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+kVals wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+kVals wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+kVals wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+kVals wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+Qr wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+Qi wo 
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+
+
+reading from array 'x' 'y' 'z' 'Qi' 'Qr' 'kVals' and writing to array 
+0  numK
+1  numX
+2  kVals
+3  x
+4  y
+5  z
+6  Qr
+7  Qi
+
+0  chill_t2
+1  chill_t1
+2  chill_t4
+3  chill_t5
+4  chill_t6
+5  chill_t8
+6  chill_t9
+7  chill_t10
+8  chill_t11
+9  chill_t13
+10  chill_t14
+11  chill_t19
+12  chill_t20
+13  chill_t21
+14  chill_t22
+15  chill_t24
+16  chill_t26
+17  chill_t27
+18  chill_t28
+19  chill_t29
+20  chill_t30
+21  chill_t31
+22  chill_t33
+23  chill_t34
+24  chill_t35
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t40
+29  chill_t41
+30  chill_t42
+31  chill_t43
+32  chill_t44
+33  chill_t45
+34  chill_t47
+35  chill_t48
+36  chill_t49
+37  chill_t50
+38  chill_t51
+39  chill_t52
+40  t2
+41  t4
+42  t6
+43  t8
+44  t10
+45  t12
+
+0  int bx= blockIdx.x
+1  int tx= threadIdx.x
+2  int ii
+3  int i
+4  int by= blockIdx.y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
