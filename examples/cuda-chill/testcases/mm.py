@@ -1,6 +1,8 @@
 from chill import *
 execfile("cudaize.py")
 
+#>SKIP
+
 destination("mmmodified.cu")
 read_IR("mm.c", "normalMM")
 

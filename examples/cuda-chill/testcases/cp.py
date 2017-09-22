@@ -8,8 +8,8 @@
 from chill import *
 execfile("cudaize.py")
 
-read_IR("cp.c", "cenergy_cpu")
 destination("cpmodified.cu")
+read_IR("cp.c", "cenergy_cpu")
 
 V=512
 N=4000
