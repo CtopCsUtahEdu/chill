@@ -13,12 +13,12 @@
 
 using namespace omega;
 
-Relation flip_var_exclusive(Relation &r1, Variable_ID &v1) {
-  Relation r;
+omega::Relation flip_var_exclusive(omega::Relation &r1, Variable_ID &v1) {
+  omega::Relation r;
   if (r1.is_set())
-    r = Relation(r1.n_set());
+    r = omega::Relation(r1.n_set());
   else
-    r = Relation(r1.n_inp(), r1.n_out());
+    r = omega::Relation(r1.n_inp(), r1.n_out());
 
   r.copy_names(r1);
   r.setup_names();
@@ -26,7 +26,7 @@ Relation flip_var_exclusive(Relation &r1, Variable_ID &v1) {
   F_And *f_root = f_exists->add_and();
   std::map<Variable_ID, Variable_ID> exists_mapping;
   bool found = false;
-  for (DNF_Iterator di(const_cast<Relation &>(r1).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(r1).query_DNF()); di; di++) {
 
     for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
       if ((*gi).get_coef(v1) != 0) {
@@ -178,12 +178,12 @@ Relation flip_var_exclusive(Relation &r1, Variable_ID &v1) {
   return r1;
 }
 
-Relation flip_var(Relation &r1, Variable_ID &v1) {
-  Relation r;
+omega::Relation flip_var(omega::Relation &r1, Variable_ID &v1) {
+  omega::Relation r;
   if (r1.is_set())
-    r = Relation(r1.n_set());
+    r = omega::Relation(r1.n_set());
   else
-    r = Relation(r1.n_inp(), r1.n_out());
+    r = omega::Relation(r1.n_inp(), r1.n_out());
 
   r.copy_names(r1);
   r.setup_names();
@@ -191,7 +191,7 @@ Relation flip_var(Relation &r1, Variable_ID &v1) {
   F_And *f_root = f_exists->add_and();
   std::map<Variable_ID, Variable_ID> exists_mapping;
 
-  for (DNF_Iterator di(const_cast<Relation &>(r1).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(r1).query_DNF()); di; di++) {
     for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
       GEQ_Handle h = f_root->add_GEQ();
 
@@ -410,7 +410,7 @@ omega::Relation parseISLStringToOmegaRelation(std::string s,
   }
 
   std::set<std::string> terms;
-  Relation R(ordered_vars.size());
+  omega::Relation R(ordered_vars.size());
 
   for (int j = 1; j <= ordered_vars.size(); j++)
     R.name_set_var(j, ordered_vars[j - 1]);
@@ -699,13 +699,13 @@ omega::Relation parseISLStringToOmegaRelation(std::string s,
 
 }
 
-bool checkIfEqual(Relation &r, Relation s) {
+bool checkIfEqual(omega::Relation &r, omega::Relation s) {
 
   std::vector<std::set<std::pair<int, int> > > output_vars;
   std::vector<std::set<std::pair<int, int> > > input_vars;
   std::vector<std::set<std::pair<int, std::string> > > global_vars;
   std::vector<int> constants;
-  for (DNF_Iterator di(const_cast<Relation &>(r).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(r).query_DNF()); di; di++) {
     for (EQ_Iterator gi((*di)->EQs()); gi; gi++) {
       int constant = (*gi).get_const();
       constants.push_back(constant);
@@ -755,7 +755,7 @@ bool checkIfEqual(Relation &r, Relation s) {
   std::vector<std::set<std::pair<int, int> > > input_vars2;
   std::vector<std::set<std::pair<int, std::string> > > global_vars2;
   std::vector<int> constants2;
-  for (DNF_Iterator di(const_cast<Relation &>(s).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(s).query_DNF()); di; di++) {
     for (EQ_Iterator gi((*di)->EQs()); gi; gi++) {
       int constant = (*gi).get_const();
       constants2.push_back(constant);
@@ -857,16 +857,16 @@ bool checkIfEqual(Relation &r, Relation s) {
   return true;
 }
 
-std::map<int, Relation> removeRedundantConstraints(
-    std::map<int, Relation> &rels) {
+std::map<int, omega::Relation> removeRedundantConstraints(
+    std::map<int, omega::Relation> &rels) {
 
-  std::map<int, Relation> to_return;
-  for (std::map<int, Relation>::iterator i = rels.begin(); i != rels.end();
+  std::map<int, omega::Relation> to_return;
+  for (std::map<int, omega::Relation>::iterator i = rels.begin(); i != rels.end();
        i++) {
     bool found = false;
     if (i->second.is_finalized()) {
 
-      for (std::map<int, Relation>::iterator j = rels.begin();
+      for (std::map<int, omega::Relation>::iterator j = rels.begin();
            j != rels.end(); j++) {
         if (j->first > i->first) {
 
@@ -875,7 +875,7 @@ std::map<int, Relation> removeRedundantConstraints(
         }
       }
       if (!found) {
-        to_return.insert(std::pair<int, Relation>(i->first, i->second));
+        to_return.insert(std::pair<int, omega::Relation>(i->first, i->second));
 
       }
 
@@ -902,12 +902,12 @@ std::map<int, Relation> removeRedundantConstraints(
 
 }
 
-std::string get_lb_string(Relation &result, Variable_ID &v2,
+std::string get_lb_string(omega::Relation &result, Variable_ID &v2,
                           bool range = true) {
   std::string a = "";
   Global_Var_ID uf;
 
-  for (DNF_Iterator di(const_cast<Relation &>(result).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(result).query_DNF()); di; di++) {
     for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
       bool found_c = false;
       bool dont_consider = false;
@@ -1023,12 +1023,12 @@ std::string get_lb_string(Relation &result, Variable_ID &v2,
   return a;
 }
 
-std::string get_ub_string(Relation &result, Variable_ID &v2,
+std::string get_ub_string(omega::Relation &result, Variable_ID &v2,
                           bool range = true) {
   std::string b = "";
   Global_Var_ID uf;
 
-  for (DNF_Iterator di(const_cast<Relation &>(result).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(result).query_DNF()); di; di++) {
     for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
       bool found_c = false;
       bool dont_consider = false;
@@ -1139,7 +1139,7 @@ std::pair<std::vector<std::string>,
     std::pair<
         std::vector<std::pair<bool, std::pair<std::string, std::string> > >,
         std::vector<std::pair<bool, std::pair<std::string, std::string> > > > > determineUFsForIegen(
-    Relation &result, IR_Code *ir, std::vector<Free_Var_Decl *> freevar) {
+    omega::Relation &result, IR_Code *ir, std::vector<Free_Var_Decl *> freevar) {
 
   std::vector<std::pair<bool, std::pair<std::string, std::string> > > to_return;
   std::vector<std::pair<bool, std::pair<std::string, std::string> > > to_return2;
@@ -1147,7 +1147,7 @@ std::pair<std::vector<std::string>,
   //would be stored as rowptr_colidx__ so just parse till first '_' for base UF name
   std::set<std::string> outer_most_ufs2;
 
-  for (DNF_Iterator di(const_cast<Relation &>(result).query_DNF()); di; di++) {
+  for (DNF_Iterator di(const_cast<omega::Relation &>(result).query_DNF()); di; di++) {
     for (Constraint_Iterator gi((*di)->constraints()); gi; gi++) {
       for (Constr_Vars_Iter cvi(*gi); cvi; cvi++) {
         Variable_ID v = cvi.curr_var();
@@ -1188,7 +1188,7 @@ std::pair<std::vector<std::string>,
   std::vector<std::pair<std::string, std::pair<std::string, std::string> > > monotonic;
   for (int i = 0; i < outer_most_ufs.size(); i++)
     for (int j = i + 1; j < outer_most_ufs.size(); j++) {
-      for (DNF_Iterator di(const_cast<Relation &>(result).query_DNF()); di;
+      for (DNF_Iterator di(const_cast<omega::Relation &>(result).query_DNF()); di;
            di++) {
         for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
           bool found_c = false;
@@ -1603,12 +1603,12 @@ omega::Relation Loop::parseExpWithWhileToRel(omega::CG_outputRepr *repr,
 }
 
 void Loop::printDependenceUFs(int stmt_num, int level) {
-  Relation R = stmt[stmt_num].IS;
+  omega::Relation R = stmt[stmt_num].IS;
 
-  Relation r = parseExpWithWhileToRel(stmt[stmt_num].code, R, stmt_num);
+  omega::Relation r = parseExpWithWhileToRel(stmt[stmt_num].code, R, stmt_num);
   r.simplify();
 
-  Relation result;
+  omega::Relation result;
   if (known.n_set() < r.n_set()) {
     omega::Relation known = omega::Extend_Set(omega::copy(this->known),
                                               r.n_set() - this->known.n_set());
@@ -1617,7 +1617,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
 
   } else {
 
-    Relation tmp = omega::Extend_Set(omega::copy(r),
+    omega::Relation tmp = omega::Extend_Set(omega::copy(r),
                                      this->known.n_set() - r.n_set());
 
     result = omega::Intersection(tmp, copy(known));
@@ -1630,7 +1630,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
 
   Variable_ID v2 = r.set_var(1);
   //need to correct following logic
-  for (DNF_Iterator di(const_cast<Relation &>(r).query_DNF()); di; di++)
+  for (DNF_Iterator di(const_cast<omega::Relation &>(r).query_DNF()); di; di++)
     for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++)
       if ((*gi).is_const(v2))
         if ((*gi).get_coef(v2) < 0 && (*gi).get_const() == 0)
@@ -1661,8 +1661,8 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
   }
 
   std::vector<std::pair<omega::Relation, omega::Relation> > dep_relation_;
-  std::map<int, Relation> rels;
-  std::vector<std::pair<Relation, Relation> > rels2;
+  std::map<int, omega::Relation> rels;
+  std::vector<std::pair<omega::Relation, omega::Relation> > rels2;
   for (int i = 0; i < access.size(); i++) {
     IR_ArrayRef *a = access[i];
 
@@ -1674,7 +1674,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
 
-        Relation r1(r.n_set(), r.n_set());
+        omega::Relation r1(r.n_set(), r.n_set());
 
         for (int i = 1; i <= r.n_set(); i++)
           r1.name_input_var(i, r.set_var(i)->name());
@@ -1766,7 +1766,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
         }
 
         rels.insert(
-            std::pair<int, Relation>(dep_relation_.size(), copy(r1)));
+            std::pair<int, omega::Relation>(dep_relation_.size(), copy(r1)));
         dep_relation_.push_back(
             std::pair<omega::Relation, omega::Relation>(r, r1));
 
@@ -1777,7 +1777,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
 // Call arrays2Relation
 
   for (int i = 0; i < dep_relation_.size(); i++) {
-    Relation t(dep_relation_[i].first.n_set());
+    omega::Relation t(dep_relation_[i].first.n_set());
     for (int j = 1; j <= t.n_set(); j++)
       t.name_set_var(j, dep_relation_[i].first.set_var(j)->name() + "p");
     F_And *f_root = t.add_and();
@@ -1814,8 +1814,8 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
     std::string s2 = t.set_var(1)->name() + " >  "
                      + dep_relation_[i].first.set_var(1)->name();
 
-    Relation s_ = copy(dep_relation_[i].first);
-    Relation t_ = copy(dep_relation_[i].second);
+    omega::Relation s_ = copy(dep_relation_[i].first);
+    omega::Relation t_ = copy(dep_relation_[i].second);
     /*for (DNF_Iterator di(const_cast<Relation &>(this->known).query_DNF());
      di; di++) {
      for (GEQ_Iterator e((*di)->GEQs()); e; e++) {
@@ -1867,7 +1867,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
     }
     s1 = start + initial + s1 + s + "}";
     s2 = start2 + initial + s2 + s + "}";
-    rels2.push_back(std::pair<Relation, Relation>(s_, t));
+    rels2.push_back(std::pair<omega::Relation, omega::Relation>(s_, t));
     std::cout << s1 << std::endl;
     std::cout << s2 << std::endl;
     std::cout << std::endl;
@@ -2003,7 +2003,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
         std::cout << "Result\n\n";
         copy(r).print();
 
-        for_codegen.insert(std::pair<int, Relation>(count++, r));
+        for_codegen.insert(std::pair<int, omega::Relation>(count++, r));
       }
       std::cout << "\n\nA1 simplified = " << A1_sim_str << "\n\n";
 
@@ -2066,7 +2066,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
         std::cout << "Result\n\n";
         copy(r2).print();
 
-        for_codegen2.insert(std::pair<int, Relation>(count, r2));
+        for_codegen2.insert(std::pair<int, omega::Relation>(count, r2));
       }
 
       std::cout << "\n\nA2 simplified = " << A2_sim_str << "\n\n";
