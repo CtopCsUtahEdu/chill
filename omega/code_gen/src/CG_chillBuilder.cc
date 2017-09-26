@@ -410,42 +410,23 @@ namespace omega {
       chillAST_SourceFile *src = toplevel; // todo don't be dumb
       
       chillAST_node *def = src->findCall(name);
-      if (!def) { // can't find it
-        debug_fprintf(stderr, "CG_chillBuilder::CreateInvoke( %s ), can't find a function or macro by that name\n", name); 
-        exit(-1); 
-      }
-      
-      //debug_fprintf(stderr, "%s is a %s\n", name, def->getTypeString()); 
-      if (def->isMacroDefinition()) { 
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
-        int numparams = list.size(); 
-        for (int i=0; i<numparams; i++) { 
+      if (def) {
+        chillAST_CallExpr *CE = new chillAST_CallExpr( new chillAST_DeclRefExpr(def) );
+        int numparams = list.size();
+        for (int i=0; i<numparams; i++) {
           CG_chillRepr *CR = (CG_chillRepr *) list[i];
-          CE->addArg( CR->GetCode() ); 
+          CE->addArg( CR->GetCode() );
         }
-        return  new CG_chillRepr( CE ); 
-      }
-      else if (def->isFunctionDecl()) { 
-        // TODO are these cases exactly the same?
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
-        int numparams = list.size(); 
-        for (int i=0; i<numparams; i++) { 
-          CG_chillRepr *CR = (CG_chillRepr *) list[i];
-          CE->addArg( CR->GetCode() ); 
-        }
-        return  new CG_chillRepr( CE ); 
-      }
-      else { 
+        return  new CG_chillRepr( CE );
       }
 
-
-      // chillAST_CallExpr::chillAST_CallExpr(chillAST_node *function, chillAST_node *p );
-
-      // todo addarg()
-      //int numargs;
-      //std::vector<class chillAST_node*> args;
-      debug_fprintf(stderr, "Code generation: invoke function io_call not implemented\n");
-      return NULL;
+      chillAST_CallExpr *CE = new chillAST_CallExpr( new chillAST_DeclRefExpr(name) );
+      int numparams = list.size();
+      for (int i=0; i<numparams; i++) {
+        CG_chillRepr *CR = (CG_chillRepr *) list[i];
+        CE->addArg( CR->GetCode() );
+      }
+      return  new CG_chillRepr( CE );
     }
   }
   
