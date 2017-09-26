@@ -863,9 +863,8 @@ public:
   chillAST_DeclRefExpr( const char *variablename);
   chillAST_DeclRefExpr( const char *vartype, const char *variablename);
   chillAST_DeclRefExpr( const char *vartype, const char *variablename, chillAST_node *dec);
-  chillAST_DeclRefExpr( chillAST_VarDecl *vd);
-  chillAST_DeclRefExpr( chillAST_FunctionDecl *fd);
-  
+  chillAST_DeclRefExpr( chillAST_node *d);
+
   // other methods particular to this type of node
   bool operator!=( chillAST_DeclRefExpr &other ) { return decl != other.decl ; }; 
   bool operator==( chillAST_DeclRefExpr &other ) { return decl == other.decl ; }; // EXACT SAME VARECL BY ADDRESS

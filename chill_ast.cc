@@ -2246,27 +2246,30 @@ chillAST_DeclRefExpr::chillAST_DeclRefExpr( const char *vartype, const char *var
 }
 
 chillAST_DeclRefExpr::chillAST_DeclRefExpr( const char *vartype, const char *varname, chillAST_node *d) {
-  //debug_fprintf(stderr, "DRE::DRE2 0x%x   %s %s  0x%x\n", this, vartype, varname, d ); 
-  declarationType = strdup(vartype);
-  declarationName = strdup(varname); 
+  //debug_fprintf(stderr, "DRE::DRE2 0x%x   %s %s  0x%x\n", this, vartype, varname, d );
+  declarationType = vartype? strdup(vartype): nullptr;
+  declarationName = varname? strdup(varname): nullptr;
   decl = d; 
 }
 
-chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_VarDecl *vd){ // variable def
-  //debug_fprintf(stderr, "DRE::DRE3 (VD)  0x%x   %s %s  0x%x\n", this, vd->vartype, vd->varname, vd ); 
-  
-  declarationType = strdup(vd->vartype);
-  declarationName = strdup(vd->varname); 
-  decl = vd; 
+chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_node *d){ // variable def
+  if (d->isVarDecl()) {
+    auto vd = dynamic_cast<chillAST_VarDecl*>(d);
+    declarationType = strdup(vd->vartype);
+    declarationName = strdup(vd->varname);
+    decl = vd;
+  } else if (d->isFunctionDecl()) {
+    auto fd = dynamic_cast<chillAST_FunctionDecl*>(d);
+    declarationType = strdup(fd->returnType);
+    declarationName = strdup(fd->functionName);
+    decl = fd;
+  } else if (d->isMacroDefinition()) {
+    auto md = dynamic_cast<chillAST_MacroDefinition*>(d);
+    declarationName = strdup(md->macroName);
+    declarationType = nullptr;
+    decl = md;
+  } else throw std::runtime_error("Illegal DeclRefExpr");
 }
-
-
-chillAST_DeclRefExpr::chillAST_DeclRefExpr( chillAST_FunctionDecl *fd){ // function def
-  declarationType = strdup(fd->returnType);
-  declarationName = strdup(fd->functionName); 
-  decl = fd; 
-}
-
 
 class chillAST_node* chillAST_DeclRefExpr::constantFold() {  // can never do anything?
   return this;
