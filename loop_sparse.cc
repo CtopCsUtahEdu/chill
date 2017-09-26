@@ -615,15 +615,12 @@ omega::Relation parseISLStringToOmegaRelation(std::string s,
                               to_comp + "p", pos);
                           v2 = R.get_local(repl, Input_Tuple);
 
-                          std::string args = "(";
+                          std::vector<std::string> args;
 
                           for (int j = 1; j <= pos; j++) {
-                            if (j > 1)
-                              args += ",";
-                            args += R.set_var(j)->name();
+                            args.push_back(R.set_var(j)->name());
 
                           }
-                          args += ")";
                           CG_outputRepr *rhs = ir->RetrieveMacro(
                               to_comp);
                           rhs = rhs->clone();
