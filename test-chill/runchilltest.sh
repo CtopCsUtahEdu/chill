@@ -47,7 +47,7 @@ exit_with_skip_code() {
 
 ## Get the destination filename from the script
 get_destination() {
-    cmd="sed -n \"s/destination(\\\"\(.*\)\\\")/\1/p\" $1"
+    cmd="sed -n \"s/destination([\\\'\\\"]\\\(.*\\\)[\\\'\\\"])/\\\1/p\" $1"
     echo `eval $cmd`
 }
 
@@ -64,7 +64,7 @@ shift 3
 chill_generated_source=$chill_script_path/$chill_dest
 chill_generated_stdout=$chill_script_path/$(basename $chill_script).stdout
 chill_generated_stderr=$chill_script_path/$(basename $chill_script).stderr
-chill_correct_source=$chill_answers_path/$(basename $chill_generated_source)
+chill_correct_source=$chill_answers_path/$chill_dest
 chill_correct_stdout=$chill_answers_path/$(basename $chill_generated_stdout)
 chill_correct_stderr=$chill_answers_path/$(basename $chill_generated_stderr)
 
