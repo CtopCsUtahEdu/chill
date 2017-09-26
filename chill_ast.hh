@@ -993,9 +993,6 @@ public:
   
   bool isAUnion()  { return isUnion;  };
   bool isAStruct() { return isStruct; }; 
-  bool isUnnamed;
-  void setUnnamed( bool b ) { isUnnamed = b; };
-
 
   void setStruct(bool tf) { isStruct = tf; }; 
   //debug_fprintf(stderr, "%s isStruct %d\n", structname, isStruct);  }; 

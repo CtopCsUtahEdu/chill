@@ -377,7 +377,6 @@ void CFamily::runS(chillAST_Preprocessing *n, std::string indent, std::ostream &
 }
 
 void CFamily::runS(chillAST_RecordDecl *n, std::string indent, std::ostream &o) {
-  if (n->isUnnamed) return;
   if (n->isAStruct()) {
     string nid = indent + identSpace;
     o << "struct ";
