@@ -1,8 +1,5 @@
 from chill import *
 
-# Testcase metadata:
-#>SKIP
-
 source('coalesce.c')
 procedure('main')
 destination('coalescemodified.c')

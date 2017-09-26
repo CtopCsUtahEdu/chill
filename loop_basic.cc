@@ -1587,20 +1587,19 @@ std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
 
 
 std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
-                                                                   std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
+                                                                   std::vector<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
   
   debug_fprintf(stderr, "constructInspectorVariables()\n"); 
 
   std::vector<std::vector<std::string> > to_return;
   
-  for (std::set<IR_ArrayRef *>::iterator i = arr.begin(); i != arr.end();
-       i++) {
+  for (auto i: arr) {
     
     std::vector<std::string> per_index;
     
-    CG_outputRepr *subscript = (*i)->index(0);
+    CG_outputRepr *subscript = i->index(0);
     
-    if ((*i)->n_dim() > 1)
+    if (i->n_dim() > 1)
       throw ir_error(
         "multi-dimensional array support non-existent for flattening currently");
     
@@ -1803,20 +1802,19 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     
     loop_indices.push_back(stmt[stmt_num].IS.set_var(*i)->name());
   }
-  std::set<IR_ArrayRef *> set_refs;
+  std::vector<IR_ArrayRef *> set_refs;
   
   for (int i = 0; i < outer_arr_refs.size(); i++) {
     bool found = false;
-    for (std::set<IR_ArrayRef*>::iterator j = set_refs.begin();
-         j != set_refs.end(); j++) {
-      if ((*j)->name() == outer_arr_refs[i]->name()) {
+    for (auto j: set_refs) {
+      if (j->name() == outer_arr_refs[i]->name()) {
         found = true;
         break;
       }
       
     }
     if (!found)
-      set_refs.insert(outer_arr_refs[i]);
+      set_refs.push_back(outer_arr_refs[i]);
     
   }
   
@@ -2051,14 +2049,13 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   //1. Create a map from array reference names to outputReprs to pass into CreateSubstituted statement
   std::map<std::string, std::string> array_name_to_relation;
   
-  for (std::set<IR_ArrayRef *>::iterator it = set_refs.begin();
-       it != set_refs.end(); it++) {
+  for (auto it: set_refs) {
     std::string s;
-    if ((*it)->n_dim() > 1)
+    if (it->n_dim() > 1)
       throw loop_error(
         "only statements with single dimensional arrays are handled for flattening currently");
     
-    CG_outputRepr *index = (*it)->index(0);
+    CG_outputRepr *index = it->index(0);
     if (ir->QueryExpOperation(index) != IR_OP_ARRAY_VARIABLE) {
       omega::Relation r(stmt[stmt_num].IS.n_set(), 1);
       //std::cout << (*it)->name() << std::endl;
@@ -2091,7 +2088,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
           "more than one level of indirection in arrays not supported currently");
       
       omega::Relation r(stmt[stmt_num].IS.n_set(), 1);
-      std::cout << (*it)->name() << std::endl;
+      std::cout << it->name() << std::endl;
       F_And *f_root = r.add_and();
       
       for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)
@@ -2112,7 +2109,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
       
     }
     array_name_to_relation.insert(
-      std::pair<std::string, std::string>((*it)->name(), s));
+      std::pair<std::string, std::string>(it->name(), s));
     std::cout << "check" << std::endl;
     std::cout << s << std::endl;
   }
@@ -2170,7 +2167,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     index_names.push_back(stmt[stmt_num].IS.set_var(j)->name());
   }
   r1.name_output_var(1, index_name);
-  
+
   Free_Var_Decl *nnz_iegen = new Free_Var_Decl(inspector_name,
                                                loop_levels.size());
   Variable_ID iegen_nnz = r1.get_local(nnz_iegen, Input_Tuple);
@@ -2181,26 +2178,15 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   e_iegen1.update_coef(iegen_nnz, 1);
   e_iegen1.update_coef(r1.output_var(1), -1);
   
-  /*EQ_Handle e_iegen2 = f_root_coalesce->add_EQ();
-    e_iegen2.update_coef(r1.input_var(r1.n_inp()), 1);
-    e_iegen2.update_coef(r1.output_var(1), -1);
-  */
-  //r1.simplify(0,0);
-
-  printf("\n*** r1   ");   r1.print(); printf("\n"); fflush(stdout); 
+  printf("\n*** r1   ");   r1.print(); printf("\n"); fflush(stdout);
 
   std::string r1_coalesce = print_to_iegen_string(r1);
   std::string set_string3 = set_string + " -> [" + r1.output_var(1)->name()
     + "] : ";
-  r1_coalesce = set_string3 + r1_coalesce + "&&" + r1.output_var(1)->name()
-    + "=" + r1.input_var(r1.n_inp())->name() + "}";
+  r1_coalesce = set_string3 + r1_coalesce + "}";
   std::cout << r1_coalesce << std::endl;
   
-//  std::string cpy_inspector_name = std::string("c");//inspector_name;
-//  std::string cpy_iegen_is = std::string("{[i,j] : index_(i) <= j && j < index__(i) && 0 <= i && i < n}");//iegen_is;
-//  std::string cpy_iegen_flattened = std::string("{[coalesced_index] : 0 <= coalesced_index && coalesced_index < nnz}");
-
-  debug_fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str()); 
+  debug_fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str());
 
   debug_fprintf(stderr, "\ndomain\n"); 
   iegenlib::Set *domain   = new iegenlib::Set(iegen_is);
@@ -2221,6 +2207,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
 
 
   iegenlib::Relation* T_coalesce = new iegenlib::Relation(r1_coalesce);
+  std::cout<< T_coalesce->prettyPrintString();
   debug_fprintf(stderr, "T_coalesce\n"); 
 
   // then applies the transformation to each of the access relation
@@ -2449,20 +2436,17 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
                                                                   arr_refs_);
   
   
-  std::set<IR_ArrayRef *> set_refs_;
+  std::vector<IR_ArrayRef *> set_refs_;
   
   for (int i = 0; i < outer_arr_refs_.size(); i++) {
     bool found = false;
-    for (std::set<IR_ArrayRef*>::iterator j = set_refs_.begin();
-         j != set_refs_.end(); j++) {
-      if ((*j)->name() == outer_arr_refs_[i]->name()) {
+    for (auto j: set_refs_)
+      if (j->name() == outer_arr_refs_[i]->name()) {
         found = true;
         break;
       }
-      
-    }
     if (!found)
-      set_refs_.insert(outer_arr_refs_[i]);
+      set_refs_.push_back(outer_arr_refs_[i]);
     
   }
   
@@ -2496,16 +2480,12 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     CG_outputRepr *new_array_exp = ir->builder()->CreateArrayRefExpression( ir->builder()->CreateIdent(array_name), subscript);
     
     IR_ArrayRef *to_replace;
-    std::set<IR_ArrayRef *>::iterator it2;
-    for( it2 = set_refs_.begin(); it2 != set_refs_.end(); it2++)
-      if((*it2)->name() == array_name)
-      {
+    auto it2 = set_refs_.begin();
+    for(; it2 != set_refs_.end(); ++it2)
+      if((*it2)->name() == array_name) {
         to_replace = *it2;
-        
         break;
-        
       }
-    
     
     set_refs_.erase(it2);
     ir->ReplaceExpression(to_replace, new_array_exp);
