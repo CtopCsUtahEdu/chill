@@ -1,3 +1,5 @@
+%option prefix="expr"
+
 %{
 // some C++ code
 #include "chill_run_util.hh"
@@ -9,14 +11,14 @@
 %%
 [ \t]+                  /*ignore*/
 \n                      /*ignore*/
-L[0-9]+                 { yylval.val = atoi(&yytext[1]); return LEVEL; }
-[0-9]+                  { yylval.val = atoi(yytext); return NUMBER; }
+L[0-9]+                 { exprlval.val = atoi(&yytext[1]); return LEVEL; }
+[0-9]+                  { exprlval.val = atoi(yytext); return NUMBER; }
 \<\=                    return LE;
 \>\=                    return GE;
 \=(\=)?                 return EQ;
 [a-zA-Z_][a-zA-Z_0-9]*  {
-                           yylval.str_val = new char[yyleng+1];
-                           strcpy(yylval.str_val, yytext);
+                           exprlval.str_val = new char[yyleng+1];
+                           strcpy(exprlval.str_val, yytext);
                            return VARIABLE;
                          }
 .                        return (int)yytext[0];

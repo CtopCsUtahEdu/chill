@@ -1578,50 +1578,14 @@ void IR_chillCode::CreateDefineMacro(std::string s,
                                     std::string args,
                                     omega::CG_outputRepr *repr)
 {
-  debug_fprintf(stderr, "ir_rose.cc  *IR_roseCode::CreateDefineMacro( string string repr)\n");
-  omega::CG_chillRepr *CR = (omega::CG_chillRepr *)repr;
-  vector<chillAST_node*> astvec = CR->getChillCode();
-
-  chillAST_node *output;
-  if (1 < astvec.size()) {
-    // make a compound node?
-    throw std::runtime_error(" IR_roseCode::CreateDefineMacro(), more than one ast???\n");
-  }
-  else output = astvec[0];
-
-  debug_fprintf(stderr, "#define %s%s ", s.c_str(), args.c_str());
-  debug_fprintf(stderr, "IR_roseCode::CreateDefineMacro(), CR chillnodes:\n");
-  CR->printChillNodes(); printf("\n"); fflush(stdout);
-  debug_fprintf(stderr, "IR_roseCode::CreateDefineMacro(), CR chillnodes DONE\n");
-
-  //what do we want ast for the macro to look like?
-  //debug_fprintf(stderr, "entire_file_AST %p\n", entire_file_AST);
-  chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str() ); // NULL);
-  //debug_fprintf(stderr, "args: '%s'\n", args.c_str());
-  //debug_fprintf(stderr, "output is of type %s\n", output->getTypeString());
-  //macro->addChild( output ); // setBody?
-
-  debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::CreateDefineMacro() adding macro to sourcefile\n");
-  entire_file_AST->addChild( macro ); // ??
-  defined_macros.insert(std::pair<std::string, chillAST_node*>(s/* + args*/, output));
-
-
-  // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
-  // TODO one of these should probably go away
-  //debug_fprintf(stderr, "entire file had %d children\n",  entire_file_AST->children.size());
-  entire_file_AST->insertChild(0, macro);
-  //debug_fprintf(stderr, "entire file has %d children\n",  entire_file_AST->children.size());
-  return;
+  throw std::runtime_error("IR_chillCode::CreateDefine Macro 2( string string repr )\n");
 }
 
 
 
 void IR_chillCode::CreateDefineMacro(std::string s,
                                     std::vector<std::string> args,
-                                    omega::CG_outputRepr *repr)
-{
-  //debug_fprintf(stderr, "ir_rose.cc *IR_roseCode::CreateDefineMacro( string, VECTOR, repr )\n");
-
+                                    omega::CG_outputRepr *repr) {
   omega::CG_chillRepr *CR = (omega::CG_chillRepr *)repr;
   vector<chillAST_node*> astvec = CR->getChillCode();
 
@@ -1630,56 +1594,23 @@ void IR_chillCode::CreateDefineMacro(std::string s,
     throw std::runtime_error(" IR_roseCode::CreateDefineMacro(), more than one ast???\n");
   }
   chillAST_node *sub = astvec[0]; // the thing we'll sub into
-  //debug_fprintf(stderr, "sub is of type %s\n", sub->getTypeString());
-
-  //chillAST_UnaryOperator *unary = new chillAST_UnaryOperator( "*", true, sub, entire_file_AST); // macro parent ??
-
-  //debug_fprintf(stderr, "#define %s", s.c_str());
-  //if (args.size()) {
-  //  debug_fprintf(stderr, "( ");
-  //  for (int i=0; i<args.size(); i++) {
-  //    if (i) debug_fprintf(stderr, ", ");
-  //    debug_fprintf(stderr, "%s", args[i].c_str());
-  //  }
-  //  debug_fprintf(stderr, " )");
-  //}
-  //debug_fprintf(stderr, "   ");
-  //sub->print(); printf("\n\n"); fflush(stdout);  // the body of the macro
-  //sub->dump();  printf("\n\n"); fflush(stdout);
-
   // make the things in the output actually reference the (fake) vardecls we created for the args, so that we can do substitutions later
 
   //what do we want ast for the macro to look like?
-  //debug_fprintf(stderr, "IR_Rosecode entire_file_AST %p\n",  entire_file_AST);
   chillAST_MacroDefinition * macro = new  chillAST_MacroDefinition( s.c_str() ); // NULL);
-
 
   // create "parameters" for the #define
   for (int i=0; i<args.size(); i++) {
-    //debug_fprintf(stderr, "'parameter' %s\n", args[i].c_str());
     chillAST_VarDecl *vd = new chillAST_VarDecl( "fake", "", args[i].c_str());
-    //debug_fprintf(stderr, "adding parameter %d ", i); vd->dump(); fflush(stdout);
     macro->addParameter( vd );
-
     // find the references to this name in output // TODO
     // make them point to the vardecl ..
-
   }
-
   macro->setBody( sub );
-
-  //debug_fprintf(stderr, "macro body is:\nprint()\n");
-  //sub->print(); printf("\ndump()\n"); fflush(stdout);
-  //sub->dump();  printf("\n"); fflush(stdout);
-
-
   defined_macros.insert(std::pair<std::string, chillAST_node*>(s /* + args */, sub));
-
   // TODO  ALSO put the macro into the SourceFile, so it will be there if that AST is printed
   // TODO one of these should probably go away
-  //debug_fprintf(stderr, "entire file had %d children\n",  entire_file_AST->children.size());
   entire_file_AST->insertChild(0, macro);
-  //debug_fprintf(stderr, "entire file has %d children\n",  entire_file_AST->children.size());
   return;
 }
 

@@ -6,6 +6,10 @@ file(STRINGS ${CMAKE_SOURCE_DIR}/CHILL_VERSION CHILL_VERSION)
 set(CMAKE_CXX_STANDARD 11)
 message(STATUS "Configuring for chill ${CHILL_VERSION}")
 
+if (DEFINED ENV{CHILLENV})
+    set(CHILLENV $ENV{CHILLENV})
+endif ()
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 if (NOT DEFINED FRONTEND)
@@ -24,10 +28,6 @@ endif()
 
 include(GTest)
 include(CHiLLModule)
-
-if (DEFINED ENV{CHILLENV})
-    set(CHILLENV $ENV{CHILLENV})
-endif ()
 
 find_package(PythonLibs 2.7 REQUIRED)
 find_package(IEGen REQUIRED)

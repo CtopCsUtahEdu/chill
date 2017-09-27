@@ -133,6 +133,20 @@ namespace {
 
   };
 
+  std::string dumpargs(std::vector<std::string> &v) {
+    std::string str = "";
+    for (const auto &i: v) {
+      if (str.length() < 1)
+        str = "(";
+      else
+        str = ",";
+      str += i;
+    }
+    if (v.size() > 0)
+      str += ")";
+    return str;
+  }
+
   bool compareTerm(LinearTerm one, LinearTerm two) {
 
     if ((one.term.size() == 0) && (two.term.size() == 0))
@@ -966,7 +980,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
         }
 
-        std::string args;
+        std::vector<std::string> args;
         std::vector<omega::CG_outputRepr *> reprs;
         std::vector<omega::CG_outputRepr *> reprs2;
 
@@ -997,41 +1011,31 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
         }
 
-        std::string args2;
+        std::vector<std::string> args2;
         for (std::set<std::string>::iterator it = vars.begin();
              it != vars.end(); it++) {
-
-          if (it == vars.begin()) {
-            args += "(";
-            args2 += "(";
-          } else {
-            args += ",";
-            args2 += ",";
-          }
           if (side == 'r') {
-            args += *it + "p";
-            args2 += *it;
+            args.push_back(*it + "p");
+            args2.push_back(*it);
           } else {
-            args += *it;
-            args2 += *it + "p";
+            args.push_back(*it);
+            args2.push_back(*it + "p");
           }
           reprs.push_back(ir->builder()->CreateIdent(*it));
           reprs2.push_back(ir->builder_s().CreateIdent(*it));
         }
-        args += ")";
-        args2 += ")";
         if (need_new_fsymbol) {
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
           curr_repr_s = ir->builder_s().CreateInvoke(ref->name(), a);
           loop->unin_symbol_for_iegen.insert(
-              std::pair<std::string, std::string>(s + args,
+              std::pair<std::string, std::string>(s + dumpargs(args),
                                                   static_cast<CG_stringRepr*>(curr_repr_s)->GetString()));
           std::vector<CG_outputRepr *> b;
           b.push_back(curr_repr_s2);
           curr_repr_s2 = ir->builder_s().CreateInvoke(ref->name(), b);
           loop->unin_symbol_for_iegen.insert(
-              std::pair<std::string, std::string>(s + args2,
+              std::pair<std::string, std::string>(s + dumpargs(args2),
                                                   static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()));
         }
         if (need_new_fsymbol2 && curr_repr_no_const != NULL) {
@@ -1040,14 +1044,14 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
           curr_repr_s_no_const = ir->builder_s().CreateInvoke(ref->name(),
                                                               a);
           loop->unin_symbol_for_iegen.insert(
-              std::pair<std::string, std::string>(s1 + args,
+              std::pair<std::string, std::string>(s1 + dumpargs(args),
                                                   static_cast<CG_stringRepr*>(curr_repr_s_no_const)->GetString()));
           std::vector<CG_outputRepr *> b;
           b.push_back(curr_repr_s2_no_const);
           curr_repr_s2_no_const = ir->builder_s().CreateInvoke(
               ref->name(), b);
           loop->unin_symbol_for_iegen.insert(
-              std::pair<std::string, std::string>(s1 + args2,
+              std::pair<std::string, std::string>(s1 + dumpargs(args2),
                                                   static_cast<CG_stringRepr*>(curr_repr_s2_no_const)->GetString()));
         }
 

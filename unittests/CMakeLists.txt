@@ -1,2 +1,6 @@
-add_subdirectory(basic_tests)
-add_subdirectory(chill_ast)
+FILE(GLOB children RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *)
+FOREACH(child ${children})
+    IF(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${child})
+        add_subdirectory(${child})
+    ENDIF()
+ENDFOREACH()

@@ -67,8 +67,10 @@ namespace omega {
     
     //debug_fprintf(stderr, "\nfunction is:\n"); currentfunction->print(); printf("\n\n"); fflush(stdout); 
 
-    symtab_  = &(currentfunction->parameters); // getSymbolTable();             // TODO rename 
-    symtab2_ = currentfunction->getBody()->getSymbolTable(); // TODO rename
+    symtab_  = &(currentfunction->parameters);
+    symtab2_ = currentfunction->getSymbolTable();
+    symtab2_->clear();
+    currentfunction->getBody()->gatherVarDecls(*symtab2_);
     
     //printf("\nsymtab_:\n"); fflush(stdout); 
     //printSymbolTable( symtab_ ); 
@@ -410,42 +412,23 @@ namespace omega {
       chillAST_SourceFile *src = toplevel; // todo don't be dumb
       
       chillAST_node *def = src->findCall(name);
-      if (!def) { // can't find it
-        debug_fprintf(stderr, "CG_chillBuilder::CreateInvoke( %s ), can't find a function or macro by that name\n", name); 
-        exit(-1); 
-      }
-      
-      //debug_fprintf(stderr, "%s is a %s\n", name, def->getTypeString()); 
-      if (def->isMacroDefinition()) { 
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
-        int numparams = list.size(); 
-        for (int i=0; i<numparams; i++) { 
+      if (def) {
+        chillAST_CallExpr *CE = new chillAST_CallExpr( new chillAST_DeclRefExpr(def) );
+        int numparams = list.size();
+        for (int i=0; i<numparams; i++) {
           CG_chillRepr *CR = (CG_chillRepr *) list[i];
-          CE->addArg( CR->GetCode() ); 
+          CE->addArg( CR->GetCode() );
         }
-        return  new CG_chillRepr( CE ); 
-      }
-      else if (def->isFunctionDecl()) { 
-        // TODO are these cases exactly the same?
-        chillAST_CallExpr *CE = new chillAST_CallExpr( def );
-        int numparams = list.size(); 
-        for (int i=0; i<numparams; i++) { 
-          CG_chillRepr *CR = (CG_chillRepr *) list[i];
-          CE->addArg( CR->GetCode() ); 
-        }
-        return  new CG_chillRepr( CE ); 
-      }
-      else { 
+        return  new CG_chillRepr( CE );
       }
 
-
-      // chillAST_CallExpr::chillAST_CallExpr(chillAST_node *function, chillAST_node *p );
-
-      // todo addarg()
-      //int numargs;
-      //std::vector<class chillAST_node*> args;
-      debug_fprintf(stderr, "Code generation: invoke function io_call not implemented\n");
-      return NULL;
+      chillAST_CallExpr *CE = new chillAST_CallExpr( new chillAST_DeclRefExpr(name) );
+      int numparams = list.size();
+      for (int i=0; i<numparams; i++) {
+        CG_chillRepr *CR = (CG_chillRepr *) list[i];
+        CE->addArg( CR->GetCode() );
+      }
+      return  new CG_chillRepr( CE );
     }
   }
   
@@ -761,44 +744,20 @@ namespace omega {
   CG_outputRepr* CG_chillBuilder::CreateIdent(const std::string &_s) const {
     debug_fprintf(stderr, "CG_chillBuilder::CreateIdent( %s )\n", _s.c_str()); 
     
-    bool already_parameter = symbolTableHasVariableNamed(symtab_,  _s.c_str());
-    bool already_internal  = symbolTableHasVariableNamed(symtab2_, _s.c_str());
-    if ( already_parameter ) { 
-      debug_fprintf(stderr, "%s was already a parameter??\n",  _s.c_str()); 
-    } 
-    if ( already_internal ) { 
-      //debug_fprintf(stderr, "%s was already defined in the function body\n",  _s.c_str()); 
-      //printSymbolTable(symtab2_); printf("dammit\n"); fflush(stdout); 
-    } 
+    auto already_parameter = symbolTableFindVariableNamed(symtab_,  _s.c_str());
+    auto already_internal  = symbolTableFindVariableNamed(symtab2_, _s.c_str());
 
-    if ( (!already_parameter) && (! already_internal)) {  
-      debug_fprintf(stderr, "CG_roseBuilder.cc L919 adding symbol %s to symtab2_ because it was not already there\n", _s.c_str()); 
-      
-      //debug_fprintf(stderr, "parameters were: %p\n", symtab_); 
-      //printSymbolTable( symtab_ ); 
-      //debug_fprintf(stderr, "\nbody symbols were: %p\n", symtab2_); 
-      //printSymbolTable( symtab2_ ); 
-      //debug_fprintf(stderr, "\n\n"); 
-      //debug_fprintf(stderr, "there were  already %d entries in body\n", symtab2_->size()); 
+    if ( already_parameter )
+      return new CG_chillRepr( new chillAST_DeclRefExpr(already_parameter) );
+    if ( already_internal )
+      return new CG_chillRepr( new chillAST_DeclRefExpr(already_internal) );
 
-      // this is copying roseBuilder, but is probably wrong. it is assuming 
-      // that the ident is a direct child of the current function 
-      
-      chillAST_VarDecl *vd = new chillAST_VarDecl( "int", "", _s.c_str()); // parent not available  TODO
-      currentfunction->addVariableToSymbolTable( vd ); // use symtab2_  ?? 
-    
-      
-      chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd ); // parent not available
-      //debug_fprintf(stderr, "made a new chillRepr from "); dre->dump(); fflush(stdout);
-      return new CG_chillRepr( dre );
-    }
+    debug_fprintf(stderr, "CG_roseBuilder.cc L919 adding symbol %s to symtab2_ because it was not already there\n", _s.c_str());
+    // this is copying roseBuilder, but is probably wrong. it is assuming
+    // that the ident is a direct child of the current function
 
-
-    // variable was already defined as either a parameter or internal variable to the function.
-
-    // NOW WHAT??  gotta return something
-    chillAST_VarDecl *vd = currentfunction->funcHasVariableNamed( _s.c_str() );
-    //debug_fprintf(stderr, "vd %p\n", vd); 
+    chillAST_VarDecl *vd = new chillAST_VarDecl( "int", "", _s.c_str()); // parent not available  TODO
+    currentfunction->addVariableToSymbolTable( vd ); // use symtab2_  ??
 
     chillAST_DeclRefExpr *dre = new chillAST_DeclRefExpr( "int", _s.c_str(), (chillAST_node*)vd ); // parent not available
     return new CG_chillRepr( dre );

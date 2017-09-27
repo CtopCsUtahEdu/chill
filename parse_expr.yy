@@ -1,12 +1,15 @@
+%define api.prefix {expr}
+
 %{
 #include "chill_run_util.hh"
 #include "parse_expr.ll.hh"
 #include "chill_io.hh"
 
-extern int yydebug;
+extern int exprdebug;
 
-void yyerror(const char*);
-int yyparse(simap_vec_t** rel);
+int exprlex(void);
+void exprerror(const char*);
+int exprparse(simap_vec_t** rel);
 
 static simap_vec_t* return_rel; // used as the return value for yyparse
 
@@ -61,26 +64,26 @@ neg_expr : '-' neg_expr          { $$ = make_cond_item_neg($2); }
 ;
 %%
 
-void yyerror(const char* msg) {
+void exprerror(const char* msg) {
   debug_fprintf(stderr, "Parse error: %s", msg);
 }
 
 simap_vec_t* parse_relation_vector(const char* expr) {
-  yydebug=0;
+  exprdebug=0;
   YY_BUFFER_STATE state;
   
   //if(yylex_init()) {
   //   TODO: error out or something
   //}
   
-  state = yy_scan_string(expr);
+  state = expr_scan_string(expr);
   
-  if(yyparse()) {
+  if(exprparse()) {
     // TODO: error out or something
   }
   
-  yy_delete_buffer(state);
-  yylex_destroy();
+  expr_delete_buffer(state);
+  exprlex_destroy();
   return return_rel;
 }
 

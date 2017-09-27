@@ -71,7 +71,7 @@ void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   // Update transformation relations
   for (std::set<int>::iterator i = active.begin(); i != active.end(); i++) {
     int n = stmt[*i].xform.n_out();
-    Relation mapping(n, n);
+    omega::Relation mapping(n, n);
     F_And *f_root = mapping.add_and();
     for (int j = 1; j <= 2 * level - 2; j++) {
       EQ_Handle h = f_root->add_EQ();
@@ -302,7 +302,7 @@ void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
   // Update transformation relations
   for (std::set<int>::iterator i = active.begin(); i != active.end(); i++) {
     int n = stmt[*i].xform.n_out();
-    Relation mapping(n, n);
+    omega::Relation mapping(n, n);
     F_And *f_root = mapping.add_and();
     for (int j = 1; j <= n; j += 2) {
       EQ_Handle h = f_root->add_EQ();
@@ -489,7 +489,7 @@ void Loop::set_array_size(std::string name, int size ){
 }
 
 
-std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
+std::set<int> Loop::split(int stmt_num, int level, const omega::Relation &cond) {
   // check for sanity of parameters
   if (stmt_num < 0 || stmt_num >= stmt.size())
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
@@ -501,7 +501,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
   std::vector<int> lex = getLexicalOrder(stmt_num);
   std::set<int> same_loop = getStatements(lex, dim - 1);
   
-  Relation cond2 = copy(cond);
+  omega::Relation cond2 = copy(cond);
   cond2.simplify();
   cond2 = EQs_to_GEQs(cond2);
   Conjunct *c = cond2.single_conjunct();
@@ -510,7 +510,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
 
   for (GEQ_Iterator gi(c->GEQs()); gi; gi++) {
     int max_level = (*gi).max_tuple_pos();
-    Relation single_cond(max_level);
+    omega::Relation single_cond(max_level);
     single_cond.and_with_GEQ(*gi);
     
     // TODO: should decide where to place newly created statements with
@@ -533,10 +533,10 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
     for (std::set<int>::iterator i = same_loop.begin();
          i != same_loop.end(); i++) {
       int n = stmt[*i].IS.n_set();
-      Relation part1, part2;
+      omega::Relation part1, part2;
       if (max_level > n) {
         part1 = copy(stmt[*i].IS);
-        part2 = Relation::False(0);
+        part2 = omega::Relation::False(0);
       } else {
         part1 = Intersection(copy(stmt[*i].IS),
                              Extend_Set(copy(single_cond), n - max_level));
@@ -790,7 +790,7 @@ std::set<int> Loop::split(int stmt_num, int level, const Relation &cond) {
       
       int n1 = part2.n_set();
       int m = this->known.n_set();
-      Relation test;
+      omega::Relation test;
       if(m > n1)
         test = Intersection(copy(this->known),
                             Extend_Set(copy(part2), m - part2.n_set()));
@@ -934,7 +934,7 @@ void Loop::skew(const std::set<int> &stmt_nums, int level,
   for (std::set<int>::const_iterator i = stmt_nums.begin();
        i != stmt_nums.end(); i++) {
     int n = stmt[*i].xform.n_out();
-    Relation r(n, n);
+    omega::Relation r(n, n);
     F_And *f_root = r.add_and();
     for (int j = 1; j <= n; j++)
       if (j != 2 * level) {
@@ -1099,7 +1099,7 @@ void Loop::shift(const std::set<int> &stmt_nums, int level, int shift_amount) {
        i != stmt_nums.end(); i++) {
     int n = stmt[*i].xform.n_out();
     
-    Relation r(n, n);
+    omega::Relation r(n, n);
     F_And *f_root = r.add_and();
     for (int j = 1; j <= n; j++) {
       EQ_Handle h = f_root->add_EQ();
@@ -1587,20 +1587,19 @@ std::vector<IR_ArrayRef *> FindOuterArrayRefs(IR_Code *ir,
 
 
 std::vector<std::vector<std::string> > constructInspectorVariables(IR_Code *ir,
-                                                                   std::set<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
+                                                                   std::vector<IR_ArrayRef *> &arr, std::vector<std::string> &index) {
   
   debug_fprintf(stderr, "constructInspectorVariables()\n"); 
 
   std::vector<std::vector<std::string> > to_return;
   
-  for (std::set<IR_ArrayRef *>::iterator i = arr.begin(); i != arr.end();
-       i++) {
+  for (auto i: arr) {
     
     std::vector<std::string> per_index;
     
-    CG_outputRepr *subscript = (*i)->index(0);
+    CG_outputRepr *subscript = i->index(0);
     
-    if ((*i)->n_dim() > 1)
+    if (i->n_dim() > 1)
       throw ir_error(
         "multi-dimensional array support non-existent for flattening currently");
     
@@ -1803,20 +1802,19 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     
     loop_indices.push_back(stmt[stmt_num].IS.set_var(*i)->name());
   }
-  std::set<IR_ArrayRef *> set_refs;
+  std::vector<IR_ArrayRef *> set_refs;
   
   for (int i = 0; i < outer_arr_refs.size(); i++) {
     bool found = false;
-    for (std::set<IR_ArrayRef*>::iterator j = set_refs.begin();
-         j != set_refs.end(); j++) {
-      if ((*j)->name() == outer_arr_refs[i]->name()) {
+    for (auto j: set_refs) {
+      if (j->name() == outer_arr_refs[i]->name()) {
         found = true;
         break;
       }
       
     }
     if (!found)
-      set_refs.insert(outer_arr_refs[i]);
+      set_refs.push_back(outer_arr_refs[i]);
     
   }
   
@@ -2006,7 +2004,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
 //f) replace nnz(i,j) with *count;
   
-//1. Create Omega Relation for Inspector Iteration Space
+//1. Create Omega omega::Relation for Inspector Iteration Space
 //   using uninterpreted function symbols
   
 //1.a) Create Mapping from i->[i,k,j]
@@ -2017,7 +2015,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
   int m = stmt[stmt_num].xform.n_out();
   
-  Relation r(m, m + 2);
+  omega::Relation r(m, m + 2);
   F_And *f_root = r.add_and();
   
   for (int j = 1; j <= m; j++) {
@@ -2042,25 +2040,24 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
   */
   
-//2. Create Omega Relation for Flattened Iteration Space
+//2. Create Omega omega::Relation for Flattened Iteration Space
 //   using uninterpreted function symbolsstd::vector<IR_ArrayRef *> arr_refs = ir->FindArrayRef(stmt[stmt_num].code);
   
   
-// Relation flattened_IS = copy(stmt[stmt_num].IS);
+// omega::Relation flattened_IS = copy(stmt[stmt_num].IS);
   //IeGenlib relation construction
   //1. Create a map from array reference names to outputReprs to pass into CreateSubstituted statement
   std::map<std::string, std::string> array_name_to_relation;
   
-  for (std::set<IR_ArrayRef *>::iterator it = set_refs.begin();
-       it != set_refs.end(); it++) {
+  for (auto it: set_refs) {
     std::string s;
-    if ((*it)->n_dim() > 1)
+    if (it->n_dim() > 1)
       throw loop_error(
         "only statements with single dimensional arrays are handled for flattening currently");
     
-    CG_outputRepr *index = (*it)->index(0);
+    CG_outputRepr *index = it->index(0);
     if (ir->QueryExpOperation(index) != IR_OP_ARRAY_VARIABLE) {
-      Relation r(stmt[stmt_num].IS.n_set(), 1);
+      omega::Relation r(stmt[stmt_num].IS.n_set(), 1);
       //std::cout << (*it)->name() << std::endl;
       F_And *f_root = r.add_and();
       
@@ -2090,8 +2087,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
         throw loop_error(
           "more than one level of indirection in arrays not supported currently");
       
-      Relation r(stmt[stmt_num].IS.n_set(), 1);
-      std::cout << (*it)->name() << std::endl;
+      omega::Relation r(stmt[stmt_num].IS.n_set(), 1);
+      std::cout << it->name() << std::endl;
       F_And *f_root = r.add_and();
       
       for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++)
@@ -2112,7 +2109,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
       
     }
     array_name_to_relation.insert(
-      std::pair<std::string, std::string>((*it)->name(), s));
+      std::pair<std::string, std::string>(it->name(), s));
     std::cout << "check" << std::endl;
     std::cout << s << std::endl;
   }
@@ -2122,7 +2119,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   // transformation.
   iegenlib::setCurrEnv(); // Clears out the environment
   
-  Relation IS_for_iegen = copy(stmt[stmt_num].IS);
+  omega::Relation IS_for_iegen = copy(stmt[stmt_num].IS);
   printf("IS_for_iegen   "); IS_for_iegen.print(); printf("\n"); fflush(stdout); 
 
   std::string set_string = "{[";
@@ -2137,7 +2134,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   iegen_is = set_string + " : " + iegen_is + "}";
   std::cout << iegen_is << std::endl;
   
-  Relation flattened_index(1);
+  omega::Relation flattened_index(1);
   flattened_index.name_set_var(1, index_name);
   F_And *f_root_iegen = flattened_index.add_and();
   
@@ -2162,7 +2159,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   iegen_flattened = set_string2 + iegen_flattened + "}";
   std::cout << iegen_flattened << std::endl;
   
-  Relation r1(stmt[stmt_num].IS.n_set(), 1);
+  omega::Relation r1(stmt[stmt_num].IS.n_set(), 1);
   
   std::vector<std::string> index_names;
   for (int j = 1; j <= stmt[stmt_num].IS.n_set(); j++) {
@@ -2170,7 +2167,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     index_names.push_back(stmt[stmt_num].IS.set_var(j)->name());
   }
   r1.name_output_var(1, index_name);
-  
+
   Free_Var_Decl *nnz_iegen = new Free_Var_Decl(inspector_name,
                                                loop_levels.size());
   Variable_ID iegen_nnz = r1.get_local(nnz_iegen, Input_Tuple);
@@ -2181,26 +2178,15 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   e_iegen1.update_coef(iegen_nnz, 1);
   e_iegen1.update_coef(r1.output_var(1), -1);
   
-  /*EQ_Handle e_iegen2 = f_root_coalesce->add_EQ();
-    e_iegen2.update_coef(r1.input_var(r1.n_inp()), 1);
-    e_iegen2.update_coef(r1.output_var(1), -1);
-  */
-  //r1.simplify(0,0);
-
-  printf("\n*** r1   ");   r1.print(); printf("\n"); fflush(stdout); 
+  printf("\n*** r1   ");   r1.print(); printf("\n"); fflush(stdout);
 
   std::string r1_coalesce = print_to_iegen_string(r1);
   std::string set_string3 = set_string + " -> [" + r1.output_var(1)->name()
     + "] : ";
-  r1_coalesce = set_string3 + r1_coalesce + "&&" + r1.output_var(1)->name()
-    + "=" + r1.input_var(r1.n_inp())->name() + "}";
+  r1_coalesce = set_string3 + r1_coalesce + "}";
   std::cout << r1_coalesce << std::endl;
   
-//  std::string cpy_inspector_name = std::string("c");//inspector_name;
-//  std::string cpy_iegen_is = std::string("{[i,j] : index_(i) <= j && j < index__(i) && 0 <= i && i < n}");//iegen_is;
-//  std::string cpy_iegen_flattened = std::string("{[coalesced_index] : 0 <= coalesced_index && coalesced_index < nnz}");
-
-  debug_fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str()); 
+  debug_fprintf(stderr, "%s\n%s\n%s\n", inspector_name.c_str(), iegen_is.c_str(), iegen_flattened.c_str());
 
   debug_fprintf(stderr, "\ndomain\n"); 
   iegenlib::Set *domain   = new iegenlib::Set(iegen_is);
@@ -2220,7 +2206,8 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   debug_fprintf(stderr, "FINISHED iegenlib::appendCurrEnv()\n\n"); 
 
 
-  iegenlib::Relation* T_coalesce = new iegenlib::Relation(r1_coalesce); 
+  iegenlib::Relation* T_coalesce = new iegenlib::Relation(r1_coalesce);
+  std::cout<< T_coalesce->prettyPrintString();
   debug_fprintf(stderr, "T_coalesce\n"); 
 
   // then applies the transformation to each of the access relation
@@ -2228,7 +2215,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   //EXPECT_EQ("{ [k] -> [i, j] : k - j = 0 && k - c(i, j) = 0 }",
   std::cout << T_coalesce_inv->prettyPrintString() << std::endl;
   
-  Relation flattened_IS(stmt[stmt_num].IS.n_set() + 1);
+  omega::Relation flattened_IS(stmt[stmt_num].IS.n_set() + 1);
   F_And *f_and = flattened_IS.add_and();
   
   for (int j = 1; j <= flattened_IS.n_set() - 1; j++) {
@@ -2257,7 +2244,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   printf("\n*** flattened_IS   ");   flattened_IS.print(); printf("\n"); fflush(stdout); 
 
 
-  Relation flattened_xform(flattened_IS.n_set(),
+  omega::Relation flattened_xform(flattened_IS.n_set(),
                            2 * flattened_IS.n_set() + 1);
   
   F_And *fr = flattened_xform.add_and();
@@ -2377,7 +2364,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
 // Update known relation
   int known_dim = (this->known).n_set();
   
-  Relation known = Extend_Set(copy(this->known),
+  omega::Relation known = Extend_Set(copy(this->known),
                               stmt[stmt_num].xform.n_out() - this->known.n_set());
   
   Variable_ID nnz_in__ = known.get_local(nnz, Input_Tuple);
@@ -2391,7 +2378,7 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
   std::vector<int> lex = getLexicalOrder(new_stmt_num);
   
-  Relation mapping(2 * n_ + 1, n_);
+  omega::Relation mapping(2 * n_ + 1, n_);
   F_And *f_root = mapping.add_and();
   for (int j = 1; j <= n_; j++) {
     EQ_Handle h = f_root->add_EQ();
@@ -2449,20 +2436,17 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
                                                                   arr_refs_);
   
   
-  std::set<IR_ArrayRef *> set_refs_;
+  std::vector<IR_ArrayRef *> set_refs_;
   
   for (int i = 0; i < outer_arr_refs_.size(); i++) {
     bool found = false;
-    for (std::set<IR_ArrayRef*>::iterator j = set_refs_.begin();
-         j != set_refs_.end(); j++) {
-      if ((*j)->name() == outer_arr_refs_[i]->name()) {
+    for (auto j: set_refs_)
+      if (j->name() == outer_arr_refs_[i]->name()) {
         found = true;
         break;
       }
-      
-    }
     if (!found)
-      set_refs_.insert(outer_arr_refs_[i]);
+      set_refs_.push_back(outer_arr_refs_[i]);
     
   }
   
@@ -2496,16 +2480,12 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
     CG_outputRepr *new_array_exp = ir->builder()->CreateArrayRefExpression( ir->builder()->CreateIdent(array_name), subscript);
     
     IR_ArrayRef *to_replace;
-    std::set<IR_ArrayRef *>::iterator it2;
-    for( it2 = set_refs_.begin(); it2 != set_refs_.end(); it2++)
-      if((*it2)->name() == array_name)
-      {
+    auto it2 = set_refs_.begin();
+    for(; it2 != set_refs_.end(); ++it2)
+      if((*it2)->name() == array_name) {
         to_replace = *it2;
-        
         break;
-        
       }
-    
     
     set_refs_.erase(it2);
     ir->ReplaceExpression(to_replace, new_array_exp);
@@ -2527,9 +2507,9 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   
 
   debug_fprintf(stderr, "BEFORE changing stmt[%d].IS\n", new_stmt_num); 
-  //debugRelations(); 
+  //debugomega::Relations();
 
-  Relation buh = Restrict_Domain(mapping, stmt[new_stmt_num].IS);
+  omega::Relation buh = Restrict_Domain(mapping, stmt[new_stmt_num].IS);
   debug_fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
   stmt[new_stmt_num].IS = omega::Range( buh ); 
   debug_fprintf(stderr, "*** buh: \n");   buh.print(); printf("\n"); fflush(stdout); 
@@ -2540,15 +2520,15 @@ void Loop::flatten(int stmt_num, std::string index_name ,std::vector<int> &loop_
   //stmt[new_stmt_num].IS = omega::Range(Restrict_Domain(mapping, stmt[new_stmt_num].IS));
 
   debug_fprintf(stderr, "AFTER changing stmt[%d].IS\n", new_stmt_num); 
-  //debugRelations(); 
+  //debugomega::Relations();
 
   stmt[new_stmt_num].IS.simplify();
   
   debug_fprintf(stderr, "AFTER simplify\n"); 
-  //debugRelations(); 
+  //debugomega::Relations();
 
   // replace original transformation relation with straight 1-1 mapping
-  mapping = Relation(n_, 2 * n_ + 1);
+  mapping = omega::Relation(n_, 2 * n_ + 1);
   f_root = mapping.add_and();
   for (int j = 1; j <= n_; j++) {
     EQ_Handle h = f_root->add_EQ();
@@ -2601,9 +2581,9 @@ void Loop::normalize(int stmt_num, int loop_level) {
   
   apply_xform(stmt_num);
   
-  Relation r = copy(stmt[stmt_num].IS);
+  omega::Relation r = copy(stmt[stmt_num].IS);
   
-  Relation bound = get_loop_bound(r, loop_level, this->known);
+  omega::Relation bound = get_loop_bound(r, loop_level, this->known);
   if (!bound.has_single_conjunct() || !bound.is_satisfiable()
       || bound.is_tautology())
     throw loop_error("unable to extract loop bound for normalize");
@@ -2641,7 +2621,7 @@ void Loop::normalize(int stmt_num, int loop_level) {
     
     int n = stmt[stmt_num].xform.n_out();
     
-    Relation r(n, n);
+    omega::Relation r(n, n);
     F_And *f_root = r.add_and();
     for (int j = 1; j <= n; j++)
       if (j != 2 * loop_level) {

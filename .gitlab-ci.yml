@@ -11,6 +11,7 @@ build-cmake:
         - make $CMAKEBUILD
     only:
         - master
+        - /^cmake-.*$/
     artifacts:
         paths:
             - build/
@@ -37,6 +38,7 @@ test-cmake:
         - make check-all
     only:
         - master
+        - /^cmake-.*$/
 
 test-automake:
     stage: test

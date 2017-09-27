@@ -316,7 +316,7 @@ void CFamily::runS(chillAST_ImplicitCastExpr *n, std::string indent, std::ostrea
 }
 
 void CFamily::runS(chillAST_MacroDefinition *n, std::string indent, std::ostream &o) {
-  o << "#define" << n->macroName << " ";
+  o << "#define " << n->macroName;
   int np = n->parameters.size();
   if (np) {
     o << "(" << n->parameters.at(0)->varname;
@@ -325,6 +325,7 @@ void CFamily::runS(chillAST_MacroDefinition *n, std::string indent, std::ostream
     o << ")";
   }
   // TODO newline for multiline macro
+  o << " ";
   run(n->getBody(), indent, o);
 }
 
@@ -376,7 +377,6 @@ void CFamily::runS(chillAST_Preprocessing *n, std::string indent, std::ostream &
 }
 
 void CFamily::runS(chillAST_RecordDecl *n, std::string indent, std::ostream &o) {
-  if (n->isUnnamed) return;
   if (n->isAStruct()) {
     string nid = indent + identSpace;
     o << "struct ";

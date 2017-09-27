@@ -1374,8 +1374,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         if (param->numdimensions > 1) { 
           debug_fprintf(stderr, "array Var %d %s is multidimensional\n",i, v->varname);
-          debug_fprintf(stderr, "underlying type %s   arraypart '%s'\n", v->underlyingtype, v->arraypart);
-          //v->print(0, stderr); debug_fprintf(stderr, "\n"); 
+          //v->print(0, stderr); debug_fprintf(stderr, "\n");
           param->print(0, stderr); debug_fprintf(stderr, "\n\n"); 
 
           char line[128];

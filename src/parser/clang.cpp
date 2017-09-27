@@ -26,6 +26,7 @@ History:
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/AST/RecordLayout.h>
 #include <clang/AST/Stmt.h>
+#include <clang/AST/ASTContext.h>
 #include <clang/Lex/Lexer.h>
 #include <clang/Parse/ParseAST.h>
 #include <clang/Basic/TargetInfo.h>
