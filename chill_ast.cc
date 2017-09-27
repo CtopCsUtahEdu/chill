@@ -89,115 +89,12 @@ void printSymbolTableMoreInfo( chillAST_SymbolTable *st ) {
   fflush(stdout);
 }
 
-bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name ) {
-  if (!table) return false; // ?? 
-  int numvars = table->size();
-  for (int i=0; i<numvars; i++) { 
-    chillAST_VarDecl *vd = (*table)[i];
-    if (!strcmp(name, vd->varname)) return true;  // need to check type? 
-  }
-  return false;
+chillAST_VarDecl* symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ) {
+  if (!table) return nullptr; // ??
+  for (auto vd: *table)
+    if (!strcmp(name, vd->varname)) return vd;
+  return nullptr;
 }
-
-chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ){  // fwd decl TODO too many similar named functions
-  if (!table) return NULL; // ?? 
-
-  // see if name has a dot or arrow (->) indicating that it is a structure/class
-  const char *cdot = strstr( name, "." );
-  const char *carrow = strstr(name, "->");  // initial 'c' for const - can't change those
-
-  char *varname;
-  char *subpart = NULL;
-
-  if (cdot || carrow) { 
-    debug_fprintf(stderr, "symbolTableFindVariableNamed(), name '%s' looks like a struct\n", name); 
-
-    // so, look for the first part in the symbol table.
-    // warning, this could be looking for a->b.c.d->e.f->g
-    varname = strdup( name );
-
-    char *dot   = strstr(varname, "." );
-    char *arrow = strstr( varname, "->" );
-    if (dot != NULL && arrow != NULL ) { // dot AND arrow, 
-      debug_fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), name '%s' has both dot and arrow? TODO\n");
-      exit(-1); 
-    }
-    else if (dot != NULL && !arrow) { // just dot(s).  dot points to the first one 
-      //debug_fprintf(stderr, "name '%s' has dot(s)\n", varname);
-      *dot = '\0'; // end string at the dot
-      subpart = &(dot[1]);
-      debug_fprintf(stderr, "will now look for a struct/class named %s that has member %s\n", varname, subpart);
-
-    }
-    else if (arrow != NULL && !dot) { // just arrow(s)  arrow points to the first one
-      //debug_fprintf(stderr, "name '%s' has arrow(s)\n", varname);
-      *arrow = '\0'; // end string at the arrow
-      subpart = &(arrow[2]); 
-      debug_fprintf(stderr, "will now look for a struct/class named %s that has member %s\n", varname, subpart);
-    }
-    else { // impossible 
-      debug_fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), varname '%s', looks like a struct,  but I can't figure it out\n", varname);
-      exit(-1); 
-    }
-  }
-  else { 
-    varname = strdup(name); 
-  }
-
-  int numvars = table->size();
-  for (int i=0; i<numvars; i++) { 
-    chillAST_VarDecl *vd = (*table)[i];
-    if (!strcmp(varname, vd->varname)) { 
-      debug_fprintf(stderr, "found variable named %s\n", varname);
-
-      if (!subpart) return vd;  // need to check type? 
-
-      // OK, we have a variable, which looks like a struct/class, and a subpart that is some member names
-      //debug_fprintf(stderr, "but I don't know how to check if it has member %s\n", subpart); 
-      
-      char *dot   = strstr(subpart, "." );
-      char *arrow = strstr(subpart, "->" );
-      
-      if (!dot && !arrow) { // whew, only one level of struct
-        //debug_fprintf(stderr, "whew, only one level of struct\n"); 
-        
-        // make sure this variable definition is a struct
-        if (vd->isAStruct()) { 
-          //debug_fprintf(stderr, "%s is a struct of type %s\n", varname, vd->getTypeString()); 
-          if (vd->isVarDecl()) { 
-            chillAST_RecordDecl  *rd = vd->getStructDef(); 
-            if (rd) { 
-              //debug_fprintf(stderr, "has a recordDecl\n"); 
-              
-              chillAST_VarDecl *sp = rd->findSubpart( subpart );
-              if (sp) { debug_fprintf(stderr, "found a struct member named %s\n", subpart); }
-              else  { debug_fprintf(stderr, "DIDN'T FIND a struct member named %s\n", subpart); }
-              return sp;  // return the subpart?? 
-            }
-            else { 
-              debug_fprintf(stderr, "no recordDecl\n"); 
-              exit(-1); 
-            }
-          }
-          else { 
-            debug_fprintf(stderr, "NOT a VarDecl???\n"); // impossible
-          }
-        }
-        else { 
-          debug_fprintf(stderr, "false alarm. %s is a variable, but doesn't have subparts\n", varname); 
-          return NULL; // false alarm. a variable of the correct name exists, but is not a struct 
-        }
-      }
-      
-      debug_fprintf(stderr, "chillast.cc symbolTableFindVariableNamed(), name '%s'  can't figure out multiple levels of struct yet!\n"); 
-
-      exit(-1); 
-    }
-  }
-  return NULL;
-}
-
-
 
 char *ulhack( char *brackets ) // remove UL from numbers, MODIFIES the argument!
 {
@@ -633,7 +530,7 @@ chillAST_FunctionDecl::chillAST_FunctionDecl(const char *rt, const char *fname ,
 void chillAST_FunctionDecl::addParameter( chillAST_VarDecl *p) {
   debug_fprintf(stderr, "%s chillAST_FunctionDecl::addParameter( 0x%x  param %s)   total of %d parameters\n", functionName, p, p->varname, 1+parameters.size()); 
 
-  if (symbolTableHasVariableNamed( &parameters, p->varname)) { // NOT recursive. just in FunctionDecl
+  if (symbolTableFindVariableNamed( &parameters, p->varname)) { // NOT recursive. just in FunctionDecl
     debug_fprintf(stderr, "chillAST_FunctionDecl::addParameter( %s ), parameter already exists?\n", p->varname);
     // exit(-1); // ?? 
     return; // error? 
@@ -1294,7 +1191,7 @@ bool chillAST_ForStmt::findLoopIndexesToReplace(chillAST_SymbolTable *symtab, bo
       contain->prependStatement( newguy );
       contain->addVariableToSymbolTable( newguy ); // adds to first enclosing symbolTable
       
-      if (!  symbolTableHasVariableNamed( contain->getSymbolTable(), vname )) { 
+      if (!  symbolTableFindVariableNamed( contain->getSymbolTable(), vname )) {
         debug_fprintf(stderr, "container doesn't have a var names %s afterwards???\n", vname); 
         exit(-1); 
       }

@@ -11,14 +11,15 @@ struct inspector {
 #define index___(i) index[1 * i + 1]
 #define index_(i) index[1 * i]
 int main() {
-  int y;
-  int a;
-  int x;
   inspector c;
   int t6;
   int t4;
   int t2;
   int n;
+  int x[10];
+  int y[10];
+  int a[100];
+  int col[100];
   n = 10;
   c.count = 0;
   for (t2 = 0; t2 <= n - 1; t2 += 1) 
@@ -28,6 +29,6 @@ int main() {
       c.count = c.count + 1;
     }
   for (t6 = 0; t6 <= c(t2, t4) - 1; t6 += 1) 
-    x[c.i[t6]] += a[c.j[t6]] * y[c.j[t6]];
+    x[c.i[t6]] += a[c.j[t6]] * y[col[c.j[t6]]];
   return 0;
 }

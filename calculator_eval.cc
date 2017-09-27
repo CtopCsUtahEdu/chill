@@ -1,21 +1,3 @@
-/*=============================================================================
-  Copyright (c) 2001-2009 Joel de Guzman
-  
-  Distributed under the Boost Software License, Version 1.0. (See accompanying
-  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
-  =============================================================================*/
-///////////////////////////////////////////////////////////////////////////////
-//
-//  Yet another calculator example! This time, we will compile to a simple
-//  virtual machine. This is actually one of the very first Spirit example
-//  circa 2000. Now, it's ported to Spirit2.
-//
-//  [ JDG Sometime 2000 ]       pre-boost
-//  [ JDG September 18, 2002 ]  spirit1
-//  [ JDG April 8, 2007 ]       spirit2
-//
-///////////////////////////////////////////////////////////////////////////////
-
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -32,7 +14,6 @@
 #include "ir_code.hh"
 #include "chill_error.hh"
 
-
 using namespace omega;
 
 namespace client
@@ -40,22 +21,6 @@ namespace client
   namespace qi = boost::spirit::qi;
   namespace phoenix = boost::phoenix;
   namespace ascii = boost::spirit::ascii;
-  
-  ///////////////////////////////////////////////////////////////////////////
-  //  The Virtual Machine
-  ///////////////////////////////////////////////////////////////////////////
-  enum byte_code
-    {
-      op_neg,     //  negate the top stack entry
-      op_add,     //  add top two stack entries
-      op_sub,     //  subtract top two stack entries
-      op_mul,     //  multiply top two stack entries
-      op_div,     //  divide top two stack entries
-      op_int,     //  push constant integer into the stack
-    };
-  
-  
-  
   
   struct createIdentifier
   {
@@ -77,35 +42,25 @@ namespace client
     void operator()(qi::unused_type,qi::unused_type, qi::unused_type ) const
     { 
       m_code.push_back(builder.CreateIdent(global_string));
-      // m_code.push_back(global_string);
-      
       code_string_.push_back(global_string);
-      
       global_string.clear();
-      //std::cout<<"1"<<std::endl; 
     }
     
     //template <typename IteratorT>
     void operator()(char &s ,qi::unused_type, qi::unused_type ) const
     { 
       global_string += s;
-      // std::cout<<"2"<<std::endl; 
-      //std::cout<< global_string<< std::endl;
     }
     
     //template <typename IteratorT>
-    void operator()(unsigned int &s ,qi::unused_type, qi::unused_type ) const
+    void operator()(int &s ,qi::unused_type, qi::unused_type ) const
     { 
       
       assert(code_string_.size() >= 2);
-      
       std::string member_name = index_names_[s];
-      
-      
       std::string function_name = code_string_[code_string_.size() -2];
-      
       std::string argument_name = code_string_[code_string_.size() -1];
-      
+
       code_string_.pop_back();
       code_string_.pop_back();
       if(function_name.find('_') != std::string::npos)
@@ -119,24 +74,20 @@ namespace client
       std::cout<< member_name<<std::endl;
       std::cout<< function_name<<std::endl;
       std::cout<< argument_name<<std::endl;
-      m_code.clear();
+      m_code.pop_back();
+      m_code.pop_back();
       m_code.push_back(builder.CreateArrayRefExpression(
                                                         
                                                         builder.ObtainInspectorData(
                                                                                     function_name, member_name),
                                                         builder.CreateIdent(argument_name)));
-      
-      
-      
-      // std::cout<<"2"<<std::endl; 
-      //std::cout<< global_string<< std::endl;
     }
     
   private:
     std::vector<CG_outputRepr *> &m_code;
     std::vector<std::string> &index_names_;
     std::vector<std::string> &code_string_;
-    CG_outputBuilder &builder; 
+    CG_outputBuilder &builder;
     std::string &global_string ;
   };  
   
@@ -147,32 +98,23 @@ namespace client
     
     checkInvoke(std::vector<CG_outputRepr *> &code, std::vector<std::string> &code_string, std::string & string_ref, CG_outputBuilder &builder_,std::vector<std::string> &index_names) :m_code(code), code_string_(code_string), global_string(string_ref), builder(builder_), index_names_(index_names){}
     
-    
-    
-    
     //template <typename IteratorT>
     void operator()(qi::unused_type ,qi::unused_type, qi::unused_type ) const
     {
       
-      if(code_string_.size() == 2){
-        std::string function_name = code_string_[0];
-        std::string argument_name = code_string_[1];
-        
+      if(m_code.size() == 2){
+        auto func = m_code[0];
+        auto param = m_code[1];
+        auto fname = code_string_[0];
         m_code.clear();
         code_string_.clear();
-        std::vector<CG_outputRepr *> to_push;
-        
-        to_push.push_back(builder.CreateIdent(argument_name));
-        // function_name may actually be an array.   ???  TODO 
-        m_code.push_back(builder.CreateInvoke(function_name, to_push, true)); // <-- it IS an array
+        // function_name may actually be an array.   ???  TODO
+        std::vector<CG_outputRepr*> p;
+        p.push_back(param);
+        m_code.push_back(builder.CreateInvoke(fname, p, true)); // <-- it IS an array
         std::cout<<"Success"<<std::endl;
-        std::cout<< function_name<<std::endl;
-        std::cout<< argument_name<<std::endl;
       }
       
-      
-      // std::cout<<"2"<<std::endl;
-      //std::cout<< global_string<< std::endl;
     }
     
   private:
@@ -182,9 +124,7 @@ namespace client
     std::vector<std::string> &index_names_;
     std::vector<std::string> &code_string_;
   };
-  ///////////////////////////////////////////////////////////////////////////
-  //  Our calculator grammar and compiler
-  ///////////////////////////////////////////////////////////////////////////
+
   template <typename Iterator>
   struct calculator : qi::grammar<Iterator, ascii::space_type>
   {
@@ -193,7 +133,7 @@ namespace client
       , code(code), index_names_(index_names), builder_(builder), code_string(code_string_)
     {
       using namespace qi::labels;
-      using qi::uint_;
+      using qi::int_;
       using ascii::char_;
       using qi::on_error;
       using qi::fail;
@@ -202,64 +142,31 @@ namespace client
       using phoenix::ref;
       using phoenix::push_back;
       using phoenix::construct;
-      
-      /*  expression =
-          term
-          >> *(   ('+' > term             [push_back(ref(code), op_add)])
-          |   ('-' > term             [push_back(ref(code), op_sub)])
-          )
-          ;
-          
-          term =
-          factor
-          >> *(   ('*' > factor           [push_back(ref(code), op_mul)])
-          |   ('/' > factor           [push_back(ref(code), op_div)])
-          )
-          ;
-          
-          factor =
-          uint_                           [
-          push_back(ref(code), op_int),
-          push_back(ref(code), _1)
-          ]
-          |   '(' > expression > ')'
-          |   ('-' > factor               [push_back(ref(code), op_neg)])
-          |   ('+' > factor)
-          ;
-          
-      */
-      
+
       expression =
         term
-        >> *(   ('+' >> term            )
-                |   ('-' >> term             )
-                )
-        ;
-      
+            >> *(   ('+' >> term)
+                |   ('-' >> term)
+                |   ('*' >> term)
+                |   ('/' >> term));
+
       term =
-        factor
-        >> *(   ('*' >> factor         )
-                |   ('/' >> factor         )
-                )
+          (identifier >> -('(' > expression > ')') >> -('[' > int_[client::createIdentifier(code, code_string, global_string,builder_,index_names_)] >>  ']') [client::checkInvoke(code, code_string, global_string,builder_,index_names_)])
+        | int_[std::cout<<_1<<std::endl] //int_[code.push_back(builder.CreateInt(static_cast<int>(_1)))]
+        | '(' >> expression >> ')'
         ;
-      
-      factor =
-        identifier    [client::createIdentifier(code, code_string, global_string,builder_,index_names_)]
-        >> -(('(' >> expression >> ')') >> (-( '[' >> uint_[client::createIdentifier(code, code_string, global_string,builder_,index_names_)] >>  ']')) [client::checkInvoke(code, code_string, global_string,builder_,index_names_)])
-        |   uint_                         
-        |   '(' >> expression >> ')'
-        |   ('-' >> factor )
-        |   ('+' >> factor)
-        ;
-      
-      identifier = char_("a-zA-Z") [client::createIdentifier(code, code_string, global_string,builder_,index_names_)]
+
+      identifier =
+          identifyP    [client::createIdentifier(code, code_string, global_string,builder_,index_names_)];
+
+      identifyP = char_("a-zA-Z") [client::createIdentifier(code, code_string, global_string,builder_,index_names_)]
         >> *(char_("_a-zA-Z0-9")[client::createIdentifier(code, code_string,global_string,builder_,index_names_)])
         ;     
       
       expression.name("expression");
       term.name("term");
-      factor.name("factor");
       identifier.name("identifier");
+      identifyP.name("identifyP");
       on_error<fail>
         (
          expression
@@ -273,7 +180,7 @@ namespace client
          );
     }
     
-    qi::rule<Iterator, ascii::space_type> expression, term, factor,identifier;
+    qi::rule<Iterator, ascii::space_type> expression, term, identifier, identifyP;
     std::vector<CG_outputRepr *>& code;
     std::vector<std::string>& code_string;
     std::vector<std::string> &index_names_ ;
@@ -289,16 +196,7 @@ namespace client
     std::string::const_iterator end = expr.end();
     bool r = phrase_parse(iter, end, calc, ascii::space);
     
-    if (r && iter == end)
-      {
-        
-        return true;
-      }
-    else
-      {
-        
-        return false;
-      }
+    return r && iter == end;
   }
 }
 
@@ -323,24 +221,13 @@ CG_outputRepr * Loop::iegen_parser(std::string &str, std::vector<std::string> &i
   
   std::vector<CG_outputRepr *> code;
   std::vector<std::string> code_string;
-  calculator calc(code, code_string, *(ir->builder()), index_names);          //  Our grammar
-  
-  
-  
-  //code.clear();
-  if (client::compile(calc, str))
-    {
-      /*     mach.execute(code);
-             std::cout << "\n\nresult = " << mach.top() << std::endl;
-             std::cout << "-------------------------\n\n";
-      */
-      debug_fprintf(stderr, "Loop::iegen_parser DONE\n"); 
-      return code[0];
-      
-    }
-  else
+  calculator calc(code, code_string, *(ir->builder()), index_names);
+
+  if (!client::compile(calc, str))
     throw loop_error("iegen string parsing failed");
   
-  debug_fprintf(stderr, "Loop::iegen_parser DONE\n"); 
+  debug_fprintf(stderr, "Loop::iegen_parser DONE\n");
+  for (auto i: code)
+    i->dump();
   return code[0];
 }

@@ -188,8 +188,7 @@ typedef std::vector<chillAST_VarDecl *>         chillAST_SymbolTable;   //  type
 typedef std::vector<chillAST_TypedefDecl *>     chillAST_TypedefTable;  //  typedef
 typedef std::vector<chillAST_node *>     chillAST_NodeList;  //  typedef
 
-bool symbolTableHasVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl 
-chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl TODO too many similar named functions
+chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl
 
 void printSymbolTable( chillAST_SymbolTable *st ); // fwd decl 
 void printSymbolTableMoreInfo( chillAST_SymbolTable *st ); // fwd decl 
@@ -1114,12 +1113,12 @@ public:
 
   chillAST_SymbolTable *getParameterSymbolTable() { return &parameters; }
   chillAST_SymbolTable *getSymbolTable() { return body->getSymbolTable(); }  //symbol_table; } // 
-  void setSymbolTable( chillAST_SymbolTable *tab ) { 
+  void setSymbolTable( chillAST_SymbolTable *tab ) {
     // no longer keeping a local ?? symbol_table = tab;
-    if (!body) { // can never happen now 
-      body = new chillAST_CompoundStmt(); 
+    if (!body) { // can never happen now
+      body = new chillAST_CompoundStmt();
     } // only if func is empty!
-    body->symbol_table = tab; 
+    body->symbol_table = tab;
   }
 
   chillAST_SymbolTable* addVariableToSymbolTable( chillAST_VarDecl *vd ) {  // chillAST_FunctionDecl method 
