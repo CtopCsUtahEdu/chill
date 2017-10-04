@@ -154,13 +154,9 @@ void Loop::stencilASEPadded(int stmt_num)   {
     treg_syms.push_back( vd ); 
   }
   
-  
-  //debug_fprintf(stderr, "\ndoing init (rampup?)\n");
   stencilInfo *SI = stmt[stmt_num].statementStencil;
   chillAST_VarDecl *src = SI->srcArrayVariable;
   chillAST_VarDecl *dst = SI->dstArrayVariable;
-  //debug_fprintf(stderr, "from stencilinfo, src %s   dst %s\n", src->varname, dst->varname); 
-  SI->print( stderr ); debug_fprintf(stderr, "\n\n");
 
   //Make a new Statement
   //Set its iteration space correctly                  // here 

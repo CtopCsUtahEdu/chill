@@ -59,7 +59,7 @@ void stencilInfo::walktree( chillAST_node *node,
       
       if (numvd != 1  || vds[0] != indexVariables[i]) { 
         debug_fprintf(stderr, "index %d has %d variables\n", i, numvd);
-        ind[i]->print(); printf("\n"); fflush(stdout); 
+        ind[i]->print(); printf("\n"); fflush(stdout);
         if (numvd > 0) debug_fprintf(stderr, "variable %s vs %s\n", vds[0]->varname, indexVariables[i]->varname );
         exit(-1);
       }
@@ -343,7 +343,7 @@ void stencilInfo::print( FILE *fp) {
     for (int j=0; j<coefficients[i].size(); j++) { 
       bool iscomplicated = coefficients[i][j]->isBinaryOperator();
       if (iscomplicated) fprintf(fp, "("); 
-      coefficients[i][j]->print(); 
+      coefficients[i][j]->print(0, fp);
       if (iscomplicated) fprintf(fp, ")"); 
       if ((j+1) < coefficients[i].size()) fprintf(fp, " * "); 
     }
@@ -418,10 +418,8 @@ bool stencilInfo::isSymmetric()
   for (int o=0; o<numoff; o++) { 
     
     int numindex = offsets[o].size();
-    if (numindex != 3) { 
-      debug_fprintf(stderr, "UHOH, stencil is not 3D?  %d offsets\n", numindex); // TODO'
-      exit(1); 
-    }
+    if (numindex != 3)
+      throw std::runtime_error("UHOH, stencil is not 3D? " + std::to_string(numindex) + " offsets"); // TODO'
 
     int ci = offsets[o][0];
     int cj = offsets[o][1];
@@ -430,8 +428,10 @@ bool stencilInfo::isSymmetric()
     chillAST_node*  n = find_coefficient( ci, cj, ck );
     
 
-    debug_fprintf(stderr, "\n\ncoeff %2d %2d %2d  is ", ci, cj, ck);
-    n->print(0, stderr); debug_fprintf(stderr, "\n"); 
+    debug_begin
+      fprintf(stderr, "\n\ncoeff %2d %2d %2d  is ", ci, cj, ck);
+      n->print(0, stderr); fprintf(stderr, "\n");
+    debug_end
 
     for (int d=0; d<3; d++)  { // dimension 0,1,2
 
@@ -448,14 +448,18 @@ bool stencilInfo::isSymmetric()
           return false; 
         }
         else {
-          debug_fprintf(stderr, "coeff %2d %2d %2d  is ", i, j, k);
-          mirror->print(0, stderr); debug_fprintf(stderr, "\n"); 
+          debug_begin
+            fprintf(stderr, "coeff %2d %2d %2d  is ", i, j, k);
+            mirror->print(0, stderr); fprintf(stderr, "\n");
+          debug_end
           
           // compare ASTs
-          if (! n->isSameAs( mirror )) { 
-            debug_fprintf(stderr, "coefficients (%d, %d, %d) and (%d, %d, d) differ\n", ci, cj, ck, i,j,k); 
-            n->print(0,stderr); debug_fprintf(stderr, "\n"); 
-            mirror->print(0,stderr); debug_fprintf(stderr, "\n"); 
+          if (! n->isSameAs( mirror )) {
+            debug_begin
+              debug_fprintf(stderr, "coefficients (%d, %d, %d) and (%d, %d, d) differ\n", ci, cj, ck, i,j,k);
+              n->print(0,stderr); debug_fprintf(stderr, "\n");
+              mirror->print(0,stderr); debug_fprintf(stderr, "\n");
+            debug_end
 
             return false; 
           }
