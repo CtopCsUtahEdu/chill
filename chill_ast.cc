@@ -3341,22 +3341,12 @@ chillAST_FunctionDecl *findFunctionDecl( chillAST_node *node, const char *procna
   vector<chillAST_FunctionDecl*> functions;
   findFunctionDeclRecursive( node, procname, functions );  
 
-  if ( functions.size() == 0 ) { 
-    debug_fprintf(stderr, "could not find function named '%s'\n", procname);
-    exit(-1);
-  }
-  
-  if ( functions.size() > 1 ) { 
-    debug_fprintf(stderr, "oddly, found %d functions named '%s'\n", functions.size(), procname);
-    debug_fprintf(stderr, "I am unsure what to do\n"); 
+  if ( functions.size() == 0 )
+    throw std::runtime_error(std::string("could not find function named ") + procname);
 
-    for (int f = 0; f < functions.size(); f++) { 
-      debug_fprintf(stderr, "function %d  %p   %s\n", f, functions[f], functions[f]->functionName); 
-    }
-    exit(-1);
-  }
-  
-  //debug_fprintf(stderr, "found the procedure named %s\n", procname); 
+  if ( functions.size() > 1 )
+    throw std::runtime_error(std::string("Multiple function named ") + procname);
+
   return functions[0];
 }
 
