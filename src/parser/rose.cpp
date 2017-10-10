@@ -1212,12 +1212,6 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE )
     }
   }
 
-  chillCE->dump();\
-  debug_fprintf(stderr, "\n\n");
-  chillCE->print();
-  debug_fprintf(stderr, "\n\n");
-  //exit(0);
-
   return chillCE;
 
 }
