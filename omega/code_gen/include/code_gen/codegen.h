@@ -27,7 +27,8 @@ public:
 		                 std::vector< std::pair<int, std::string> >  syncs_ =    std::vector< std::pair<int, std::string> >()
 		         );
   ~CodeGen() {}
-  
+
+	//! Build the tree-like loop nest/split relations
   CG_result *buildAST(int effort = 1);
   int num_level() const { return projected_IS_.size(); }
   

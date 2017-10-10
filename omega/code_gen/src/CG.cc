@@ -242,11 +242,8 @@ namespace omega {
   
   int CG_split::populateDepth() {
     int max_depth = 0;
-    for (int i = 0; i < clauses_.size(); i++) {
-      int t = clauses_[i]->populateDepth();
-      if (t > max_depth)
-        max_depth = t;
-    }
+    for (auto &clause: clauses_)
+      max_depth = std::max(clause->populateDepth(), max_depth);
     return max_depth;
   }
   
@@ -1511,7 +1508,7 @@ namespace omega {
     known_ = copy(known);
     
     guards_.clear();
-    for (BoolSet<>::iterator i = active_.begin(); i != active_.end(); i++) {
+    for (auto i = active_.begin(); i != active_.end(); i++) {
       Relation r = Intersection(
                                 copy(codegen_->projected_IS_[num_level() - 1][*i]),
                                 copy(restriction));
@@ -1573,8 +1570,8 @@ namespace omega {
   
   Relation CG_leaf::hoistGuard() {
     std::vector<Relation> guards;
-    for (BoolSet<>::iterator i = active_.begin(); i != active_.end(); i++) {
-      std::map<int, Relation>::iterator j = guards_.find(*i);
+    for (auto i = active_.begin(); i != active_.end(); i++) {
+      auto j = guards_.find(*i);
       if (j == guards_.end()) {
         Relation r = Relation::True(num_level());
         r.copy_names(known_);
@@ -1592,7 +1589,7 @@ namespace omega {
     known_ = Intersection(known_, copy(guard));
     known_.simplify();
     
-    std::map<int, Relation>::iterator i = guards_.begin();
+    auto i = guards_.begin();
     while (i != guards_.end()) {
       i->second = Gist(i->second, copy(known_), 1);
       if (i->second.is_obvious_tautology())
