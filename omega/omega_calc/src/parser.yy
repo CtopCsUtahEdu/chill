@@ -68,7 +68,7 @@ int clock_diff( void ) {
 
 
 #ifdef BUILD_CODEGEN  
-#include <code_gen/codegen.h>
+#include <codegen.h>
 #endif
 
 extern myFlexLexer mylexer;
@@ -1875,7 +1875,7 @@ int main(int argc, char **argv) {
 #else
     std::cout << "Omega+ ";
 #endif
-    std::cout << "v2.2.3 (built on " OMEGA_BUILD_DATE ")" << std::endl;
+    std::cout << "v2.2.3 (built on " OC_BUILD_DATE ")" << std::endl;
     std::cout << "Copyright (C) 1994-2000 the Omega Project Team" << std::endl;
     std::cout << "Copyright (C) 2005-2011 Chun Chen" << std::endl;
     std::cout << "Copyright (C) 2011-2012 University of Utah" << std::endl;
