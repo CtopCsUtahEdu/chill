@@ -1035,84 +1035,6 @@ namespace omega {
     return std::make_pair(false, GEQ_Handle());
   }
   
-  //Anand- adding the following just for debug
-  std::vector<std::pair<bool, GEQ_Handle> > find_floor_definition_temp(
-    const Relation &R, Variable_ID v,
-    std::set<Variable_ID> excluded_floor_vars) {
-    Conjunct *c = const_cast<Relation &>(R).single_conjunct();
-    std::vector<std::pair<bool, GEQ_Handle> > to_return;
-    excluded_floor_vars.insert(v);
-    for (GEQ_Iterator e = c->GEQs(); e; e++) {
-      coef_t a = (*e).get_coef(v);
-      if (a >= -1)
-        continue;
-      a = -a;
-      
-      //Anand: commenting out the following for debug   7/28/2013
-      bool interested = true;
-      Variable_ID possibly_interfering;
-      for (std::set<Variable_ID>::const_iterator i =
-             excluded_floor_vars.begin(); i != excluded_floor_vars.end();
-           i++)
-        if ((*i) != v && (*e).get_coef(*i) != 0) {
-          possibly_interfering = *i;
-          interested = false;
-          break;
-        }
-      
-      //  continue;
-      
-      // check if any wildcard is floor defined
-      bool has_undefined_wc = false;
-      for (Constr_Vars_Iter cvi(*e, true); cvi; cvi++)
-        if (excluded_floor_vars.find(cvi.curr_var())
-            == excluded_floor_vars.end()) {
-          std::pair<bool, GEQ_Handle> result = find_floor_definition(R,
-                                                                     cvi.curr_var(), excluded_floor_vars);
-          if (!result.first) {
-            has_undefined_wc = true;
-            break;
-          }
-        }
-      if (has_undefined_wc)
-        continue;
-      
-// find the matching upper bound for floor definition
-      for (GEQ_Iterator e2 = c->GEQs(); e2; e2++)
-        if ((*e2).get_coef(v) == a
-            && (*e).get_const() + (*e2).get_const() < a) {
-          bool match = true;
-          for (Constr_Vars_Iter cvi(*e); cvi; cvi++)
-            if (v == cvi.curr_var()
-                && (*e2).get_coef(cvi.curr_var())
-                != -cvi.curr_coef()) {
-              match = false;
-              break;
-            }
-          if (!match)
-            continue;
-          for (Constr_Vars_Iter cvi(*e2); cvi; cvi++)
-            if (v == cvi.curr_var()
-                && (*e).get_coef(cvi.curr_var())
-                != -cvi.curr_coef()) {
-              match = false;
-              break;
-            }
-          if (match) {
-            to_return.push_back(std::make_pair(true, *e));
-            if (!interested)
-              to_return.push_back(std::make_pair(true, *e2));
-            return to_return;
-            
-          }
-        }
-    }
-    
-    to_return.push_back(std::make_pair(false, GEQ_Handle()));
-    
-    return to_return;
-  }
-
 //
 // find the stride involving the specified variable, the stride
 // equality can have other wildcards as long as they are defined as
@@ -1527,35 +1449,6 @@ namespace omega {
                                                                      cvi.curr_var(), 
                                                                      excluded_floor_vars);
           if (!result.first) {
-            debug_fprintf(stderr, "\n\n*** heading into NEW CODE\n");
-
-            coef_t coef_ = cvi.curr_coef();
-            result2 = find_floor_definition_temp(R, cvi.curr_var(),
-                                                 excluded_floor_vars);
-            
-            for (Constr_Vars_Iter cvi_(
-                   result2[result2.size() - 1].second); cvi_; cvi_++) {
-              if (cvi_.curr_var()->kind() != Wildcard_Var
-                  && cvi_.curr_var()->kind() != Set_Var) {
-                t = output_ident(ocg, R, cvi_.curr_var(),
-                                 assigned_on_the_fly, unin);
-                coef_t coef2 = cvi_.curr_coef();
-                assert(cvi_.curr_coef() == -1 && a == 1);
-                repr = ocg->CreateIntegerFloor(t,
-                                               ocg->CreateInt(-coef_));
-                repr = ocg->CreateTimes(ocg->CreateInt(-coef_),
-                                        repr);
-                
-                debug_fprintf(stderr, "returning a TIMES\n"); 
-                return repr;
-                
-              }
-              
-            }
-            
-          };
-
-          if (!result.first) {
             delete repr;
             throw codegen_error("Can't generate bound expression with wildcard not involved in floor definition");
           }
@@ -1929,76 +1822,63 @@ namespace omega {
       
       std::pair<bool, GEQ_Handle> result = find_floor_definition(R, v,
                                                                  excluded_floor_vars);
-      std::vector<std::pair<bool, GEQ_Handle> > result2;
-      
-      if (!result.first) {
-        
-        result2 = find_floor_definition_temp(R, v, excluded_floor_vars2);
-        assert(result2.size() >= 1);
-        result = result2[0];
-      } 
-      else
-        result2.push_back(result);
-
       assert(result.first);
       excluded_floor_vars.insert(v);
       excluded_floor_vars2.insert(v);
       
-      for (int i = 0; i < result2.size(); i++) {
-
-        GEQ_Handle h1 = f_root->add_GEQ();
-        GEQ_Handle h2 = f_root->add_GEQ();
-        for (Constr_Vars_Iter cvi(result2[i].second); cvi; cvi++) {
-          Variable_ID v2 = cvi.curr_var();
-          switch  (v2->kind()) {
-          case Input_Var: {
-            int pos = v2->get_position();
-             if (!is_mapping) {
-              h1.update_coef(r.input_var(pos), cvi.curr_coef());
-              h2.update_coef(r.input_var(pos), -cvi.curr_coef());
-            } 
-            else {
-              h1.update_coef(r.output_var(pos), cvi.curr_coef());
-              h2.update_coef(r.output_var(pos), -cvi.curr_coef());
-            }
-            break;
+      GEQ_Handle h1 = f_root->add_GEQ();
+      GEQ_Handle h2 = f_root->add_GEQ();
+      for (Constr_Vars_Iter cvi(result.second); cvi; cvi++) {
+        Variable_ID v2 = cvi.curr_var();
+        switch  (v2->kind()) {
+        case Input_Var: {
+          int pos = v2->get_position();
+           if (!is_mapping) {
+            h1.update_coef(r.input_var(pos), cvi.curr_coef());
+            h2.update_coef(r.input_var(pos), -cvi.curr_coef());
           }
-          case Wildcard_Var: {
-            std::map<Variable_ID, Variable_ID>::iterator p=exists_mapping.find(v2);
-            Variable_ID v3;
-            if (p == exists_mapping.end()) {
-              v3 = f_exists->declare();
-              exists_mapping[v2] = v3;
-            }
-            else
-              v3 = p->second;
-            h1.update_coef(v3, cvi.curr_coef());
-            h2.update_coef(v3, -cvi.curr_coef());
-            if (v2 != v)
-              to_fill.push(v2);
-            break;
+          else {
+            h1.update_coef(r.output_var(pos), cvi.curr_coef());
+            h2.update_coef(r.output_var(pos), -cvi.curr_coef());
           }
-          case Global_Var: {
-            Global_Var_ID g = v2->get_global_var();
-            Variable_ID v3;
-            if (g->arity() == 0)
-              v3 = r.get_local(g);
-            else
-              v3 = r.get_local(g, v2->function_of());
-            h1.update_coef(v3, cvi.curr_coef());
-            h2.update_coef(v3, -cvi.curr_coef());
-            break;
-          }
-          default:
-            assert(false);
-          }
+          break;
         }
-        h1.update_const(result2[i].second.get_const());
-        h2.update_const(
-          -result2[i].second.get_const()
-          - result2[i].second.get_coef(v) - 1);
+        case Wildcard_Var: {
+          std::map<Variable_ID, Variable_ID>::iterator p=exists_mapping.find(v2);
+          Variable_ID v3;
+          if (p == exists_mapping.end()) {
+            v3 = f_exists->declare();
+            exists_mapping[v2] = v3;
+          }
+          else
+            v3 = p->second;
+          h1.update_coef(v3, cvi.curr_coef());
+          h2.update_coef(v3, -cvi.curr_coef());
+          if (v2 != v)
+            to_fill.push(v2);
+          break;
+        }
+        case Global_Var: {
+          Global_Var_ID g = v2->get_global_var();
+          Variable_ID v3;
+          if (g->arity() == 0)
+            v3 = r.get_local(g);
+          else
+            v3 = r.get_local(g, v2->function_of());
+          h1.update_coef(v3, cvi.curr_coef());
+          h2.update_coef(v3, -cvi.curr_coef());
+          break;
+        }
+        default:
+          assert(false);
+        }
       }
+      h1.update_const(result.second.get_const());
+      h2.update_const(
+        -result.second.get_const()
+        - result.second.get_coef(v) - 1);
     }
+
     if (floor_var->kind() == Input_Var)
       return r.input_var(floor_var->get_position());
     else if (floor_var->kind() == Wildcard_Var)
@@ -2574,19 +2454,7 @@ namespace omega {
     to_return.finalize();
     return to_return;
   }
-/*Relation addInequalitiesToRelation(const Relation &R,
-  std::vector<GEQ_Handle> &inequalities) {
-  Relation to_return(R.n_set());
-  
-  return to_return;
-  }
-  
-*/
-  
 
-
-
-  
 //
 // heavy lifting for code output for one level of loop nodes
 //

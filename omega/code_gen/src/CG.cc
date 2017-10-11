@@ -502,55 +502,6 @@ namespace omega {
             }
             
             if (!is_bound) {
-              std::vector<std::pair<bool, GEQ_Handle> > result =
-                find_floor_definition_temp(b, cvi.curr_var(),
-                                           excluded_floor_vars);
-              
-              if (result.size() != 2)
-                break;
-              
-              has_unresolved_bound = false;
-              for (int i = 0; i < result.size(); i++) {
-                
-                GEQ_Handle h = f_root->add_GEQ();
-                
-                for (Constr_Vars_Iter cvi(result[i].second); cvi;
-                     cvi++) {
-                  Variable_ID v = cvi.curr_var();
-                  switch (v->kind()) {
-                  case Input_Var:
-                    h.update_coef(
-                                  bounds_.input_var(
-                                                    v->get_position()),
-                                  cvi.curr_coef());
-                    break;
-                  case Wildcard_Var: {
-                    Variable_ID v2;
-                    
-                    v2 = replicate_floor_definition(b, v,
-                                                    bounds_, f_exists, f_root,
-                                                    exists_mapping);
-                    
-                    h.update_coef(v2, cvi.curr_coef());
-                    break;
-                  }
-                  case Global_Var: {
-                    Global_Var_ID g = v->get_global_var();
-                    Variable_ID v2;
-                    if (g->arity() == 0)
-                      v2 = bounds_.get_local(g);
-                    else
-                      v2 = bounds_.get_local(g,
-                                             v->function_of());
-                    h.update_coef(v2, cvi.curr_coef());
-                    break;
-                  }
-                  default:
-                    assert(false);
-                  }
-                }
-                h.update_const((result[i].second).get_const());
-              }
               break;
             }
           }
