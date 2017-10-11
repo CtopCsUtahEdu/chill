@@ -9,8 +9,6 @@
 #include "chill_error.hh"
 #include <omega.h>
 #include "omegatools.hh"
-#include <string.h>
-
 #include <code_gen/CG_utils.h>
 #include "iegenlib.h"
 

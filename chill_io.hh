@@ -41,7 +41,7 @@ bool debug_isdefined(char* symbol);
 #define debug_fprintf(...)                  do {} while (false)
 #define debug_printf(...)                   do {} while (false)
 
-#define debug_begin                         if (0){
+#define debug_begin                         if (false){
 #define debug_end                           }
 
 #endif
