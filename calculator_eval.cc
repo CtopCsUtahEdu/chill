@@ -9,7 +9,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include "loop.hh"
 #include "ir_code.hh"
 #include "chill_error.hh"

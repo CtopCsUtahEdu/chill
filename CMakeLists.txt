@@ -90,7 +90,6 @@ else ()
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/omega_lib/include
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/basic/include
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/code_gen/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/omega/code_gen/include/code_gen
             )
 endif ()
 

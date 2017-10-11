@@ -12,7 +12,7 @@
    02/20/09 Created by Chun Chen by splitting original datacopy from loop.cc
 *****************************************************************************/
 
-#include <codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG_utils.h>
 #include "loop.hh"
 #include "omegatools.hh"

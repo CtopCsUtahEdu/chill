@@ -26,7 +26,7 @@
 #include <typeinfo>
 #include <assert.h>
 #include <omega.h>
-#include <code_gen/codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG.h>
 #include <code_gen/CG_outputBuilder.h>
 #include <code_gen/CG_stringBuilder.h>
