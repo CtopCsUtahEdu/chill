@@ -27,7 +27,9 @@ public:
   bool   has_wildcards() const;
   int    max_tuple_pos() const;
   int    min_tuple_pos() const;
+  //! Constraint is constant on variable v
   bool is_const(Variable_ID v);
+  //! Constraint is constant that only involves v and globals
   bool is_const_except_for_global(Variable_ID v);
 
   virtual std::string print_to_string() const;

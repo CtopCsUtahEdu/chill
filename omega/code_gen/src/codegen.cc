@@ -59,7 +59,7 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
   else
     known_.simplify(2, 4);
   if (!known_.is_upper_bound_satisfiable())
-    return;
+    throw std::invalid_argument("Known condition is not satisfiable");
   if (known_.number_of_conjuncts() > 1)
     throw std::invalid_argument("only one conjunct allowed in known condition");
 
@@ -67,27 +67,26 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
   xforms_ = xforms;
   for (int i = 0; i < num_stmt; i++) {
     xforms_[i].simplify();
-    if (!xforms_[i].has_single_conjunct()){
-        copy(xforms_[i]).print();
+    if (!xforms_[i].has_single_conjunct())
       throw std::invalid_argument("mapping relation must have only one conjunct");
-    }if (xforms_[i].n_inp() != IS[i].n_inp() || IS[i].n_out() != 0)
+    if (xforms_[i].n_inp() != IS[i].n_inp() || IS[i].n_out() != 0)
       throw std::invalid_argument("illegal iteration space or transformation arity");
   }
-
 
   //protonu--
   //easier to handle this as a global
   smtNonSplitLevels = smtNonSplitLevels_;
   syncs = syncs_;
   loopIdxNames = loopIdxNames_;
-  
-  debug_fprintf(stderr, "codegen.cc loopIdxNames.size() %d\n", loopIdxNames.size()); 
-  for (int i=0; i<loopIdxNames.size(); i++) { 
-    debug_fprintf(stderr, "\n"); 
-    for (int j=0; j<loopIdxNames[i].size(); j++) { 
-      debug_fprintf(stderr, "i %d   j %d %s\n", i, j,loopIdxNames[i][j].c_str() ); 
+
+  debug_begin
+    fprintf(stderr, "codegen.cc loopIdxNames.size() %lu\n", loopIdxNames.size());
+    for (int i=0; i<loopIdxNames.size(); i++) {
+      fprintf(stderr, "\n");
+      for (int j=0; j<loopIdxNames[i].size(); j++)
+        fprintf(stderr, "i %d   j %d %s\n", i, j,loopIdxNames[i][j].c_str() );
     }
-  } 
+  debug_end
 
   //end-protonu
 
@@ -111,20 +110,11 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
     for (int j = 1; j <= xforms_[i].n_out(); j++)
       xforms_[i].name_output_var(j, loop_var_name_prefix + to_string(j));
     xforms_[i].setup_names();
-  //  int x = xforms_[i].query_guaranteed_leading_0s();
-  //  int y = xforms_[i].query_possible_leading_0s();
-  //  for (DNF_Iterator conj(xforms_[i].query_DNF()); conj; conj++) ;
-  //  for (DNF_Iterator conj(copy(IS[i]).query_DNF()); conj; conj++) ;
 
     Relation S = Restrict_Domain(copy(xforms_[i]), copy(IS[i]));
-
-
-    debug_fprintf(stderr, "here goes\n"); 
-    //Relation R = Range(Restrict_Domain(copy(xforms_[i]), copy(IS[i])));
     Relation R = Range(S);
     R = Intersection(Extend_Set(R, num_level-R.n_inp()), copy(known_));
     R.simplify(2, 4);
-
 
     if (R.is_inexact())
       throw codegen_error("cannot generate code for inexact iteration spaces");
@@ -139,8 +129,7 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
       c.next();
       if (!c.live()) 
         break;
-      Relation remainder(R, *c);
-      c.next();
+      Relation remainder = Relation::False(R);
       while (c.live()) {
         remainder = Union(remainder, Relation(R, *c));
         c.next();
@@ -154,7 +143,8 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
   num_stmt = new_IS.size();
   if(!smtNonSplitLevels.empty())
       smtNonSplitLevels.resize(num_stmt);
-  // assign a dummy value to loops created for the purpose of expanding to maximum dimension
+
+  // assign negative infinity to extra loops created for the purpose of expanding to maximum dimension
   for (int i = 0; i < num_stmt; i++) {
     if (xforms[remap_[i]].n_out() < num_level) {
       F_And *f_root = new_IS[i].and_with_and();
@@ -164,7 +154,7 @@ CodeGen::CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation
         h.update_const(posInfinity);
       }
       new_IS[i].simplify();
-    }   
+    }
   }
 
   // calculate projected subspaces for each loop level once and save for CG tree manipulation later
@@ -285,24 +275,21 @@ CG_result *CodeGen::buildAST(int level, const BoolSet<> &active, bool split_on_c
     Relation hull = SimpleHull(Rs);
 
     //protonu-warn Chun about this change
-  //This does some fancy splitting of statements into loops with the
-  //fewest dimentions, but that's not necessarily what we want when
-  //code-gening for CUDA. smtNonSplitLevels keeps track per-statment of
-  //the levels that should not be split on.
-  bool checkForSplits = true;
- for (BoolSet<>::const_iterator i = active.begin(); i != active.end(); i++) {
-      if(*i  < smtNonSplitLevels.size())
-         for(int k = 0; k <smtNonSplitLevels[*i].size();  k++)
-           if(smtNonSplitLevels[*i][k] == (level-2)){
-               checkForSplits = false;
-              break;
-      }
+    //This does some fancy splitting of statements into loops with the
+    //fewest dimentions, but that's not necessarily what we want when
+    //code-gening for CUDA. smtNonSplitLevels keeps track per-statment of
+    //the levels that should not be split on.
+    bool checkForSplits = true;
+    for (auto i = active.begin(); i != active.end(); i++) {
+      if (*i < smtNonSplitLevels.size())
+        for (auto lev: smtNonSplitLevels[*i])
+          if (lev == (level - 2)) {
+            checkForSplits = false;
+            break;
+          }
     }
-  
 
-
-
-    for (BoolSet<>::const_iterator i = active.begin(); i != active.end() && checkForSplits; i++) {
+    for (auto i = active.begin(); i != active.end() && checkForSplits; i++) {
       Relation r = Gist(copy(Rs[*i]), copy(hull), 1);
       if (r.is_obvious_tautology())
         continue;

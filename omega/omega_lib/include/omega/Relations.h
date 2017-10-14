@@ -25,11 +25,17 @@ Relation consume_and_regurgitate(NOT_CONST Relation &R);
  */
 Relation  Union(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 Relation  Intersection(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
+//! Add 1-more input variable to relation
 Relation  Extend_Domain(NOT_CONST Relation &R);
+//! Add more-more input variables to relation
 Relation  Extend_Domain(NOT_CONST Relation &R, int more);
+//! Add 1-more output variable to relation
 Relation  Extend_Range(NOT_CONST Relation &R);
+//! Add more-more output variables to relation
 Relation  Extend_Range(NOT_CONST Relation &R, int more);
+//! Add 1-more variable to set
 Relation  Extend_Set(NOT_CONST Relation &R);
+//! Add more-more variables to set
 Relation  Extend_Set(NOT_CONST Relation &R, int more);
 Relation  Restrict_Domain(NOT_CONST Relation &r1, NOT_CONST Relation &r2); // Takes set as 2nd
 Relation  Restrict_Range(NOT_CONST Relation &r1, NOT_CONST Relation &r2);  // Takes set as 2nd
@@ -75,6 +81,11 @@ Relation  Project_Sym(NOT_CONST Relation &R);
  */
 Relation  Project_On_Sym(NOT_CONST Relation &R,
                          NOT_CONST Relation &context = Relation::Null());
+/**
+ * @brief Compute (gist r1 given r2).
+ * Assuming that r2 has only one conjunct.
+ * r2 may have zero input and output OR may have # in/out vars equal to r1.
+ */
 Relation  GistSingleConjunct(NOT_CONST Relation &R, NOT_CONST Relation &R2, int effort=0);
 /**
  * Works for both relation and sets. The arguments must have the same arity.
@@ -83,6 +94,10 @@ Relation  GistSingleConjunct(NOT_CONST Relation &R, NOT_CONST Relation &R2, int 
  * @param effort[in] how hard we try to make f tight
  */
 Relation  Gist(NOT_CONST Relation &R1, NOT_CONST Relation &R2, int effort=0);
+/**
+ * Works for both relation and sets. Arguments must have the same arity.
+ * Calculate r1-r2 by (r1 and !r2).
+ */
 Relation  Difference(NOT_CONST Relation &r1, NOT_CONST Relation &r2);
 /**
  * Works for both relations and sets. For all quantified variables are designated as
