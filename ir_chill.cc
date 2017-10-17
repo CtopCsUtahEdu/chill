@@ -870,6 +870,12 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
   char tmpname[128];
   sprintf(tmpname, "newVariable%i\0", chillAST_VarDecl::chill_scalar_counter++);
   chillAST_VarDecl * scalarvd = new chillAST_VarDecl( type.c_str(), "", tmpname );
+
+  VariableDeclarations.push_back(scalarvd);
+
+  this->chillfunc->addDecl(scalarvd);
+  this->chillfunc->prependStatement(scalarvd);
+
   return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd)); // CSS->clone();
 }
 
@@ -880,6 +886,10 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(IR_CONSTANT_TYPE type, int mem
 
   chillAST_VarDecl * scalarvd = new chillAST_VarDecl( basetype, "", name.c_str() );
 
+  VariableDeclarations.push_back(scalarvd);
+
+  this->chillfunc->addDecl(scalarvd);
+  this->chillfunc->prependStatement(scalarvd);
   return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd));
 
 }
@@ -919,8 +929,8 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
   // put decl in some symbol table
   VariableDeclarations.push_back(vd);
   // insert decl in the IR_code body
-  chillAST_node *bod = chillfunc->getBody(); // always a compoundStmt ?? 
-  bod->insertChild(0, vd);
+  this->chillfunc->addDecl(vd);
+  this->chillfunc->prependStatement(vd);
 
   return new IR_chillArraySymbol( this, vd);
 }
@@ -964,8 +974,10 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_Symbol *sym,
   chillAST_VarDecl *vd = new chillAST_VarDecl(type.c_str(), po.c_str(), s.c_str());
 
   // TODO parent? symbol table?
-  chillfunc->getBody()->insertChild( 0, vd);  // is this always the right function to add to?
-  chillfunc->addVariableToSymbolTable( vd ); // always right?
+  this->chillfunc->addDecl(vd);
+  this->chillfunc->prependStatement(vd);
+  //chillfunc->getBody()->insertChild( 0, vd);  // is this always the right function to add to?
+  //chillfunc->addVariableToSymbolTable( vd ); // always right?
 
 
   return new IR_chillPointerSymbol(this, vd);
@@ -1000,7 +1012,8 @@ IR_PointerSymbol *IR_chillCode::CreatePointerSymbol(const IR_CONSTANT_TYPE type,
 
   chillAST_VarDecl *vd = new  chillAST_VarDecl( ty.c_str(), pointer.c_str(), n.c_str() );
 
-  // put this in current function?  (seems wrong)  TODO
+  this->chillfunc->addDecl(vd);
+  this->chillfunc->prependStatement(vd);
   return new IR_chillPointerSymbol( this, vd );
 }
 

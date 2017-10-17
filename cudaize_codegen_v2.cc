@@ -1484,6 +1484,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       }
       debug_fprintf(stderr, "\n\n"); 
       
+
       //int nump = GPUKernel->parameters.size();
       //debug_fprintf(stderr, "\n%d parameters to GPUKernel\n", nump); 
       //for (int i=0; i<nump; i++) debug_fprintf(stderr, "parameter %s\n",  GPUKernel->parameters[i]->varname );
@@ -1662,7 +1663,13 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       }
       debug_fprintf(stderr, "\n"); 
       
-      // 
+      // Add remaining declarations
+      for(auto v: decls) {
+          if(!GPUKernel->funcHasVariableNamed(v->varname)) {
+              GPUKernel->addDecl(v);
+              GPUKernel->prependStatement(v);
+          }
+      }
       
       // TODO ... stuff comment above
       
