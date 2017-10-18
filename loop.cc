@@ -24,7 +24,7 @@
 
 #include <limits.h>
 #include <math.h>
-#include <codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG_utils.h>
 #include <code_gen/CG_chillBuilder.h> // Manu   bad idea.  TODO
 #include <code_gen/CG_stringRepr.h>

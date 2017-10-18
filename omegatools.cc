@@ -4331,31 +4331,6 @@ CG_outputRepr * construct_int_floor(CG_outputBuilder * ocg, const Relation &R,
         std::pair<bool, GEQ_Handle> result = find_floor_definition(R,
                                                                    cvi.curr_var(), excluded_floor_vars);
         if (!result.first) {
-          coef_t coef_ = cvi.curr_coef();
-          result2 = find_floor_definition_temp(R, cvi.curr_var(),
-                                               excluded_floor_vars);
-          
-          for (Constr_Vars_Iter cvi_(
-                                     result2[result2.size() - 1].second); cvi_; cvi_++) {
-            if (cvi_.curr_var()->kind() != Wildcard_Var
-                && cvi_.curr_var()->kind() != Set_Var) {
-              t = output_ident(ocg, R, cvi_.curr_var(),
-                               assigned_on_the_fly, unin);
-              coef_t coef2 = cvi_.curr_coef();
-              assert(cvi_.curr_coef() == -1 && a == 1);
-              repr = ocg->CreateIntegerFloor(t,
-                                             ocg->CreateInt(-coef_));
-              repr = ocg->CreateTimes(ocg->CreateInt(-coef_),
-                                      repr);
-              
-              return repr;
-              
-            }
-            
-          }
-          
-        };
-        if (!result.first) {
           delete repr;
           throw omega_error(
                             "Can't generate bound expression with wildcard not involved in floor definition");

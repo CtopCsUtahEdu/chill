@@ -90,7 +90,6 @@ else ()
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/omega_lib/include
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/basic/include
             ${CMAKE_CURRENT_SOURCE_DIR}/omega/code_gen/include
-            ${CMAKE_CURRENT_SOURCE_DIR}/omega/code_gen/include/code_gen
             )
 endif ()
 
@@ -131,6 +130,7 @@ set(chill-libs
 add_subdirectory(omega/basic)
 add_subdirectory(omega/omega_lib)
 add_subdirectory(omega/code_gen)
+add_subdirectory(omega/omega_calc)
 add_subdirectory(src/printer)
 add_subdirectory(src/scanner)
 add_subdirectory(src/parser)

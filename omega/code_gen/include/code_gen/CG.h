@@ -10,35 +10,52 @@ namespace omega {
 
 class CodeGen;
 
+/**
+ * @brief Tree-like structure holding the iteration space
+ */
 struct CG_result {
-  CodeGen *codegen_;
-  BoolSet<> active_;
+  CodeGen *codegen_; //!< Reference to the codegen
+  BoolSet<> active_; //!< Active set of statements
 
   CG_result() { codegen_ = NULL; }
   virtual ~CG_result() { /* not responsible for codegen_ */ }
-  
+
+  //! break down the complete iteration space condition to levels of bound/guard condtions
   virtual CG_result *recompute(const BoolSet<> &parent_active, const Relation &known, const Relation &restriction) = 0;
+  /**
+   * @brief calculate each loop's nesting depth
+   * Used in liftOverhead - depth start with 0 at leaf
+   */
   virtual int populateDepth() = 0;
+  //! redistribute guard condition locations by additional splittings
   virtual std::pair<CG_result *, Relation> liftOverhead(int depth, bool propagate_up) = 0;
+  /**
+   * @brief Hoist guard conditions for non-loop levels
+   * Enables proper if-condition simplication when outputting actual code.
+   */
   virtual Relation hoistGuard() = 0;
   virtual void removeGuard(const Relation &guard) = 0;
+  //! Signature for printRepr of actual node types
   virtual CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, bool printString = false) const = 0;
+  //! Main entry point for codegen
   CG_outputRepr *printRepr(CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, std::vector<std::map<std::string,std::vector<CG_outputRepr *> > >uninterpreted_symbols, bool printString = false) const;
+  //! Using stringBuilder to generate loop representation
   std::string printString(std::vector<std::map<std::string, std::vector<CG_outputRepr *> > >uninterpreted_symbols = std::vector<std::map<std::string, std::vector<CG_outputRepr *> > >()) const;
 
-  //virtual CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly) const = 0;
-  //CG_outputRepr *printRepr(CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts) const;
-  //std::string printString() const;
+  //! Total number of levels
   int num_level() const;
+  //! A deep clone of the tree
   virtual CG_result *clone() const = 0;
+  //! Dump content for debug information
   virtual void dump(int indent) const {}
-  void dump() { dump(0); }
 };
 
-
+/**
+ * @brief Statement sequence
+ */
 struct CG_split: public CG_result {
-  std::vector<Relation> restrictions_;
-  std::vector<CG_result *> clauses_;
+  std::vector<Relation> restrictions_;  //!< Restriction on each of the splits
+  std::vector<CG_result *> clauses_;    //!< Sequence of splits on this level
 
   CG_split(CodeGen *codegen, const BoolSet<> &active, const std::vector<Relation> &restrictions, const std::vector<CG_result *> &clauses) {
     codegen_ = codegen;
@@ -57,7 +74,7 @@ struct CG_split: public CG_result {
   Relation hoistGuard();
   void removeGuard(const Relation &guard);
   CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly, std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, bool printString=false) const;
-  //  CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly) const;
+
   CG_result *clone() const;
   void dump(int indent) const;
 
@@ -65,17 +82,19 @@ private:
   std::vector<CG_result *> findNextLevel() const;
 };
 
-
+/**
+ * @brief Loop
+ */
 struct CG_loop: public CG_result {
-  int level_;
-  CG_result *body_;
+  int level_;       //!< Current level in the iteration space (1-based)
+  CG_result *body_; //!< Body node
 
-  Relation known_;
-  Relation restriction_;
-  Relation bounds_;
-  Relation guard_;
+  Relation known_;  //!< What is known globally/from parents
+  Relation restriction_;  //!< Restriction based on split
+  Relation bounds_; //!< Iteration bounds
+  Relation guard_;  //!< Conditions other than bounds
   bool needLoop_;
-  int depth_;
+  int depth_;       //!< Current depth of loop - start with 0 at leaf(max)
 
   CG_loop(CodeGen *codegen, const BoolSet<> &active, int level, CG_result *body) {
     codegen_ = codegen;
@@ -91,19 +110,20 @@ struct CG_loop: public CG_result {
   Relation hoistGuard();
   void removeGuard(const Relation &guard);
   CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,std::vector<std::map<std::string, std::vector<CG_outputRepr *> > >unin, bool printString = false) const;
+  //! True implementation of printRepr to control of whether guard relation is printed
   CG_outputRepr *printRepr(bool do_print_guard, int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly, std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, bool printString = false) const;
 
-  //  CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly) const;
-  //CG_outputRepr *printRepr(bool do_print_guard, int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly) const;
   CG_result *clone() const;
   void dump(int indent) const;
 };
 
 
-
+/**
+ * @brief Leaf - a basic code block
+ */
 struct CG_leaf: public CG_result {
-  Relation known_;
-  std::map<int, Relation> guards_;
+  Relation known_;  //!< Global known/parents
+  std::map<int, Relation> guards_;  //!< Guard relations for each active statements
   
   CG_leaf(CodeGen *codegen, const BoolSet<> &active) {
     codegen_ = codegen;
@@ -117,7 +137,7 @@ struct CG_leaf: public CG_result {
   Relation hoistGuard();
   void removeGuard(const Relation &guard);
   CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly, std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, bool printString = false) const;
-  //  CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly) const;
+
   CG_result *clone() const;
   void dump(int indent) const;
 };

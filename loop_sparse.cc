@@ -7,7 +7,7 @@
 
 #include "loop.hh"
 #include <iegenlib.h>
-#include <omega/code_gen/include/code_gen/CG_utils.h>
+#include <code_gen/CG_utils.h>
 #include "omegatools.hh"
 #include <sstream>
 

@@ -196,19 +196,6 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
                                         excluded_floor_vars);
                 if (!result.first) {
                   is_bound = false;
-                  
-                  //break;
-                }
-                
-                if (!is_bound) {
-                  std::vector<std::pair<bool, GEQ_Handle> > result =
-                    find_floor_definition_temp(copy(r),
-                                               cvi.curr_var(),
-                                               excluded_floor_vars);
-                  
-                  if (result.size() == 2)
-                    floor_defined = true;
-                  
                   break;
                 }
               }

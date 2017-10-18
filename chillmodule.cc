@@ -92,7 +92,7 @@ void finalize_loop() {
 }
 static void init_loop(int loop_num_start, int loop_num_end) {
   if (source_filename.empty()) {
-    debug_fprintf(stderr, "source file not set when initializing the loop");
+    fprintf(stderr, "source file not set when initializing the loop");
     if (!is_interactive)
       exit(2);
   }
@@ -121,19 +121,19 @@ static void init_loop(int loop_num_start, int loop_num_end) {
   set_loop_num_start(loop_num_start);
   set_loop_num_end(loop_num_end);
   if (loop_num_end < loop_num_start) {
-    debug_fprintf(stderr, "the last loop must be after the start loop");
+    fprintf(stderr, "the last loop must be after the start loop");
     if (!is_interactive)
       exit(2);
   }              
   if (loop_num_end >= loops.size()) {
-    debug_fprintf(stderr, "loop %d does not exist", loop_num_end);
+    fprintf(stderr, "loop %d does not exist", loop_num_end);
     if (!is_interactive)
       exit(2);
   }
   std::vector<IR_Control *> parm;
   for (int i = loops[loop_num_start]; i <= loops[loop_num_end]; i++) {
     if (ir_controls[i] == NULL) {
-      debug_fprintf(stderr, "loop has already been processed");
+      fprintf(stderr, "loop has already been processed");
       if (!is_interactive)
         exit(2);
     }

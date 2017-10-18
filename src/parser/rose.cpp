@@ -700,14 +700,8 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
       SgClassDeclaration::class_types class_type = CD->get_class_type();
       if (class_type == SgClassDeclaration::e_struct) {
         debug_fprintf(stderr, "it's a ClassDeclaration of a struct\n");
-
         // RD should be the RecordDecl that says what's in the struct
         RD = (chillAST_RecordDecl *) ConvertRoseStructDeclaration( CD );
-
-        debug_fprintf(stderr, "\nhere is the struct definition:\n"); RD->print(); printf("\n"); fflush(stdout);
-
-        //debug_fprintf(stderr, "we need to declare a variable of this STRUCT type named %s\n", varname);
-
         // do we need to remember this struct type somewhere in case there are more of them?
 
       }
@@ -1218,12 +1212,6 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE )
     }
   }
 
-  chillCE->dump();\
-  debug_fprintf(stderr, "\n\n");
-  chillCE->print();
-  debug_fprintf(stderr, "\n\n");
-  //exit(0);
-
   return chillCE;
 
 }
@@ -1308,7 +1296,7 @@ chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC )  //
   debug_fprintf(stderr, "ConvertRoseStructDeclaration( CLASSDEC )\n");
 
   const char *origname = strdup( CLASSDEC->get_name().str());
-  chill_fprintf(stderr, "struct name is '%s'\n", origname);
+  debug_fprintf(stderr, "struct name is '%s'\n", origname);
 
   // temp  TODO   DANGER
   char *name = shortenRoseUnnamedName( origname );

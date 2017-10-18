@@ -25,7 +25,11 @@
 #include <iterator>
 
 namespace omega {
-  
+
+  /**
+   * @brief BoolSet implemented using bitmasks
+   * @tparam T Individual cell type holding the bits - defaults to unsigned int
+   */
 template<typename T = unsigned int>
 class BoolSet {
 protected:
@@ -50,12 +54,16 @@ public:
   BoolSet<T> &operator|=(const BoolSet<T> &); 
   BoolSet<T> &operator&=(const BoolSet<T> &); 
   BoolSet<T> &operator-=(const BoolSet<T> &); 
-  
-  template<typename TT> friend BoolSet<TT> operator|(const BoolSet<TT> &, const BoolSet<TT> &);  // union
-  template<typename TT> friend BoolSet<TT> operator&(const BoolSet<TT> &, const BoolSet<TT> &);  // intersection
-  template<typename TT> friend BoolSet<TT> operator-(const BoolSet<TT> &, const BoolSet<TT> &);  // difference  
-  template<typename TT> friend BoolSet<TT> operator~(const BoolSet<TT> &);                       // complement
-  template<typename TT> friend bool operator==(const BoolSet<TT> &, const BoolSet<TT> &); 
+
+  //! Union
+  template<typename TT> friend BoolSet<TT> operator|(const BoolSet<TT> &, const BoolSet<TT> &);
+  //! intersection
+  template<typename TT> friend BoolSet<TT> operator&(const BoolSet<TT> &, const BoolSet<TT> &);
+  //! difference
+  template<typename TT> friend BoolSet<TT> operator-(const BoolSet<TT> &, const BoolSet<TT> &);
+  //! complement
+  template<typename TT> friend BoolSet<TT> operator~(const BoolSet<TT> &);
+  template<typename TT> friend bool operator==(const BoolSet<TT> &, const BoolSet<TT> &);
   template<typename TT> friend bool operator!=(const BoolSet<TT> &, const BoolSet<TT> &); 
   template<typename TT> friend std::ostream& operator<<(std::ostream &, const BoolSet<TT> &);
   template<typename TT> friend bool operator<(const BoolSet<TT> &, const BoolSet<TT> &);

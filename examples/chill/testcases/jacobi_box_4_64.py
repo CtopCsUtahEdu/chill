@@ -26,15 +26,15 @@ stencil_temp(0)
 #print
 #print space
 
-#stencil_ASE_padded(5)
+stencil_temp(5)
 #print
 #print space
 
-#fuse([2,3,4,5,6,7,8,9],1)
+fuse([2,3,4,5,6,7,8,9],1)
 #print
-#fuse([2,3,4,5,6,7,8,9],2)
+fuse([2,3,4,5,6,7,8,9],2)
 #print
-#fuse([2,3,4,5,6,7,8,9],3)
+fuse([2,3,4,5,6,7,8,9],3)
 #print
-#fuse([2,3,4,5,6,7,8,9],4)
+fuse([2,3,4,5,6,7,8,9],4)
 #print

@@ -33,7 +33,7 @@
 //#define TRANSFORMATION_FILE_INFO Sg_File_Info::generateDefaultFileInfoForTransformationNode()
 #include <code_gen/CG_stringBuilder.h>
 
-#include <codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG_utils.h>
 #include <code_gen/CG_outputRepr.h>
 #include "loop.hh"

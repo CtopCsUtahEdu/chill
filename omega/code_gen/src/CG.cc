@@ -26,7 +26,7 @@
 #include <typeinfo>
 #include <assert.h>
 #include <omega.h>
-#include <code_gen/codegen.h>
+#include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG.h>
 #include <code_gen/CG_outputBuilder.h>
 #include <code_gen/CG_stringBuilder.h>
@@ -34,6 +34,527 @@
 #include <code_gen/codegen_error.h>
 #include <stack>
 #include <string.h>
+
+namespace {
+  using namespace omega;
+
+  Relation find_best_guard(const Relation &R, const BoolSet<> &active, const std::map<int, Relation> &guards) {
+    std::pair<int, int> best_cost = std::make_pair(0, 0);
+    Relation best_cond = Relation::True(R.n_set());
+
+    Relation r = copy(R);
+    int max_iter_count = 2 * (r.single_conjunct()->n_EQs()) + r.single_conjunct()->n_GEQs();
+    int iter_count = 0;
+    while (!r.is_obvious_tautology()) {
+      std::pair<int, int> cost = std::make_pair(0, 0);
+      Relation cond = pick_one_guard(r);
+      Relation complement_cond = Complement(copy(cond));
+      complement_cond.simplify();
+      for (BoolSet<>::const_iterator i = active.begin(); i != active.end(); i++) {
+        std::map<int, Relation>::const_iterator j = guards.find(*i);
+        if (j == guards.end())
+          continue;
+        if (Must_Be_Subset(copy(j->second), copy(cond)))
+          cost.first++;
+        else if (Must_Be_Subset(copy(j->second), copy(complement_cond)))
+          cost.second++;
+      }
+      if (cost > best_cost) {
+        best_cost = cost;
+        best_cond = copy(cond);
+      }
+      r = Gist(r, cond, 1);
+
+      if (iter_count > max_iter_count)
+        throw codegen_error("guard condition too complex to handle");
+
+      iter_count++;
+    }
+
+    return best_cond;
+  }
+
+
+  Relation find_best_guard(const Relation &R, const std::vector<CG_loop *> &loops, int start, int end) {
+    std::pair<int, int> best_cost = std::make_pair(0, 0);
+    Relation best_cond = Relation::True(R.n_set());
+
+    Relation r = copy(R);
+    int max_iter_count = 2 * (r.single_conjunct()->n_EQs()) + r.single_conjunct()->n_GEQs();
+    int iter_count = 0;
+    while (!r.is_obvious_tautology()) {
+      std::pair<int, int> cost = std::make_pair(0, 0);
+
+      // was Relation cond = pick_one_guard(r);
+      Relation cond = pick_one_guard(r, loops[start]->level_);
+      int i = start;
+      for (; i < end; i++) {
+        if (Must_Be_Subset(copy(loops[i]->guard_), copy(cond)))
+          cost.first++;
+        else
+          break;
+      }
+      Relation complement_cond = Complement(copy(cond));
+      complement_cond.simplify();
+      for (int j = i; j < end; j++)
+        if (Must_Be_Subset(copy(loops[j]->guard_), copy(complement_cond)))
+          cost.second++;
+        else
+          break;
+
+      if (cost > best_cost) {
+        best_cost = cost;
+        best_cond = copy(cond);
+      }
+      r = Gist(r, cond, 1);
+
+      if (iter_count > max_iter_count)
+        throw codegen_error("guard condition too complex to handle");
+
+      iter_count++;
+    }
+
+    return best_cond;
+  }
+
+
+  //
+// heavy lifting for code output for one level of loop nodes
+//
+  CG_outputRepr *loop_print_repr(BoolSet<> active,
+                                 const std::vector<CG_loop *> &loops,
+                                 int start,
+                                 int end,
+                                 const Relation &guard,
+                                 CG_outputRepr *guard_repr,
+                                 int indent,
+                                 const std::vector<int> &remap,
+                                 const std::vector<Relation> &xforms,
+                                 CG_outputBuilder *ocg,
+                                 const std::vector<CG_outputRepr *> &stmts,
+                                 const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,
+                                 std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin) {
+
+    debug_fprintf(stderr, "loop_print_repr()  guard_repr ");
+    if (guard_repr == NULL) debug_fprintf(stderr, "NULL\n");
+    else
+      debug_fprintf(stderr, "NOT NULL\n");
+
+    if (start >= end)
+      return NULL;
+
+    Relation R = Gist(copy(loops[start]->guard_), copy(guard), 1);
+    if (Must_Be_Subset(Intersection(copy(loops[start]->known_), copy(guard)),
+                       copy(R))) {
+      int new_indent = (guard_repr == NULL) ? indent : indent + 1;
+      int i = start + 1;
+      for (; i < end; i++)
+        if (!Gist(copy(loops[i]->guard_), copy(guard), 1).is_obvious_tautology())
+          break;
+      CG_outputRepr *stmt_list = NULL;
+      for (int j = start; j < i; j++)
+        stmt_list = ocg->StmtListAppend(stmt_list,
+                                        loops[j]->printRepr(false,
+                                                            new_indent,
+                                                            ocg,
+                                                            stmts,
+                                                            assigned_on_the_fly,
+                                                            unin));
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive\n");
+      stmt_list = ocg->StmtListAppend(stmt_list,
+                                      loop_print_repr(active,
+                                                      loops,
+                                                      i,
+                                                      end,
+                                                      guard,
+                                                      NULL,
+                                                      new_indent,
+                                                      remap,
+                                                      xforms,
+                                                      ocg,
+                                                      stmts,
+                                                      assigned_on_the_fly,
+                                                      unin));
+
+      //debug_fprintf(stderr, "guard_repr 0x%x\n", guard_repr);
+      if (guard_repr == NULL)
+        return stmt_list;
+      else {
+        debug_fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf()\n");
+        return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+      }
+    }
+
+    Relation then_cond = find_best_guard(R, loops, start, end);
+    debug_begin
+      debug_fprintf(stderr, "then_cond  ");
+      then_cond.print(stderr);
+    debug_end
+    assert(!then_cond.is_obvious_tautology());
+    Relation else_cond = Complement(copy(then_cond));
+    else_cond.simplify();
+
+    std::vector<CG_loop *> then_loops, else_loops, indep_loops;
+    int i = start;
+    for (; i < end; i++)
+      if (!Must_Be_Subset(copy(loops[i]->guard_), copy(then_cond)))
+        break;
+    int j = i;
+    for (; j < end; j++)
+      if (!Must_Be_Subset(copy(loops[j]->guard_), copy(else_cond)))
+        break;
+    assert(i > start);
+
+    //Anand: adding support for Replacing substituted variables within
+    //Uninterpreted function symbols or global variables with arity > 0 here
+    //--begin
+    std::vector<std::pair<CG_outputRepr *, int> > aotf = assigned_on_the_fly;
+    CG_outputRepr *new_guard_repr = output_guard(ocg, then_cond, aotf, unin[*(active.begin())]);
+
+    //debug_fprintf(stderr, "new_guard_repr 0x%x\n", new_guard_repr);
+    if (j == i && end == j) {
+      guard_repr = ocg->CreateAnd(guard_repr, new_guard_repr);
+      Relation new_guard = Intersection(copy(guard), copy(then_cond));
+      new_guard.simplify();
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 2\n");
+      return loop_print_repr(active, loops, start, end, new_guard, guard_repr,
+                             indent, remap, xforms, ocg, stmts, aotf, unin);
+    } else if (j == i && end > j) {
+      int new_indent = (guard_repr == NULL) ? indent : indent + 1;
+      Relation new_guard = Intersection(copy(guard), copy(then_cond));
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
+      new_guard.simplify();
+      debug_begin
+        new_guard.print(stderr);
+        new_guard.print_with_subs(stderr);
+      debug_end
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 3\n");
+      CG_outputRepr *stmt_list = loop_print_repr(active,
+                                                 loops,
+                                                 start,
+                                                 i,
+                                                 new_guard,
+                                                 new_guard_repr,
+                                                 new_indent,
+                                                 remap,
+                                                 xforms,
+                                                 ocg,
+                                                 stmts,
+                                                 aotf,
+                                                 unin);
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 4\n");
+      stmt_list = ocg->StmtListAppend(stmt_list,
+                                      loop_print_repr(active,
+                                                      loops,
+                                                      j,
+                                                      end,
+                                                      guard,
+                                                      NULL,
+                                                      new_indent,
+                                                      remap,
+                                                      xforms,
+                                                      ocg,
+                                                      stmts,
+                                                      aotf,
+                                                      unin));
+
+      if (guard_repr == NULL)
+        return stmt_list;
+      else {
+        debug_fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 2\n");
+        return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+      }
+    } else { // (j > i)
+      int new_indent = (guard_repr == NULL) ? indent : indent + 1;
+      Relation then_new_guard = Intersection(copy(guard), copy(then_cond));
+      then_new_guard.simplify();
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 5\n");
+      CG_outputRepr *then_stmt_list = loop_print_repr(active,
+                                                      loops,
+                                                      start,
+                                                      i,
+                                                      then_new_guard,
+                                                      NULL,
+                                                      new_indent + 1,
+                                                      remap,
+                                                      xforms,
+                                                      ocg,
+                                                      stmts,
+                                                      aotf,
+                                                      unin);
+
+      Relation else_new_guard = Intersection(copy(guard), copy(else_cond));
+      else_new_guard.simplify();
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 6\n");
+      CG_outputRepr *else_stmt_list = loop_print_repr(active,
+                                                      loops,
+                                                      i,
+                                                      j,
+                                                      else_new_guard,
+                                                      NULL,
+                                                      new_indent + 1,
+                                                      remap,
+                                                      xforms,
+                                                      ocg,
+                                                      stmts,
+                                                      aotf,
+                                                      unin);
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 3\n");
+      CG_outputRepr *stmt_list = ocg->CreateIf(new_indent,
+                                               new_guard_repr,
+                                               then_stmt_list,
+                                               else_stmt_list);
+
+      debug_fprintf(stderr, "CG_utils.cc loop_print_repr recursive 7\n");
+      stmt_list = ocg->StmtListAppend(stmt_list,
+                                      loop_print_repr(active,
+                                                      loops,
+                                                      j,
+                                                      end,
+                                                      guard,
+                                                      NULL,
+                                                      new_indent,
+                                                      remap,
+                                                      xforms,
+                                                      ocg,
+                                                      stmts,
+                                                      aotf,
+                                                      unin));
+
+
+      if (guard_repr == NULL)
+        return stmt_list;
+      else {
+        debug_fprintf(stderr, "CG_utils.cc loop_print_repr() CreateIf() 4\n");
+        return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+      }
+    }
+  }
+
+  //
+// heavy lifting for code output for one leaf node
+//
+  CG_outputRepr *leaf_print_repr(BoolSet<> active,
+                                 const std::map<int,
+                                     Relation> &guards,
+                                 CG_outputRepr *guard_repr,
+                                 const Relation &known,
+                                 int indent,
+                                 CG_outputBuilder *ocg,
+                                 const std::vector<int> &remap,
+                                 const std::vector<Relation> &xforms,
+                                 const std::vector<CG_outputRepr *> &stmts,
+                                 const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,
+                                 std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin) {
+    //debug_fprintf(stderr, "\n\nleaf_print_repr()\n");
+
+    if (active.num_elem() == 0)
+      return NULL;
+
+    CG_outputRepr *stmt_list = NULL;
+    for (BoolSet<>::iterator i = active.begin(); i != active.end(); i++) {
+      std::map<int, Relation>::const_iterator j = guards.find(*i);
+      if (j == guards.end() || Must_Be_Subset(copy(known), copy(j->second))) {
+        Relation mapping = Inverse(copy((xforms[remap[*i]])));
+        mapping.simplify();
+        mapping.setup_names();
+        std::vector<std::string> loop_vars;
+        for (int k = 1; k <= mapping.n_out(); k++)
+          loop_vars.push_back(mapping.output_var(k)->name());
+
+
+        std::vector<CG_outputRepr *> sList = output_substitutions(ocg,
+                                                                  mapping,
+                                                                  assigned_on_the_fly,
+                                                                  unin[*i]);
+
+        stmt_list = ocg->StmtListAppend(stmt_list,
+                                        ocg->CreateSubstitutedStmt(
+                                            (guard_repr == NULL) ? indent : indent + 1,
+                                            stmts[remap[*i]]->clone(),
+                                            loop_vars,
+                                            sList));
+        active.unset(*i);
+      }
+    }
+
+    if (stmt_list != NULL) {
+      if (active.num_elem() != 0)
+        stmt_list = ocg->StmtListAppend(stmt_list,
+                                        leaf_print_repr(active,
+                                                        guards,
+                                                        NULL,
+                                                        known,
+                                                        (guard_repr == NULL) ? indent : indent + 1,
+                                                        ocg,
+                                                        remap,
+                                                        xforms,
+                                                        stmts,
+                                                        assigned_on_the_fly,
+                                                        unin));
+
+      if (guard_repr == NULL)
+        return stmt_list;
+      else {
+        debug_fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf()\n");
+        return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+      }
+    } else {
+      Relation then_cond =
+          find_best_guard(
+              const_cast<std::map<int, Relation> &>(guards)[*(active.begin())],
+              active, guards);
+
+      assert(!then_cond.is_obvious_tautology());
+      Relation new_then_known = Intersection(copy(known), copy(then_cond));
+      new_then_known.simplify();
+      Relation else_cond = Complement(copy(then_cond));
+      else_cond.simplify();
+      Relation new_else_known = Intersection(copy(known), copy(else_cond));
+      new_else_known.simplify();
+
+      BoolSet<> then_active(active.size());
+      BoolSet<> else_active(active.size());
+      BoolSet<> indep_active(active.size());
+      std::map<int, Relation> then_guards, else_guards;
+      for (BoolSet<>::iterator i = active.begin(); i != active.end(); i++) {
+        Relation &r = const_cast<std::map<int, Relation> &>(guards)[*i];
+        if (Must_Be_Subset(copy(r), copy(then_cond))) {
+          Relation r2 = Gist(copy(r), copy(then_cond), 1);
+          if (!r2.is_obvious_tautology())
+            then_guards[*i] = r2;
+          then_active.set(*i);
+        } else if (Must_Be_Subset(copy(r), copy(else_cond))) {
+          Relation r2 = Gist(copy(r), copy(else_cond), 1);
+          if (!r2.is_obvious_tautology())
+            else_guards[*i] = r2;
+          else_active.set(*i);
+        } else
+          indep_active.set(*i);
+      }
+      assert(!then_active.empty());
+
+      //Anand: adding support for Replacing substituted variables within
+      //Uninterpreted function symbols or global variables with arity > 0 here
+      //--begin
+      std::vector<std::pair<CG_outputRepr *, int> > aotf = assigned_on_the_fly;
+
+      CG_outputRepr *new_guard_repr = output_guard(ocg, then_cond, aotf,
+                                                   unin[*(active.begin())]);
+      if (else_active.empty() && indep_active.empty()) {
+        guard_repr = ocg->CreateAnd(guard_repr, new_guard_repr);
+        return leaf_print_repr(then_active,
+                               then_guards,
+                               guard_repr,
+                               new_then_known,
+                               indent,
+                               ocg,
+                               remap,
+                               xforms,
+                               stmts,
+                               assigned_on_the_fly,
+                               unin);
+
+
+      } else if (else_active.empty() && !indep_active.empty()) {
+        int new_indent = (guard_repr == NULL) ? indent : indent + 1;
+        stmt_list = leaf_print_repr(then_active,
+                                    then_guards,
+                                    new_guard_repr,
+                                    new_then_known,
+                                    new_indent,
+                                    ocg,
+                                    remap,
+                                    xforms,
+                                    stmts,
+                                    assigned_on_the_fly,
+                                    unin);
+
+        stmt_list = ocg->StmtListAppend(stmt_list,
+                                        leaf_print_repr(indep_active,
+                                                        guards,
+                                                        NULL,
+                                                        known,
+                                                        new_indent,
+                                                        ocg,
+                                                        remap,
+                                                        xforms,
+                                                        stmts,
+                                                        assigned_on_the_fly,
+                                                        unin));
+
+        if (guard_repr == NULL)
+          return stmt_list;
+        else {
+          debug_fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 2\n");
+          return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+        }
+      } else { // (!else_active.empty())
+        int new_indent = (guard_repr == NULL) ? indent : indent + 1;
+
+        CG_outputRepr *then_stmt_list = leaf_print_repr(then_active,
+                                                        then_guards,
+                                                        NULL,
+                                                        new_then_known,
+                                                        new_indent + 1,
+                                                        ocg,
+                                                        remap,
+                                                        xforms,
+                                                        stmts,
+                                                        assigned_on_the_fly,
+                                                        unin);
+
+        CG_outputRepr *else_stmt_list = leaf_print_repr(else_active,
+                                                        else_guards,
+                                                        NULL,
+                                                        new_else_known,
+                                                        new_indent + 1,
+                                                        ocg,
+                                                        remap,
+                                                        xforms,
+                                                        stmts,
+                                                        assigned_on_the_fly,
+                                                        unin);
+
+        debug_fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 3\n");
+        stmt_list = ocg->CreateIf(new_indent,
+                                  new_guard_repr,
+                                  then_stmt_list,
+                                  else_stmt_list);
+
+        if (!indep_active.empty())
+          stmt_list = ocg->StmtListAppend(stmt_list,
+                                          leaf_print_repr(indep_active,
+                                                          guards,
+                                                          NULL,
+                                                          known,
+                                                          new_indent,
+                                                          ocg,
+                                                          remap,
+                                                          xforms,
+                                                          stmts,
+                                                          assigned_on_the_fly,
+                                                          unin));
+
+        if (guard_repr == NULL)
+          return stmt_list;
+        else {
+          debug_fprintf(stderr, "CG_utils.cc leaf_print_repr() CreateIf() 4\n");
+          return ocg->CreateIf(indent, guard_repr, stmt_list, NULL);
+        }
+      }
+    }
+  }
+}
 
 namespace omega {
   
@@ -46,7 +567,8 @@ namespace omega {
   extern int upperBoundForLevel;
   extern int lowerBoundForLevel;
   extern bool fillInBounds;
-  
+
+
   //-----------------------------------------------------------------------------
   // Class: CG_result
   //-----------------------------------------------------------------------------
@@ -242,11 +764,8 @@ namespace omega {
   
   int CG_split::populateDepth() {
     int max_depth = 0;
-    for (int i = 0; i < clauses_.size(); i++) {
-      int t = clauses_[i]->populateDepth();
-      if (t > max_depth)
-        max_depth = t;
-    }
+    for (auto &clause: clauses_)
+      max_depth = std::max(clause->populateDepth(), max_depth);
     return max_depth;
   }
   
@@ -502,55 +1021,6 @@ namespace omega {
             }
             
             if (!is_bound) {
-              std::vector<std::pair<bool, GEQ_Handle> > result =
-                find_floor_definition_temp(b, cvi.curr_var(),
-                                           excluded_floor_vars);
-              
-              if (result.size() != 2)
-                break;
-              
-              has_unresolved_bound = false;
-              for (int i = 0; i < result.size(); i++) {
-                
-                GEQ_Handle h = f_root->add_GEQ();
-                
-                for (Constr_Vars_Iter cvi(result[i].second); cvi;
-                     cvi++) {
-                  Variable_ID v = cvi.curr_var();
-                  switch (v->kind()) {
-                  case Input_Var:
-                    h.update_coef(
-                                  bounds_.input_var(
-                                                    v->get_position()),
-                                  cvi.curr_coef());
-                    break;
-                  case Wildcard_Var: {
-                    Variable_ID v2;
-                    
-                    v2 = replicate_floor_definition(b, v,
-                                                    bounds_, f_exists, f_root,
-                                                    exists_mapping);
-                    
-                    h.update_coef(v2, cvi.curr_coef());
-                    break;
-                  }
-                  case Global_Var: {
-                    Global_Var_ID g = v->get_global_var();
-                    Variable_ID v2;
-                    if (g->arity() == 0)
-                      v2 = bounds_.get_local(g);
-                    else
-                      v2 = bounds_.get_local(g,
-                                             v->function_of());
-                    h.update_coef(v2, cvi.curr_coef());
-                    break;
-                  }
-                  default:
-                    assert(false);
-                  }
-                }
-                h.update_const((result[i].second).get_const());
-              }
               break;
             }
           }
@@ -1560,7 +2030,7 @@ namespace omega {
     known_ = copy(known);
     
     guards_.clear();
-    for (BoolSet<>::iterator i = active_.begin(); i != active_.end(); i++) {
+    for (auto i = active_.begin(); i != active_.end(); i++) {
       Relation r = Intersection(
                                 copy(codegen_->projected_IS_[num_level() - 1][*i]),
                                 copy(restriction));
@@ -1622,8 +2092,8 @@ namespace omega {
   
   Relation CG_leaf::hoistGuard() {
     std::vector<Relation> guards;
-    for (BoolSet<>::iterator i = active_.begin(); i != active_.end(); i++) {
-      std::map<int, Relation>::iterator j = guards_.find(*i);
+    for (auto i = active_.begin(); i != active_.end(); i++) {
+      auto j = guards_.find(*i);
       if (j == guards_.end()) {
         Relation r = Relation::True(num_level());
         r.copy_names(known_);
@@ -1641,7 +2111,7 @@ namespace omega {
     known_ = Intersection(known_, copy(guard));
     known_.simplify();
     
-    std::map<int, Relation>::iterator i = guards_.begin();
+    auto i = guards_.begin();
     while (i != guards_.end()) {
       i->second = Gist(i->second, copy(known_), 1);
       if (i->second.is_obvious_tautology())
@@ -1657,26 +2127,12 @@ namespace omega {
                                     std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, 
                                     bool printString) const {
     debug_fprintf(stderr, "CG_leaf::printRepr()\n"); 
-    int numfly =  assigned_on_the_fly.size();
-    //debug_fprintf(stderr, "assigned on the fly  %d\n", numfly );
-    for (int i=0; i<numfly; i++) { 
-      //debug_fprintf(stderr, "i %d\n", i); 
-      std::pair<CG_outputRepr *, int>p = assigned_on_the_fly[i];
-      CG_outputRepr *tr = NULL;
-      if (p.first != NULL) tr = p.first->clone();
-      int val = p.second;
-      //debug_fprintf(stderr, "0x%x   %d\n", tr, val);
-    }
-
     return leaf_print_repr(active_, guards_, NULL, known_, indent, ocg,
                            codegen_->remap_, codegen_->xforms_, stmts, 
                            assigned_on_the_fly, unin);
   }
   
-
-
   CG_result *CG_leaf::clone() const {
-    //debug_fprintf(stderr, "CG_leaf::clone()\n"); 
     return new CG_leaf(codegen_, active_);
   }
   

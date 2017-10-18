@@ -15,10 +15,10 @@ public:
   static const int var_substitution_threshold;
   
 protected:
-  std::vector<std::vector<Relation> > projected_IS_; // projected_IS_[level-1][new stmt#]
-  std::vector<Relation> xforms_;  // transformations[original stmt#]
-  Relation known_; // no need to generate code for constraints satisfied in known
-  std::vector<int> remap_; // map new stmt# to original stmt#
+  std::vector<std::vector<Relation> > projected_IS_; //!< projected_IS_[level-1][new stmt#]
+  std::vector<Relation> xforms_;  //!< transformations[original stmt#]
+  Relation known_; //!< no need to generate code for constraints satisfied in known
+  std::vector<int> remap_; //!< map new stmt# to original stmt#
 
 public:
   CodeGen(const std::vector<Relation> &xforms, const std::vector<Relation> &IS, const Relation &known = Relation::Null(),
@@ -27,7 +27,8 @@ public:
 		                 std::vector< std::pair<int, std::string> >  syncs_ =    std::vector< std::pair<int, std::string> >()
 		         );
   ~CodeGen() {}
-  
+
+	//! Build the tree-like loop nest/split relations
   CG_result *buildAST(int effort = 1);
   int num_level() const { return projected_IS_.size(); }
   

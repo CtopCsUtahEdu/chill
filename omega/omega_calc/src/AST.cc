@@ -50,7 +50,7 @@ void AST_constraints::print() {
   for (std::set<Exp *>::iterator i = first->begin(); ;) {
     printf(coef_fmt, (*i)->constantTerm);
     for (std::map<Variable_Ref *, omega::coef_t>::iterator j = (*i)->coefs.begin(); j != (*i)->coefs.end(); j++)
-      printf("+"coef_fmt"%s", (*j).second, static_cast<const char *>((*j).first->name));
+      printf("+" coef_fmt "%s", (*j).second, static_cast<const char *>((*j).first->name));
     i++;
     if (i != first->end())
       printf(", ");
