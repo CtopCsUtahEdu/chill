@@ -1247,6 +1247,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
     return NULL;
   const int n = stmt[0].xform.n_out();
   
+  // If generated omega code has never been computed, initialize last_compute_cg_
   if (last_compute_cg_ == NULL) {
     debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ == NULL\n"); 
     
@@ -1272,22 +1273,58 @@ CG_outputRepr *Loop::getCode(int effort) const {
   }
 
   
+  // if generated ast has never been computed, create it from last_compute_cg
   if (last_compute_cgr_ == NULL || last_compute_effort_ != effort) {
     delete last_compute_cgr_;
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
   
+  // Copy loop statements
   std::vector<CG_outputRepr *> stmts(m);
   debug_fprintf(stderr, "%d stmts\n", m); 
   for (int i = 0; i < m; i++)
     stmts[i] = stmt[i].code;
   CG_outputBuilder *ocg = ir->builder();
 
+  // Get generate code
   debug_fprintf(stderr, "calling last_compute_cgr_->printRepr()\n"); 
   CG_outputRepr *repr = last_compute_cgr_->printRepr(ocg, stmts, 
                                                      uninterpreted_symbols);
   
+  // Add OMP info
+  for(int k = 0; k < m; k++) {
+      for(auto l = this->omp_pragmas.begin(); l != this->omp_pragmas.end(); l++) {
+          if(k == l->first) {
+              for(int j = 0; j < l->second.first.size(); j++) {
+                  repr = this->omp_add_pragma(repr, 1, l->second.first[j], l->second.second);
+              }
+          }
+      }
+  }
+
+  if(this->omp_loop_for_parallel_region >= 0) {
+      for(int k = 0; k < m; k++) {
+          if(this->omp_loop_for_parallel_region == k) {
+              repr = this->omp_add_omp_thread_info(repr);
+          }
+      }
+  }
+
+  if(this->omp_parallel_for) {
+      bool found = false;
+      for(int k = 0; k < m; k++) {
+          for(auto l = this->omp_threads.begin(); l != this->omp_threads.end(); l++) {
+              if(k == l->first) {
+                  repr = this->omp_add_omp_for_recursive(repr, 0, 0, this->omp_threads_to_use);
+              }
+          }
+      }
+  }
+
+
+
+  // Add init and cleanup code.
   if (init_code != NULL)
     repr = ocg->StmtListAppend(init_code->clone(), repr);
   if (cleanup_code != NULL)
@@ -8000,4 +8037,22 @@ bool Loop::find_stencil_shape( int statement ) {
   stmt[statement].statementStencil = new stencilInfo( AST_statements[0] ); 
   return true; 
   
+}
+
+omega::CG_outputRepr* Loop::omp_add_pragma(omega::CG_outputRepr* repr, int curlevel, int addlevel, std::string name) const {
+    //TODO: something
+
+    return repr;
+}
+
+omega::CG_outputRepr* Loop::omp_add_omp_thread_info(omega::CG_outputRepr* repr) const {
+    //TODO: something
+
+    return repr;
+}
+
+omega::CG_outputRepr* Loop::omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int curlevel, int addlevel, int num_threads, std::vector<std::string> prv) const {
+    //TODO: something
+
+    return repr;
 }

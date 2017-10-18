@@ -37,6 +37,7 @@ class IR_Code;
 
 enum TilingMethodType { StridedTile, CountedTile };
 enum LoopLevelType { LoopLevelOriginal, LoopLevelTile, LoopLevelUnknown };
+enum BarrierType { Barrier, P2P, DOACROSS };
 
 //! Describes properties of each loop level of a statement.
 struct LoopLevel {
@@ -112,12 +113,25 @@ public:
   omega::CG_outputRepr *cleanup_code;
   std::map<int, std::vector<omega::Free_Var_Decl *> > overflow;
   std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > > uninterpreted_symbols;
-  std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > >uninterpreted_symbols_stringrepr;
+  std::vector<std::map<std::string, std::vector<omega::CG_outputRepr * > > > uninterpreted_symbols_stringrepr;
+
   // Need for sparse
   std::vector<std::map<std::string, std::vector<omega::Relation > > >unin_rel;
   std::map<std::string, std::set<std::string > > unin_symbol_args;
   std::map<std::string, std::string > unin_symbol_for_iegen;
   std::vector<std::pair<std::string, std::string > > dep_rel_for_iegen;
+
+  // Need for OMP parallel regions
+  BarrierType                                               opm_use_barier;
+  int                                                       omp_loop_for_parallel_region;
+  std::map<int, std::vector<int>>                           omp_threads;
+  std::map<int, std::vector<std::string>>                   omp_prv;
+  std::map<int, std::pair<std::vector<int>, std::string>>   omp_pragmas;
+  std::map<int, std::vector<int>>                           omp_syncs;
+  std::map<int, int>                                        omp_loops_for_parallel_region;
+  int                                                       omp_threads_to_use;
+  int                                                       omp_parallel_for;
+  int                                                       omp_barrier_level;
 
 protected:
   mutable omega::CodeGen *last_compute_cg_;
@@ -165,6 +179,12 @@ protected:
   int  getMinLexValue(std::set<int> stmts, int level);
   omega::Relation parseExpWithWhileToRel(omega::CG_outputRepr *repr, omega::Relation &R, int loc);
  
+  //
+  // OMP operations
+  //
+  omega::CG_outputRepr* omp_add_pragma(omega::CG_outputRepr* repr, int, int, std::string) const;
+  omega::CG_outputRepr* omp_add_omp_thread_info(omega::CG_outputRepr* repr) const;
+  omega::CG_outputRepr* omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int, int, int num_threads = 0, std::vector<std::string> prv = std::vector<std::string>()) const;
   
 public:
   Loop() { ir = NULL; tmp_loop_var_name_counter = 1; init_code = NULL; }
@@ -310,5 +330,6 @@ public:
   void pragma(int stmt_num, int level, const std::string &pragmaText);
   void prefetch(int stmt_num, int level, const std::string &arrName, int hint);
   //void prefetch(int stmt_num, int level, const std::string &arrName, const std::string &indexName, int offset, int hint);
+
 };
 #endif

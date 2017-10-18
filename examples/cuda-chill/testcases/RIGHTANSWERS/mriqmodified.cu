@@ -3,6 +3,15 @@
 float sinf(float );
 float cosf(float );
 __global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
+  float phi;
+  float sinArg;
+  float cosArg;
+  float expArg;
+  float newVariable4;
+  float newVariable3;
+  float newVariable2;
+  float newVariable1;
+  float newVariable0;
   int by = blockIdx.y;
   int i;
   int ii;

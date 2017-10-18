@@ -1,6 +1,8 @@
 // this source is derived from CHILL AST originally from file 'mpeg4.c' as parsed by frontend compiler rose
 
 __global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  float _P2[2];
+  __shared__ float _P1[47][48];
   int jjj;
   int l;
   int k;
