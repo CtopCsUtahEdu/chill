@@ -2,10 +2,10 @@
 
 void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
   int t8;
-  float newVariable0;
   int t6;
   int t4;
   int t2;
+  float newVariable0;
   if (1 <= an && 1 <= bm) 
     for (t2 = 0; t2 <= ambn - 1; t2 += 16) 
       for (t4 = 0; t4 <= an - 1; t4 += 1) 
