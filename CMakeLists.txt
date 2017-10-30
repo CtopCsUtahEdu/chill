@@ -16,9 +16,11 @@ if (NOT DEFINED FRONTEND)
     set(FRONTEND "Rose")
 endif ()
 
+# Rose/calculator_eval.cc
+find_package(RoseBoost REQUIRED)
+
 if (${FRONTEND} STREQUAL "Rose")
     find_package(Rose REQUIRED)
-    find_package(RoseBoost REQUIRED)
 elseif (${FRONTEND} STREQUAL "Clang")
     find_package(LLVM CONFIG REQUIRED)
     find_package(Clang REQUIRED)
@@ -35,7 +37,7 @@ find_package(IEGen REQUIRED)
 string(TIMESTAMP build_date "\\\"%m/%d/%Y\\\"")
 
 set(CORE_LIBS
-        m rt util omega_basic omega_lib codegen codegen_chill dl
+        m rt util omega_lib omega_basic codegen codegen_chill dl
         ${IEGen_LIBS})
 
 add_chill_module(chill_io

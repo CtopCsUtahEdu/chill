@@ -31,6 +31,7 @@ elseif (${FRONTEND} STREQUAL "Clang")
     chill_module_link_libraries(chill_parser
             ${CLANG_LIBS}
             ${llvm_libs}
+            tinfo
             )
 
     target_include_directories(chill_parser
