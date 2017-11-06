@@ -27,6 +27,7 @@ using namespace chill;
 chillAST_node * ConvertRoseFile(  SgGlobal *sg, const char *filename ); // the entire file
 chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *D );
 chillAST_node * ConvertRoseParamVarDecl( SgInitializedName *vardecl );
+chillAST_node * ConvertRoseFunctionRefExp( SgFunctionRefExp *FRE );
 chillAST_node * ConvertRoseInitName( SgInitializedName *vardecl );
 chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl ); // stupid name TODO
 chillAST_node * ConvertRoseForStatement( SgForStatement *forstatement );
@@ -145,6 +146,47 @@ void ConvertRosePreprocessing(  SgNode *sg, chillAST_node *n ) { // add preproce
 
 
 
+chillAST_node * ConvertRoseFunctionRefExp( SgFunctionRefExp *FRE ) {
+  SgFunctionDeclaration *fdecl = FRE->getAssociatedFunctionDeclaration();
+  SgFunctionDeclaration *defining_fdecl = (SgFunctionDeclaration *) fdecl->get_definingDeclaration(); // this fails for builtins?
+
+
+  if (defining_fdecl) {
+    fdecl = defining_fdecl;
+    debug_fprintf(stderr, "symbol->get_definingDeclaration() %p  %s\n", fdecl, fdecl->get_name().str() );
+  }
+  else {
+    debug_fprintf(stderr, "symbol->get_definingDeclaration() NULL  a builtin?\n");
+  }
+
+  const char *name = strdup(fdecl->get_name().str());
+
+  // fdecl should match the uniquePtr for some function definition we've seen already (todo builtins?)
+  chillAST_FunctionDecl *chillfd = NULL;
+  int numfuncs = FunctionDeclarations.size();
+  debug_fprintf(stderr, "there are %d functions to compare to\n", numfuncs);
+  for (int i=0; i<numfuncs; i++) {
+    SgFunctionDeclaration *fd = (SgFunctionDeclaration *) FunctionDeclarations[i]->uniquePtr;
+
+    debug_fprintf(stderr, "func %2d unique %p %s  vs fdecl %p %s\n", i, fd, fd->get_name().str(), fdecl, name );
+    if (fd == fdecl) {
+      chillfd = FunctionDeclarations[i];
+      debug_fprintf(stderr, "found it at functiondeclaration %d of %d\n", i, numfuncs);
+    }
+    //else  { // temp compare names until I can figure out why the nodes are not the same
+    //  if (!strcmp( fd->get_name().str(), name )) {
+    //    debug_fprintf(stderr, "\nWARNING: HACK TO FIND FUNCTIONDECL TRIGGERED. name matched but not node address\n\n");
+    //    chillfd = FunctionDeclarations[i];
+    //  }
+    //}
+  }
+  if (chillfd == NULL) { debug_fprintf(stderr, "couldn't find function definition in the locally defined list of functions\n"); exit(-1); }
+
+  // make a DeclRefExpr from the function definition
+  chillAST_DeclRefExpr *DRE = new  chillAST_DeclRefExpr( chillfd );
+
+  return DRE;
+}
 
 
 chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entire file
@@ -285,6 +327,7 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
 
           // what we really want is the class DEFINTION, not the DECLARATION
           SgClassDefinition *def = SD->get_definition();
+          if (def == NULL) continue;
           chillAST_node *structdef = ConvertRoseStructDefinition( def ); // really a recorddecl
           structdef->isFromSourceFile = (nodefile == sourcefile);
           structdef->filename = strdup(nodefile.c_str());
@@ -311,10 +354,8 @@ chillAST_node * ConvertRoseFile(  SgNode *sg, const char *filename )// the entir
           }
           else debug_fprintf(stderr, "DON'T know the location of the struct definition\n");
         }
-        else {
+        else
           debug_fprintf(stderr, "unhandled top node SgClassDeclaration that is not a struct!\n");
-          exit(-1);
-        }
 
       }
       //else {
@@ -537,6 +578,11 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
       typ = AT->get_base_type();
     }
   }
+  bool isRef = false;
+  if (isSgReferenceType(typ)) {
+    isRef = true;
+    typ = ((SgReferenceType*)typ)->get_base_type();
+  }
 
   string really = typ->unparseToString();
   const char *otype =   really.c_str();
@@ -569,6 +615,7 @@ chillAST_node * ConvertRoseInitName( SgInitializedName *initname ) // TODO proba
 
   chillVD->isRestrict = restricted; // TODO nicer way
   chillVD->uniquePtr = defdec;
+  chillVD->byreference = isRef;
 
   debug_fprintf(stderr, "ConvertRoseInitName()  storing variable declaration '%s' with unique value %p\n", varname,  chillVD->uniquePtr );
   // store this away for declrefexpr that references it!
@@ -985,10 +1032,6 @@ chillAST_node * ConvertRoseMemberExpr( SgBinaryOp *rose_binop ) // rose member e
   if ( strcmp(op, ".") )
     throw std::runtime_error("Member expression is NOT a binop with dot as the operation?\n");
 
-  typ = rose_binop->get_rhs_operand_i()->variantT();
-  if (strcmp( "SgVarRefExp", roseGlobalVariantNameList[ typ ]))
-    throw std::runtime_error("rhs of binop dot expression does not seem right\n");
-
   chillAST_node *base   = ConvertRoseGenericAST( rose_binop->get_lhs_operand_i() );
   char *member = ConvertRoseMember( (SgVarRefExp*)(rose_binop->get_rhs_operand_i()) );
 
@@ -1138,59 +1181,10 @@ chillAST_node * ConvertRoseFunctionCallExp( SgFunctionCallExp *FCE )
   debug_fprintf(stderr, "function %s is of type %s\n", funcname, func->class_name().c_str());
   debug_fprintf(stderr, "(rose) args %s\n", args->unparseToString().c_str());
 
-  if (!isSgFunctionRefExp(func)) { // should never happen  (assert?)
-    debug_fprintf(stderr, "ConvertRoseFunctionCallExp() function call not made of SgFunctionRefExp???\n");
-    exit(-1);
-  }
-
-  SgFunctionRefExp * FRE = (SgFunctionRefExp * ) func;
-
-  //SgFunctionDeclaration *fdecl;
-  //SgFunctionSymbol *symbol = FRE->get_symbol_i();
-  //fdecl = symbol->get_declaration();
-  //debug_fprintf(stderr, "symbol->get_declaration() %p  %s\n", fdecl, fdecl->get_name().str() );
-
-  SgFunctionDeclaration *fdecl = FRE->getAssociatedFunctionDeclaration();
-  SgFunctionDeclaration *defining_fdecl = (SgFunctionDeclaration *) fdecl->get_definingDeclaration(); // this fails for builtins?
-
-
-  if (defining_fdecl) {
-    fdecl = defining_fdecl;
-    debug_fprintf(stderr, "symbol->get_definingDeclaration() %p  %s\n", fdecl, fdecl->get_name().str() );
-  }
-  else {
-    debug_fprintf(stderr, "symbol->get_definingDeclaration() NULL  a builtin?\n");
-  }
-
-  const char *name = strdup(fdecl->get_name().str());
-
-  // fdecl should match the uniquePtr for some function definition we've seen already (todo builtins?)
-  chillAST_FunctionDecl *chillfd = NULL;
-  int numfuncs = FunctionDeclarations.size();
-  debug_fprintf(stderr, "there are %d functions to compare to\n", numfuncs);
-  for (int i=0; i<numfuncs; i++) {
-    SgFunctionDeclaration *fd = (SgFunctionDeclaration *) FunctionDeclarations[i]->uniquePtr;
-
-    debug_fprintf(stderr, "func %2d unique %p %s  vs fdecl %p %s\n", i, fd, fd->get_name().str(), fdecl, name );
-    if (fd == fdecl) {
-      chillfd = FunctionDeclarations[i];
-      debug_fprintf(stderr, "found it at functiondeclaration %d of %d\n", i, numfuncs);
-    }
-    //else  { // temp compare names until I can figure out why the nodes are not the same
-    //  if (!strcmp( fd->get_name().str(), name )) {
-    //    debug_fprintf(stderr, "\nWARNING: HACK TO FIND FUNCTIONDECL TRIGGERED. name matched but not node address\n\n");
-    //    chillfd = FunctionDeclarations[i];
-    //  }
-    //}
-  }
-  if (chillfd == NULL) { debug_fprintf(stderr, "couldn't find function definition for %s in the locally defined list of functions\n", func->unparseToString().c_str()); exit(-1); }
-
-  // make a DeclRefExpr from the function definition
-  chillAST_DeclRefExpr *DRE = new  chillAST_DeclRefExpr( chillfd );
+  chillAST_node *chillfunc = ConvertRoseGenericAST(func);
 
   // create a call expression from the DRE
-  chillAST_CallExpr *chillCE = new chillAST_CallExpr( DRE );
-  DRE->setParent( chillCE ); // ??
+  chillAST_CallExpr *chillCE = new chillAST_CallExpr( chillfunc );
 
   // now add the args  - I can't find a clean way to get the args.
   // this will probably die horribly at some point
@@ -1327,7 +1321,7 @@ chillAST_node * ConvertRoseStructDeclaration( SgClassDeclaration *CLASSDEC )  //
         RD->addSubpart(VD);
       }
       else
-        throw std::runtime_error("ir_rose.c, L866, struct member subpart is not a variable declaration");
+        continue;
     }
   }
   return RD;
@@ -1367,6 +1361,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
   for (int i=0; i<numsub; i++) {
     SgNode *thing = subparts[i].first;
     string name   = subparts[i].second;
+    if (!thing) continue;
     if (name == string("declaration")) {
       // doublecheck
       if ( !strcmp( "SgClassDeclaration", roseGlobalVariantNameList[ thing->variantT() ])) {
@@ -1418,10 +1413,7 @@ chillAST_node * ConvertRoseTypeDefDecl( SgTypedefDeclaration *TDD )   {
 
   }
 
-  debug_fprintf(stderr, "uhoh\n");
-  die();
-  return NULL;
-
+  return tdd;
 }
 
 
@@ -1454,8 +1446,9 @@ chillAST_node * ConvertRoseGenericAST( SgNode *n )
 
   chillAST_node *ret = NULL;
   if        ( isSgFunctionDeclaration(n) ) { ret = ConvertRoseFunctionDecl    ((SgFunctionDeclaration *)n );
-  } else if ( isSgInitializedName(n)     ) { /*debug_fprintf(stderr, "(1)\n"); */ret = ConvertRoseInitName         ((SgInitializedName *)n );    // param?
-  } else if ( isSgVariableDeclaration(n) ) { /*debug_fprintf(stderr, "(2)\n"); */ret = ConvertRoseVarDecl(       (SgVariableDeclaration *)n );
+  } else if ( isSgInitializedName(n)     ) { ret = ConvertRoseInitName         ((SgInitializedName *)n );
+  } else if ( isSgFunctionRefExp(n)      ) { ret = ConvertRoseFunctionRefExp     ((SgFunctionRefExp *)n );
+  } else if ( isSgVariableDeclaration(n) ) { ret = ConvertRoseVarDecl(       (SgVariableDeclaration *)n );
   } else if ( isSgForStatement(n)        ) { ret = ConvertRoseForStatement    ((SgForStatement *)n );
   } else if ( isSgWhileStmt(n)           ) { ret = ConvertRoseWhileStmt       ((SgWhileStmt *)n);
   } else if ( isSgExprStatement(n)       ) { ret = ConvertRoseExprStatement   ((SgExprStatement *)n ); // expression hidden inside exprstatement

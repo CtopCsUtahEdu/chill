@@ -2576,6 +2576,9 @@ class chillAST_node* chillAST_CStyleCastExpr::constantFold() {
       val = ((chillAST_FloatingLiteral*)subexpr)->value;
     return new chillAST_FloatingLiteral(val,prec);
   }
+  if (!strcmp("long", towhat) || !strcmp("int", towhat))
+    if (subexpr->isIntegerLiteral())
+      return subexpr;
   return this;
 }
 
