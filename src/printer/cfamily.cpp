@@ -234,6 +234,8 @@ void CFamily::runS(chillAST_FloatingLiteral *n, std::string indent, std::ostream
 void CFamily::runS(chillAST_ForStmt *n, std::string indent, std::ostream &o) {
   if (n->metacomment)
     o << "// " << n->metacomment << "\n" << indent;
+  if (n->pragma)
+    o << "#pragma " << n->pragma << "\n" << indent;
   o << "for (";
   run(n->getInit(), indent, o);
   o << "; ";

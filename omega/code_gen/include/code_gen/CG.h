@@ -35,6 +35,7 @@ struct CG_result {
    */
   virtual Relation hoistGuard() = 0;
   virtual void removeGuard(const Relation &guard) = 0;
+
   //! Signature for printRepr of actual node types
   virtual CG_outputRepr *printRepr(int indent, CG_outputBuilder *ocg, const std::vector<CG_outputRepr *> &stmts, const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, bool printString = false) const = 0;
   //! Main entry point for codegen
@@ -48,6 +49,9 @@ struct CG_result {
   virtual CG_result *clone() const = 0;
   //! Dump content for debug information
   virtual void dump(int indent) const {}
+
+  //! Add pragma info prior to code generation
+  virtual void addPragma(int stmt, int loop_level, std::string name) = 0;
 };
 
 /**
@@ -78,6 +82,8 @@ struct CG_split: public CG_result {
   CG_result *clone() const;
   void dump(int indent) const;
 
+  void addPragma(int stmt, int loop_level, std::string name);
+
 private:
   std::vector<CG_result *> findNextLevel() const;
 };
@@ -86,21 +92,28 @@ private:
  * @brief Loop
  */
 struct CG_loop: public CG_result {
-  int level_;       //!< Current level in the iteration space (1-based)
-  CG_result *body_; //!< Body node
+  int level_;               //!< Current level in the iteration space (1-based)
+  CG_result *body_;         //!< Body node
 
-  Relation known_;  //!< What is known globally/from parents
-  Relation restriction_;  //!< Restriction based on split
-  Relation bounds_; //!< Iteration bounds
-  Relation guard_;  //!< Conditions other than bounds
+  Relation known_;          //!< What is known globally/from parents
+  Relation restriction_;    //!< Restriction based on split
+  Relation bounds_;         //!< Iteration bounds
+  Relation guard_;          //!< Conditions other than bounds
   bool needLoop_;
-  int depth_;       //!< Current depth of loop - start with 0 at leaf(max)
+  int depth_;               //!< Current depth of loop - start with 0 at leaf(max)
+
+  bool attachPragma_;       //!< Apply pragma to a loop
+  std::string pragmaName_;  //!< Pragma text
 
   CG_loop(CodeGen *codegen, const BoolSet<> &active, int level, CG_result *body) {
     codegen_ = codegen;
     active_ = active;
     level_ = level;
     body_ = body;
+
+    needLoop_     = false;
+    depth_        = 0;
+    attachPragma_ = false;
   }
   ~CG_loop() { delete body_; }
   
@@ -115,6 +128,8 @@ struct CG_loop: public CG_result {
 
   CG_result *clone() const;
   void dump(int indent) const;
+
+  void addPragma(int stmt, int loop_level, std::string name);
 };
 
 
@@ -140,6 +155,8 @@ struct CG_leaf: public CG_result {
 
   CG_result *clone() const;
   void dump(int indent) const;
+
+  void addPragma(int stmt, int loop_level, std::string name);
 };
 
 }

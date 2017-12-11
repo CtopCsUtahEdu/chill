@@ -914,6 +914,16 @@ namespace omega {
     
   }
   
+  void CG_split::addPragma(int stmt, int loop_level, std::string name) {
+    if(active_.get(stmt)) {
+      for(auto cl: clauses_) {
+        //if(cl->active_.get(stmt)) {
+          cl->addPragma(stmt, loop_level, name);
+        //}
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
   // Class: CG_loop
   //-----------------------------------------------------------------------------
@@ -1669,6 +1679,9 @@ namespace omega {
       else
         loopRepr = ocg->CreateLoop(indent + 1, ctrlRepr, bodyRepr);
       
+      if(attachPragma_) {
+        loopRepr = ocg->CreatePragmaAttribute(loopRepr, level_ / 2, pragmaName_);
+      }
       
       if (!smtNonSplitLevels.empty()) {
         debug_fprintf(stderr, "!smtNonSplitLevels.empty()\n"); 
@@ -1863,140 +1876,10 @@ namespace omega {
           return ocg->CreateIf(indent, guardRepr,
                                ocg->StmtListAppend(assignRepr, bodyRepr), NULL);
 
-        /*  DEAD CODE
-            std::pair<EQ_Handle, int> result_ = find_simplest_assignment(
-            copy(bounds_), copy(bounds_).set_var(level_),
-            assigned_on_the_fly);
-            bool found_func = false;
-            Variable_ID v2;
-            int arity;
-            for (Constr_Vars_Iter cvi(result_.first); cvi; cvi++)
-            if (cvi.curr_var()->kind() == Global_Var) {
-            Global_Var_ID g = cvi.curr_var()->get_global_var();
-            if ((g->arity() > 0)) {
-            
-            found_func = true;
-            arity = g->arity();
-            //copy(R).print();
-            v2 = copy(bounds_).get_local(g,
-            cvi.curr_var()->function_of());
-            
-            break;
-            }
-            }
-            
-            bool is_array = false;
-            if (found_func) {
-            
-            is_array = ocg->QueryInspectorType(
-            v2->get_global_var()->base_name());
-            
-            }
-            if (!found_func || !is_array) {
-            
-            CG_outputRepr *assignRepr = ocg->CreateAssignment(
-            (guardRepr == NULL) ? indent : indent + 1,
-            output_ident(ocg, bounds_,
-            const_cast<CG_loop *>(this)->bounds_.set_var(
-            level_), assigned_on_the_fly),
-            result.second.first);
-            
-            CG_outputRepr *bodyRepr = body_->printRepr(
-            (guardRepr == NULL) ? indent : indent + 1, ocg, stmts,
-            assigned_on_the_fly);
-            if (guardRepr == NULL)
-            return ocg->StmtListAppend(assignRepr, bodyRepr);
-            else
-            return ocg->CreateIf(indent, guardRepr,
-            ocg->StmtListAppend(assignRepr, bodyRepr), NULL);
-            
-            } else {
-            
-            std::vector<CG_outputRepr *> index_expr;
-            
-            CG_outputRepr* lb = ocg->CreateArrayRefExpression(
-            v2->get_global_var()->base_name(),
-            output_ident(ocg, bounds_,
-            const_cast<CG_loop *>(this)->bounds_.set_var(2),
-            assigned_on_the_fly));
-            
-            for (int i = arity; i > 1; i--) {
-            
-            index_expr.push_back(
-            ocg->CreateArrayRefExpression(
-            v2->get_global_var()->base_name(),
-            output_ident(ocg, bounds_,
-            const_cast<CG_loop *>(this)->bounds_.set_var(
-            2 * i),
-            assigned_on_the_fly)));
-            
-            //}
-            
-            }
-            
-            CG_outputRepr *ub;
-            if (index_expr.size() > 1)
-            ub = ocg->CreateInvoke("max", index_expr);
-            else
-            ub = index_expr[0];
-            CG_outputRepr *le = ocg->CreateMinus(ub, ocg->CreateInt(1));
-            CG_outputRepr *inductive = ocg->CreateInductive(
-            output_ident(ocg, bounds_,
-            const_cast<CG_loop *>(this)->bounds_.set_var(
-            level_), assigned_on_the_fly), lb, le,
-            NULL);
-            
-            CG_outputRepr *bodyRepr = body_->printRepr(
-            (guardRepr == NULL) ? indent : indent + 1, ocg, stmts,
-            assigned_on_the_fly);
-            
-            if (guardRepr == NULL) {
-            return ocg->CreateLoop(indent, inductive, bodyRepr);
-            } else
-            return ocg->CreateIf(indent, guardRepr,
-            ocg->CreateLoop(indent + 1, inductive, bodyRepr),
-            NULL);
-            }
-        */      
+
       }
     }
   }
-  
-
-/*
-//Protonu--adding a helper function to get the ids of the nested loops
-//to help with OpenMP code generation
-  std::vector<std::string> get_idxs( CG_result * cgl, std::vector<std::string>& idxs)
-  {
-    CG_loop * _lp;
-    CG_split *_sp;
-    
-    _lp = dynamic_cast<CG_loop *>(cgl);
-    _sp = dynamic_cast<CG_split *>(cgl);
-    
-    if(_lp){
-      if (_lp->needLoop_)
-        idxs.push_back((copy(_lp->bounds_).set_var(_lp->level_))->name());
-      if (_lp->depth() > 0 ){
-        cgl = _lp->body_;
-        get_idxs(cgl, idxs);
-      }
-      if (_lp->depth() == 0)
-        return idxs;
-    }
-    if(_sp){
-      for(int i=0; i<_sp->clauses_.size(); i++)
-      {
-        get_idxs(_sp->clauses_[i], idxs);
-      }
-    }
-    
-    return idxs;
-    
-  }
-//end.
-*/
-
 
   CG_result *CG_loop::clone() const {
     //debug_fprintf(stderr, "CG_loop::clone()\n"); 
@@ -2020,6 +1903,18 @@ namespace omega {
     body_->dump(indent + 1);
   }
   
+  void CG_loop::addPragma(int stmt, int loop_level, std::string name) {
+    if(active_.get(stmt)) {
+      if(level_/2 == loop_level && needLoop_) {
+        attachPragma_ = true;
+        pragmaName_   = name;
+      }
+      else if(level_/2 < loop_level) {
+        body_->addPragma(stmt, loop_level, name);
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
   // Class: CG_leaf
   //-----------------------------------------------------------------------------
@@ -2152,4 +2047,8 @@ namespace omega {
     }
   }
   
+  void CG_leaf::addPragma(int stmt, int loop_level, std::string name) {
+      // do nothing
+  }
+
 }

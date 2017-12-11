@@ -1298,13 +1298,15 @@ public:
   chillAST_Child<chillAST_node> init,cond,incr,body;
   // FIXME: Should not be the responsibility of this
   IR_CONDITION_TYPE conditionoperator;  // from ir_code.hh
+  char* pragma;
 
   chillAST_SymbolTable *symbol_table; // symbols defined inside this forstmt (in init but not body?) body is compound stmt 
-   bool hasSymbolTable() { return true; } ;
+  bool hasSymbolTable() { return true; } ;
 
   // constructors
   chillAST_ForStmt();
   chillAST_ForStmt(chillAST_node *ini, chillAST_node *con, chillAST_node *inc, chillAST_node *bod);
+  virtual ~chillAST_ForStmt() = default;
   
   // other methods particular to this type of node
   void addSyncs();
@@ -1313,8 +1315,7 @@ public:
   chillAST_node *getInit() { return init; };
   chillAST_node *getCond() { return cond; };
   chillAST_node *getInc()  { return incr; };
-  chillAST_node *getBody() { //debug_fprintf(stderr, "chillAST_ForStmt::getBody(), returning a chillAST_node of type %s\n", body->getTypeString()); 
-    return body; }; 
+  chillAST_node *getBody() { return body; };
   void setBody( chillAST_node *b ) { body = b;  b->parent = this; };
   
   bool isNotLeaf() { return true; }; 

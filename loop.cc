@@ -125,10 +125,7 @@ void Loop::reduce(int stmt_num,
   //  std::pair<int, std::string> to_insert(level, func_name);
   //  reduced_statements.insert(std::pair<int, std::pair<int, std::string> >(stmt_num, to_insert ));
   // invalidate saved codegen computation
-  delete last_compute_cgr_;
-  last_compute_cgr_ = NULL;
-  delete last_compute_cg_;
-  last_compute_cg_ = NULL;
+  this->invalidateCodeGen();
   debug_fprintf(stderr, "set last_compute_cg_ = NULL;\n");
   
   omega::CG_outputBuilder *ocg = ir->builder();
@@ -1117,8 +1114,7 @@ Loop::Loop(const IR_Control *control) {
 
 Loop::~Loop() {
   
-  delete last_compute_cgr_;
-  delete last_compute_cg_;
+  this->invalidateCodeGen();
   
   for (int i = 0; i < stmt.size(); i++)
     if (stmt[i].code != NULL) {
@@ -1247,7 +1243,7 @@ CG_outputRepr *Loop::getCode(int effort) const {
     return NULL;
   const int n = stmt[0].xform.n_out();
   
-  // If generated omega code has never been computed, initialize last_compute_cg_
+  // if the omega code generator has never been computed, initialize last_compute_cg_
   if (last_compute_cg_ == NULL) {
     debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ == NULL\n"); 
     
@@ -1271,18 +1267,21 @@ CG_outputRepr *Loop::getCode(int effort) const {
   else {
     debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ NOT NULL\n"); 
   }
+  // TODO: add omp pragmas to last_compute_cg_ here.
 
   
-  // if generated ast has never been computed, create it from last_compute_cg
+  // if codegen result ast has never been computed, create it from last_compute_cg
   if (last_compute_cgr_ == NULL || last_compute_effort_ != effort) {
     delete last_compute_cgr_;
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
   
+  this->omp_apply_pragmas();
+
   // Copy loop statements
   std::vector<CG_outputRepr *> stmts(m);
-  debug_fprintf(stderr, "%d stmts\n", m); 
+  debug_fprintf(stderr, "%d stmts\n", m);
   for (int i = 0; i < m; i++)
     stmts[i] = stmt[i].code;
   CG_outputBuilder *ocg = ir->builder();
@@ -1291,37 +1290,6 @@ CG_outputRepr *Loop::getCode(int effort) const {
   debug_fprintf(stderr, "calling last_compute_cgr_->printRepr()\n"); 
   CG_outputRepr *repr = last_compute_cgr_->printRepr(ocg, stmts, 
                                                      uninterpreted_symbols);
-  
-  // Add OMP info
-  for(int k = 0; k < m; k++) {
-      for(auto l = this->omp_pragmas.begin(); l != this->omp_pragmas.end(); l++) {
-          if(k == l->first) {
-              for(int j = 0; j < l->second.first.size(); j++) {
-                  repr = this->omp_add_pragma(repr, 1, l->second.first[j], l->second.second);
-              }
-          }
-      }
-  }
-
-  if(this->omp_loop_for_parallel_region >= 0) {
-      for(int k = 0; k < m; k++) {
-          if(this->omp_loop_for_parallel_region == k) {
-              repr = this->omp_add_omp_thread_info(repr);
-          }
-      }
-  }
-
-  if(this->omp_parallel_for) {
-      bool found = false;
-      for(int k = 0; k < m; k++) {
-          for(auto l = this->omp_threads.begin(); l != this->omp_threads.end(); l++) {
-              if(k == l->first) {
-                  repr = this->omp_add_omp_for_recursive(repr, 0, 0, this->omp_threads_to_use);
-              }
-          }
-      }
-  }
-
 
 
   // Add init and cleanup code.
@@ -1402,7 +1370,7 @@ std::vector<Relation> Loop::getNewIS() const {
   return new_IS;
 }
 
-// pragmas are tied to loops only ??? 
+// pragmas are tied to loops only ???
 void Loop::pragma(int stmt_num, int level, const std::string &pragmaText) {
   // check sanity of parameters
   if(stmt_num < 0)
@@ -8039,20 +8007,3 @@ bool Loop::find_stencil_shape( int statement ) {
   
 }
 
-omega::CG_outputRepr* Loop::omp_add_pragma(omega::CG_outputRepr* repr, int curlevel, int addlevel, std::string name) const {
-    //TODO: something
-
-    return repr;
-}
-
-omega::CG_outputRepr* Loop::omp_add_omp_thread_info(omega::CG_outputRepr* repr) const {
-    //TODO: something
-
-    return repr;
-}
-
-omega::CG_outputRepr* Loop::omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int curlevel, int addlevel, int num_threads, std::vector<std::string> prv) const {
-    //TODO: something
-
-    return repr;
-}

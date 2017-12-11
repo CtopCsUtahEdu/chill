@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <stack>
+#include <cstring>
 #include <code_gen/CG_chillBuilder.h>
 #include "scanner.h"
 
@@ -24,7 +25,12 @@ namespace omega {
   // substitute at chill AST level
   // forward declarations
   class SubstituteOldVar : public chill::Scanner<const char *, chillAST_node*, CG_chillRepr *, chillAST_node *&> {
+  public:
+
+      virtual ~SubstituteOldVar() = default;
+
   protected:
+
     virtual void errorRun(chillAST_node *n, const char *oldvar, chillAST_node* parent, CG_chillRepr *newvar, chillAST_node *&newnode) {
       chillAST_node* replaced;
       // This is generic
@@ -627,7 +633,7 @@ namespace omega {
   //-----------------------------------------------------------------------------
   CG_outputRepr* CG_chillBuilder::CreatePragmaAttribute(CG_outputRepr *stmt, int looplevel, const std::string &pragmaText) const {
     debug_fprintf(stderr, "CG_chillBuilder::CreatePragmaAttribute()   TODO\n");
-    exit(-1); 
+    //exit(-1);
     // TODO    effectively a comment? 
     /* 
        SgNode *tnl = static_cast<CG_chillRepr*>(stmt)->tnl_;
@@ -641,6 +647,22 @@ namespace omega {
        }
        attr->add(new PragmaInsertion(looplevel, pragmaText));
     */
+
+    auto chill_stmt = dynamic_cast<CG_chillRepr*>(stmt);
+    for(auto node: chill_stmt->chillnodes) {
+      switch(node->getType()) {
+      case CHILLAST_NODETYPE_LOOP:
+          auto loop_node = node->as<chillAST_ForStmt>();
+          // TODO: maybe call something like chillAST_ForStmt::setPragma() ?
+          if(loop_node->pragma != NULL) {
+              free(loop_node->pragma);
+          }
+          loop_node->pragma = (char*) malloc(pragmaText.size() + 1);
+          strcpy(loop_node->pragma, pragmaText.c_str());
+          break;
+      }
+    }
+
     return stmt;
   }
   

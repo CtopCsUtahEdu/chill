@@ -298,8 +298,21 @@ static bool to_int_matrix(PyObject* args, int index, std::vector<std::vector<int
 
 
 
+// ---------------------------------------- //
+// Cuda CHiLL and CHiLL interface functions //
+// ---------------------------------------- //
 
+static PyObject* chill_pragma(PyObject* self, PyObject* args) {
+    strict_arg_num(args, 3, "pragma");
 
+    auto stmt       = intArg(args, 0);
+    auto level      = intArg(args, 1);
+    auto name       = strArg(args, 2);
+
+    myloop->omp_mark_pragma(stmt, level, name);
+
+    Py_RETURN_NONE;
+}
 
 #ifdef CUDACHILL
 // ------------------------------ //
@@ -1599,14 +1612,14 @@ static PyObject* chill_permute(PyObject* self, PyObject* args) {
   Py_RETURN_NONE;
 }
 
-static PyObject* chill_pragma(PyObject* self, PyObject* args) {
-  strict_arg_num(args, 3, "pragma");
-  int stmt_num = intArg(args, 1);
-  int level = intArg(args, 1);
-  std::string pragmaText = strArg(args, 2);
-  myloop->pragma(stmt_num, level, pragmaText);
-  Py_RETURN_NONE;
-}
+//static PyObject* chill_pragma(PyObject* self, PyObject* args) {
+//  strict_arg_num(args, 3, "pragma");
+//  int stmt_num = intArg(args, 1);
+//  int level = intArg(args, 1);
+//  std::string pragmaText = strArg(args, 2);
+//  myloop->pragma(stmt_num, level, pragmaText);
+//  Py_RETURN_NONE;
+//}
 
 static PyObject* chill_prefetch(PyObject* self, PyObject* args) {
   strict_arg_num(args, 3, "prefetch");
@@ -2001,6 +2014,7 @@ static PyMethodDef ChillMethods[] = {
 
   {"copy_to_shared",      chill_copy_to_shared,      METH_VARARGS,    ""},
   {"copy_to_registers",   chill_copy_to_registers,   METH_VARARGS,    ""},
+  {"pragma",              chill_pragma,              METH_VARARGS,    "insert a pragma"},
   {NULL, NULL, 0, NULL}        /* Sentinel */
   
   //{"copy_to_constant",    chill_copy_to_constant,    METH_VARARGS,  "copy to constant mem"},
@@ -2046,6 +2060,7 @@ static PyMethodDef ChillMethods[] = {
   {"find_stencil_shape",  chill_find_stencil_shape,        METH_VARARGS,     "???"},
   {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},
   {"print_dep_ufs",       chill_print_dep_ufs,             METH_VARARGS,     "..."},
+  {"pragma",              chill_pragma,                    METH_VARARGS,     "insert a pragma"},
   {NULL, NULL, 0, NULL}
 };
 #endif

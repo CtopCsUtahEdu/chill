@@ -21,6 +21,7 @@ static error_t parse_chill_arg(int key, char* value, argp_state* state) {
     else {
       return ARGP_ERR_UNKNOWN;
     }
+    break;
   case 'D':
     if(value != nullptr) {
       debug_enable(true);

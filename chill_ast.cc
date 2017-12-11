@@ -860,6 +860,7 @@ chillAST_ForStmt::chillAST_ForStmt():init(this, 0),cond(this,1),incr(this,2),bod
 
   conditionoperator = IR_COND_UNKNOWN;
   symbol_table = NULL;
+  pragma = NULL;
 }
 
 
