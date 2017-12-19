@@ -27,12 +27,20 @@
 
 
 void Loop::omp_mark_pragma(int stmt, int level, std::string name) {
-    this->omp_pragma_info.push_back(PragmaInfo(stmt, level, name));
+    this->general_pragma_info.push_back(PragmaInfo(stmt, level, name));
+}
+
+void Loop::omp_mark_parallel_for(int stmt, int level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
+    this->omp_pragma_info.push_back(OMPPragmaInfo(stmt, level, privitized_vars, shared_vars));
 }
 
 void Loop::omp_apply_pragmas() const {
-    for(auto pinfo: this->omp_pragma_info) {
+    for(auto pinfo: this->general_pragma_info) {
         this->last_compute_cgr_->addPragma(pinfo.stmt, pinfo.loop_level, pinfo.name);
+    }
+
+    for(auto pinfo: this->omp_pragma_info) {
+        this->last_compute_cgr_->addOmpPragma(pinfo.stmt, pinfo.loop_level, pinfo.privitized_vars, pinfo.shared_vars);
     }
 }
 

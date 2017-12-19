@@ -917,9 +917,15 @@ namespace omega {
   void CG_split::addPragma(int stmt, int loop_level, std::string name) {
     if(active_.get(stmt)) {
       for(auto cl: clauses_) {
-        //if(cl->active_.get(stmt)) {
-          cl->addPragma(stmt, loop_level, name);
-        //}
+        cl->addPragma(stmt, loop_level, name);
+      }
+    }
+  }
+
+  void CG_split::addOmpPragma(int stmt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
+    if(active_.get(stmt)) {
+      for(auto cl: clauses_) {
+        cl->addOmpPragma(stmt, loop_level, privitized_vars, shared_vars);
       }
     }
   }
@@ -1915,6 +1921,30 @@ namespace omega {
     }
   }
 
+  void CG_loop::addOmpPragma(int stmt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
+    if(active_.get(stmt)) {
+      if(level_/2 == loop_level && needLoop_) {
+        attachPragma_ = true;
+        pragmaName_   = "omp for default(shared)";
+
+        // Create privitized variables list, starting with this loop index variable
+        std::string privitized_vars_str = this->bounds_.set_var(this->level_)->name();
+
+        //TODO: Add nested loop variables
+
+//        // Add user privitized variables
+//        for(auto n: privitized_vars) {
+//            privitized_vars_str += std::string(", ") + n;
+//        }
+
+        pragmaName_  += std::string(" private(") + privitized_vars_str + ")";
+      }
+      else if(level_/2 < loop_level) {
+        body_->addOmpPragma(stmt, loop_level, privitized_vars, shared_vars);
+      }
+    }
+  }
+
   //-----------------------------------------------------------------------------
   // Class: CG_leaf
   //-----------------------------------------------------------------------------
@@ -2048,6 +2078,10 @@ namespace omega {
   }
   
   void CG_leaf::addPragma(int stmt, int loop_level, std::string name) {
+      // do nothing
+  }
+
+  void CG_leaf::addOmpPragma(int stnt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
       // do nothing
   }
 

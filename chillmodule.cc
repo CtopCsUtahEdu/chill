@@ -150,7 +150,6 @@ static void init_loop(int loop_num_start, int loop_num_end) {
 // Python support funcions //
 // ----------------------- //
 
-// -- CHiLL support -- //
 static void strict_arg_num(PyObject* args, int arg_num, const char* fname = NULL) {
   int arg_given = PyTuple_Size(args);
   char msg[128];
@@ -310,6 +309,31 @@ static PyObject* chill_pragma(PyObject* self, PyObject* args) {
     auto name       = strArg(args, 2);
 
     myloop->omp_mark_pragma(stmt, level, name);
+
+    Py_RETURN_NONE;
+}
+
+//TODO: this should be specific to CHiLL
+static PyObject* chill_omp_for(PyObject* self, PyObject* args) {
+    strict_arg_range(args, 2, 3, "omp_parallel_for");
+
+    auto stmt       = intArg(args, 0);
+    auto level      = intArg(args, 1);
+
+    std::vector<std::string> privitized_vars;
+    std::vector<std::string> shared_vars;
+
+    // read privatized variables
+    if(PyTuple_Size(args) >= 3) {
+        to_string_vector(args, 2, privitized_vars);
+    }
+
+    // read shared variables
+    if(PyTuple_Size(args) >= 4) {
+        to_string_vector(args, 3, shared_vars);
+    }
+
+    myloop->omp_mark_parallel_for(stmt, level, privitized_vars, shared_vars);
 
     Py_RETURN_NONE;
 }
@@ -2061,6 +2085,7 @@ static PyMethodDef ChillMethods[] = {
   {"num_statements",      chill_num_statements,            METH_VARARGS,     "number of statements in the current loop"},
   {"print_dep_ufs",       chill_print_dep_ufs,             METH_VARARGS,     "..."},
   {"pragma",              chill_pragma,                    METH_VARARGS,     "insert a pragma"},
+  {"omp_for",             chill_omp_for,                   METH_VARARGS,     "insert a an omp for pragma"},
   {NULL, NULL, 0, NULL}
 };
 #endif

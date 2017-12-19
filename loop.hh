@@ -82,6 +82,9 @@ struct Statement {
   //end--protonu.
 };
 
+/*!
+ * @brief Info for pragmas during code generation
+ */
 struct PragmaInfo {
 public:
 
@@ -94,6 +97,23 @@ public:
       // do nothiing
   }
 
+};
+
+/*!
+ * @brief Info for omp pragma during code generation
+ */
+struct OMPPragmaInfo {
+public:
+
+  int                       stmt;
+  int                       loop_level;
+  std::vector<std::string>  privitized_vars;
+  std::vector<std::string>  shared_vars;
+
+  inline OMPPragmaInfo(int stmt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) noexcept
+          : stmt(stmt), loop_level(loop_level), privitized_vars(privitized_vars), shared_vars(shared_vars) {
+      // do nothing
+  }
 };
 
 class Loop {
@@ -135,7 +155,8 @@ public:
   std::vector<std::pair<std::string, std::string > > dep_rel_for_iegen;
 
   // Need for OMP parallel regions
-  std::vector<PragmaInfo>               omp_pragma_info;
+  std::vector<PragmaInfo>               general_pragma_info;
+  std::vector<OMPPragmaInfo>            omp_pragma_info;
 
 protected:
   mutable omega::CodeGen *last_compute_cg_;
@@ -196,6 +217,7 @@ public:
   //
 
   void                  omp_mark_pragma(int, int, std::string);
+  void                  omp_mark_parallel_for(int, int, const std::vector<std::string>&, const std::vector<std::string>&);
 
 private:
 
