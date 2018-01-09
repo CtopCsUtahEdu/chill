@@ -4,6 +4,7 @@
 #include <omega/Relation.h>
 #include <basic/boolset.h>
 #include <code_gen/CG_outputBuilder.h>
+#include <set>
 #include <vector>
 
 namespace omega {
@@ -54,6 +55,10 @@ struct CG_result {
   virtual void addPragma(int stmt, int loop_level, std::string name) = 0;
   //! Add omp pragma info prior to code generation
   virtual void addOmpPragma(int stmt, int loop_level, const std::vector<std::string>&, const std::vector<std::string>&) = 0;
+
+  // These methods are for parallelization support
+  virtual void collectIterationVariableNames(std::set<std::string>&) noexcept = 0;
+  // TODO: read & write arrays - private
 };
 
 /**
@@ -86,6 +91,8 @@ struct CG_split: public CG_result {
 
   void addPragma(int stmt, int loop_level, std::string name);
   void addOmpPragma(int stnt, int loop_level, const std::vector<std::string>&, const std::vector<std::string>&);
+
+  virtual void collectIterationVariableNames(std::set<std::string>&) noexcept;
 
 private:
   std::vector<CG_result *> findNextLevel() const;
@@ -134,6 +141,9 @@ struct CG_loop: public CG_result {
 
   void addPragma(int stmt, int loop_level, std::string name);
   void addOmpPragma(int stnt, int loop_level, const std::vector<std::string>&, const std::vector<std::string>&);
+
+  virtual void collectIterationVariableNames(std::set<std::string>&) noexcept;
+
 };
 
 
@@ -162,6 +172,9 @@ struct CG_leaf: public CG_result {
 
   void addPragma(int stmt, int loop_level, std::string name);
   void addOmpPragma(int stnt, int loop_level, const std::vector<std::string>&, const std::vector<std::string>&);
+
+  virtual void collectIterationVariableNames(std::set<std::string>&) noexcept;
+
 };
 
 }

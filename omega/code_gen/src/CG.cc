@@ -930,6 +930,12 @@ namespace omega {
     }
   }
 
+  void CG_split::collectIterationVariableNames(std::set<std::string>& dest) noexcept {
+      for(auto cl: clauses_) {
+          cl->collectIterationVariableNames(dest);
+      }
+  }
+
   //-----------------------------------------------------------------------------
   // Class: CG_loop
   //-----------------------------------------------------------------------------
@@ -1927,15 +1933,30 @@ namespace omega {
         attachPragma_ = true;
         pragmaName_   = "omp for default(shared)";
 
-        // Create privitized variables list, starting with this loop index variable
-        std::string privitized_vars_str = this->bounds_.set_var(this->level_)->name();
+        // -------------------------------- //
+        // Create privitized variables list //
+        // -------------------------------- //
 
-        //TODO: Add nested loop variables
+        std::string privitized_vars_str = "";
 
-//        // Add user privitized variables
-//        for(auto n: privitized_vars) {
-//            privitized_vars_str += std::string(", ") + n;
-//        }
+        // Add iteration variables
+        std::set<std::string> itr_vars; // Iteration variable names
+        this->collectIterationVariableNames(itr_vars);
+        for(auto iv: itr_vars) {
+            if(privitized_vars_str.empty()) {
+                privitized_vars_str = iv;
+            }
+            else {
+                privitized_vars_str += ", " + iv;
+            }
+        }
+
+        // Add user privitized variables
+        for(auto n: privitized_vars) {
+            privitized_vars_str += ", " + n;
+        }
+
+        // TODO: ...
 
         pragmaName_  += std::string(" private(") + privitized_vars_str + ")";
       }
@@ -1943,6 +1964,14 @@ namespace omega {
         body_->addOmpPragma(stmt, loop_level, privitized_vars, shared_vars);
       }
     }
+  }
+
+  void CG_loop::collectIterationVariableNames(std::set<std::string>& dest) noexcept {
+      if(this->needLoop_) {
+          auto vname = this->bounds_.set_var(this->level_)->name();
+          dest.insert(vname);
+      }
+      body_->collectIterationVariableNames(dest);
   }
 
   //-----------------------------------------------------------------------------
@@ -2082,6 +2111,10 @@ namespace omega {
   }
 
   void CG_leaf::addOmpPragma(int stnt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
+      // do nothing
+  }
+
+  void CG_leaf::collectIterationVariableNames(std::set<std::string>&) noexcept {
       // do nothing
   }
 
