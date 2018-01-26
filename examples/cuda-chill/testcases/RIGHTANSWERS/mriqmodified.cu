@@ -1,7 +1,5 @@
 // this source is derived from CHILL AST originally from file 'mriq.c' as parsed by frontend compiler rose
 
-float sinf(float );
-float cosf(float );
 __global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, struct kValues *kVals) {
   float phi;
   float sinArg;
@@ -52,24 +50,26 @@ __global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, s
     }
   }
 }
-void ComputeQCPU(int numK, int numX, struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+#include "mriq.h"
+
+void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
   struct kValues * devI6Ptr;
   float * devI5Ptr;
   float * devI4Ptr;
   float * devI3Ptr;
   float * devI2Ptr;
   float * devI1Ptr;
-  cudaMalloc((void **)devI1Ptr, 32768 * sizeof(float));
+  cudaMalloc((void **)&devI1Ptr, 32768 * sizeof(float));
   cudaMemcpy(devI1Ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI2Ptr, 32768 * sizeof(float));
+  cudaMalloc((void **)&devI2Ptr, 32768 * sizeof(float));
   cudaMemcpy(devI2Ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI3Ptr, 32768 * sizeof(float));
+  cudaMalloc((void **)&devI3Ptr, 32768 * sizeof(float));
   cudaMemcpy(devI3Ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI4Ptr, 32768 * sizeof(float));
+  cudaMalloc((void **)&devI4Ptr, 32768 * sizeof(float));
   cudaMemcpy(devI4Ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI5Ptr, 32768 * sizeof(float));
+  cudaMalloc((void **)&devI5Ptr, 32768 * sizeof(float));
   cudaMemcpy(devI5Ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI6Ptr, 3072 * sizeof(struct kValues));
+  cudaMalloc((void **)&devI6Ptr, 3072 * sizeof(struct kValues));
   cudaMemcpy(devI6Ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(256, 1);
   dim3 dimBlock0 = dim3(128);

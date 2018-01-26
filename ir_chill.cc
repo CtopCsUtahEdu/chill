@@ -873,9 +873,8 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(const IR_Symbol *sym, int i) {
 
   VariableDeclarations.push_back(scalarvd);
 
-  this->chillfunc->addDecl(scalarvd);
-  this->chillfunc->prependStatement(scalarvd);
-
+  this->chillfunc->addDecl(scalarvd);               //TODO: this may not be necessary
+  this->chillfunc->prependStatement(scalarvd);      //      ...
   return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd)); // CSS->clone();
 }
 
@@ -888,8 +887,8 @@ IR_ScalarSymbol *IR_chillCode::CreateScalarSymbol(IR_CONSTANT_TYPE type, int mem
 
   VariableDeclarations.push_back(scalarvd);
 
-  this->chillfunc->addDecl(scalarvd);
-  this->chillfunc->prependStatement(scalarvd);
+  this->chillfunc->addDecl(scalarvd);               //TODO: this may not be necessary
+  this->chillfunc->prependStatement(scalarvd);      //      ...
   return (IR_ScalarSymbol *) (new IR_chillScalarSymbol( this, scalarvd));
 
 }
@@ -929,8 +928,8 @@ IR_ArraySymbol *IR_chillCode::CreateArraySymbol(const IR_Symbol *sym, vector<CG_
   // put decl in some symbol table
   VariableDeclarations.push_back(vd);
   // insert decl in the IR_code body
-  this->chillfunc->addDecl(vd);
-  this->chillfunc->prependStatement(vd);
+  this->chillfunc->addDecl(vd);             //TODO: this may not be necessary
+  this->chillfunc->prependStatement(vd);    //      ...
 
   return new IR_chillArraySymbol( this, vd);
 }

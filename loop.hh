@@ -82,6 +82,39 @@ struct Statement {
   //end--protonu.
 };
 
+/*!
+ * @brief Info for pragmas during code generation
+ */
+struct PragmaInfo {
+public:
+
+  int           stmt;
+  int           loop_level;
+  std::string   name;
+
+  inline PragmaInfo(int stmt, int loop_level, std::string name) noexcept
+          : stmt(stmt), loop_level(loop_level), name(name) {
+      // do nothiing
+  }
+
+};
+
+/*!
+ * @brief Info for omp pragma during code generation
+ */
+struct OMPPragmaInfo {
+public:
+
+  int                       stmt;
+  int                       loop_level;
+  std::vector<std::string>  privitized_vars;
+  std::vector<std::string>  shared_vars;
+
+  inline OMPPragmaInfo(int stmt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) noexcept
+          : stmt(stmt), loop_level(loop_level), privitized_vars(privitized_vars), shared_vars(shared_vars) {
+      // do nothing
+  }
+};
 
 class Loop {
 protected:
@@ -122,16 +155,8 @@ public:
   std::vector<std::pair<std::string, std::string > > dep_rel_for_iegen;
 
   // Need for OMP parallel regions
-  BarrierType                                               opm_use_barier;
-  int                                                       omp_loop_for_parallel_region;
-  std::map<int, std::vector<int>>                           omp_threads;
-  std::map<int, std::vector<std::string>>                   omp_prv;
-  std::map<int, std::pair<std::vector<int>, std::string>>   omp_pragmas;
-  std::map<int, std::vector<int>>                           omp_syncs;
-  std::map<int, int>                                        omp_loops_for_parallel_region;
-  int                                                       omp_threads_to_use;
-  int                                                       omp_parallel_for;
-  int                                                       omp_barrier_level;
+  std::vector<PragmaInfo>               general_pragma_info;
+  std::vector<OMPPragmaInfo>            omp_pragma_info;
 
 protected:
   mutable omega::CodeGen *last_compute_cg_;
@@ -169,7 +194,7 @@ protected:
    * @param dim The dimension to set starting with 0
    * @param active Set of statements to set order
    * @param starting_order
-   * @param idxNames
+   * @param idxNamesopp_
    */
   void setLexicalOrder(int dim, const std::set<int> &active, int starting_order = 0, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >());
   void apply_xform(int stmt_num);
@@ -182,9 +207,23 @@ protected:
   //
   // OMP operations
   //
-  omega::CG_outputRepr* omp_add_pragma(omega::CG_outputRepr* repr, int, int, std::string) const;
-  omega::CG_outputRepr* omp_add_omp_thread_info(omega::CG_outputRepr* repr) const;
-  omega::CG_outputRepr* omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int, int, int num_threads = 0, std::vector<std::string> prv = std::vector<std::string>()) const;
+
+  void                  omp_apply_pragmas() const;
+
+public:
+
+  //
+  // OMP Interface
+  //
+
+  void                  omp_mark_pragma(int, int, std::string);
+  void                  omp_mark_parallel_for(int, int, const std::vector<std::string>&, const std::vector<std::string>&);
+
+private:
+
+  //omega::CG_outputRepr* omp_add_pragma(omega::CG_outputRepr* repr, int, int, std::string) const;
+  //omega::CG_outputRepr* omp_add_omp_thread_info(omega::CG_outputRepr* repr) const;
+  //omega::CG_outputRepr* omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int, int, int num_threads = 0, std::vector<std::string> prv = std::vector<std::string>()) const;
   
 public:
   Loop() { ir = NULL; tmp_loop_var_name_counter = 1; init_code = NULL; }
@@ -201,10 +240,14 @@ public:
    * Must be called whenever changes are made to the IS, even with auxiliary loop indices.
    */
   void invalidateCodeGen() {
-    delete last_compute_cgr_;
-    last_compute_cgr_ = NULL;
-    delete last_compute_cg_;
-    last_compute_cg_ = NULL;
+    if(last_compute_cgr_ != NULL) {
+      delete last_compute_cgr_;
+      last_compute_cgr_ = NULL;
+    }
+    if(last_compute_cg_ != NULL) {
+      delete last_compute_cg_;
+      last_compute_cg_ = NULL;
+    }
   }
   
   void printCode(int effort = 3) const;

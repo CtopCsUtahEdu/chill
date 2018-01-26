@@ -10,6 +10,7 @@
  */
 
 #include <Python.h>
+#include <tuple>
 
 // a C routine that will be called from python
 //static PyObject * chill_print_code(PyObject *self, PyObject *args);

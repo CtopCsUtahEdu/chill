@@ -54,6 +54,7 @@ add_chill_module(chill_core
         loop_stencil.cc
         loop_ghostcells.cc
         loop_sparse.cc
+        loop_omp.cc
         omegatools.cc
         stencil.cc
         calculator_eval.cc

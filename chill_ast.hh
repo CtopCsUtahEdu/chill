@@ -7,6 +7,7 @@
 #define CHILL_INDENT_AMOUNT 2
 
 #include "chill_io.hh"
+#include "chill_error.hh"
 
 #include <iostream>
 #include <stdio.h>
@@ -186,7 +187,7 @@ class chillAST_Preprocessing;
 
 typedef std::vector<chillAST_VarDecl *>         chillAST_SymbolTable;   //  typedef
 typedef std::vector<chillAST_TypedefDecl *>     chillAST_TypedefTable;  //  typedef
-typedef std::vector<chillAST_node *>     chillAST_NodeList;  //  typedef
+typedef std::vector<chillAST_node *>            chillAST_NodeList;      //  typedef
 
 chillAST_VarDecl *symbolTableFindVariableNamed( chillAST_SymbolTable *table, const char *name ); // fwd decl
 
@@ -216,6 +217,8 @@ public:
   static int chill_array_counter;
   //! for manufactured arrays
   static int chill_pointer_counter;
+
+  virtual ~chillAST_node() = default;
 
   bool isSourceFile()         { return (getType() == CHILLAST_NODETYPE_SOURCEFILE); };
   bool isTypeDefDecl()        { return (getType() == CHILLAST_NODETYPE_TYPEDEFDECL); };
@@ -364,6 +367,8 @@ public:
     // potentially change the children vector, which is not the simple array it might appear.
     // so you have to make a copy of the vector to traverse
     
+    __throw_runtime_error_at(__FILE__, __LINE__, std::string("looseLoopWithLoopVar calloed on node of type") + this->getTypeString());
+
     vector<chillAST_node*> dupe = children;
     for (int i=0; i<dupe.size(); i++) {  // recurse on all children
       dupe[i]->loseLoopWithLoopVar( var );
@@ -669,10 +674,19 @@ public:
     parent->setChild(pos, NULL);
   }
 
+  chillAST_Child(const chillAST_Child<ASTNodeClass>&) = delete;
+  chillAST_Child(const chillAST_Child<ASTNodeClass>&&) = delete;
+
   //! Assignment operator will set the child
   ASTNodeClass* operator=(ASTNodeClass *ptr) {
     _parent->setChild(_pos, ptr);
     return ptr;
+  }
+
+  //! Assignment operator from another child of the same type
+  ASTNodeClass* operator=(const chillAST_Child<ASTNodeClass>& other) {
+      _parent->setChild(_pos, (ASTNodeClass*)other);
+      return (ASTNodeClass*)other;
   }
 
   //! Equality operator for "not null" and "null" checks
@@ -683,16 +697,9 @@ public:
 
   //! Implicit conversion to the default type, or base of default type
   template<typename DestASTNodeClass,
-           typename std::enable_if<std::is_base_of<DestASTNodeClass, ASTNodeClass>::value, int>::type = 0>
+           typename std::enable_if<std::is_base_of<chillAST_node, DestASTNodeClass>::value, int>::type = 0>
   operator DestASTNodeClass* () const {
       return dynamic_cast<DestASTNodeClass*>(get());
-  }
-
-  //! Explicit conversion to some type
-  template <typename DestASTNodeClass>
-  explicit operator DestASTNodeClass* () const {
-    chillAST_node *p = (DestASTNodeClass*) NULL; // Constraint
-    return dynamic_cast<DestASTNodeClass*>(get());
   }
 
   //! Boolean conversion for "not null" and "null" checks
@@ -730,7 +737,7 @@ public:
 //typedef is a keyword in the C and C++ programming languages. The purpose of typedef is to assign alternative names to existing types, most often those whose standard declaration is cumbersome, potentially confusing, or likely to vary from one implementation to another. 
 class chillAST_TypedefDecl: public chillAST_node { 
 private:
-  virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_TYPEDEFDECL;}
+  CHILL_ASTNODE_TYPE getType() override {return CHILLAST_NODETYPE_TYPEDEFDECL;}
   bool isStruct;
   bool isUnion;
   char *structname;  // get rid of this? 
@@ -769,7 +776,7 @@ public:
 
 class chillAST_VarDecl: public chillAST_node { 
 public:
-  virtual CHILL_ASTNODE_TYPE getType() {return CHILLAST_NODETYPE_VARDECL;}
+  CHILL_ASTNODE_TYPE getType() override {return CHILLAST_NODETYPE_VARDECL;}
   char *vartype; //!< interchangabe with underlying type
 
   chillAST_RecordDecl  *vardef;// the thing that says what the struct looks like
@@ -843,7 +850,9 @@ public:
   virtual chillAST_VarDecl* getUnderlyingVarDecl() { return this; }; 
 
   chillAST_node* constantFold();
-  chillAST_node* clone();  
+  chillAST_node* clone();
+
+  void loseLoopWithLoopVar(char *var ) override;
 
 };
 
@@ -947,7 +956,7 @@ public:
 
   // constructors
   chillAST_CompoundStmt(); // never has any args ???
-  
+
   // other methods particular to this type of node
   
   
@@ -963,7 +972,7 @@ public:
 
   void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
-  void loseLoopWithLoopVar( char *var ); // special case this for not for debugging
+  void loseLoopWithLoopVar( char *var );
 
   void gatherStatements( std::vector<chillAST_node*> &statements );
 }; 
@@ -1298,9 +1307,10 @@ public:
   chillAST_Child<chillAST_node> init,cond,incr,body;
   // FIXME: Should not be the responsibility of this
   IR_CONDITION_TYPE conditionoperator;  // from ir_code.hh
+  char* pragma;
 
   chillAST_SymbolTable *symbol_table; // symbols defined inside this forstmt (in init but not body?) body is compound stmt 
-   bool hasSymbolTable() { return true; } ;
+  bool hasSymbolTable() { return true; } ;
 
   // constructors
   chillAST_ForStmt();
@@ -1313,8 +1323,7 @@ public:
   chillAST_node *getInit() { return init; };
   chillAST_node *getCond() { return cond; };
   chillAST_node *getInc()  { return incr; };
-  chillAST_node *getBody() { //debug_fprintf(stderr, "chillAST_ForStmt::getBody(), returning a chillAST_node of type %s\n", body->getTypeString()); 
-    return body; }; 
+  chillAST_node *getBody() { return body; };
   void setBody( chillAST_node *b ) { body = b;  b->parent = this; };
   
   bool isNotLeaf() { return true; }; 
@@ -2155,6 +2164,8 @@ public:
   bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ); 
 
   void gatherStatements( std::vector<chillAST_node*> &statements );
+
+  void loseLoopWithLoopVar(char *var) override;
  
 }; 
 

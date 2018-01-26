@@ -9,6 +9,7 @@ maybe_exit_with_error_code() {
     fi
 }
 
+## Exit with a skip, or continue
 maybe_exit_with_skip_code() {
     if [ $1 != 0 ]; then
         echo $@
@@ -64,6 +65,7 @@ shift 3
 chill_generated_source=$chill_script_path/$chill_dest
 chill_generated_stdout=$chill_script_path/$(basename $chill_script).stdout
 chill_generated_stderr=$chill_script_path/$(basename $chill_script).stderr
+chill_generated_object=$chill_script_path/$(basename $chill_script).o
 chill_correct_source=$chill_answers_path/$chill_dest
 chill_correct_stdout=$chill_answers_path/$(basename $chill_generated_stdout)
 chill_correct_stderr=$chill_answers_path/$(basename $chill_generated_stderr)
@@ -73,6 +75,7 @@ echo "CHiLL script path:     $chill_script_path"
 echo "CHiLL script name:     $chill_script"
 echo "Generated source file: $chill_generated_source"
 echo "Correct source file:   $chill_correct_source"
+echo "Generated object file: $chill_generated_object"
 
 ## remove generated files if they exist
 if [ -e $chill_generated_source ]; then
@@ -97,6 +100,7 @@ fi
 ## Defaults
 expect_fail=0
 skip_test=0
+compiler=gcc
 
 ## Read arguments
 arg_index=1
@@ -114,6 +118,18 @@ while [ $arg_index -lt $(( $# + 1 )) ]; do
         check-diff)
                 test_type=${!arg_index}
             ;;
+        check-stdout)
+                test_type=${!arg_index}
+            ;;
+        check-stderr)
+                test_type=${!arg_index}
+            ;;
+        check-compile)
+                test_type=${!arg_index}
+            ;;
+        cuda)
+                compiler=nvcc
+            ;;
     esac
     arg_index=$[$arg_index + 1]
 done
@@ -130,7 +146,7 @@ done
 run_chill() {
     pushd $chill_script_path >/dev/null
     $chill_exec $chill_script 1>$1 2>$2
-    err=$?
+    local err=$?
     if [ $err == 0 ]; then
         if [ "x$3" != "x" -a "x$3" != "x0" ]; then
             if [ ! -e $chill_generated_source ]; then
@@ -147,6 +163,11 @@ run_chill() {
     popd >/dev/null
     echo $err $msg
 }
+
+
+## Check diff between generated file and expected output (ignorring errors)
+##      $1 - first file
+##      $2 - second file
 
 check_diff() {
     local generated_file="$1.temp"
@@ -166,6 +187,20 @@ check_diff() {
     rm $correct_file
 }
 
+
+## Compile generated source
+##      $1 - compiler
+##      $2 - error code on failure
+
+compile_chill() {
+    $1 -c $chill_generated_source -o $chill_generated_object
+    local err=$?
+    if [ $err == 0 ]; then
+        echo 0
+    else
+        echo $2
+    fi
+}
 
 
 ## Skip Test? ##
@@ -205,6 +240,12 @@ case $test_type in
             maybe_exit_with_skip_code $err
             err=`check_diff $tmp $chill_correct_stderr`
             rm -f $tmp
+            exit_with_passfail_code $err
+        ;;
+    check-compile)
+            err=`run_chill /dev/null /dev/null 77`
+            maybe_exit_with_skip_code $err
+            err=`compile_chill $compiler 1`
             exit_with_passfail_code $err
         ;;
 esac

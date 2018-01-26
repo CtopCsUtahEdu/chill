@@ -20,6 +20,7 @@ namespace chill {
     chillAST_SourceFile *entire_file_AST;
 
     Parser() : entire_file_AST(NULL) {}
+    virtual ~Parser() = default;
 
     /*!
      * @brief Parse a new file

@@ -89,6 +89,7 @@ namespace chill {
 
     public:
       Dump() {}
+      virtual ~Dump() = default;
 
       /*!
        * Just prints everything. Indent is igored due to need to limit the number of output

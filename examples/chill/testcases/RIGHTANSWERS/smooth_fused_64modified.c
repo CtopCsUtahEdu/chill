@@ -30,15 +30,19 @@ void main(box_type *box, int phi_id, int rhs_id, int temp_phi_id, double a, doub
   int I;
   int J;
   int K;
-  double h2inv= 1 / (h * h);
-  __restrict__ double *phi= box->grids[phi_id] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *rhs= box->grids[rhs_id] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *alpha= box->grids[2] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *beta_i= box->grids[3] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *beta_j= box->grids[4] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *beta_k= box->grids[5] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *lambda= box->grids[6] + ghosts * plane + ghosts * pencil + ghosts;
-  __restrict__ double *temp= box->grids[temp_phi_id] + ghosts * plane + ghosts * pencil + ghosts;
+  double h2inv = 1 / (h * h);
+  // i.e. [0] = first non ghost zone point
+
+  double * __restrict__ phi = box->grids[phi_id] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ rhs = box->grids[rhs_id] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ alpha = box->grids[2] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ beta_i = box->grids[3] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ beta_j = box->grids[4] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ beta_k = box->grids[5] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ lambda = box->grids[6] + ghosts * plane + ghosts * pencil + ghosts;
+  double * __restrict__ temp = box->grids[temp_phi_id] + ghosts * plane + ghosts * pencil + ghosts;
+  //Protonu--hacks to get CHiLL's dependence analysis to work
+
   double (*_phi)[64 + 8][64 + 8];
   double (*_rhs)[64 + 8][64 + 8];
   double (*_alpha)[64 + 8][64 + 8];
@@ -47,6 +51,10 @@ void main(box_type *box, int phi_id, int rhs_id, int temp_phi_id, double a, doub
   double (*_beta_k)[64 + 8][64 + 8];
   double (*_lambda)[64 + 8][64 + 8];
   double (*_temp)[64 + 8][64 + 8];
+  //Protonu--more hack, this might have to re-implemented later
+
+  //extracring the offsets, with CHiLL we can set bounds to these values
+
   _phi = (double(*)[64 + 8][64 + 8])phi;
   _rhs = (double(*)[64 + 8][64 + 8])rhs;
   _alpha = (double(*)[64 + 8][64 + 8])alpha;
@@ -58,6 +66,8 @@ void main(box_type *box, int phi_id, int rhs_id, int temp_phi_id, double a, doub
   K = box->dim.k;
   J = box->dim.j;
   I = box->dim.i;
+  //  0=red, 1=black
+
   int color;
   color = sweep;
   for (t2 = 0; t2 <= 3; t2 += 1) 

@@ -1,4 +1,5 @@
-(CallExpr : (DeclRefExpr : sqrtf (VarDecl : "'float ' '' ''" dim 0 ) ) ) sqrtf(dx * dx + dy * dy + dz * dz)4001float atoms[16000]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+4001float atoms[16000]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+  float newVariable0;
   __shared__ float _P1[4001];
   int i;
   int j;
