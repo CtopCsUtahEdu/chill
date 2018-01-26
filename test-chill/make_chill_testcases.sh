@@ -39,11 +39,13 @@ do
         diff_test_file="test-chill/$test_file.diff.test"
         stdout_test_file="test-chill/$test_file.stdout.test"
         stderr_test_file="test-chill/$test_file.stderr.test"
+        compile_test_file="test-chill/$test_file.compile.test"
 
         run_chill_exec="\$SRCDIR/test-chill/runchilltest.sh ./$chill_exec \$SRCDIR/$test_dir/$test_file \$SRCDIR/$answers_dir"
         run_chill_flags=""
-        [ `is_skip_test $test_file_path`   == 1 ] && run_chill_flags="$run_chill_flags skip"
-        [ `is_exfail_test $test_file_path` == 1 ] && run_chill_flags="$run_chill_flags exfail"
+        [ `is_skip_test $test_file_path`   == 1            ] && run_chill_flags="$run_chill_flags skip"
+        [ `is_exfail_test $test_file_path` == 1            ] && run_chill_flags="$run_chill_flags exfail"
+        [ "$chill_exec"                    == "cuda-chill" ] && run_chill_flags="$run_chill_flags cuda"
         
         echo "#!/bin/bash"                                      >  $run_test_file # make new file
         echo "$run_chill_exec check-run  $run_chill_flags"      >> $run_test_file
@@ -64,13 +66,23 @@ do
         echo "$run_chill_exec check-stderr $run_chill_flags"    >> $stderr_test_file
         echo "exit \$?"                                         >> $stderr_test_file
         chmod +x $stderr_test_file
+
+        echo "#!/bin/bash"                                      >  $compile_test_file
+        echo "$run_chill_exec check-compile $run_chill_flags"   >> $compile_test_file
+        echo "exit \$?"                                         >> $compile_test_file
+        chmod +x $compile_test_file
         
         
         echo "TESTS += $run_test_file"                      ## make_test_file
         if [ `is_skip_test $test_file_path` != 1 ]; then
             echo "TESTS += $diff_test_file"
             echo "TESTS += $stdout_test_file"
-            echo "TESTS += $stderr_test_file"
+            ## turn stderr tests off for now
+            # echo "TESTS += $stderr_test_file"
+            ## turn cuda chill compilation off for now
+            if [ "$chill_exec" != "cuda-chill" ]; then
+                echo "TESTS += $compile_test_file"
+            fi
         fi
         
     fi

@@ -18,10 +18,10 @@ void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
   float * devI2Ptr;
   float * devI1Ptr;
   float * devO1Ptr;
-  cudaMalloc((void **)devO1Ptr, 1048576 * sizeof(float));
-  cudaMalloc((void **)devI1Ptr, 1048576 * sizeof(float));
+  cudaMalloc((void **)&devO1Ptr, 1048576 * sizeof(float));
+  cudaMalloc((void **)&devI1Ptr, 1048576 * sizeof(float));
   cudaMemcpy(devI1Ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI2Ptr, 1048576 * sizeof(float));
+  cudaMalloc((void **)&devI2Ptr, 1048576 * sizeof(float));
   cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(1024, 1024);
   dim3 dimBlock0 = dim3(1);

@@ -5,259 +5,254 @@ source 'smooth_fused_64.c'
 dest   'smooth_fused_64modified.c'
 
 
-before   1502306670.37
+before   1516921253.54
 ../../../chill smooth_fused_64.script
-now   1502306670.39
+now   1516921253.57
 smooth_fused_64.script succeeded?   status 0
-smooth_fused_64modified.c exists and has 3282 bytes
-1501870924.56
-elapsed 435745.829450
+smooth_fused_64modified.c exists and has 3559 bytes
+1516825413.21
+elapsed 95840.359612
 
 split1.script
 source 'split.c'
 dest   'split1modified.c'
 
 
-before   1502306670.39
+before   1516921253.57
 ../../../chill split1.script
-now   1502306670.42
+now   1516921253.59
 split1.script succeeded?   status 0
 split1modified.c exists and has 702 bytes
-1501870925.1
-elapsed 435745.323274
+1516825414.06
+elapsed 95839.533229
 
 unroll2c.script
 source 'unroll2.c'
 dest   'unroll2cmodified.c'
 
 
-before   1502306670.42
+before   1516921253.59
 ../../../chill unroll2c.script
-now   1502306670.44
+now   1516921253.62
 unroll2c.script succeeded?   status 0
 unroll2cmodified.c exists and has 447 bytes
-1501870929.04
-elapsed 435741.400160
+1516825422.01
+elapsed 95831.610032
 
 permute3.script
 source 'permute123456.c'
 dest   'permute3modified.c'
 
 
-before   1502306670.44
+before   1516921253.62
 ../../../chill permute3.script
-now   1502306670.47
+now   1516921253.65
 permute3.script succeeded?   status 0
 permute3modified.c exists and has 547 bytes
-1502306666.52
-elapsed 3.947256
+1516921249.12
+elapsed 4.528405
 
 permute1.script
 source 'permute123456.c'
 dest   'permute1modified.c'
 
 
-before   1502306670.47
+before   1516921253.65
 ../../../chill permute1.script
-now   1502306670.49
+now   1516921253.67
 permute1.script succeeded?   status 0
 permute1modified.c exists and has 581 bytes
-1502306665.81
-elapsed 4.683266
+1516921248.45
+elapsed 5.216150
 
 permute8.script
 source 'permute8910.c'
 dest   'permute8modified.c'
 
 
-before   1502306670.49
+before   1516921253.67
 ../../../chill permute8.script
-now   1502306670.52
+now   1516921253.69
 permute8.script succeeded?   status 0
 permute8modified.c exists and has 548 bytes
-1502306667.56
-elapsed 2.954685
-
-knowngood RIGHTANSWERS/permute8modified.c
-18 lines vs 18 lines
-permute8modified.c is the same as RIGHTANSWERS/permute8modified.c
-
+1516921250.25
+elapsed 3.439449
 
 reverse3.script
 source 'reverse.c'
 dest   'reverse3modified.c'
 
 
-before   1502306670.52
+before   1516921253.69
 ../../../chill reverse3.script
-now   1502306670.54
+now   1516921253.72
 reverse3.script succeeded?   status 0
 reverse3modified.c exists and has 534 bytes
-1501870919.58
-elapsed 435750.963617
+1516825403.79
+elapsed 95849.924466
 
 AKp256hack.script
 source 'AKp256hack.c'
 dest   'AKp256hackmodified.c'
 
 
-before   1502306670.54
+before   1516921253.72
 ../../../chill AKp256hack.script
-now   1502306670.56
+now   1516921253.74
 AKp256hack.script succeeded?   status 0
 AKp256hackmodified.c exists and has 295 bytes
-1502306651.98
-elapsed 18.585334
+1516921235.56
+elapsed 18.181400
 
 permute6.script
 source 'permute123456.c'
 dest   'permute6modified.c'
 
 
-before   1502306670.56
+before   1516921253.74
 ../../../chill permute6.script
-now   1502306670.59
+now   1516921253.76
 permute6.script succeeded?   status 0
 permute6modified.c exists and has 501 bytes
-1502306667.13
-elapsed 3.468502
+1516921249.79
+elapsed 3.972394
 
 peel9.script
 source 'peel9101112.c'
 dest   'peel9modified.c'
 
 
-before   1502306670.59
+before   1516921253.76
 ../../../chill peel9.script
-now   1502306670.64
+now   1516921253.78
 peel9.script succeeded?   status 0
 peel9modified.c exists and has 1665 bytes
-1502306665.57
-elapsed 5.071856
+1516921248.27
+elapsed 5.514381
 
 p46.script
 source 'p46.c'
 dest   'p46modified.c'
 
 
-before   1502306670.64
+before   1516921253.78
 ../../../chill p46.script
-now   1502306670.68
+now   1516921253.81
 p46.script succeeded?   status 0
 p46modified.c exists and has 432 bytes
-1502306661.67
-elapsed 9.009291
+1516921244.25
+elapsed 9.557082
 
 peel1.script
 source 'peel1234.c'
 dest   'peel1modified.c'
 
 
-before   1502306670.68
+before   1516921253.81
 ../../../chill peel1.script
-now   1502306670.72
+now   1516921253.83
 peel1.script succeeded?   status 0
 peel1modified.c exists and has 615 bytes
-1502306662.7
-elapsed 8.015822
+1516921245.27
+elapsed 8.559623
 
 shift1.script
 source 'shift.c'
 dest   'shift1modified.c'
 
 
-before   1502306670.72
+before   1516921253.83
 ../../../chill shift1.script
-now   1502306670.76
+now   1516921253.85
 shift1.script succeeded?   status 0
 shift1modified.c exists and has 850 bytes
-1501870921.78
-elapsed 435748.976285
+1516825407.78
+elapsed 95846.071879
 
 peel6.script
 source 'peel5678.c'
 dest   'peel6modified.c'
 
 
-before   1502306670.76
+before   1516921253.85
 ../../../chill peel6.script
-now   1502306670.8
+now   1516921253.88
 peel6.script succeeded?   status 0
 peel6modified.c exists and has 633 bytes
-1502306664.9
-elapsed 5.896458
+1516921247.55
+elapsed 6.321221
 
 peel8.script
 source 'peel5678.c'
 dest   'peel8modified.c'
 
 
-before   1502306670.8
+before   1516921253.88
 ../../../chill peel8.script
-now   1502306670.83
+now   1516921253.9
 peel8.script succeeded?   status 0
 peel8modified.c exists and has 1026 bytes
-1502306665.39
-elapsed 5.446039
+1516921248.03
+elapsed 5.871802
 
 p49.script
 source 'p49.c'
 dest   'p49modified.c'
 
 
-before   1502306670.83
+before   1516921253.9
 ../../../chill p49.script
-now   1502306670.86
+now   1516921253.92
 p49.script succeeded?   status 0
 p49modified.c exists and has 350 bytes
-1502306662.53
-elapsed 8.328903
+1516921245.0
+elapsed 8.918135
 
 permute4.script
 source 'permute123456.c'
 dest   'permute4modified.c'
 
 
-before   1502306670.86
+before   1516921253.92
 ../../../chill permute4.script
-now   1502306670.91
+now   1516921253.94
 permute4.script succeeded?   status 0
 permute4modified.c exists and has 501 bytes
-1502306666.75
-elapsed 4.156029
+1516921249.35
+elapsed 4.589495
 
 unroll1b.script
 source 'unroll1.c'
 dest   'unroll1bmodified.c'
 
 
-before   1502306670.91
+before   1516921253.94
 ../../../chill unroll1b.script
-now   1502306670.94
+now   1516921253.97
 unroll1b.script succeeded?   status 0
 unroll1bmodified.c exists and has 566 bytes
-1501870927.05
-elapsed 435743.894702
+1516825418.11
+elapsed 95835.857296
 
 split2.script
 source 'split.c'
 dest   'split2modified.c'
 
 
-before   1502306670.94
+before   1516921253.97
 ../../../chill split2.script
-now   1502306670.98
+now   1516921253.99
 split2.script succeeded?   status 0
 split2modified.c exists and has 583 bytes
-1501870925.47
-elapsed 435745.504542
+1516825414.9
+elapsed 95839.083482
 
 AKp257.script
 source 'AKp257.c'
 dest   'AKp257modified.c'
 
 
-before   1502306670.98
+before   1516921253.99
 ../../../chill AKp257.script
-now   1502306671.01
+now   1516921254.01
 AKp257.script succeeded?   status 0

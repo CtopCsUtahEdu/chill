@@ -5,7 +5,11 @@ parameter_symtab has 3 entries
 2  b
 
 
-body_symtab has 0 entries
+body_symtab has 3 entries
+0  i
+1  j
+2  k
+
 
 j
 thread= 
@@ -41,87 +45,123 @@ loop_cuda_chill.cc L903 code_temp:
 
 
 c wo 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
 c wo 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
 a wo 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
@@ -129,29 +169,41 @@ a wo
 
 
 b wo 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  c
 1  a
@@ -165,14 +217,17 @@ reading from array 'a' 'b' and writing to array 'c'
 1  a
 2  b
 
-0  t2
-1  t4
-2  t6
+0  i
+1  j
+2  k
+3  t2
+4  t4
+5  t6
 
 0  int i
-1  int bx= blockIdx.x
+1  int bx = blockIdx.x
 2  int k
-3  int by= blockIdx.y
-4  int tx= threadIdx.x
+3  int by = blockIdx.y
+4  int tx = threadIdx.x
 
 

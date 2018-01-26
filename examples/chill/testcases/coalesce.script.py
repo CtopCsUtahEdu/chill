@@ -1,5 +1,9 @@
 from chill import *
 
+
+## coalesce function is not working
+#>SKIP
+
 source('coalesce.c')
 procedure('main')
 destination('coalescemodified.c')

@@ -1,5 +1,8 @@
 from chill import *
 
+## Issue #53
+#>SKIP
+
 source('jacobi_box_4_64.c')
 destination('jacobi_box_4_64modified.c')
 procedure('smooth_box_4_64')

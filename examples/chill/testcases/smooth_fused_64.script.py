@@ -1,5 +1,8 @@
 from chill import *
 
+## Issue #54
+#>SKIP
+
 source('smooth_fused_64.c')
 destination('smooth_fused_64modified.c')
 procedure('main')

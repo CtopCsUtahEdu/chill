@@ -27,7 +27,7 @@ for (t2 = 0; t2 <= 1023; t2 += 1)
 }{
 }float a[1024][1024]float a[1024][1024]float *a[1024]a[t6][t2]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
 }{
-}float b[1024][1024]float b[1024][1024]float *b[1024]b[t4][t6]1048576 * sizeof(float)1048576 * sizeof(float)float a[1024][1024]1048576 * sizeof(float)float b[1024][1024]1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI1Ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice)10241dim3 dimBlock0= dim3(1)float c[1024][1024]float a[1024][1024]float b[1024][1024]kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])float * devO1Ptr, (float (*)[1024])float * devI1Ptr, (float (*)[1024])float * devI2Ptr)// ~cuda~ preferredIdx: bx
+}float b[1024][1024]float b[1024][1024]float *b[1024]b[t4][t6]1048576 * sizeof(float)1048576 * sizeof(float)float a[1024][1024]1048576 * sizeof(float)float b[1024][1024]1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI1Ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice)10241dim3 dimBlock0 = dim3(1)float c[1024][1024]float a[1024][1024]float b[1024][1024]kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])float * devO1Ptr, (float (*)[1024])float * devI1Ptr, (float (*)[1024])float * devI2Ptr)// ~cuda~ preferredIdx: bx
 for (t2 = 0; t2 <= 1023; t2 += 1) 
   // ~cuda~ preferredIdx: j
   for (t4 = 0; t4 <= 1023; t4 += 1) 
@@ -84,52 +84,53 @@ for (j = 0; j <= 1023; j += 1)
 }t6 = 0t6 <= 1023t6 += 1k = 0k <= 1023k += 1// ~cuda~ preferredIdx: k
 for (k = 0; k <= 1023; k += 1) 
   c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];int bxint jint kfloat c[1024][1024]float a[1024][1024]float b[1024][1024]__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
-  int by= blockIdx.y;
+  int by = blockIdx.y;
   int k;
   int j;
-  int bx= blockIdx.x;
+  int bx = blockIdx.x;
   for (bx = 0; bx <= 1023; bx += 1) 
     for (j = 0; j <= 1023; j += 1) 
       for (k = 0; k <= 1023; k += 1) 
         c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
 }float c[1024][1024]float c[1024][1024]float a[1024][1024]float b[1024][1024]__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
-  int tx= threadIdx.x;
-  int by= blockIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
   int k;
   int j;
-  int bx= blockIdx.x;
+  int bx = blockIdx.x;
   for (bx = 0; bx <= 1023; bx += 1) 
     for (j = 0; j <= 1023; j += 1) 
       for (k = 0; k <= 1023; k += 1) 
         c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
 }__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
-  int tx= threadIdx.x;
-  int by= blockIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
   int k;
   int j;
-  int bx= blockIdx.x;
+  int bx = blockIdx.x;
   for (bx = 0; bx <= 1023; bx += 1) 
     for (j = 0; j <= 1023; j += 1) 
       for (k = 0; k <= 1023; k += 1) 
         c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
 }__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
-  int tx= threadIdx.x;
-  int by= blockIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
   int k;
   int j;
-  int bx= blockIdx.x;
+  int bx = blockIdx.x;
   for (bx = 0; bx <= 1023; bx += 1) 
     for (j = 0; j <= 1023; j += 1) 
       for (k = 0; k <= 1023; k += 1) 
         c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
 }__global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
-  int tx= threadIdx.x;
-  int by= blockIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
   int k;
   int j;
-  int bx= blockIdx.x;
-  
+  int bx = blockIdx.x;
+  {
     for (j = 0; j <= 1023; j += 1) 
       for (k = 0; k <= 1023; k += 1) 
-        c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];;
+        c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
+  }
 }c[j][i] = c[j][i] + a[k][i] * b[j][k]

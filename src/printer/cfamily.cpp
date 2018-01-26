@@ -167,8 +167,8 @@ void CFamily::runS(chillAST_CompoundStmt *n, std::string indent, std::ostream &o
 
 
 void CFamily::runS(chillAST_CStyleAddressOf *n, std::string indent, std::ostream &o) {
-  int prec = getPrec(n);
-  printPrec(n->subexpr, indent, o, prec);
+  o << "&";
+  printPrec(n->subexpr, indent, o, getPrec(n));
 }
 
 
@@ -373,6 +373,7 @@ void CFamily::runS(chillAST_Preprocessing *n, std::string indent, std::ostream &
     case CHILL_PREPROCESSING_IMMEDIATELYBEFORE:
     case CHILL_PREPROCESSING_TOTHERIGHT:
       o << n->blurb;
+      break;
     default:
       break;
   }
@@ -460,7 +461,7 @@ void CFamily::runS(chillAST_UnaryOperator *n, std::string indent, std::ostream &
 void CFamily::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
   if (n->isDevice) o << "__device__ ";
   if (n->isShared) o << "__shared__ ";
-  if (n->isRestrict) o << "__restrict__ ";
+  //if (n->isRestrict) o << "__restrict__ ";
 
   if ((!n->isAParameter) && n->isAStruct() && n->vardef) {
     run(n->vardef, indent, o);
@@ -474,6 +475,9 @@ void CFamily::runS(chillAST_VarDecl *n, std::string indent, std::ostream &o) {
     o << n->arraypointerpart;
   if (n->byreference)
     o << "&";
+
+  if (n->isRestrict) o << " __restrict__ ";
+
   string def = n->varname;
   bool paren = false;
   for (int i = 0; i < (n->getNumChildren()); ++i) {

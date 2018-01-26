@@ -478,6 +478,10 @@ chillAST_node * ConvertRoseFunctionDecl( SgFunctionDeclaration *fd )
   }
   else {
     //debug_fprintf(stderr, "function %s is a forward declaration or external\n", functionname);
+
+    if(fd->get_externBrace()) {
+      chillFD->setExtern();
+    }
     chillFD->setForward();
   }
 
@@ -723,6 +727,7 @@ chillAST_node * ConvertRoseVarDecl( SgVariableDeclaration *vardecl )
 
   debug_fprintf(stderr, "ConvertRoseVarDecl() storing variable declaration '%s' with unique value %p from  "
       "SgInitializedName\n", entiredecl,  vd->uniquePtr );
+
 
   // store this away for declrefexpr that references it!
   // since we called ConvertRoseInitName() which added it already, don't do that again.

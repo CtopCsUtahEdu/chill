@@ -414,6 +414,12 @@ chillAST_RecordDecl * chillAST_TypedefDecl::getStructDef() {
 
 
 
+void chillAST_VarDecl::loseLoopWithLoopVar(char* var) {
+    /* do nothing */
+}
+
+
+
 chillAST_RecordDecl::chillAST_RecordDecl() { 
   name = NULL; // ??
   originalname = NULL;      // ?? 
@@ -3256,6 +3262,12 @@ void chillAST_IfStmt::gatherStatements(std::vector<chillAST_node*> &statements )
   //debug_fprintf(stderr, "ifstmt, after else, %d statements\n", statements.size()); 
 }
 
+void chillAST_IfStmt::loseLoopWithLoopVar(char* var) {
+    thenpart->loseLoopWithLoopVar(var);
+    if(elsepart) {
+        elsepart->loseLoopWithLoopVar(var);
+    }
+}
 
 
 chillAST_node *chillAST_IfStmt::clone() { 
@@ -3273,8 +3285,10 @@ chillAST_node *chillAST_IfStmt::clone() {
 
 
 bool chillAST_IfStmt::findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync ) { 
-  thenpart->findLoopIndexesToReplace( symtab ); 
-  elsepart->findLoopIndexesToReplace( symtab ); 
+  thenpart->findLoopIndexesToReplace( symtab );
+  if(elsepart) {
+      elsepart->findLoopIndexesToReplace( symtab );
+  }
   return false; // ?? 
 }
 

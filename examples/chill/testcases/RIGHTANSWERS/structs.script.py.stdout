@@ -1,16 +1,1 @@
 
-
-
-Unhandled case in scanner: SourceFile
-Looking for def int
-Looking for def int
-Unhandled case in scanner: BinaryOperator
-Unhandled case in scanner: MemberExpr
-Unhandled case in scanner: MemberExpr
-Unhandled case in scanner: SourceFile
-Unhandled case in scanner: VarDecl
-Unhandled case in scanner: FunctionDecl
-Unhandled case in scanner: CompoundStmt
-Unhandled case in scanner: BinaryOperator
-Unhandled case in scanner: MemberExpr
-Unhandled case in scanner: MemberExpr
