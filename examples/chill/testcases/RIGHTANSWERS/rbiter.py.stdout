@@ -1,0 +1,10 @@
+s0: { Sym=[N,M] [t1,t2,t3,t4,t5] : exists ( alpha : 2alpha = 1+t2+t4 && t1 = 0 && t3 = 0 && t5 = 0 && 0 <= t2 <= 63 && N <= t4 < M) }
+if (M >= N+1) {
+  for(t2 = 0; t2 <= 63; t2++) {
+    for(t4 = N+intMod(-t2-1-N,2); t4 <= M-1; t4 += 2) {
+      s0(t2,t4);
+    }
+  }
+}
+
+
