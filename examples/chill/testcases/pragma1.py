@@ -1,12 +1,5 @@
 
 
-#
-#  example from CHiLL manual page 10
-#
-#  distribute
-#
-
-
 from chill import *
 
 source('distribute.c')
@@ -23,6 +16,6 @@ known('bm > 0')
 distribute([0,1], 1)
 
 pragma(0, 2, 'some pragma')
-omp_for(1, 2)
+
 
 
