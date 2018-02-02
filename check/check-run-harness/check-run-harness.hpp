@@ -10,6 +10,7 @@
 
 #include <cstring>
 
+#include <iostream>
 #include <numeric>
 #include <random>
 #include <type_traits>
@@ -49,6 +50,31 @@ inline static void fill_random(T (&arr)[I][J]) {
     }
 }
 
+template<typename T>
+static T* __alloc_and_fill_random(size_t r) {
+    auto arr = reinterpret_cast<T*>(malloc(r * sizeof(T*)));
+    for(int i = 0; i < r; i++) {
+        arr[i] = rand<T>();
+    }
+    return arr;
+}
+
+template<typename T>
+static T** __alloc_and_fill_random(size_t r, size_t c) {
+    auto arr = reinterpret_cast<T**>(malloc(c*sizeof(T*)));
+    for(int i = 0; i < r; i++) {
+        arr[i] = __alloc_and_fill_random<T>(c);
+    }
+    return arr;
+}
+
+template<typename TPtr>
+inline static void alloc_and_fill_random(TPtr& arr, size_t r, size_t c) {
+    typedef typename std::remove_pointer<
+                typename std::remove_pointer<TPtr>::type>::type fp_t;
+    arr = __alloc_and_fill_random<fp_t>(r, c);
+}
+
 /*
  * zero generator
  */
@@ -68,6 +94,31 @@ inline static void fill_zero(T (&arr)[I]) {
     }
 }
 
+template<typename T>
+static T* __alloc_and_fill_zero(size_t r) {
+    auto arr = reinterpret_cast<T*>(malloc(r * sizeof(T*)));
+    for(int i = 0; i < r; i++) {
+        setzero<T>(&arr[i]);
+    }
+    return arr;
+}
+
+template<typename T>
+static T** __alloc_and_fill_zero(size_t r, size_t c) {
+    auto arr = reinterpret_cast<T**>(malloc(c*sizeof(T*)));
+    for(int i = 0; i < r; i++) {
+        arr[i] = __alloc_and_fill_zero<T>(c);
+    }
+    return arr;
+}
+
+template<typename TPtr>
+inline static void alloc_and_fill_zero(TPtr& arr, size_t r, size_t c) {
+    typedef typename std::remove_pointer<
+                    typename std::remove_pointer<TPtr>::type>::type fp_t;
+    arr = __alloc_and_fill_zero<fp_t>(r, c);
+}
+
 /*
  * compare
  */
@@ -76,13 +127,33 @@ static inline float  compare(float  x, float  y) { return x - y; }
 static inline double compare(double x, double y) { return x - y; }
 
 template<typename T, size_t I>
-static inline auto compute_error(T (&lhs)[I], T (&rhs)[I])
+static auto compute_error(T (&lhs)[I], T (&rhs)[I])
         -> decltype(compare(lhs[0], rhs[0])) {
     decltype(compare(lhs[0], rhs[0])) err = 0;
     for(size_t i = 0; i < I; i++) {
         err += compare(lhs[i], rhs[i]);
     }
     return err/I;
+}
+
+template<typename T>
+static auto compute_error(T* lhs, T* rhs, size_t c)
+        -> decltype(compare(*lhs, *rhs)) {
+    decltype(compare(*lhs, *rhs)) err = 0;
+    for(size_t i = 0; i < c; i++) {
+        err += compare(lhs[i], rhs[i]);
+    }
+    return err/c;
+}
+
+template<typename T>
+static auto compute_error(T** lhs, T** rhs, size_t r, size_t c)
+        -> decltype(compare(**lhs, **rhs)) {
+    decltype(compare(**lhs, **rhs)) err = 0;
+    for(size_t i = 0; i < r; i++) {
+        err += compute_error(lhs[i], rhs[i], c);
+    }
+    return err/r;
 }
 
 template<typename T, size_t I, size_t J>
@@ -99,5 +170,20 @@ static inline auto compute_error(T (&lhs)[I][J], T (&rhs)[I][J])
 
 template<typename T>
 static inline T min_error() { return std::numeric_limits<T>::epsilon(); }
+
+/*
+ * Print
+ */
+
+template<typename T>
+static void print_matrix(T** m, size_t r, size_t c, std::ostream& s) {
+    for(int i = 0; i < r; i++) {
+        s << "[";
+        for(int j = 0; j < c; j++) {
+            s << m[j][i] << ", ";
+        }
+        s << "]" << std::endl;
+    }
+}
 
 #endif /* SRC_CHECK_DATAGEN_HPP_ */

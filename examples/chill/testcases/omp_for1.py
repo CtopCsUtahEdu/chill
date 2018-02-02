@@ -3,7 +3,7 @@
 from chill import *
 
 source('distribute.c')
-destination('pragma1modified.c')
+destination('omp_for1modified.c')
 
 procedure('mm')
 
@@ -15,7 +15,6 @@ known('bm > 0')
 
 distribute([0,1], 1)
 
-pragma(0, 2, 'some pragma')
-
+omp_for(1, 2)
 
 
