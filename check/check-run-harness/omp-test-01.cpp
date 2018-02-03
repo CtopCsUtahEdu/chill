@@ -10,12 +10,10 @@
 
 #include "check-run-harness.hpp"
 
-//>procedure_name:          mm
 //>procedure_compiler:      gcc -fopenmp
 //>procedure_linker:        g++ -fopenmp
+//>script:                  examples/chill/testcases/omp_for1.py
 //>original_header:         examples/chill/testcases/dummy.h
-//>original_source:         examples/chill/testcases/mm.c
-//>generated_source:        examples/chill/testcases/pragma1modified.c
 
 extern "C" void mm_original(float **A, float **B, float **C, int ambn, int an, int bm);
 extern "C" void mm_generated(float **A, float **B, float **C, int ambn, int an, int bm);

@@ -242,4 +242,3 @@ reading from array 'a' 'b' and writing to array 'c'
 2  int k
 3  int tx = threadIdx.x
 
-
