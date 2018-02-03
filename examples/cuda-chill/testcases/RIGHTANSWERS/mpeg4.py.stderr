@@ -1,5 +1,5 @@
 4748float prev[4096 + 16][4096 + 16]2float result[4096][4096]Traceback (most recent call last):
-  File "mpeg4.py", line 36, in <module>
+  File "mpeg4.py", line 39, in <module>
     unroll_to_depth(2)
   File "cudaize.py", line 891, in unroll_to_depth
     guard_idx = thread_idxs[-1]  # last one
@@ -68,7 +68,7 @@ for (t2 = 0; t2 <= 127; t2 += 1)
 }{
 }float curr[16 * 16]float curr[16 * 16]float *currcurr[t18 * (unsigned int)16 + t20]void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
 }{
-}float result[4096][4096]float result[4096][4096]float *result[4096]float prev[4096 + 16][4096 + 16]16908544 * sizeof(float)float result[4096][4096]16777216 * sizeof(float)float curr[16 * 16]256 * sizeof(float)16908544 * sizeof(float)16908544 * sizeof(float)cudaMemcpy(devI1Ptr, prev, 16908544 * sizeof(float), cudaMemcpyHostToDevice)16777216 * sizeof(float)16777216 * sizeof(float)cudaMemcpy(devI2Ptr, result, 16777216 * sizeof(float), cudaMemcpyHostToDevice)256 * sizeof(float)256 * sizeof(float)cudaMemcpy(devI3Ptr, curr, 256 * sizeof(float), cudaMemcpyHostToDevice)128128dim3 dimBlock0 = dim3(16, 16)float prev[4096 + 16][4096 + 16]float result[4096][4096]kernel_GPU<<<dimGrid0,dimBlock0>>>((float (*)[4112])float * devI1Ptr, (float (*)[4096])float * devI2Ptr, devI3Ptr)// ~cuda~ blockLoop preferredIdx: bx
+}float result[4096][4096]float result[4096][4096]float *result[4096]float prev[4096 + 16][4096 + 16]16908544 * sizeof(float)float result[4096][4096]16777216 * sizeof(float)float curr[16 * 16]256 * sizeof(float)16908544 * sizeof(float)16908544 * sizeof(float)cudaMemcpy(devI1Ptr, prev, 16908544 * sizeof(float), cudaMemcpyHostToDevice)16777216 * sizeof(float)16777216 * sizeof(float)cudaMemcpy(devI2Ptr, result, 16777216 * sizeof(float), cudaMemcpyHostToDevice)256 * sizeof(float)256 * sizeof(float)cudaMemcpy(devI3Ptr, curr, 256 * sizeof(float), cudaMemcpyHostToDevice)128128dim3 dimBlock0 = dim3(16, 16)float prev[4096 + 16][4096 + 16]float result[4096][4096]kernel_GPU<<<dimGrid0,dimBlock0>>>((float (*)[4112])devI1Ptr, (float (*)[4096])devI2Ptr, devI3Ptr)// ~cuda~ blockLoop preferredIdx: bx
 for (t2 = 0; t2 <= 127; t2 += 1) 
   // ~cuda~ preferredIdx: by
   for (t4 = 0; t4 <= 127; t4 += 1) {

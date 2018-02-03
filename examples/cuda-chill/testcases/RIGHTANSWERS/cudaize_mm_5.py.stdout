@@ -254,4 +254,3 @@ reading from array 'a' 'b' and writing to array 'c'
 1  int by = blockIdx.y
 2  int tx = threadIdx.x
 
-

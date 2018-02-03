@@ -94,6 +94,9 @@ namespace chill {
     virtual void runS(chillAST_VarDecl *n, Ts... args) { errorRun(n, args...); }
 
   public:
+
+    virtual ~Scanner() = default;
+
     //! Scanner entry, multiplexer
     /*!
      * @param n the chillAST_Node

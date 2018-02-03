@@ -1,9 +1,3 @@
-/*
- * mriq.h
- *
- *  Created on: Jan 25, 2018
- *      Author: derick
- */
 
 #ifndef EXAMPLES_CUDA_CHILL_TESTCASES_MRIQ_H_
 #define EXAMPLES_CUDA_CHILL_TESTCASES_MRIQ_H_
@@ -14,6 +8,12 @@ struct kValues {
   float Kz;
   float PhiMag;
 };
+
+#ifdef __cplusplus
+#define NO_EXCEPT       noexcept
+#else
+#define NO_EXCEPT
+#endif
 
 extern float sinf(float);
 extern float cosf(float);

@@ -12,7 +12,7 @@ __global__ void kernel_gpu(float *c[1024], float *a[1024], float *b[1024]) {
         c[j][bx] = c[j][bx] + a[k][bx] * b[j][k];
   }
 }
-#define N 1024
+#include "mm.h"
 
 void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
   float * devI2Ptr;
@@ -25,7 +25,7 @@ void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
   cudaMemcpy(devI2Ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(1024, 1);
   dim3 dimBlock0 = dim3(1);
-  kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])float * devO1Ptr, (float (*)[1024])float * devI1Ptr, (float (*)[1024])float * devI2Ptr);
+  kernel_gpu<<<dimGrid0,dimBlock0>>>((float (*)[1024])devO1Ptr, (float (*)[1024])devI1Ptr, (float (*)[1024])devI2Ptr);
   cudaMemcpy(c, devO1Ptr, 1048576 * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(devO1Ptr);
   cudaFree(devI1Ptr);

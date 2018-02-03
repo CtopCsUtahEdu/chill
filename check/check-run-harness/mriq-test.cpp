@@ -10,12 +10,10 @@
 
 #include "check-run-harness.hpp"
 
-//>procedure_name:          ComputeQCPU
 //>procedure_compiler:      nvcc
 //>procedure_linker:        nvcc
+//>script:                  examples/cuda-chill/testcases/mriq.py
 //>original_header:         examples/cuda-chill/testcases/mriq.h
-//>original_source:         examples/cuda-chill/testcases/mriq.c
-//>generated_source:        examples/cuda-chill/testcases/mriqmodified.cu
 
 struct kValues {
     float Kx;

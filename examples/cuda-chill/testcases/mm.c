@@ -1,4 +1,4 @@
-#define N 1024
+#include "mm.h"
 
 void normalMM(float c[N][N], float a[N][N], float b[N][N]) {
   int i, j, k;
@@ -8,3 +8,4 @@ void normalMM(float c[N][N], float a[N][N], float b[N][N]) {
       for (k = 0; k < N; k++)
         c[j][i] = c[j][i] + a[k][i] * b[j][k];
 }
+

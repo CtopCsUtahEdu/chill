@@ -1931,7 +1931,7 @@ namespace omega {
     if(active_.get(stmt)) {
       if(level_/2 == loop_level && needLoop_) {
         attachPragma_ = true;
-        pragmaName_   = "omp for default(shared)";
+        pragmaName_   = "omp for";
 
         // -------------------------------- //
         // Create privitized variables list //

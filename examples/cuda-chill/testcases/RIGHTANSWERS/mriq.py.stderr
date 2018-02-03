@@ -589,4 +589,4 @@ for (tx = 0; tx <= 127; tx += 1)
       Qi[128 * bx + tx] = newVariable3;
     }
   }
-}kVals[chill_t52].KxkVals[chill_t52].KykVals[chill_t52].KzkVals[chill_t52].PhiMagexpArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2)cosArg = cosf(expArg)sinArg = sinf(expArg)phi = kVals[chill_t52].PhiMagnewVariable4 += phi * cosArgnewVariable3 += phi * sinArgnewVariable0 = x[chill_t21 + 128 * chill_t19]newVariable1 = y[128 * chill_t26 + chill_t28]newVariable2 = z[chill_t35 + 128 * chill_t33]newVariable3 = Qi[128 * chill_t40 + chill_t42]Qi[128 * chill_t40 + chill_t42] = newVariable3newVariable4 = Qr[chill_t49 + 128 * chill_t47]Qr[chill_t49 + 128 * chill_t47] = newVariable4
+}
