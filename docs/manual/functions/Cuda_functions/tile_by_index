@@ -1,9 +1,14 @@
 @unnumberedsubsec Tile_by_index
-@deftypefn {Transform} {} tile (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+@deftypefn {Transform} {} tile_by_index (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
 
-The @code{tile} transformation allows a loop dimension to be segregated into tiles, the execution of which are scheduled by a control loop placed outside the tiled loop. The statements @var{stmt} and surrounding loops inside the control loop will be executed a tile at a time along the tiled dimension.
+The @code{tile_by_index} transformation
 
-The loop nest to tile is specified by @var{stmt} and @var{loop}. The argument @var{tile_size} specifies the tile size, a value of 0 indicates no tiling, a value of 1 is similar to loop interchange and a value greater than 1 sets the tile size to that value. The argument @var{control_loop} specifies the loop level where the controlling loop should be placed, the default is 1 or the outermost loop. The argument @var{method} specifies the tiling method, a value of 0 indicates that the index value of the control loop is the actual index to the start of the tile and is known as a ``strided tile'', a value of 1 indicates that the index value of control loop is the value of the tile and must be multiplied by @var{tile_size} to get the index to the start of the tile. The value of @var{alignment_offset} shifts the beginning of the area to tile consistent with the alignment constraint in @var{alignment_multiple}.
+{"i","j"} The index variables of the loops that will be tiled
+{TI,TJ} The respective tile sizes for each index variable
+{l1 control="ii",l2 control="jj"} A mapping that specifies control loop variable names and optionally renames tile loop index variables.
+{"ii", "jj", "i", "j"} Final order of nested loops with update loop index names
+
+
 @end deftypefn
 
 @multitable @columnfractions .50 .50 
@@ -12,12 +17,10 @@ The loop nest to tile is specified by @var{stmt} and @var{loop}. The argument @v
 @smallformat
 @cartouche
 @verbatim
-from chill import *
-source('mm.c')
-procedure('mm')
-loop(0)
-known(['ambn > 0', 'an > 0', 'bm > 0'])
-tile(0,2,4)
+read_IR("normalMM")
+TI=16
+TJ=16
+tile_by_index(["i","j"], [TI, TJ], {'l1_control': "ii", 'l2_control':"jj"}, ["ii","jj", "i", "j"], None)
 print_code()
 @end verbatim
 @end cartouche
@@ -26,15 +29,14 @@ print_code()
 @smallformat
 @cartouche
 @verbatim
-void mm(float **A, float **B, float **C, 
-        int ambn, int an, int bm) {
-  int i, j, n;
-  for(i = 0; i < an; i++)
-    for(j = 0; j < bm; j++) {
-      C[i][j] = 0.0f;
-      for(n = 0; n < ambn; n++)
-        C[i][j] += A[i][n] * B[n][j];
-    }
+#define N 1024
+
+void normalMM(float c[N][N], float a[N], float b[N]) {
+  int i, j;
+
+  for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
+        a[i] = a[i] + c[i][j] * b[j];
 }
 @end verbatim
 @end cartouche
@@ -47,18 +49,111 @@ void mm(float **A, float **B, float **C,
 @smallformat
 @cartouche
 @verbatim
-chill test_tile.py
-for(t2 = 0; t2 <= bm-1; t2 += 4) {
-  for(t4 = 0; t4 <= an-1; t4++) {
-    for(t6 = t2; t6 <= min(t2+3,bm-1); t6++) {
-      s0(t4,t6,0);
-      s1(t4,t6,0);
-      for(t8 = 1; t8 <= ambn-1; t8++) {
-        s1(t4,t6,t8);
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 2 entries
+0  i
+1  j
+
+
+['i', 'j']
+curOrder: i,j
+idxNames: i,j
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 2 entries
+0  i
+1  j
+
+
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+
+
+curOrder: ii,i,j
+idxNames: ii,i,j
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+
+
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 6 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+
+
+curOrder: ii,jj,i,j
+idxNames: ii,jj,i,j
+for(t2 = 0; t2 <= 63; t2++) {
+  for(t4 = 0; t4 <= 63; t4++) {
+    for(t6 = 16*t2; t6 <= 16*t2+15; t6++) {
+      for(t8 = 16*t4; t8 <= 16*t4+15; t8++) {
+        s0(t2,t6,t8);
       }
     }
   }
 }
+
+
+// ~cuda~ preferredIdx: ii
+for (t2 = 0; t2 <= 63; t2 += 1) 
+  // ~cuda~ preferredIdx: jj
+  for (t4 = 0; t4 <= 63; t4 += 1) 
+    // ~cuda~ preferredIdx: i
+    for (t6 = 16 * t2; t6 <= 16 * t2 + 15; t6 += 1) 
+      // ~cuda~ preferredIdx: j
+      for (t8 = 16 * t4; t8 <= 16 * t4 + 15; t8 += 1) 
+        a[t6] = a[t6] + c[t6][t8] * b[t8];// this source is derived from CHILL AST originally from file 'chill87ef8226-0e61-4713-afa4-05e17429a93f.c' as parsed by frontend compiler rose
+
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+  int i;
+  int j;
+  for (i = 0; i < 1024; i++) 
+    for (j = 0; j < 1024; j++) 
+      a[chill_t4] = a[chill_t4] + c[chill_t4][chill_t5] * b[chill_t5];
+}
+
 @end verbatim
 @end cartouche
 @end smallformat
@@ -66,19 +161,16 @@ for(t2 = 0; t2 <= bm-1; t2 += 4) {
 @smallformat
 @cartouche
 @verbatim
-#define __rose_lt(x,y) ((x)<(y)?(x):(y))
-void mm(float **A, float **B, float **C,
-        int ambn, int an, int bm) {
-  int i, j, n, jj;
-  for (jj = 0; jj <= bm - 1; jj += 4) 
-    for (i = 0; i <= an - 1; i += 1) 
-      for (j=jj; j<=__rose_lt(bm-1,jj+3); 
-           j+=1) {
-        C[i][j] = 0.0f;
-        C[i][j] += (A[i][0] * B[0][j]);
-        for (n = 1; n <= ambn - 1; n += 1) 
-            C[i][j] += (A[i][n] * B[n][j]);
-      }
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+  int chill_t5;
+  int chill_t4;
+  int i;
+  int j;
+  for (i = 0; i < 1024; i++) 
+    for (j = 0; j < 1024; j++) 
+      a[chill_t4] = a[chill_t4] + c[chill_t4][chill_t5] * b[chill_t5];
 }
 @end verbatim
 @end cartouche
