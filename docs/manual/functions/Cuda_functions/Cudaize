@@ -1,0 +1,386 @@
+@unnumberedsubsec Cudaize
+@deftypefn {Transform} {} cudaize (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+
+The @code{cudaize} transformation
+
+
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+read_IR("normalMM")
+TI=16
+TJ=16
+cudaize(0, "kernel_gpu", {'a':1024**2,'b':1024**2,'c':1024**2}, ['i'], ['j'], [])
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+#define N 1024
+
+void normalMM(float c[N][N], float a[N], float b[N]) {
+  int i, j;
+
+  for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
+        a[i] = a[i] + c[i][j] * b[j];
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 2 entries
+0  i
+1  j
+
+
+i
+thread= j
+
+i,j
+// ~cuda~ preferredIdx: i
+for(t2 = 0; t2 <= 1023; t2++) {
+  // ~cuda~ preferredIdx: j
+  for(t4 = 0; t4 <= 1023; t4++) {
+    s0(t2,t4);
+  }
+}
+
+block idx i level 1 lb: 0 ub 1023
+bx,j
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 1023; t2++) {
+  // ~cuda~ preferredIdx: j
+  for(t4 = 0; t4 <= 1023; t4++) {
+    s0(t2,t4);
+  }
+}
+
+thread idx j level 2 lb: 0 ub 1023
+Codegen: current names: bx,tx
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 1023; t2++) {
+  // ~cuda~ preferredIdx: j
+  for(t4 = 0; t4 <= 1023; t4++) {
+    s0(t2,t4);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+a wo 
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+a wo 
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+c wo 
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+
+b wo 
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  c
+1  a
+2  b
+
+
+
+
+reading from array 'c' 'b' and writing to array 'a' 
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  t2
+3  t4
+
+0  int bx = blockIdx.x
+1  int tx = threadIdx.x
+2  int by = blockIdx.y
+
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+  int i;
+  int j;
+  for (i = 0; i < 1024; i++) 
+    for (j = 0; j < 1024; j++) 
+      a[i] = a[i] + c[i][j] * b[j];
+}// this source is derived from CHILL AST originally from file 'chillece82fd0-c278-49c8-b9b5-a6184d0476e8.c' as parsed by frontend compiler rose
+
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}a[i] = a[i] + c[i][j] * b[j]// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    a[t2] = a[t2] + c[t2][t4] * b[t4];a[t2]a[t2]c[t2][t4]b[t4]void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float a[1024]float a[1024]float *avoid normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float a[1024]float a[1024]float *avoid normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float c[1024][1024]float c[1024][1024]float *c[1024]c[t2][t4]void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float b[1024]float b[1024]float *bb[t4]1024 * sizeof(float)1024 * sizeof(float)float c[1024][1024]1048576 * sizeof(float)float b[1024]1024 * sizeof(float)1024 * sizeof(float)1024 * sizeof(float)1048576 * sizeof(float)1048576 * sizeof(float)cudaMemcpy(devI1Ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1024 * sizeof(float)1024 * sizeof(float)cudaMemcpy(devI2Ptr, b, 1024 * sizeof(float), cudaMemcpyHostToDevice)10241dim3 dimBlock0 = dim3(1024)float c[1024][1024]kernel_gpu<<<dimGrid0,dimBlock0>>>(devO1Ptr, (float (*)[1024])float * devI1Ptr, devI2Ptr)// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    a[t2] = a[t2] + c[t2][t4] * b[t4];__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      a[t2] = a[t2] + c[t2][t4] * b[t4];
+}// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 1023; t2 += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    a[t2] = a[t2] + c[t2][t4] * b[t4];__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 1023; t2 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      a[t2] = a[t2] + c[t2][t4] * b[t4];
+}t2 = 0t2 <= 1023t2 += 1bx = 0bx <= 1023bx += 1// ~cuda~ preferredIdx: bx
+for (bx = 0; bx <= 1023; bx += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 1023; t4 += 1) 
+    a[bx] = a[bx] + c[bx][t4] * b[t4];__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int bx;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 1023; t4 += 1) 
+      a[bx] = a[bx] + c[bx][t4] * b[t4];
+}t4 = 0t4 <= 1023t4 += 1tx = 0tx <= 1023tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 1023; tx += 1) 
+  a[bx] = a[bx] + c[bx][tx] * b[tx];int bxint txfloat a[1024]float c[1024][1024]float b[1024]float a[1024]float a[1024]float c[1024][1024]float b[1024]__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (tx = 0; tx <= 1023; tx += 1) 
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+}__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (tx = 0; tx <= 1023; tx += 1) 
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+}__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 1023; bx += 1) 
+    for (tx = 0; tx <= 1023; tx += 1) 
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+}__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  {
+    {
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+    }
+  }
+}a[i] = a[i] + c[i][j] * b[j]
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  {
+    {
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+    }
+  }
+}
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+  float * devI2Ptr;
+  float * devI1Ptr;
+  float * devO1Ptr;
+  cudaMalloc((void **)&devO1Ptr, 1024 * sizeof(float));
+  cudaMalloc((void **)&devI1Ptr, 1048576 * sizeof(float));
+  cudaMemcpy(devI1Ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devI2Ptr, 1024 * sizeof(float));
+  cudaMemcpy(devI2Ptr, b, 1024 * sizeof(float), cudaMemcpyHostToDevice);
+  dim3 dimGrid0 = dim3(1024, 1);
+  dim3 dimBlock0 = dim3(1024);
+  kernel_gpu<<<dimGrid0,dimBlock0>>>(devO1Ptr, (float (*)[1024])float * devI1Ptr, devI2Ptr);
+  cudaMemcpy(a, devO1Ptr, 1024 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devO1Ptr);
+  cudaFree(devI1Ptr);
+  cudaFree(devI2Ptr);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
