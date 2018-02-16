@@ -516,8 +516,6 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @page
 @include functions/Cuda_functions/Copy_to_shared.texi
 @page
-@include functions/Cuda_functions/Datacopy_privatized.texi
-@page
 
 @section Data operations
 @include functions/datacopy.texi
