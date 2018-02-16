@@ -1,4 +1,4 @@
-@unnumberedsubsec OMP for
+@unnumberedsubsec pragma
 The @code{pragma} command inserts an arbitrary pragma at the specified loop and statement number. 
 @deftypefn {Transform} {} pragma (int @var{loop_level}, int @var{stmt_number}, str @var{pragma_text})
 

@@ -1,4 +1,4 @@
-@unnumberedsubsec OMP for
+@unnumberedsubsec omp_for
 The @code{omp_for} command inserts an @code{omp for} pragma at the specified loop and statement number. 
 @deftypefn {Transform} {} omp_for (int @var{loop_level}, int @var{stmt_number})
 
