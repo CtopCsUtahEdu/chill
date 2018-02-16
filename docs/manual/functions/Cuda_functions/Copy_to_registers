@@ -23,10 +23,17 @@ Tii=16
 Tjj=16
 Tk=4
 
-tile_by_index(["i","j"],[Ti,Tj],{'l1_control':"ii",'l2_control':"jj"},["ii","jj","i","j","k","l"], None)
-tile_by_index(["i","j"],[Tii,Tjj],{'l1_control':"iii",'l2_control':"jjj"},["ii","jj","iii","i","jjj","j","k","l"],None)
+tile_by_index(["i","j"],[Ti,Tj],
+{'l1_control':"ii",'l2_control':"jj"},
+["ii","jj","i","j","k","l"], None)
 
-cudaize(0, "kernel_GPU",{'curr':W*W,'prev':(N+W)*(M+W),'result':N*M}, ["ii","jj"], ["i","j"], [])
+tile_by_index(["i","j"],[Tii,Tjj],
+{'l1_control':"iii",'l2_control':"jjj"},
+["ii","jj","iii","i","jjj","j","k","l"],None)
+
+cudaize(0, "kernel_GPU",{'curr':W*W,
+'prev':(N+W)*(M+W),'result':N*M}, 
+["ii","jj"], ["i","j"], [])
 
 copy_to_registers("jjj","result")
 
@@ -42,7 +49,9 @@ copy_to_registers("jjj","result")
 #define N2 4096
 #define WINDOW_SIZE 16
 
-void mpeg4_cpu(float result[N1][N2], float prev[N2+WINDOW_SIZE][N2+WINDOW_SIZE], float  curr[WINDOW_SIZE*WINDOW_SIZE])
+void mpeg4_cpu(float result[N1][N2], 
+float prev[N2+WINDOW_SIZE][N2+WINDOW_SIZE], 
+float  curr[WINDOW_SIZE*WINDOW_SIZE])
 {
 	unsigned int i;
 	unsigned int j;
@@ -51,14 +60,11 @@ void mpeg4_cpu(float result[N1][N2], float prev[N2+WINDOW_SIZE][N2+WINDOW_SIZE],
 
 	for ( i = 0; i < N1; ++i)    
 		for ( j = 0; j < N2; ++j) 
-                       for ( k = 0; k < WINDOW_SIZE; ++k) 
-				for ( l = 0; l < WINDOW_SIZE; ++l) 
-					result[i][j] += prev[i+k][j+l] * curr[k*WINDOW_SIZE+l];
-				
-			
-
-		
-	
+           for ( k = 0; k < WINDOW_SIZE; ++k) 
+			for ( l = 0; l < WINDOW_SIZE; ++l) 
+					result[i][j] += 
+					prev[i+k][j+l] * 
+					curr[k*WINDOW_SIZE+l];
 }
 
 @end verbatim
@@ -73,7 +79,10 @@ void mpeg4_cpu(float result[N1][N2], float prev[N2+WINDOW_SIZE][N2+WINDOW_SIZE],
 @cartouche
 @verbatim
 
-kernel_GPU<<<dimGrid0,dimBlock0>>>((float (*)[4096])float * devI1Ptr, (float (*)[4112])float * devI2Ptr, devI3Ptr)// ~cuda~ blockLoop preferredIdx: bx
+kernel_GPU<<<dimGrid0,dimBlock0>>>((
+float (*)[4096])float * devI1Ptr, 
+(float (*)[4112])float * devI2Ptr, devI3Ptr)
+// ~cuda~ blockLoop preferredIdx: bx
 for (t2 = 0; t2 <= 127; t2 += 1)
   // ~cuda~ preferredIdx: by
   for (t4 = 0; t4 <= 127; t4 += 1)
@@ -84,8 +93,10 @@ for (t2 = 0; t2 <= 127; t2 += 1)
         // ~cuda~ preferredIdx: k
         for (t12 = 0; t12 <= 15; t12 += 1)
           // ~cuda~ preferredIdx: l
-          for (t14 = 32 * t4 + t12; t14 <= 32 * t4 + t12 + 16; t14 += 16)
-            _P1[(t14 - (32 * t4 + t12)) / 16] = result[t8 + 32 * t2 + 16 * t6][t14];
+          for (t14 = 32 * t4 + t12; t14 <= 32 *
+          t4 + t12 + 16; t14 += 16)
+            _P1[(t14 - (32 * t4 + t12)) / 16] =
+            result[t8 + 32 * t2 + 16 * t6][t14];
         // ~cuda~ preferredIdx: jjj
         for (t12 = 0; t12 <= 1; t12 += 1)
           // ~cuda~ preferredIdx: ty
@@ -94,12 +105,18 @@ for (t2 = 0; t2 <= 127; t2 += 1)
             for (t18 = 0; t18 <= 15; t18 += 1)
               // ~cuda~ preferredIdx: l
               for (t20 = 0; t20 <= 15; t20 += 1)
-                _P1[(32 * t4 + 16 * t12 + t14 - (32 * t4 + t14)) / 16] += prev[32 * t2 + 16 * t6 + t8 + t18][32 * t4 + 16 * t12 + t14 + t20] * curr[t18 * (unsigned int)16 + t20];
+                _P1[(32 * t4 + 16 * t12 + t14 -
+                (32 * t4 + t14)) / 16] += prev
+                [32 * t2 + 16 * t6 + t8 + t18]
+                [32 * t4 + 16 * t12 + t14 + t20] *
+                curr[t18 * (unsigned int)16 + t20];
         // ~cuda~ preferredIdx: k
         for (t12 = 0; t12 <= 15; t12 += 1)
           // ~cuda~ preferredIdx: l
-          for (t14 = 32 * t4 + t12; t14 <= 32 * t4 + t12 + 16; t14 += 16)
-            result[t8 + 32 * t2 + 16 * t6][t14] = _P1[(t14 - (32 * t4 + t12)) / 16];
+          for (t14 = 32 * t4 + t12; t14 <= 32 *
+          t4 + t12 + 16; t14 += 16)
+            result[t8 + 32 * t2 + 16 * t6][t14] =
+            _P1[(t14 - (32 * t4 + t12)) / 16];
       }
 
 @end verbatim
