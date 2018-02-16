@@ -110,4 +110,67 @@ for (t12 = 0; t12 <= 15; t12 += 1)
 @end verbatim
 @end cartouche
 @end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+
+
+
+__global__ void kernel_GPU(float *result[4096], float *prev[4096 + 16], float *curr) {
+  float _P1[2];
+  int ty = threadIdx.y;
+  int jjj;
+  int l;
+  int k;
+  int tx = threadIdx.x;
+  int iii;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  {
+    {
+      for (iii = 0; iii <= 1; iii += 1) 
+        {
+          for (k = 0; k <= 15; k += 1) 
+            for (l = 32 * by + k; l <= 32 * by + k + 16; l += 16) 
+              _P1[(l - (32 * by + k)) / 16] = result[tx + 32 * bx + 16 * iii][l];
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            {
+              for (k = 0; k <= 15; k += 1) 
+                for (l = 0; l <= 15; l += 1) 
+                  _P1[(32 * by + 16 * jjj + ty - (32 * by + ty)) / 16] += prev[32 * bx + 16 * iii + tx + k][32 * by + 16 * jjj + ty + l] * curr[k * (unsigned int)16 + l];
+            }
+          for (k = 0; k <= 15; k += 1) 
+            for (l = 32 * by + k; l <= 32 * by + k + 16; l += 16) 
+              result[tx + 32 * bx + 16 * iii][l] = _P1[(l - (32 * by + k)) / 16];
+        }
+    }
+  }
+}
+#define N1 4096
+
+#define N2 4096
+
+#define WINDOW_SIZE 16
+
+void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+  float * devI3Ptr;
+  float * devI2Ptr;
+  float * devI1Ptr;
+  cudaMalloc((void **)&devI1Ptr, 16777216 * sizeof(float));
+  cudaMemcpy(devI1Ptr, result, 16777216 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devI2Ptr, 16908544 * sizeof(float));
+  cudaMemcpy(devI2Ptr, prev, 16908544 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devI3Ptr, 256 * sizeof(float));
+  cudaMemcpy(devI3Ptr, curr, 256 * sizeof(float), cudaMemcpyHostToDevice);
+  dim3 dimGrid0 = dim3(128, 128);
+  dim3 dimBlock0 = dim3(16, 16);
+  kernel_GPU<<<dimGrid0,dimBlock0>>>((float (*)[4096])float * devI1Ptr, (float (*)[4112])float * devI2Ptr, devI3Ptr);
+  cudaFree(devI1Ptr);
+  cudaFree(devI2Ptr);
+  cudaFree(devI3Ptr);
+}
+@end verbatim
+@end cartouche
+@end smallformat
 @end multitable
