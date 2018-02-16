@@ -15,7 +15,9 @@ The loop nest to tile is specified by @var{tile_indices}. The argument @var{tile
 read_IR("normalMM")
 TI=16
 TJ=16
-tile_by_index(["i","j"], [TI, TJ], {'l1_control': "ii", 'l2_control':"jj"}, ["ii","jj", "i", "j"], None)
+tile_by_index(["i","j"], [TI, TJ], 
+{'l1_control': "ii", 'l2_control':"jj"}, 
+["ii","jj", "i", "j"], None)
 print_code()
 @end verbatim
 @end cartouche
@@ -26,7 +28,8 @@ print_code()
 @verbatim
 #define N 1024
 
-void normalMM(float c[N][N], float a[N], float b[N]) {
+void normalMM(float c[N][N], float a[N], 
+              float b[N]) {
   int i, j;
 
   for (i = 0; i < N; i++)
@@ -69,14 +72,18 @@ for(t2 = 0; t2 <= 63; t2++) {
 @verbatim
 #define N 1024
 
-void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+void normalMM(float c[1024][1024],
+              float a[1024], 
+              float b[1024]) {
   int chill_t5;
   int chill_t4;
   int i;
   int j;
   for (i = 0; i < 1024; i++) 
     for (j = 0; j < 1024; j++) 
-      a[chill_t4] = a[chill_t4] + c[chill_t4][chill_t5] * b[chill_t5];
+      a[chill_t4] = a[chill_t4] + 
+      c[chill_t4][chill_t5] * 
+      b[chill_t5];
 }
 @end verbatim
 @end cartouche
