@@ -116,7 +116,8 @@ void normalMM(float c[1024][1024],
   (devO1Ptr, (float (*)[1024])
   float * devI1Ptr, devI2Ptr);
   cudaMemcpy(a, devO1Ptr,
-  1024 * sizeof(float), cudaMemcpyDeviceToHost);
+  1024 * sizeof(float), 
+  cudaMemcpyDeviceToHost);
   cudaFree(devO1Ptr);
   cudaFree(devI1Ptr);
   cudaFree(devI2Ptr);
