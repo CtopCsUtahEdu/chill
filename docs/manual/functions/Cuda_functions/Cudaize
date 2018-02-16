@@ -1,0 +1,111 @@
+@unnumberedsubsec Cudaize
+@deftypefn {Transform} {} cudaize (int @var{stmt}, string @var{Kernel_name}, map<string:int> @var{array_sizes}, string @var{blockIndex},string @var{threadIndex},string @var{kernel_parameters)})
+
+The @code{cudaize} transformation specifies the name of the generated kernel function, the mapping of one or two loop levels to block indices in the grid dimension, and the mapping of up to three loops to thread indices. The effect of the cudaize call on the generated code is to allocate storage and marshall inputs for the CUDA kernel, and select the loops from the transformed loop nest that will be mapped to grid and thread dimensions. These tile controlling loops are effectively removed from the code.
+
+
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+read_IR("normalMM")
+TI=16
+TJ=16
+cudaize(0, "kernel_gpu", {'a':1024**2,'b':1024**2,'c':1024**2}, ['i'], ['j'], [])
+print_code()
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+#define N 1024
+
+void normalMM(float c[N][N], float a[N], float b[N]) {
+  int i, j;
+
+  for (i = 0; i < N; i++)
+    for (j = 0; j < N; j++)
+        a[i] = a[i] + c[i][j] * b[j];
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+
+i
+thread= j
+
+i,j
+for(t2 = 0; t2 <= 1023; t2++) {
+  for(t4 = 0; t4 <= 1023; t4++) {
+    s0(t2,t4);
+  }
+}
+
+block idx i level 1 lb: 0 ub 1023
+bx,j
+for(t2 = 0; t2 <= 1023; t2++) {
+  for(t4 = 0; t4 <= 1023; t4++) {
+    s0(t2,t4);
+  }
+}
+
+thread idx j level 2 lb: 0 ub 1023
+Codegen: current names: bx,tx
+
+
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+  int by = blockIdx.y;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  {
+    {
+      a[bx] = a[bx] + c[bx][tx] * b[tx];
+    }
+  }
+}
+#define N 1024
+
+void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+  float * devI2Ptr;
+  float * devI1Ptr;
+  float * devO1Ptr;
+  cudaMalloc((void **)&devO1Ptr, 1024 * sizeof(float));
+  cudaMalloc((void **)&devI1Ptr, 1048576 * sizeof(float));
+  cudaMemcpy(devI1Ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devI2Ptr, 1024 * sizeof(float));
+  cudaMemcpy(devI2Ptr, b, 1024 * sizeof(float), cudaMemcpyHostToDevice);
+  dim3 dimGrid0 = dim3(1024, 1);
+  dim3 dimBlock0 = dim3(1024);
+  kernel_gpu<<<dimGrid0,dimBlock0>>>(devO1Ptr, (float (*)[1024])float * devI1Ptr, devI2Ptr);
+  cudaMemcpy(a, devO1Ptr, 1024 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devO1Ptr);
+  cudaFree(devI1Ptr);
+  cudaFree(devI2Ptr);
+}
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable

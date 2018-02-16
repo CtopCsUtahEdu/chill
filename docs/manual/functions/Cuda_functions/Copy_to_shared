@@ -1,0 +1,3734 @@
+@unnumberedsubsec Copy_to_shared
+@deftypefn {Transform} {} copy_to_shared (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+
+The @code{copy_to_shared} not working transformation
+
+
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+read_IR( "mpeg4_cpu")
+
+N=4096
+M=4096
+W=16
+
+Ti=32
+Tj=32
+Tii=16
+Tjj=16
+Tk=4
+
+tile_by_index(["i","j"],[Ti,Tj],{'l1_control':"ii",'l2_control':"jj"},["ii","jj","i","j","k","l"], None)
+tile_by_index(["i","j"],[Tii,Tjj],{'l1_control':"iii",'l2_control':"jjj"},["ii","jj","iii","i","jjj","j","k","l"],None)
+
+cudaize(0, "kernel_GPU",{'curr':W*W,'prev':(N+W)*(M+W),'result':N*M}, ["ii","jj"], ["i","j"], [])
+
+copy_to_shared("iii","prev",16)
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+#define N1 4096
+#define N2 4096
+#define WINDOW_SIZE 16
+
+void mpeg4_cpu(float result[N1][N2], float prev[N2+WINDOW_SIZE][N2+WINDOW_SIZE], float  curr[WINDOW_SIZE*WINDOW_SIZE])
+{
+	unsigned int i;
+	unsigned int j;
+	unsigned int k;
+	unsigned int l;
+
+	for ( i = 0; i < N1; ++i)    
+		for ( j = 0; j < N2; ++j) 
+                       for ( k = 0; k < WINDOW_SIZE; ++k) 
+				for ( l = 0; l < WINDOW_SIZE; ++l) 
+					result[i][j] += prev[i+k][j+l] * curr[k*WINDOW_SIZE+l];
+				
+			
+
+		
+	
+}
+
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+4748float prev[4096 + 16][4096 + 16]void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+  __shared__ float _P1[47][48];
+  unsigned int i;
+  unsigned int j;
+  unsigned int k;
+  unsigned int l;
+  for (i = (unsigned int)0; i < (unsigned int)4096; ++i) 
+    for (j = (unsigned int)0; j < (unsigned int)4096; ++j) 
+      for (k = (unsigned int)0; k < (unsigned int)16; ++k) 
+        for (l = (unsigned int)0; l < (unsigned int)16; ++l) 
+          result[chill_t69][chill_t72] += _P1[chill_t72 + chill_t74 - 32 * chill_t66][chill_t69 + chill_t73 - 32 * chill_t65] * curr[chill_t73 * (unsigned int)16 + chill_t74];
+}// this source is derived from CHILL AST originally from file 'chilldb5762b5-ea90-4ca7-9331-66520f08ebcd.c' as parsed by frontend compiler rose
+
+#define N1 4096
+
+#define N2 4096
+
+#define WINDOW_SIZE 16
+
+void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+}
+void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+}result[chill_t69][chill_t72] += _P1[chill_t72 + chill_t74 - 32 * chill_t66][chill_t69 + chill_t73 - 32 * chill_t65] * curr[chill_t73 * (unsigned int)16 + chill_t74]_P1[chill_t124 - 32 * chill_t118][chill_t122 - 32 * chill_t117] = prev[chill_t122][chill_t124]// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 127; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 127; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 46; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 46; t8 += 1) 
+        _P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2] = prev[32 * t2 + t8][32 * t4 + t6];
+    // ~cuda~ preferredIdx: iii sync
+    for (t6 = 0; t6 <= 1; t6 += 1) 
+      // ~cuda~ threadLoop preferredIdx: tx
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 0; t12 <= 1; t12 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t14 = 0; t14 <= 15; t14 += 1) 
+            // ~cuda~ preferredIdx: k
+            for (t18 = 0; t18 <= 15; t18 += 1) 
+              // ~cuda~ preferredIdx: l
+              for (t20 = 0; t20 <= 15; t20 += 1) 
+                result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2] * curr[t18 * (unsigned int)16 + t20];
+  }_P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2]prev[32 * t2 + t8][32 * t4 + t6]result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14]_P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2]curr[t18 * (unsigned int)16 + t20]void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+}{
+}float prev[4096 + 16][4096 + 16]float prev[4096 + 16][4096 + 16]float *prev[4096 + 16]prev[32 * t2 + t8][32 * t4 + t6]void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+}{
+}float result[4096][4096]float result[4096][4096]float *result[4096]void mpeg4_cpu(float result[4096][4096], float prev[4096 + 16][4096 + 16], float curr[16 * 16]) {
+}{
+}float curr[16 * 16]float curr[16 * 16]float *currcurr[t18 * (unsigned int)16 + t20]16777216 * sizeof(float)16777216 * sizeof(float)float prev[4096 + 16][4096 + 16]16908544 * sizeof(float)float curr[16 * 16]256 * sizeof(float)16777216 * sizeof(float)16777216 * sizeof(float)16908544 * sizeof(float)16908544 * sizeof(float)cudaMemcpy(devI1Ptr, prev, 16908544 * sizeof(float), cudaMemcpyHostToDevice)256 * sizeof(float)256 * sizeof(float)cudaMemcpy(devI2Ptr, curr, 256 * sizeof(float), cudaMemcpyHostToDevice)128128dim3 dimBlock0 = dim3(16, 16)float result[4096][4096]float prev[4096 + 16][4096 + 16]kernel_GPU<<<dimGrid0,dimBlock0>>>((float (*)[4096])float * devO1Ptr, (float (*)[4112])float * devI1Ptr, devI2Ptr)// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 127; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 127; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 46; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 46; t8 += 1) 
+        _P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2] = prev[32 * t2 + t8][32 * t4 + t6];
+    // ~cuda~ preferredIdx: iii sync
+    for (t6 = 0; t6 <= 1; t6 += 1) 
+      // ~cuda~ threadLoop preferredIdx: tx
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 0; t12 <= 1; t12 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t14 = 0; t14 <= 15; t14 += 1) 
+            // ~cuda~ preferredIdx: k
+            for (t18 = 0; t18 <= 15; t18 += 1) 
+              // ~cuda~ preferredIdx: l
+              for (t20 = 0; t20 <= 15; t20 += 1) 
+                result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2] * curr[t18 * (unsigned int)16 + t20];
+  }__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 127; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 127; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 46; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 46; t8 += 1) 
+          _P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2] = prev[32 * t2 + t8][32 * t4 + t6];
+      // ~cuda~ preferredIdx: iii sync
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2] * curr[t18 * (unsigned int)16 + t20];
+    }
+}// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 127; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 127; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 46; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 46; t8 += 1) 
+        _P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2] = prev[32 * t2 + t8][32 * t4 + t6];
+    // ~cuda~ preferredIdx: iii sync
+    for (t6 = 0; t6 <= 1; t6 += 1) 
+      // ~cuda~ threadLoop preferredIdx: tx
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 0; t12 <= 1; t12 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t14 = 0; t14 <= 15; t14 += 1) 
+            // ~cuda~ preferredIdx: k
+            for (t18 = 0; t18 <= 15; t18 += 1) 
+              // ~cuda~ preferredIdx: l
+              for (t20 = 0; t20 <= 15; t20 += 1) 
+                result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2] * curr[t18 * (unsigned int)16 + t20];
+  }__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 127; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 127; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 46; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 46; t8 += 1) 
+          _P1[32 * t4 + t6 - 32 * t4][32 * t2 + t8 - 32 * t2] = prev[32 * t2 + t8][32 * t4 + t6];
+      // ~cuda~ preferredIdx: iii sync
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * t2 + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * t2 + 16 * t6 + t8 + t18 - 32 * t2] * curr[t18 * (unsigned int)16 + t20];
+    }
+}t2 = 0t2 <= 127t2 += 1bx = 0bx <= 127bx += 1// ~cuda~ blockLoop preferredIdx: bx
+for (bx = 0; bx <= 127; bx += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 127; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 46; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 46; t8 += 1) 
+        _P1[32 * t4 + t6 - 32 * t4][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * t4 + t6];
+    // ~cuda~ preferredIdx: iii sync
+    for (t6 = 0; t6 <= 1; t6 += 1) 
+      // ~cuda~ threadLoop preferredIdx: tx
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 0; t12 <= 1; t12 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t14 = 0; t14 <= 15; t14 += 1) 
+            // ~cuda~ preferredIdx: k
+            for (t18 = 0; t18 <= 15; t18 += 1) 
+              // ~cuda~ preferredIdx: l
+              for (t20 = 0; t20 <= 15; t20 += 1) 
+                result[32 * bx + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+  }__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 127; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 46; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 46; t8 += 1) 
+          _P1[32 * t4 + t6 - 32 * t4][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * t4 + t6];
+      // ~cuda~ preferredIdx: iii sync
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * t6 + t8][32 * t4 + 16 * t12 + t14] += _P1[32 * t4 + 16 * t12 + t14 + t20 - 32 * t4][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+    }
+}t4 = 0t4 <= 127t4 += 1by = 0by <= 127by += 1// ~cuda~ preferredIdx: by
+for (by = 0; by <= 127; by += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 46; t6 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t8 = 0; t8 <= 46; t8 += 1) 
+      _P1[32 * by + t6 - 32 * by][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * by + t6];
+  // ~cuda~ preferredIdx: iii sync
+  for (t6 = 0; t6 <= 1; t6 += 1) 
+    // ~cuda~ threadLoop preferredIdx: tx
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      // ~cuda~ preferredIdx: jjj
+      for (t12 = 0; t12 <= 1; t12 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t14 = 0; t14 <= 15; t14 += 1) 
+          // ~cuda~ preferredIdx: k
+          for (t18 = 0; t18 <= 15; t18 += 1) 
+            // ~cuda~ preferredIdx: l
+            for (t20 = 0; t20 <= 15; t20 += 1) 
+              result[32 * bx + 16 * t6 + t8][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+}__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 46; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 46; t8 += 1) 
+          _P1[32 * by + t6 - 32 * by][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * by + t6];
+      // ~cuda~ preferredIdx: iii sync
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * t6 + t8][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+    }
+}t6 = 0t6 <= 46t6 += 1tx = 0tx <= 46tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 46; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t8 = 0; t8 <= 46; t8 += 1) 
+    _P1[32 * by + tx - 32 * by][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * by + tx];__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 46; t8 += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + t8 - 32 * bx] = prev[32 * bx + t8][32 * by + tx];
+      // ~cuda~ preferredIdx: iii sync
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * t6 + t8][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+    }
+}t8 = 0t8 <= 46t8 += 1ty = 0ty <= 46ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 46; ty += 1) 
+  _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      // ~cuda~ preferredIdx: 
+      for (t6 = 0; t6 <= 1; t6 += 1) 
+        // ~cuda~ threadLoop preferredIdx: tx
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * t6 + t8][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * t6 + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+      __syncthreads();
+    }
+}t6 = 0t6 <= 1t6 += 1iii = 0iii <= 1iii += 1// ~cuda~ preferredIdx: 
+for (iii = 0; iii <= 1; iii += 1) 
+  // ~cuda~ threadLoop preferredIdx: tx
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    // ~cuda~ preferredIdx: jjj
+    for (t12 = 0; t12 <= 1; t12 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t14 = 0; t14 <= 15; t14 += 1) 
+        // ~cuda~ preferredIdx: k
+        for (t18 = 0; t18 <= 15; t18 += 1) 
+          // ~cuda~ preferredIdx: l
+          for (t20 = 0; t20 <= 15; t20 += 1) 
+            result[32 * bx + 16 * iii + t8][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * iii + t8 + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];t8 = 0t8 <= 15t8 += 1tx = 0tx <= 15tx += 1// ~cuda~ threadLoop preferredIdx: tx
+for (tx = 0; tx <= 15; tx += 1) 
+  // ~cuda~ preferredIdx: jjj
+  for (t12 = 0; t12 <= 1; t12 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t14 = 0; t14 <= 15; t14 += 1) 
+      // ~cuda~ preferredIdx: k
+      for (t18 = 0; t18 <= 15; t18 += 1) 
+        // ~cuda~ preferredIdx: l
+        for (t20 = 0; t20 <= 15; t20 += 1) 
+          result[32 * bx + 16 * iii + tx][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * iii + tx + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 0; t12 <= 1; t12 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t14 = 0; t14 <= 15; t14 += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * t12 + t14] += _P1[32 * by + 16 * t12 + t14 + t20 - 32 * by][32 * bx + 16 * iii + tx + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+      __syncthreads();
+    }
+}t12 = 0t12 <= 1t12 += 1jjj = 0jjj <= 1jjj += 1// ~cuda~ preferredIdx: jjj
+for (jjj = 0; jjj <= 1; jjj += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t14 = 0; t14 <= 15; t14 += 1) 
+    // ~cuda~ preferredIdx: k
+    for (t18 = 0; t18 <= 15; t18 += 1) 
+      // ~cuda~ preferredIdx: l
+      for (t20 = 0; t20 <= 15; t20 += 1) 
+        result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + t14] += _P1[32 * by + 16 * jjj + t14 + t20 - 32 * by][32 * bx + 16 * iii + tx + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];t14 = 0t14 <= 15t14 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  // ~cuda~ preferredIdx: k
+  for (t18 = 0; t18 <= 15; t18 += 1) 
+    // ~cuda~ preferredIdx: l
+    for (t20 = 0; t20 <= 15; t20 += 1) 
+      result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + t20 - 32 * by][32 * bx + 16 * iii + tx + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int jjj;
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              // ~cuda~ preferredIdx: k
+              for (t18 = 0; t18 <= 15; t18 += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + t20 - 32 * by][32 * bx + 16 * iii + tx + t18 - 32 * bx] * curr[t18 * (unsigned int)16 + t20];
+      __syncthreads();
+    }
+}t18 = 0t18 <= 15t18 += 1k = 0k <= 15k += 1// ~cuda~ preferredIdx: k
+for (k = 0; k <= 15; k += 1) 
+  // ~cuda~ preferredIdx: l
+  for (t20 = 0; t20 <= 15; t20 += 1) 
+    result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + t20 - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + t20];__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  int k;
+  int jjj;
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (k = 0; k <= 15; k += 1) 
+                // ~cuda~ preferredIdx: l
+                for (t20 = 0; t20 <= 15; t20 += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + t20 - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + t20];
+      __syncthreads();
+    }
+}t20 = 0t20 <= 15t20 += 1l = 0l <= 15l += 1// ~cuda~ preferredIdx: l
+for (l = 0; l <= 15; l += 1) 
+  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + l - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + l];int bxint byint txint ty__shared__ float _P1[47][48]float prev[4096 + 16][4096 + 16]int iiiint jjjint kint lfloat result[4096][4096]float curr[16 * 16](fake1 : ) __syncthreads()__shared__ float _P1[47][48]float prev[4096 + 16][4096 + 16]float result[4096][4096]__shared__ float _P1[47][48]float curr[16 * 16]__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  __shared__ float _P1[47][48];
+  int l;
+  int k;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (k = 0; k <= 15; k += 1) 
+                for (l = 0; l <= 15; l += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + l - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + l];
+      __syncthreads();
+    }
+}__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  __shared__ float _P1[47][48];
+  int l;
+  int k;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (k = 0; k <= 15; k += 1) 
+                for (l = 0; l <= 15; l += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + l - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + l];
+      __syncthreads();
+    }
+}__global__ void kernel_GPU(float *prev[4096 + 16], float *result[4096], float *curr) {
+  __shared__ float _P1[47][48];
+  int l;
+  int k;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 127; bx += 1) 
+    for (by = 0; by <= 127; by += 1) {
+      for (tx = 0; tx <= 46; tx += 1) 
+        for (ty = 0; ty <= 46; ty += 1) 
+          _P1[32 * by + tx - 32 * by][32 * bx + ty - 32 * bx] = prev[32 * bx + ty][32 * by + tx];
+      for (iii = 0; iii <= 1; iii += 1) 
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (jjj = 0; jjj <= 1; jjj += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (k = 0; k <= 15; k += 1) 
+                for (l = 0; l <= 15; l += 1) 
+                  result[32 * bx + 16 * iii + tx][32 * by + 16 * jjj + ty] += _P1[32 * by + 16 * jjj + ty + l - 32 * by][32 * bx + 16 * iii + tx + k - 32 * bx] * curr[k * (unsigned int)16 + l];
+      __syncthreads();
+    }
+}terminate called after throwing an instance of 'std::runtime_error'
+  what():  "/home/chillsrv/srv/chill/chill_ast.hh", 370: looseLoopWithLoopVar calloed on node of typefake1
+Aborted (core dumped)
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  k
+3  l
+
+
+['i', 'j', 'k', 'l']
+curOrder: i,j,k,l
+idxNames: i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  k
+3  l
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 8 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+
+
+curOrder: ii,i,j,k,l
+idxNames: ii,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 8 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 12 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+
+
+curOrder: ii,jj,i,j,k,l
+idxNames: ii,jj,i,j,k,l
+['ii', 'jj', 'i', 'j', 'k', 'l']
+curOrder: ii,jj,i,j,k,l
+idxNames: ii,jj,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 12 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 17 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+
+
+curOrder: ii,jj,iii,i,j,k,l
+idxNames: ii,jj,iii,i,j,k,l
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 17 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 23 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+
+
+curOrder: ii,jj,iii,i,jjj,j,k,l
+idxNames: ii,jj,iii,i,jjj,j,k,l
+ii,jj
+thread= i,j
+
+ii,jj,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: ii
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: jj
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+block idx ii level 1 lb: 0 ub 127
+bx,jj,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: jj
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+block idx jj level 2 lb: 0 ub 127
+bx,by,iii,i,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 32*t2+16*t6; t8 <= 32*t2+16*t6+15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t10 = 0; t10 <= 1; t10++) {
+          // ~cuda~ preferredIdx: j
+          for(t12 = 32*t4+16*t10; t12 <= 32*t4+16*t10+15; t12++) {
+            // ~cuda~ preferredIdx: k
+            for(t14 = 0; t14 <= 15; t14++) {
+              // ~cuda~ preferredIdx: l
+              for(t16 = 0; t16 <= 15; t16++) {
+                s0(t2,t4,t6,t8,t12,t14,t16);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 4 to try and normalize lower bounds
+bx,by,iii,i,,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: i
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 32*t4+16*t12; t14 <= 32*t4+16*t12+15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t16 = 0; t16 <= 15; t16++) {
+              // ~cuda~ preferredIdx: l
+              for(t18 = 0; t18 <= 15; t18++) {
+                s0(t2,t4,t6,16*t6+t8+32*t2,t12,t14,t16,t18);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+thread idx i level 4 lb: 0 ub 15
+bx,by,iii,tx,,jjj,j,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 32*t4+16*t12; t14 <= 32*t4+16*t12+15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t16 = 0; t16 <= 15; t16++) {
+              // ~cuda~ preferredIdx: l
+              for(t18 = 0; t18 <= 15; t18++) {
+                s0(t2,t4,t6,16*t6+t8+32*t2,t12,t14,t16,t18);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 7 to try and normalize lower bounds
+bx,by,iii,tx,,jjj,j,,k,l
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: iii
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: j
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,16*t12+t14+32*t4,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+thread idx j level 7 lb: 0 ub 15
+Codegen: current names: bx,by,iii,tx,,jjj,ty,,k,l
+before datacopy:
+ printing statement:0
+{[chill_t49,chill_t50,chill_t51,chill_t52,chill_t53,chill_t54,chill_t55,chill_t56,chill_t57] : 32chill_t49+16chill_t51+chill_t52 = chill_t53 && 0, 32chill_t49 <= chill_t53 <= 4095, 32chill_t49+31 && 32chill_t50, 0 <= chill_t55 <= 32chill_t50+31, 4095 && 0 <= chill_t49 <= 127 && 0 <= chill_t57 <= 15 && 0 <= chill_t50 <= 127 && 0 <= chill_t54 <= 1 && 0 <= chill_t51 <= 1 && 0 <= chill_t56 <= 15 && 32chill_t49+16chill_t51 <= chill_t53 && chill_t53 <= 15+32chill_t49+16chill_t51 && 32chill_t50+16chill_t54 <= chill_t55 && chill_t55 <= 15+32chill_t50+16chill_t54 }
+
+
+
+after datacopy:
+ printing statement:0
+{[chill_t65,chill_t66,chill_t67,chill_t68,chill_t69,chill_t70,chill_t71,chill_t72,chill_t73,chill_t74] : chill_t69 = 32chill_t65+16chill_t67+chill_t68 && 16chill_t70+32chill_t66+chill_t71 = chill_t72 && 0, 32chill_t66 <= chill_t72 <= 4095, 32chill_t66+31 && 0, -16chill_t67 <= chill_t68 <= 15, -16chill_t67+31 && 0 <= chill_t65 <= 127 && 0 <= chill_t70 <= 1 && 0 <= chill_t66 <= 127 && 0 <= chill_t74 <= 15 && 0 <= chill_t67 <= 1 && 0 <= chill_t73 <= 15 && 16chill_t70+32chill_t66 <= chill_t72 && chill_t72 <= 15+16chill_t70+32chill_t66 && 32chill_t65+16chill_t67+chill_t68 <= 4095 && 0 <= 32chill_t65+16chill_t67+chill_t68 }
+ printing statement:1
+{[chill_t65,chill_t66,chill_t75,chill_t76] : 32chill_t66 <= chill_t76 <= 32chill_t66+46 && 0 <= chill_t65 <= 127 && 32chill_t65 <= chill_t75 <= 32chill_t65+46 && 0 <= chill_t66 <= 127 }
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 54 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 54 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tmp1,tmp2,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tmp1
+    for(t6 = 32*t2; t6 <= 32*t2+46; t6++) {
+      // ~cuda~ preferredIdx: tmp2
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t4);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 58 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 62 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 32*t2; t8 <= 32*t2+46; t8++) {
+        s1(t2,t4,t8,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 32*t2; t8 <= 32*t2+46; t8++) {
+        s1(t2,t4,t8,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 62 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 62 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 67 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 67 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t2,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+bx,by,iii,tx,,jjj,ty,,k,l
+bx,by,tx,tmp1,,,
+// ~cuda~ blockLoop preferredIdx: bx
+for(t2 = 0; t2 <= 127; t2++) {
+  // ~cuda~ preferredIdx: by
+  for(t4 = 0; t4 <= 127; t4++) {
+    // ~cuda~ preferredIdx: tx
+    for(t6 = 0; t6 <= 46; t6++) {
+      // ~cuda~ preferredIdx: tmp1
+      for(t8 = 0; t8 <= 46; t8++) {
+        s1(t2,t4,t6,t8+32*t2,t6,32*t4+t6);
+      }
+    }
+    // ~cuda~ preferredIdx: iii sync
+    for(t6 = 0; t6 <= 1; t6++) {
+      // ~cuda~ threadLoop preferredIdx: tx
+      for(t8 = 0; t8 <= 15; t8++) {
+        // ~cuda~ preferredIdx: jjj
+        for(t12 = 0; t12 <= 1; t12++) {
+          // ~cuda~ preferredIdx: ty
+          for(t14 = 0; t14 <= 15; t14++) {
+            // ~cuda~ preferredIdx: k
+            for(t18 = 0; t18 <= 15; t18++) {
+              // ~cuda~ preferredIdx: l
+              for(t20 = 0; t20 <= 15; t20++) {
+                s0(t2,t4,t6,t8,32*t2+16*t6+t8,t12,t14,32*t4+16*t12+t14,t18,t20);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 67 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 73 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 73 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 73 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 80 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+
+
+
+parameter_symtab has 3 entries
+0  result
+1  prev
+2  curr
+
+
+body_symtab has 80 entries
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+loop_cuda_chill.cc L903 code_temp:
+
+
+
+
+
+
+
+_P1 wo 
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+prev wo 
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+
+result wo 
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+_P1 wo 
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+curr wo 
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  result
+1  prev
+2  curr
+
+
+
+
+reading from array 'prev' 'curr' and writing to array 'result' 
+0  result
+1  prev
+2  curr
+
+0  i
+1  j
+2  k
+3  l
+4  chill_t1
+5  chill_t2
+6  chill_t3
+7  chill_t4
+8  chill_t6
+9  chill_t7
+10  chill_t8
+11  chill_t9
+12  chill_t10
+13  chill_t12
+14  chill_t13
+15  chill_t14
+16  chill_t15
+17  chill_t16
+18  chill_t17
+19  chill_t19
+20  chill_t20
+21  chill_t21
+22  chill_t22
+23  t2
+24  t6
+25  chill_t30
+26  chill_t31
+27  chill_t32
+28  chill_t33
+29  chill_t35
+30  chill_t36
+31  chill_t37
+32  t4
+33  t12
+34  chill_t49
+35  chill_t50
+36  chill_t51
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t57
+42  chill_t65
+43  chill_t66
+44  chill_t67
+45  chill_t68
+46  chill_t69
+47  chill_t70
+48  chill_t72
+49  chill_t73
+50  chill_t74
+51  _P1
+52  chill_t76
+53  chill_t75
+54  chill_t77
+55  chill_t78
+56  chill_t79
+57  chill_t80
+58  chill_t85
+59  chill_t86
+60  chill_t87
+61  chill_t89
+62  chill_t97
+63  chill_t98
+64  chill_t100
+65  chill_t101
+66  chill_t102
+67  chill_t110
+68  chill_t111
+69  chill_t112
+70  chill_t114
+71  chill_t115
+72  chill_t116
+73  chill_t117
+74  chill_t118
+75  chill_t119
+76  chill_t121
+77  chill_t122
+78  chill_t123
+79  chill_t124
+80  t8
+81  t10
+82  t14
+83  t16
+84  t18
+85  t20
+
+0  int bx = blockIdx.x
+1  int by = blockIdx.y
+2  int tx = threadIdx.x
+3  int ty = threadIdx.y
+4  int iii
+5  int jjj
+6  int k
+7  int l
+8  __shared__ float _P1[47][48]
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+#define N 1024
+
+Not working yet
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
