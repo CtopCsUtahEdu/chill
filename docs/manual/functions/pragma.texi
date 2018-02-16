@@ -1,6 +1,6 @@
 @unnumberedsubsec OMP for
 The @code{pragma} command inserts an arbitrary pragma at the specified loop and statement number. 
-@deftypefn {Transform} {} omp_for (int @var{loop_level}, int @var{stmt_number}, str @var{pragma_text})
+@deftypefn {Transform} {} pragma (int @var{loop_level}, int @var{stmt_number}, str @var{pragma_text})
 
 
 @end deftypefn
@@ -34,7 +34,8 @@ pragma(0, 2, 'some pragma')
 @smallformat
 @cartouche
 @verbatim
-void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
   int i, j, n;
 
   for(i = 0; i < an; i++) {
@@ -58,7 +59,8 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 @smallformat
 @cartouche
 @verbatim
-void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+void mm(float **A, float **B, float **C,
+        int ambn, int an, int bm) {
   int t6;
   int t4;
   int t2;
