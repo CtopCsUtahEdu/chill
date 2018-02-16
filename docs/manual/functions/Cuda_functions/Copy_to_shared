@@ -1,7 +1,8 @@
 @unnumberedsubsec Copy_to_shared
-@deftypefn {Transform} {} copy_to_shared (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
+@deftypefn {Transform} {} copy_to_shared (string @var{start_loop}, string @var{array_name}, string @var{blockIndex},string @var{threadIndex},string @var{kernel_parameters})
 
-The @code{copy_to_shared} not working transformation
+
+The @code{copy_to_shared} command copies the vector @var{array_name} to an shared memory. @var{start_loop} specifies the loop in which the shared memory access should be placed.
 
 
 @end deftypefn
