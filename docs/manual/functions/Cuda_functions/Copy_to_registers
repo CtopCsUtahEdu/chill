@@ -59,12 +59,12 @@ float  curr[WINDOW_SIZE*WINDOW_SIZE])
 	unsigned int l;
 
 	for ( i = 0; i < N1; ++i)    
-		for ( j = 0; j < N2; ++j) 
-           for ( k = 0; k < WINDOW_SIZE; ++k) 
-			for ( l = 0; l < WINDOW_SIZE; ++l) 
-					result[i][j] += 
-					prev[i+k][j+l] * 
-					curr[k*WINDOW_SIZE+l];
+	 for ( j = 0; j < N2; ++j) 
+      for ( k = 0; k < WINDOW_SIZE; ++k) 
+	   for ( l = 0; l < WINDOW_SIZE; ++l) 
+		result[i][j] += 
+		prev[i+k][j+l] * 
+		curr[k*WINDOW_SIZE+l];
 }
 
 @end verbatim
