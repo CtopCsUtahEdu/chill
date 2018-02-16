@@ -82,42 +82,30 @@ float  curr[WINDOW_SIZE*WINDOW_SIZE])
 kernel_GPU<<<dimGrid0,dimBlock0>>>((
 float (*)[4096])float * devI1Ptr, 
 (float (*)[4112])float * devI2Ptr, devI3Ptr)
-// ~cuda~ blockLoop preferredIdx: bx
 for (t2 = 0; t2 <= 127; t2 += 1)
-  // ~cuda~ preferredIdx: by
-  for (t4 = 0; t4 <= 127; t4 += 1)
-    // ~cuda~ preferredIdx: iii
-    for (t6 = 0; t6 <= 1; t6 += 1)
-      // ~cuda~ threadLoop preferredIdx: tx
-      for (t8 = 0; t8 <= 15; t8 += 1) {
-        // ~cuda~ preferredIdx: k
-        for (t12 = 0; t12 <= 15; t12 += 1)
-          // ~cuda~ preferredIdx: l
-          for (t14 = 32 * t4 + t12; t14 <= 32 *
-          t4 + t12 + 16; t14 += 16)
-            _P1[(t14 - (32 * t4 + t12)) / 16] =
-            result[t8 + 32 * t2 + 16 * t6][t14];
-        // ~cuda~ preferredIdx: jjj
-        for (t12 = 0; t12 <= 1; t12 += 1)
-          // ~cuda~ preferredIdx: ty
-          for (t14 = 0; t14 <= 15; t14 += 1)
-            // ~cuda~ preferredIdx: k
-            for (t18 = 0; t18 <= 15; t18 += 1)
-              // ~cuda~ preferredIdx: l
-              for (t20 = 0; t20 <= 15; t20 += 1)
-                _P1[(32 * t4 + 16 * t12 + t14 -
-                (32 * t4 + t14)) / 16] += prev
-                [32 * t2 + 16 * t6 + t8 + t18]
-                [32 * t4 + 16 * t12 + t14 + t20] *
-                curr[t18 * (unsigned int)16 + t20];
-        // ~cuda~ preferredIdx: k
-        for (t12 = 0; t12 <= 15; t12 += 1)
-          // ~cuda~ preferredIdx: l
-          for (t14 = 32 * t4 + t12; t14 <= 32 *
-          t4 + t12 + 16; t14 += 16)
-            result[t8 + 32 * t2 + 16 * t6][t14] =
-            _P1[(t14 - (32 * t4 + t12)) / 16];
-      }
+ for (t4 = 0; t4 <= 127; t4 += 1)
+  for (t6 = 0; t6 <= 1; t6 += 1)
+   for (t8 = 0; t8 <= 15; t8 += 1) {
+    for (t12 = 0; t12 <= 15; t12 += 1)
+     for (t14 = 32 * t4 + t12; t14 <= 32 *
+      t4 + t12 + 16; t14 += 16)
+      _P1[(t14 - (32 * t4 + t12)) / 16] =
+      result[t8 + 32 * t2 + 16 * t6][t14];
+for (t12 = 0; t12 <= 1; t12 += 1)
+ for (t14 = 0; t14 <= 15; t14 += 1)
+  for (t18 = 0; t18 <= 15; t18 += 1)
+   for (t20 = 0; t20 <= 15; t20 += 1)
+    _P1[(32 * t4 + 16 * t12 + t14 -
+    (32 * t4 + t14)) / 16] += prev
+    [32 * t2 + 16 * t6 + t8 + t18]
+    [32 * t4 + 16 * t12 + t14 + t20] *
+    curr[t18 * (unsigned int)16 + t20];
+for (t12 = 0; t12 <= 15; t12 += 1)
+ for (t14 = 32 * t4 + t12; t14 <= 32 *
+  t4 + t12 + 16; t14 += 16)
+  result[t8 + 32 * t2 + 16 * t6][t14] =
+   _P1[(t14 - (32 * t4 + t12)) / 16];
+}
 
 @end verbatim
 @end cartouche
