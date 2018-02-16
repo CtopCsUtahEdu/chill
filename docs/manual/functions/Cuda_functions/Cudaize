@@ -15,7 +15,8 @@ The @code{cudaize} transformation specifies the name of the generated kernel fun
 read_IR("normalMM")
 TI=16
 TJ=16
-cudaize(0, "kernel_gpu", {'a':1024**2,'b':1024**2,'c':1024**2}, ['i'], ['j'], [])
+cudaize(0, "kernel_gpu", {'a':1024**2,
+'b':1024**2,'c':1024**2}, ['i'], ['j'], [])
 print_code()
 @end verbatim
 @end cartouche
@@ -26,7 +27,8 @@ print_code()
 @verbatim
 #define N 1024
 
-void normalMM(float c[N][N], float a[N], float b[N]) {
+void normalMM(float c[N][N], float a[N], 
+              float b[N]) {
   int i, j;
 
   for (i = 0; i < N; i++)
@@ -76,7 +78,9 @@ Codegen: current names: bx,tx
 @smallformat
 @cartouche
 @verbatim
-__global__ void kernel_gpu(float *a, float *c[1024], float *b) {
+__global__ void kernel_gpu(float *a, 
+                           float *c[1024], 
+                           float *b) {
   int by = blockIdx.y;
   int tx = threadIdx.x;
   int bx = blockIdx.x;
@@ -88,19 +92,31 @@ __global__ void kernel_gpu(float *a, float *c[1024], float *b) {
 }
 #define N 1024
 
-void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
+void normalMM(float c[1024][1024], 
+              float a[1024], 
+              float b[1024]) {
   float * devI2Ptr;
   float * devI1Ptr;
   float * devO1Ptr;
-  cudaMalloc((void **)&devO1Ptr, 1024 * sizeof(float));
-  cudaMalloc((void **)&devI1Ptr, 1048576 * sizeof(float));
-  cudaMemcpy(devI1Ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI2Ptr, 1024 * sizeof(float));
-  cudaMemcpy(devI2Ptr, b, 1024 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devO1Ptr, 
+             1024 * siz eof(float));
+  cudaMalloc((void **)&devI1Ptr, 
+             1048576 * sizeof(float));
+  cudaMemcpy(devI1Ptr, c, 1048576 * 
+             sizeof(float), 
+             cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devI2Ptr, 
+              1024 * sizeof(float));
+  cudaMemcpy(devI2Ptr, b, 
+             1024 * sizeof(float), 
+             cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(1024, 1);
   dim3 dimBlock0 = dim3(1024);
-  kernel_gpu<<<dimGrid0,dimBlock0>>>(devO1Ptr, (float (*)[1024])float * devI1Ptr, devI2Ptr);
-  cudaMemcpy(a, devO1Ptr, 1024 * sizeof(float), cudaMemcpyDeviceToHost);
+  kernel_gpu<<<dimGrid0,dimBlock0>>>
+  (devO1Ptr, (float (*)[1024])
+  float * devI1Ptr, devI2Ptr);
+  cudaMemcpy(a, devO1Ptr,
+  1024 * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(devO1Ptr);
   cudaFree(devI1Ptr);
   cudaFree(devI2Ptr);
