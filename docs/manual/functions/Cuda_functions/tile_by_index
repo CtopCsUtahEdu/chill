@@ -1,6 +1,5 @@
 @unnumberedsubsec Tile_by_index
 @deftypefn {Transform} {} tile_by_index ( vector<string> @var{tile_indices}, vector<int> @var{tile_sizes}, map<string:string> @var{control_loop},  vector<string> @var{FinalOrder}, TileMethod @var{method} = 0)
-The @code{tile_by_index} transformation
 
 The @code{tile} transformation allows a loop dimension to be segregated into tiles, the execution of which are scheduled by a control loop placed outside the tiled loop. The statements and surrounding loops inside the control loops will be executed a tile at a time along the tiled dimension.
 
