@@ -29,8 +29,8 @@ tile_by_index(["i","j"],[Ti,Tj],
 
 tile_by_index(["i","j"],[Tii,Tjj],
 {'l1_control':"iii",'l2_control':"jjj"},
-["ii","jj","iii","i","jjj","j","k","l"],None)
-
+["ii","jj","iii","i","jjj","j","k","l"],
+None)
 cudaize(0, "kernel_GPU",{'curr':W*W,
 'prev':(N+W)*(M+W),'result':N*M}, 
 ["ii","jj"], ["i","j"], [])
