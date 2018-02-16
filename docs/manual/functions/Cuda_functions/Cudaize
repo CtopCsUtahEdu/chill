@@ -1,5 +1,5 @@
 @unnumberedsubsec Cudaize
-@deftypefn {Transform} {} cudaize (int @var{stmt}, string @var{Kernel_name}, map<string:int> @var{array_sizes}, string @var{blockIndex},string @var{threadIndex},string @var{kernel_parameters)})
+@deftypefn {Transform} {} cudaize (int @var{stmt}, string @var{Kernel_name}, map<string:int> @var{array_sizes}, string @var{blockIndex},string @var{threadIndex},string @var{kernel_parameters})
 
 The @code{cudaize} transformation specifies the name of the generated kernel function, the mapping of one or two loop levels to block indices in the grid dimension, and the mapping of up to three loops to thread indices. The effect of the cudaize call on the generated code is to allocate storage and marshall inputs for the CUDA kernel, and select the loops from the transformed loop nest that will be mapped to grid and thread dimensions. These tile controlling loops are effectively removed from the code.
 

@@ -508,6 +508,16 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @page
 @include functions/unroll.texi
 @page
+@include functions/Cuda_functions/tile_by_index.texi
+@page
+@include functions/Cuda_functions/Cudaize.texi
+@page
+@include functions/Cuda_functions/Copy_to_registers.texi
+@page
+@include functions/Cuda_functions/Copy_to_shared.texi
+@page
+@include functions/Cuda_functions/Datacopy_privatized.texi
+@page
 
 @section Data operations
 @include functions/datacopy.texi
@@ -679,6 +689,10 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
   @c {"pragma",              chill_pragma,                    METH_VARARGS,     "pragma"},
   @c {"prefetch",            chill_prefetch,                  METH_VARARGS,     "prefetch"},
   @c {"tile",                chill_tile,                      METH_VARARGS,     "tile"},
+  @c {"tile_by_index",       chill_tile_by_index,             METH_VARARGS,     "tile_by_index"},
+  @c {"cudaize",             chill_cudaize,                   METH_VARARGS,     "cudaize"},
+  @c {"copy_to_registers",   chill_copy_to_registers,         METH_VARARGS,     "copy_to_registers"},
+  @c {"copy_to_shared",      chill_copy_to_shared,            METH_VARARGS,     "copy_to_shared"},
   @c {"datacopy",            chill_datacopy,                  METH_VARARGS,     "datacopy"},
   @c {"datacopy_privitized", chill_datacopy_privatized,       METH_VARARGS,     "datacopy_privatized"},
   @c {"unroll",              chill_unroll,                    METH_VARARGS,     "unroll"},

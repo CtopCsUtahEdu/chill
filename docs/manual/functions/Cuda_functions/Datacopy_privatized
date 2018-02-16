@@ -1,0 +1,56 @@
+@unnumberedsubsec Datacopy_privatized
+@deftypefn {Transform} {} datacopy_privatized ( vector<string> @var{tile_indices}, vector<int> @var{tile_sizes}, map<string:string> @var{control_loop},  vector<string> @var{FinalOrder}, TileMethod @var{method} = 0)
+
+The @code{datacopy_privatized} transformation exploits the reuse of index arrays repeatedly referenced in the executor by storing them in registers.
+@end deftypefn
+
+@multitable @columnfractions .50 .50 
+@item
+@b{Python Script}
+@smallformat
+@cartouche
+@verbatim
+
+
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Original code}
+@smallformat
+@cartouche
+@verbatim
+
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
+
+@multitable @columnfractions .50 .50
+@item
+@b{Output on stdout}
+@smallformat
+@cartouche
+@verbatim
+
+
+
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@tab @b{Transformed code}
+@smallformat
+@cartouche
+@verbatim
+
+
+
+@end verbatim
+@end cartouche
+@end smallformat
+@end multitable
