@@ -1,14 +1,10 @@
 @unnumberedsubsec Tile_by_index
-@deftypefn {Transform} {} tile_by_index (int @var{stmt}, int @var{loop}, int @var{tile_size}, int @var{control_loop} = 1, TileMethod @var{method} = 0, int @var{alignment_offset} = 1, @* int @var{alignment_multiple} = 1) 
-
+@deftypefn {Transform} {} tile_by_index ( vector<string> @var{tile_indices}, vector<int> @var{tile_sizes}, map<string:string> @var{control_loop},  vector<string> @var{FinalOrder}, TileMethod @var{method} = 0)
 The @code{tile_by_index} transformation
 
-{"i","j"} The index variables of the loops that will be tiled
-{TI,TJ} The respective tile sizes for each index variable
-{l1 control="ii",l2 control="jj"} A mapping that specifies control loop variable names and optionally renames tile loop index variables.
-{"ii", "jj", "i", "j"} Final order of nested loops with update loop index names
+The @code{tile} transformation allows a loop dimension to be segregated into tiles, the execution of which are scheduled by a control loop placed outside the tiled loop. The statements and surrounding loops inside the control loops will be executed a tile at a time along the tiled dimension.
 
-
+The loop nest to tile is specified by @var{tile_indices}. The argument @var{tile_sizes} specifies the tile size, a value of 0 indicates no tiling, a value of 1 is similar to loop interchange and a value greater than 1 sets the tile size to that value. The argument @var{control_loop} specifies the loop level where the controlling loop should be placed, the default is 1 or the outermost loop. The argument @var{method} specifies the tiling method, a value of 0 indicates that the index value of the control loop is the actual index to the start of the tile and is known as a ``strided tile'', a value of 1 indicates that the index value of control loop is the value of the tile and must be multiplied by @var{tile_size} to get the index to the start of the tile.
 @end deftypefn
 
 @multitable @columnfractions .50 .50 
