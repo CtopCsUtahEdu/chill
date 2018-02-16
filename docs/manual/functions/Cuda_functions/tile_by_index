@@ -49,76 +49,7 @@ void normalMM(float c[N][N], float a[N], float b[N]) {
 @smallformat
 @cartouche
 @verbatim
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
 
-
-body_symtab has 2 entries
-0  i
-1  j
-
-
-['i', 'j']
-curOrder: i,j
-idxNames: i,j
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
-body_symtab has 2 entries
-0  i
-1  j
-
-
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
-body_symtab has 4 entries
-0  i
-1  j
-2  chill_t1
-3  chill_t2
-
-
-curOrder: ii,i,j
-idxNames: ii,i,j
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
-body_symtab has 4 entries
-0  i
-1  j
-2  chill_t1
-3  chill_t2
-
-
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
-body_symtab has 6 entries
-0  i
-1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
 
 
 curOrder: ii,jj,i,j
@@ -133,26 +64,6 @@ for(t2 = 0; t2 <= 63; t2++) {
   }
 }
 
-
-// ~cuda~ preferredIdx: ii
-for (t2 = 0; t2 <= 63; t2 += 1) 
-  // ~cuda~ preferredIdx: jj
-  for (t4 = 0; t4 <= 63; t4 += 1) 
-    // ~cuda~ preferredIdx: i
-    for (t6 = 16 * t2; t6 <= 16 * t2 + 15; t6 += 1) 
-      // ~cuda~ preferredIdx: j
-      for (t8 = 16 * t4; t8 <= 16 * t4 + 15; t8 += 1) 
-        a[t6] = a[t6] + c[t6][t8] * b[t8];// this source is derived from CHILL AST originally from file 'chill87ef8226-0e61-4713-afa4-05e17429a93f.c' as parsed by frontend compiler rose
-
-#define N 1024
-
-void normalMM(float c[1024][1024], float a[1024], float b[1024]) {
-  int i;
-  int j;
-  for (i = 0; i < 1024; i++) 
-    for (j = 0; j < 1024; j++) 
-      a[chill_t4] = a[chill_t4] + c[chill_t4][chill_t5] * b[chill_t5];
-}
 
 @end verbatim
 @end cartouche
