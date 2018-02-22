@@ -516,10 +516,6 @@ for(t2 = 0; t2 <= 255; t2++) {
 
 
 
-loop_cuda_chill.cc L903 code_temp:
-
-
-
 
 
 
@@ -3323,16 +3319,6 @@ Qi wo
 55  t10
 56  t12
 
-0  kVals
-1  x
-2  y
-3  z
-4  Qr
-5  Qi
-
-
-
-reading from array 'x' 'y' 'z' 'Qi' 'Qr' 'kVals' and writing to array 
 0  kVals
 1  x
 2  y

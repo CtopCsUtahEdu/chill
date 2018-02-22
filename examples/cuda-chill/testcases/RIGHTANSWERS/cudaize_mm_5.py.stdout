@@ -63,10 +63,6 @@ Codegen: current names: bx,by,tx
 
 
 
-loop_cuda_chill.cc L903 code_temp:
-
-
-
 
 
 
@@ -235,13 +231,6 @@ b wo
 1  a
 2  b
 
-
-
-
-reading from array 'a' 'b' and writing to array 'c' 
-0  c
-1  a
-2  b
 
 0  i
 1  j

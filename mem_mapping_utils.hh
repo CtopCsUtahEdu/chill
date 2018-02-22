@@ -12,14 +12,14 @@
 using namespace SageInterface;
 using namespace SageBuilder;
 
-struct VarDefs;
+struct CudaIOVardef;
 
 class memory_mapping {
 private:
   bool mem_used;
   std::vector< std::string > mapped_array_name;
   std::map<std::string, SgVariableSymbol*> mapped_symbol;  // tied to Rose
-  std::map<std::string, VarDefs*> vardefs;
+  std::map<std::string, CudaIOVardef*> vardefs;
 public:
   memory_mapping();
   memory_mapping(bool used, const char* array_name);
@@ -27,9 +27,9 @@ public:
   bool is_mem_used();
   bool is_array_mapped(const char* array_name);
   void set_mapped_symbol(const char* array_name, SgVariableSymbol* sym);  // tied to Rose
-  void set_vardef(const char* array_name, VarDefs* vardef);
+  void set_vardef(const char* array_name, CudaIOVardef* vardef);
   SgVarRefExp* get_mapped_symbol_exp(const char* array_name);  // tied to Rose
-  VarDefs* get_vardef(const char* vardef_name);
+  CudaIOVardef* get_vardef(const char* vardef_name);
 };
 
 //protonu --class introduced to hold texture memory information in one single place

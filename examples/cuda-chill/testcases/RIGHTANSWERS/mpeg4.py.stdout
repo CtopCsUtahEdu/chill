@@ -1811,10 +1811,6 @@ SYNC UP
 
 
 
-loop_cuda_chill.cc L903 code_temp:
-
-
-
 
 
 
@@ -3978,13 +3974,6 @@ _P2 wo
 96  t18
 97  t20
 
-0  result
-1  prev
-2  curr
-
-
-
-reading from array 'prev' 'result' 'curr' and writing to array 
 0  result
 1  prev
 2  curr

@@ -1,5 +1,5 @@
 
-
+#include "cudaize_codegen_v3.cc"
 
 
 chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW    ANAND'S  ??  
@@ -66,7 +66,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   debug_fprintf(stderr, "original function  is now child %d of srcfile\n", which);
   p->removeChild( which );  // TODO do this last, because we look for it later
   
-  origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
+  //origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n");
 
   debug_fprintf(stderr, "OK, made new (empty) CPU side function %s, removed original function\n",origfunction->functionName );
   p->print(); printf("\n\n\n"); fflush(stdout);
@@ -243,11 +243,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     debug_fprintf(stderr, "HGN CS %d / %d\n", CS, num_ordered-1);
     
     CG_outputRepr* repr;
-    std::vector<VarDefs> arrayVars;
-    std::vector<VarDefs> localScopedVars;
+    std::vector<CudaIOVardef> arrayVars;
+    std::vector<CudaIOVardef> localScopedVars;
     
-    std::vector<IR_ArrayRef *> ro_refs; // this one is not used ??? 
-    std::vector<IR_ArrayRef *> wo_refs;
+    //std::vector<IR_ArrayRef *> ro_refs; // this one is not used ???
+    //std::vector<IR_ArrayRef *> wo_refs;
     //std::set<std::string> uniqueRefs; // unused ?? 
     //std::set<std::string> uniqueWoRefs;
     
@@ -261,8 +261,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
     if (code_temp != NULL) {
       
-      debug_fprintf(stderr, "\nHGN %d code_temp was NOT NULL\n", CS); 
-      printf("\nloop_cuda_chill.cc L903 code_temp:\n"); code_temp->print(); printf("\n\n"); fflush(stdout);
+      //debug_fprintf(stderr, "\nHGN %d code_temp was NOT NULL\n", CS);
+      //printf("\nloop_cuda_chill.cc L903 code_temp:\n"); code_temp->print(); printf("\n\n"); fflush(stdout);
       
       
       debug_fprintf(stderr, "set %d has size %d\n", CS,  ordered_cudaized_stmts[CS].first.size()); 
@@ -503,10 +503,6 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         }
         printf("\n"); fflush(stdout);
         
-        
-        debug_fprintf(stderr, "call to %s is:\n",inspectorFunc->functionName ); 
-        CE->print(); printf(""); fflush(stdout);
-        
         debug_fprintf(stderr, "adding inspectorfunc call to setup_code\n"); 
         setup_code = ocg->StmtListAppend(setup_code,
                                          new CG_chillRepr(CE));
@@ -526,8 +522,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
     debug_fprintf(stderr, "\n\n\n\n\n*** dimgrid dimblock\n");
     char gridName[20];
     char blockName[20];
-    sprintf(gridName,  "dimGrid%i\0",  CS);
-    sprintf(blockName, "dimBlock%i\0", CS); 
+    sprintf(gridName,  "dimGrid%i",  CS);
+    sprintf(blockName, "dimBlock%i", CS);
     
 
     // still in int CS loop 2
@@ -608,8 +604,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       
       //  the thing that is being checked is (was?)  wrong
       
-      std::vector<IR_chillArrayRef *> ro_refs; // this one is used 
+#if 1
+      std::vector<IR_chillArrayRef *> ro_refs; // this one is used
       std::vector<IR_chillArrayRef *> wo_refs;
+      std::vector<IR_chillArrayRef *> rw_refs;
+#endif
       
       //std::vector<chillAST_ArraySubscriptExpr *> ro_refs;// try chillAST versions
       //std::vector<chillAST_ArraySubscriptExpr *> wo_refs;
@@ -746,7 +745,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //if (!vd->isParmVarDecl()) { 
         //  debug_fprintf(stderr, "local array - kernel stack variable\n"); 
         
-        
+#if 1
         //debug_fprintf(stderr, "looking for %s in %d uniqueRefs\n",  stringvar.c_str(), uniqueRefs.size()); 
         int offset = charstarvectorindex(  stringvar.c_str(), uniqueRefs );
         if ( offset == -1 )  { // != -1uniqueRefs.find( stringvar.c_str() )  == uniqueRefs.end()) {
@@ -758,17 +757,15 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           
           // remember, refs WAS  std::vector<chillAST_ArraySubscriptExpr*> refs;   WAS 
           //  std::vector<IR_chillArrayRef *> wo_refs;
-          if (refs[i]-> imwrittento) { 
-            debug_fprintf(stderr, "adding variable %s to unique Write Only Refs\n", stringvar.c_str() );
-            wo_refs.push_back( new IR_chillArrayRef( ir, refs[i], refs[i]-> imwrittento /* true */ ) ); 
-            
-            // later logic in this routine removes reads if it's also a write ... 
-            // so let's just not add it.  ??  
-            //if (refs[i]->imreadfrom) { // warning ONLY valid if also written to! TODO bad logic
-            //  ro_refs.push_back( new IR_chillArrayRef( ir, refs[i], false ) ); 
-            //  debug_fprintf(stderr, "adding variable %s to unique Read Only Refs TOO\n", vd->varname);
-            //} 
-            
+          if (refs[i]-> imwrittento) {
+            if(refs[i]->imreadfrom) {
+              debug_fprintf(stderr, "adding variable %s to unique Read & Write Refs\n", stringvar.c_str());
+              rw_refs.push_back(new IR_chillArrayRef(ir, refs[i], refs[i]->imwrittento));
+            }
+            else {
+              debug_fprintf(stderr, "adding variable %s to unique Write Only Refs\n", stringvar.c_str() );
+              wo_refs.push_back( new IR_chillArrayRef( ir, refs[i], refs[i]-> imwrittento /* true */ ) );
+            }
           }
           else { // JUST read from 
             debug_fprintf(stderr, "adding variable %s to unique Read Only Refs\n", stringvar.c_str() ); // this is c.i
@@ -777,22 +774,9 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           }
         } // this is a new  reference 
         else debug_fprintf(stderr, "%s was already there?\n", stringvar.c_str()); 
-        
+#endif
         // NOT a parameter 
       } // for each ref  i 
-      
-      
-      
-      printf("\n\nreading from array ");
-      for (int i = 0; i < ro_refs.size(); i++) { 
-        //printf("("); ro_refs[i]->chillASE->base->print(); printf(")"); 
-        printf("'%s' ", ro_refs[i]->chillASE->multibase()->varname); 
-      }
-      printf("and writing to array ");
-      for (int i = 0; i < wo_refs.size(); i++)
-        printf("'%s' ", wo_refs[i]->chillASE->multibase()->varname); 
-      printf("\n");
-      fflush(stdout); 
       
       
       debug_fprintf(stderr, "NOW WE MAKE THE GPU SIDE CODE\n\n"); 
@@ -926,7 +910,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
       } // for each kernel parameter ???
       
-      
+      get_io_refs(ir, array_dims, refs, arrayVars);
+#if 0
       // unclear where this came from. older version, I assume 
       debug_fprintf(stderr, "OK, first the %d OUTPUTS of the GPU code\n",  wo_refs.size() ); 
       for (int i = 0; i < wo_refs.size(); i++) {
@@ -935,10 +920,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
       }
       debug_fprintf(stderr, "\n");
       debug_fprintf(stderr, "original function  parameters are:\n");
-      printSymbolTable( &(origfunction->parameters )); 
+      printSymbolTable( &(origfunction->parameters ));
+#endif
       
-      
-      
+
+#if 0
       for (int i = 0; i < wo_refs.size(); i++) {
         std::string name = wo_refs[i]->name();
         debug_fprintf(stderr, "output %s\n", name.c_str()); 
@@ -953,12 +939,12 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           debug_fprintf(stderr, "the parameters are:\n");
           printSymbolTable( &(origfunction->parameters )); 
 
-          origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n"); 
+          //origfunction->print(0,stderr); debug_fprintf(stderr, "\n\n");
           exit(-1); 
         }
         //param->print(); printf("\n"); fflush(stdout); 
         
-        VarDefs v; // scoping seems wrong/odd
+        CudaIOVardef v; // scoping seems wrong/odd
         v.size_multi_dim = std::vector<int>();
         char buf[32];
         snprintf(buf, 32, "devO%dPtr", i + 1);
@@ -1042,25 +1028,13 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         debug_fprintf(stderr, "adding written v to arrayVars\n\n"); 
         v.print(); 
         arrayVars.push_back(v);
-      } //  wo_refs 
+      } //  wo_refs
+#else
+      //get_io_array_refs(array_dims, wo_refs, io_dir::write_only, arrayVars);
+#endif
       
       
-      // then READ ONLY refs 
-      debug_fprintf(stderr, "\n*** OK, then  the %d INPUTS of the GPU code\n",  ro_refs.size() ); 
-      for (int i = 0; i < ro_refs.size(); i++) {
-        debug_fprintf(stderr, "read only parameter %d %s \n", i,  ro_refs[i]->name().c_str()); 
-      }
-      debug_fprintf(stderr, "\n");
-      
-      for (std::set<std::string>::iterator i = kernel_parameters.begin();
-           i != kernel_parameters.end(); i++) {
-        std::string kp(*i);
-        debug_fprintf(stderr, "kernel_parameter %s\n", kp.c_str()); 
-      }
-      debug_fprintf(stderr, "\n");
-      
-      
-      
+#if 0
       for (int i = 0; i < ro_refs.size(); i++) {
         std::string name = ro_refs[i]->name();
         char *tmpname = strdup( name.c_str() ); 
@@ -1074,7 +1048,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         //  exit(-1);
         //} 
         
-        VarDefs v; // scoping seems wrong/odd
+        CudaIOVardef v; // scoping seems wrong/odd
         v.size_multi_dim = std::vector<int>();
         char buf[32];
         snprintf(buf, 32, "devI%dPtr", i + 1);
@@ -1169,6 +1143,11 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         v.print(); 
         arrayVars.push_back(v);   
       } // end of READ refs
+#else
+      //get_io_array_refs(array_dims, ro_refs, io_dir::read_only, arrayVars);
+#endif
+      //get_io_array_refs(array_dims, rw_refs, io_dir::read_write, arrayVars);
+
       debug_fprintf(stderr, "done with READ ONLY\n\n"); 
       
       
@@ -1230,7 +1209,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         
         // do the CPU side cudaMalloc 
         debug_fprintf(stderr, "cudaize_codegen_v2.cc L1184  building CUDAmalloc using %s    i %d\n", aname, i); 
-        arrayVars[i].size_expr->print(0,stderr); debug_fprintf(stderr, "\n"); 
+        //arrayVars[i].size_expr->print(0,stderr); debug_fprintf(stderr, "\n");
 
         // wait, malloc?
         chillAST_DeclRefExpr *DRE = new chillAST_DeclRefExpr( var );

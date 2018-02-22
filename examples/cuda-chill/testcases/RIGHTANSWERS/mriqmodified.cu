@@ -53,31 +53,33 @@ __global__ void Kernel_GPU(float *x, float *y, float *z, float *Qi, float *Qr, s
 #include "mriq.h"
 
 void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
-  struct kValues * devI6Ptr;
-  float * devI5Ptr;
-  float * devI4Ptr;
-  float * devI3Ptr;
-  float * devI2Ptr;
-  float * devI1Ptr;
-  cudaMalloc((void **)&devI1Ptr, 32768 * sizeof(float));
-  cudaMemcpy(devI1Ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI2Ptr, 32768 * sizeof(float));
-  cudaMemcpy(devI2Ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI3Ptr, 32768 * sizeof(float));
-  cudaMemcpy(devI3Ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI4Ptr, 32768 * sizeof(float));
-  cudaMemcpy(devI4Ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI5Ptr, 32768 * sizeof(float));
-  cudaMemcpy(devI5Ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)&devI6Ptr, 3072 * sizeof(struct kValues));
-  cudaMemcpy(devI6Ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice);
+  float * devRO3ptr;
+  float * devRO2ptr;
+  float * devRO1ptr;
+  struct kValues * devRO0ptr;
+  float * devRW1ptr;
+  float * devRW0ptr;
+  cudaMalloc((void **)&devRW0ptr, 32768 * sizeof(float));
+  cudaMemcpy(devRW0ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRW1ptr, 32768 * sizeof(float));
+  cudaMemcpy(devRW1ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRO0ptr, 3072 * sizeof(struct kValues));
+  cudaMemcpy(devRO0ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRO1ptr, 32768 * sizeof(float));
+  cudaMemcpy(devRO1ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRO2ptr, 32768 * sizeof(float));
+  cudaMemcpy(devRO2ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRO3ptr, 32768 * sizeof(float));
+  cudaMemcpy(devRO3ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(256, 1);
   dim3 dimBlock0 = dim3(128);
-  Kernel_GPU<<<dimGrid0,dimBlock0>>>(devI1Ptr, devI2Ptr, devI3Ptr, devI4Ptr, devI5Ptr, devI6Ptr);
-  cudaFree(devI1Ptr);
-  cudaFree(devI2Ptr);
-  cudaFree(devI3Ptr);
-  cudaFree(devI4Ptr);
-  cudaFree(devI5Ptr);
-  cudaFree(devI6Ptr);
+  Kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr, devRO1ptr, devRO2ptr, devRO3ptr);
+  cudaMemcpy(Qi, devRW0ptr, 32768 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devRW0ptr);
+  cudaMemcpy(Qr, devRW1ptr, 32768 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devRW1ptr);
+  cudaFree(devRO0ptr);
+  cudaFree(devRO1ptr);
+  cudaFree(devRO2ptr);
+  cudaFree(devRO3ptr);
 }

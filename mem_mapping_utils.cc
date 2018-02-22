@@ -52,7 +52,7 @@ void memory_mapping::set_mapped_symbol(const char * array_name, SgVariableSymbol
 void texture_memory_mapping::set_devptr_symbol(const char * array_name, SgVariableSymbol* sym) {
   devptr_symbol[std::string(array_name)] = sym;
 }
-void memory_mapping::set_vardef(const char* array_name, VarDefs* vardef) {
+void memory_mapping::set_vardef(const char* array_name, CudaIOVardef* vardef) {
   this->vardefs[std::string(array_name)] = vardef;
 }
 SgVarRefExp* memory_mapping::get_mapped_symbol_exp(const char * array_name) {
@@ -61,7 +61,7 @@ SgVarRefExp* memory_mapping::get_mapped_symbol_exp(const char * array_name) {
 SgVarRefExp* texture_memory_mapping::get_devptr_symbol_exp(const char * array_name) {
   return buildVarRefExp(devptr_symbol[std::string(array_name)]);
 }
-VarDefs* memory_mapping::get_vardef(const char* vardef_name) {
+CudaIOVardef* memory_mapping::get_vardef(const char* vardef_name) {
   return this->vardefs[std::string(vardef_name)];
 }
 //int texture_memory_mapping::get_dims(const char* array_name) {

@@ -23,7 +23,7 @@ enum MemoryMode { GlobalMem, SharedMem, TexMem };
 
 #ifndef CUDAVARDEFS
 #define CUDAVARDEFS
-struct VarDefs {
+struct CudaIOVardef {
   std::string name;
   std::string secondName;
   char* type;
@@ -41,11 +41,13 @@ struct VarDefs {
   bool cons_mapped;
   std::string original_name; //this is such a hack, to store the original name, to store a table to textures used
 
-  VarDefs() { // constructor
+  CudaIOVardef() { // constructor
     //debug_fprintf(stderr, "constructing VarDef\n");
     vardecl = NULL;
     in_data = out_data = NULL;
     CPUside_param = 0;
+    size_expr = NULL;
+    type = NULL;
     tex_mapped = cons_mapped = false;
   }
 
