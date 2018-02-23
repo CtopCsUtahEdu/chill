@@ -633,10 +633,6 @@ for(t2 = 0; t2 <= 15; t2++) {
 
 
 
-loop_cuda_chill.cc L903 code_temp:
-
-
-
 
 
 
@@ -1675,13 +1671,6 @@ energy wo
 54  t14
 55  t16
 
-0  atoms
-1  energy
-2  z
-
-
-
-reading from array 'atoms' 'energy' and writing to array 
 0  atoms
 1  energy
 2  z

@@ -517,9 +517,15 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @include functions/Cuda_functions/Copy_to_shared
 @page
 
-@section Data operations
-@include functions/datacopy.texi
+@section Other
+@include functions/omp_for.texi
 @page
+@include functions/pragma.texi
+@page
+
+@c @section Data operations
+@c @include functions/datacopy.texi
+@c @page
 
 @c Prefetch
 @c The prefetch command has the form:
