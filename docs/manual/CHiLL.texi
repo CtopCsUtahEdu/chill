@@ -508,9 +508,11 @@ The @code{remove_dep} removes a dependence between two statements in the loop ne
 @page
 @include functions/unroll.texi
 @page
-@include functions/Cuda_functions/tile_by_index
-@page
+
+@section Cuda-CHiLL Transformations
 @include functions/Cuda_functions/Cudaize
+@page
+@include functions/Cuda_functions/tile_by_index
 @page
 @include functions/Cuda_functions/Copy_to_registers
 @page

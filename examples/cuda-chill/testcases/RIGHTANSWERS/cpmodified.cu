@@ -17,43 +17,64 @@
 #define zDim 0
 
 float sqrtf(float );
-__global__ void kernel_GPU(float *energy, float atoms[16000]) {
-  int t2;
-  int t4;
-  int t6;
-  int t10;
-  int t14;
-  float dx;
-  float dy;
+__global__ void kernel_GPU(float *atoms, float *energy) {
+  float z;
   float dz;
-  
-    // ~cuda~ blockLoop preferredIdx: bx
-    for (t2 = 0; t2 <= 15; t2 += 1) 
-      // ~cuda~ preferredIdx: by
-      for (t4 = 0; t4 <= 31; t4 += 1) 
-        // ~cuda~ threadLoop preferredIdx: tx
-        for (t6 = 0; t6 <= 31; t6 += 1) 
-          // ~cuda~ preferredIdx: ty
-          for (t10 = 0; t10 <= 15; t10 += 1) 
-            // ~cuda~ preferredIdx: n
-            for (t14 = 0; t14 <= 3996; t14 += 4) {
-              dx = (float)(0.10000000000000001 * (double)(t10 + 16 * t4) - (double)atoms[t14]);
-              dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)atoms[t14 + 1]);
-              dz = z - atoms[t14 + 2];
-              energy[(32 * t2 + t6) * 512 + (t10 + 16 * t4) + 512 * 512 * 0] += atoms[t14 + 3] / sqrtf(dx * dx + dy * dy + dz * dz);
-            };
+  float dy;
+  float dx;
+  float newVariable0;
+  __shared__ float _P1[4001];
+  int ty = threadIdx.y;
+  int n;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  {
+    {
+      {
+        _P1[tx - 0] = atoms[tx];
+      }
+      __syncthreads();
+      {
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      }
+      __syncthreads();
+      {
+        {
+          for (n = 0; n <= 3996; n += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+            dz = z - _P1[n + 2 - 0];
+            newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+        }
+      }
+      __syncthreads();
+      {
+        for (n = 0; n <= 15; n += 1) 
+          energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;
+      }
+      __syncthreads();
+    }
+  }
 }
 void cenergy_cpu(float atoms[16000], float *energy, float z) {
-  float * devI1Ptr;
-  float * devO1Ptr;
-  cudaMalloc((void **)devO1Ptr, 0 * sizeof(float));
-  cudaMemcpy(float * devO1Ptr, float *energy, 0 * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMalloc((void **)devI1Ptr, 16000 * sizeof(float));
-  cudaMemcpy(float * devI1Ptr, float atoms[16000], 16000 * sizeof(float), cudaMemcpyHostToDevice);
-  dim3 dimGrid= dim3(1, 1);
-  dim3 dimBlock= dim3(1, 1);
-  kernel_GPU<<<dimGrid,dimBlock>>>(devO1Ptr, devI1Ptr);
-  cudaMemcpy(float *energy, float * devO1Ptr, 0 * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaFree(float * devO1Ptr);
-  cudaFree(float * devI1Ptr);
+  float * devRO0ptr;
+  float * devRW1ptr;
+  float * devRW0ptr;
+  cudaMalloc((void **)&devRW0ptr, 4001 * sizeof(float));
+  cudaMemcpy(devRW0ptr, _P1, 4001 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRW1ptr, 262144 * sizeof(float));
+  cudaMemcpy(devRW1ptr, energy, 262144 * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMalloc((void **)&devRO0ptr, 4 * sizeof(float));
+  cudaMemcpy(devRO0ptr, atoms, 4 * sizeof(float), cudaMemcpyHostToDevice);
+  dim3 dimGrid0 = dim3(16, 32);
+  dim3 dimBlock0 = dim3(32, 16);
+  kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr);
+  cudaMemcpy(_P1, devRW0ptr, 4001 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devRW0ptr);
+  cudaMemcpy(energy, devRW1ptr, 262144 * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaFree(devRW1ptr);
+  cudaFree(devRO0ptr);
 }

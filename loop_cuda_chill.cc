@@ -343,10 +343,15 @@ bool LoopCuda::validIndexes(int stmt_num, const std::vector<std::string>& idxs) 
 // Anand's April 2015 version, with statement numbers and 1 more arg
 bool LoopCuda::cudaize_v3(int stmt_num, 
                           std::string kernel_name,
-                          std::map<std::string, int> array_dims,
+                          std::map<std::string, int> array_sizes,
                           std::vector<std::string> blockIdxs,
                           std::vector<std::string> threadIdxs,
                           std::vector<std::string> kernel_params) {
+
+  // set array sizes
+  for(auto dim_pair: array_sizes) {
+    this->array_sizes[dim_pair.first] = dim_pair.second;
+  }
 
   cudaDebug = true; 
 
@@ -724,7 +729,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
   debug_fprintf(stderr, "\n(chill) ANAND'S LoopCuda::cudaize_v3() Set codegen flag\n"); 
 
   //Save array dimension sizes
-  this->Varray_dims.push_back(array_dims);
+  this->Varray_dims.push_back(array_sizes);
   Vcu_kernel_name.push_back(kernel_name.c_str()); debug_fprintf(stderr, "Vcu_kernel_name.push_back(%s)\n", kernel_name.c_str()); 
 
   block_and_thread_levels.insert(
@@ -2284,7 +2289,7 @@ void LoopCuda::peel_cuda(int stmt_num, int level, int amount) {
 
 
 bool LoopCuda::cudaize_v2(std::string kernel_name,
-                          std::map<std::string, int> array_dims,
+                          std::map<std::string, int> array_sizes,
                           std::vector<std::string> blockIdxs,
                           std::vector<std::string> threadIdxs) {
   debug_fprintf(stderr, "\n(chill) LoopCuda::cudaize_v2( NO stmt_num  )    WHY IS THiS GETTING CALLED?\n");

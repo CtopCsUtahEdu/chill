@@ -25,7 +25,7 @@ enum class io_dir {
 };
 
 static void get_io_array_refs(
-    const std::map<std::string, int>& array_dims,
+    const std::map<std::string, int>& array_sizes,
     const std::vector<IR_chillArrayRef*>& refs,
     io_dir dir,
     std::vector<CudaIOVardef>& arrayVars) noexcept {
@@ -56,13 +56,25 @@ static void get_io_array_refs(
     v.type        = strdup(param->underlyingtype);
 
     // set size expression
+    // -------------------
     chillAST_node* so = new chillAST_Sizeof(v.type);
     int numelements = 1;
-    if(param->numdimensions < 1 ||
+
+    // if the array size was set by a call to cudaize
+    if(array_sizes.find(vname) != array_sizes.end()) {
+      numelements = array_sizes.at(vname);
+    }
+    else {
+      for(int idx = 0; idx < param->numdimensions; idx++) {
+        numelements *= param->getArraySizeAsInt(idx);
+      }
+    }
+
+    /*if(param->numdimensions < 1 ||
        param->getArrayDimensions() == 0) {
       // look for array dims in array_dims map
-      auto itr = array_dims.find(vname);
-      if(itr == array_dims.end()) {
+      auto itr = array_sizes.find(vname);
+      if(itr == array_sizes.end()) {
         //TODO: error out here
       }
       else {
@@ -73,7 +85,7 @@ static void get_io_array_refs(
       for(int idx = 0; idx < param->numdimensions; idx++) {
         numelements *= param->getArraySizeAsInt(idx);
       }
-    } // if param->numdimensions
+    } // if param->numdimensions */
 
     chillAST_IntegerLiteral* numofthings = new chillAST_IntegerLiteral(numelements);
     v.size_expr = new chillAST_BinaryOperator(numofthings, "*", so);

@@ -208,10 +208,11 @@ static bool boolArg(PyObject* args, int index, bool dval = false) {
   return (bool)PyObject_IsTrue(item);
 }
 
-static bool tostringintmapvector(PyObject* args, int index, std::vector<std::map<std::string,int> >& vec) {
+static bool readArg(PyObject* args, int index, std::vector<std::map<std::string,int> >& vec) {
   if(PyTuple_Size(args) <= index)
     return false;
   PyObject* seq = PyTuple_GetItem(args, index);
+
   //TODO: Typecheck
   int seq_len = PyList_Size(seq);
   for(int i = 0; i < seq_len; i++) {
@@ -229,6 +230,28 @@ static bool tostringintmapvector(PyObject* args, int index, std::vector<std::map
     }
     vec.push_back(map);
   }
+  return true;
+}
+
+/**
+ * Read argument at index as a map<string, int>
+ */
+static bool readArg(PyObject* args, int index, std::map<std::string, int>& m) {
+  if(PyTuple_Size(args) <= index)
+    __throw_runtime_error_at(__FILE__, __LINE__, "bad input");
+
+  auto dict = PyTuple_GetItem(args, index);
+  if(!PyDict_Check(dict))
+    __throw_runtime_error_at(__FILE__, __LINE__, "bad input");
+
+  auto kv_list = PyDict_Items(dict);
+  for(int i = 0; i < PyList_Size(kv_list); i++) {
+    auto        kv = PyList_GetItem(kv_list, i);
+    std::string k  = PyString_AsString(PyTuple_GetItem(kv, 0));
+    int         v  = PyInt_AsLong(PyTuple_GetItem(kv, 1));
+    m[k] = v;
+  }
+
   return true;
 }
 
@@ -1319,15 +1342,8 @@ static PyObject* chill_cudaize_v3(PyObject *self, PyObject *args)
   std::string kernel_name = strArg(args, 1);
   int offset = 3;
   
-  PyObject* py_array_sizes = PyTuple_GetItem(args, 2);
   std::map<std::string, int> array_sizes;
-  for(int i = 0; i < PyList_Size(py_array_sizes); i++) {
-    PyObject* elem     = PyList_GetItem(py_array_sizes, i);
-    std::string cppstr = strArg(elem, 0);
-    int siz            = intArg(elem, 1);
-    array_sizes.insert( std::make_pair( cppstr, siz )); 
-  }
-  
+  readArg(args, 2, array_sizes);
   
   std::vector<std::string> blockIdxs;
   to_string_vector(args, 3, blockIdxs);

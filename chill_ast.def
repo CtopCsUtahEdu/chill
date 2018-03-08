@@ -1,0 +1,45 @@
+// Basic C nodes
+// -------------
+
+chillast_nodetype(SOURCEFILE,           "SourceFile")           // AKA TRANSLATIONUNIT
+chillast_nodetype(TYPEDEFDECL,          "TypedefDecl")
+chillast_nodetype(VARDECL,              "VarDecl")
+chillast_nodetype(FUNCTIONDECL,         "FunctionDecl")
+chillast_nodetype(RECORDDECL,           "RecordDecl")           // struct or union (or class) 
+chillast_nodetype(MACRODEFINITION,      "MacroDefinition")
+chillast_nodetype(COMPOUNDSTMT,         "CompoundStmt")
+chillast_nodetype(LOOP,                 "ForStmt")              // AKA FORSTMT
+chillast_nodetype(WHILESTMT,            "WhileStmt")
+chillast_nodetype(TERNARYOPERATOR,      "TernaryOperator")
+chillast_nodetype(BINARYOPERATOR,       "BinaryOperator")
+chillast_nodetype(UNARYOPERATOR,        "UnaryOperator")
+chillast_nodetype(ARRAYSUBSCRIPTEXPR,   "ArraySubscriptExpr")
+chillast_nodetype(MEMBEREXPR,           "MemberExpr")           // struct or union (or class) member
+chillast_nodetype(DECLREFEXPR,          "DeclRefExpr")
+chillast_nodetype(INTEGERLITERAL,       "IntegerLiteral")
+chillast_nodetype(FLOATINGLITERAL,      "FloatingLiteral")
+chillast_nodetype(IMPLICITCASTEXPR,     "ImplicitCastExpr")
+chillast_nodetype(RETURNSTMT,           "ReturnStmt")
+chillast_nodetype(CALLEXPR,             "CallExpr")
+chillast_nodetype(DECLSTMT,             "DeclStmt")
+chillast_nodetype(PARENEXPR,            "ParenExpr")
+chillast_nodetype(CSTYLECASTEXPR,       "CStyleCastExpr")
+chillast_nodetype(CSTYLEADDRESSOF,      "CStyleAddressOf")
+chillast_nodetype(IFSTMT,               "IfStmt")
+chillast_nodetype(SIZEOF,               "SizeOf")
+chillast_nodetype(MALLOC,               "Malloc")
+chillast_nodetype(FREE,                 "Free")
+chillast_nodetype(PREPROCESSING,        "PPNode")               // comments, #define, #include, whatever else works
+chillast_nodetype(NOOP,                 "NoOp")                 // NO OP
+
+// CUDA specific
+// -------------
+chillast_nodetype(CUDAMALLOC,           "CudaMalloc")
+chillast_nodetype(CUDAFREE,             "CudaFree")
+chillast_nodetype(CUDAMEMCPY,           "CudaMemcpy")
+chillast_nodetype(CUDAKERNELCALL,       "CudaKernelCall")
+chillast_nodetype(CUDASYNCTHREADS,      "CudaSyncthreads")
+chillast_nodetype(NULL,                 "NULL")                 // explicit non-statement 
+
+chillast_nodetype_alias(FORSTMT,         LOOP)
+chillast_nodetype_alias(TRANSLATIONUNIT, SOURCEFILE)

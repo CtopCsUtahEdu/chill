@@ -118,7 +118,7 @@ public:
   texture_memory_mapping *texture; //protonu        depends on rose internals
   constant_memory_mapping *constant_mem;         // depends on rose 
 #endif
-  std::map<std::string, int> array_dims;
+  std::map<std::string, int> array_sizes;
   std::vector<std::map<std::string, int> >Varray_dims;
   omega::CG_outputRepr *setup_code;
   omega::CG_outputRepr *teardown_code;
@@ -251,7 +251,8 @@ int findCurLevel(int stmt, std::string idx);
                   std::string kernel_name,
                   std::map<std::string, int> array_dims,
                   std::vector<std::string> blockIdxs,
-                  std::vector<std::string> threadIdxs,std::vector<std::string> kernel_params);
+                  std::vector<std::string> threadIdxs,
+                  std::vector<std::string> kernel_params);
   chillAST_FunctionDecl *function_that_contains_this_loop; 
   chillAST_node* cudaize_codegen_v2(); 
   chillAST_node* codegen();            
