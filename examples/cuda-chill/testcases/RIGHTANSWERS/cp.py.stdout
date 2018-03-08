@@ -1675,3 +1675,72 @@ energy wo
 1  energy
 2  z
 
+0  i
+1  j
+2  n
+3  dx
+4  dy
+5  dz
+6  chill_t1
+7  chill_t2
+8  chill_t3
+9  chill_t4
+10  chill_t5
+11  chill_t7
+12  chill_t9
+13  chill_t10
+14  chill_t11
+15  chill_t12
+16  t2
+17  chill_t19
+18  chill_t21
+19  chill_t22
+20  chill_t23
+21  chill_t24
+22  t4
+23  chill_t33
+24  chill_t34
+25  chill_t36
+26  chill_t37
+27  chill_t38
+28  chill_t39
+29  chill_t45
+30  chill_t46
+31  chill_t47
+32  chill_t48
+33  chill_t50
+34  chill_t51
+35  chill_t52
+36  _P1
+37  chill_t53
+38  chill_t54
+39  chill_t55
+40  chill_t56
+41  chill_t60
+42  chill_t61
+43  chill_t62
+44  chill_t63
+45  chill_t64
+46  chill_t65
+47  chill_t66
+48  chill_t67
+49  newVariable0
+50  t6
+51  t8
+52  t10
+53  t12
+54  t14
+55  t16
+
+0  int bx = blockIdx.x
+1  int by = blockIdx.y
+2  int tx = threadIdx.x
+3  int n
+4  int ty = threadIdx.y
+5  __shared__ float _P1[4001]
+6  float newVariable0
+7  float dx
+8  float dy
+9  float dz
+10  float z
+

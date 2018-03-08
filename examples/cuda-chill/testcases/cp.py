@@ -2,9 +2,6 @@
 
 #--This function form intializes "CUDAIZE v2" versus "CUDAIZE v1" if you
 #--call init() and use global variables to specify procedure and loop
-
-#--Second parameter is procedure # and third is loop #
-#>SKIP
 from chill import *
 execfile("cudaize.py")
 

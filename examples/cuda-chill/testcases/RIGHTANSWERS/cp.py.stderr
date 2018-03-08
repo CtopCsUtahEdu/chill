@@ -26,6 +26,481 @@ void cenergy_cpu(float atoms[16000], float *energy, float z) {
 }{
 }float *energyfloat *energyfloat *energyenergy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
 }{
-}float *energyfloat *energyfloat *energyterminate called after throwing an instance of 'std::runtime_error'
-  what():  EvalAsInt called on node fake2
-Aborted (core dumped)
+}float *energyfloat *energyfloat *energy4001 * sizeof(float)cudaMemcpy(devRW0ptr, _P1, 4001 * sizeof(float), cudaMemcpyHostToDevice)262144 * sizeof(float)cudaMemcpy(devRW1ptr, energy, 262144 * sizeof(float), cudaMemcpyHostToDevice)4 * sizeof(float)cudaMemcpy(devRO0ptr, atoms, 4 * sizeof(float), cudaMemcpyHostToDevice)1632dim3 dimBlock0 = dim3(32, 16)kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr)// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 15; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 31; t4 += 1) {
+    // ~cuda~ preferredIdx: tx sync
+    for (t6 = 0; t6 <= 3999; t6 += 1) 
+      _P1[t6 - 0] = atoms[t6];
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        newVariable0 = energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4];
+    // ~cuda~ threadLoop preferredIdx: tx sync
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t14 = 0; t14 <= 3996; t14 += 4) {
+          dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+          dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)_P1[t14 + 1 - 0]);
+          dz = z - _P1[t14 + 2 - 0];
+          newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4] = newVariable0;
+  }__global__ void kernel_GPU(float *atoms, float *energy) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 15; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 31; t4 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t6 = 0; t6 <= 3999; t6 += 1) 
+        _P1[t6 - 0] = atoms[t6];
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          newVariable0 = energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4];
+      // ~cuda~ threadLoop preferredIdx: tx sync
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4] = newVariable0;
+    }
+}// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 15; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 31; t4 += 1) {
+    // ~cuda~ preferredIdx: tx sync
+    for (t6 = 0; t6 <= 3999; t6 += 1) 
+      _P1[t6 - 0] = atoms[t6];
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        newVariable0 = energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4];
+    // ~cuda~ threadLoop preferredIdx: tx sync
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t14 = 0; t14 <= 3996; t14 += 4) {
+          dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+          dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)_P1[t14 + 1 - 0]);
+          dz = z - _P1[t14 + 2 - 0];
+          newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4] = newVariable0;
+  }__global__ void kernel_GPU(float *atoms, float *energy) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 15; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 31; t4 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t6 = 0; t6 <= 3999; t6 += 1) 
+        _P1[t6 - 0] = atoms[t6];
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          newVariable0 = energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4];
+      // ~cuda~ threadLoop preferredIdx: tx sync
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * t2 + t6) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4] = newVariable0;
+    }
+}t2 = 0t2 <= 15t2 += 1bx = 0bx <= 15bx += 1// ~cuda~ blockLoop preferredIdx: bx
+for (bx = 0; bx <= 15; bx += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 31; t4 += 1) {
+    // ~cuda~ preferredIdx: tx sync
+    for (t6 = 0; t6 <= 3999; t6 += 1) 
+      _P1[t6 - 0] = atoms[t6];
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        newVariable0 = energy[t8 + 16384 * bx + 512 * t6 + 16 * t4];
+    // ~cuda~ threadLoop preferredIdx: tx sync
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t14 = 0; t14 <= 3996; t14 += 4) {
+          dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+          dy = (float)(0.10000000000000001 * (double)(32 * bx + t6) - (double)_P1[t14 + 1 - 0]);
+          dz = z - _P1[t14 + 2 - 0];
+          newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+        }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        energy[t8 + 16384 * bx + 512 * t6 + 16 * t4] = newVariable0;
+  }__global__ void kernel_GPU(float *atoms, float *energy) {
+  int bx;
+  for (bx = 0; bx <= 15; bx += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 31; t4 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t6 = 0; t6 <= 3999; t6 += 1) 
+        _P1[t6 - 0] = atoms[t6];
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          newVariable0 = energy[t8 + 16384 * bx + 512 * t6 + 16 * t4];
+      // ~cuda~ threadLoop preferredIdx: tx sync
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * t4 + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + t6) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * bx + 512 * t6 + 16 * t4] = newVariable0;
+    }
+}t4 = 0t4 <= 31t4 += 1by = 0by <= 31by += 1// ~cuda~ preferredIdx: by
+for (by = 0; by <= 31; by += 1) {
+  // ~cuda~ preferredIdx: tx sync
+  for (t6 = 0; t6 <= 3999; t6 += 1) 
+    _P1[t6 - 0] = atoms[t6];
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 31; t6 += 1) 
+    // ~cuda~ preferredIdx: n
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      newVariable0 = energy[t8 + 16384 * bx + 512 * t6 + 16 * by];
+  // ~cuda~ threadLoop preferredIdx: tx sync
+  for (t6 = 0; t6 <= 31; t6 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t10 = 0; t10 <= 15; t10 += 1) 
+      // ~cuda~ preferredIdx: n
+      for (t14 = 0; t14 <= 3996; t14 += 4) {
+        dx = (float)(0.10000000000000001 * (double)(16 * by + t10) - (double)_P1[t14 - 0]);
+        dy = (float)(0.10000000000000001 * (double)(32 * bx + t6) - (double)_P1[t14 + 1 - 0]);
+        dz = z - _P1[t14 + 2 - 0];
+        newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+      }
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 31; t6 += 1) 
+    // ~cuda~ preferredIdx: n
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      energy[t8 + 16384 * bx + 512 * t6 + 16 * by] = newVariable0;
+}__global__ void kernel_GPU(float *atoms, float *energy) {
+  int by;
+  int bx;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      // ~cuda~ preferredIdx: 
+      for (t6 = 0; t6 <= 3999; t6 += 1) 
+        _P1[t6 - 0] = atoms[t6];
+      __syncthreads();
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          newVariable0 = energy[t8 + 16384 * bx + 512 * t6 + 16 * by];
+      // ~cuda~ threadLoop preferredIdx: tx sync
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + t6) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * bx + 512 * t6 + 16 * by] = newVariable0;
+    }
+}t6 = 0t6 <= 3999t6 += 1tx = 0tx <= 3999tx += 1// ~cuda~ preferredIdx: 
+for (tx = 0; tx <= 3999; tx += 1) 
+  _P1[tx - 0] = atoms[tx];t6 = 0t6 <= 31t6 += 1tx = 0tx <= 31tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 31; tx += 1) 
+  // ~cuda~ preferredIdx: n
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    newVariable0 = energy[t8 + 16384 * bx + 512 * tx + 16 * by];__global__ void kernel_GPU(float *atoms, float *energy) {
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      for (tx = 0; tx <= 3999; tx += 1) 
+        _P1[tx - 0] = atoms[tx];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          newVariable0 = energy[t8 + 16384 * bx + 512 * tx + 16 * by];
+      __syncthreads();
+      // ~cuda~ threadLoop preferredIdx: tx sync
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + t6) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * bx + 512 * t6 + 16 * by] = newVariable0;
+    }
+}t8 = 0t8 <= 15t8 += 1n = 0n <= 15n += 1// ~cuda~ preferredIdx: n
+for (n = 0; n <= 15; n += 1) 
+  newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];t6 = 0t6 <= 31t6 += 1tx = 0tx <= 31tx += 1// ~cuda~ threadLoop preferredIdx: tx sync
+for (tx = 0; tx <= 31; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t10 = 0; t10 <= 15; t10 += 1) 
+    // ~cuda~ preferredIdx: n
+    for (t14 = 0; t14 <= 3996; t14 += 4) {
+      dx = (float)(0.10000000000000001 * (double)(16 * by + t10) - (double)_P1[t14 - 0]);
+      dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[t14 + 1 - 0]);
+      dz = z - _P1[t14 + 2 - 0];
+      newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+    }__global__ void kernel_GPU(float *atoms, float *energy) {
+  int n;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      for (tx = 0; tx <= 3999; tx += 1) 
+        _P1[tx - 0] = atoms[tx];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: n
+          for (t14 = 0; t14 <= 3996; t14 += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + t10) - (double)_P1[t14 - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[t14 + 1 - 0]);
+            dz = z - _P1[t14 + 2 - 0];
+            newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      __syncthreads();
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: n
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          energy[t8 + 16384 * bx + 512 * t6 + 16 * by] = newVariable0;
+    }
+}t10 = 0t10 <= 15t10 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  // ~cuda~ preferredIdx: n
+  for (t14 = 0; t14 <= 3996; t14 += 4) {
+    dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[t14 - 0]);
+    dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[t14 + 1 - 0]);
+    dz = z - _P1[t14 + 2 - 0];
+    newVariable0 += _P1[t14 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+  }t14 = 0t14 <= 3996t14 += 4n = 0n <= 3996n += 4// ~cuda~ preferredIdx: n
+for (n = 0; n <= 3996; n += 4) {
+  dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+  dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+  dz = z - _P1[n + 2 - 0];
+  newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+}t6 = 0t6 <= 31t6 += 1tx = 0tx <= 31tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 31; tx += 1) 
+  // ~cuda~ preferredIdx: n
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    energy[t8 + 16384 * bx + 512 * tx + 16 * by] = newVariable0;t8 = 0t8 <= 15t8 += 1n = 0n <= 15n += 1// ~cuda~ preferredIdx: n
+for (n = 0; n <= 15; n += 1) 
+  energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;int bxint byint tx__shared__ float _P1[4001]float atoms[16000]int nfloat newVariable0float *energyint tyfloat dxfloat dyfloat dzfloat z(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()__shared__ float _P1[4001]float atoms[16000]float *energy__shared__ float _P1[4001]__shared__ float _P1[4001]__shared__ float _P1[4001]__shared__ float _P1[4001]float *energy__global__ void kernel_GPU(float *atoms, float *energy) {
+  float z;
+  float dz;
+  float dy;
+  float dx;
+  float newVariable0;
+  __shared__ float _P1[4001];
+  int ty = threadIdx.y;
+  int n;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      for (tx = 0; tx <= 3999; tx += 1) 
+        _P1[tx - 0] = atoms[tx];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (n = 0; n <= 3996; n += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+            dz = z - _P1[n + 2 - 0];
+            newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;
+      __syncthreads();
+    }
+}__global__ void kernel_GPU(float *atoms, float *energy) {
+  float z;
+  float dz;
+  float dy;
+  float dx;
+  float newVariable0;
+  __shared__ float _P1[4001];
+  int ty = threadIdx.y;
+  int n;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      for (tx = 0; tx <= 3999; tx += 1) 
+        _P1[tx - 0] = atoms[tx];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (n = 0; n <= 3996; n += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+            dz = z - _P1[n + 2 - 0];
+            newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;
+      __syncthreads();
+    }
+}__global__ void kernel_GPU(float *atoms, float *energy) {
+  float z;
+  float dz;
+  float dy;
+  float dx;
+  float newVariable0;
+  __shared__ float _P1[4001];
+  int ty = threadIdx.y;
+  int n;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 15; bx += 1) 
+    for (by = 0; by <= 31; by += 1) {
+      for (tx = 0; tx <= 3999; tx += 1) 
+        _P1[tx - 0] = atoms[tx];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (n = 0; n <= 3996; n += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+            dz = z - _P1[n + 2 - 0];
+            newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+      __syncthreads();
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (n = 0; n <= 15; n += 1) 
+          energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;
+      __syncthreads();
+    }
+}__global__ void kernel_GPU(float *atoms, float *energy) {
+  float z;
+  float dz;
+  float dy;
+  float dx;
+  float newVariable0;
+  __shared__ float _P1[4001];
+  int ty = threadIdx.y;
+  int n;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  {
+    {
+      {
+        _P1[tx - 0] = atoms[tx];
+      }
+      __syncthreads();
+      {
+        for (n = 0; n <= 15; n += 1) 
+          newVariable0 = energy[n + 16384 * bx + 512 * tx + 16 * by];
+      }
+      __syncthreads();
+      {
+        {
+          for (n = 0; n <= 3996; n += 4) {
+            dx = (float)(0.10000000000000001 * (double)(16 * by + ty) - (double)_P1[n - 0]);
+            dy = (float)(0.10000000000000001 * (double)(32 * bx + tx) - (double)_P1[n + 1 - 0]);
+            dz = z - _P1[n + 2 - 0];
+            newVariable0 += _P1[n + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz);
+          }
+        }
+      }
+      __syncthreads();
+      {
+        for (n = 0; n <= 15; n += 1) 
+          energy[n + 16384 * bx + 512 * tx + 16 * by] = newVariable0;
+      }
+      __syncthreads();
+    }
+  }
+}
