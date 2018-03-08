@@ -42,52 +42,20 @@ char *ulhack(  char *brackets );
 //! remove __restrict__ , MODIFIES the argument!
 char *restricthack( char *typeinfo );
 
+#ifdef chillast_nodetype
+#error "chillast_nodetype already defined"
+#else
+#define chillast_nodetype(n, s)                     CHILLAST_NODETYPE_##n,
+#define chillast_nodetype_alias(a, b)               CHILLAST_NODETYPE_##a = CHILLAST_NODETYPE_##b,
+#endif
 
 enum CHILL_ASTNODE_TYPE {
-  CHILLAST_NODETYPE_UNKNOWN=0,
-  CHILLAST_NODETYPE_SOURCEFILE,
-  CHILLAST_NODETYPE_TRANSLATIONUNIT = CHILLAST_NODETYPE_SOURCEFILE,
-  CHILLAST_NODETYPE_TYPEDEFDECL,
-  CHILLAST_NODETYPE_VARDECL,
-  //  CHILLAST_NODETYPE_PARMVARDECL,   not used any more 
-  CHILLAST_NODETYPE_FUNCTIONDECL,
-  CHILLAST_NODETYPE_RECORDDECL,     // struct or union (or class) 
-  CHILLAST_NODETYPE_MACRODEFINITION,
-  CHILLAST_NODETYPE_COMPOUNDSTMT,
-  CHILLAST_NODETYPE_LOOP,               // AKA ForStmt
-  CHILLAST_NODETYPE_FORSTMT = CHILLAST_NODETYPE_LOOP,
-  CHILLAST_NODETYPE_WHILESTMT,
-  CHILLAST_NODETYPE_TERNARYOPERATOR,
-  CHILLAST_NODETYPE_BINARYOPERATOR,
-  CHILLAST_NODETYPE_UNARYOPERATOR,
-  CHILLAST_NODETYPE_ARRAYSUBSCRIPTEXPR,
-  CHILLAST_NODETYPE_MEMBEREXPR,          // structs/unions
-  CHILLAST_NODETYPE_DECLREFEXPR,
-  CHILLAST_NODETYPE_INTEGERLITERAL,
-  CHILLAST_NODETYPE_FLOATINGLITERAL,
-  CHILLAST_NODETYPE_IMPLICITCASTEXPR,
-  CHILLAST_NODETYPE_RETURNSTMT,
-  CHILLAST_NODETYPE_CALLEXPR,
-  CHILLAST_NODETYPE_DECLSTMT,
-  CHILLAST_NODETYPE_PARENEXPR,
-  CHILLAST_NODETYPE_CSTYLECASTEXPR,
-  CHILLAST_NODETYPE_CSTYLEADDRESSOF,
-  CHILLAST_NODETYPE_IFSTMT,
-  CHILLAST_NODETYPE_SIZEOF,
-  CHILLAST_NODETYPE_MALLOC,
-  CHILLAST_NODETYPE_FREE,
-  CHILLAST_NODETYPE_PREPROCESSING, // comments, #define, #include, whatever else works
-  CHILLAST_NODETYPE_NOOP,   // NO OP
-  // CUDA specific
-  CHILLAST_NODETYPE_CUDAMALLOC,
-  CHILLAST_NODETYPE_CUDAFREE,
-  CHILLAST_NODETYPE_CUDAMEMCPY,
-  CHILLAST_NODETYPE_CUDAKERNELCALL,
-  CHILLAST_NODETYPE_CUDASYNCTHREADS,
-  CHILLAST_NODETYPE_NULL    // explicit non-statement 
-  // TODO 
-  
-} ;
+  CHILLAST_NODETYPE_UNKNOWN = 0,
+#include "chill_ast.def"
+};
+
+#undef chillast_nodetype
+#undef chillast_nodetype_alias
 
 enum CHILL_FUNCTION_TYPE { 
   CHILL_FUNCTION_CPU = 0,
@@ -359,20 +327,9 @@ public:
    * @param var
    */
   virtual void loseLoopWithLoopVar( char *var ) { 
-    // things that can not have loops as substatements can have a null version of this method
-    // things that have more complicated sets of "children" will have specialized versions
-
-    // this is the generic version of the method. It just recurses among its children.
-    // ForStmt is the only one that can actually remove itself. When it does, it will 
-    // potentially change the children vector, which is not the simple array it might appear.
-    // so you have to make a copy of the vector to traverse
+    // things that can not have loops as substatements should have a null version of this method
     
-    __throw_runtime_error_at(__FILE__, __LINE__, std::string("looseLoopWithLoopVar calloed on node of type") + this->getTypeString());
-
-    vector<chillAST_node*> dupe = children;
-    for (int i=0; i<dupe.size(); i++) {  // recurse on all children
-      dupe[i]->loseLoopWithLoopVar( var );
-    }
+    __throw_runtime_error_at(__FILE__, __LINE__, std::string("looseLoopWithLoopVar called on node of type") + this->getTypeString());
   }
 
   virtual int evalAsInt() { 
@@ -813,7 +770,7 @@ public:
   void setInit( chillAST_node *i ) { init = i; i->setParent(this); };
   bool hasInit() { return init != NULL; };
   chillAST_node *getInit() { return init; };
-  int  getArrayDimensions() { return this->getChildren().size(); }
+  int            getArrayDimensions()                  { return this->getChildren().size(); }
   chillAST_node *getArraySize(int i)                   { return this->getChild(i); }
   int            getArraySizeAsInt(int i)              { return this->getArraySize(i)->evalAsInt(); }
   void           setArraySize(int i, chillAST_node* s) { this->setChild(i, s); }
@@ -1994,7 +1951,9 @@ public:
   void gatherVarUsage( vector<chillAST_VarDecl*> &decls ) {}; // does nothing
   //void gatherDeclRefExprs( vector<chillAST_DeclRefExpr *>&refs );
   //void replaceVarDecls( chillAST_VarDecl *olddecl, chillAST_VarDecl *newdecl);
-  //bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; }; 
+  //bool findLoopIndexesToReplace(  chillAST_SymbolTable *symtab, bool forcesync=false ){ return false; };
+
+  void loseLoopWithLoopVar( char *var ) final override { /* do nothing */ }
 
 }; 
 

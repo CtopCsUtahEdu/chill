@@ -10,49 +10,20 @@
 int chillAST_node::chill_scalar_counter = 0;
 int chillAST_node::chill_array_counter  = 1;
 
+#ifdef chillast_nodetype
+#error "chillast_nodetype already defined"
+#else
+#define chillast_nodetype(n, s)                   s,
+#define chillast_nodetype_alias(a, b)             /* nothing */
+#endif
 
 const char* Chill_AST_Node_Names[] = { 
   "Unknown AST node type",
-  "SourceFile",
-  "TypedefDecl",
-  "VarDecl",
-  //  "ParmVarDecl",  not used any more
-  "FunctionDecl",
-  "RecordDecl",
-  "MacroDefinition", 
-  "CompoundStmt",
-  "ForStmt",
-  "WhileStmt",
-  "TernaryOperator",
-  "BinaryOperator",
-  "UnaryOperator",
-  "ArraySubscriptExpr",
-  "MemberExpr",
-  "DeclRefExpr",
-  "IntegerLiteral",
-  "FloatingLiteral",
-  "ImplicitCastExpr", // not sure we need this
-  "ReturnStmt",
-  "CallExpr",
-  "DeclStmt", 
-  "ParenExpr",
-  "CStyleCastExpr",
-  "CStyleAddressOf",
-  "IfStmt",
-  "SizeOf",
-  "Malloc", 
-  "Free",
-  "NoOp",
-// CUDA specific 
-  "CudaMalloc",
-  "CudaFree",
-  "CudaMemcpy",
-  "CudaKernelCall",
-  "CudaSyncthreads",
-  "fake1",
-  "fake2", 
-  "fake3"
+#include "chill_ast.def"
 };
+
+#undef chillast_nodetype
+#undef chillast_nodetype_alias
 
 char *parseUnderlyingType( char *sometype ) {
     int len = strlen(sometype);
@@ -2931,62 +2902,10 @@ void chillAST_CompoundStmt::replaceChild( chillAST_node *old, chillAST_node *new
 }
 
 
-void chillAST_CompoundStmt::loseLoopWithLoopVar( char *var ) { 
-  //debug_fprintf(stderr, "chillAST_CompoundStmt::loseLoopWithLoopVar( %s )\n", var); 
-
-  //debug_fprintf(stderr, "CompoundStmt 0x%x has parent 0x%x  ", this, this->parent);
-  //debug_fprintf(stderr, "%s\n", parent->getTypeString()); 
-
-  
-  //debug_fprintf(stderr, "CompoundStmt node has %d children\n", children.size()); 
-  //debug_fprintf(stderr, "before doing a damned thing, \n"); 
-  //print();
-  //dump(); fflush(stdout);
-  //debug_fprintf(stderr, "\n\n"); 
-
-#ifdef DAMNED
-  for (int j=0; j<children.size(); j++) { 
-    debug_fprintf(stderr, "j %d/%d  ", j, children.size()); 
-    debug_fprintf(stderr, "subnode %d 0x%x  ", j, children[j] );
-    debug_fprintf(stderr, "asttype %d  ", children[j]->asttype); 
-    debug_fprintf(stderr, "%s    ", children[j]->getTypeString());
-    if (children[j]->isForStmt()) { 
-      chillAST_ForStmt *FS = ((chillAST_ForStmt *)  children[j]); 
-      debug_fprintf(stderr, "for (");
-      FS->init->print(0, stderr);
-      debug_fprintf(stderr, "; ");
-      FS->cond->print(0, stderr);
-      debug_fprintf(stderr, "; ");
-      FS->incr->print(0, stderr);
-      debug_fprintf(stderr, ")  with %d statements in body 0x%x\n",  FS->body->getNumChildren(), FS->body );   
-    }
-    else debug_fprintf(stderr, "\n"); 
+void chillAST_CompoundStmt::loseLoopWithLoopVar( char *var ) {
+  for (int i=0; i<children.size(); i++) {
+    children[i]->loseLoopWithLoopVar( var );
   }
-#endif
-
-
-  vector<chillAST_node*> dupe = children; // simple enough?
-  for (int i=0; i<dupe.size(); i++) { 
-    //for (int j=0; j<dupe.size(); j++) { 
-    //  debug_fprintf(stderr, "j %d/%d\n", j, dupe.size()); 
-    //  debug_fprintf(stderr, "subnode %d %s    ", j, children[j]->getTypeString());
-    //  if (children[j]->isForStmt()) { 
-    //    chillAST_ForStmt *FS = ((chillAST_ForStmt *)  children[j]); 
-    //    debug_fprintf(stderr, "for (");
-    //     FS->init->print(0, stderr);
-    //    debug_fprintf(stderr, "; ");
-    //    FS->cond->print(0, stderr);
-    //    debug_fprintf(stderr, "; ");
-    //    FS->incr->print(0, stderr);
-    //    debug_fprintf(stderr, ")  with %d statements in body 0x%x\n",  FS->body->getNumChildren(), FS->body );   
-    //} 
-    //else debug_fprintf(stderr, "\n"); 
-    //}
-    
-    //debug_fprintf(stderr, "CompoundStmt 0x%x recursing to child %d/%d\n", this, i, dupe.size()); 
-    dupe[i]->loseLoopWithLoopVar( var );
-  }
-  //debug_fprintf(stderr, "CompoundStmt node 0x%x done recursing\n", this ); 
 }
 
 

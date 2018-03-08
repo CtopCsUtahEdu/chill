@@ -6,7 +6,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
   debug_fprintf(stderr, "\nLoopCuda::cudaize codegen V2 (CHILL) Line 7 of cudaize_codegen_v2.cc\n");
   
   debug_fprintf(stderr, "here is the list of array_dims\n"); 
-  for(std::map<std::string, int>::iterator it = array_dims.begin(); it != array_dims.end(); it++)  {
+  for(std::map<std::string, int>::iterator it = array_sizes.begin(); it != array_sizes.end(); it++)  {
     debug_fprintf(stderr, "array_dims  '%s'  %d\n", it->first.c_str(), it->second);
   }
   debug_fprintf(stderr, "that is the list\n"); 
@@ -910,7 +910,7 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
 
       } // for each kernel parameter ???
       
-      get_io_refs(ir, array_dims, refs, arrayVars);
+      get_io_refs(ir, array_sizes, refs, arrayVars);
 #if 0
       // unclear where this came from. older version, I assume 
       debug_fprintf(stderr, "OK, first the %d OUTPUTS of the GPU code\n",  wo_refs.size() ); 
@@ -971,8 +971,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
           debug_fprintf(stderr, "looking in array_dims numdimensions = %d\n", param->numdimensions);
 
           //Lookup in array_dims (the cudaize call has this info for some variables?) 
-          std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
-          if (it == array_dims.end()) { 
+          std::map<std::string, int>::iterator it = array_sizes.find(name.c_str());
+          if (it == array_sizes.end()) { 
             debug_fprintf(stderr, "L955 Can't find %s in array_dims\n", name.c_str()); 
             numitems = 123456;
           }
@@ -1101,8 +1101,8 @@ chillAST_node *LoopCuda::cudaize_codegen_v2() {  // NOT WORKING ON THIS ONE NOW 
         if (base->numdimensions < 1 || 
             base->getArrayDimensions() == 0) {
           //Lookup in array_dims (the cudaize call has this info for some variables?) 
-          std::map<std::string, int>::iterator it = array_dims.find(name.c_str());
-          if (it == array_dims.end()) { 
+          std::map<std::string, int>::iterator it = array_sizes.find(name.c_str());
+          if (it == array_sizes.end()) { 
             debug_fprintf(stderr, "L1097 Can't find %s in array_dims\n", name.c_str()); 
             numitems = 123456;
           }
