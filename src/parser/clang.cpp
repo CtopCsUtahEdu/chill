@@ -66,39 +66,6 @@ chillAST_NodeList ConvertGenericClangAST( clang::Stmt *s );
 using namespace clang;
 using namespace std;
 
-namespace {
-  static string binops[] = {
-      " ", " ",             // BO_PtrMemD, BO_PtrMemI,       // [C++ 5.5] Pointer-to-member operators.
-      "*", "/", "%",        // BO_Mul, BO_Div, BO_Rem,       // [C99 6.5.5] Multiplicative operators.
-      "+", "-",             // BO_Add, BO_Sub,               // [C99 6.5.6] Additive operators.
-      "<<", ">>",           // BO_Shl, BO_Shr,               // [C99 6.5.7] Bitwise shift operators.
-      "<", ">", "<=", ">=", // BO_LT, BO_GT, BO_LE, BO_GE,   // [C99 6.5.8] Relational operators.
-      "==", "!=",           // BO_EQ, BO_NE,                 // [C99 6.5.9] Equality operators.
-      "&",                  // BO_And,                       // [C99 6.5.10] Bitwise AND operator.
-      "^",                 // BO_Xor,                       // [C99 6.5.11] Bitwise XOR operator.
-      "|",                  // BO_Or,                        // [C99 6.5.12] Bitwise OR operator.
-      "&&",                 // BO_LAnd,                      // [C99 6.5.13] Logical AND operator.
-      "||",                 // BO_LOr,                       // [C99 6.5.14] Logical OR operator.
-      "=", "*=",            // BO_Assign, BO_MulAssign,      // [C99 6.5.16] Assignment operators.
-      "/=", "%=",           // BO_DivAssign, BO_RemAssign,
-      "+=", "-=",           // BO_AddAssign, BO_SubAssign,
-      "<<=", ">>=",         // BO_ShlAssign, BO_ShrAssign,
-      "&&=", "^=",         // BO_AndAssign, BO_XorAssign,
-      "||=",                // BO_OrAssign,
-      ","};                 // BO_Comma                      // [C99 6.5.17] Comma operator.
-
-
-  static string unops[] = {
-      "++", "--",           // [C99 6.5.2.4] Postfix increment and decrement
-      "++", "--",           // [C99 6.5.3.1] Prefix increment and decrement
-      "@", "*",            // [C99 6.5.3.2] Address and indirection
-      "+", "-",             // [C99 6.5.3.3] Unary arithmetic
-      "~", "!",             // [C99 6.5.3.3] Unary arithmetic
-      "__real", "__imag",   // "__real expr"/"__imag expr" Extension.
-      "__extension"          // __extension__ marker.
-  };
-}
-
 extern vector<chillAST_VarDecl *> VariableDeclarations;  // a global.   TODO
 
 class aClangCompiler {
@@ -394,7 +361,7 @@ chillAST_NodeList ConvertIfStmt( IfStmt *clangIS ) {
 
 
 chillAST_NodeList ConvertUnaryOperator( UnaryOperator * clangUO ) {
-  const char *op = unops[clangUO->getOpcode()].c_str();
+  const char *op = clangUO->getOpcodeStr(clangUO->getOpcode()).str().c_str();
   bool pre = !(clangUO->isPostfix());
   chillAST_node *sub = UNWRAP(ConvertGenericClangAST( clangUO->getSubExpr()));
 
@@ -409,12 +376,10 @@ chillAST_NodeList ConvertBinaryOperator( BinaryOperator * clangBO ) {
   // get the clang parts
   Expr *lhs = clangBO->getLHS();
   Expr *rhs = clangBO->getRHS();
-  BinaryOperator::Opcode op = clangBO->getOpcode(); // this is CLANG op, not CHILL op
-
 
   // convert to chill equivalents
   chillAST_node *l = UNWRAP(ConvertGenericClangAST( lhs ));
-  const char *opstring = binops[op].c_str();
+  const char *opstring = clangBO->getOpcodeStr().str().c_str();
   chillAST_node *r = UNWRAP(ConvertGenericClangAST( rhs ));
   // TODO chill equivalent for numeric op.
 
@@ -723,6 +688,7 @@ aClangCompiler::aClangCompiler(const char *filename ) {
   dl.exec(entire_file_AST);
   chill::scanner::SanityCheck sc;
   sc.run(entire_file_AST,std::cout);
+  entire_file_AST->print();
   astContext_ = &Clang->getASTContext();
 }
 
