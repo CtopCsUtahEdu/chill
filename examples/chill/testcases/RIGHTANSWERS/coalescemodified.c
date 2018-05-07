@@ -1,4 +1,4 @@
-// this source is derived from CHILL AST originally from file 'coalesce.c' as parsed by frontend compiler clang
+// this source is derived from CHILL AST originally from file 'coalesce.c' as parsed by frontend compiler rose
 
 #define c(i, j) c.count
 struct inspector {

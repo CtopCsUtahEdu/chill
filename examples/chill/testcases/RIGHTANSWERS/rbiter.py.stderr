@@ -1,0 +1,5 @@
+"/home/derick/dev/chill/chill-src/examples/chill/testcases/rbiter.cpp", line 7: warning: 
+          missing return statement at end of non-void function "f"
+  }
+  ^
+

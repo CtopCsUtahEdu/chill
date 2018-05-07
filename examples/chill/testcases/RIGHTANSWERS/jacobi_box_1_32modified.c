@@ -42,8 +42,8 @@ void smooth_box_1_32(domain_type *domain, int level, int box_id, int phi_id, int
   int s;
   box = box_id;
   s = sweep;
-  double h2inv= 1 / (domain->h[level] * domain->h[level]);
-  double TwoThirds= 2 / 3;
+  double h2inv = 1 / (domain->h[level] * domain->h[level]);
+  double TwoThirds = 2 / 3;
   double _in[32 + 2][32 + 2][32 + 2];
   double _out[32 + 2][32 + 2][32 + 2];
   double _rhs[32 + 2][32 + 2][32 + 2];

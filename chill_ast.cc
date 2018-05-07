@@ -2356,6 +2356,7 @@ chillAST_node* chillAST_VarDecl::clone() {
   }
 
   vd->isStruct = this->isStruct;
+  vd->isAParameter = this->isAParameter;
 
   vd->isFromSourceFile = isFromSourceFile;
   if (filename) vd->filename = strdup(filename); 

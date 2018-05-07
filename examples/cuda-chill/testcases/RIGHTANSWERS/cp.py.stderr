@@ -1,32 +1,10 @@
-4001float atoms[16000]// this source is derived from CHILL AST originally from file 'cp.c' as parsed by frontend compiler rose
-
-#define N 1
-
-#define VOLSIZEY 512
-
-#define VOLSIZEX 512
-
-#define VOLSIZEZ 1
-
-#define ATOMCOUNT 4000
-
-#define ATOMCOUNTTIMES4 16000
-
-#define GRIDSPACING 0.1
-
-#define zDim 0
-
-float sqrtf(float );
-void cenergy_cpu(float atoms[16000], float *energy, float z) {
-}
-void cenergy_cpu(float atoms[16000], float *energy, float z) {
-}dx = (float)(0.10000000000000001 * (double)chill_t65 - (double)_P1[chill_t67 - 0])dy = (float)(0.10000000000000001 * (double)chill_t63 - (double)_P1[chill_t67 + 1 - 0])dz = z - _P1[chill_t67 + 2 - 0]newVariable0 += _P1[chill_t67 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz)_P1[chill_t56 - 0] = atoms[chill_t56]newVariable0 = energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61]energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61] = newVariable0_P1[t6 - 0]atoms[t6]energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]_P1[t14 - 0]_P1[t14 + 1 - 0]_P1[t14 + 2 - 0]_P1[t14 + 3 - 0]energy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+4001float atoms[16000]dx = (float)(0.10000000000000001 * (double)chill_t65 - (double)_P1[chill_t67 - 0])dy = (float)(0.10000000000000001 * (double)chill_t63 - (double)_P1[chill_t67 + 1 - 0])dz = z - _P1[chill_t67 + 2 - 0]newVariable0 += _P1[chill_t67 + 3 - 0] / sqrtf(dx * dx + dy * dy + dz * dz)_P1[chill_t56 - 0] = atoms[chill_t56]newVariable0 = energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61]energy[chill_t64 + 16384 * chill_t60 + 512 * chill_t62 + 16 * chill_t61] = newVariable0void cenergy_cpu(float atoms[16000], float *energy, float z) {
 }{
-}float atoms[16000]float atoms[16000]float *atomsatoms[t6]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}float atoms[16000]float *atomsatoms[t6]void cenergy_cpu(float atoms[16000], float *energy, float z) {
 }{
-}float *energyfloat *energyfloat *energyenergy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
+}float *energyfloat *energyenergy[t8 + 16384 * t2 + 512 * t6 + 16 * t4]void cenergy_cpu(float atoms[16000], float *energy, float z) {
 }{
-}float *energyfloat *energyfloat *energy4001 * sizeof(float)cudaMemcpy(devRW0ptr, _P1, 4001 * sizeof(float), cudaMemcpyHostToDevice)262144 * sizeof(float)cudaMemcpy(devRW1ptr, energy, 262144 * sizeof(float), cudaMemcpyHostToDevice)4 * sizeof(float)cudaMemcpy(devRO0ptr, atoms, 4 * sizeof(float), cudaMemcpyHostToDevice)1632dim3 dimBlock0 = dim3(32, 16)kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr)// ~cuda~ blockLoop preferredIdx: bx
+}float *energyfloat *energy262144 * sizeof(float)cudaMemcpy(devRW1ptr, energy, 262144 * sizeof(float), cudaMemcpyHostToDevice)4 * sizeof(float)cudaMemcpy(devRO0ptr, atoms, 4 * sizeof(float), cudaMemcpyHostToDevice)1632dim3 dimBlock0 = dim3(32, 16)kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW1ptr, devRO0ptr)// ~cuda~ blockLoop preferredIdx: bx
 for (t2 = 0; t2 <= 15; t2 += 1) 
   // ~cuda~ preferredIdx: by
   for (t4 = 0; t4 <= 31; t4 += 1) {

@@ -62,18 +62,13 @@ __global__ void kernel_GPU(float *atoms, float *energy) {
 void cenergy_cpu(float atoms[16000], float *energy, float z) {
   float * devRO0ptr;
   float * devRW1ptr;
-  float * devRW0ptr;
-  cudaMalloc((void **)&devRW0ptr, 4001 * sizeof(float));
-  cudaMemcpy(devRW0ptr, _P1, 4001 * sizeof(float), cudaMemcpyHostToDevice);
   cudaMalloc((void **)&devRW1ptr, 262144 * sizeof(float));
   cudaMemcpy(devRW1ptr, energy, 262144 * sizeof(float), cudaMemcpyHostToDevice);
   cudaMalloc((void **)&devRO0ptr, 4 * sizeof(float));
   cudaMemcpy(devRO0ptr, atoms, 4 * sizeof(float), cudaMemcpyHostToDevice);
   dim3 dimGrid0 = dim3(16, 32);
   dim3 dimBlock0 = dim3(32, 16);
-  kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr);
-  cudaMemcpy(_P1, devRW0ptr, 4001 * sizeof(float), cudaMemcpyDeviceToHost);
-  cudaFree(devRW0ptr);
+  kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW1ptr, devRO0ptr);
   cudaMemcpy(energy, devRW1ptr, 262144 * sizeof(float), cudaMemcpyDeviceToHost);
   cudaFree(devRW1ptr);
   cudaFree(devRO0ptr);

@@ -1,33 +1,26 @@
-kVals[i].KxkVals[i].KykVals[i].KzkVals[i].PhiMagkVals[chill_t14].KxkVals[chill_t14].KykVals[chill_t14].KzkVals[chill_t14].PhiMagkVals[chill_t24].KxkVals[chill_t24].KykVals[chill_t24].KzkVals[chill_t24].PhiMagkVals[chill_t31].KxkVals[chill_t31].KykVals[chill_t31].KzkVals[chill_t31].PhiMagkVals[chill_t38].KxkVals[chill_t38].KykVals[chill_t38].KzkVals[chill_t38].PhiMagkVals[chill_t45].KxkVals[chill_t45].KykVals[chill_t45].KzkVals[chill_t45].PhiMag// this source is derived from CHILL AST originally from file 'mriq.c' as parsed by frontend compiler rose
-
-#include "mriq.h"
-
-void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
-}
-void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
-}expArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2)cosArg = cosf(expArg)sinArg = sinf(expArg)phi = kVals[chill_t52].PhiMagnewVariable4 += phi * cosArgnewVariable3 += phi * sinArgkVals[chill_t52].KxkVals[chill_t52].KykVals[chill_t52].KzkVals[chill_t52].PhiMagnewVariable0 = x[chill_t21 + 128 * chill_t19]newVariable1 = y[128 * chill_t26 + chill_t28]newVariable2 = z[chill_t35 + 128 * chill_t33]newVariable3 = Qi[128 * chill_t40 + chill_t42]Qi[128 * chill_t40 + chill_t42] = newVariable3newVariable4 = Qr[chill_t49 + 128 * chill_t47]Qr[chill_t49 + 128 * chill_t47] = newVariable4kVals[128 * t4 + t10].KxkVals[128 * t4 + t10].KykVals[128 * t4 + t10].KzkVals[128 * t4 + t10].PhiMagx[t4 + 128 * t2]y[128 * t2 + t4]z[t4 + 128 * t2]Qi[128 * t2 + t4]Qr[t4 + 128 * t2]kVals[128 * t4 + t10]kVals[128 * t4 + t10]kVals[128 * t4 + t10]kVals[128 * t4 + t10]Qr[t4 + 128 * t2]Qi[128 * t2 + t4]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+kVals[i].KxkVals[i].KykVals[i].KzkVals[i].PhiMagkVals[chill_t14].KxkVals[chill_t14].KykVals[chill_t14].KzkVals[chill_t14].PhiMagkVals[chill_t24].KxkVals[chill_t24].KykVals[chill_t24].KzkVals[chill_t24].PhiMagkVals[chill_t31].KxkVals[chill_t31].KykVals[chill_t31].KzkVals[chill_t31].PhiMagkVals[chill_t38].KxkVals[chill_t38].KykVals[chill_t38].KzkVals[chill_t38].PhiMagkVals[chill_t45].KxkVals[chill_t45].KykVals[chill_t45].KzkVals[chill_t45].PhiMagexpArg = 6.28318548f * (kVals[chill_t52].Kx * newVariable0 + kVals[chill_t52].Ky * newVariable1 + kVals[chill_t52].Kz * newVariable2)cosArg = cosf(expArg)sinArg = sinf(expArg)phi = kVals[chill_t52].PhiMagnewVariable4 += phi * cosArgnewVariable3 += phi * sinArgkVals[chill_t52].KxkVals[chill_t52].KykVals[chill_t52].KzkVals[chill_t52].PhiMagnewVariable0 = x[chill_t21 + 128 * chill_t19]newVariable1 = y[128 * chill_t26 + chill_t28]newVariable2 = z[chill_t35 + 128 * chill_t33]newVariable3 = Qi[128 * chill_t40 + chill_t42]Qi[128 * chill_t40 + chill_t42] = newVariable3newVariable4 = Qr[chill_t49 + 128 * chill_t47]Qr[chill_t49 + 128 * chill_t47] = newVariable4kVals[128 * t4 + t10].KxkVals[128 * t4 + t10].KykVals[128 * t4 + t10].KzkVals[128 * t4 + t10].PhiMagvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float x[32768]float x[32768]float *xx[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float x[32768]float *xx[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float y[32768]float y[32768]float *yy[128 * t2 + t4]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float y[32768]float *yy[128 * t2 + t4]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float z[32768]float z[32768]float *zz[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float z[32768]float *zz[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float Qi[32768]float Qi[32768]float *QiQi[128 * t2 + t4]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float Qi[32768]float *QiQi[128 * t2 + t4]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float Qr[32768]float Qr[32768]float *QrQr[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float Qr[32768]float *QrQr[t4 + 128 * t2]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValskVals[128 * t4 + t10]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}struct kValues kVals[3072]struct kValues *kValskVals[128 * t4 + t10]void ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}struct kValues kVals[3072]struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}struct kValues kVals[3072]struct kValues *kValsvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float Qr[32768]float Qr[32768]float *Qrvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
+}float Qr[32768]float *Qrvoid ComputeQCPU(struct kValues kVals[3072], float x[32768], float y[32768], float z[32768], float Qr[32768], float Qi[32768]) {
 }{
-}float Qi[32768]float Qi[32768]float *Qi32768 * sizeof(float)cudaMemcpy(devRW0ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRW1ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice)3072 * sizeof(struct kValues)cudaMemcpy(devRO0ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO1ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO2ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO3ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice)2561dim3 dimBlock0 = dim3(128)Kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr, devRO1ptr, devRO2ptr, devRO3ptr)// ~cuda~ preferredIdx: bx
+}float Qi[32768]float *Qi32768 * sizeof(float)cudaMemcpy(devRW0ptr, Qi, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRW1ptr, Qr, 32768 * sizeof(float), cudaMemcpyHostToDevice)3072 * sizeof(struct kValues)cudaMemcpy(devRO0ptr, kVals, 3072 * sizeof(struct kValues), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO1ptr, x, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO2ptr, y, 32768 * sizeof(float), cudaMemcpyHostToDevice)32768 * sizeof(float)cudaMemcpy(devRO3ptr, z, 32768 * sizeof(float), cudaMemcpyHostToDevice)2561dim3 dimBlock0 = dim3(128)Kernel_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRW1ptr, devRO0ptr, devRO1ptr, devRO2ptr, devRO3ptr)// ~cuda~ preferredIdx: bx
 for (t2 = 0; t2 <= 255; t2 += 1) {
   // ~cuda~ preferredIdx: tx
   for (t4 = 0; t4 <= 127; t4 += 1) 
