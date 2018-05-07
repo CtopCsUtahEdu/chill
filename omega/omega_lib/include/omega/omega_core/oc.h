@@ -11,7 +11,7 @@ namespace omega {
 
 // Manu:: commented the line below  -- fortran bug workaround
 //#define maxVars 256 /* original 56, increased by chun */
-#define maxVars 100 
+#define maxVars 100
 
 extern int maxGEQs;
 extern int maxEQs;

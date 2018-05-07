@@ -4,8 +4,6 @@
 
 from chill import *
 
-#>SKIP
-
 source('jacobi_1d.c')
 destination('jacobi_1dmodified.c')
 procedure('jacobi')

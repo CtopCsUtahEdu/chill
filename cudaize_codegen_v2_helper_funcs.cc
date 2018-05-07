@@ -33,7 +33,11 @@ static void get_io_array_refs(
     auto vref   = refs[i];
     auto vname  = vref->name();
 
+    //TODO: maybe exclude non-parameter array refs
     auto param = vref->chillASE->multibase();
+    if(!param->isParmVarDecl()) {
+      continue;
+    }
 
     CudaIOVardef v;
     // set parameter name
@@ -55,6 +59,7 @@ static void get_io_array_refs(
     v.cons_mapped = false;
     v.type        = strdup(param->underlyingtype);
 
+
     // set size expression
     // -------------------
     chillAST_node* so = new chillAST_Sizeof(v.type);
@@ -69,23 +74,6 @@ static void get_io_array_refs(
         numelements *= param->getArraySizeAsInt(idx);
       }
     }
-
-    /*if(param->numdimensions < 1 ||
-       param->getArrayDimensions() == 0) {
-      // look for array dims in array_dims map
-      auto itr = array_sizes.find(vname);
-      if(itr == array_sizes.end()) {
-        //TODO: error out here
-      }
-      else {
-        numelements = itr->second;
-      }
-    }
-    else {
-      for(int idx = 0; idx < param->numdimensions; idx++) {
-        numelements *= param->getArraySizeAsInt(idx);
-      }
-    } // if param->numdimensions */
 
     chillAST_IntegerLiteral* numofthings = new chillAST_IntegerLiteral(numelements);
     v.size_expr = new chillAST_BinaryOperator(numofthings, "*", so);

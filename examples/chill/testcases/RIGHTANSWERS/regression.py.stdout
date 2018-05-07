@@ -11,8 +11,8 @@ dest   'AKp256modified.c'
 ../../../chill AKp256.script
 checking to see if AKp256modified.c exists
 AKp256modified.c exists and has 368 bytes
-1516921235.3
-elapsed 15.827034
+1525713681.54
+elapsed 15.081584
 
 knowngood RIGHTANSWERS/AKp256modified.c
 checking for knowngood RIGHTANSWERS/AKp256modified.c
@@ -34,8 +34,8 @@ dest   'AKp256hackmodified.c'
 ../../../chill AKp256hack.script
 checking to see if AKp256hackmodified.c exists
 AKp256hackmodified.c exists and has 295 bytes
-1516921235.56
-elapsed 15.607030
+1525713681.76
+elapsed 14.893752
 
 knowngood RIGHTANSWERS/AKp256hackmodified.c
 checking for knowngood RIGHTANSWERS/AKp256hackmodified.c
@@ -79,8 +79,8 @@ dest   'bug1modified.c'
 ../../../chill bug1.script
 checking to see if bug1modified.c exists
 bug1modified.c exists and has 512 bytes
-1516921236.12
-elapsed 15.139563
+1525713682.26
+elapsed 14.437060
 
 knowngood RIGHTANSWERS/bug1modified.c
 checking for knowngood RIGHTANSWERS/bug1modified.c
@@ -105,8 +105,8 @@ dest   'coalescemodified.c'
 ../../../chill coalesce.script
 checking to see if coalescemodified.c exists
 coalescemodified.c exists and has 768 bytes
-1516921236.36
-elapsed 14.935258
+1525713682.48
+elapsed 14.248843
 
 knowngood RIGHTANSWERS/coalescemodified.c
 checking for knowngood RIGHTANSWERS/coalescemodified.c
@@ -132,8 +132,8 @@ dest   'distribute1modified.c'
 ../../../chill distribute1.script
 checking to see if distribute1modified.c exists
 distribute1modified.c exists and has 531 bytes
-1516921237.94
-elapsed 13.396642
+1525713684.02
+elapsed 12.732837
 
 knowngood RIGHTANSWERS/distribute1modified.c
 checking for knowngood RIGHTANSWERS/distribute1modified.c
@@ -185,8 +185,8 @@ dest   'fuseexamplemodified.c'
 ../../../chill fuseexample.script
 checking to see if fuseexamplemodified.c exists
 fuseexamplemodified.c exists and has 724 bytes
-1516921238.42
-elapsed 12.990067
+1525713684.5
+elapsed 12.294498
 
 knowngood RIGHTANSWERS/fuseexamplemodified.c
 checking for knowngood RIGHTANSWERS/fuseexamplemodified.c
@@ -215,8 +215,8 @@ dest   'includemodified.c'
 ../../../chill include.script
 checking to see if includemodified.c exists
 includemodified.c exists and has 339 bytes
-1516921239.47
-elapsed 11.976607
+1525713685.47
+elapsed 11.345023
 
 knowngood RIGHTANSWERS/includemodified.c
 checking for knowngood RIGHTANSWERS/includemodified.c
@@ -246,8 +246,8 @@ dest   'jacobi2modified.c'
 ../../../chill jacobi2.script
 checking to see if jacobi2modified.c exists
 jacobi2modified.c exists and has 1513 bytes
-1516921239.96
-elapsed 11.526759
+1525713685.95
+elapsed 10.888671
 
 knowngood RIGHTANSWERS/jacobi2modified.c
 checking for knowngood RIGHTANSWERS/jacobi2modified.c
@@ -368,8 +368,8 @@ dest   'p38modified.c'
 ../../../chill p38.script
 checking to see if p38modified.c exists
 p38modified.c exists and has 363 bytes
-1516921243.56
-elapsed 8.070512
+1525713689.56
+elapsed 7.395541
 
 knowngood RIGHTANSWERS/p38modified.c
 checking for knowngood RIGHTANSWERS/p38modified.c
@@ -404,8 +404,8 @@ dest   'p39modified.c'
 ../../../chill p39.script
 checking to see if p39modified.c exists
 p39modified.c exists and has 310 bytes
-1516921243.8
-elapsed 7.862412
+1525713689.78
+elapsed 7.208946
 
 knowngood RIGHTANSWERS/p39modified.c
 checking for knowngood RIGHTANSWERS/p39modified.c
@@ -441,8 +441,8 @@ dest   'p40modified.c'
 ../../../chill p40.script
 checking to see if p40modified.c exists
 p40modified.c exists and has 373 bytes
-1516921244.02
-elapsed 7.676995
+1525713690.0
+elapsed 7.020095
 
 knowngood RIGHTANSWERS/p40modified.c
 checking for knowngood RIGHTANSWERS/p40modified.c
@@ -479,8 +479,8 @@ dest   'p46modified.c'
 ../../../chill p46.script
 checking to see if p46modified.c exists
 p46modified.c exists and has 432 bytes
-1516921244.25
-elapsed 7.472772
+1525713690.22
+elapsed 6.833915
 
 knowngood RIGHTANSWERS/p46modified.c
 checking for knowngood RIGHTANSWERS/p46modified.c
@@ -518,8 +518,8 @@ dest   'p47modified.c'
 ../../../chill p47.script
 checking to see if p47modified.c exists
 p47modified.c exists and has 360 bytes
-1516921244.49
-elapsed 7.273484
+1525713690.43
+elapsed 6.645881
 
 knowngood RIGHTANSWERS/p47modified.c
 checking for knowngood RIGHTANSWERS/p47modified.c
@@ -558,8 +558,8 @@ dest   'p48modified.c'
 ../../../chill p48.script
 checking to see if p48modified.c exists
 p48modified.c exists and has 59721 bytes
-1516921244.77
-elapsed 7.026073
+1525713690.72
+elapsed 6.382177
 
 knowngood RIGHTANSWERS/p48modified.c
 checking for knowngood RIGHTANSWERS/p48modified.c
@@ -599,8 +599,8 @@ dest   'p49modified.c'
 ../../../chill p49.script
 checking to see if p49modified.c exists
 p49modified.c exists and has 350 bytes
-1516921245.0
-elapsed 6.831837
+1525713690.92
+elapsed 6.201838
 
 knowngood RIGHTANSWERS/p49modified.c
 checking for knowngood RIGHTANSWERS/p49modified.c
@@ -641,8 +641,8 @@ dest   'peel1modified.c'
 ../../../chill peel1.script
 checking to see if peel1modified.c exists
 peel1modified.c exists and has 615 bytes
-1516921245.27
-elapsed 6.594793
+1525713691.14
+elapsed 6.008892
 
 knowngood RIGHTANSWERS/peel1modified.c
 checking for knowngood RIGHTANSWERS/peel1modified.c
@@ -684,8 +684,8 @@ dest   'peel10modified.c'
 ../../../chill peel10.script
 checking to see if peel10modified.c exists
 peel10modified.c exists and has 1721 bytes
-1516921245.55
-elapsed 6.347350
+1525713691.34
+elapsed 5.831466
 
 knowngood RIGHTANSWERS/peel10modified.c
 checking for knowngood RIGHTANSWERS/peel10modified.c
@@ -728,8 +728,8 @@ dest   'peel11modified.c'
 ../../../chill peel11.script
 checking to see if peel11modified.c exists
 peel11modified.c exists and has 3307 bytes
-1516921245.79
-elapsed 6.126073
+1525713691.58
+elapsed 5.609686
 
 knowngood RIGHTANSWERS/peel11modified.c
 checking for knowngood RIGHTANSWERS/peel11modified.c
@@ -773,8 +773,8 @@ dest   'peel12modified.c'
 ../../../chill peel12.script
 checking to see if peel12modified.c exists
 peel12modified.c exists and has 3427 bytes
-1516921246.13
-elapsed 5.820354
+1525713691.82
+elapsed 5.388081
 
 knowngood RIGHTANSWERS/peel12modified.c
 checking for knowngood RIGHTANSWERS/peel12modified.c
@@ -819,8 +819,8 @@ dest   'peel2modified.c'
 ../../../chill peel2.script
 checking to see if peel2modified.c exists
 peel2modified.c exists and has 711 bytes
-1516921246.6
-elapsed 5.373392
+1525713692.14
+elapsed 5.115374
 
 knowngood RIGHTANSWERS/peel2modified.c
 checking for knowngood RIGHTANSWERS/peel2modified.c
@@ -866,8 +866,8 @@ dest   'peel3modified.c'
 ../../../chill peel3.script
 checking to see if peel3modified.c exists
 peel3modified.c exists and has 1060 bytes
-1516921246.84
-elapsed 5.154613
+1525713692.3
+elapsed 4.989803
 
 knowngood RIGHTANSWERS/peel3modified.c
 checking for knowngood RIGHTANSWERS/peel3modified.c
@@ -914,8 +914,8 @@ dest   'peel4modified.c'
 ../../../chill peel4.script
 checking to see if peel4modified.c exists
 peel4modified.c exists and has 1160 bytes
-1516921247.09
-elapsed 4.934883
+1525713692.54
+elapsed 4.777292
 
 knowngood RIGHTANSWERS/peel4modified.c
 checking for knowngood RIGHTANSWERS/peel4modified.c
@@ -963,8 +963,8 @@ dest   'peel5modified.c'
 ../../../chill peel5.script
 checking to see if peel5modified.c exists
 peel5modified.c exists and has 585 bytes
-1516921247.33
-elapsed 4.710871
+1525713692.76
+elapsed 4.582702
 
 knowngood RIGHTANSWERS/peel5modified.c
 checking for knowngood RIGHTANSWERS/peel5modified.c
@@ -1013,8 +1013,8 @@ dest   'peel6modified.c'
 ../../../chill peel6.script
 checking to see if peel6modified.c exists
 peel6modified.c exists and has 633 bytes
-1516921247.55
-elapsed 4.514163
+1525713692.99
+elapsed 4.382084
 
 knowngood RIGHTANSWERS/peel6modified.c
 checking for knowngood RIGHTANSWERS/peel6modified.c
@@ -1064,8 +1064,8 @@ dest   'peel7modified.c'
 ../../../chill peel7.script
 checking to see if peel7modified.c exists
 peel7modified.c exists and has 1006 bytes
-1516921247.79
-elapsed 4.313738
+1525713693.23
+elapsed 4.172339
 
 knowngood RIGHTANSWERS/peel7modified.c
 checking for knowngood RIGHTANSWERS/peel7modified.c
@@ -1116,8 +1116,8 @@ dest   'peel8modified.c'
 ../../../chill peel8.script
 checking to see if peel8modified.c exists
 peel8modified.c exists and has 1026 bytes
-1516921248.03
-elapsed 4.133463
+1525713693.46
+elapsed 3.978356
 
 knowngood RIGHTANSWERS/peel8modified.c
 checking for knowngood RIGHTANSWERS/peel8modified.c
@@ -1169,8 +1169,8 @@ dest   'peel9modified.c'
 ../../../chill peel9.script
 checking to see if peel9modified.c exists
 peel9modified.c exists and has 1665 bytes
-1516921248.27
-elapsed 3.923973
+1525713693.72
+elapsed 3.767931
 
 knowngood RIGHTANSWERS/peel9modified.c
 checking for knowngood RIGHTANSWERS/peel9modified.c
@@ -1223,8 +1223,8 @@ dest   'permute1modified.c'
 ../../../chill permute1.script
 checking to see if permute1modified.c exists
 permute1modified.c exists and has 581 bytes
-1516921248.45
-elapsed 3.794595
+1525713693.94
+elapsed 3.582319
 
 knowngood RIGHTANSWERS/permute1modified.c
 checking for knowngood RIGHTANSWERS/permute1modified.c
@@ -1278,8 +1278,8 @@ dest   'permute10modified.c'
 ../../../chill permute10.script
 checking to see if permute10modified.c exists
 permute10modified.c exists and has 564 bytes
-1516921248.67
-elapsed 3.607062
+1525713694.15
+elapsed 3.416347
 
 knowngood RIGHTANSWERS/permute10modified.c
 checking for knowngood RIGHTANSWERS/permute10modified.c
@@ -1334,8 +1334,8 @@ dest   'permute2modified.c'
 ../../../chill permute2.script
 checking to see if permute2modified.c exists
 permute2modified.c exists and has 581 bytes
-1516921248.89
-elapsed 3.416206
+1525713694.37
+elapsed 3.235786
 
 knowngood RIGHTANSWERS/permute2modified.c
 checking for knowngood RIGHTANSWERS/permute2modified.c
@@ -1391,8 +1391,8 @@ dest   'permute3modified.c'
 ../../../chill permute3.script
 checking to see if permute3modified.c exists
 permute3modified.c exists and has 547 bytes
-1516921249.12
-elapsed 3.223018
+1525713694.52
+elapsed 3.131447
 
 knowngood RIGHTANSWERS/permute3modified.c
 checking for knowngood RIGHTANSWERS/permute3modified.c
@@ -1449,8 +1449,8 @@ dest   'permute4modified.c'
 ../../../chill permute4.script
 checking to see if permute4modified.c exists
 permute4modified.c exists and has 501 bytes
-1516921249.35
-elapsed 3.015074
+1525713694.66
+elapsed 3.032064
 
 knowngood RIGHTANSWERS/permute4modified.c
 checking for knowngood RIGHTANSWERS/permute4modified.c
@@ -1508,8 +1508,8 @@ dest   'permute5modified.c'
 ../../../chill permute5.script
 checking to see if permute5modified.c exists
 permute5modified.c exists and has 547 bytes
-1516921249.57
-elapsed 2.840841
+1525713694.86
+elapsed 2.871397
 
 knowngood RIGHTANSWERS/permute5modified.c
 checking for knowngood RIGHTANSWERS/permute5modified.c
@@ -1618,8 +1618,8 @@ dest   'permute6modified.c'
 ../../../chill permute6.script
 checking to see if permute6modified.c exists
 permute6modified.c exists and has 501 bytes
-1516921249.79
-elapsed 2.668386
+1525713695.01
+elapsed 2.764874
 
 knowngood RIGHTANSWERS/permute6modified.c
 checking for knowngood RIGHTANSWERS/permute6modified.c
@@ -1725,8 +1725,8 @@ dest   'permute7modified.c'
 ../../../chill permute7.script
 checking to see if permute7modified.c exists
 permute7modified.c exists and has 812 bytes
-1516921250.04
-elapsed 2.456583
+1525713695.22
+elapsed 2.582757
 
 knowngood RIGHTANSWERS/permute7modified.c
 checking for knowngood RIGHTANSWERS/permute7modified.c
@@ -1853,8 +1853,8 @@ dest   'permute8modified.c'
 ../../../chill permute8.script
 checking to see if permute8modified.c exists
 permute8modified.c exists and has 548 bytes
-1516921250.25
-elapsed 2.273144
+1525713695.37
+elapsed 2.470152
 
 knowngood RIGHTANSWERS/permute8modified.c
 checking for knowngood RIGHTANSWERS/permute8modified.c
@@ -1966,8 +1966,8 @@ dest   'permute9modified.c'
 ../../../chill permute9.script
 checking to see if permute9modified.c exists
 permute9modified.c exists and has 564 bytes
-1516921250.47
-elapsed 2.086705
+1525713695.56
+elapsed 2.308258
 
 knowngood RIGHTANSWERS/permute9modified.c
 checking for knowngood RIGHTANSWERS/permute9modified.c
@@ -2080,8 +2080,8 @@ dest   'reverse1modified.c'
 ../../../chill reverse1.script
 checking to see if reverse1modified.c exists
 reverse1modified.c exists and has 531 bytes
-1516825402.17
-elapsed 95850.417360
+1525662151.39
+elapsed 51546.502538
 
 knowngood RIGHTANSWERS/reverse1modified.c
 checking for knowngood RIGHTANSWERS/reverse1modified.c
@@ -2145,8 +2145,8 @@ dest   'reverse2modified.c'
 ../../../chill reverse2.script
 checking to see if reverse2modified.c exists
 reverse2modified.c exists and has 531 bytes
-1516825402.96
-elapsed 95849.664845
+1525662152.21
+elapsed 51545.712612
 
 knowngood RIGHTANSWERS/reverse2modified.c
 checking for knowngood RIGHTANSWERS/reverse2modified.c
@@ -2211,8 +2211,8 @@ dest   'reverse3modified.c'
 ../../../chill reverse3.script
 checking to see if reverse3modified.c exists
 reverse3modified.c exists and has 534 bytes
-1516825403.79
-elapsed 95848.871767
+1525662153.02
+elapsed 51544.925813
 
 knowngood RIGHTANSWERS/reverse3modified.c
 checking for knowngood RIGHTANSWERS/reverse3modified.c
@@ -2278,8 +2278,8 @@ dest   'scale1modified.c'
 ../../../chill scale1.script
 checking to see if scale1modified.c exists
 scale1modified.c exists and has 559 bytes
-1516825404.59
-elapsed 95848.117991
+1525662153.95
+elapsed 51544.017440
 
 knowngood RIGHTANSWERS/scale1modified.c
 checking for knowngood RIGHTANSWERS/scale1modified.c
@@ -2346,8 +2346,8 @@ dest   'scale2modified.c'
 ../../../chill scale2.script
 checking to see if scale2modified.c exists
 scale2modified.c exists and has 547 bytes
-1516825405.39
-elapsed 95847.353485
+1525662154.8
+elapsed 51543.196012
 
 knowngood RIGHTANSWERS/scale2modified.c
 checking for knowngood RIGHTANSWERS/scale2modified.c
@@ -2415,8 +2415,8 @@ dest   'scale3modified.c'
 ../../../chill scale3.script
 checking to see if scale3modified.c exists
 scale3modified.c exists and has 547 bytes
-1516825406.15
-elapsed 95846.631601
+1525662155.65
+elapsed 51542.370252
 
 knowngood RIGHTANSWERS/scale3modified.c
 checking for knowngood RIGHTANSWERS/scale3modified.c
@@ -2485,8 +2485,8 @@ dest   'scale4modified.c'
 ../../../chill scale4.script
 checking to see if scale4modified.c exists
 scale4modified.c exists and has 559 bytes
-1516825406.9
-elapsed 95845.906756
+1525662156.56
+elapsed 51541.476486
 
 knowngood RIGHTANSWERS/scale4modified.c
 checking for knowngood RIGHTANSWERS/scale4modified.c
@@ -2556,8 +2556,8 @@ dest   'shift1modified.c'
 ../../../chill shift1.script
 checking to see if shift1modified.c exists
 shift1modified.c exists and has 850 bytes
-1516825407.78
-elapsed 95845.058729
+1525662157.55
+elapsed 51540.514785
 
 knowngood RIGHTANSWERS/shift1modified.c
 checking for knowngood RIGHTANSWERS/shift1modified.c
@@ -2628,8 +2628,8 @@ dest   'shift_to1modified.c'
 ../../../chill shift_to1.script
 checking to see if shift_to1modified.c exists
 shift_to1modified.c exists and has 525 bytes
-1516825408.64
-elapsed 95844.226620
+1525662158.47
+elapsed 51539.630270
 
 knowngood RIGHTANSWERS/shift_to1modified.c
 checking for knowngood RIGHTANSWERS/shift_to1modified.c
@@ -2701,8 +2701,8 @@ dest   'shift_to2modified.c'
 ../../../chill shift_to2.script
 checking to see if shift_to2modified.c exists
 shift_to2modified.c exists and has 525 bytes
-1516825409.47
-elapsed 95843.424887
+1525662159.32
+elapsed 51538.820854
 
 knowngood RIGHTANSWERS/shift_to2modified.c
 checking for knowngood RIGHTANSWERS/shift_to2modified.c
@@ -2775,8 +2775,8 @@ dest   'shift_to3modified.c'
 ../../../chill shift_to3.script
 checking to see if shift_to3modified.c exists
 shift_to3modified.c exists and has 514 bytes
-1516825410.29
-elapsed 95842.631805
+1525662160.31
+elapsed 51537.876345
 
 knowngood RIGHTANSWERS/shift_to3modified.c
 checking for knowngood RIGHTANSWERS/shift_to3modified.c
@@ -2850,8 +2850,8 @@ dest   'skew1modified.c'
 ../../../chill skew1.script
 checking to see if skew1modified.c exists
 skew1modified.c exists and has 349 bytes
-1516825411.06
-elapsed 95841.918246
+1525662161.15
+elapsed 51537.076996
 
 knowngood RIGHTANSWERS/skew1modified.c
 checking for knowngood RIGHTANSWERS/skew1modified.c
@@ -2925,9 +2925,9 @@ dest   'smooth_fused_64modified.c'
 
 ../../../chill smooth_fused_64.script
 checking to see if smooth_fused_64modified.c exists
-smooth_fused_64modified.c exists and has 3559 bytes
-1516825413.21
-elapsed 95839.806912
+smooth_fused_64modified.c exists and has 3567 bytes
+1525712220.78
+elapsed 1477.488453
 
 knowngood RIGHTANSWERS/smooth_fused_64modified.c
 checking for knowngood RIGHTANSWERS/smooth_fused_64modified.c
@@ -3003,8 +3003,8 @@ dest   'split1modified.c'
 ../../../chill split1.script
 checking to see if split1modified.c exists
 split1modified.c exists and has 702 bytes
-1516825414.06
-elapsed 95838.990482
+1525662162.03
+elapsed 51536.280276
 
 knowngood RIGHTANSWERS/split1modified.c
 checking for knowngood RIGHTANSWERS/split1modified.c
@@ -3081,8 +3081,8 @@ dest   'split2modified.c'
 ../../../chill split2.script
 checking to see if split2modified.c exists
 split2modified.c exists and has 583 bytes
-1516825414.9
-elapsed 95838.188309
+1525662162.93
+elapsed 51535.416464
 
 knowngood RIGHTANSWERS/split2modified.c
 checking for knowngood RIGHTANSWERS/split2modified.c
@@ -3160,8 +3160,8 @@ dest   'split3modified.c'
 ../../../chill split3.script
 checking to see if split3modified.c exists
 split3modified.c exists and has 623 bytes
-1516825415.7
-elapsed 95837.432075
+1525662163.81
+elapsed 51534.586147
 
 knowngood RIGHTANSWERS/split3modified.c
 checking for knowngood RIGHTANSWERS/split3modified.c
@@ -3317,8 +3317,8 @@ dest   'tile1modified.c'
 ../../../chill tile1.script
 checking to see if tile1modified.c exists
 tile1modified.c exists and has 593 bytes
-1516825416.48
-elapsed 95836.723496
+1525662164.71
+elapsed 51533.765075
 
 knowngood RIGHTANSWERS/tile1modified.c
 checking for knowngood RIGHTANSWERS/tile1modified.c
@@ -3399,8 +3399,8 @@ dest   'unroll1amodified.c'
 ../../../chill unroll1a.script
 checking to see if unroll1amodified.c exists
 unroll1amodified.c exists and has 563 bytes
-1516825417.26
-elapsed 95835.990374
+1525662165.58
+elapsed 51532.939067
 
 knowngood RIGHTANSWERS/unroll1amodified.c
 checking for knowngood RIGHTANSWERS/unroll1amodified.c
@@ -3482,8 +3482,8 @@ dest   'unroll1bmodified.c'
 ../../../chill unroll1b.script
 checking to see if unroll1bmodified.c exists
 unroll1bmodified.c exists and has 566 bytes
-1516825418.11
-elapsed 95835.180719
+1525662166.4
+elapsed 51532.149155
 
 knowngood RIGHTANSWERS/unroll1bmodified.c
 checking for knowngood RIGHTANSWERS/unroll1bmodified.c
@@ -3566,8 +3566,8 @@ dest   'unroll1cmodified.c'
 ../../../chill unroll1c.script
 checking to see if unroll1cmodified.c exists
 unroll1cmodified.c exists and has 563 bytes
-1516825418.86
-elapsed 95834.461072
+1525662167.31
+elapsed 51531.276442
 
 knowngood RIGHTANSWERS/unroll1cmodified.c
 checking for knowngood RIGHTANSWERS/unroll1cmodified.c
@@ -3651,8 +3651,8 @@ dest   'unroll1dmodified.c'
 ../../../chill unroll1d.script
 checking to see if unroll1dmodified.c exists
 unroll1dmodified.c exists and has 461 bytes
-1516825419.68
-elapsed 95833.684258
+1525662168.09
+elapsed 51530.517212
 
 knowngood RIGHTANSWERS/unroll1dmodified.c
 checking for knowngood RIGHTANSWERS/unroll1dmodified.c
@@ -3737,8 +3737,8 @@ dest   'unroll2amodified.c'
 ../../../chill unroll2a.script
 checking to see if unroll2amodified.c exists
 unroll2amodified.c exists and has 447 bytes
-1516825420.5
-elapsed 95832.898852
+1525662168.96
+elapsed 51529.676289
 
 knowngood RIGHTANSWERS/unroll2amodified.c
 checking for knowngood RIGHTANSWERS/unroll2amodified.c
@@ -3824,8 +3824,8 @@ dest   'unroll2bmodified.c'
 ../../../chill unroll2b.script
 checking to see if unroll2bmodified.c exists
 unroll2bmodified.c exists and has 445 bytes
-1516825421.28
-elapsed 95832.146572
+1525662169.79
+elapsed 51528.871979
 
 knowngood RIGHTANSWERS/unroll2bmodified.c
 checking for knowngood RIGHTANSWERS/unroll2bmodified.c
@@ -3912,8 +3912,8 @@ dest   'unroll2cmodified.c'
 ../../../chill unroll2c.script
 checking to see if unroll2cmodified.c exists
 unroll2cmodified.c exists and has 447 bytes
-1516825422.01
-elapsed 95831.463462
+1525662170.61
+elapsed 51528.086205
 
 knowngood RIGHTANSWERS/unroll2cmodified.c
 checking for knowngood RIGHTANSWERS/unroll2cmodified.c
@@ -4001,8 +4001,8 @@ dest   'unroll2dmodified.c'
 ../../../chill unroll2d.script
 checking to see if unroll2dmodified.c exists
 unroll2dmodified.c exists and has 368 bytes
-1516825422.73
-elapsed 95830.775358
+1525662171.43
+elapsed 51527.291823
 
 knowngood RIGHTANSWERS/unroll2dmodified.c
 checking for knowngood RIGHTANSWERS/unroll2dmodified.c
