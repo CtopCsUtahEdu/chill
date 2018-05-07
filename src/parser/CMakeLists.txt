@@ -17,7 +17,11 @@ elseif (${FRONTEND} STREQUAL "Clang")
 
     add_definitions(${LLVM_DEFINITIONS})
 
-    llvm_map_components_to_libnames(llvm_libs bitreader mcparser option profiledata)
+    if (${LLVM_VERSION_MAJOR} GREATER 5)
+        set(llvm_libs LLVM)
+    else()
+        llvm_map_components_to_libnames(llvm_libs bitreader mcparser option profiledata)
+    endif()
 
     add_chill_module(chill_parser
             parser.cpp
@@ -27,6 +31,7 @@ elseif (${FRONTEND} STREQUAL "Clang")
     chill_module_link_libraries(chill_parser
             ${CLANG_LIBS}
             ${llvm_libs}
+            tinfo
             )
 
     target_include_directories(chill_parser
