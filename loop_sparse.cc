@@ -1885,18 +1885,30 @@ relCounter = 1;
     main_constraints += " && " + print_to_iegen_string(read_constraints);
     main_constraints += " && " + print_to_iegen_string(equality_constraints);
 //std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";
-    for (std::map<std::string, std::string>::iterator a =
-        unin_symbol_for_iegen.begin(); a != unin_symbol_for_iegen.end();
-         a++) {
-      std::size_t found = main_constraints.find(a->first);
+    // Here we replace the UFCs in the omega::relation that kind of have 
+    // a symbolic constant form, with their actual equivalent in the code:
+    // Note: omega can only handle certain type of UFCs that is why 
+    // they are not stored in their original form at the first place.
+    // For instance: omega::relation would have row(i+1) as row__(i).
+    for (std::map<std::string, std::string>::iterator it =
+         unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
+      std::size_t found = main_constraints.find(it->first);
 
       while (found != std::string::npos) {
-        if( found > 0 ){  // Mahdi: I added this. Because the might be at the start of the string.
-          if(main_constraints.substr(found - 1, 1) != "_"){   // Mahdi: This is necessary to skip nested calls, e.g A_(B_(i))
-            main_constraints.replace(found, a->first.length(), a->second);
+        // Mahdi: If UFC is not at the beginning of the string we need to check for nested calls.
+        if( found > 0 ){
+           // Mahdi: This is necessary to skip nested calls, e.g A_(B_(i))
+          if(main_constraints.substr(found - 1, 1) != "_"){
+            main_constraints.replace(found, it->first.length(), it->second);
           }
+        // Mahdi: If UFC is at the beginning of the string we do not need to check for nested calls.
+        // Also, since checking for nested UFCalls involves looking up 1-character before found,
+        // when found == 0, we would have a seg fault in our hand looking up the -1 position of a string.
+        } else if( found == 0 ){ 
+          main_constraints.replace(found, it->first.length(), it->second);
         }
-        found = main_constraints.find(a->first, found + 1);
+
+        found = main_constraints.find(it->first, found + 1);
       }
     }
 //std::cout<<"\n******************* main_constraints "<<relCounter<<" = "<<main_constraints<<"\n";
