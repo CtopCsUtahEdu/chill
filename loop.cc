@@ -304,6 +304,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
   debug_fprintf(stderr, "extract_ir_stmts()\n");
   debug_fprintf(stderr, "ir_tree has %d statements\n", ir_tree.size());
 
+  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  replaceCode_ind = 1;
+
   ir_stmt = extract_ir_stmts(ir_tree);
 
   debug_fprintf(stderr,"nesting level stmt size = %d\n", (int)ir_stmt.size());
@@ -569,12 +572,19 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         
         
       case IR_CONTROL_IF: {
+
         debug_fprintf(stderr, "IR_CONTROL_IF\n"); 
         IR_If *theif = static_cast<IR_If *>(itn->content);
         
+// Mahdi: In current form, following only supports one condition in the if-statement
+//        something like following is not supported: if( A && B )
+//std::cout<<"\n\n\n+++++++++++++++++++++++++HI FROM IFFFFF\n\n\n";
+
         CG_outputRepr *cond =
           static_cast<IR_If *>(itn->content)->condition();
         
+//cond->dump();
+
         try {
           if (itn->payload % 2 == 1)
             exp2constraint(this, ir, r, f_root, freevar, cond, true,
@@ -898,6 +908,9 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "control type is %d   ", control->type()); 
   echocontroltype(control);
   
+  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  replaceCode_ind = 1;
+
   last_compute_cgr_ = NULL;
   last_compute_cg_ = NULL;
   debug_fprintf(stderr, "2set last_compute_cg_ = NULL; \n"); 
@@ -1237,12 +1250,10 @@ void Loop::debugRelations() const {
 
 CG_outputRepr *Loop::getCode(int effort) const {
   debug_fprintf(stderr,"\nloop.cc Loop::getCode(  effort %d )\n", effort ); 
-  
   const int m = stmt.size();
   if (m == 0)
     return NULL;
   const int n = stmt[0].xform.n_out();
-  
   // if the omega code generator has never been computed, initialize last_compute_cg_
   if (last_compute_cg_ == NULL) {
     debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ == NULL\n"); 
@@ -1253,13 +1264,11 @@ CG_outputRepr *Loop::getCode(int effort) const {
       IS[i] = stmt[i].IS;
       xforms[i] = stmt[i].xform;
     }
-
     Relation known = Extend_Set(copy(this->known), n - this->known.n_set());
     debug_begin
       debugRelations();
       printf("\nknown:\n"); known.print(); printf("\n\n"); fflush(stdout);
     debug_end
-
     last_compute_cg_ = new CodeGen(xforms, IS, known);
     delete last_compute_cgr_;
     last_compute_cgr_ = NULL;
@@ -1268,15 +1277,12 @@ CG_outputRepr *Loop::getCode(int effort) const {
     debug_fprintf(stderr, "Loop::getCode() last_compute_cg_ NOT NULL\n"); 
   }
   // TODO: add omp pragmas to last_compute_cg_ here.
-
-  
   // if codegen result ast has never been computed, create it from last_compute_cg
   if (last_compute_cgr_ == NULL || last_compute_effort_ != effort) {
     delete last_compute_cgr_;
     last_compute_cgr_ = last_compute_cg_->buildAST(effort);
     last_compute_effort_ = effort;
   }
-  
   this->omp_apply_pragmas();
 
   // Copy loop statements
@@ -1290,14 +1296,11 @@ CG_outputRepr *Loop::getCode(int effort) const {
   debug_fprintf(stderr, "calling last_compute_cgr_->printRepr()\n"); 
   CG_outputRepr *repr = last_compute_cgr_->printRepr(ocg, stmts, 
                                                      uninterpreted_symbols);
-
-
   // Add init and cleanup code.
   if (init_code != NULL)
     repr = ocg->StmtListAppend(init_code->clone(), repr);
   if (cleanup_code != NULL)
     repr = ocg->StmtListAppend(repr, cleanup_code->clone());
-  
   debug_fprintf(stderr,"\nloop.cc Loop::getCode( effort %d )   DONE\n", effort ); 
   return repr;
 }

@@ -69,7 +69,11 @@ static void set_loop_num_end(int end_num) {
 
 void finalize_loop(int loop_num_start, int loop_num_end) {
   if (loop_num_start == loop_num_end) {
-    ir_code->ReplaceCode(ir_controls[loops[loop_num_start]], myloop->getCode(effort));
+    // Mahdi: Following if is a HACK for getting dependence extraction test cases 
+    // running for now. Refer to loop.h::replaceCode() comments for more details. 
+    if( myloop->replaceCode() ){
+      ir_code->ReplaceCode(ir_controls[loops[loop_num_start]], myloop->getCode(effort));
+    }
     ir_controls[loops[loop_num_start]] = NULL;
   }
   else {
@@ -2014,7 +2018,7 @@ chill_print_dep_ufs(PyObject *self, PyObject *args) {
   strict_arg_num(args, 2);
   int stmt = intArg(args, 0);
   int level = intArg(args, 1);
-  myloop->printDependenceUFs(stmt, level);
+  myloop->depRelsForParallelization();
   Py_RETURN_NONE;
 }
 #endif

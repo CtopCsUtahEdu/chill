@@ -1599,32 +1599,51 @@ omega::Relation Loop::parseExpWithWhileToRel(omega::CG_outputRepr *repr,
 
 }
 
-void Loop::printDependenceUFs(int stmt_num, int level) {
-  omega::Relation R = stmt[stmt_num].IS;
 
-  omega::Relation r = parseExpWithWhileToRel(stmt[stmt_num].code, R, stmt_num);
+
+/*!
+ * Mahdi: This functions extarcts and returns the data dependence relations 
+ * that are needed for generating inspectors for wavefront paralleization of a 
+ * specific loop level
+ * Loop levels start with 0 (being outer most loop), outer most loop is the default
+ * Input:  loop level for parallelization
+ * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
+ */
+std::vector<std::pair<std::string, std::string >> 
+ Loop::depRelsForParallelization(int parallelLoopLevel){
+
+  int stmt_num = 1, level = 1, whileLoop_stmt_num = 1;
+
+  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  replaceCode_ind = 0;
+
+//std::cout<<"Start of printDependenceUFs!\n";
+//std::cout<<"\n|_|-|_| START UFCs:\n";
+//  for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
+//    std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
+//for(int i = 0; i<stmt.size() ; i++){
+//  std::cout<<"\nR "<<i<<" = "<<stmt[i].IS<<"\nXform = "<<stmt[i].xform<<"\nSt NL = "<<stmt_nesting_level_[i]<<"\n";
+//}
+
+  omega::Relation r = parseExpWithWhileToRel(stmt[whileLoop_stmt_num].code, 
+                                             stmt[whileLoop_stmt_num].IS, stmt_num);
+
   r.simplify();
 
+  // Adding some extra constraints that are input from chill script and stored in Loop::known
   omega::Relation result;
   if (known.n_set() < r.n_set()) {
     omega::Relation known = omega::Extend_Set(omega::copy(this->known),
                                               r.n_set() - this->known.n_set());
-
     result = omega::Intersection(copy(known), copy(r));
-
   } else {
-
     omega::Relation tmp = omega::Extend_Set(omega::copy(r),
                                      this->known.n_set() - r.n_set());
-
     result = omega::Intersection(tmp, copy(known));
-
   }
   result.simplify();
-//r.print();
 
   bool is_negative = false;
-
   Variable_ID v2 = r.set_var(1);
   //need to correct following logic
   for (DNF_Iterator di(const_cast<omega::Relation &>(r).query_DNF()); di; di++)
@@ -1632,77 +1651,81 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
       if ((*gi).is_const(v2))
         if ((*gi).get_coef(v2) < 0 && (*gi).get_const() == 0)
           is_negative = true;
-
   if (is_negative) {
     r = flip_var(r, v2);	//convert to positive_IS
     Variable_ID v3 = result.set_var(1);
     result = flip_var(result, v3);
   }
+
+  // FIXME: Mahdi: Do we need following? Seems to me all the UFCs shold have already been 
+  //               stored in Loop::dep_rel_for_iegen in previous phases.
+  // UFCs and their representations in omega::relations are extracted and stored in
+  // Loop::dep_rel_for_iegen. We can later use them to generate IEGenLib(ISL)::Relations
+  // out of omeg::Relations and vice versa. We also need symbolic constants for generating
+  // ISL relations specifically.
   std::pair<std::vector<std::string>,
-      std::pair<
-          std::vector<std::pair<bool, std::pair<std::string, std::string> > >,
+      std::pair<std::vector<std::pair<bool, std::pair<std::string, std::string> > >,
           std::vector<std::pair<bool, std::pair<std::string, std::string> > > > > syms =
       determineUFsForIegen(result, ir, freevar);
 
-  std::vector<int> lex_ = getLexicalOrder(stmt_num);
-  std::set<int> same_loop_ = getStatements(lex_, level - 1);
-  std::vector<IR_ArrayRef *> access;
-//get the equality, and_with_EQ,
 
+  // Getting the statement number for all statements in the parallel loop
+  int first_stmt_in_parallel_loop = 0;
+  for(int i = 0; i<stmt.size() ; i++){
+    if (stmt_nesting_level_[i] == parallelLoopLevel)
+      first_stmt_in_parallel_loop = i;
+  }
+  std::vector<int> lex_ = getLexicalOrder(first_stmt_in_parallel_loop);
+  std::set<int> same_loop_ = getStatements(lex_, level - 1);
+
+  // Store all accesses in all the statements of the parallel loop level in access
+  std::vector<IR_ArrayRef *> access;
+  int access_st[100]={-1},ct=0;
   for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end();
        i++) {
-
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(stmt[*i].code);
-    for (int j = 0; j < access2.size(); j++)
+    for (int j = 0; j < access2.size(); j++){
       access.push_back(access2[j]);
+      access_st[ct++] = *i; 
+    }
   }
 
-  std::vector<std::pair<omega::Relation, omega::Relation> > dep_relation_;
+int relCounter = 1;
+
+  // Checking pairs of all accesses for comming up with data access equalities.
+  std::vector<std::pair< std::pair<omega::Relation, omega::Relation> , omega::Relation>> dep_relation_;
   std::map<int, omega::Relation> rels;
   std::vector<std::pair<omega::Relation, omega::Relation> > rels2;
   for (int i = 0; i < access.size(); i++) {
     IR_ArrayRef *a = access[i];
-
     IR_ArraySymbol *sym_a = a->symbol();
-
-    for (int j = i + 1; j < access.size(); j++) {
+//std::cout<<"\ni #"<<i<<" : "<<*sym_a<<"\n";
+    for (int j = i; j < access.size(); j++) {
       IR_ArrayRef *b = access[j];
       IR_ArraySymbol *sym_b = b->symbol();
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
-
-        omega::Relation r1(r.n_set(), r.n_set());
+        omega::Relation write_r, read_r;
+        if ( a->is_write() ) {
+          write_r = stmt[access_st[i]].IS;
+          read_r = stmt[access_st[j]].IS;
+        } else {
+          write_r = stmt[access_st[j]].IS;
+          read_r = stmt[access_st[i]].IS;
+        }
+        omega::Relation r1(write_r.n_set(), read_r.n_set());
+        for (int i = 1; i <= r.n_set(); i++)
+          r1.name_input_var(i, write_r.set_var(i)->name());
 
         for (int i = 1; i <= r.n_set(); i++)
-          r1.name_input_var(i, r.set_var(i)->name());
+          r1.name_output_var(i, read_r.set_var(i)->name() + "p");
 
-        for (int i = 1; i <= r.n_set(); i++)
-          r1.name_output_var(i, r.set_var(i)->name() + "p");
+//std::cout<<"\n#############Initial r1#"<<relCounter<<" = "<<r1<<"  write_r = "<<write_r<<"  read_r = "<<read_r<<"\n";
 
-        IR_Symbol *sym_src;	// = a->symbol();
-        IR_Symbol *sym_dst;	// = b->symbol();
+        F_And *f_root = r1.add_and(); 
 
-        if (!a->is_write()) {
-          sym_src = a->symbol();
-          sym_dst = b->symbol();
-
-        } else {
-          sym_src = b->symbol();
-          sym_dst = a->symbol();
-        }
-
-        if (*sym_src != *sym_dst) {
-          r1.add_or(); // False Relation
-          delete sym_src;
-          delete sym_dst;
-          //return r;
-        } else {
-          delete sym_src;
-          delete sym_dst;
-        }
-
-        F_And *f_root = r1.add_and();
-
+        // Mahdi: The reason behind the loop over n_dim is to have equalities between 
+        // different indices of array accesses; e.g y[i][col[j]] and y[k][l] -> { i = k and col(j) = l }
         for (int i = 0; i < a->n_dim(); i++) {
           F_Exists *f_exists = f_root->add_exists();
           Variable_ID e1 = f_exists->declare(tmp_e());
@@ -1711,7 +1734,7 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
 
           CG_outputRepr *repr_src; // = a->index(i);
           CG_outputRepr *repr_dst; // = b->index(i);
-          if (!a->is_write()) {
+          if ( a->is_write() ) {  
             repr_src = a->index(i);
             repr_dst = b->index(i);
 
@@ -1721,36 +1744,37 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
           }
           bool has_complex_formula = false;
 
-          if (ir->QueryExpOperation(repr_src) == IR_OP_ARRAY_VARIABLE
-              || ir->QueryExpOperation(repr_dst) == IR_OP_ARRAY_VARIABLE)
-            ; //has_complex_formula = true;
-
-          //if (!has_complex_formula) {
-
-          try {
+//std::cout<<"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Before exp2for r1 = "<<r1<<"\n";
+//repr_src->dump();
+//repr_dst->dump();
+          try {   
             exp2formula(this, ir, r1, f_and, freevar, repr_src, e1, 'w',
                         IR_COND_EQ, false, uninterpreted_symbols[stmt_num],
                         uninterpreted_symbols_stringrepr[stmt_num],
                         unin_rel[stmt_num]);
+//std::cout<<"After 1st exp2for r1 = "<<r1<<"   E1 = "<<e1->name()<<"\n";
             exp2formula(this, ir, r1, f_and, freevar, repr_dst, e2, 'r',
                         IR_COND_EQ, false, uninterpreted_symbols[stmt_num],
                         uninterpreted_symbols_stringrepr[stmt_num],
                         unin_rel[stmt_num]);
+//std::cout<<"After 2nd exp2for r1 = "<<r1<<"   E2 = "<<e2->char_name()<<"\n";
           } catch (const ir_exp_error &e) {
             has_complex_formula = true;
           }
 
           if (!has_complex_formula) {
             EQ_Handle h = f_and->add_EQ();
-            h.update_coef(e1, 1);
-            h.update_coef(e2, -1);
+            h.update_coef(e1, -1);
+            h.update_coef(e2, 1);
           }
-          //}
+//std::cout<<"\nAfter creating the equality r1 = "<<r1<<"\n";
+
           repr_src->clear();
           repr_dst->clear();
           delete repr_src;
           delete repr_dst;
-        }
+        }   // Mahdi: end of n_dim loop
+
         r1.simplify();
         if (is_negative) {
           Variable_ID v1, v2;
@@ -1759,322 +1783,135 @@ void Loop::printDependenceUFs(int stmt_num, int level) {
           r1 = flip_var_exclusive(r1, v1);
           v2 = r1.output_var(1);
           r1 = flip_var_exclusive(r1, v2);
-
         }
 
-        rels.insert(
-            std::pair<int, omega::Relation>(dep_relation_.size(), copy(r1)));
+        rels.insert(std::pair<int, omega::Relation>(dep_relation_.size(), copy(r1)));
         dep_relation_.push_back(
-            std::pair<omega::Relation, omega::Relation>(r, r1));
+            std::pair<std::pair<omega::Relation, omega::Relation>, omega::Relation>( 
+                   (std::pair<omega::Relation, omega::Relation>(write_r, read_r)) , r1) );
 
+//std::cout<<"\nEnd of access check loop: r#"<<relCounter++<<" = "<<r1<<" \nwrite________r = "<<write_r<<"read________r = "<<read_r<<"\n";
       }
     }
   }
 
-// Call arrays2Relation
+relCounter = 1;
 
+  // The loop that creates the relations for IEGen
   for (int i = 0; i < dep_relation_.size(); i++) {
-    omega::Relation t(dep_relation_[i].first.n_set());
-    for (int j = 1; j <= t.n_set(); j++)
-      t.name_set_var(j, dep_relation_[i].first.set_var(j)->name() + "p");
-    F_And *f_root = t.add_and();
+    omega::Relation write_constraints = copy(dep_relation_[i].first.first);
+    omega::Relation read_constraints(dep_relation_[i].first.second.n_set()); 
+    omega::Relation equality_constraints = copy(dep_relation_[i].second);
+
+    for (int j = 1; j <= read_constraints.n_set(); j++){
+      read_constraints.name_set_var(j, dep_relation_[i].first.second.set_var(j)->name() + "p");
+    }
+    read_constraints.copy_names(read_constraints);
+    read_constraints.setup_names();
+
+    F_And *f_root = read_constraints.add_and();
 
     std::map<int, int> pos_map;
-    for (int j = 1; j <= t.n_set(); j++) {
+    for (int j = 1; j <= read_constraints.n_set(); j++) {
       pos_map.insert(std::pair<int, int>(i, i));
-
     }
+//std::cout<<"\n----^^^----Before replace Read Constraints #"<<relCounter<<" = "<<dep_relation_[i].first.second<<"\n";
+//    for (int j = 1; j <= read_constraints.n_set(); j++) {
+     read_constraints = replace_set_vars(read_constraints, 
+                                  dep_relation_[i].first.second, relCounter);//, j, j, pos_map);
+//    }
+    read_constraints.simplify();
+//std::cout<<"----^^^----After replace Read Constraints #"<<relCounter<<" = "<<read_constraints<<"\nwrite = "<<write_constraints<<"\n";
 
-    for (int j = 1; j <= t.n_set(); j++) {
-
-      t = replace_set_var_as_another_set_var(t, dep_relation_[i].first, j, j,
-                                             pos_map);
-
-    }
-    t.simplify();
-
-    std::string initial = "{[";
-
-    for (int j = 1; j <= dep_relation_[i].first.n_set(); j++) {
+    std::string tuple_decl_RAW = "[";
+    for (int j = 1; j <= write_constraints.n_set(); j++) {
       if (j > 1)
-        initial += ",";
-
-      initial += dep_relation_[i].first.set_var(j)->name();
-      initial += ",";
-      initial += dep_relation_[i].first.set_var(j)->name() + "p";
+        tuple_decl_RAW += ",";
+      tuple_decl_RAW += write_constraints.set_var(j)->name();
+    }
+    tuple_decl_RAW += "] -> [";
+    for (int j = 1; j <= read_constraints.n_set(); j++) {
+      if (j > 1)
+        tuple_decl_RAW += ",";
+      tuple_decl_RAW += read_constraints.set_var(j)->name();
+    }
+    tuple_decl_RAW += "]";
+    std::string tuple_decl_WAR = "[";
+    for (int j = 1; j <= read_constraints.n_set(); j++) {
+      if (j > 1)
+        tuple_decl_WAR += ",";
+      tuple_decl_WAR += read_constraints.set_var(j)->name();
+    }
+    tuple_decl_WAR += "] -> [";
+    for (int j = 1; j <= write_constraints.n_set(); j++) {
+      if (j > 1)
+        tuple_decl_WAR += ",";
+      tuple_decl_WAR += write_constraints.set_var(j)->name();
     }
 
-    initial += "]: ";
+    tuple_decl_WAR += "]";
 
-    std::string s1 = t.set_var(1)->name() + " <  "
-                     + dep_relation_[i].first.set_var(1)->name();
-    std::string s2 = t.set_var(1)->name() + " >  "
-                     + dep_relation_[i].first.set_var(1)->name();
+    std::string lex_order1 = write_constraints.set_var(1)->name()  + " < "
+                     + read_constraints.set_var(1)->name();
+    std::string lex_order2 = read_constraints.set_var(1)->name() + " < "
+                     + write_constraints.set_var(1)->name();
 
-    omega::Relation s_ = copy(dep_relation_[i].first);
-    omega::Relation t_ = copy(dep_relation_[i].second);
-    /*for (DNF_Iterator di(const_cast<Relation &>(this->known).query_DNF());
-     di; di++) {
-     for (GEQ_Iterator e((*di)->GEQs()); e; e++) {
-     s_.and_with_GEQ(*e);
-     t.and_with_GEQ(*e);
+//std::cout<<"\nLex ord1 = "<<lex_order1<<"    Lex ord2 = "<<lex_order2<<"\n";
 
-     }
-     }*/
+    // Generating symbolic constants for the dependencs
+    std::set<std::string> global_vars_write = get_global_vars(write_constraints);
+    std::set<std::string> global_vars_read = get_global_vars(read_constraints);
+    std::set<std::string> global_vars_equality = get_global_vars(equality_constraints);
+    std::set<std::string> global_vars;
+    for (std::set<std::string>::iterator it = global_vars_write.begin();
+         it != global_vars_write.end(); it++)  global_vars.insert(*it);
+    for (std::set<std::string>::iterator it = global_vars_read.begin();
+         it != global_vars_read.end(); it++)  global_vars.insert(*it);
+    for (std::set<std::string>::iterator it = global_vars_equality.begin();
+         it != global_vars_equality.end(); it++)  global_vars.insert(*it);
 
-    std::set<std::string> global_vars = get_global_vars(s_);
-    std::set<std::string> global_vars2 = get_global_vars(t);
-
-    std::string start = "[";
-
-    for (std::set<std::string>::iterator j = global_vars.begin();
-         j != global_vars.end(); j++) {
-      if (j != global_vars.begin())
-        start += ",";
-      start += *j;
-
+    string symbolic_constants = "[";
+    for (std::set<std::string>::iterator it = global_vars.begin(); 
+         it != global_vars.end(); it++){
+      if (it != global_vars.begin())
+        symbolic_constants += ",";
+      symbolic_constants += *it;
     }
+    symbolic_constants += "]";
+//std::cout<<"\nsymbolic_constants = "<<symbolic_constants<<"\n";
 
-    std::string start2 = "[";
 
-    for (std::set<std::string>::iterator j = global_vars2.begin();
-         j != global_vars2.end(); j++) {
-      if (j != global_vars2.begin())
-        start2 += ",";
-      start2 += *j;
-
-    }
-    start += "] ->";
-    start2 += "] ->";
-    std::string s = " && " + print_to_iegen_string(s_);
-    s += " && " + print_to_iegen_string(t);
-    s += " && " + print_to_iegen_string(t_);
-//std::cout<<s<<std::endl<<std::endl;
+    std::string main_constraints = print_to_iegen_string(write_constraints);
+    main_constraints += " && " + print_to_iegen_string(read_constraints);
+    main_constraints += " && " + print_to_iegen_string(equality_constraints);
+//std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";
     for (std::map<std::string, std::string>::iterator a =
         unin_symbol_for_iegen.begin(); a != unin_symbol_for_iegen.end();
          a++) {
-      std::size_t found = s.find(a->first);
+      std::size_t found = main_constraints.find(a->first);
+
       while (found != std::string::npos) {
-        if (s.substr(found - 1, 1) != "_")
-          s.replace(found, a->first.length(), a->second);
-
-        found = s.find(a->first, found + 1);
-
+        if( found > 0 ){  // Mahdi: I added this. Because the might be at the start of the string.
+          if(main_constraints.substr(found - 1, 1) != "_"){   // Mahdi: This is necessary to skip nested calls, e.g A_(B_(i))
+            main_constraints.replace(found, a->first.length(), a->second);
+          }
+        }
+        found = main_constraints.find(a->first, found + 1);
       }
     }
-    s1 = start + initial + s1 + s + "}";
-    s2 = start2 + initial + s2 + s + "}";
-    rels2.push_back(std::pair<omega::Relation, omega::Relation>(s_, t));
-    std::cout << s1 << std::endl;
-    std::cout << s2 << std::endl;
-    std::cout << std::endl;
-    dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
-  }
+//std::cout<<"\n******************* main_constraints "<<relCounter<<" = "<<main_constraints<<"\n";
 
-  std::map<int, omega::Relation> for_codegen;
-  std::map<int, omega::Relation> for_codegen2;
-  int count = 0;
+    std::string s1 = symbolic_constants + " -> " + "{" + tuple_decl_RAW + " : " + lex_order1 + " && " + main_constraints + "}";
+    std::string s2 = symbolic_constants + " -> " + "{" + tuple_decl_WAR + " : " + lex_order2 + " && " + main_constraints + "}";
+
+    rels2.push_back(std::pair<omega::Relation, omega::Relation>(write_constraints, read_constraints));
+    std::cout << "\nS"<<relCounter++<<" = " << s1;
+    std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
+    dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
+
+  }  // Mahdi: End of the loop that creates dependencs for IEGenLib
+
   rels = removeRedundantConstraints(rels);
 
-  /*std::string try_ =
-   "[ m, nnz ] -> { [i, ip, k] : ip - colidx(k) = 0 && colidx(k) >= 0 && rowptr(i) >= 0 && rowptr(ip) >= 0 && rowptr(colidx(k)) >= 0  && k - rowptr(i) >= 0 && nnz - diagptr(colidx(k) + 1) >= 0  && nnz - rowptr(colidx(k) + 1) >= 0 && diagptr(i + 1) - rowptr(i + 1) >= 0 && diagptr(ip + 1) - rowptr(ip + 1) >= 0 && diagptr(colidx(k)) - rowptr(colidx(k)) >= 0 && diagptr(colidx(k) + 1) + 1 >= 0 && rowptr(colidx(k) + 1) + 1 >= 0  && -i + m - 2 >= 0 && i - colidx(k) - 1 >= 0 && -k + diagptr(i) - 1 >= 0 && -k + rowptr(i + 1) - 2 >= 0 && nnz - diagptr(i) - 1 >= 0 && nnz - diagptr(i + 1) - 1 >= 0 && nnz - diagptr(ip) - 1 >= 0 && nnz - diagptr(ip + 1) - 1 >= 0 && -diagptr(colidx(k)) + rowptr(ip + 1) - 2 >= 0 && -diagptr(colidx(k)) + rowptr(colidx(k) + 1) + 2 >= 0 && diagptr(colidx(k) + 1) - rowptr(colidx(k) + 1) + 8 >= 0}";
-   Relation a = parseISLStringToOmegaRelation(try_, rels2[0].first,
-   rels2[0].second, unin_symbol_for_iegen, freevar, ir);
-   std::cout << "First Result\n\n";
-   copy(a).print();
-   */
-
-  //get IS intersect Known
-  // check for domain and range info"
-  // if rowptr_ < rowptr__  add monotonic info
-  //
-  for (int j = 0; j < dep_rel_for_iegen.size(); j++) {
-
-    if (rels.find(j) != rels.end()) {
-
-      iegenlib::setCurrEnv();
-      for (int k = 0; k < syms.second.first.size(); k++) {
-        std::string symbol = syms.second.first[k].second.first;
-        std::string range_ = syms.second.first[k].second.second;
-        std::string domain_ = syms.second.second[k].second.second;
-
-        if (syms.second.first[k].first == true) {
-          iegenlib::appendCurrEnv(symbol,
-                                  new iegenlib::Set("{[i]:" + domain_ + "}"), // Domain
-                                  new iegenlib::Set("{[j]:" + range_ + "}"),  // Range
-                                  false,                              // Bijective?!
-                                  iegenlib::Monotonic_Increasing       // monotonicity
-          );
-
-        } else {
-          iegenlib::appendCurrEnv(symbol,
-                                  new iegenlib::Set("{[i]:" + domain_ + "}"), // Domain
-                                  new iegenlib::Set("{[j]:" + range_ + "}"),  // Range
-                                  false,                              // Bijective?!
-                                  iegenlib::Monotonic_NONE            // monotonicity
-          );
-
-        }
-
-      }
-
-      ;
-
-      /*		iegenlib::appendCurrEnv("colidx",
-       new iegenlib::Set("{[i]:0<=i &&i<nnz}"), // Domain
-       new iegenlib::Set("{[j]:0<=j &&j<m}"),        // Range
-       false,                              // Bijective?!
-       iegenlib::Monotonic_NONE            // monotonicity
-       );
-       iegenlib::appendCurrEnv("rowptr",
-       new iegenlib::Set("{[i]:0<=i &&i<=m}"),
-       new iegenlib::Set("{[j]:0<=j &&j<nnz}"), false,
-       iegenlib::Monotonic_Increasing);
-       iegenlib::appendCurrEnv("diagptr",
-       new iegenlib::Set("{[i]:0<=i &&i<=m}"),
-       new iegenlib::Set("{[j]:0<=j &&j<nnz}"), false,
-       iegenlib::Monotonic_Increasing);
-       */
-// (2)
-// Putting constraints in an iegenlib::Set
-// Data access dependence from ILU CSR code
-      iegenlib::Set *A1 = new iegenlib::Set(dep_rel_for_iegen[j].first);
-
-// (3)
-// How to add user defined constraint
-      //iegenlib::Set* A1_extend;
-      std::cout << dep_rel_for_iegen[j].first << std::endl;
-      for (int i = 0; i < syms.first.size(); i++) {
-        //		cout << syms.first[i] << endl;
-        std::string comparator_str;
-        if (syms.first[i].find("<=") != std::string::npos) {
-          comparator_str = "<=";
-        } else if (syms.first[i].find("<") != std::string::npos)
-          comparator_str = "<";
-        else
-          assert(false);
-
-        char *copy_str = new char[syms.first[i].length() + 1];
-        ;
-
-        strcpy(copy_str, syms.first[i].c_str());
-        //	char *first_part = part1.c_str();
-        char *pch3 = strtok(copy_str, " ><=");
-        std::string token1(pch3);
-
-        pch3 = strtok(NULL, " ><=");
-        std::string token2(pch3);
-        iegenlib::Set *tmp = A1->addUFConstraints(token1, comparator_str,
-                                                  token2);
-        delete A1;
-        A1 = tmp;
-      }
-// (4)
-// Specify loops that are going to be parallelized, so we are not going to
-// project them out. Here "i" and "ip"
-      std::set<int> parallelTvs;
-      parallelTvs.insert(0);
-      parallelTvs.insert(1);
-
-// expected output  (for testing purposes)
-//std::string ex_A1_str("Not Satisfiable");
-// (5)
-// Simplifyng the constraints set
-
-      iegenlib::Set* A1_sim = A1->simplifyForPartialParallel(parallelTvs);
-
-// (6)
-// Print out results
-// If set is not satisfiable simplifyForPartialParallel is going to return
-// NULL, we should check this before getting result's string with
-// toISLString.
-      std::string A1_sim_str("Not Satisfiable");
-
-      omega::Relation r, r2;
-      //r = Relation::False(1);
-      //r2 = Relation::False(1);
-      if (A1_sim) {
-        A1_sim_str = A1_sim->toISLString();
-        r = parseISLStringToOmegaRelation(A1_sim_str, rels2[j].first,
-                                          rels2[j].second, unin_symbol_for_iegen, freevar, ir);
-        std::cout << "Result\n\n";
-        copy(r).print();
-
-        for_codegen.insert(std::pair<int, omega::Relation>(count++, r));
-      }
-      std::cout << "\n\nA1 simplified = " << A1_sim_str << "\n\n";
-
-      iegenlib::Set *A2 = new iegenlib::Set(dep_rel_for_iegen[j].second);
-      for (int i = 0; i < syms.first.size(); i++) {
-        //cout << syms.first[i] << endl;
-        std::string comparator_str;
-        if (syms.first[i].find("<=") != std::string::npos) {
-          comparator_str = "<=";
-        } else if (syms.first[i].find("<") != std::string::npos)
-          comparator_str = "<";
-        else
-          assert(false);
-
-        char *copy_str = new char[syms.first[i].length() + 1];
-        ;
-
-        strcpy(copy_str, syms.first[i].c_str());
-        //	char *first_part = part1.c_str();
-        char *pch3 = strtok(copy_str, " ><=");
-        std::string token1(pch3);
-
-        pch3 = strtok(NULL, " ><=");
-        std::string token2(pch3);
-
-        iegenlib::Set *tmp = A2->addUFConstraints(token1, comparator_str,
-                                                  token2);
-        delete A2;
-        A2 = tmp;
-      }
-// (3)
-// How to add user defined constraint
-      //	iegenlib::Set* A2_extend = A2->addUFConstraints("rowptr", "<=",
-      //			"diagptr");
-
-// (4)
-// Specify loops that are going to be parallelized, so we are not going to
-// project them out. Here "i" and "ip"
-      std::set<int> parallelTvs2;
-      parallelTvs2.insert(0);
-      parallelTvs2.insert(1);
-
-// expected output  (for testing purposes)
-//std::string ex_A1_str("Not Satisfiable");
-// (5)
-// Simplifyng the constraints set
-
-      iegenlib::Set* A2_sim = A2->simplifyForPartialParallel(parallelTvs2);
-
-// (6)
-// Print out results
-// If set is not satisfiable simplifyForPartialParallel is going to return
-// NULL, we should check this before getting result's string with
-// toISLString.
-      std::string A2_sim_str("Not Satisfiable");
-      if (A2_sim) {
-        A2_sim_str = A2_sim->toISLString();
-        r2 = parseISLStringToOmegaRelation(A2_sim_str, rels2[j].first,
-                                           rels2[j].second, unin_symbol_for_iegen, freevar, ir);
-        std::cout << "Result\n\n";
-        copy(r2).print();
-
-        for_codegen2.insert(std::pair<int, omega::Relation>(count, r2));
-      }
-
-      std::cout << "\n\nA2 simplified = " << A2_sim_str << "\n\n";
-// For testing purposes
-//EXPECT_EQ(ex_A1_str, A1_sim_str);
-      delete A1;
-      delete A2;
-      //delete A1_extend;
-      delete A1_sim;
-      //delete A2_extend;
-      delete A2_sim;
-    }
-  }
+  return dep_rel_for_iegen;
 }
