@@ -134,16 +134,17 @@ namespace {
   };
 
   std::string dumpargs(std::vector<std::string> &v) {
-    std::string str = "";
-    for (const auto &i: v) {
-      if (str.length() < 1)
-        str = "(";
-      else
-        str = ",";
-      str += i;
+// Mahdi: fixed a bug, empty argument list was not handlesd correctly.
+
+    if (v.size() == 0) return "";
+
+    std::string str = "(";
+    for (int i = 0 ; i < v.size() ; i++ ) {
+      if ( i ) str += ",";
+      str += v[i];
     }
-    if (v.size() > 0)
-      str += ")";
+    str += ")";
+
     return str;
   }
 
@@ -197,7 +198,6 @@ namespace {
 
   std::vector<LinearTerm> recursiveConstructLinearExpression(
       CG_outputRepr *repr_src, IR_Code *ir, char side) {
-
     std::vector<LinearTerm> v;
     switch (ir->QueryExpOperation(repr_src)) {
 
@@ -213,7 +213,13 @@ namespace {
       }
       case IR_OP_MACRO: {
         std::vector<CG_outputRepr *> v_ = ir->QueryExpOperand(repr_src);
-        IR_ScalarRef *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v_[0]));
+        // Fixme: I'm a hack
+        IR_FunctionRef *ref;
+        {
+          CG_chillRepr *crepr = (CG_chillRepr *) v_[0];
+          chillAST_node *node = crepr->chillnodes[0];
+          ref = new IR_chillFunctionRef(ir, static_cast<chillAST_DeclRefExpr *>(node));
+        }
         LinearTerm to_push;
         to_push.is_function = true;
 
@@ -426,7 +432,6 @@ namespace {
         break;
       }
     }
-
     return v;
 
   }
@@ -508,8 +513,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
+
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
-      repr->dump();
+
       IR_Ref *ref = ir->Repr2Ref(v[0]);
 
       std::string s = ref->name();
@@ -567,9 +573,11 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
         Free_Var_Decl *t = new Free_Var_Decl(s);
         Variable_ID e = temp.get_local(t);
         freevars.insert(freevars.end(), t);
+
         exp2formula(loop, ir, temp, temp_root, freevars, repr2, e, side,
                     IR_COND_EQ, false, uninterpreted_symbols,
                     uninterpreted_symbols_stringrepr, index_variables);
+
         EQ_Handle e1;
 
         //std::set<std::string> arg_set_vars;
@@ -584,6 +592,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                 std::string name = (*cvi).var->name();
                 if (side == 'r')
                   name += "p";
+
                 curr_repr = ir->builder()->CreatePlus(curr_repr,
                                                       ir->builder()->CreateTimes(
                                                           ir->builder()->CreateInt(
@@ -649,8 +658,6 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                   c.add_and();
                   reprs_3.push_back(e1);
                   c.and_with_EQ(e1);
-                  //reprs3.push_back(c);
-
                 }
 
               } else if ((*cvi).var->kind() == Global_Var
@@ -769,7 +776,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                               g->base_name())));
                   vars.insert(g->base_name());
                 }
-              }
+              }   // Mahdi: end of: for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
             if ((*ei).get_const() != 0) {
 
               curr_repr_no_const = curr_repr->clone();
@@ -829,17 +836,16 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
           changed = false;
           s += "_";
           t = NULL;
+
           for (unsigned i = 0; i < freevars.size(); i++) {
             std::string ss = freevars[i]->base_name();
             t = freevars[i];
             if (s == ss) {
-
               std::vector<CG_outputRepr *> curr;
               curr.push_back(curr_repr->clone());
               std::vector<LinearTerm> a =
                   recursiveConstructLinearExpression(curr_repr,
                                                      ir, side);
-
               CG_outputRepr *args = ir->RetrieveMacro(s);
               CG_outputRepr * inner = NULL;
               if (ir->QueryExpOperation(args)
@@ -907,6 +913,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
             changed = false;
             s1 += "_";
             t1 = NULL;
+
             for (unsigned i = 0; i < freevars.size(); i++) {
               std::string ss = freevars[i]->base_name();
               t1 = freevars[i];
@@ -977,12 +984,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
             freevars.insert(freevars.end(), t1);
 
           }
-
         }
-
-        std::vector<std::string> args;
-        std::vector<omega::CG_outputRepr *> reprs;
-        std::vector<omega::CG_outputRepr *> reprs2;
 
         if (need_new_fsymbol) {
           loop->unin_symbol_args.insert(
@@ -1011,19 +1013,44 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
         }
 
+        std::vector<std::string> args;
         std::vector<std::string> args2;
-        for (std::set<std::string>::iterator it = vars.begin();
-             it != vars.end(); it++) {
-          if (side == 'r') {
-            args.push_back(*it + "p");
-            args2.push_back(*it);
-          } else {
-            args.push_back(*it);
-            args2.push_back(*it + "p");
+        std::vector<omega::CG_outputRepr *> reprs;
+        std::vector<omega::CG_outputRepr *> reprs2;
+
+// Mahdi: CODE changed: Following is going to generate the prefix tuple declaration for an UFC.
+//        However, the old implementation was changing the order of tuple variables. That was because
+//        the set of prefix tuple variables were getting stored and read from a c++ std::set, and
+//        this data structure orders its elements based on its own metrics (alphabetical) not order of insertion.
+//
+//        for (std::set<std::string>::iterator it = vars.begin();
+//             it != vars.end(); it++) {
+//          if (side == 'r') {
+//            args.push_back(*it + "p");
+//            args2.push_back(*it);
+//          } else {
+//            args.push_back(*it);
+//            args2.push_back(*it + "p");
+//          }
+//          reprs.push_back(ir->builder()->CreateIdent(*it));
+//          reprs2.push_back(ir->builder_s().CreateIdent(*it));
+//        }
+
+        for (int j = 1; j <= max_dim; j++) {
+          std::string tv_name = r.input_var(j)->name();
+          if (vars.find( tv_name ) != vars.end()){
+            if (side == 'r') {
+              args.push_back(tv_name + "p");
+              args2.push_back(tv_name);
+            } else {
+              args.push_back(tv_name);
+              args2.push_back(tv_name + "p");
+            }
+            reprs.push_back(ir->builder()->CreateIdent(tv_name));
+            reprs2.push_back(ir->builder_s().CreateIdent(tv_name));
           }
-          reprs.push_back(ir->builder()->CreateIdent(*it));
-          reprs2.push_back(ir->builder_s().CreateIdent(*it));
         }
+
         if (need_new_fsymbol) {
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
@@ -1055,19 +1082,18 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                                                   static_cast<CG_stringRepr*>(curr_repr_s2_no_const)->GetString()));
         }
 
-//if(vars.size() > 0){
         if (need_new_fsymbol) {
           ir->CreateDefineMacro(s, args,
                                 ir->builder()->CreateArrayRefExpression(ref->convert(),
                                                                         curr_repr));
         }
 
-        if (uninterpreted_symbols.find(s) == uninterpreted_symbols.end())
+        if (uninterpreted_symbols.find(s) == uninterpreted_symbols.end()){
           uninterpreted_symbols.insert(
               std::pair<std::string,
                   std::vector<omega::CG_outputRepr *> >(s,
                                                         reprs));
-
+        }
         if (uninterpreted_symbols_stringrepr.find(s)
             == uninterpreted_symbols_stringrepr.end())
           uninterpreted_symbols_stringrepr.insert(
@@ -1106,6 +1132,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                 std::pair<std::string, std::vector<omega::Relation> >(
                     s1, reprs3));
         }
+
         if (side == 'r')
           e = r.get_local(t, Output_Tuple);
         else
@@ -1126,6 +1153,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
           EQ_Handle h = f_root->add_EQ();
           h.update_coef(lhs, 1);
           h.update_coef(e, -1);
+
         } else
           throw std::invalid_argument("unsupported condition type");
       }
@@ -1148,11 +1176,13 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
         Free_Var_Decl *t = NULL;
         for (unsigned i = 0; i < freevars.size(); i++) {
           std::string ss = freevars[i]->base_name();
+
           if (s == ss) {
             t = freevars[i];
             break;
           }
         }
+
 
         if (t == NULL) {
           t = new Free_Var_Decl(s);
@@ -1160,8 +1190,8 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
         }
 
         e = r.get_local(t);
-      }
 
+      }
       if (rel == IR_COND_GE || rel == IR_COND_GT) {
         GEQ_Handle h = f_root->add_GEQ();
         h.update_coef(lhs, 1);
@@ -1624,6 +1654,7 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
                          std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                          std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
                          std::map<std::string, std::vector<omega::Relation> > &unin_rel) {
+
   Relation &IS1 = const_cast<Relation &>(IS_w);
   Relation &IS2 = const_cast<Relation &>(IS_r);
 
@@ -2858,6 +2889,9 @@ Variable_ID find_index(Relation &r, const std::string &s, char side) {
       if (s+"'" == ss) {
         return r.output_var(i);
       }
+      else if (s+"p" == ss) {    // Mahdi: I added this else if, THE FIX FOR (') ISSUE for Gauss-Seidel example (only?)
+        return r.output_var(i);
+      }
     }
   }
   
@@ -3123,6 +3157,90 @@ std::set<std::string> get_global_vars(const omega::Relation &r) {
   }
   return vars;
 }
+
+
+// Mahdi: Adding this specifically for dependence extraction
+//        This function basically renames tuple variables of old_relation
+//        using tuple declaration of new_relation, and updates all constraints in the old_relation
+//        and returns the updated relation. It can be used for doing something like following:
+//        INPUTS:
+//          old_relation: {[i,j]: col(j)=i && 0 < i < n}
+//          new_relation: {[ip,jp]}
+//        OUTPUT:
+//                      : {[ip,jp]: col(jp)=ip && 0 < ip < n}
+// Note: replace_set_var_as_another_set_var functions are suppose to do the same thing
+//       but 1 tuple variable at a time, which is not efficient for dependence extractiion.
+//       Also, those functions are not handling all kinds of variables.
+Relation replace_set_vars(const omega::Relation &new_relation,
+                                            const omega::Relation &old_relation, int counter) {
+  Relation r = copy(new_relation);
+  r.copy_names(new_relation);
+  r.setup_names();
+  
+  F_Exists *f_exists = r.and_with_and()->add_exists();
+  F_And *f_root = f_exists->add_and();
+  std::map<Variable_ID, Variable_ID> exists_mapping;
+  // Just simply go over all the constraints and copy them over while changing the name of the tuple variables 
+  for (DNF_Iterator di(const_cast<Relation &>(old_relation).query_DNF()); di; di++) {
+    // Going over inequalities
+    for (GEQ_Iterator gi((*di)->GEQs()); gi; gi++) {
+      GEQ_Handle h = f_root->add_GEQ();
+      h.update_const( (*gi).get_const() );             // Copy the constant
+      for (Constr_Vars_Iter cvi(*gi); cvi; cvi++) {
+        Variable_ID v = cvi.curr_var();
+        if ( v->kind() == Input_Var || v->kind() == Output_Var ) {
+
+          h.update_coef(r.input_var( v->get_position() ), cvi.curr_coef());
+        } else if ( v->kind() == Global_Var ) {
+
+          Global_Var_ID g = v->get_global_var();
+          Variable_ID v2;
+          if (g->arity() == 0)  v2 = r.get_local(g);
+          else v2 = r.get_local(g, v->function_of());
+          h.update_coef(v2, cvi.curr_coef());
+        } else if ( v->kind() == Wildcard_Var ) {
+
+          Variable_ID v2 = 
+          replicate_floor_definition( old_relation, v, r, f_exists, f_root,
+                                                           exists_mapping);
+          h.update_coef(v2, cvi.curr_coef());
+        } else {
+          throw omega_error("replace_set_var_as_another_set_var: Unknown Var!");
+        }
+      }
+    }
+    // Going over equalities
+    for (EQ_Iterator ei((*di)->EQs()); ei; ei++) {
+      EQ_Handle h = f_root->add_EQ();
+      h.update_const( (*ei).get_const() );             // Copy the constant
+      for (Constr_Vars_Iter cvi(*ei); cvi; cvi++) {
+        Variable_ID v = cvi.curr_var();
+        if ( v->kind() == Input_Var || v->kind() == Output_Var ) {
+          h.update_coef(r.input_var( v->get_position() ),
+                              cvi.curr_coef());
+        } else if ( v->kind() == Global_Var ) {
+          Global_Var_ID g = v->get_global_var();
+          Variable_ID v2;
+          if (g->arity() == 0)  v2 = r.get_local(g);
+          else v2 = r.get_local(g, v->function_of());
+          h.update_coef(v2, cvi.curr_coef());
+        } else if ( v->kind() == Wildcard_Var ) {
+
+          Variable_ID v2 = 
+          replicate_floor_definition( old_relation, v, r, f_exists, f_root,
+                                                           exists_mapping);
+          h.update_coef(v2, cvi.curr_coef());
+        } else {
+          throw omega_error("replace_set_var_as_another_set_var: Unknown Var!");
+        }
+      }
+    }
+  }
+
+  return r;
+}
+
+
 
 // Replicates old_relation's bounds for set var at old_pos into new_relation at new_pos, but position's bounds must involve constants
 //  only supports GEQs

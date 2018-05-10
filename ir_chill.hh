@@ -35,9 +35,9 @@ struct IR_chillScalarSymbol: public IR_ScalarSymbol {
 };
 
 struct IR_chillFunctionSymbol: public IR_FunctionSymbol {
-  chillAST_FunctionDecl* fs_;
+  chillAST_DeclRefExpr* fs_;
 
-  IR_chillFunctionSymbol(const IR_Code *ir, chillAST_FunctionDecl *fs ) {
+  IR_chillFunctionSymbol(const IR_Code *ir, chillAST_DeclRefExpr *fs ) {
     ir_ = ir;
     fs_ = fs;
   }

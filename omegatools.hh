@@ -69,6 +69,22 @@ std::pair<omega::Relation, bool> replace_set_var_as_existential(const omega::Rel
 omega::Relation replace_set_var_as_Global(const omega::Relation &R,int pos,std::vector<omega::Relation> &bound);
 //! Return names of global vars with arity 0
 std::set<std::string> get_global_vars(const omega::Relation &r);
+
+
+// Mahdi: Adding this specifically for dependence extraction
+//        This function basically renames tuple variables of old_relation
+//        using tuple declaration of new_relation, and updates all constraints in the old_relation
+//        and returns the updated relation. It can be used for doing something like following:
+//        INPUTS:
+//          old_relation: {[i,j]: col(j)=i && 0 < i < n}
+//          new_relation: {[ip,jp]}
+//        OUTPUT:
+//                      : {[ip,jp]: col(jp)=ip && 0 < ip < n}
+// NOte: replace_set_var_as_another_set_var functions are suppose to do the same thing
+//       but 1 tuple variable at a time, which is not efficient for dependence extractiion.
+//       Also, those functions are not handling all kinds of variables.
+omega::Relation replace_set_vars(const omega::Relation &new_relation, const omega::Relation &old_relation, int counter);
+
 //! Replicates old_relation's bounds for set var at old_pos into new_relation at new_pos
 /**
  * position's bounds must involve constants, only supports GEQs

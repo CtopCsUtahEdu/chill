@@ -1,0 +1,31 @@
+{[j,In_2] : TRUE }
+{ Sym=[Lp_(j),Lp__(j),n] [j,p] : Lp_(j)+1 <= p < Lp__(j) && 0 <= j < n }
+{ Sym=[n] [j,p] : 0 <= j < n }
+{ Sym=[Lp_(j),Lp__(j),n] [j,p] : Lp_(j)+1 <= p < Lp__(j) && 0 <= j < n }
+
+S1 = [n] -> {[j,p] -> [jp,pp] : j < jp && 0 <= j && j < n && 1+Lp(j) = p && 0 <= jp && jp < n && 1+Lp(jp) = pp && j = jp}
+S2 = [n] -> {[jp,pp] -> [j,p] : jp < j && 0 <= j && j < n && 1+Lp(j) = p && 0 <= jp && jp < n && 1+Lp(jp) = pp && j = jp}
+
+S3 = [n] -> {[j,p] -> [jp,pp] : j < jp && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && 0 <= jp && jp < n && 1+Lp(jp) = pp && Li(p) = jp}
+S4 = [n] -> {[jp,pp] -> [j,p] : jp < j && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && 0 <= jp && jp < n && 1+Lp(jp) = pp && Li(p) = jp}
+
+S5 = [n] -> {[j,p] -> [jp,pp] : j < jp && 0 <= j && j < n && 1+Lp(j) = p && 0 <= jp && jp < n && 1+Lp(jp) = pp && j = jp}
+S6 = [n] -> {[jp,pp] -> [j,p] : jp < j && 0 <= j && j < n && 1+Lp(j) = p && 0 <= jp && jp < n && 1+Lp(jp) = pp && j = jp}
+
+S7 = [n] -> {[j,p] -> [jp,pp] : j < jp && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = Li(pp)}
+S8 = [n] -> {[jp,pp] -> [j,p] : jp < j && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = Li(pp)}
+
+S9 = [n] -> {[j,p] -> [jp,pp] : j < jp && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = Li(pp)}
+S10 = [n] -> {[jp,pp] -> [j,p] : jp < j && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = Li(pp)}
+
+S11 = [n] -> {[j,p] -> [jp,pp] : j < jp && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = jp}
+S12 = [n] -> {[jp,pp] -> [j,p] : jp < j && 0 <= j && j < n && 1+Lp(j) = p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && j = jp}
+
+S13 = [n] -> {[j,p] -> [jp,pp] : j < jp && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = Li(pp)}
+S14 = [n] -> {[jp,pp] -> [j,p] : jp < j && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = Li(pp)}
+
+S15 = [n] -> {[j,p] -> [jp,pp] : j < jp && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = Li(pp)}
+S16 = [n] -> {[jp,pp] -> [j,p] : jp < j && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = Li(pp)}
+
+S17 = [n] -> {[j,p] -> [jp,pp] : j < jp && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = jp}
+S18 = [n] -> {[jp,pp] -> [j,p] : jp < j && p < Lp(j+1) && 0 <= j && j < n && Lp(j) < p && pp < Lp(jp+1) && 0 <= jp && jp < n && Lp(jp) < pp && Li(p) = jp}

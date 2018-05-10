@@ -226,7 +226,7 @@ private:
   //omega::CG_outputRepr* omp_add_omp_for_recursive(omega::CG_outputRepr* repr, int, int, int num_threads = 0, std::vector<std::string> prv = std::vector<std::string>()) const;
   
 public:
-  Loop() { ir = NULL; tmp_loop_var_name_counter = 1; init_code = NULL; }
+  Loop() { ir = NULL; tmp_loop_var_name_counter = 1; init_code = NULL; replaceCode_ind = 1;}
   Loop(const IR_Control *control);
   ~Loop();
   
@@ -257,11 +257,22 @@ public:
   int num_statement() const { return stmt.size(); }
   void printIterationSpace() const;
   void printDependenceGraph() const;
-  //! Print dependence with uninterpreted function symbols
   /*!
-   * Adapted from *reorder_by_inspector*
+   * Mahdi: This functions extarcts and returns the data dependence relations 
+   * that are needed for generating inspectors for wavefront paralleization of a 
+   * specific loop level
+   * Loop levels start with 0 (being outer most loop), outer most loop is the default
+   * Input:  loop level for parallelization
+   * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
    */
-  void printDependenceUFs(int stmt_num, int level);
+  std::vector<std::pair<std::string, std::string >> 
+    depRelsForParallelization(int parallelLoopLevel = 0);
+  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  // Reason: Transformed code that is suppose to be printed out when Chill finishes everything,
+  //         is not correct for our examples!
+  int replaceCode_ind;
+  int replaceCode(){ return replaceCode_ind;}
+
   void removeDependence(int stmt_num_from, int stmt_num_to);
   void dump() const;
   

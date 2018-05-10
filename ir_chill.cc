@@ -212,7 +212,7 @@ IR_Symbol *IR_chillArraySymbol::clone() const {
 
 std::string IR_chillFunctionSymbol::name() const {
 
-  return fs_->functionName;
+  return fs_->declarationName;
 
 }
 
@@ -373,7 +373,7 @@ bool IR_chillFunctionRef::is_write() const {
 }
 
 IR_FunctionSymbol *IR_chillFunctionRef::symbol() const {
-  return new IR_chillFunctionSymbol(ir_, vs_->getFunctionDecl());
+  return new IR_chillFunctionSymbol(ir_, vs_);
 }
 
 bool IR_chillFunctionRef::operator==(const IR_Ref &that) const {
@@ -1118,7 +1118,6 @@ std::vector<IR_Loop *> IR_chillCode::FindLoops(omega::CG_outputRepr *repr) {
       return std::vector<IR_Loop*>();
     std::copy(l.begin(), l.end(), back_inserter(ret));
   }
-
   return ret;
 }
 
@@ -1804,7 +1803,8 @@ vector<CG_outputRepr *> IR_chillCode::QueryExpOperand(const CG_outputRepr *repr)
   } else if (e->isArraySubscriptExpr() ) {
     v.push_back(new omega::CG_chillRepr(e));
   } else if (e->isCallExpr()) {
-    v.push_back(new omega::CG_chillRepr(e));
+    for (auto c:e->getChildren())
+      v.push_back(new omega::CG_chillRepr(c));
   } else {
     debug_fprintf(stderr, "ir_rose.cc  IR_roseCode::QueryExpOperand() UNHANDLED node type %s\n", e->getTypeString());
     exit(-1);
@@ -1840,6 +1840,7 @@ IR_Ref *IR_chillCode::Repr2Ref(const CG_outputRepr *repr) const {
     err = err + node->getTypeString();
     throw runtime_error(err.c_str());
   }
+
 }
 
 omega::CG_outputRepr *IR_chillCode::CreateArrayType(IR_CONSTANT_TYPE type, omega::CG_outputRepr* size)
