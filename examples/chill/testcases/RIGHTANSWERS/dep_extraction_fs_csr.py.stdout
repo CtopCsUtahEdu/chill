@@ -1,0 +1,10 @@
+{[i,In_2] : TRUE }
+{ Sym=[rowPtr_(i),rowPtr__(i),n] [i,j] : rowPtr_(i) <= j <= rowPtr__(i)-2 && 0 <= i < n }
+{ Sym=[n] [i,j] : 0 <= i < n }
+{ Sym=[rowPtr_(i),rowPtr__(i),n] [i,j] : rowPtr_(i) <= j <= rowPtr__(i)-2 && 0 <= i < n }
+
+S1 = [n] -> {[i,j] -> [ip,jp] : i < ip && 0 <= i && i < n && rowPtr(i+1) = 1+j && rowPtr(ip) <= jp && 0 <= ip && ip < n && 2+jp <= rowPtr(ip+1) && i = colIdx(jp)}
+S2 = [n] -> {[ip,jp] -> [i,j] : ip < i && 0 <= i && i < n && rowPtr(i+1) = 1+j && rowPtr(ip) <= jp && 0 <= ip && ip < n && 2+jp <= rowPtr(ip+1) && i = colIdx(jp)}
+
+S3 = [n] -> {[i,j] -> [ip,jp] : i < ip && 0 <= i && i < n && rowPtr(i+1) = 1+j && 0 <= ip && ip < n && rowPtr(ip+1) = 1+jp && i = ip}
+S4 = [n] -> {[ip,jp] -> [i,j] : ip < i && 0 <= i && i < n && rowPtr(i+1) = 1+j && 0 <= ip && ip < n && rowPtr(ip+1) = 1+jp && i = ip}

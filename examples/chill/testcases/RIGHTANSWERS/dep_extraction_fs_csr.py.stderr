@@ -1,0 +1,1 @@
+rowPtr[1 * i]rowPtr[1 * i + 1]rowPtr[1 * i + 1]rowPtr[1 * i]colIdx[1 * j]colIdx[1 * j + 1]colIdx[1 * jp]colIdx[1 * jp + 1]
