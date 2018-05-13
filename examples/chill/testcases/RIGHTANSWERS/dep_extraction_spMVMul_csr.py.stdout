@@ -9,8 +9,8 @@
 
 
 
-S1 = [n] -> {[i,k] -> [ip,kp] : i < ip && rowptr_(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && 0 <= ip && ip < n && rowptr(ip) = kp && i = ip}
-S2 = [n] -> {[ip,kp] -> [i,k] : ip < i && rowptr_(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && 0 <= ip && ip < n && rowptr(ip) = kp && i = ip}
+S1 = [n] -> {[i,k] -> [ip,kp] : i < ip && rowptr(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && 0 <= ip && ip < n && rowptr(ip) = kp && i = ip}
+S2 = [n] -> {[ip,kp] -> [i,k] : ip < i && rowptr(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && 0 <= ip && ip < n && rowptr(ip) = kp && i = ip}
 
-S3 = [n] -> {[i,k] -> [ip,kp] : i < ip && rowptr_(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && rowptr(ip) <= kp && kp < rowptr(ip+1) && 0 <= ip && ip < n && i = ip}
-S4 = [n] -> {[ip,kp] -> [i,k] : ip < i && rowptr_(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && rowptr(ip) <= kp && kp < rowptr(ip+1) && 0 <= ip && ip < n && i = ip}
+S3 = [n] -> {[i,k] -> [ip,kp] : i < ip && rowptr(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && rowptr(ip) <= kp && kp < rowptr(ip+1) && 0 <= ip && ip < n && i = ip}
+S4 = [n] -> {[ip,kp] -> [i,k] : ip < i && rowptr(i) <= k && k < rowptr(i+1) && 0 <= i && i < n && rowptr(ip) <= kp && kp < rowptr(ip+1) && 0 <= ip && ip < n && i = ip}
