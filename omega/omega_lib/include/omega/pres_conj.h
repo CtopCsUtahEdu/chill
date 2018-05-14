@@ -270,8 +270,8 @@ private:
 
   friend int       simplify_conj(Conjunct* conj, int ver_sim, int elim_red, int color);
   friend DNF*      negate_conj(Conjunct* conj);
-  friend Conjunct* merge_conjs(Conjunct* conj1, Conjunct* conj2,
-                               Merge_Action action, Rel_Body *body = 0);
+  friend Conjunct* _merge_conjs(Conjunct* conj1, Conjunct* conj2,
+                               Merge_Action action, Rel_Body *body);
   friend void      copy_conj_header(Conjunct* to, Conjunct* fr);
 
 
@@ -314,6 +314,11 @@ void copy_column(Problem *tp,  int to_col,
 void zero_column(Problem *tp,  int to_col,
                  int start_EQ, int start_GEQ,
                  int no_EQs,   int no_GEQs);
+
+inline Conjunct* merge_conjs(Conjunct* conj1, Conjunct* conj2,
+                      Merge_Action action, Rel_Body *body = 0) {
+  return _merge_conjs(conj1, conj2, action, body);
+}
 
 } // namespace
 

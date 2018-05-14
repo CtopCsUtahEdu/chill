@@ -28,11 +28,13 @@ struct omega_error: public std::runtime_error {
 };
 
 
-#define __throw_at(t, f, l, msg)                throw t(std::string(#f ", " #l ": ") + msg)
-#define __throw_loop_error_at(f, l, msg)        __throw_at(loop_error, f, l, msg)
-#define __throw_ir_error_at(f, l, msg)          __throw_at(ir_error, f, l, msg)
-#define __throw_ir_exp_error_at(f, l, msg)      __throw_at(ir_exp_error, f, l, msg)
-#define __throw_omega_error_at(f, l, msg)       __throw_at(omega_error, f, l, msg)
-#define __throw_runtime_error_at(f, l, msg)     __throw_at(std::runtime_error, f, l, msg)
+#define __stringify(id)                #id
+#define __tostring(id)                 __stringify(id)
+#define __throw(t, msg)                throw t(std::string(__FILE__ ", " __tostring(__LINE__) ", ") + __func__ + ": " + msg)
+#define __throw_loop_error(msg)        __throw(loop_error, msg)
+#define __throw_ir_errort(msg)         __throw(ir_error, msg)
+#define __throw_ir_exp_error(msg)      __throw(ir_exp_error, msg)
+#define __throw_omega_error(msg)       __throw(omega_error, msg)
+#define __throw_runtime_error(msg)     __throw(std::runtime_error, msg)
 
 #endif

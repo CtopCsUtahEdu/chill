@@ -197,7 +197,7 @@ chillAST_VarDecl * chillAST_node::findVariableNamed( const char *name ) { // rec
     chillAST_VarDecl *vd = symbolTableFindVariableNamed( getSymbolTable(), name);
     if (vd) return vd; // found locally
   }
-  if (!parent) return NULL; // no more recursion available
+  if (!parent) return nullptr; // no more recursion available
   // recurse upwards
   return parent->findVariableNamed( name ); 
 }
@@ -211,7 +211,7 @@ chillAST_RecordDecl * chillAST_node::findRecordDeclNamed( const char *name ) { /
   for (int i=0; i<numchildren; i++) {
     debug_fprintf(stderr, "child %d  %s\n", i, children[i]->getTypeString());
     if (children[i]->isRecordDecl()) {
-      chillAST_RecordDecl *RD = (chillAST_RecordDecl *)children[i];
+      auto RD = (chillAST_RecordDecl *)children[i];
       debug_fprintf(stderr, "it is a recordDecl named '%s' vs '%s'\n", RD->getName(), name); 
       if (!strcmp( RD->getName(), name )) {
         debug_fprintf(stderr, "FOUND IT\n"); 
@@ -220,7 +220,7 @@ chillAST_RecordDecl * chillAST_node::findRecordDeclNamed( const char *name ) { /
     }
   }   
     
-  if (!parent) return NULL; // no more recursion available
+  if (!parent) return nullptr; // no more recursion available
   // recurse upwards
   return parent->findRecordDeclNamed( name ); 
 }
@@ -1767,32 +1767,18 @@ chillAST_ArraySubscriptExpr::chillAST_ArraySubscriptExpr( chillAST_VarDecl *v, s
 
 
 
-chillAST_node *chillAST_node::getEnclosingStatement( int level ) {  // TODO do for subclasses?
-
-  //debug_fprintf(stderr, "chillAST_node::getEnclosingStatement( level %d ) node type %s\n", level, getTypeString());
-  //print(); printf("\n"); fflush(stdout);
-
-  // so far, user will ONLY call this directly on an array subscript expression
-  if (isArraySubscriptExpr()) return parent->getEnclosingStatement( level+1); 
-
-  if (level != 0) { 
-    if (isBinaryOperator()    || 
-        isUnaryOperator()     || 
-        isTernaryOperator()   || 
-        isReturnStmt()        ||
-        isCallExpr()
-        ) return this;
-    
-
-    // things that are not endpoints. recurse through parent 
-    if (isMemberExpr())       return parent->getEnclosingStatement( level+1 ); 
-    if (isImplicitCastExpr()) return parent->getEnclosingStatement( level+1 ); 
-    if (isSizeof())           return parent->getEnclosingStatement( level+1 );  
-    if (isCStyleCastExpr())   return parent->getEnclosingStatement( level+1 );  
-    return NULL;
-  }
-
-  throw std::runtime_error("getEnclosingStatement() returning NULL\n");
+chillAST_node *chillAST_node::getEnclosingStatement() {
+  if (!parent)
+    return this;
+  if (parent->isForStmt()      ||
+      parent->isIfStmt()       ||
+      parent->isVarDecl()      ||
+      parent->isWhileStmt()    ||
+      parent->isCompoundStmt() ||
+      parent->isSourceFile()   ||
+      parent->isFunctionDecl())
+    return this;
+  return parent->getEnclosingStatement();
 }
 
 
@@ -2333,7 +2319,11 @@ void chillAST_VarDecl::gatherArrayVarDecls( vector<chillAST_VarDecl*> &decls ) {
 
 
 
-chillAST_node *chillAST_VarDecl::constantFold() {  return this; }
+chillAST_node *chillAST_VarDecl::constantFold() {
+  if (init)
+    init = init->constantFold();
+  return this;
+}
 
 chillAST_node* chillAST_VarDecl::clone() {
   //debug_fprintf(stderr, "\nchillAST_VarDecl::clone()  cloning vardecl for %s\n", varname); 
