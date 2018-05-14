@@ -29,13 +29,6 @@ const int maxmaxEQs = 256;
 /* #define maxmaxEQs  512  /\* original 256, increased by chun *\/ */
 /* #endif */
 
-
-#if 0
-#if ! defined Already_Included_Portable
-typedef unsigned char bool;  /* what a gross thing to do */
-#endif
-#endif
-
 typedef int EqnKey;
 
 enum {EQ_BLACK = 0, EQ_RED = 1};
