@@ -242,11 +242,11 @@ static bool readArg(PyObject* args, int index, std::vector<std::map<std::string,
  */
 static bool readArg(PyObject* args, int index, std::map<std::string, int>& m) {
   if(PyTuple_Size(args) <= index)
-    __throw_runtime_error_at(__FILE__, __LINE__, "bad input");
+    __throw_runtime_error("bad input");
 
   auto dict = PyTuple_GetItem(args, index);
   if(!PyDict_Check(dict))
-    __throw_runtime_error_at(__FILE__, __LINE__, "bad input");
+    __throw_runtime_error("bad input");
 
   auto kv_list = PyDict_Items(dict);
   for(int i = 0; i < PyList_Size(kv_list); i++) {

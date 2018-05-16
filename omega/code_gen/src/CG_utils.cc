@@ -1238,7 +1238,7 @@ namespace omega {
       }
     }  
     coef_t c = stride_eq.get_const();
-    debug_fprintf(stderr, "stride eq const %d\n", c); 
+    debug_fprintf(stderr, "stride eq const %lld\n", c);
     debug_fprintf(stderr, "sign %d\n", sign ); 
     if (c > 0) {
       if (sign < 0)
@@ -1258,8 +1258,8 @@ namespace omega {
     //debug_fprintf(stderr, "inequality repr %p\n", repr); 
     CG_outputRepr *repr2 = ocg->CreateCopy(repr);
     
-    debug_fprintf(stderr, "stride_eq.get_coef(wc) %d\n", stride_eq.get_coef(wc)); 
-    debug_fprintf(stderr, "repr + mod( strideBoundRepr - repr, %d )\n", stride_eq.get_coef(wc)); 
+    debug_fprintf(stderr, "stride_eq.get_coef(wc) %lld\n", stride_eq.get_coef(wc));
+    debug_fprintf(stderr, "repr + mod( strideBoundRepr - repr, %lld )\n", stride_eq.get_coef(wc));
 
     repr = ocg->CreatePlus(repr2, 
                            ocg->CreateIntegerMod(ocg->CreateMinus(strideBoundRepr, repr), 
@@ -1557,7 +1557,7 @@ namespace omega {
           case Wildcard_Var:
             num_wildcard++;
             wc = cvi.curr_var();
-            direction = cvi.curr_coef()>0?true:false;
+            direction = cvi.curr_coef() > 0;
             break;
           case Input_Var:
             if (cvi.curr_var()->get_position() > max_level)
@@ -1581,7 +1581,7 @@ namespace omega {
               case Wildcard_Var:
                 num_wildcard2++;
                 wc2 = cvi.curr_var();
-                direction2 = cvi.curr_coef()>0?true:false;
+                direction2 = cvi.curr_coef() > 0;
                 break;
               case Input_Var:
                 if (cvi.curr_var()->get_position() > max_level2)

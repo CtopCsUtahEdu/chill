@@ -754,7 +754,7 @@ int Conjunct::cost() {
 // declared above, not here; so we can simply create columns for the 
 // locals of each conj after doing the protected vars.  
 //
-Conjunct* merge_conjs(Conjunct* conj1, Conjunct* conj2,
+Conjunct* _merge_conjs(Conjunct* conj1, Conjunct* conj2,
                       Merge_Action action, Rel_Body *body) {
   // body must be set unless both conjuncts are from the same relation
   assert(body || conj1->relation() == conj2->relation());

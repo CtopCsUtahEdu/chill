@@ -432,9 +432,8 @@ bool from_same_statement(IR_Code *ir, IR_ArrayRef *a, IR_ArrayRef *b) {
 
 // Manu
 int stmtType(IR_Code *ir, const CG_outputRepr *repr) {
-  debug_fprintf(stderr, "stmtType() DIE \n"); 
-  exit(-1); 
-  return (ir->getStmtType(repr)); /// AIEEE returns a meaningless number encoding rose internals. 
+  auto rep = static_cast<const CG_chillRepr*>(repr);
+  return (rep->getChillCode().size() == 0 && rep->getChillCode()[0]->isBinaryOperator()) ? 1 : 0;
 }
 
 // Manu:: set the reduction operation
