@@ -4,7 +4,7 @@
 --call init() and use global variables to specify procedure and loop
 
 --Second parameter is procedure # and third is loop #
-init("mpeg4.c", "mpeg4_cpu", 0) 
+init("mpeg4.cu", "mpeg4_cpu", 0) 
 
 --dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,copy_to_shared methods
 dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,copy_to_shared methods

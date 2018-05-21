@@ -1,4 +1,4 @@
-init("tmv.c","normalMV",0)
+init("tmv.cu","normalMV",0)
 dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,
                       --copy_to_shared methods
 
@@ -10,7 +10,7 @@ N=1024
 TI=32
 --tile, "k" for the control loop for the "j" tile, with the final order
 --of {"ii", "k", "i", "j"}
-tile_by_index({"i","j"}, {TI,TI}, {l1_control="ii", l2_control="k"}, {"ii", "k", "i", "j"})
+tile_by_index(0, {"i","j"}, {TI,TI}, {l1_control="ii", l2_control="k"}, {"ii", "k", "i", "j"})
 --tile_by_index({"i"}, {TI}, {l1_control="ii"}, {"ii",  "i", "j"})
 --print_code()
 --tile_by_index({"i"}, {TI/32}, {l1_control="iii"}, {"ii", "k", "iii","i", "j"})
@@ -28,21 +28,21 @@ tile_by_index({"i","j"}, {TI,TI}, {l1_control="ii", l2_control="k"}, {"ii", "k",
 --given block and thread loops's indexes to the approviate values from
 --the set {"bx","by","tx","ty","tz"}. The second parameter specifies the
 --size of the arrays to be copied in the CUDA scaffolding.
-cudaize("tmv_GPU", {a=N, b=N, c=N*N},{block={"ii"}, thread={"i"}})
+cudaize(0, "tmv_GPU", {a=N, b=N, c=N*N},{block={"ii"}, thread={"i"}}, {})
 
 --print_code()
 
 --Does a datacopy, tile, and add_sync to get a shared memory copy
-copy_to_shared("tx", "b", 1)
+copy_to_shared(0, "tx", "b", 1)
 --copy_to_texture("b")
 --print_code()
 
-copy_to_shared("tx", "c", -16)
+copy_to_shared(0, "tx", "c", -16)
 --copy_to_texture("c")
 --print_code()
 
-copy_to_registers("k", "a")
-print_code()
+copy_to_registers(0, "k", "a")
+print_code(0)
 --unroll(0,5,0)
 --unroll(0,4,0)
 --unroll(2,4,16)

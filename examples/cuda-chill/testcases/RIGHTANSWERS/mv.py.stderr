@@ -1,0 +1,225 @@
+newVariable0 = newVariable0 + c[chill_t21][chill_t20] * b[chill_t21]newVariable0 = a[32 * chill_t17 + chill_t19]a[32 * chill_t17 + chill_t19] = newVariable0void normalMV(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float a[1024]float *aa[32 * t2 + t4]void normalMV(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float c[1024][1024]float *c[1024]c[t10][32 * t2 + t6]void normalMV(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float b[1024]float *bb[t10]void normalMV(float c[1024][1024], float a[1024], float b[1024]) {
+}{
+}float a[1024]float *a1024 * sizeof(float)cudaMemcpy(devRW0ptr, a, 1024 * sizeof(float), cudaMemcpyHostToDevice)1024 * sizeof(float)cudaMemcpy(devRO0ptr, b, 1024 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)cudaMemcpy(devRO1ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice)321dim3 dimBlock0 = dim3(32)float c[1024][1024]mv_GPU<<<dimGrid0,dimBlock0>>>(devRW0ptr, devRO0ptr, (float (*)[1024])devRO1ptr)// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 31; t2 += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    newVariable0 = a[32 * t2 + t4];
+  // ~cuda~ preferredIdx: k
+  for (t4 = 0; t4 <= 15; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: j
+      for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+        newVariable0 = newVariable0 + c[t10][32 * t2 + t6] * b[t10];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    a[32 * t2 + t4] = newVariable0;
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 31; t2 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      newVariable0 = a[32 * t2 + t4];
+    // ~cuda~ preferredIdx: k
+    for (t4 = 0; t4 <= 15; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: j
+        for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+          newVariable0 = newVariable0 + c[t10][32 * t2 + t6] * b[t10];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      a[32 * t2 + t4] = newVariable0;
+  }
+}// ~cuda~ preferredIdx: bx
+for (t2 = 0; t2 <= 31; t2 += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    newVariable0 = a[32 * t2 + t4];
+  // ~cuda~ preferredIdx: k
+  for (t4 = 0; t4 <= 15; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: j
+      for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+        newVariable0 = newVariable0 + c[t10][32 * t2 + t6] * b[t10];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    a[32 * t2 + t4] = newVariable0;
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  // ~cuda~ preferredIdx: bx
+  for (t2 = 0; t2 <= 31; t2 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      newVariable0 = a[32 * t2 + t4];
+    // ~cuda~ preferredIdx: k
+    for (t4 = 0; t4 <= 15; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: j
+        for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+          newVariable0 = newVariable0 + c[t10][32 * t2 + t6] * b[t10];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      a[32 * t2 + t4] = newVariable0;
+  }
+}t2 = 0t2 <= 31t2 += 1bx = 0bx <= 31bx += 1// ~cuda~ preferredIdx: bx
+for (bx = 0; bx <= 31; bx += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    newVariable0 = a[32 * bx + t4];
+  // ~cuda~ preferredIdx: k
+  for (t4 = 0; t4 <= 15; t4 += 1) 
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 31; t6 += 1) 
+      // ~cuda~ preferredIdx: j
+      for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+        newVariable0 = newVariable0 + c[t10][32 * bx + t6] * b[t10];
+  // ~cuda~ preferredIdx: tx
+  for (t4 = 0; t4 <= 31; t4 += 1) 
+    a[32 * bx + t4] = newVariable0;
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  int bx;
+  for (bx = 0; bx <= 31; bx += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      newVariable0 = a[32 * bx + t4];
+    // ~cuda~ preferredIdx: k
+    for (t4 = 0; t4 <= 15; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: j
+        for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+          newVariable0 = newVariable0 + c[t10][32 * bx + t6] * b[t10];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      a[32 * bx + t4] = newVariable0;
+  }
+}t4 = 0t4 <= 31t4 += 1tx = 0tx <= 31tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 31; tx += 1) 
+  newVariable0 = a[32 * bx + tx];__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  int tx;
+  int bx;
+  for (bx = 0; bx <= 31; bx += 1) {
+    for (tx = 0; tx <= 31; tx += 1) 
+      newVariable0 = a[32 * bx + tx];
+    // ~cuda~ preferredIdx: k
+    for (t4 = 0; t4 <= 15; t4 += 1) 
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 31; t6 += 1) 
+        // ~cuda~ preferredIdx: j
+        for (t10 = 64 * t4; t10 <= 64 * t4 + 63; t10 += 1) 
+          newVariable0 = newVariable0 + c[t10][32 * bx + t6] * b[t10];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      a[32 * bx + t4] = newVariable0;
+  }
+}t4 = 0t4 <= 15t4 += 1k = 0k <= 15k += 1// ~cuda~ preferredIdx: k
+for (k = 0; k <= 15; k += 1) 
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 31; t6 += 1) 
+    // ~cuda~ preferredIdx: j
+    for (t10 = 64 * k; t10 <= 64 * k + 63; t10 += 1) 
+      newVariable0 = newVariable0 + c[t10][32 * bx + t6] * b[t10];t6 = 0t6 <= 31t6 += 1tx = 0tx <= 31tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 31; tx += 1) 
+  // ~cuda~ preferredIdx: j
+  for (t10 = 64 * k; t10 <= 64 * k + 63; t10 += 1) 
+    newVariable0 = newVariable0 + c[t10][32 * bx + tx] * b[t10];__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  int k;
+  int tx;
+  int bx;
+  for (bx = 0; bx <= 31; bx += 1) {
+    for (tx = 0; tx <= 31; tx += 1) 
+      newVariable0 = a[32 * bx + tx];
+    for (k = 0; k <= 15; k += 1) 
+      for (tx = 0; tx <= 31; tx += 1) 
+        // ~cuda~ preferredIdx: j
+        for (t10 = 64 * k; t10 <= 64 * k + 63; t10 += 1) 
+          newVariable0 = newVariable0 + c[t10][32 * bx + tx] * b[t10];
+    // ~cuda~ preferredIdx: tx
+    for (t4 = 0; t4 <= 31; t4 += 1) 
+      a[32 * bx + t4] = newVariable0;
+  }
+}t10 = 64 * kt10 <= 64 * k + 63t10 += 1j = 64 * kj <= 64 * k + 63j += 1// ~cuda~ preferredIdx: j
+for (j = 64 * k; j <= 64 * k + 63; j += 1) 
+  newVariable0 = newVariable0 + c[j][32 * bx + tx] * b[j];t4 = 0t4 <= 31t4 += 1tx = 0tx <= 31tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 31; tx += 1) 
+  a[32 * bx + tx] = newVariable0;int bxint txfloat newVariable0float a[1024]int kint jfloat c[1024][1024]float b[1024]float a[1024]float c[1024][1024]float b[1024]float a[1024]__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  float newVariable0;
+  int by = blockIdx.y;
+  int j;
+  int k;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 31; bx += 1) {
+    for (tx = 0; tx <= 31; tx += 1) 
+      newVariable0 = a[32 * bx + tx];
+    for (k = 0; k <= 15; k += 1) 
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (j = 64 * k; j <= 64 * k + 63; j += 1) 
+          newVariable0 = newVariable0 + c[j][32 * bx + tx] * b[j];
+    for (tx = 0; tx <= 31; tx += 1) 
+      a[32 * bx + tx] = newVariable0;
+  }
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  float newVariable0;
+  int by = blockIdx.y;
+  int j;
+  int k;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 31; bx += 1) {
+    for (tx = 0; tx <= 31; tx += 1) 
+      newVariable0 = a[32 * bx + tx];
+    for (k = 0; k <= 15; k += 1) 
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (j = 64 * k; j <= 64 * k + 63; j += 1) 
+          newVariable0 = newVariable0 + c[j][32 * bx + tx] * b[j];
+    for (tx = 0; tx <= 31; tx += 1) 
+      a[32 * bx + tx] = newVariable0;
+  }
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  float newVariable0;
+  int by = blockIdx.y;
+  int j;
+  int k;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 31; bx += 1) {
+    for (tx = 0; tx <= 31; tx += 1) 
+      newVariable0 = a[32 * bx + tx];
+    for (k = 0; k <= 15; k += 1) 
+      for (tx = 0; tx <= 31; tx += 1) 
+        for (j = 64 * k; j <= 64 * k + 63; j += 1) 
+          newVariable0 = newVariable0 + c[j][32 * bx + tx] * b[j];
+    for (tx = 0; tx <= 31; tx += 1) 
+      a[32 * bx + tx] = newVariable0;
+  }
+}__global__ void mv_GPU(float *a, float *c[1024], float *b) {
+  float newVariable0;
+  int by = blockIdx.y;
+  int j;
+  int k;
+  int tx = threadIdx.x;
+  int bx = blockIdx.x;
+  {
+    {
+      newVariable0 = a[32 * bx + tx];
+    }
+    for (k = 0; k <= 15; k += 1) 
+      {
+        for (j = 64 * k; j <= 64 * k + 63; j += 1) 
+          newVariable0 = newVariable0 + c[j][32 * bx + tx] * b[j];
+      }
+    {
+      a[32 * bx + tx] = newVariable0;
+    }
+  }
+}

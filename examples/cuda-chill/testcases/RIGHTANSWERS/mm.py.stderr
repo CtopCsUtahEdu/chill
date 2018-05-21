@@ -1,1 +1,914 @@
-12817float a[1024][1024]1665float b[1024][1024]
+12817float a[1024][1024]1665float b[1024][1024]48float c[1024][1024]_P3[(chill_t274 - (64 * chill_t263 + chill_t267)) / 16][(chill_t270 - (128 * chill_t262 + chill_t266)) / 16] = _P3[(chill_t274 - (64 * chill_t263 + chill_t267)) / 16][(chill_t270 - (128 * chill_t262 + chill_t266)) / 16] + _P1[chill_t270 - 128 * chill_t262][chill_t276 - 16 * chill_t264] * _P2[chill_t276 - 16 * chill_t264][chill_t274 - 64 * chill_t263]_P1[chill_t271 - 128 * chill_t262][chill_t269 - 16 * chill_t264] = a[chill_t269][chill_t271]_P2[chill_t271 - 16 * chill_t264][chill_t269 - 64 * chill_t263] = b[chill_t269][chill_t271]_P3[(chill_t277 - (64 * chill_t263 + chill_t267)) / 16][(chill_t278 - (128 * chill_t262 + chill_t266)) / 16] = c[chill_t277][chill_t278]c[chill_t277][chill_t278] = _P3[(chill_t277 - (64 * chill_t263 + chill_t267)) / 16][(chill_t278 - (128 * chill_t262 + chill_t266)) / 16]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float *c[1024]c[t10][t12]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float a[1024][1024]float *a[1024]a[16 * t6 + t10][128 * t2 + t8]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float b[1024][1024]float *b[1024]b[64 * t4 + t10][16 * t6 + t8]void normalMM(float c[1024][1024], float a[1024][1024], float b[1024][1024]) {
+}{
+}float c[1024][1024]float *c[1024]1048576 * sizeof(float)cudaMemcpy(devRW3ptr, c, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)cudaMemcpy(devRO0ptr, a, 1048576 * sizeof(float), cudaMemcpyHostToDevice)1048576 * sizeof(float)cudaMemcpy(devRO1ptr, b, 1048576 * sizeof(float), cudaMemcpyHostToDevice)816dim3 dimBlock0 = dim3(16, 16)float c[1024][1024]float a[1024][1024]float b[1024][1024]mm_GPU<<<dimGrid0,dimBlock0>>>((float (*)[1024])devRW3ptr, (float (*)[1024])devRO0ptr, (float (*)[1024])devRO1ptr)// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 7; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 15; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+            _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16] = c[t10][t12];
+    // ~cuda~ preferredIdx: kk
+    for (t6 = 0; t6 <= 63; t6 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 127; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          _P1[128 * t2 + t8 - 128 * t2][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * t2 + t8];
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 63; t10 += 1) 
+          _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+      // ~cuda~ threadLoop preferredIdx: k
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: tx sync
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t12 = 0; t12 <= 15; t12 += 1) 
+            // ~cuda~ preferredIdx: iii
+            for (t14 = 0; t14 <= 7; t14 += 1) 
+              // ~cuda~ preferredIdx: jjj
+              for (t22 = 0; t22 <= 3; t22 += 1) 
+                _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] + _P1[128 * t2 + t10 + 16 * t14 - 128 * t2][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+    }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+            c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16];
+  }__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 7; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 15; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+              _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * t2 + t8 - 128 * t2][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * t2 + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] + _P1[128 * t2 + t10 + 16 * t14 - 128 * t2][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16];
+    }
+}// ~cuda~ blockLoop preferredIdx: bx
+for (t2 = 0; t2 <= 7; t2 += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 15; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+            _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16] = c[t10][t12];
+    // ~cuda~ preferredIdx: kk
+    for (t6 = 0; t6 <= 63; t6 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 127; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          _P1[128 * t2 + t8 - 128 * t2][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * t2 + t8];
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 63; t10 += 1) 
+          _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+      // ~cuda~ threadLoop preferredIdx: k
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: tx sync
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t12 = 0; t12 <= 15; t12 += 1) 
+            // ~cuda~ preferredIdx: iii
+            for (t14 = 0; t14 <= 7; t14 += 1) 
+              // ~cuda~ preferredIdx: jjj
+              for (t22 = 0; t22 <= 3; t22 += 1) 
+                _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] + _P1[128 * t2 + t10 + 16 * t14 - 128 * t2][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+    }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+            c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16];
+  }__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  // ~cuda~ blockLoop preferredIdx: bx
+  for (t2 = 0; t2 <= 7; t2 += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 15; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+              _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * t2 + t8 - 128 * t2][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * t2 + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * t2 + t10 + 16 * t14 - (128 * t2 + t10)) / 16] + _P1[128 * t2 + t10 + 16 * t14 - 128 * t2][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * t2 + t6; t12 <= 128 * t2 + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * t2 + t6)) / 16];
+    }
+}t2 = 0t2 <= 7t2 += 1bx = 0bx <= 7bx += 1// ~cuda~ blockLoop preferredIdx: bx
+for (bx = 0; bx <= 7; bx += 1) 
+  // ~cuda~ preferredIdx: by
+  for (t4 = 0; t4 <= 15; t4 += 1) {
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+            _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * bx + t6)) / 16] = c[t10][t12];
+    // ~cuda~ preferredIdx: kk
+    for (t6 = 0; t6 <= 63; t6 += 1) {
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 127; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+      // ~cuda~ preferredIdx: tx sync
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t10 = 0; t10 <= 63; t10 += 1) 
+          _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+      // ~cuda~ threadLoop preferredIdx: k
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: tx sync
+        for (t10 = 0; t10 <= 15; t10 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t12 = 0; t12 <= 15; t12 += 1) 
+            // ~cuda~ preferredIdx: iii
+            for (t14 = 0; t14 <= 7; t14 += 1) 
+              // ~cuda~ preferredIdx: jjj
+              for (t22 = 0; t22 <= 3; t22 += 1) 
+                _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+    }
+    // ~cuda~ preferredIdx: tx
+    for (t6 = 0; t6 <= 15; t6 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t8 = 0; t8 <= 15; t8 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+          // ~cuda~ preferredIdx: jjj
+          for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+            c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+  }__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    // ~cuda~ preferredIdx: by
+    for (t4 = 0; t4 <= 15; t4 += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * bx + t6)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * t4 + t10 - 64 * t4] = b[64 * t4 + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * t4 + 16 * t22 + t12 - (64 * t4 + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * t4 + 16 * t22 + t12 - 64 * t4];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * t4 + t8; t10 <= 64 * t4 + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * t4 + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t4 = 0t4 <= 15t4 += 1by = 0by <= 15by += 1// ~cuda~ preferredIdx: by
+for (by = 0; by <= 15; by += 1) {
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 15; t6 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      // ~cuda~ preferredIdx: iii
+      for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+          _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16] = c[t10][t12];
+  // ~cuda~ preferredIdx: kk
+  for (t6 = 0; t6 <= 63; t6 += 1) {
+    // ~cuda~ preferredIdx: tx sync
+    for (t8 = 0; t8 <= 127; t8 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+    // ~cuda~ preferredIdx: tx sync
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t10 = 0; t10 <= 63; t10 += 1) 
+        _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+    // ~cuda~ threadLoop preferredIdx: k
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      // ~cuda~ preferredIdx: tx sync
+      for (t10 = 0; t10 <= 15; t10 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t12 = 0; t12 <= 15; t12 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t14 = 0; t14 <= 7; t14 += 1) 
+            // ~cuda~ preferredIdx: jjj
+            for (t22 = 0; t22 <= 3; t22 += 1) 
+              _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+  }
+  // ~cuda~ preferredIdx: tx
+  for (t6 = 0; t6 <= 15; t6 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t8 = 0; t8 <= 15; t8 += 1) 
+      // ~cuda~ preferredIdx: iii
+      for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+        // ~cuda~ preferredIdx: jjj
+        for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+          c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+}__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t6 = 0t6 <= 15t6 += 1tx = 0tx <= 15tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 15; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    // ~cuda~ preferredIdx: iii
+    for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+      // ~cuda~ preferredIdx: jjj
+      for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+        _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + tx)) / 16] = c[t10][t12];__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+              _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + tx)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t8 = 0t8 <= 15t8 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  // ~cuda~ preferredIdx: iii
+  for (t10 = 64 * by + ty; t10 <= 64 * by + ty + 48; t10 += 16) 
+    // ~cuda~ preferredIdx: jjj
+    for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+      _P3[(t10 - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16] = c[t10][t12];__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + ty; t10 <= 64 * by + ty + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+              _P3[(t10 - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16] = c[t10][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t10 = 64 * by + tyt10 <= 64 * by + ty + 48t10 += 16iii = 64 * by + tyiii <= 64 * by + ty + 48iii += 16// ~cuda~ preferredIdx: iii
+for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+  // ~cuda~ preferredIdx: jjj
+  for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+    _P3[(iii - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16] = c[iii][t12];__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16] = c[iii][t12];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t12 = 128 * bx + txt12 <= 128 * bx + tx + 112t12 += 16jjj = 128 * bx + txjjj <= 128 * bx + tx + 112jjj += 16// ~cuda~ preferredIdx: jjj
+for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+  _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int jjj;
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+      // ~cuda~ preferredIdx: kk
+      for (t6 = 0; t6 <= 63; t6 += 1) {
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 127; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            _P1[128 * bx + t8 - 128 * bx][16 * t6 + t10 - 16 * t6] = a[16 * t6 + t10][128 * bx + t8];
+        // ~cuda~ preferredIdx: tx sync
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: ty
+          for (t10 = 0; t10 <= 63; t10 += 1) 
+            _P2[16 * t6 + t8 - 16 * t6][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * t6 + t8];
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * t6 + t8 - 16 * t6] * _P2[16 * t6 + t8 - 16 * t6][64 * by + 16 * t22 + t12 - 64 * by];
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t6 = 0t6 <= 63t6 += 1kk = 0kk <= 63kk += 1// ~cuda~ preferredIdx: kk
+for (kk = 0; kk <= 63; kk += 1) {
+  // ~cuda~ preferredIdx: tx sync
+  for (t8 = 0; t8 <= 127; t8 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t10 = 0; t10 <= 15; t10 += 1) 
+      _P1[128 * bx + t8 - 128 * bx][16 * kk + t10 - 16 * kk] = a[16 * kk + t10][128 * bx + t8];
+  // ~cuda~ preferredIdx: tx sync
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t10 = 0; t10 <= 63; t10 += 1) 
+      _P2[16 * kk + t8 - 16 * kk][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * kk + t8];
+  // ~cuda~ threadLoop preferredIdx: k
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    // ~cuda~ preferredIdx: tx sync
+    for (t10 = 0; t10 <= 15; t10 += 1) 
+      // ~cuda~ preferredIdx: ty
+      for (t12 = 0; t12 <= 15; t12 += 1) 
+        // ~cuda~ preferredIdx: iii
+        for (t14 = 0; t14 <= 7; t14 += 1) 
+          // ~cuda~ preferredIdx: jjj
+          for (t22 = 0; t22 <= 3; t22 += 1) 
+            _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * kk + t8 - 16 * kk] * _P2[16 * kk + t8 - 16 * kk][64 * by + 16 * t22 + t12 - 64 * by];
+}t8 = 0t8 <= 127t8 += 1tx = 0tx <= 127tx += 1// ~cuda~ preferredIdx: 
+for (tx = 0; tx <= 127; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t10 = 0; t10 <= 15; t10 += 1) 
+    _P1[128 * bx + tx - 128 * bx][16 * kk + t10 - 16 * kk] = a[16 * kk + t10][128 * bx + tx];t10 = 0t10 <= 15t10 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];t8 = 0t8 <= 15t8 += 1tx = 0tx <= 15tx += 1// ~cuda~ preferredIdx: tx sync
+for (tx = 0; tx <= 15; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t10 = 0; t10 <= 63; t10 += 1) 
+    _P2[16 * kk + tx - 16 * kk][64 * by + t10 - 64 * by] = b[64 * by + t10][16 * kk + tx];t10 = 0t10 <= 63t10 += 1ty = 0ty <= 63ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 63; ty += 1) 
+  _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  int kk;
+  int jjj;
+  int iii;
+  int ty;
+  int tx;
+  int by;
+  int bx;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+      for (kk = 0; kk <= 63; kk += 1) {
+        for (tx = 0; tx <= 127; tx += 1) 
+          for (ty = 0; ty <= 15; ty += 1) 
+            _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];
+        __syncthreads();
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (ty = 0; ty <= 63; ty += 1) 
+            _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];
+        __syncthreads();
+        // ~cuda~ threadLoop preferredIdx: k
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: tx sync
+          for (t10 = 0; t10 <= 15; t10 += 1) 
+            // ~cuda~ preferredIdx: ty
+            for (t12 = 0; t12 <= 15; t12 += 1) 
+              // ~cuda~ preferredIdx: iii
+              for (t14 = 0; t14 <= 7; t14 += 1) 
+                // ~cuda~ preferredIdx: jjj
+                for (t22 = 0; t22 <= 3; t22 += 1) 
+                  _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * kk + t8 - 16 * kk] * _P2[16 * kk + t8 - 16 * kk][64 * by + 16 * t22 + t12 - 64 * by];
+        __syncthreads();
+      }
+      // ~cuda~ preferredIdx: tx
+      for (t6 = 0; t6 <= 15; t6 += 1) 
+        // ~cuda~ preferredIdx: ty
+        for (t8 = 0; t8 <= 15; t8 += 1) 
+          // ~cuda~ preferredIdx: iii
+          for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+            // ~cuda~ preferredIdx: jjj
+            for (t12 = 128 * bx + t6; t12 <= 128 * bx + t6 + 112; t12 += 16) 
+              c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + t6)) / 16];
+    }
+}t8 = 0t8 <= 15t8 += 1k = 0k <= 15k += 1// ~cuda~ threadLoop preferredIdx: k
+for (k = 0; k <= 15; k += 1) 
+  // ~cuda~ preferredIdx: tx sync
+  for (t10 = 0; t10 <= 15; t10 += 1) 
+    // ~cuda~ preferredIdx: ty
+    for (t12 = 0; t12 <= 15; t12 += 1) 
+      // ~cuda~ preferredIdx: iii
+      for (t14 = 0; t14 <= 7; t14 += 1) 
+        // ~cuda~ preferredIdx: jjj
+        for (t22 = 0; t22 <= 3; t22 += 1) 
+          _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + t10 + 16 * t14 - (128 * bx + t10)) / 16] + _P1[128 * bx + t10 + 16 * t14 - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * t22 + t12 - 64 * by];t10 = 0t10 <= 15t10 += 1tx = 0tx <= 15tx += 1// ~cuda~ preferredIdx: 
+for (tx = 0; tx <= 15; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t12 = 0; t12 <= 15; t12 += 1) 
+    // ~cuda~ preferredIdx: iii
+    for (t14 = 0; t14 <= 7; t14 += 1) 
+      // ~cuda~ preferredIdx: jjj
+      for (t22 = 0; t22 <= 3; t22 += 1) 
+        _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + tx + 16 * t14 - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * t22 + t12 - (64 * by + t12)) / 16][(128 * bx + tx + 16 * t14 - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * t14 - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * t22 + t12 - 64 * by];t12 = 0t12 <= 15t12 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  // ~cuda~ preferredIdx: iii
+  for (t14 = 0; t14 <= 7; t14 += 1) 
+    // ~cuda~ preferredIdx: jjj
+    for (t22 = 0; t22 <= 3; t22 += 1) 
+      _P3[(64 * by + 16 * t22 + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * t14 - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * t22 + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * t14 - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * t14 - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * t22 + ty - 64 * by];t14 = 0t14 <= 7t14 += 1iii = 0iii <= 7iii += 1// ~cuda~ preferredIdx: iii
+for (iii = 0; iii <= 7; iii += 1) 
+  // ~cuda~ preferredIdx: jjj
+  for (t22 = 0; t22 <= 3; t22 += 1) 
+    _P3[(64 * by + 16 * t22 + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * t22 + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * t22 + ty - 64 * by];t22 = 0t22 <= 3t22 += 1jjj = 0jjj <= 3jjj += 1// ~cuda~ preferredIdx: jjj
+for (jjj = 0; jjj <= 3; jjj += 1) 
+  _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * jjj + ty - 64 * by];t6 = 0t6 <= 15t6 += 1tx = 0tx <= 15tx += 1// ~cuda~ preferredIdx: tx
+for (tx = 0; tx <= 15; tx += 1) 
+  // ~cuda~ preferredIdx: ty
+  for (t8 = 0; t8 <= 15; t8 += 1) 
+    // ~cuda~ preferredIdx: iii
+    for (t10 = 64 * by + t8; t10 <= 64 * by + t8 + 48; t10 += 16) 
+      // ~cuda~ preferredIdx: jjj
+      for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+        c[t10][t12] = _P3[(t10 - (64 * by + t8)) / 16][(t12 - (128 * bx + tx)) / 16];t8 = 0t8 <= 15t8 += 1ty = 0ty <= 15ty += 1// ~cuda~ preferredIdx: ty
+for (ty = 0; ty <= 15; ty += 1) 
+  // ~cuda~ preferredIdx: iii
+  for (t10 = 64 * by + ty; t10 <= 64 * by + ty + 48; t10 += 16) 
+    // ~cuda~ preferredIdx: jjj
+    for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+      c[t10][t12] = _P3[(t10 - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16];t10 = 64 * by + tyt10 <= 64 * by + ty + 48t10 += 16iii = 64 * by + tyiii <= 64 * by + ty + 48iii += 16// ~cuda~ preferredIdx: iii
+for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+  // ~cuda~ preferredIdx: jjj
+  for (t12 = 128 * bx + tx; t12 <= 128 * bx + tx + 112; t12 += 16) 
+    c[iii][t12] = _P3[(iii - (64 * by + ty)) / 16][(t12 - (128 * bx + tx)) / 16];t12 = 128 * bx + txt12 <= 128 * bx + tx + 112t12 += 16jjj = 128 * bx + txjjj <= 128 * bx + tx + 112jjj += 16// ~cuda~ preferredIdx: jjj
+for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+  c[iii][jjj] = _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16];int bxint byint txint tyint iiiint jjjfloat _P3[4][8]float c[1024][1024]int kk__shared__ float _P1[128][17]float a[1024][1024]__shared__ float _P2[16][65]float b[1024][1024]int k(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()(CudaSyncthreads : ) __syncthreads()float _P3[4][8]float c[1024][1024]__shared__ float _P1[128][17]float a[1024][1024]__shared__ float _P2[16][65]float b[1024][1024]float _P3[4][8]float _P3[4][8]__shared__ float _P1[128][17]__shared__ float _P2[16][65]float c[1024][1024]float _P3[4][8]__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  __shared__ float _P2[16][65];
+  __shared__ float _P1[128][17];
+  float _P3[4][8];
+  int k;
+  int kk;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+      for (kk = 0; kk <= 63; kk += 1) {
+        for (tx = 0; tx <= 127; tx += 1) 
+          for (ty = 0; ty <= 15; ty += 1) 
+            _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];
+        __syncthreads();
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (ty = 0; ty <= 63; ty += 1) 
+            _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];
+        __syncthreads();
+        for (k = 0; k <= 15; k += 1) {
+          for (tx = 0; tx <= 15; tx += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (iii = 0; iii <= 7; iii += 1) 
+                for (jjj = 0; jjj <= 3; jjj += 1) 
+                  _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * jjj + ty - 64 * by];
+          __syncthreads();
+        }
+        __syncthreads();
+      }
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              c[iii][jjj] = _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16];
+    }
+}__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  __shared__ float _P2[16][65];
+  __shared__ float _P1[128][17];
+  float _P3[4][8];
+  int k;
+  int kk;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+      for (kk = 0; kk <= 63; kk += 1) {
+        for (tx = 0; tx <= 127; tx += 1) 
+          for (ty = 0; ty <= 15; ty += 1) 
+            _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];
+        __syncthreads();
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (ty = 0; ty <= 63; ty += 1) 
+            _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];
+        __syncthreads();
+        for (k = 0; k <= 15; k += 1) {
+          for (tx = 0; tx <= 15; tx += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (iii = 0; iii <= 7; iii += 1) 
+                for (jjj = 0; jjj <= 3; jjj += 1) 
+                  _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * jjj + ty - 64 * by];
+          __syncthreads();
+        }
+        __syncthreads();
+      }
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              c[iii][jjj] = _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16];
+    }
+}__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  __shared__ float _P2[16][65];
+  __shared__ float _P1[128][17];
+  float _P3[4][8];
+  int k;
+  int kk;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  for (bx = 0; bx <= 7; bx += 1) 
+    for (by = 0; by <= 15; by += 1) {
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+      for (kk = 0; kk <= 63; kk += 1) {
+        for (tx = 0; tx <= 127; tx += 1) 
+          for (ty = 0; ty <= 15; ty += 1) 
+            _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];
+        __syncthreads();
+        for (tx = 0; tx <= 15; tx += 1) 
+          for (ty = 0; ty <= 63; ty += 1) 
+            _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];
+        __syncthreads();
+        for (k = 0; k <= 15; k += 1) {
+          for (tx = 0; tx <= 15; tx += 1) 
+            for (ty = 0; ty <= 15; ty += 1) 
+              for (iii = 0; iii <= 7; iii += 1) 
+                for (jjj = 0; jjj <= 3; jjj += 1) 
+                  _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * jjj + ty - 64 * by];
+          __syncthreads();
+        }
+        __syncthreads();
+      }
+      for (tx = 0; tx <= 15; tx += 1) 
+        for (ty = 0; ty <= 15; ty += 1) 
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              c[iii][jjj] = _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16];
+    }
+}__global__ void mm_GPU(float *c[1024], float *a[1024], float *b[1024]) {
+  __shared__ float _P2[16][65];
+  __shared__ float _P1[128][17];
+  float _P3[4][8];
+  int k;
+  int kk;
+  int jjj;
+  int iii;
+  int ty = threadIdx.y;
+  int tx = threadIdx.x;
+  int by = blockIdx.y;
+  int bx = blockIdx.x;
+  {
+    {
+      {
+        {
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16] = c[iii][jjj];
+        }
+      }
+      for (kk = 0; kk <= 63; kk += 1) {
+        {
+          {
+            _P1[128 * bx + tx - 128 * bx][16 * kk + ty - 16 * kk] = a[16 * kk + ty][128 * bx + tx];
+          }
+        }
+        __syncthreads();
+        {
+          {
+            _P2[16 * kk + tx - 16 * kk][64 * by + ty - 64 * by] = b[64 * by + ty][16 * kk + tx];
+          }
+        }
+        __syncthreads();
+        for (k = 0; k <= 15; k += 1) {
+          {
+            {
+              for (iii = 0; iii <= 7; iii += 1) 
+                for (jjj = 0; jjj <= 3; jjj += 1) 
+                  _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] = _P3[(64 * by + 16 * jjj + ty - (64 * by + ty)) / 16][(128 * bx + tx + 16 * iii - (128 * bx + tx)) / 16] + _P1[128 * bx + tx + 16 * iii - 128 * bx][16 * kk + k - 16 * kk] * _P2[16 * kk + k - 16 * kk][64 * by + 16 * jjj + ty - 64 * by];
+            }
+          }
+          __syncthreads();
+        }
+        __syncthreads();
+      }
+      {
+        {
+          for (iii = 64 * by + ty; iii <= 64 * by + ty + 48; iii += 16) 
+            for (jjj = 128 * bx + tx; jjj <= 128 * bx + tx + 112; jjj += 16) 
+              c[iii][jjj] = _P3[(iii - (64 * by + ty)) / 16][(jjj - (128 * bx + tx)) / 16];
+        }
+      }
+    }
+  }
+}
