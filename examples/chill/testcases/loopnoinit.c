@@ -1,6 +1,6 @@
 
 
-void main( )
+int main( )
 {
    float A[ 48 ];
    
@@ -9,5 +9,4 @@ void main( )
    for (; i< 48; i++) {
       A[i] = i;
    }
-
 }

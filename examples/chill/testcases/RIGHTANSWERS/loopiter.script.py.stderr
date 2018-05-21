@@ -1,12 +1,5 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/loopiter.c", line 3: warning: 
-          return type of function "main" must be "int"
-  void main( )
-       ^
-
 "/home/derick/dev/chill/chill-src/examples/chill/testcases/loopiter.c", line 5: warning: 
           variable "A" was set but never used
-     float A[ 48 ];
+     float A[48];
            ^
 
-for (int i = 0; i < 48; i++) 
-  A[i] = (float)i;

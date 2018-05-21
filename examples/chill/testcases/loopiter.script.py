@@ -1,7 +1,5 @@
 from chill import *
 
-#>SKIP
-
 source('loopiter.c')
 destination('loopitermodified.c')
 
