@@ -38,14 +38,17 @@ namespace omega {
         replaced = NULL;
         run(n->getChild(i), oldvar, n, newvar, replaced);
         if (replaced)
-          n->replaceChild(n->getChild(i), replaced);
+//          n->replaceChild(n->getChild(i), replaced);
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+          n->setChild(i, replaced);
       }
     }
 
     virtual void runS(chillAST_DeclRefExpr *n, const char *oldvar, chillAST_node* parent, CG_chillRepr *newvar, chillAST_node *&newnode) {
       if (streq( oldvar,  n->declarationName)) {
         chillAST_node *firstn = newvar->chillnodes[0];
-        firstn->parent = parent;
+// Mahdi: Commented to correct embedded iteration space: from Tuowen's topdown branch
+//        firstn->parent = parent;
         newnode = firstn;
       }
     }
@@ -845,7 +848,8 @@ namespace omega {
       //debug_fprintf(stderr, "CG_chillBuilder::CreateMinus()  unary\n");
       chillAST_node *rAST = crop->chillnodes[0]; // always just one?
       chillAST_UnaryOperator *ins = new chillAST_UnaryOperator("-", true, rAST->clone()); // clone?
-      delete crop;  // ?? note: the chillRepr, not the chillAST_node 
+// Mahdi: Comment to correct embedded iteration space: from Tuowen's topdown branch
+//      delete crop;  // ?? note: the chillRepr, not the chillAST_node 
       return new CG_chillRepr(ins);
     } else {
       //debug_fprintf(stderr, "binary\n");
@@ -856,7 +860,8 @@ namespace omega {
       
       chillAST_BinaryOperator *bop = new chillAST_BinaryOperator(lAST->clone(), "-", rAST->clone()); // clone??
       
-      delete clop; delete crop; // ?? note: the chillReprs, not the chillAST_nodes
+// Mahdi: Comment to correct embedded iteration space: from Tuowen's topdown branch
+//      delete clop; delete crop; // ?? note: the chillReprs, not the chillAST_nodes
       return new CG_chillRepr(bop);
     }
   }
@@ -885,7 +890,8 @@ namespace omega {
     chillAST_node *rAST = crop->chillnodes[0]; // always just one?
     
     chillAST_BinaryOperator *binop = new chillAST_BinaryOperator( lAST, "*", rAST );
-    delete lop; delete rop; // ?? 
+// Mahdi: Comment to correct embedded iteration space: from Tuowen's topdown branch
+//    delete lop; delete rop; // ?? 
     //debug_fprintf(stderr, "CG_chillBuilder::CreateTimes() returning a CG_chillRepr with a binop inside\n");
     return new CG_chillRepr( binop );
   }

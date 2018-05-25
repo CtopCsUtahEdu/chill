@@ -164,7 +164,14 @@ protected:
   mutable int last_compute_effort_;
   
 protected:
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+// init_loop is renamed as buildIS, actualy commented in Tuowen's branch, it is related to current way of 
+// generating iteration space that Tuowen may want to keep, so I am leaving it in there for now 
   bool init_loop(std::vector<ir_tree_node *> &ir_tree, std::vector<ir_tree_node *> &ir_stmt);
+  // Mahdi: Following two functions are added for above reason
+  void buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexicalOrder,std::vector<ir_tree_node*> &ctrls, int level);
+  void align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<omega::CG_outputRepr*> &vars_replacement,int level);
+
   int get_dep_dim_of(int stmt, int level) const;
   int get_last_dep_dim_before(int stmt, int level) const;
   std::vector<omega::Relation> getNewIS() const;
