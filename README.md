@@ -28,7 +28,7 @@ Note: you can also create the build directory somewhere else and substitute `..`
 
 1. clone repository, for example: `git clone https://echo12.cs.utah.edu/dhuth/chill-dev.git`
 2. make a build directory somewhere outside of the cloned repository.
-3. cd into the newly created build directory and run /path/to/the/cloned/repository/bootstrap
+3. cd into the newly created build directory and run `.bootstrap`
 4. run `./configure --with-rose=<...> --with-boost=<...> --with-iegen=<...>` (optionally specify `--enable-cuda=yes` to build cuda-chill intsead)
 5. run make
 
