@@ -1599,6 +1599,18 @@ omega::Relation Loop::parseExpWithWhileToRel(omega::CG_outputRepr *repr,
 
 }
 
+// Mahdi: A helper function to correct embedded iteration space: from Tuowen's topdown branch
+// buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
+// however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
+extern std::string index_name(int level);
+
+typedef struct depRelationParts{
+  omega::Relation write_st_is;
+  omega::Relation write_st_no;
+  omega::Relation read_st_is;
+  omega::Relation read_st_no;
+  omega::Relation equality_st_is;
+}depRelParts;
 
 
 /*!
@@ -1615,15 +1627,16 @@ std::vector<std::pair<std::string, std::string >>
   int stmt_num = 1, level = 1, whileLoop_stmt_num = 1;
 
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
-  replaceCode_ind = 0;
+  replaceCode_ind = 0; 
 
-//std::cout<<"Start of printDependenceUFs!\n";
-//std::cout<<"\n|_|-|_| START UFCs:\n";
-//  for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
-//    std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
-//for(int i = 0; i<stmt.size() ; i++){
-//  std::cout<<"\nR "<<i<<" = "<<stmt[i].IS<<"\nXform = "<<stmt[i].xform<<"\nSt NL = "<<stmt_nesting_level_[i]<<"\n";
-//}
+std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
+std::cout<<"\n|_|-|_| START UFCs:\n";
+  for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
+    std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
+std::cout<<"\nIS and Xform of statements:\n";
+for(int i = 0; i<stmt.size() ; i++){
+  std::cout<<"\nR "<<i<<" = "<<stmt[i].IS<<"\nXform = "<<stmt[i].xform<<"\nSt NL = "<<stmt_nesting_level_[i]<<"\n";
+}
 
   omega::Relation r = parseExpWithWhileToRel(stmt[whileLoop_stmt_num].code, 
                                              stmt[whileLoop_stmt_num].IS, stmt_num);
@@ -1657,7 +1670,7 @@ std::vector<std::pair<std::string, std::string >>
     result = flip_var(result, v3);
   }
 
-  // FIXME: Mahdi: Do we need following? Seems to me all the UFCs shold have already been 
+  // FIXME: Mahdi: Do we need following? Seems to me all the UFCs should have already been 
   //               stored in Loop::dep_rel_for_iegen in previous phases.
   // UFCs and their representations in omega::relations are extracted and stored in
   // Loop::dep_rel_for_iegen. We can later use them to generate IEGenLib(ISL)::Relations
@@ -1667,7 +1680,6 @@ std::vector<std::pair<std::string, std::string >>
       std::pair<std::vector<std::pair<bool, std::pair<std::string, std::string> > >,
           std::vector<std::pair<bool, std::pair<std::string, std::string> > > > > syms =
       determineUFsForIegen(result, ir, freevar);
-
 
   // Getting the statement number for all statements in the parallel loop
   int first_stmt_in_parallel_loop = 0;
@@ -1693,10 +1705,11 @@ std::vector<std::pair<std::string, std::string >>
 int relCounter = 1;
 
   // Checking pairs of all accesses for comming up with data access equalities.
-  std::vector<std::pair< std::pair<omega::Relation, omega::Relation> , omega::Relation>> dep_relation_;
-  std::map<int, omega::Relation> rels;
-  std::vector<std::pair<omega::Relation, omega::Relation> > rels2;
+  std::vector<depRelParts> depRels_Parts;
+//  std::map<int, omega::Relation> rels;
+//  std::vector<std::pair<omega::Relation, omega::Relation> > rels2;
   for (int i = 0; i < access.size(); i++) {
+    int write_st_no, read_st_no;
     IR_ArrayRef *a = access[i];
     IR_ArraySymbol *sym_a = a->symbol();
 //std::cout<<"\ni #"<<i<<" : "<<*sym_a<<"\n";
@@ -1706,23 +1719,45 @@ int relCounter = 1;
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
         omega::Relation write_r, read_r;
+        omega::Relation a_rel = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[i]].xform), 
+                                omega::copy(stmt[access_st[i]].IS)));
+        omega::Relation b_rel = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[j]].xform), 
+                                omega::copy(stmt[access_st[j]].IS)));
+//        omega::Relation defRel(a_rel.n_set());
+//        for (int i = 1; i <= defRel.n_set(); i++)
+//          defRel.name_input_var(i, std::string("tv"+to_string(i)) );
+//        defRel.copy_names(defRel);
+//        defRel.setup_names();
+//        F_And *temp_root = defRel.add_and();
+
+//std::cout<<"\n\ndepRelsForParallelization: After defRel = "<<defRel<<"\n\n";
+//        a_rel = replace_set_vars(defRel, a_rel, relCounter);
+//        b_rel = replace_set_vars(defRel, b_rel, relCounter);
+
+std::cout<<"\n--------\na_IS = "<<stmt[access_st[i]].IS<<"a_rel ="<<a_rel<<"b_IS = "<<stmt[access_st[j]].IS<<"b_rel = "<<b_rel<<"\n";
+
         if ( a->is_write() ) {
-          write_r = stmt[access_st[i]].IS;
-          read_r = stmt[access_st[j]].IS;
+
+          write_r = stmt[access_st[i]].IS;//a_rel;
+          read_r = stmt[access_st[j]].IS;//b_rel;//
+          write_st_no = access_st[i]; read_st_no = access_st[j];
         } else {
-          write_r = stmt[access_st[j]].IS;
-          read_r = stmt[access_st[i]].IS;
+          write_r = stmt[access_st[j]].IS;//b_rel;//
+          read_r = stmt[access_st[i]].IS;//a_rel;//
+          write_st_no = access_st[j]; read_st_no = access_st[i];
         }
-        omega::Relation r1(write_r.n_set(), read_r.n_set());
-        for (int i = 1; i <= r.n_set(); i++)
-          r1.name_input_var(i, write_r.set_var(i)->name());
+        int maxDim = write_r.n_set();
+//std::cout<<"\n--------\nwrite_r ="<<write_r<<"read_r = "<<read_r<<"\n";
+        omega::Relation accessEqRel(maxDim, maxDim);
+        for (int i = 1; i <= maxDim; i++)
+          accessEqRel.name_input_var(i, index_name(i));//r1.name_input_var(i, write_r.set_var(i)->name());
 
-        for (int i = 1; i <= r.n_set(); i++)
-          r1.name_output_var(i, read_r.set_var(i)->name() + "p");
+        for (int i = 1; i <= maxDim; i++)
+          accessEqRel.name_output_var(i, index_name(i) + "p");//r1.name_output_var(i, read_r.set_var(i)->name() + "p");
 
-//std::cout<<"\n#############Initial r1#"<<relCounter<<" = "<<r1<<"  write_r = "<<write_r<<"  read_r = "<<read_r<<"\n";
+std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel<<"  write_r = "<<write_r<<"  read_r = "<<read_r<<"  w[2] =  "<<write_r.set_var(2)->name()<<"\n";
 
-        F_And *f_root = r1.add_and(); 
+        F_And *f_root = accessEqRel.add_and(); 
 
         // Mahdi: The reason behind the loop over n_dim is to have equalities between 
         // different indices of array accesses; e.g y[i][col[j]] and y[k][l] -> { i = k and col(j) = l }
@@ -1744,20 +1779,20 @@ int relCounter = 1;
           }
           bool has_complex_formula = false;
 
-//std::cout<<"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Before exp2for r1 = "<<r1<<"\n";
-//repr_src->dump();
-//repr_dst->dump();
+std::cout<<"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Before exp2for accessEqRel = "<<accessEqRel<<"\n";
+repr_src->dump();
+repr_dst->dump();
           try {   
-            exp2formula(this, ir, r1, f_and, freevar, repr_src, e1, 'w',
-                        IR_COND_EQ, false, uninterpreted_symbols[stmt_num],
-                        uninterpreted_symbols_stringrepr[stmt_num],
-                        unin_rel[stmt_num]);
-//std::cout<<"After 1st exp2for r1 = "<<r1<<"   E1 = "<<e1->name()<<"\n";
-            exp2formula(this, ir, r1, f_and, freevar, repr_dst, e2, 'r',
-                        IR_COND_EQ, false, uninterpreted_symbols[stmt_num],
-                        uninterpreted_symbols_stringrepr[stmt_num],
-                        unin_rel[stmt_num]);
-//std::cout<<"After 2nd exp2for r1 = "<<r1<<"   E2 = "<<e2->char_name()<<"\n";
+            exp2formula(this, ir, accessEqRel, f_and, freevar, repr_src, e1, 'w',
+                        IR_COND_EQ, false, uninterpreted_symbols[write_st_no],
+                        uninterpreted_symbols_stringrepr[write_st_no],
+                        unin_rel[write_st_no]);
+std::cout<<"\nAfter 1st exp2for accessEqRel = "<<accessEqRel<<"\n";
+            exp2formula(this, ir, accessEqRel, f_and, freevar, repr_dst, e2, 'r',
+                        IR_COND_EQ, false, uninterpreted_symbols[read_st_no],
+                        uninterpreted_symbols_stringrepr[read_st_no],
+                        unin_rel[read_st_no]);
+std::cout<<"\nAfter 2nd exp2for accessEqRel = "<<accessEqRel<<"\n";
           } catch (const ir_exp_error &e) {
             has_complex_formula = true;
           }
@@ -1767,7 +1802,7 @@ int relCounter = 1;
             h.update_coef(e1, -1);
             h.update_coef(e2, 1);
           }
-//std::cout<<"\nAfter creating the equality r1 = "<<r1<<"\n";
+std::cout<<"\nAfter creating the equality accessEqRel = "<<accessEqRel<<"\n";
 
           repr_src->clear();
           repr_dst->clear();
@@ -1775,22 +1810,25 @@ int relCounter = 1;
           delete repr_dst;
         }   // Mahdi: end of n_dim loop
 
-        r1.simplify();
+        accessEqRel.simplify();
         if (is_negative) {
           Variable_ID v1, v2;
 
-          v1 = r1.input_var(1);
-          r1 = flip_var_exclusive(r1, v1);
-          v2 = r1.output_var(1);
-          r1 = flip_var_exclusive(r1, v2);
+          v1 = accessEqRel.input_var(1);
+          accessEqRel = flip_var_exclusive(accessEqRel, v1);
+          v2 = accessEqRel.output_var(1);
+          accessEqRel = flip_var_exclusive(accessEqRel, v2);
         }
 
-        rels.insert(std::pair<int, omega::Relation>(dep_relation_.size(), copy(r1)));
-        dep_relation_.push_back(
-            std::pair<std::pair<omega::Relation, omega::Relation>, omega::Relation>( 
-                   (std::pair<omega::Relation, omega::Relation>(write_r, read_r)) , r1) );
+        depRelParts tempDepRelParts;
+        tempDepRelParts.write_st_is = write_r;
+        tempDepRelParts.write_st_no = write_st_no;
+        tempDepRelParts.read_st_is = read_r;
+        tempDepRelParts.read_st_no = read_st_no;
+        tempDepRelParts.equality_st_is = accessEqRel;
+        depRels_Parts.push_back( tempDepRelParts );
 
-//std::cout<<"\nEnd of access check loop: r#"<<relCounter++<<" = "<<r1<<" \nwrite________r = "<<write_r<<"read________r = "<<read_r<<"\n";
+//std::cout<<"\nEnd of access check loop: r#"<<relCounter++<<" = "<<accessEqRel<<" \nwrite________r = "<<write_r<<"read________r = "<<read_r<<"\n";
       }
     }
   }
@@ -1798,27 +1836,33 @@ int relCounter = 1;
 relCounter = 1;
 
   // The loop that creates the relations for IEGen
-  for (int i = 0; i < dep_relation_.size(); i++) {
-    omega::Relation write_constraints = copy(dep_relation_[i].first.first);
-    omega::Relation read_constraints(dep_relation_[i].first.second.n_set()); 
-    omega::Relation equality_constraints = copy(dep_relation_[i].second);
+  for (int i = 0; i < depRels_Parts.size(); i++) {
+
+//   omega::Relation write_constraints = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[i]].xform), 
+//                                omega::copy(stmt[access_st[i]].IS)));
+//        omega::Relation b_rel = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[j]].xform), 
+//                                omega::copy(stmt[access_st[j]].IS)));
+
+    omega::Relation write_constraints = copy(depRels_Parts[i].write_st_is);
+    omega::Relation read_constraints(depRels_Parts[i].read_st_is.n_set()); 
+    omega::Relation equality_constraints = copy(depRels_Parts[i].equality_st_is);
 
     for (int j = 1; j <= read_constraints.n_set(); j++){
-      read_constraints.name_set_var(j, dep_relation_[i].first.second.set_var(j)->name() + "p");
+      read_constraints.name_set_var(j, depRels_Parts[i].read_st_is.set_var(j)->name() + "p");
     }
     read_constraints.copy_names(read_constraints);
     read_constraints.setup_names();
 
     F_And *f_root = read_constraints.add_and();
 
-    std::map<int, int> pos_map;
-    for (int j = 1; j <= read_constraints.n_set(); j++) {
-      pos_map.insert(std::pair<int, int>(i, i));
-    }
+//    std::map<int, int> pos_map;
+//    for (int j = 1; j <= read_constraints.n_set(); j++) {
+//      pos_map.insert(std::pair<int, int>(i, i));
+//    }
 //std::cout<<"\n----^^^----Before replace Read Constraints #"<<relCounter<<" = "<<dep_relation_[i].first.second<<"\n";
 //    for (int j = 1; j <= read_constraints.n_set(); j++) {
      read_constraints = replace_set_vars(read_constraints, 
-                                  dep_relation_[i].first.second, relCounter);//, j, j, pos_map);
+                                  depRels_Parts[i].read_st_is, relCounter);//, j, j, pos_map);
 //    }
     read_constraints.simplify();
 //std::cout<<"----^^^----After replace Read Constraints #"<<relCounter<<" = "<<read_constraints<<"\nwrite = "<<write_constraints<<"\n";
@@ -1916,14 +1960,14 @@ relCounter = 1;
     std::string s1 = symbolic_constants + " -> " + "{" + tuple_decl_RAW + " : " + lex_order1 + " && " + main_constraints + "}";
     std::string s2 = symbolic_constants + " -> " + "{" + tuple_decl_WAR + " : " + lex_order2 + " && " + main_constraints + "}";
 
-    rels2.push_back(std::pair<omega::Relation, omega::Relation>(write_constraints, read_constraints));
+//    rels2.push_back(std::pair<omega::Relation, omega::Relation>(write_constraints, read_constraints));
     std::cout << "\nS"<<relCounter++<<" = " << s1;
     std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
     dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
 
   }  // Mahdi: End of the loop that creates dependencs for IEGenLib
 
-  rels = removeRedundantConstraints(rels);
+//  rels = removeRedundantConstraints(rels);
 
   return dep_rel_for_iegen;
 }

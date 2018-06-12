@@ -454,6 +454,10 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
                  std::map<std::string, std::vector<omega::Relation> > &index_variables) {
+
+std::cout<<"\n+++++++++START exp2for: r = "<<r<<"\n";
+repr->dump();
+
   switch (ir->QueryExpOperation(repr)) {
 
     case IR_OP_MACRO: {
@@ -513,6 +517,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
+
+//std::cout<<"\nexp2for::IR_OP_ARRAY_VARIABLE\n";
+
 
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
 
@@ -3176,7 +3183,11 @@ Relation replace_set_vars(const omega::Relation &new_relation,
   Relation r = copy(new_relation);
   r.copy_names(new_relation);
   r.setup_names();
-  
+ 
+   Relation old = old_relation, new_r = new_relation;
+
+//std::cout<<"\n\nreplace_set_vars: r = "<<r<<"old_relation = "<<old<<"  new_relation = "<<new_r<<"\n\n";
+
   F_Exists *f_exists = r.and_with_and()->add_exists();
   F_And *f_root = f_exists->add_and();
   std::map<Variable_ID, Variable_ID> exists_mapping;

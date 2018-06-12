@@ -904,7 +904,6 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
 // Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
 // buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
 // however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
-// so I am leaving it in there for now 
 std::string index_name(int level) {
   std::string iname = ("chill_idx"+to_string(level));
   return iname;
@@ -1262,6 +1261,9 @@ Loop::Loop(const IR_Control *control) {
     align_loops(ir_tree, vars_to_be_relaced,vars_replacement,/*loop_index_start*/1);
   }
   bool trybuild = true;
+
+//std::cout<<"\n\nLoop::Loop: Before while(tryBuild)\n\n";
+
   while (trybuild)
   {
     uninterpreted_symbols_stringrepr.clear();
@@ -1282,6 +1284,12 @@ Loop::Loop(const IR_Control *control) {
       trybuild=true;
     }
   }
+
+std::cout<<"\n\nLoop::Loop: Iteration Spaces:\n";
+for(int i = 0; i<stmt.size() ; i++){
+  std::cout<<"\nstmt["<<i<<"].IS  = "<<stmt[i].IS;
+}
+//std::cout<<"\n\nLoop::Loop: After while(tryBuild)\n\n";
 
   for (int i = 0; i < stmt.size(); i++) {
     std::map<int, CG_outputRepr*>::iterator it = replace.find(i);
