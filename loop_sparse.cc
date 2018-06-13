@@ -1613,6 +1613,18 @@ typedef struct depRelationParts{
 }depRelParts;
 
 
+void replace_tv_name(std::string &str, std::string old_name, std::string new_name){
+  std::size_t found = str.find(old_name);
+  while (found != std::string::npos) {
+    if( (found + old_name.length()) >= str.size() ){
+      str.replace(found, old_name.length(), new_name);
+    } else if(str[(found + old_name.length())] != 'p') {
+      str.replace(found, old_name.length(), new_name);
+    }
+    found = str.find(old_name, found + 1);
+  }
+} 
+
 /*!
  * Mahdi: This functions extarcts and returns the data dependence relations 
  * that are needed for generating inspectors for wavefront paralleization of a 
@@ -1624,7 +1636,7 @@ typedef struct depRelationParts{
 std::vector<std::pair<std::string, std::string >> 
  Loop::depRelsForParallelization(int parallelLoopLevel){
 
-  int stmt_num = 1, level = 1, whileLoop_stmt_num = 1;
+  int stmt_num = 1, level = 1, whileLoop_stmt_num = 1, maxDim = stmt[0].IS.n_set();
 
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   replaceCode_ind = 0; 
@@ -1703,7 +1715,7 @@ for(int i = 0; i<stmt.size() ; i++){
   }
 
 int relCounter = 1;
-
+  
   // Checking pairs of all accesses for comming up with data access equalities.
   std::vector<depRelParts> depRels_Parts;
 //  std::map<int, omega::Relation> rels;
@@ -1746,7 +1758,6 @@ std::cout<<"\n--------\na_IS = "<<stmt[access_st[i]].IS<<"a_rel ="<<a_rel<<"b_IS
           read_r = stmt[access_st[i]].IS;//a_rel;//
           write_st_no = access_st[j]; read_st_no = access_st[i];
         }
-        int maxDim = stmt[access_st[i]].IS.n_set();
         omega::Relation accessEqRel(maxDim, maxDim);
         for (int i = 1; i <= maxDim; i++)
           accessEqRel.name_input_var(i, index_name(i));//r1.name_input_var(i, write_r.set_var(i)->name());
@@ -1833,6 +1844,38 @@ std::cout<<"\nAfter creating the equality accessEqRel = "<<accessEqRel<<"\n";
   }
 
 relCounter = 1;
+
+  // Creating a map for tuple variable name adjusment because of applying schedule to Iteration Space
+  std::vector<std::pair<std::string,std::string>> replace_tuple_var;
+  for (int j = 1; j <= maxDim; j++){
+    std::string is_tv = index_name(j);
+    std::string is_tvp = is_tv+"p";
+    replace_tuple_var.push_back( std::pair<std::string,std::string>(is_tv, ("In_"+to_string(j*2))) );
+    replace_tuple_var.push_back( std::pair<std::string,std::string>(is_tvp, ("Out_"+to_string(j*2))) );
+  }
+ 
+/*
+  // Replacing tuple variable names in UFC map kept for turning omega::Relaiton to iegen::Relation
+  std::map<std::string, std::string > omega2iegen_ufc_map;
+  for (std::map<std::string, std::string>::iterator it =
+       unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
+    for (int j=0; j < replace_tuple_var.size(); j++) {
+      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
+      while (found != std::string::npos) {
+        if( (found + replace_tuple_var[j].first.length()) >= equality_constraints_str.size() ){
+          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
+                                           replace_tuple_var[j].second);
+        } else if(equality_constraints_str[(found + replace_tuple_var[j].first.length())] != 'p') {
+          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
+                                           replace_tuple_var[j].second);
+        }
+
+        found = equality_constraints_str.find(replace_tuple_var[j].first, found + 1);
+      }
+    }
+
+  }
+*/
 
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
@@ -1948,24 +1991,14 @@ std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
 
 //std::cout<<"\n********Init Eq = "<<equality_constraints_str<<"\n";
 
-    // Creating a map for tuple variable name adjusment because of applying schedule to Iteration Space
-    std::vector<std::pair<std::string,std::string>> replace_tuple_var;
-    for (int j = 1; j <= write_orig_IS.n_set(); j++){
-      std::string w_tv = write_orig_IS.set_var(j)->name();
-      std::string r_tv = read_orig_IS.set_var(j)->name();
-      if(w_tv[0] != 'I') // Mahdi: Dirty exclusion of extra padded dimensions, exclude tv = In_XX
-        replace_tuple_var.push_back( std::pair<std::string,std::string>(w_tv, ("In_"+to_string(j*2))) );
-      if(r_tv[0] != 'I') 
-        replace_tuple_var.push_back( std::pair<std::string,std::string>(r_tv+"p", ("Out_"+to_string(j*2))) );
-    }
-
     // Replacing tuple variable names in equality constraint that is 
     // built based on names in original iteration space, e.g 
-    // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) ->  gets turs into -> In_2 = colidx__(Out_2,Out_4)
+    // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) -> In_2 = colidx__(Out_2,Out_4)
     for (int j=0; j < replace_tuple_var.size(); j++) {
-      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
+      replace_tv_name(equality_constraints_str, replace_tuple_var[j].first, 
+                      replace_tuple_var[j].second);
+/*      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
       while (found != std::string::npos) {
-//std::cout<<"\n******** Found = "<<found<<" t2rep = "<<replace_tuple_var[j].first<<"  w2repwith = "<<replace_tuple_var[j].second<<"\n";
         if( (found + replace_tuple_var[j].first.length()) >= equality_constraints_str.size() ){
           equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
                                            replace_tuple_var[j].second);
@@ -1976,18 +2009,9 @@ std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
 
         found = equality_constraints_str.find(replace_tuple_var[j].first, found + 1);
       }
-    }
-
-    
-
-
-/*
-    std::map<std::string, std::string > unin_symbol_map;
-    for (std::map<std::string, std::string>::iterator it =
-         unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
-
-    }
 */
+    }
+
     std::cout<<"\n*******************Tup vars to replace:  eq = "<<equality_constraints_str<<"\n";
     for (int j=0; j < replace_tuple_var.size(); j++) {
       std::cout<<"\n    1 = "<<replace_tuple_var[j].first<<"   2 = "<<replace_tuple_var[j].second;
