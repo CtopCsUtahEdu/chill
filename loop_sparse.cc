@@ -1606,9 +1606,9 @@ extern std::string index_name(int level);
 
 typedef struct depRelationParts{
   omega::Relation write_st_is;
-  omega::Relation write_st_no;
+  int write_st_no;
   omega::Relation read_st_is;
-  omega::Relation read_st_no;
+  int read_st_no;
   omega::Relation equality_st_is;
 }depRelParts;
 
@@ -1746,8 +1746,7 @@ std::cout<<"\n--------\na_IS = "<<stmt[access_st[i]].IS<<"a_rel ="<<a_rel<<"b_IS
           read_r = stmt[access_st[i]].IS;//a_rel;//
           write_st_no = access_st[j]; read_st_no = access_st[i];
         }
-        int maxDim = write_r.n_set();
-//std::cout<<"\n--------\nwrite_r ="<<write_r<<"read_r = "<<read_r<<"\n";
+        int maxDim = stmt[access_st[i]].IS.n_set();
         omega::Relation accessEqRel(maxDim, maxDim);
         for (int i = 1; i <= maxDim; i++)
           accessEqRel.name_input_var(i, index_name(i));//r1.name_input_var(i, write_r.set_var(i)->name());
@@ -1755,7 +1754,7 @@ std::cout<<"\n--------\na_IS = "<<stmt[access_st[i]].IS<<"a_rel ="<<a_rel<<"b_IS
         for (int i = 1; i <= maxDim; i++)
           accessEqRel.name_output_var(i, index_name(i) + "p");//r1.name_output_var(i, read_r.set_var(i)->name() + "p");
 
-std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel<<"  write_r = "<<write_r<<"  read_r = "<<read_r<<"  w[2] =  "<<write_r.set_var(2)->name()<<"\n";
+std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel<<"  write_r = "<<stmt[access_st[write_st_no]].IS<<"  read_r = "<<stmt[access_st[read_st_no]].IS<<"  w[2] =  "<<stmt[access_st[write_st_no]].IS.set_var(2)->name()<<"\n";
 
         F_And *f_root = accessEqRel.add_and(); 
 
@@ -1838,14 +1837,34 @@ relCounter = 1;
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
 
-//   omega::Relation write_constraints = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[i]].xform), 
-//                                omega::copy(stmt[access_st[i]].IS)));
-//        omega::Relation b_rel = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[j]].xform), 
-//                                omega::copy(stmt[access_st[j]].IS)));
+    omega::Relation write_sch = stmt[(depRels_Parts[i].write_st_no)].xform;
+    omega::Relation read_sch = stmt[depRels_Parts[i].read_st_no].xform;
+    omega::Relation write_orig_IS = stmt[(depRels_Parts[i].write_st_no)].IS;
+    omega::Relation read_orig_IS = stmt[depRels_Parts[i].read_st_no].IS;
+ 
+    omega::Relation equality_constraints = copy(depRels_Parts[i].equality_st_is);
 
+    omega::Relation write_constraints = 
+           omega::Range(omega::Restrict_Domain(omega::copy(write_sch), 
+                        omega::copy(write_orig_IS)));
+    omega::Relation read_constraints_orig_ = 
+           omega::Range(omega::Restrict_Domain(omega::copy(read_sch), 
+                        omega::copy(read_orig_IS)));
+    omega::Relation read_constraints(read_constraints_orig_.n_set()); 
+    for (int j = 1; j <= read_constraints_orig_.n_set(); j++){
+      read_constraints.name_set_var(j, ("Out_"+to_string(j)));
+    }
+    read_constraints.copy_names(read_constraints);
+    read_constraints.setup_names();
+    F_And *f_root_ = read_constraints.add_and();
+    read_constraints = replace_set_vars(read_constraints, read_constraints_orig_, relCounter);
+    read_constraints.simplify();
+
+std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
+         <<" \nwrite_r = "<<write_constraints<<"read_r = "<<read_constraints<<"\n";
+/*
     omega::Relation write_constraints = copy(depRels_Parts[i].write_st_is);
     omega::Relation read_constraints(depRels_Parts[i].read_st_is.n_set()); 
-    omega::Relation equality_constraints = copy(depRels_Parts[i].equality_st_is);
 
     for (int j = 1; j <= read_constraints.n_set(); j++){
       read_constraints.name_set_var(j, depRels_Parts[i].read_st_is.set_var(j)->name() + "p");
@@ -1865,8 +1884,9 @@ relCounter = 1;
                                   depRels_Parts[i].read_st_is, relCounter);//, j, j, pos_map);
 //    }
     read_constraints.simplify();
-//std::cout<<"----^^^----After replace Read Constraints #"<<relCounter<<" = "<<read_constraints<<"\nwrite = "<<write_constraints<<"\n";
-
+//std::cout<<"----^^^----After replace Read Constraints #"<<relCounter<<" = "
+           <<read_constraints<<"\nwrite = "<<write_constraints<<"\n";
+*/
     std::string tuple_decl_RAW = "[";
     for (int j = 1; j <= write_constraints.n_set(); j++) {
       if (j > 1)
@@ -1895,10 +1915,10 @@ relCounter = 1;
 
     tuple_decl_WAR += "]";
 
-    std::string lex_order1 = write_constraints.set_var(1)->name()  + " < "
-                     + read_constraints.set_var(1)->name();
-    std::string lex_order2 = read_constraints.set_var(1)->name() + " < "
-                     + write_constraints.set_var(1)->name();
+    std::string lex_order1 = write_constraints.set_var(2)->name()  + " < "
+                     + read_constraints.set_var(2)->name();
+    std::string lex_order2 = read_constraints.set_var(2)->name() + " < "
+                     + write_constraints.set_var(2)->name();
 
 //std::cout<<"\nLex ord1 = "<<lex_order1<<"    Lex ord2 = "<<lex_order2<<"\n";
 
@@ -1924,11 +1944,63 @@ relCounter = 1;
     symbolic_constants += "]";
 //std::cout<<"\nsymbolic_constants = "<<symbolic_constants<<"\n";
 
+    std::string equality_constraints_str = print_to_iegen_string(equality_constraints);
+
+//std::cout<<"\n********Init Eq = "<<equality_constraints_str<<"\n";
+
+    // Creating a map for tuple variable name adjusment because of applying schedule to Iteration Space
+    std::vector<std::pair<std::string,std::string>> replace_tuple_var;
+    for (int j = 1; j <= write_orig_IS.n_set(); j++){
+      std::string w_tv = write_orig_IS.set_var(j)->name();
+      std::string r_tv = read_orig_IS.set_var(j)->name();
+      if(w_tv[0] != 'I') // Mahdi: Dirty exclusion of extra padded dimensions, exclude tv = In_XX
+        replace_tuple_var.push_back( std::pair<std::string,std::string>(w_tv, ("In_"+to_string(j*2))) );
+      if(r_tv[0] != 'I') 
+        replace_tuple_var.push_back( std::pair<std::string,std::string>(r_tv+"p", ("Out_"+to_string(j*2))) );
+    }
+
+    // Replacing tuple variable names in equality constraint that is 
+    // built based on names in original iteration space, e.g 
+    // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) ->  gets turs into -> In_2 = colidx__(Out_2,Out_4)
+    for (int j=0; j < replace_tuple_var.size(); j++) {
+      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
+      while (found != std::string::npos) {
+//std::cout<<"\n******** Found = "<<found<<" t2rep = "<<replace_tuple_var[j].first<<"  w2repwith = "<<replace_tuple_var[j].second<<"\n";
+        if( (found + replace_tuple_var[j].first.length()) >= equality_constraints_str.size() ){
+          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
+                                           replace_tuple_var[j].second);
+        } else if(equality_constraints_str[(found + replace_tuple_var[j].first.length())] != 'p') {
+          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
+                                           replace_tuple_var[j].second);
+        }
+
+        found = equality_constraints_str.find(replace_tuple_var[j].first, found + 1);
+      }
+    }
+
+    
+
+
+/*
+    std::map<std::string, std::string > unin_symbol_map;
+    for (std::map<std::string, std::string>::iterator it =
+         unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
+
+    }
+*/
+    std::cout<<"\n*******************Tup vars to replace:  eq = "<<equality_constraints_str<<"\n";
+    for (int j=0; j < replace_tuple_var.size(); j++) {
+      std::cout<<"\n    1 = "<<replace_tuple_var[j].first<<"   2 = "<<replace_tuple_var[j].second;
+    }
+    
 
     std::string main_constraints = print_to_iegen_string(write_constraints);
     main_constraints += " && " + print_to_iegen_string(read_constraints);
-    main_constraints += " && " + print_to_iegen_string(equality_constraints);
+    main_constraints += " && " + equality_constraints_str;
+//    main_constraints += " && " + print_to_iegen_string(equality_constraints);
+
 //std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";
+
     // Here we replace the UFCs in the omega::relation that kind of have 
     // a symbolic constant form, with their actual equivalent in the code:
     // Note: omega can only handle certain type of UFCs that is why 
