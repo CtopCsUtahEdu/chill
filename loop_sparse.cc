@@ -1625,6 +1625,39 @@ void replace_tv_name(std::string &str, std::string old_name, std::string new_nam
   }
 } 
 
+
+std::string omega_rel_to_string(omega::Relation rel){
+  std::string result,tuple_decl = "[", constraints;
+
+  constraints = rel.print_formula_to_string();
+
+  if (rel.is_set()){
+    for (int j = 1; j <= rel.n_set(); j++) {
+      if (j > 1)
+        tuple_decl += ",";
+      tuple_decl += rel.set_var(j)->name();
+    }
+  } else {
+    for (int j = 1; j <= rel.n_inp(); j++) {
+      if (j > 1)
+        tuple_decl += ",";
+      tuple_decl += rel.input_var(j)->name();
+    }
+    tuple_decl += "] -> [";
+    for (int j = 1; j <= rel.n_out(); j++) {
+      if (j > 1)
+        tuple_decl += ",";
+      tuple_decl += rel.output_var(j)->name();
+    }
+  }
+  tuple_decl += "]";
+  
+  result = "{" + tuple_decl + ": " + constraints + "}"; 
+
+  return result;
+}
+
+
 /*!
  * Mahdi: This functions extarcts and returns the data dependence relations 
  * that are needed for generating inspectors for wavefront paralleization of a 
@@ -1878,121 +1911,70 @@ for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(
     omega::Relation read_sch = stmt[depRels_Parts[i].read_st_no].xform;
     omega::Relation write_orig_IS = stmt[(depRels_Parts[i].write_st_no)].IS;
     omega::Relation read_orig_IS = stmt[depRels_Parts[i].read_st_no].IS;
- 
     omega::Relation equality_constraints = copy(depRels_Parts[i].equality_st_is);
 
-    omega::Relation write_constraints = 
-           omega::Range(omega::Restrict_Domain(omega::copy(write_sch), 
-                        omega::copy(write_orig_IS)));
-    omega::Relation read_constraints_orig_ = 
-           omega::Range(omega::Restrict_Domain(omega::copy(read_sch), 
-                        omega::copy(read_orig_IS)));
-    omega::Relation read_constraints(read_constraints_orig_.n_set()); 
-    for (int j = 1; j <= read_constraints_orig_.n_set(); j++){
-      read_constraints.name_set_var(j, ("Out_"+to_string(j)));
+    omega::Relation read_orig_IS_p(read_orig_IS.n_set()); 
+    for (int j = 1; j <= read_orig_IS_p.n_set(); j++){
+      read_orig_IS_p.name_set_var(j, read_orig_IS.set_var(j)->name() + "p");
     }
-    read_constraints.copy_names(read_constraints);
-    read_constraints.setup_names();
-    F_And *f_root_ = read_constraints.add_and();
-    read_constraints = replace_set_vars(read_constraints, read_constraints_orig_, relCounter);
-    read_constraints.simplify();
+    read_orig_IS_p.copy_names(read_orig_IS_p);
+    read_orig_IS_p.setup_names();
+    F_And *f_root = read_orig_IS_p.add_and();
+    read_orig_IS_p = replace_set_vars(read_orig_IS_p, read_orig_IS, relCounter);
+    read_orig_IS_p.simplify();
 
-std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
-         <<" \nwrite_r = "<<write_constraints<<"read_r_orig = "<<read_constraints_orig_<<"read_r = "<<read_constraints<<"\n";
-/*
-    omega::Relation write_constraints = copy(depRels_Parts[i].write_st_is);
-    omega::Relation read_constraints(depRels_Parts[i].read_st_is.n_set()); 
 
-    for (int j = 1; j <= read_constraints.n_set(); j++){
-      read_constraints.name_set_var(j, depRels_Parts[i].read_st_is.set_var(j)->name() + "p");
-    }
-    read_constraints.copy_names(read_constraints);
-    read_constraints.setup_names();
 
-    F_And *f_root = read_constraints.add_and();
+std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
+         <<" \nwrite_r = "<<omega_rel_to_string(write_orig_IS)<<" \nwrite_sch = "<<omega_rel_to_string(write_sch)<<"\nread_r_orig = "<<omega_rel_to_string(read_orig_IS_p)<<"\nread_sch = "<<omega_rel_to_string(read_sch)<<"\n";
 
-//    std::map<int, int> pos_map;
-//    for (int j = 1; j <= read_constraints.n_set(); j++) {
-//      pos_map.insert(std::pair<int, int>(i, i));
-//    }
-//std::cout<<"\n----^^^----Before replace Read Constraints #"<<relCounter<<" = "<<dep_relation_[i].first.second<<"\n";
-//    for (int j = 1; j <= read_constraints.n_set(); j++) {
-     read_constraints = replace_set_vars(read_constraints, 
-                                  depRels_Parts[i].read_st_is, relCounter);//, j, j, pos_map);
-//    }
-    read_constraints.simplify();
-//std::cout<<"----^^^----After replace Read Constraints #"<<relCounter<<" = "
-           <<read_constraints<<"\nwrite = "<<write_constraints<<"\n";
-*/
-    std::string tuple_decl_RAW = "[";
-    for (int j = 1; j <= write_constraints.n_set(); j++) {
-      if (j > 1)
-        tuple_decl_RAW += ",";
-      tuple_decl_RAW += write_constraints.set_var(j)->name();
-    }
-    tuple_decl_RAW += "] -> [";
-    for (int j = 1; j <= read_constraints.n_set(); j++) {
-      if (j > 1)
-        tuple_decl_RAW += ",";
-      tuple_decl_RAW += read_constraints.set_var(j)->name();
-    }
-    tuple_decl_RAW += "]";
-    std::string tuple_decl_WAR = "[";
-    for (int j = 1; j <= read_constraints.n_set(); j++) {
-      if (j > 1)
-        tuple_decl_WAR += ",";
-      tuple_decl_WAR += read_constraints.set_var(j)->name();
-    }
-    tuple_decl_WAR += "] -> [";
-    for (int j = 1; j <= write_constraints.n_set(); j++) {
-      if (j > 1)
-        tuple_decl_WAR += ",";
-      tuple_decl_WAR += write_constraints.set_var(j)->name();
-    }
 
-    tuple_decl_WAR += "]";
 
-    std::string lex_order1 = write_constraints.set_var(2)->name()  + " < "
-                     + read_constraints.set_var(2)->name();
-    std::string lex_order2 = read_constraints.set_var(2)->name() + " < "
-                     + write_constraints.set_var(2)->name();
+    std::string omega_orig_write_is = omega_rel_to_string(write_orig_IS);
+    std::string omega_orig_write_sch = omega_rel_to_string(write_sch);
+    iegenlib::Set *iegen_write_is = new iegenlib::Set(omega_orig_write_is);
+    iegenlib::Relation *iegen_write_sch = new iegenlib::Relation(omega_orig_write_sch);
+    iegenlib::Set *iegen_write;
+    iegen_write = iegen_write_sch->Apply(iegen_write_is);
+    std::string iegen_write_str = iegen_write->prettyPrintString();
+    replace_tv_name(iegen_write_str,std::string("Out"),std::string("In"));
 
-//std::cout<<"\nLex ord1 = "<<lex_order1<<"    Lex ord2 = "<<lex_order2<<"\n";
+    std::string omega_orig_read_is = omega_rel_to_string(read_orig_IS_p);
+    std::string omega_orig_read_sch = omega_rel_to_string(read_sch);
+    iegenlib::Set *iegen_read_is = new iegenlib::Set(omega_orig_read_is);
+    iegenlib::Relation *iegen_read_sch = new iegenlib::Relation(omega_orig_read_sch);
+    iegenlib::Set *iegen_read;
+    iegen_read = iegen_read_sch->Apply(iegen_read_is);
 
-    // Generating symbolic constants for the dependencs
-    std::set<std::string> global_vars_write = get_global_vars(write_constraints);
-    std::set<std::string> global_vars_read = get_global_vars(read_constraints);
-    std::set<std::string> global_vars_equality = get_global_vars(equality_constraints);
-    std::set<std::string> global_vars;
-    for (std::set<std::string>::iterator it = global_vars_write.begin();
-         it != global_vars_write.end(); it++)  global_vars.insert(*it);
-    for (std::set<std::string>::iterator it = global_vars_read.begin();
-         it != global_vars_read.end(); it++)  global_vars.insert(*it);
-    for (std::set<std::string>::iterator it = global_vars_equality.begin();
-         it != global_vars_equality.end(); it++)  global_vars.insert(*it);
+    srParts iegen_write_parts, iegen_read_parts;
+    iegen_write_parts = getPartsFromStr(iegen_write_str);
+    iegen_read_parts = getPartsFromStr(iegen_read->prettyPrintString());
 
-    string symbolic_constants = "[";
-    for (std::set<std::string>::iterator it = global_vars.begin(); 
-         it != global_vars.end(); it++){
-      if (it != global_vars.begin())
-        symbolic_constants += ",";
-      symbolic_constants += *it;
-    }
-    symbolic_constants += "]";
-//std::cout<<"\nsymbolic_constants = "<<symbolic_constants<<"\n";
 
-    std::string equality_constraints_str = print_to_iegen_string(equality_constraints);
+    // Generating tuple declaration for the dependencs
+    std::string tuple_decl_RAW = iegen_write_parts.tupDecl + "->" + iegen_read_parts.tupDecl;
+    std::string tuple_decl_WAR = iegen_read_parts.tupDecl + "->" + iegen_write_parts.tupDecl;
+
+    // Generating lexographical ordering for the dependencs
+    std::string lex_order1 = "In_2 < Out_2";
+    std::string lex_order2 = "Out_2 < In_2";
+
+
+    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB\n   write = "<<iegen_write_str<<"\n   Read = "<<iegen_read->prettyPrintString()<<"\n\n";
+    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB Parts\n   read_c = "<<iegen_read_parts.constraints<<"\n   read_td = "<<iegen_read_parts.tupDecl<<"\n\n";
+
 
     // Replacing tuple variable names in equality constraint that is 
     // built based on names in original iteration space, e.g 
     // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) -> In_2 = colidx__(Out_2,Out_4)
+    std::string equality_constraints_str = print_to_iegen_string(equality_constraints);
     for (int j=0; j < replace_tuple_var.size(); j++) {
       replace_tv_name(equality_constraints_str, replace_tuple_var[j].first, 
                       replace_tuple_var[j].second);
     }
 
-    std::string main_constraints = print_to_iegen_string(write_constraints);
-    main_constraints += " && " + print_to_iegen_string(read_constraints);
+    std::string main_constraints = iegen_write_parts.constraints;
+    main_constraints += " && " + iegen_read_parts.constraints;
     main_constraints += " && " + equality_constraints_str;
 
 //std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";
@@ -2025,10 +2007,9 @@ std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
     }
 //std::cout<<"\n******************* main_constraints "<<relCounter<<" = "<<main_constraints<<"\n";
 
-    std::string s1 = symbolic_constants + " -> " + "{" + tuple_decl_RAW + " : " + lex_order1 + " && " + main_constraints + "}";
-    std::string s2 = symbolic_constants + " -> " + "{" + tuple_decl_WAR + " : " + lex_order2 + " && " + main_constraints + "}";
+    std::string s1 = "{" + tuple_decl_RAW + " : " + lex_order1 + " && " + main_constraints + "}";
+    std::string s2 = "{" + tuple_decl_WAR + " : " + lex_order2 + " && " + main_constraints + "}";
 
-//    rels2.push_back(std::pair<omega::Relation, omega::Relation>(write_constraints, read_constraints));
     std::cout << "\nS"<<relCounter++<<" = " << s1;
     std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
     dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
