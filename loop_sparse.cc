@@ -1643,8 +1643,8 @@ std::vector<std::pair<std::string, std::string >>
 
 std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
 std::cout<<"\n|_|-|_| START UFCs:\n";
-  for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
-    std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
+for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
+  std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
 std::cout<<"\nIS and Xform of statements:\n";
 for(int i = 0; i<stmt.size() ; i++){
   std::cout<<"\nR "<<i<<" = "<<stmt[i].IS<<"\nXform = "<<stmt[i].xform<<"\nSt NL = "<<stmt_nesting_level_[i]<<"\n";
@@ -1854,28 +1854,22 @@ relCounter = 1;
     replace_tuple_var.push_back( std::pair<std::string,std::string>(is_tvp, ("Out_"+to_string(j*2))) );
   }
  
-/*
+
   // Replacing tuple variable names in UFC map kept for turning omega::Relaiton to iegen::Relation
   std::map<std::string, std::string > omega2iegen_ufc_map;
   for (std::map<std::string, std::string>::iterator it =
        unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
+    std::string omega_name = it->first, iegen_name = it->second;
     for (int j=0; j < replace_tuple_var.size(); j++) {
-      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
-      while (found != std::string::npos) {
-        if( (found + replace_tuple_var[j].first.length()) >= equality_constraints_str.size() ){
-          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
-                                           replace_tuple_var[j].second);
-        } else if(equality_constraints_str[(found + replace_tuple_var[j].first.length())] != 'p') {
-          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
-                                           replace_tuple_var[j].second);
-        }
-
-        found = equality_constraints_str.find(replace_tuple_var[j].first, found + 1);
-      }
+      replace_tv_name(omega_name, replace_tuple_var[j].first, replace_tuple_var[j].second);
+      replace_tv_name(iegen_name, replace_tuple_var[j].first, replace_tuple_var[j].second);
     }
-
+    omega2iegen_ufc_map.insert(std::pair<std::string, std::string>(omega_name, iegen_name));
   }
-*/
+
+std::cout<<"\n|_|-|_| START omega2iegen_ufc_map UFCs:\n";
+for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(); it!=omega2iegen_ufc_map.end(); ++it)
+  std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
 
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
@@ -1904,7 +1898,7 @@ relCounter = 1;
     read_constraints.simplify();
 
 std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
-         <<" \nwrite_r = "<<write_constraints<<"read_r = "<<read_constraints<<"\n";
+         <<" \nwrite_r = "<<write_constraints<<"read_r_orig = "<<read_constraints_orig_<<"read_r = "<<read_constraints<<"\n";
 /*
     omega::Relation write_constraints = copy(depRels_Parts[i].write_st_is);
     omega::Relation read_constraints(depRels_Parts[i].read_st_is.n_set()); 
@@ -1989,39 +1983,17 @@ std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
 
     std::string equality_constraints_str = print_to_iegen_string(equality_constraints);
 
-//std::cout<<"\n********Init Eq = "<<equality_constraints_str<<"\n";
-
     // Replacing tuple variable names in equality constraint that is 
     // built based on names in original iteration space, e.g 
     // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) -> In_2 = colidx__(Out_2,Out_4)
     for (int j=0; j < replace_tuple_var.size(); j++) {
       replace_tv_name(equality_constraints_str, replace_tuple_var[j].first, 
                       replace_tuple_var[j].second);
-/*      std::size_t found = equality_constraints_str.find(replace_tuple_var[j].first);
-      while (found != std::string::npos) {
-        if( (found + replace_tuple_var[j].first.length()) >= equality_constraints_str.size() ){
-          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
-                                           replace_tuple_var[j].second);
-        } else if(equality_constraints_str[(found + replace_tuple_var[j].first.length())] != 'p') {
-          equality_constraints_str.replace(found, replace_tuple_var[j].first.length(), 
-                                           replace_tuple_var[j].second);
-        }
-
-        found = equality_constraints_str.find(replace_tuple_var[j].first, found + 1);
-      }
-*/
     }
-
-    std::cout<<"\n*******************Tup vars to replace:  eq = "<<equality_constraints_str<<"\n";
-    for (int j=0; j < replace_tuple_var.size(); j++) {
-      std::cout<<"\n    1 = "<<replace_tuple_var[j].first<<"   2 = "<<replace_tuple_var[j].second;
-    }
-    
 
     std::string main_constraints = print_to_iegen_string(write_constraints);
     main_constraints += " && " + print_to_iegen_string(read_constraints);
     main_constraints += " && " + equality_constraints_str;
-//    main_constraints += " && " + print_to_iegen_string(equality_constraints);
 
 //std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";
 
@@ -2031,7 +2003,7 @@ std::cout<<"\n-----------New types: r#"<<relCounter<<" = "<<equality_constraints
     // they are not stored in their original form at the first place.
     // For instance: omega::relation would have row(i+1) as row__(i).
     for (std::map<std::string, std::string>::iterator it =
-         unin_symbol_for_iegen.begin(); it != unin_symbol_for_iegen.end(); it++) {
+         omega2iegen_ufc_map.begin(); it != omega2iegen_ufc_map.end(); it++) {
       std::size_t found = main_constraints.find(it->first);
 
       while (found != std::string::npos) {
