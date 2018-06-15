@@ -1905,7 +1905,7 @@ for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(
   std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
 
   std::ofstream outf;
-  outf.open (output_filename.c_str(), std::ofstream::out | std::ofstream::app);
+  outf.open (output_filename.c_str(), std::ofstream::out);
   
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
@@ -2020,6 +2020,8 @@ std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
 
   }  // Mahdi: End of the loop that creates dependencs for IEGenLib
 
+  outf.close();
+  
 //  rels = removeRedundantConstraints(rels);
 
   return dep_rel_for_iegen;
