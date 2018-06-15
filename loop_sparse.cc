@@ -1667,7 +1667,7 @@ std::string omega_rel_to_string(omega::Relation rel){
  * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
  */
 std::vector<std::pair<std::string, std::string >> 
- Loop::depRelsForParallelization(int parallelLoopLevel){
+ Loop::depRelsForParallelization(std::string output_filename, int parallelLoopLevel){
 
   int stmt_num = 1, level = 1, whileLoop_stmt_num = 1, maxDim = stmt[0].IS.n_set();
 
@@ -1904,6 +1904,9 @@ std::cout<<"\n|_|-|_| START omega2iegen_ufc_map UFCs:\n";
 for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(); it!=omega2iegen_ufc_map.end(); ++it)
   std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
 
+  std::ofstream outf;
+  outf.open (output_filename.c_str(), std::ofstream::out | std::ofstream::app);
+  
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
 
@@ -1929,7 +1932,7 @@ std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
          <<" \nwrite_r = "<<omega_rel_to_string(write_orig_IS)<<" \nwrite_sch = "<<omega_rel_to_string(write_sch)<<"\nread_r_orig = "<<omega_rel_to_string(read_orig_IS_p)<<"\nread_sch = "<<omega_rel_to_string(read_sch)<<"\n";
 
 
-
+    // We are going to use IEGenLib to apply schedule to iteration space
     std::string omega_orig_write_is = omega_rel_to_string(write_orig_IS);
     std::string omega_orig_write_sch = omega_rel_to_string(write_sch);
     iegenlib::Set *iegen_write_is = new iegenlib::Set(omega_orig_write_is);
@@ -2012,6 +2015,7 @@ std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
 
     std::cout << "\nS"<<relCounter++<<" = " << s1;
     std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
+    outf<<s1<<std::endl<<s2<<std::endl;
     dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
 
   }  // Mahdi: End of the loop that creates dependencs for IEGenLib

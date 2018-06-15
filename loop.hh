@@ -273,7 +273,7 @@ public:
    * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
    */
   std::vector<std::pair<std::string, std::string >> 
-    depRelsForParallelization(int parallelLoopLevel = 0);
+    depRelsForParallelization(std::string output_filename, int parallelLoopLevel = 0);
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   // Reason: Transformed code that is suppose to be printed out when Chill finishes everything,
   //         is not correct for our examples!

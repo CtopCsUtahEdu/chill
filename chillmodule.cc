@@ -2015,10 +2015,9 @@ chill_num_statements(PyObject *self, PyObject *args)
 
 static PyObject *
 chill_print_dep_ufs(PyObject *self, PyObject *args) {
-  strict_arg_num(args, 2);
-  int stmt = intArg(args, 0);
-  int level = intArg(args, 1);
-  myloop->depRelsForParallelization();
+  strict_arg_num(args, 1);
+  std::string output_filename = strArg(args, 0);
+  myloop->depRelsForParallelization(output_filename);
   Py_RETURN_NONE;
 }
 #endif
