@@ -1626,10 +1626,14 @@ void replace_tv_name(std::string &str, std::string old_name, std::string new_nam
 } 
 
 
+// Printing omega::Relation to string 
 std::string omega_rel_to_string(omega::Relation rel){
+
   std::string result,tuple_decl = "[", constraints;
 
-  constraints = rel.print_formula_to_string();
+// Mahdi: Think more generally about if following change is correct
+//  constraints = rel.print_formula_to_string();
+  constraints = print_to_iegen_string(rel);
 
   if (rel.is_set()){
     for (int j = 1; j <= rel.n_set(); j++) {
@@ -1657,6 +1661,18 @@ std::string omega_rel_to_string(omega::Relation rel){
   return result;
 }
 
+// Helper function to remove extrac spaces after "," from a string
+std::string remExtraSpace(std::string str){
+
+  std::string result = str;
+
+  for(int i=0 ; i < result.length()-1; i++){
+    if(result[i] == ',') while(result[i+1] == ' ') result.erase (i+1,1); 
+  }
+
+  return result;
+}
+
 
 /*!
  * Mahdi: This functions extarcts and returns the data dependence relations 
@@ -1675,14 +1691,12 @@ std::vector<std::pair<std::string, std::string >>
   replaceCode_ind = 0; 
 
 std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
-std::cout<<"\n|_|-|_| START UFCs:\n";
-for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
-  std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
+
 std::cout<<"\nIS and Xform of statements:\n";
 for(int i = 0; i<stmt.size() ; i++){
   std::cout<<"\nR "<<i<<" = "<<stmt[i].IS<<"\nXform = "<<stmt[i].xform<<"\nSt NL = "<<stmt_nesting_level_[i]<<"\n";
 }
-
+/*
   omega::Relation r = parseExpWithWhileToRel(stmt[whileLoop_stmt_num].code, 
                                              stmt[whileLoop_stmt_num].IS, stmt_num);
 
@@ -1725,7 +1739,7 @@ for(int i = 0; i<stmt.size() ; i++){
       std::pair<std::vector<std::pair<bool, std::pair<std::string, std::string> > >,
           std::vector<std::pair<bool, std::pair<std::string, std::string> > > > > syms =
       determineUFsForIegen(result, ir, freevar);
-
+*/
   // Getting the statement number for all statements in the parallel loop
   int first_stmt_in_parallel_loop = 0;
   for(int i = 0; i<stmt.size() ; i++){
@@ -1798,7 +1812,7 @@ std::cout<<"\n--------\na_IS = "<<stmt[access_st[i]].IS<<"a_rel ="<<a_rel<<"b_IS
         for (int i = 1; i <= maxDim; i++)
           accessEqRel.name_output_var(i, index_name(i) + "p");//r1.name_output_var(i, read_r.set_var(i)->name() + "p");
 
-std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel<<"  write_r = "<<stmt[access_st[write_st_no]].IS<<"  read_r = "<<stmt[access_st[read_st_no]].IS<<"  w[2] =  "<<stmt[access_st[write_st_no]].IS.set_var(2)->name()<<"\n";
+//std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel<<"  write_r = "<<stmt[access_st[write_st_no]].IS<<"  read_r = "<<stmt[access_st[read_st_no]].IS<<"  w[2] =  "<<stmt[access_st[write_st_no]].IS.set_var(2)->name()<<"\n";
 
         F_And *f_root = accessEqRel.add_and(); 
 
@@ -1822,20 +1836,20 @@ std::cout<<"\n#############Initial accessEqRel#"<<relCounter<<" = "<<accessEqRel
           }
           bool has_complex_formula = false;
 
-std::cout<<"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Before exp2for accessEqRel = "<<accessEqRel<<"\n";
-repr_src->dump();
-repr_dst->dump();
+//std::cout<<"\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Before exp2for accessEqRel = "<<accessEqRel<<"\n";
+//repr_src->dump();
+//repr_dst->dump();
           try {   
             exp2formula(this, ir, accessEqRel, f_and, freevar, repr_src, e1, 'w',
                         IR_COND_EQ, false, uninterpreted_symbols[write_st_no],
                         uninterpreted_symbols_stringrepr[write_st_no],
                         unin_rel[write_st_no]);
-std::cout<<"\nAfter 1st exp2for accessEqRel = "<<accessEqRel<<"\n";
+//std::cout<<"\nAfter 1st exp2for accessEqRel = "<<accessEqRel<<"\n";
             exp2formula(this, ir, accessEqRel, f_and, freevar, repr_dst, e2, 'r',
                         IR_COND_EQ, false, uninterpreted_symbols[read_st_no],
                         uninterpreted_symbols_stringrepr[read_st_no],
                         unin_rel[read_st_no]);
-std::cout<<"\nAfter 2nd exp2for accessEqRel = "<<accessEqRel<<"\n";
+//std::cout<<"\nAfter 2nd exp2for accessEqRel = "<<accessEqRel<<"\n";
           } catch (const ir_exp_error &e) {
             has_complex_formula = true;
           }
@@ -1854,7 +1868,7 @@ std::cout<<"\nAfter creating the equality accessEqRel = "<<accessEqRel<<"\n";
         }   // Mahdi: end of n_dim loop
 
         accessEqRel.simplify();
-        if (is_negative) {
+/*        if (is_negative) {
           Variable_ID v1, v2;
 
           v1 = accessEqRel.input_var(1);
@@ -1862,7 +1876,7 @@ std::cout<<"\nAfter creating the equality accessEqRel = "<<accessEqRel<<"\n";
           v2 = accessEqRel.output_var(1);
           accessEqRel = flip_var_exclusive(accessEqRel, v2);
         }
-
+*/
         depRelParts tempDepRelParts;
         tempDepRelParts.write_st_is = write_r;
         tempDepRelParts.write_st_no = write_st_no;
@@ -1900,6 +1914,10 @@ relCounter = 1;
     omega2iegen_ufc_map.insert(std::pair<std::string, std::string>(omega_name, iegen_name));
   }
 
+
+std::cout<<"\n|_|-|_| START UFCs:\n";
+for (std::map<std::string, std::string >::iterator it=unin_symbol_for_iegen.begin(); it!=unin_symbol_for_iegen.end(); ++it)
+  std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
 std::cout<<"\n|_|-|_| START omega2iegen_ufc_map UFCs:\n";
 for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(); it!=omega2iegen_ufc_map.end(); ++it)
   std::cout<<"\n *****UFS = " << it->first << " => " << it->second << '\n';
@@ -1927,9 +1945,7 @@ for (std::map<std::string, std::string >::iterator it=omega2iegen_ufc_map.begin(
     read_orig_IS_p.simplify();
 
 
-
-std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
-         <<" \nwrite_r = "<<omega_rel_to_string(write_orig_IS)<<" \nwrite_sch = "<<omega_rel_to_string(write_sch)<<"\nread_r_orig = "<<omega_rel_to_string(read_orig_IS_p)<<"\nread_sch = "<<omega_rel_to_string(read_sch)<<"\n";
+//std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints<<" \n\n  write_r = "<<omega_rel_to_string(write_orig_IS)<<" \n\n  write_sch = "<<omega_rel_to_string(write_sch)<<"\n\n  read_r_orig = "<<omega_rel_to_string(read_orig_IS_p)<<"\n\n  read_sch = "<<omega_rel_to_string(read_sch)<<"\n";
 
 
     // We are going to use IEGenLib to apply schedule to iteration space
@@ -1953,6 +1969,10 @@ std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
     iegen_write_parts = getPartsFromStr(iegen_write_str);
     iegen_read_parts = getPartsFromStr(iegen_read->prettyPrintString());
 
+//    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB Write \n   omega_orig_write_is = "<<omega_orig_write_is<<"\n   iegen_write_is = "<<iegen_write_is->prettyPrintString()<<"\n   omega_orig_write_sch = "<<omega_orig_write_sch<<"\n  iegen_erite_sch = "<<iegen_write_sch->prettyPrintString()<<"\n  iegen_write = "<<iegen_write->prettyPrintString()<<"\n  iegen_write_str = "<<iegen_write_str<<"\n\n";
+
+
+//    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB Read \n   omega_orig_read_is = "<<omega_orig_read_is<<"\n   iegen_read_is = "<<iegen_read_is->prettyPrintString()<<"\n   omega_orig_read_sch = "<<omega_orig_read_sch<<"\n  iegen_read_sch = "<<iegen_read_sch->prettyPrintString()<<"\n  iegen_read = "<<iegen_read->prettyPrintString()<<"\n\n";
 
     // Generating tuple declaration for the dependencs
     std::string tuple_decl_RAW = iegen_write_parts.tupDecl + "->" + iegen_read_parts.tupDecl;
@@ -1962,22 +1982,22 @@ std::cout<<"\n-----------The print: r#"<<relCounter<<" = "<<equality_constraints
     std::string lex_order1 = "In_2 < Out_2";
     std::string lex_order2 = "Out_2 < In_2";
 
-
-    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB\n   write = "<<iegen_write_str<<"\n   Read = "<<iegen_read->prettyPrintString()<<"\n\n";
-    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB Parts\n   read_c = "<<iegen_read_parts.constraints<<"\n   read_td = "<<iegen_read_parts.tupDecl<<"\n\n";
+//    std::cout<<"\n\n&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&& IEGENLIB Parts\n   read_c = "<<iegen_read_parts.constraints<<"\n   read_td = "<<iegen_read_parts.tupDecl<<"\n\n";
 
 
     // Replacing tuple variable names in equality constraint that is 
     // built based on names in original iteration space, e.g 
     // chill_idx1 = colidx__(chill_idx1p,chill_idx2p) -> In_2 = colidx__(Out_2,Out_4)
     std::string equality_constraints_str = print_to_iegen_string(equality_constraints);
+std::cout<<"\n*******************Before replace equality_constraints_str #"<<relCounter<<" = "<<equality_constraints_str<<"\n";
     for (int j=0; j < replace_tuple_var.size(); j++) {
       replace_tv_name(equality_constraints_str, replace_tuple_var[j].first, 
                       replace_tuple_var[j].second);
     }
+std::cout<<"\n*******************After replace equality_constraints_str #"<<relCounter<<" = "<<equality_constraints_str<<"\n";
 
-    std::string main_constraints = iegen_write_parts.constraints;
-    main_constraints += " && " + iegen_read_parts.constraints;
+    std::string main_constraints = remExtraSpace(iegen_write_parts.constraints);
+    main_constraints += " && " + remExtraSpace(iegen_read_parts.constraints);
     main_constraints += " && " + equality_constraints_str;
 
 //std::cout<<"\n*******************Before replace  main_constraints #"<<relCounter<<" = "<<main_constraints<<"\n";

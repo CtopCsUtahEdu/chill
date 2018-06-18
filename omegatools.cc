@@ -444,6 +444,11 @@ std::string tmp_e() {
 
 
 
+// Mahdi: A helper function to correct embedded iteration space: from Tuowen's topdown branch
+// buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
+// however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
+extern std::string index_name(int level);
+
 //-----------------------------------------------------------------------------
 // Convert expression tree to omega relation.  "destroy" means shallow
 // deallocation of "repr", not freeing the actual code inside.
@@ -455,8 +460,29 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
                  std::map<std::string, std::vector<omega::Relation> > &index_variables) {
 
-std::cout<<"\n+++++++++START exp2for: r = "<<r<<"\n";
+std::cout<<"\n+++++++++START exp2for: r = "<<r<<"  side = "<<side<<"\n";
 repr->dump();
+/*
+  if (r.is_set()){
+     omega::Relation iterRel(r.n_set());
+     for (int i = 1; i <= r.n_set(); i++)
+       iterRel.name_set_var(i, index_name(i));
+     F_And *f_root = iterRel.add_and();
+     r = iterRel;
+  } else{
+*
+  if ( !(r.is_set()) && side == 'r' ){
+std::cout<<"\n old r = "<<r<<"\n";
+     omega::Relation iterRel(r.n_inp(), r.n_out());
+     for (int i = 1; i <= r.n_inp(); i++)
+       iterRel.name_input_var(i, index_name(i));
+     for (int i = 1; i <= r.n_out(); i++)
+       iterRel.name_output_var(i, r.output_var(i)->name());
+     F_And *f_root = iterRel.add_and();
+     r = iterRel;
+std::cout<<"\n New r = "<<r<<"\n";  
+  }
+*/
 
   switch (ir->QueryExpOperation(repr)) {
 
@@ -553,13 +579,12 @@ repr->dump();
             temp.name_set_var(j, r.set_var(j)->name());
 
           }
-        else
+        else{   // Mahdi: The change is because of new iteration space adopted from Tuowen's Topdown branch
           for (int j = 1; j <= r.n_inp(); j++) {
-
-            temp.name_input_var(j, r.input_var(j)->name());
-
+            if(side == 'w') temp.name_input_var(j, r.input_var(j)->name());
+            else if(side == 'r') temp.name_input_var(j, r.output_var(j)->name());
           }
-
+        }
         F_And *temp_root = temp.add_and();
 
         CG_outputRepr* repr2 = repr->clone();
@@ -594,9 +619,14 @@ repr->dump();
             e1 = *ei;
             for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
               if ((*cvi).var->kind() == Input_Var) {
+                // Mahdi: change to consider changes of iteration space
+                std::string tv_name = (*cvi).var->name();
+                if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+                  tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+
                 if ((*cvi).var->get_position() > max_dim)
                   max_dim = (*cvi).var->get_position();
-                std::string name = (*cvi).var->name();
+                std::string name = tv_name;
                 if (side == 'r')
                   name += "p";
 
@@ -614,7 +644,7 @@ repr->dump();
                           ir->builder_s().CreateIdent(
                               name)));
                   if (side == 'r') {
-                    std::string name = (*cvi).var->name();
+                    std::string name = tv_name;
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateTimes(
@@ -625,7 +655,7 @@ repr->dump();
 
                   } else {
 
-                    name += "p";
+                  name += "p";
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateTimes(
@@ -639,7 +669,7 @@ repr->dump();
                       curr_repr_s,
                       ir->builder_s().CreateIdent(name));
                   if (side == 'r') {
-                    std::string name = (*cvi).var->name();
+                    std::string name = tv_name;
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateIdent(name));
@@ -1043,9 +1073,21 @@ repr->dump();
 //          reprs2.push_back(ir->builder_s().CreateIdent(*it));
 //        }
 
+        for (std::set<std::string>::iterator it = vars.begin();
+             it != vars.end(); it++) {
+          reprs.push_back(ir->builder()->CreateIdent(*it));
+          reprs2.push_back(ir->builder_s().CreateIdent(*it));
+        }
         for (int j = 1; j <= max_dim; j++) {
-          std::string tv_name = r.input_var(j)->name();
-          if (vars.find( tv_name ) != vars.end()){
+          std::string tv_name;// = r.input_var(j)->name();
+          if (side == 'r') {
+            tv_name = r.output_var(j)->name();
+            if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+              tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+          } else {
+            tv_name = r.input_var(j)->name();          // There is no extra "p" or "'"
+          }
+          //if (vars.find( tv_name ) != vars.end()){
             if (side == 'r') {
               args.push_back(tv_name + "p");
               args2.push_back(tv_name);
@@ -1053,12 +1095,14 @@ repr->dump();
               args.push_back(tv_name);
               args2.push_back(tv_name + "p");
             }
-            reprs.push_back(ir->builder()->CreateIdent(tv_name));
-            reprs2.push_back(ir->builder_s().CreateIdent(tv_name));
-          }
+          //}
+          std::string parameters = static_cast<CG_stringRepr*>(curr_repr_s)->GetString();
+          if( parameters.find(tv_name) !=std::string::npos ) break;
         }
 
         if (need_new_fsymbol) {
+std::cout<<"\n\n-----------+++++++++++++++++---------- EXP2Formula: A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
+         <<"\n                             B = "<<static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()<<"\n\n";
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
           curr_repr_s = ir->builder_s().CreateInvoke(ref->name(), a);
@@ -1071,6 +1115,9 @@ repr->dump();
           loop->unin_symbol_for_iegen.insert(
               std::pair<std::string, std::string>(s + dumpargs(args2),
                                                   static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()));
+
+std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
+         <<"\n                             B = "<<static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()<<"\n\n";
         }
         if (need_new_fsymbol2 && curr_repr_no_const != NULL) {
           std::vector<CG_outputRepr *> a;
@@ -2873,11 +2920,16 @@ Relation permute_relation(const std::vector<int> &pi) {
 Variable_ID find_index(Relation &r, const std::string &s, char side) {
   // Omega quirks: assure the names are propagated inside the relation
   r.setup_names();
-  
+  std::cout<<"\n find_index : r = "<<r<<"   s = "<<s<<"  s+ = "<<(s+"\'")<<"   side = "<<side<<"\n";
   if (r.is_set()) { // side == 's'
     for (int i = 1; i <= r.n_set(); i++) {
       std::string ss = r.set_var(i)->name();
       if (s == ss) {
+        return r.set_var(i);
+      } else if (s+"\'" == ss) {
+        return r.set_var(i);
+      }
+      else if (s+"p" == ss) {    // Mahdi: 
         return r.set_var(i);
       }
     }
@@ -2893,7 +2945,7 @@ Variable_ID find_index(Relation &r, const std::string &s, char side) {
   else { // side == 'r'
     for (int i = 1; i <= r.n_out(); i++) {
       std::string ss = r.output_var(i)->name();
-      if (s+"'" == ss) {
+      if (s+"\'" == ss) {
         return r.output_var(i);
       }
       else if (s+"p" == ss) {    // Mahdi: I added this else if, THE FIX FOR (') ISSUE for Gauss-Seidel example (only?)
@@ -2901,6 +2953,7 @@ Variable_ID find_index(Relation &r, const std::string &s, char side) {
       }
     }
   }
+  std::cout<<"\n find_index: Ret NULL\n";
   
   return NULL;
 }

@@ -1289,7 +1289,6 @@ std::cout<<"\n\nLoop::Loop: Iteration Spaces:\n";
 for(int i = 0; i<stmt.size() ; i++){
   std::cout<<"\nstmt["<<i<<"].IS  = "<<stmt[i].IS;
 }
-//std::cout<<"\n\nLoop::Loop: After while(tryBuild)\n\n";
 
   for (int i = 0; i < stmt.size(); i++) {
     std::map<int, CG_outputRepr*>::iterator it = replace.find(i);
@@ -1312,6 +1311,10 @@ for(int i = 0; i<stmt.size() ; i++){
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
   
+
+std::cout<<"\n\nLoop::Loop: Before dep test\n\n";
+
+
   for (int i = 0; i < stmt.size(); i++) {
     stmt[i].reduction = 0; // Manu -- initialization
     for (int j = i; j < stmt.size(); j++) {
@@ -1353,6 +1356,10 @@ for(int i = 0; i<stmt.size() ; i++){
     }
   }
   
+
+std::cout<<"\n\nLoop::Loop: After dep test\n\n";
+
+
   debug_fprintf(stderr, "\n\n*** LOTS OF REDUCTIONS ***\n\n"); 
   
   // TODO: Reduction check
