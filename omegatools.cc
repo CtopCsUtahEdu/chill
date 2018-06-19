@@ -443,6 +443,15 @@ std::string tmp_e() {
 }
 
 
+// Mahdi: This is needed for a change in exp2formula's concept that itself was related to
+//        how iteration space is cacluated for imperfect loops.
+//* When faced with nested function calls while calculated experssion for a dependence
+//  exp2formual, now, passes output tuple of relation (r relation in the input list) to recursive 
+//  call to exp2formual, instead of passing input tuple of relation that previously was getting passed.
+std::string rmvExtraPrime(std::string str){
+  if(str[(str.size()-1)] == 'p' || str[(str.size()-1)] == '\'')
+    str.erase(str.end()-1, str.end()); // removing extra "p" or "'"
+}
 
 // Mahdi: A helper function to correct embedded iteration space: from Tuowen's topdown branch
 // buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
@@ -462,27 +471,6 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
 std::cout<<"\n+++++++++START exp2for: r = "<<r<<"  side = "<<side<<"\n";
 repr->dump();
-/*
-  if (r.is_set()){
-     omega::Relation iterRel(r.n_set());
-     for (int i = 1; i <= r.n_set(); i++)
-       iterRel.name_set_var(i, index_name(i));
-     F_And *f_root = iterRel.add_and();
-     r = iterRel;
-  } else{
-*
-  if ( !(r.is_set()) && side == 'r' ){
-std::cout<<"\n old r = "<<r<<"\n";
-     omega::Relation iterRel(r.n_inp(), r.n_out());
-     for (int i = 1; i <= r.n_inp(); i++)
-       iterRel.name_input_var(i, index_name(i));
-     for (int i = 1; i <= r.n_out(); i++)
-       iterRel.name_output_var(i, r.output_var(i)->name());
-     F_And *f_root = iterRel.add_and();
-     r = iterRel;
-std::cout<<"\n New r = "<<r<<"\n";  
-  }
-*/
 
   switch (ir->QueryExpOperation(repr)) {
 
@@ -614,8 +602,10 @@ std::cout<<"\n New r = "<<r<<"\n";
 
         //std::set<std::string> arg_set_vars;
 
+std::cout<<"\n\n############# exp2formula: temp = "<<temp<<"   s = "<<s<<"\n\n";
         for (DNF_Iterator di(temp.query_DNF()); di; di++) {
           for (EQ_Iterator ei = (*di)->EQs(); ei; ei++) {
+
             e1 = *ei;
             for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
               if ((*cvi).var->kind() == Input_Var) {
@@ -629,7 +619,7 @@ std::cout<<"\n New r = "<<r<<"\n";
                 std::string name = tv_name;
                 if (side == 'r')
                   name += "p";
-
+std::cout<<"\n\n############# exp2formula: Before curr_repr build";
                 curr_repr = ir->builder()->CreatePlus(curr_repr,
                                                       ir->builder()->CreateTimes(
                                                           ir->builder()->CreateInt(
@@ -700,6 +690,7 @@ std::cout<<"\n New r = "<<r<<"\n";
               } else if ((*cvi).var->kind() == Global_Var
                          && (*cvi).var->get_global_var()->base_name()
                             != s) {
+std::cout<<"\n\n[][][][][][][][][][] exp2formula: Inside else if construct\n\n";
                 Global_Var_ID g = (*cvi).var->get_global_var();
                 if (g->arity() > 0) {
                   std::vector<CG_outputRepr *> args;
@@ -708,18 +699,21 @@ std::cout<<"\n New r = "<<r<<"\n";
                   std::string arg_string = "(";
                   std::string arg_string2 = "(";
                   for (int l = 1; l <= g->arity(); l++) {
+                    std::string tv_name = temp.set_var(l)->name();
+                    if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+                      tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
                     if (l > 1) {
                       arg_string += ",";
                       arg_string2 += ",";
                     }
                     args.push_back(
                         ir->builder()->CreateIdent(
-                            temp.set_var(l)->name()));
+                            tv_name));
                     args2.push_back(
                         ir->builder_s().CreateIdent(
-                            temp.set_var(l)->name()));
-                    arg_string += temp.set_var(l)->name();
-                    arg_string2 += temp.set_var(l)->name();
+                            tv_name));
+                    arg_string += tv_name;
+                    arg_string2 += tv_name;
                     if (side == 'r')
                       arg_string += "p";
                     else
@@ -745,10 +739,17 @@ std::cout<<"\n New r = "<<r<<"\n";
                                                                 -(*cvi).coef),
                                                             ir->builder()->CreateInvoke(
                                                                 g->base_name(), args)));
-
+std::cout<<"\n\n@@@@@@@@@@@@@@@@@@@@@---------@@@@@@@@@@@@@@@@@ exp2formula: curr_repr = ";
+curr_repr->dump();
+if( !curr_repr_s ) 
+  std::cout<<"\n\n############# exp2formula: curr_repr_s is NULL!\n\n";
+if( !curr_repr_s2 ) 
+  std::cout<<"\n\n############# exp2formula: curr_repr_s2 is NULL!\n\n";
                   if (-(*cvi).coef != 1) {
+  std::cout<<"\n\n############# exp2formula: -(*cvi).coef != 1\n\n";
                     if (lookup2
-                        != loop->unin_symbol_for_iegen.end())
+                        != loop->unin_symbol_for_iegen.end()){
+  std::cout<<"\n\n############# exp2formula: lookup2\n\n";
                       curr_repr_s =
                           ir->builder_s().CreatePlus(
                               curr_repr_s,
@@ -756,7 +757,7 @@ std::cout<<"\n New r = "<<r<<"\n";
                                   ir->builder_s().CreateInt(
                                       -(*cvi).coef),
                                   new CG_stringRepr(
-                                      lookup2->second)));
+                                      lookup2->second)));}
                     if (lookup3
                         != loop->unin_symbol_for_iegen.end())
                       curr_repr_s2 =
@@ -815,6 +816,7 @@ std::cout<<"\n New r = "<<r<<"\n";
                 }
               }   // Mahdi: end of: for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
             if ((*ei).get_const() != 0) {
+std::cout<<"\n\n$$$$$$$$$$ Some constant\n\n";
 
               curr_repr_no_const = curr_repr->clone();
               curr_repr_s_no_const = curr_repr_s->clone();
@@ -831,7 +833,14 @@ std::cout<<"\n New r = "<<r<<"\n";
               //true;
               //s += "_";
             } else {
-
+std::cout<<"\n\n$$$$$$$$$$ exp2formula: No constant: Before ir builders\n\n";
+if( !curr_repr_s ) 
+  std::cout<<"\n\n############# exp2formula: curr_repr_s is NULL!\n\n";
+if( !curr_repr_s2 ) 
+  std::cout<<"\n\n############# exp2formula: curr_repr_s2 is NULL!\n\n";
+   curr_repr->dump();
+   curr_repr_s->dump();
+   curr_repr_s2->dump();
               curr_repr_no_const = ir->builder()->CreatePlus(
                   curr_repr->clone(),
                   ir->builder()->CreateInt(1));
@@ -842,6 +851,11 @@ std::cout<<"\n New r = "<<r<<"\n";
                   curr_repr_s2->clone(),
                   ir->builder_s().CreateInt(1));
 
+std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
+   curr_repr->dump();
+   curr_repr_s->dump();
+   curr_repr_s2->dump();
+   curr_repr_s_no_const->dump();
             }
 
           }
@@ -861,6 +875,7 @@ std::cout<<"\n New r = "<<r<<"\n";
 
       //if(need_new_fsymbol)
       //	s+="_";
+std::cout<<"\n\n$$$$$$$$$$%%%%%%%%% after dim loop: s = "<<s<<"\n\n";
 
       need_new_fsymbol = true;
       Variable_ID e = find_index(r, s, side);
@@ -1080,7 +1095,13 @@ std::cout<<"\n New r = "<<r<<"\n";
         }
         for (int j = 1; j <= max_dim; j++) {
           std::string tv_name;// = r.input_var(j)->name();
-          if (side == 'r') {
+          if (r.is_set() ) {
+            tv_name = r.set_var(j)->name();
+std::cout<<"\n========== exp2formula: j = "<<j<<"  tv_name = "<<tv_name<<"\n\n";
+            if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+              tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+          } else if (side == 'r') {
+
             tv_name = r.output_var(j)->name();
             if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
               tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
@@ -1116,7 +1137,7 @@ std::cout<<"\n\n-----------+++++++++++++++++---------- EXP2Formula: A = "<<stati
               std::pair<std::string, std::string>(s + dumpargs(args2),
                                                   static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()));
 
-std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
+std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: AL = "<<(s + dumpargs(args))<<"\n         A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
          <<"\n                             B = "<<static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()<<"\n\n";
         }
         if (need_new_fsymbol2 && curr_repr_no_const != NULL) {
@@ -1217,6 +1238,7 @@ std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: A = "<<s
       delete ref;
       if (destroy)
         delete repr;
+std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: before array break:  r = "<<r<<"\n\n";
       break;
     }
     case IR_OP_VARIABLE: {
@@ -1755,6 +1777,9 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
     } catch (const ir_exp_error &e) {
       has_complex_formula = true;
     }
+std::cout<<"\n\n=========== arrays2relation  before eq creation: r = "<<r<<"\n\n";
+    repr_src->dump();
+    repr_dst->dump();
 
     if (!has_complex_formula) {
       EQ_Handle h = f_and->add_EQ();
@@ -1765,8 +1790,10 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
     repr_dst->clear();
     delete repr_src;
     delete repr_dst;
+std::cout<<"\n\n=========== arrays2relation loop end: r = "<<r<<"\n\n";
   }
 
+std::cout<<"\n\n=========== arrays2relation  before restict: r = "<<r<<"\n\n";
 // add iteration space restriction
   r = Restrict_Domain(r, copy(IS1));
   r = Restrict_Range(r, copy(IS2));
@@ -1774,7 +1801,8 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
 // reset the output variable names lost in restriction
   for (int i = 1; i <= IS2.n_set(); i++)
     r.name_output_var(i, IS2.set_var(i)->name() + "'");
-
+  r.setup_names();
+//std::cout<<"\n\n=========== arrays2relation  before ret: r = "<<r<<"\n\n";
   return r;
 }
 
