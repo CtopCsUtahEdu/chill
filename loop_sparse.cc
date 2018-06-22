@@ -1673,6 +1673,46 @@ std::string remExtraSpace(std::string str){
   return result;
 }
 
+// Extracts names privatizable arrays from a string
+std::set<std::string> privateArrays(std::string str){
+
+  std::set<std::string> prArrays;
+  str = iegenlib::trim(str);
+
+  std::size_t start = 0, end = 0 ;
+  while( start < str.length() ){
+    end = str.find_first_of(',', start);
+    if( end == std::string::npos ) 
+      end = str.length();
+    prArrays.insert( trim( str.substr(start,end-start) ) ); 
+    start = end + 1;
+  }
+
+  return prArrays;
+}
+
+// Extracts statement number for reduction operations
+std::set<int> reductionOps(std::string str){
+
+  std::set<int> redOps;
+  int tint;
+  std::string tstr;
+  str = iegenlib::trim(str);
+
+  std::size_t start = 0, end = 0 ;
+  while( start < str.length() ){
+    end = str.find_first_of(',', start);
+    if( end == std::string::npos ) 
+      end = str.length();
+    str = trim( str.substr(start,end-start) );
+    sscanf(str.c_str(), "%d", &tint); 
+    redOps.insert(tint);
+    start = end + 1;
+  }
+
+  return redOps;
+}
+
 
 /*!
  * Mahdi: This functions extarcts and returns the data dependence relations 
@@ -1683,9 +1723,13 @@ std::string remExtraSpace(std::string str){
  * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
  */
 std::vector<std::pair<std::string, std::string >> 
- Loop::depRelsForParallelization(std::string output_filename, int parallelLoopLevel){
+Loop::depRelsForParallelization(std::string output_filename, std::string privatizable_arrays, 
+                                std::string reduction_operations, int parallelLoopLevel){
 
   int stmt_num = 1, level = 1, whileLoop_stmt_num = 1, maxDim = stmt[0].IS.n_set();
+
+  std::set<std::string> prArrays = privateArrays(privatizable_arrays);
+  std::set<int> redOps = reductionOps(reduction_operations);
 
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   replaceCode_ind = 0; 
@@ -1708,6 +1752,15 @@ std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
        i++) {
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(stmt[*i].code);
     for (int j = 0; j < access2.size(); j++){
+
+
+      // Excluding private arrays 
+      IR_ArrayRef *a = access2[j];
+      IR_ArraySymbol *sym_a = a->symbol();
+      std::string f_name = sym_a->name();
+      //std::cout<<"\n access : "<<f_name <<"\n";
+      if( prArrays.find(f_name) != prArrays.end() ) continue;
+
       access.push_back(access2[j]);
       access_st[ct++] = *i; 
     }
@@ -1723,6 +1776,11 @@ int relCounter = 1;
     IR_ArraySymbol *sym_a = a->symbol();
 
     for (int j = i; j < access.size(); j++) {
+
+      // Excluding reduction operations
+      if( access_st[i] == access_st[j] && redOps.find(access_st[i]) != redOps.end() )
+        continue;
+
       IR_ArrayRef *b = access[j];
       IR_ArraySymbol *sym_b = b->symbol();
 

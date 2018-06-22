@@ -2015,9 +2015,11 @@ chill_num_statements(PyObject *self, PyObject *args)
 
 static PyObject *
 chill_print_dep_ufs(PyObject *self, PyObject *args) {
-  strict_arg_num(args, 1);
+  strict_arg_num(args, 3);
   std::string output_filename = strArg(args, 0);
-  myloop->depRelsForParallelization(output_filename);
+  std::string privatizable_arrays = strArg(args, 1); // listed in a string separated with comma
+  std::string reduction_operations = strArg(args, 2);// listed in a string separated with comma
+  myloop->depRelsForParallelization(output_filename, privatizable_arrays, reduction_operations);
   Py_RETURN_NONE;
 }
 #endif
