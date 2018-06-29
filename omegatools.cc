@@ -469,15 +469,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
                  std::map<std::string, std::vector<omega::Relation> > &index_variables, bool extractingDepRel) {
 
-std::cout<<"\n+++++++++START exp2for: r = "<<r<<"  side = "<<side<<"\n";
-repr->dump();
-
   switch (ir->QueryExpOperation(repr)) {
 
     case IR_OP_MACRO: {
-std::cout<<"\nexp2for::IR_OP_MACRO\n";
-
-
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       IR_FunctionRef *ref = static_cast<IR_FunctionRef *>(ir->Repr2Ref(v[0]));
       std::string s = ref->name();
@@ -500,7 +494,6 @@ std::cout<<"\nexp2for::IR_OP_MACRO\n";
       break;
     }
     case IR_OP_CONSTANT: {
-std::cout<<"\nexp2for::IR_OP_CONSTANT\n";
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       IR_ConstantRef *ref = static_cast<IR_ConstantRef *>(ir->Repr2Ref(v[0]));
       if (!ref->is_integer())
@@ -535,8 +528,6 @@ std::cout<<"\nexp2for::IR_OP_CONSTANT\n";
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
-std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
-
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
 
       IR_Ref *ref = ir->Repr2Ref(v[0]);
@@ -559,6 +550,29 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
 
       for (int i = 0; i < ref->n_dim(); i++) {
 
+/* Mahdi: Here exp2formula recursively traverses nested calls, e.g a(b(c(i))).
+To tell the recursive calls what is the tuple declaration for the relation that 
+includes the overall term, here a temporary set is created out of tuple declaration of 
+the input omega relation to first exp2formula call. It used to be the case that 
+this set was created  ONLY with INPUT tuple declaration of the original input relation. 
+And, it used to work well because we call exp2formula in 2 general case: 
+(1) when chill is building the iteration space of the statements, in which case 
+the input relation for first call to exp2formual is already just a set, e.g r = {[...] : ...}. 
+So, when we build temporary set out of set, their tuple declaration is the same. 
+(2) chill calls exp2formula when building some sort of dependence relation. 
+Depenedence relations are actually relations, meaning their tuple declaration have 
+input and output parts, e.g r = {[...]->[...] : ...}. Now, in this case, 
+the tuple declaration of the temporary set would not be same as input relation to 
+first call of exp2formula. The old behaivour of using only input part of tuple declaration 
+used to work since chill had certain form of creating iteration space for 
+imperfectly nested loops that was skewed toward this behaivour working. 
+But chill previous way of creating iteration space was not correct for general cases. 
+Now, that Tuowen has implemented a better way of generating iteration sapce for loop nests, 
+following code cannot just use the input part of tuple declaration of input relation to 
+create the temporary set. It needs to create the temporary set with either input or output part of 
+the input relation depending on whether we are creating constraints related to 
+write-access (input part), or constraints for read-access (output part).
+*/
         Relation temp(r.n_inp());
 
         r.setup_names();
@@ -569,7 +583,7 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
             temp.name_set_var(j, r.set_var(j)->name());
 
           }
-        else{   // Mahdi: The change is because of new iteration space adopted from Tuowen's Topdown branch
+        else{
           for (int j = 1; j <= r.n_inp(); j++) {
             if(side == 'w') temp.name_input_var(j, r.input_var(j)->name());
             else if(side == 'r') temp.name_input_var(j, r.output_var(j)->name());
@@ -603,8 +617,6 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
         EQ_Handle e1;
 
         //std::set<std::string> arg_set_vars;
-
-//std::cout<<"\n\n############# exp2formula: temp = "<<temp<<"   s = "<<s<<"\n\n";
         for (DNF_Iterator di(temp.query_DNF()); di; di++) {
           for (EQ_Iterator ei = (*di)->EQs(); ei; ei++) {
 
@@ -621,7 +633,6 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
                 std::string name = tv_name;
                 if (side == 'r')
                   name += "p";
-//std::cout<<"\n\n############# exp2formula: Before curr_repr build";
                 curr_repr = ir->builder()->CreatePlus(curr_repr,
                                                       ir->builder()->CreateTimes(
                                                           ir->builder()->CreateInt(
@@ -692,7 +703,6 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
               } else if ((*cvi).var->kind() == Global_Var
                          && (*cvi).var->get_global_var()->base_name()
                             != s) {
-//std::cout<<"\n\n[][][][][][][][][][] exp2formula: Inside else if construct\n\n";
                 Global_Var_ID g = (*cvi).var->get_global_var();
                 if (g->arity() > 0) {
                   std::vector<CG_outputRepr *> args;
@@ -741,17 +751,9 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
                                                                 -(*cvi).coef),
                                                             ir->builder()->CreateInvoke(
                                                                 g->base_name(), args)));
-//std::cout<<"\n\n@@@@@@@@@@@@@@@@@@@@@---------@@@@@@@@@@@@@@@@@ exp2formula: curr_repr = ";
-//curr_repr->dump();
-//if( !curr_repr_s ) 
-//  std::cout<<"\n\n############# exp2formula: curr_repr_s is NULL!\n\n";
-//if( !curr_repr_s2 ) 
-//  std::cout<<"\n\n############# exp2formula: curr_repr_s2 is NULL!\n\n";
                   if (-(*cvi).coef != 1) {
-//  std::cout<<"\n\n############# exp2formula: -(*cvi).coef != 1\n\n";
                     if (lookup2
                         != loop->unin_symbol_for_iegen.end()){
-//  std::cout<<"\n\n############# exp2formula: lookup2\n\n";
                       curr_repr_s =
                           ir->builder_s().CreatePlus(
                               curr_repr_s,
@@ -818,8 +820,6 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
                 }
               }   // Mahdi: end of: for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
             if ((*ei).get_const() != 0) {
-//std::cout<<"\n\n$$$$$$$$$$ Some constant\n\n";
-
               curr_repr_no_const = curr_repr->clone();
               curr_repr_s_no_const = curr_repr_s->clone();
               curr_repr_s2_no_const = curr_repr_s2->clone();
@@ -835,14 +835,7 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
               //true;
               //s += "_";
             } else {
-//std::cout<<"\n\n$$$$$$$$$$ exp2formula: No constant: Before ir builders\n\n";
-//if( !curr_repr_s ) 
-//  std::cout<<"\n\n############# exp2formula: curr_repr_s is NULL!\n\n";
-//if( !curr_repr_s2 ) 
-//  std::cout<<"\n\n############# exp2formula: curr_repr_s2 is NULL!\n\n";
-   curr_repr->dump();
-   curr_repr_s->dump();
-   curr_repr_s2->dump();
+
               curr_repr_no_const = ir->builder()->CreatePlus(
                   curr_repr->clone(),
                   ir->builder()->CreateInt(1));
@@ -852,12 +845,6 @@ std::cout<<"\nexp2for::IR_OP_ARRAY_VAR\n";
               curr_repr_s2_no_const = ir->builder_s().CreatePlus(
                   curr_repr_s2->clone(),
                   ir->builder_s().CreateInt(1));
-
-std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
-   curr_repr->dump();
-   curr_repr_s->dump();
-   curr_repr_s2->dump();
-   curr_repr_s_no_const->dump();
             }
 
           }
@@ -877,7 +864,6 @@ std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
 
       //if(need_new_fsymbol)
       //	s+="_";
-//std::cout<<"\n\n$$$$$$$$$$%%%%%%%%% after dim loop: s = "<<s<<"\n\n";
 
       need_new_fsymbol = true;
       Variable_ID e = find_index(r, s, side);
@@ -1099,7 +1085,6 @@ std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
           std::string tv_name;// = r.input_var(j)->name();
           if (r.is_set() ) {
             tv_name = r.set_var(j)->name();
-//std::cout<<"\n========== exp2formula: j = "<<j<<"  tv_name = "<<tv_name<<"\n\n";
             if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
               tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
           } else if (side == 'r') {
@@ -1124,8 +1109,6 @@ std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
         }
 
         if (need_new_fsymbol) {
-//std::cout<<"\n\n-----------+++++++++++++++++---------- EXP2Formula: A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
-//         <<"\n                             B = "<<static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()<<"\n\n";
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
           curr_repr_s = ir->builder_s().CreateInvoke(ref->name(), a);
@@ -1138,9 +1121,6 @@ std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
           loop->unin_symbol_for_iegen.insert(
               std::pair<std::string, std::string>(s + dumpargs(args2),
                                                   static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()));
-
-//std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: AL = "<<(s + dumpargs(args))<<"\n         A = "<<static_cast<CG_stringRepr*>(curr_repr_s)->GetString()
-//         <<"\n                             B = "<<static_cast<CG_stringRepr*>(curr_repr_s2)->GetString()<<"\n\n";
         }
         if (need_new_fsymbol2 && curr_repr_no_const != NULL) {
           std::vector<CG_outputRepr *> a;
@@ -1240,11 +1220,9 @@ std::cout<<"\n\n$$$$$$$$$$ No constant: After ir builders:  r = "<<r<<"\n\n";
       delete ref;
       if (destroy)
         delete repr;
-//std::cout<<"\n\n---------^^^^^^^^^^^^^^^^^^^^^------------ EXP2Formula: before array break:  r = "<<r<<"\n\n";
       break;
     }
     case IR_OP_VARIABLE: {
-std::cout<<"\nexp2for::IR_OP_VAR\n";
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
       IR_ScalarRef *ref = static_cast<IR_ScalarRef *>(ir->Repr2Ref(v[0]));
 
@@ -1252,11 +1230,9 @@ std::cout<<"\nexp2for::IR_OP_VAR\n";
       Variable_ID e = find_index(r, s, side);
 
       if (e == NULL) { // must be free variable
-if( extractingDepRel && side == 'r' ){
-  std::cout<<"\n\n************************************************** ADDING P to existentials! ******************\n";
-  std::cout<<"    s = "<<s<<"\n\n";
-  s = s+"p";
-}
+        if( extractingDepRel && side == 'r' ){
+          s = s+"p";
+        }
         Free_Var_Decl *t = NULL;
         for (unsigned i = 0; i < freevars.size(); i++) {
           std::string ss = freevars[i]->base_name();
@@ -1785,9 +1761,6 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
     } catch (const ir_exp_error &e) {
       has_complex_formula = true;
     }
-//std::cout<<"\n\n=========== arrays2relation  before eq creation: r = "<<r<<"\n\n";
-    repr_src->dump();
-    repr_dst->dump();
 
     if (!has_complex_formula) {
       EQ_Handle h = f_and->add_EQ();
@@ -1798,10 +1771,8 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
     repr_dst->clear();
     delete repr_src;
     delete repr_dst;
-//std::cout<<"\n\n=========== arrays2relation loop end: r = "<<r<<"\n\n";
   }
 
-//std::cout<<"\n\n=========== arrays2relation  before restict: r = "<<r<<"\n\n";
 // add iteration space restriction
   r = Restrict_Domain(r, copy(IS1));
   r = Restrict_Range(r, copy(IS2));
@@ -1810,7 +1781,6 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
   for (int i = 1; i <= IS2.n_set(); i++)
     r.name_output_var(i, IS2.set_var(i)->name() + "'");
   r.setup_names();
-//std::cout<<"\n\n=========== arrays2relation  before ret: r = "<<r<<"\n\n";
   return r;
 }
 
@@ -2956,7 +2926,6 @@ Relation permute_relation(const std::vector<int> &pi) {
 Variable_ID find_index(Relation &r, const std::string &s, char side) {
   // Omega quirks: assure the names are propagated inside the relation
   r.setup_names();
-//  std::cout<<"\n find_index : r = "<<r<<"   s = "<<s<<"  s+ = "<<(s+"\'")<<"   side = "<<side<<"\n";
   if (r.is_set()) { // side == 's'
     for (int i = 1; i <= r.n_set(); i++) {
       std::string ss = r.set_var(i)->name();
@@ -2989,7 +2958,6 @@ Variable_ID find_index(Relation &r, const std::string &s, char side) {
       }
     }
   }
-//  std::cout<<"\n find_index: Ret NULL\n";
   
   return NULL;
 }

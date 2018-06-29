@@ -1679,6 +1679,8 @@ std::set<std::string> privateArrays(std::string str){
   std::set<std::string> prArrays;
   str = iegenlib::trim(str);
 
+  if(str.length() == 0 )   return prArrays;
+
   std::size_t start = 0, end = 0 ;
   while( start < str.length() ){
     end = str.find_first_of(',', start);
@@ -1698,6 +1700,8 @@ std::set<int> reductionOps(std::string str){
   int tint;
   std::string tstr;
   str = iegenlib::trim(str);
+
+  if(str.length() == 0 )   return redOps;
 
   std::size_t start = 0, end = 0 ;
   while( start < str.length() ){
@@ -1723,7 +1727,7 @@ std::set<int> reductionOps(std::string str){
  * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
  */
 std::vector<std::pair<std::string, std::string >> 
-Loop::depRelsForParallelization(std::string output_filename, std::string privatizable_arrays, 
+Loop::depRelsForParallelization(std::string privatizable_arrays, 
                                 std::string reduction_operations, int parallelLoopLevel){
 
   int stmt_num = 1, level = 1, whileLoop_stmt_num = 1, maxDim = stmt[0].IS.n_set();
@@ -1752,8 +1756,6 @@ std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
        i++) {
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(stmt[*i].code);
     for (int j = 0; j < access2.size(); j++){
-
-
       // Excluding private arrays 
       IR_ArrayRef *a = access2[j];
       IR_ArraySymbol *sym_a = a->symbol();
@@ -1850,7 +1852,6 @@ int relCounter = 1;
             h.update_coef(e1, -1);
             h.update_coef(e2, 1);
           }
-std::cout<<"\nAfter creating the equality accessEqRel = "<<accessEqRel<<"\n";
 
           repr_src->clear();
           repr_dst->clear();
@@ -1894,8 +1895,8 @@ relCounter = 1;
     omega2iegen_ufc_map.insert(std::pair<std::string, std::string>(omega_name, iegen_name));
   }
 
-  std::ofstream outf;
-  outf.open (output_filename.c_str(), std::ofstream::out);
+//  std::ofstream outf;
+//  outf.open (output_filename.c_str(), std::ofstream::out);
   
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
@@ -1923,7 +1924,7 @@ relCounter = 1;
     iegenlib::Relation *iegen_write_sch = new iegenlib::Relation(omega_orig_write_sch);
     iegenlib::Set *iegen_write;
     iegen_write = iegen_write_sch->Apply(iegen_write_is);
-    std::string iegen_write_str = iegen_write->prettyPrintString();
+    std::string iegen_write_str = iegen_write->getString();//prettyPrintString();//
     replace_tv_name(iegen_write_str,std::string("Out"),std::string("In"));
 
     std::string omega_orig_read_is = omega_rel_to_string(read_orig_IS_p);
@@ -1932,7 +1933,7 @@ relCounter = 1;
     iegenlib::Relation *iegen_read_sch = new iegenlib::Relation(omega_orig_read_sch);
     iegenlib::Set *iegen_read;
     iegen_read = iegen_read_sch->Apply(iegen_read_is);
-    std::string iegen_read_str = iegen_read->prettyPrintString();
+    std::string iegen_read_str = iegen_read->getString();//prettyPrintString();//
     // Mahdi FIXME: exception for smSmMul: make this general by getting it from json file
     replace_tv_name(iegen_read_str,std::string("nz"),std::string("nzp"));
 
@@ -1993,16 +1994,17 @@ relCounter = 1;
     std::string s1 = "{" + tuple_decl_RAW + " : " + lex_order1 + " && " + main_constraints + "}";
     std::string s2 = "{" + tuple_decl_WAR + " : " + lex_order2 + " && " + main_constraints + "}";
 
-    std::cout << "\nS"<<relCounter++<<" = " << s1;
-    std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
-    outf<<s1<<std::endl<<s2<<std::endl;
+    //std::cout << "\nS"<<relCounter++<<" = " << s1;
+    //std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
+    //outf<<s1<<std::endl<<s2<<std::endl;
     dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
 
   }  // Mahdi: End of the loop that creates dependencs for IEGenLib
 
-  outf.close();
+  //outf.close();
   
 //  rels = removeRedundantConstraints(rels);
 
   return dep_rel_for_iegen;
 }
+

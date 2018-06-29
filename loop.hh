@@ -164,9 +164,9 @@ protected:
   mutable int last_compute_effort_;
   
 protected:
-// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
-// init_loop is renamed as buildIS, actualy commented in Tuowen's branch, it is related to current way of 
-// generating iteration space that Tuowen may want to keep, so I am leaving it in there for now 
+  // Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch init_loop
+  // is renamed as buildIS, actualy commented in Tuowen's branch, it is related to current way of 
+  // generating iteration space that Tuowen may want to keep, so I am leaving it in there for now 
   bool init_loop(std::vector<ir_tree_node *> &ir_tree, std::vector<ir_tree_node *> &ir_stmt);
   // Mahdi: Following two functions are added for above reason
   void buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexicalOrder,std::vector<ir_tree_node*> &ctrls, int level);
@@ -273,7 +273,7 @@ public:
    * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
    */
   std::vector<std::pair<std::string, std::string >> 
-    depRelsForParallelization(std::string output_filename, std::string privatizable_arrays, 
+    depRelsForParallelization(std::string privatizable_arrays, 
                               std::string reduction_operations, int parallelLoopLevel = 0);
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   // Reason: Transformed code that is suppose to be printed out when Chill finishes everything,

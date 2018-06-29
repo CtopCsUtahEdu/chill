@@ -578,12 +578,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         
 // Mahdi: In current form, following only supports one condition in the if-statement
 //        something like following is not supported: if( A && B )
-//std::cout<<"\n\n\n+++++++++++++++++++++++++HI FROM IFFFFF\n\n\n";
 
         CG_outputRepr *cond =
           static_cast<IR_If *>(itn->content)->condition();
-        
-//cond->dump();
 
         try {
           if (itn->payload % 2 == 1)
@@ -1218,7 +1215,7 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "control type is %d   ", control->type()); 
   echocontroltype(control);
   
-  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  // Mahdi: A temporary hack for getting dependence extraction changes integrated       
   replaceCode_ind = 1;
 
   last_compute_cgr_ = NULL;
@@ -1262,8 +1259,6 @@ Loop::Loop(const IR_Control *control) {
   }
   bool trybuild = true;
 
-//std::cout<<"\n\nLoop::Loop: Before while(tryBuild)\n\n";
-
   while (trybuild)
   {
     uninterpreted_symbols_stringrepr.clear();
@@ -1285,11 +1280,6 @@ Loop::Loop(const IR_Control *control) {
     }
   }
 
-//std::cout<<"\n\nLoop::Loop: Iteration Spaces:\n";
-//for(int i = 0; i<stmt.size() ; i++){
-//  std::cout<<"\nstmt["<<i<<"].IS  = "<<stmt[i].IS;
-//}
-
   for (int i = 0; i < stmt.size(); i++) {
     std::map<int, CG_outputRepr*>::iterator it = replace.find(i);
     
@@ -1310,10 +1300,6 @@ Loop::Loop(const IR_Control *control) {
   // init the dependence graph
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
-  
-
-//std::cout<<"\n\nLoop::Loop: Before dep test\n\n";
-
 
   for (int i = 0; i < stmt.size(); i++) {
     stmt[i].reduction = 0; // Manu -- initialization
@@ -1355,10 +1341,6 @@ Loop::Loop(const IR_Control *control) {
       }
     }
   }
-  
-
-//std::cout<<"\n\nLoop::Loop: After dep test\n\n";
-
 
   debug_fprintf(stderr, "\n\n*** LOTS OF REDUCTIONS ***\n\n"); 
   
