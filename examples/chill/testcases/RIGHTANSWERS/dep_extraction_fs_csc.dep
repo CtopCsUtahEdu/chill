@@ -1,0 +1,14 @@
+{ [0, In_2, 0, 0, 0] -> [0, Out_2, 0, 0, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}
+{ [0, Out_2, 0, 0, 0] -> [0, In_2, 0, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}
+{ [0, In_2, 1, In_4, 0] -> [0, Out_2, 0, 0, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n && In_4 < Lp(In_2+1) && Lp(In_2) < In_4  &&  0 <= Out_2 && Out_2 < n  && Li(In_4) = Out_2}
+{ [0, Out_2, 0, 0, 0] -> [0, In_2, 1, In_4, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n && In_4 < Lp(In_2+1) && Lp(In_2) < In_4  &&  0 <= Out_2 && Out_2 < n  && Li(In_4) = Out_2}
+{ [0, In_2, 0, 0, 0] -> [0, Out_2, 0, 0, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}
+{ [0, Out_2, 0, 0, 0] -> [0, In_2, 0, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}
+{ [0, In_2, 0, 0, 0] -> [0, Out_2, 1, Out_4, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Li(Out_4)}
+{ [0, Out_2, 1, Out_4, 0] -> [0, In_2, 0, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Li(Out_4)}
+{ [0, In_2, 0, 0, 0] -> [0, Out_2, 1, Out_4, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Li(Out_4)}
+{ [0, Out_2, 1, Out_4, 0] -> [0, In_2, 0, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Li(Out_4)}
+{ [0, In_2, 0, 0, 0] -> [0, Out_2, 1, Out_4, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Out_2}
+{ [0, Out_2, 1, Out_4, 0] -> [0, In_2, 0, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && In_2 = Out_2}
+{ [0, In_2, 1, In_4, 0] -> [0, Out_2, 1, Out_4, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n && In_4 < Lp(In_2+1) && Lp(In_2) < In_4  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && Li(In_4) = Out_2}
+{ [0, Out_2, 1, Out_4, 0] -> [0, In_2, 1, In_4, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n && In_4 < Lp(In_2+1) && Lp(In_2) < In_4  &&  0 <= Out_2 && Out_2 < n && Out_4 < Lp(Out_2+1) && Lp(Out_2) < Out_4  && Li(In_4) = Out_2}

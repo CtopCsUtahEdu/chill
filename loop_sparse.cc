@@ -1738,7 +1738,7 @@ Loop::depRelsForParallelization(std::string privatizable_arrays,
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   replaceCode_ind = 0; 
 
-std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
+//std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
 
   // Getting the statement number for all statements in the parallel loop
   int first_stmt_in_parallel_loop = 0;
@@ -1779,12 +1779,12 @@ int relCounter = 1;
 
     for (int j = i; j < access.size(); j++) {
 
-      // Excluding reduction operations
-      if( access_st[i] == access_st[j] && redOps.find(access_st[i]) != redOps.end() )
-        continue;
-
       IR_ArrayRef *b = access[j];
       IR_ArraySymbol *sym_b = b->symbol();
+
+      // Excluding reduction operations
+      if( access_st[i] == access_st[j] && redOps.find(access_st[i]) != redOps.end() && *a == *b )
+        continue;
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
         // Mahdi: write_r, read_r are useless remove them.
