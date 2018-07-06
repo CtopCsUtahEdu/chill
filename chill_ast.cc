@@ -13,7 +13,7 @@ int chillAST_node::chill_array_counter  = 1;
 #ifdef chillast_nodetype
 #error "chillast_nodetype already defined"
 #else
-#define chillast_nodetype(n, s)                   s,
+#define chillast_nodetype(n, i, s)                s,
 #define chillast_nodetype_alias(a, b)             /* nothing */
 #endif
 
@@ -21,9 +21,6 @@ const char* Chill_AST_Node_Names[] = {
   "Unknown AST node type",
 #include "chill_ast.def"
 };
-
-#undef chillast_nodetype
-#undef chillast_nodetype_alias
 
 char *parseUnderlyingType( char *sometype ) {
     int len = strlen(sometype);
