@@ -528,6 +528,16 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
+// Mahdi: comment: Whenever you see something like if(side == 'r'); += "p"; += "\'"; 
+// these rae related to building data access equality for dependence relations. 
+// if(side == 'r') is checking to see if we have gotten an expression related to read access. 
+// Note, iterators for read access, at the end, are going to have 
+// an extra "p" in built for IEGenLib relations and an extra "\'" in CHILL specific relations. 
+// So exp2formula needs to know that input relation for building
+//  a dependence would be something like: Relation &r = {[chillidx_1]->[chillidx1p] :}
+// But, both chillidx_1 and chillidx1p are (probably) representing the same iterator in the code (IR_Code *ir). 
+ 
+
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
 
       IR_Ref *ref = ir->Repr2Ref(v[0]);
@@ -536,10 +546,16 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
       int max_dim = 0;
       bool need_new_fsymbol = false;
+
+      // Mahdi: comment: vars stores the prefix tuple variable up to (and including) 
+      // the input iterator parameter to an index array.
       std::set<std::string> vars;
       std::vector<Relation> reprs3;
       std::vector<EQ_Handle> reprs_3;
 
+// Mahdi: comment: These are the names that are going to built for an uninetreted function call (UFC). 
+// Then if the UFC does not already exists in the maps, its going to be added to them. 
+// Different names are for differnt maps (code to omega, omega to iegenlib).
       std::set<std::string> unin_syms;
       CG_outputRepr *curr_repr = NULL;
       CG_outputRepr *curr_repr_s = NULL;
@@ -548,14 +564,16 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       CG_outputRepr *curr_repr_s_no_const = NULL;
       CG_outputRepr *curr_repr_s2_no_const = NULL;
 
+
+      // Mahdi: comment: This loop traverses different dimentions of a multi dimentional array, e.g A[i1][i2][i3].
       for (int i = 0; i < ref->n_dim(); i++) {
 
-/* Mahdi: Here exp2formula recursively traverses nested calls, e.g a(b(c(i))).
+/* Mahdi: Here exp2formula recursively traverses nested calls, e.g a[b[c[i]]].
 To tell the recursive calls what is the tuple declaration for the relation that 
 includes the overall term, here a temporary set is created out of tuple declaration of 
 the input omega relation to first exp2formula call. It used to be the case that 
 this set was created  ONLY with INPUT tuple declaration of the original input relation. 
-And, it used to work well because we call exp2formula in 2 general case: 
+And, it used to work fine, because we call exp2formula in 2 general case: 
 (1) when chill is building the iteration space of the statements, in which case 
 the input relation for first call to exp2formual is already just a set, e.g r = {[...] : ...}. 
 So, when we build temporary set out of set, their tuple declaration is the same. 
@@ -615,6 +633,18 @@ write-access (input part), or constraints for read-access (output part).
                     uninterpreted_symbols_stringrepr, index_variables);
 
         EQ_Handle e1;
+
+// Mahdi: comment: when there are nested index arrays (Val[A[B[i+1]]]). 
+// I think exp2formula's output is kept inide omega::Relation temp in a way that is not straightforward.
+// Since things can get complicated, when we reach inner most parameter for instance for Val[A[B[i+1]] example, 
+// and say input relation to first call to exp2formula was:
+// r = {[i] : }
+// the output for inner most call would be something like:
+// r = {[i] : B = i+1}
+// And, then:
+// // r = {[i] : A = B__(i)}
+// And finally, "e" (Variable_ID lhs) should return A_(B__(i))) for the very first call to exp2formula.
+// Following trying to fish out the output of recursive calls from the output relation
 
         //std::set<std::string> arg_set_vars;
         for (DNF_Iterator di(temp.query_DNF()); di; di++) {
@@ -858,6 +888,8 @@ write-access (input part), or constraints for read-access (output part).
 
       //if(side == 'r')
       //	s+="'";
+
+      // Mahdi: comment: The s+= "_" are related to building a UFC like A__(i) out of A[i+1]
       for (std::set<std::string>::iterator i = unin_syms.begin();
            i != unin_syms.end(); i++)
         s += "_" + *i;
@@ -1038,6 +1070,9 @@ write-access (input part), or constraints for read-access (output part).
               std::pair<std::string, std::set<std::string> >(s1,
                                                              vars));
         }
+
+        // Mahdi: comment: vars stores the prefix tuple variable up to (and including) 
+        // the input iterator parameter to an index array.
         for (int j = 1; j <= max_dim; j++) {
 
           if (vars.find(r.input_var(j)->name()) == vars.end())
@@ -1081,8 +1116,14 @@ write-access (input part), or constraints for read-access (output part).
           reprs.push_back(ir->builder()->CreateIdent(*it));
           reprs2.push_back(ir->builder_s().CreateIdent(*it));
         }
+
+        // Mahdi: comment:  max_dim represents the number of prefix iterators up to 
+        // parameter iterator of UFC (e.g A[i3], A_(i1,i2,i3), max_dim=3). 
         for (int j = 1; j <= max_dim; j++) {
           std::string tv_name;// = r.input_var(j)->name();
+
+          // Mahdi: comment: I am first removing extra "p" or "'" if they already exists.
+          // But I would add them later.
           if (r.is_set() ) {
             tv_name = r.set_var(j)->name();
             if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
@@ -1096,6 +1137,9 @@ write-access (input part), or constraints for read-access (output part).
             tv_name = r.input_var(j)->name();          // There is no extra "p" or "'"
           }
           //if (vars.find( tv_name ) != vars.end()){
+            //  Mahdi: comment: we always build 2 version of an UFC, A_(i1,i2,i3) and A_(i1p,i2p,i3p)
+            //  The A_(i1p,i2p,i3p) is for read part of a dependence relation. 
+            //  Note, we might end up needing only one of them, or both.
             if (side == 'r') {
               args.push_back(tv_name + "p");
               args2.push_back(tv_name);
@@ -1108,6 +1152,8 @@ write-access (input part), or constraints for read-access (output part).
           if( parameters.find(tv_name) !=std::string::npos ) break;
         }
 
+        // Mahdi: comment: Checking to see if UFC is already in the maps that keep track of mapping 
+        // UFCs between code, omega, and IEGenLib representations.
         if (need_new_fsymbol) {
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
