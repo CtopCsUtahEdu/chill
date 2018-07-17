@@ -273,13 +273,16 @@ public:
    * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
    */
   std::vector<std::pair<std::string, std::string >> 
-    depRelsForParallelization(std::string privatizable_arrays, 
-                              std::string reduction_operations, int parallelLoopLevel = 0);
+    depRelsForParallelization(std::string privatizable_arrays, std::string reduction_operations, 
+                              int first_stmt_in_parallel_loop = 0, int parallelLoopLevel = 1);
+  void depRelsForAllLoopPar(std::string output_filename, std::string privatizable_arrays, 
+                            std::string reduction_operations);
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   // Reason: Transformed code that is suppose to be printed out when Chill finishes everything,
   //         is not correct for our examples!
   int replaceCode_ind;
   int replaceCode(){ return replaceCode_ind;}
+  int getMaxDim(){ return stmt[0].IS.n_set();}
 
   void removeDependence(int stmt_num_from, int stmt_num_to);
   void dump() const;

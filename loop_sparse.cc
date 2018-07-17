@@ -1718,55 +1718,129 @@ std::set<int> reductionOps(std::string str){
 }
 
 
+
 /*!
- * Mahdi: This functions extarcts and returns the data dependence relations 
+ * Mahdi: 
+ * Input: 
+ * Output: 
+ */
+void Loop::depRelsForAllLoopPar(std::string output_filename, std::string privatizable_arrays, 
+                            std::string reduction_operations){
+  //
+  std::ofstream outf;
+  outf.open (output_filename.c_str(), std::ofstream::out);
+
+  int first_stmt_in_parallel_loop, parallelLoopLevel;
+  int maxDim = getMaxDim();
+
+  std::cout<<"\n\n No. of stmt = "<<stmt.size();
+  for( int j=0; j<stmt.size() ; j++){
+    //CG_outputRepr *co = 
+    std::cout<<"\n St #"<<j<<" nestedness = "<<stmt_nesting_level_[j];
+  }
+  std::cout<<"\n\n";
+
+  for(int ll = 1; ll <= maxDim; ll++){  // loop levels
+    for(int st_it = 0; st_it < stmt.size(); st_it++){ // traversing over statements
+      if (stmt_nesting_level_[st_it] < ll) continue;
+      first_stmt_in_parallel_loop = st_it;
+      parallelLoopLevel = ll;
+      std::vector<int> lex_ = getLexicalOrder(first_stmt_in_parallel_loop);
+      std::set<int> same_loop_ = getStatements(lex_, (parallelLoopLevel - 1)*2 );
+      int maxIt = st_it;
+      for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end(); i++){
+        if(*i > maxIt) maxIt = *i;
+      }
+std::cout<<"\n      MaxIt = "<<maxIt;
+      st_it = maxIt;  // Should this be maxIt+1?!
+
+      std::vector<std::pair<std::string, std::string > > dep_rels = 
+         depRelsForParallelization(privatizable_arrays, reduction_operations, 
+                                   first_stmt_in_parallel_loop, parallelLoopLevel);
+      outf<<"[First stmt = "<<first_stmt_in_parallel_loop<<", Loop level = "
+          <<parallelLoopLevel<<", No. of Rels = "<<(dep_rels.size()*2)<<"]"<<std::endl;
+//      outf<<"["<<first_stmt_in_parallel_loop<<","<<parallelLoopLevel<<"]"<<std::endl;
+      for(int i = 0 ; i < dep_rels.size() ; i++){
+        outf<<dep_rels[i].first<<std::endl<<dep_rels[i].second<<std::endl;
+      }
+      if( dep_rels.size() == 0 ) outf<<""<<std::endl;
+    }
+  }
+  outf.close();
+}
+
+
+/*!
+ * Mahdi: This functions extracts and returns the data dependence relations 
  * that are needed for generating inspectors for wavefront paralleization of a 
  * specific loop level
- * Loop levels start with 0 (being outer most loop), outer most loop is the default
+ * Loop levels start with 1 (being outer most loop), outer most loop is the default
  * Input:  loop level for parallelization
  * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
  */
 std::vector<std::pair<std::string, std::string >> 
 Loop::depRelsForParallelization(std::string privatizable_arrays, 
-                                std::string reduction_operations, int parallelLoopLevel){
+                                std::string reduction_operations, 
+                                int first_stmt_in_parallel_loop, int parallelLoopLevel){
 
-  int stmt_num = 1, level = 1, whileLoop_stmt_num = 1, maxDim = stmt[0].IS.n_set();
-
-  std::set<std::string> prArrays = privateArrays(privatizable_arrays);
-  std::set<int> redOps = reductionOps(reduction_operations);
+  int maxDim = stmt[0].IS.n_set();
 
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  // Currently, codegen seg faulting trying to generate modified code for some of our examples.
   replaceCode_ind = 0; 
+
+  // Get a list of arrays that can be considered private for parallelisim purposes, 
+  // they are given as an input.
+  std::set<std::string> prArrays = privateArrays(privatizable_arrays);
+  
+  // Get a list of statements numbers that can be considered as reduction statements 
+  // for parallelisim purposes, they are given as an input.
+  std::set<int> redOps = reductionOps(reduction_operations);
+
 
 //std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
 
-  // Getting the statement number for all statements in the parallel loop
-  int first_stmt_in_parallel_loop = 0;
-  for(int i = 0; i<stmt.size() ; i++){
-    if (stmt_nesting_level_[i] == parallelLoopLevel)
-      first_stmt_in_parallel_loop = i;
-  }
+
   std::vector<int> lex_ = getLexicalOrder(first_stmt_in_parallel_loop);
-  std::set<int> same_loop_ = getStatements(lex_, level - 1);
+  std::set<int> same_loop_ = getStatements(lex_, (parallelLoopLevel - 1)*2 );
+/*
+  std::cout<<"\n\n No. of stmt = "<<stmt.size();
+  for( int j=0; j<stmt.size() ; j++){
+    //CG_outputRepr *co = 
+    std::cout<<"\n St #"<<j<<" = ";
+    (stmt[j].code)->dump();
+  }
+*/
+  std::cout<<"\n\n Lex ord = ["<<lex_[0];
+  for(int i=1; i<lex_.size(); i++)
+    std::cout<<", "<<lex_[i];
+  std::cout<<"]\n\nFS = "<<first_stmt_in_parallel_loop<<"  PLL = "<<parallelLoopLevel;
+  std::cout<<"\n\nSame its = ";
+  for (std::set<int>::iterator it = same_loop_.begin(); it != same_loop_.end();  it++) {
+    std::cout<<*it<<" , ";
+  }
+  std::cout<<"\n\n";
 
   // Store all accesses in all the statements of the parallel loop level in access
   std::vector<IR_ArrayRef *> access;
   int access_st[100]={-1},ct=0;
-  for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end();
-       i++) {
+std::cout<<"\n\nAcc gath:";
+  for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end(); i++) {
+std::cout<<"\n   sit = "<<*i;
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(stmt[*i].code);
     for (int j = 0; j < access2.size(); j++){
       // Excluding private arrays 
       IR_ArrayRef *a = access2[j];
       IR_ArraySymbol *sym_a = a->symbol();
       std::string f_name = sym_a->name();
-      //std::cout<<"\n access : "<<f_name <<"\n";
+      std::cout<<"\n      access : "<<f_name;
       if( prArrays.find(f_name) != prArrays.end() ) continue;
 
       access.push_back(access2[j]);
       access_st[ct++] = *i; 
     }
   }
+std::cout<<"\n\n";
 
 int relCounter = 1;
   
@@ -1787,6 +1861,10 @@ int relCounter = 1;
         continue;
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
+
+std::string f_name = sym_a->name();
+std::cout<<"\n\nChecking pairs, one is write,  f name = "<<f_name;
+
         // Mahdi: write_r, read_r are useless remove them.
         omega::Relation write_r, read_r;
         omega::Relation a_rel = omega::Range(omega::Restrict_Domain(omega::copy(stmt[access_st[i]].xform), 
@@ -1897,7 +1975,7 @@ relCounter = 1;
 
 //  std::ofstream outf;
 //  outf.open (output_filename.c_str(), std::ofstream::out);
-  
+  std::vector<std::pair<std::string, std::string > > dep_rels;
   // The loop that creates the relations for IEGen
   for (int i = 0; i < depRels_Parts.size(); i++) {
 
@@ -1935,7 +2013,8 @@ relCounter = 1;
     iegen_read = iegen_read_sch->Apply(iegen_read_is);
     std::string iegen_read_str = iegen_read->getString();//prettyPrintString();//
     // Mahdi FIXME: exception for smSmMul: make this general by getting it from json file
-    replace_tv_name(iegen_read_str,std::string("nz"),std::string("nzp"));
+    //              we are not considering smSmMul for now.
+    //replace_tv_name(iegen_read_str,std::string("nz"),std::string("nzp"));
 
     srParts iegen_write_parts, iegen_read_parts;
     iegen_write_parts = getPartsFromStr(iegen_write_str);
@@ -1945,9 +2024,26 @@ relCounter = 1;
     std::string tuple_decl_RAW = iegen_write_parts.tupDecl + "->" + iegen_read_parts.tupDecl;
     std::string tuple_decl_WAR = iegen_read_parts.tupDecl + "->" + iegen_write_parts.tupDecl;
 
-    // Generating lexographical ordering for the dependencs
-    std::string lex_order1 = "In_2 < Out_2";
-    std::string lex_order2 = "Out_2 < In_2";
+
+    // Generating lexographical ordering for loop carried dependences of a specific loop level
+    std::string lex_order1 = "";
+    std::string lex_order2 = "";
+    for (int j = 1; j <= maxDim; j++){
+      std::string write_it = ("In_"+to_string(j*2));
+      std::string read_it = ("Out_"+to_string(j*2));
+      if( j > 1 ){
+        lex_order1 += " && ";
+        lex_order2 += " && ";
+      }
+      if( j < parallelLoopLevel ){
+        lex_order1 += write_it + " = " + read_it;
+        lex_order2 += read_it + " = " + write_it;
+      } else if( j == parallelLoopLevel ){
+        lex_order1 += write_it + " < " + read_it;
+        lex_order2 += read_it + " < " + write_it;
+        break;
+      }
+    }
 
     // Replacing tuple variable names in equality constraint that is 
     // built based on names in original iteration space, e.g 
@@ -1997,7 +2093,7 @@ relCounter = 1;
     //std::cout << "\nS"<<relCounter++<<" = " << s1;
     //std::cout << "\nS"<<relCounter++<<" = " << s2 <<std::endl;
     //outf<<s1<<std::endl<<s2<<std::endl;
-    dep_rel_for_iegen.push_back(std::pair<std::string, std::string>(s1, s2));
+    dep_rels.push_back(std::pair<std::string, std::string>(s1, s2));
 
   }  // Mahdi: End of the loop that creates dependencs for IEGenLib
 
@@ -2005,6 +2101,8 @@ relCounter = 1;
   
 //  rels = removeRedundantConstraints(rels);
 
-  return dep_rel_for_iegen;
+std::cout<<"\n\nNUMBER OF RELS = "<<dep_rels.size()<<"\n\n";
+
+  return dep_rels;
 }
 
