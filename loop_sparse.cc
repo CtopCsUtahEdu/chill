@@ -1732,14 +1732,14 @@ void Loop::depRelsForAllLoopPar(std::string output_filename, std::string privati
 
   int first_stmt_in_parallel_loop, parallelLoopLevel;
   int maxDim = getMaxDim();
-
+/*
   std::cout<<"\n\n No. of stmt = "<<stmt.size();
   for( int j=0; j<stmt.size() ; j++){
     //CG_outputRepr *co = 
     std::cout<<"\n St #"<<j<<" nestedness = "<<stmt_nesting_level_[j];
   }
   std::cout<<"\n\n";
-
+*/
   for(int ll = 1; ll <= maxDim; ll++){  // loop levels
     for(int st_it = 0; st_it < stmt.size(); st_it++){ // traversing over statements
       if (stmt_nesting_level_[st_it] < ll) continue;
@@ -1751,7 +1751,7 @@ void Loop::depRelsForAllLoopPar(std::string output_filename, std::string privati
       for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end(); i++){
         if(*i > maxIt) maxIt = *i;
       }
-std::cout<<"\n      MaxIt = "<<maxIt;
+//std::cout<<"\n      MaxIt = "<<maxIt;
       st_it = maxIt;  // Should this be maxIt+1?!
 
       std::vector<std::pair<std::string, std::string > > dep_rels = 
@@ -1763,7 +1763,7 @@ std::cout<<"\n      MaxIt = "<<maxIt;
       for(int i = 0 ; i < dep_rels.size() ; i++){
         outf<<dep_rels[i].first<<std::endl<<dep_rels[i].second<<std::endl;
       }
-      if( dep_rels.size() == 0 ) outf<<""<<std::endl;
+      //if( dep_rels.size() == 0 ) outf<<""<<std::endl;
     }
   }
   outf.close();
@@ -1810,7 +1810,7 @@ Loop::depRelsForParallelization(std::string privatizable_arrays,
     std::cout<<"\n St #"<<j<<" = ";
     (stmt[j].code)->dump();
   }
-*/
+
   std::cout<<"\n\n Lex ord = ["<<lex_[0];
   for(int i=1; i<lex_.size(); i++)
     std::cout<<", "<<lex_[i];
@@ -1820,27 +1820,29 @@ Loop::depRelsForParallelization(std::string privatizable_arrays,
     std::cout<<*it<<" , ";
   }
   std::cout<<"\n\n";
+*/
 
   // Store all accesses in all the statements of the parallel loop level in access
   std::vector<IR_ArrayRef *> access;
   int access_st[100]={-1},ct=0;
-std::cout<<"\n\nAcc gath:";
+
+//std::cout<<"\n\nAcc gath:";
   for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end(); i++) {
-std::cout<<"\n   sit = "<<*i;
+//std::cout<<"\n   sit = "<<*i;
     std::vector<IR_ArrayRef *> access2 = ir->FindArrayRef(stmt[*i].code);
     for (int j = 0; j < access2.size(); j++){
       // Excluding private arrays 
       IR_ArrayRef *a = access2[j];
       IR_ArraySymbol *sym_a = a->symbol();
       std::string f_name = sym_a->name();
-      std::cout<<"\n      access : "<<f_name;
+//      std::cout<<"\n      access : "<<f_name;
       if( prArrays.find(f_name) != prArrays.end() ) continue;
 
       access.push_back(access2[j]);
       access_st[ct++] = *i; 
     }
   }
-std::cout<<"\n\n";
+//std::cout<<"\n\n";
 
 int relCounter = 1;
   
@@ -1862,8 +1864,8 @@ int relCounter = 1;
 
       if (*sym_a == *sym_b && (a->is_write() || b->is_write())) {
 
-std::string f_name = sym_a->name();
-std::cout<<"\n\nChecking pairs, one is write,  f name = "<<f_name;
+//std::string f_name = sym_a->name();
+//std::cout<<"\n\nChecking pairs, one is write,  f name = "<<f_name;
 
         // Mahdi: write_r, read_r are useless remove them.
         omega::Relation write_r, read_r;
@@ -2101,7 +2103,7 @@ relCounter = 1;
   
 //  rels = removeRedundantConstraints(rels);
 
-std::cout<<"\n\nNUMBER OF RELS = "<<dep_rels.size()<<"\n\n";
+//std::cout<<"\n\nNUMBER OF RELS = "<<dep_rels.size()<<"\n\n";
 
   return dep_rels;
 }
