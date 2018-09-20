@@ -30,44 +30,24 @@ function next_clean_level(cur_idxs,level)
    return -1 --sentinal that there were no non-dummy indices left
 end
 
-
-
 function build_order(final_order, tile_idx_names, ctrl_idx_names, tile_idx_map, cur_level)
    order = {}
    for i,k in ipairs(final_order) do
-
-      print("build_order i,k "..i.." "..k)
-      io.flush()
-
       skip = false
       cur = final_order[i]
       --control loops below our current level should not be in the current order
       for j=cur_level+2,# ctrl_idx_names do
-         print("build_order j "..j) 
-         io.flush()
-
          if ctrl_idx_names[j] == final_order[i] then
-            print("build_order j "..j.."  SKIPPING") 
-            io.flush()
             skip = true
          end
       end
-
-      --possibly substitute tile indices if necessary
-      print("build_order POSSIBLY")
-      io.flush()
-
+      --possibly substitute tile indices ifn necessar
       if table.contains_key(tile_idx_map,final_order[i]) then
-         print("build_order CONTAINS "..final_order[i])
-         io.flush()
-
          approved_sub = false
          sub_string = tile_idx_map[final_order[i]]
          for j=cur_level+2,# tile_idx_names do
             if tile_idx_names[j] == sub_string then
                approved_sub = true
-               print("build_order j "..j.." APPROVED")
-               io.flush()            
             end
          end
          if approved_sub then
@@ -75,23 +55,11 @@ function build_order(final_order, tile_idx_names, ctrl_idx_names, tile_idx_map, 
          end
       end
       if not skip then
-         print("build_order inserting "..cur)
-         io.flush()
-
          table.insert(order,cur)
       end
    end
-
-   print("build_order order is ")
-   print( order )
-   io.flush()
-
    return order
 end
-
-
-
-
 
 function list_to_string(str_list)
    --Helpful debug output
@@ -140,10 +108,10 @@ function find_offset(cur_order, tile, control)
       end
    end
    if(idx1 < 0) then
-      error("Unable to find tile " .. tile .. " in current list of indices")
+      error("Unable to file " .. tile .. " in current list of indices")
    end
    if(idx2 < 0) then
-      error("Unable to find control " .. control .. " in current list of indices")
+      error("Unable to file " .. control .. " in current list of indices")
    end
    --print("found at level " .. idx2 .. " and " .. idx1)
    if(idx2 < idx1) then
@@ -154,14 +122,10 @@ function find_offset(cur_order, tile, control)
 end
 
 function tile_by_index(stmt,tile_indices, sizes, index_names, final_order, tile_method)
-   print("\ncudaize.lua tile_by_index()")
-   --print("stmt is a TABLE?")  -- if it is, you have not updated your lua scripts from the days where it didn't send a stmt parameter
-   --print( stmt )
-   io.flush()
 
    --stmt = 0 --assume stmt 0
    cur = cur_indices(stmt)
-   print("Cur indices "..list_to_string(cur))
+   --print("Cur indices "..list_to_string(cur))
    if not valid_indices(stmt,tile_indices) then
       error('One of the indices in the first parameter were not '..
             'found in the current set of indices.')
@@ -178,7 +142,7 @@ function tile_by_index(stmt,tile_indices, sizes, index_names, final_order, tile_
             i = tonumber(string.sub(k,2,-9))
             if i and i >= 1 and i <= (# tile_indices) then
                ctrl_idx_names[i] = v
-               print(string.format("(cudaize.lua) Handling control %s for loop level %d",v,i))
+               print(string.format("Handling control %s for loop level %d",v,i))
                valid = true
             end
          elseif string.sub(k,-5) == "_tile" then
@@ -213,9 +177,8 @@ function tile_by_index(stmt,tile_indices, sizes, index_names, final_order, tile_
       level = find_cur_level(stmt,cur_idx)
       offset = find_offset(cur_order, tile_idx_names[i], ctrl_idx_names[i])
       if (offset <= 0) then
-         print(string.format("\n[offset<=0]tile(%d, %d, %d, %d,%s,%s,%s)",stmt, level, sizes[i], level+offset, tile_idx_names[i], ctrl_idx_names[i], tile_method)) 
-         io.flush()
-   tile(stmt, level, sizes[i], level+offset, tile_idx_names[i], ctrl_idx_names[i], tile_method)
+	 print(string.format("\n[offset<=0]tile(%d, %d, %d, %d,%s,%s,%s)",stmt, level, sizes[i], level+offset, tile_idx_names[i], ctrl_idx_names[i], tile_method)) 
+         tile(stmt, level, sizes[i], level+offset, tile_idx_names[i], ctrl_idx_names[i], tile_method)
       else
 
          tile(stmt, level, sizes[i], level, tile_idx_names[i], ctrl_idx_names[i], tile_method);--regular level
@@ -237,7 +200,7 @@ function tile_by_index(stmt,tile_indices, sizes, index_names, final_order, tile_
 
       end
       --Do permutation based on curOrder
-	 print_code(0)
+	 --print_code(0)
 
       cur_order = build_order(final_order, tile_indices, ctrl_idx_names, tile_idx_map, i-1)
       permute(stmt, cur_order);
@@ -269,199 +232,199 @@ end
 
 function copy_to_registers(stmt, start_loop, array_name)
   
-   --print("starting copy to registers")
-   level_tx = -1
-   level_ty = -1
-   --stmt = 0 --assume stmt 0
-   cur = cur_indices(stmt)
-   --print("Cur indices "..list_to_string(cur))
-   hold_constant = {}
+   --print("\n\n****** starting copy to registers")
+   io.flush()
+
+
+   
    -- [Malik] first we make sure that tx and ty are consecutive loops in the 2D thread setup, otherwise all levels for subsequent operations are messed up. Start logic.
    cur = cur_indices(stmt)
    table_Size = table.getn(cur)
-   --print("Cur indices "..list_to_string(cur))
-   --print("The table size is"..table.getn(cur))
+   
+   --print(string.format("Cur indices %s,",list_to_string(cur)))
+   --print(string.format("The table size is %d", table_Size))
    --table.foreach(cur, print)
    --print_code()
-
-   if is_in_indices(stmt,"tx") then   level_tx = find_cur_level(stmt,"tx") end
+   
+   level_tx = -1
+   level_ty = -1
+   if is_in_indices(stmt,"tx") then level_tx = find_cur_level(stmt,"tx") end
    if is_in_indices(stmt,"ty") then level_ty = find_cur_level(stmt,"ty") end
+   --print(string.format("level_tx %d  level_ty %d", level_tx, level_ty))
+   
    ty_lookup_idx = "" 
    org_level_ty = level_ty
+   
    --if(cur[level_tx+1]~=nil and cur[level_tx+1]~="") then ty_lookup = ty_lookup+1 end
    if(cur[level_ty+1]~=nil and cur[level_ty+1]~="") then 
-	ty_lookup_idx = cur[level_ty+1] 
-	else
-	ty_lookup_idx = cur[level_ty] 
+      --print(string.format("IF  cur[%d] = %s", level_ty+1, cur[level_ty+1]))
+      ty_lookup_idx = cur[level_ty+1] 
+   else
+      --if cur[level_ty]  ~= nil then print(string.format("ELSE ty_lookup_idx = cur[%d] = %s", level_ty, cur[level_ty])) --   TODO 
+      --else print "ELSE (dangerous)" end
+      ty_lookup_idx = cur[level_ty]  -- may assign nil !?
    end
+   --if ty_lookup_idx ~= nil then print(string.format("ty_lookup_idx '%s'", ty_lookup_idx))  --  TODO 
+   --else print "ty_lookup_idx is NIL"
+   --end
+   
    if level_ty > 0 then
-	print("\ntile(%d,%d,%d)",stmt,level_ty,level_tx+1)
---	tile(stmt,level_ty,level_tx+1) 
+      --print(string.format("\ntile3(%d,%d,%d)",stmt,level_ty,level_tx+1))
+      tile(stmt,level_ty,level_tx+1) 
    end
+   --print_code()
+   
    --print("\ntylookup is %d",ty_lookup)
---exit(0)
---
+   --exit(0)
+   --
    cur = cur_indices(stmt)
    table_Size = table.getn(cur)
-   --print("Cur indices "..list_to_string(cur))
+   --print(string.format("Cur indices %s,",list_to_string(cur)))
+   --print("The table size is "..table.getn(cur))
+   --table.foreach(cur, print)
+   
    if is_in_indices(stmt,"tx") then   level_tx = find_cur_level(stmt,"tx") end
    if ty_lookup_idx then
-	   if is_in_indices(stmt,ty_lookup_idx) then level_ty = find_cur_level(stmt,ty_lookup_idx) end
+      if is_in_indices(stmt,ty_lookup_idx) then level_ty = find_cur_level(stmt,ty_lookup_idx) end
    end
-
+   
    ty_lookup = 1
    idx_flag = -1
    -- find the level of the next valid index after ty+1
+   --print(string.format("\nlevel_ty %d", level_ty))
    if level_ty > 0 then
-	   for num= level_ty+ty_lookup,table_Size do
-		if(cur[num] ~= "") then
-			idx_flag = find_cur_level(stmt,cur[num])
-			break
-			--print("\n I am checking all indexes after ty+1 %s",idx)
-		end
-   	end
-  end
-print("\n I am checking all indexes after ty+1 %s",idx_flag)
-print_code(0)
-how_many_levels = 1
-for ch_lev = idx_flag+1,table_Size,1 do
-	
-	if(cur[ch_lev] ~= nil and cur[ch_lev] ~= "") then
-		how_many_levels = how_many_levels+1
-	end
-end
-print("\n How Many Levels",how_many_levels)
-
---exit(0)
+      --print(string.format("table_Size %d", table_Size))
+      for num= level_ty+ty_lookup,table_Size do
+         --print(string.format("num=%d   cur[num] = '%s'",num, cur[num]))
+         if(cur[num] ~= "") then
+            idx_flag = find_cur_level(stmt,cur[num])
+            --print (string.format("idx_flag = %d", idx_flag))
+            break
+         end
+      end
+   end
+   
+   --print(string.format("\n(first) I am checking all indexes after ty+1 %s",idx_flag))
+   --print_code()
+   --print ""
+   
+   how_many_levels = 1
+   startat = idx_flag + 1
+   if startat == 0 then startat = 1 end  -- avoid attempt to examine an illegal array offset
+   --print(string.format("idx_flag = %d   I will check levels starting with %d", idx_flag, idx_flag+1))
+   
+   for ch_lev = startat,table_Size,1 do    -- was for ch_lev = idx_flag+1,table_Size,1 do
+      --print(string.format("ch_lev %d", ch_lev))
+      if(cur[ch_lev] ~= nil and cur[ch_lev] ~= "") then
+         --print(string.format("cur[%d] = '%s'", ch_lev, cur[ch_lev])) 
+         how_many_levels = how_many_levels+1
+      end
+   end
+   --print("\nHow Many Levels",how_many_levels)
+   
    -- change this all to reflect the real logic which is to normalize all loops inside the thread loops. 
-if(how_many_levels <2) then
-   while( idx_flag >= 0) do
---
-          for num = level_ty+ty_lookup,(table_Size) do
-                if(cur[num] ~= "") then
-                    idx=cur[num]
-                    --print_code()
-                    print("\n[COPYTOREG]tile(%d,%d,%d)",stmt,find_cur_level(stmt,idx),level_tx)
-                    tile(stmt,find_cur_level(stmt,idx),find_cur_level(stmt,idx))
-                    tile(stmt,find_cur_level(stmt,idx),level_tx)
-                    --print("hehe "..cur[num])
-		    cur = cur_indices(stmt)
-		    print("Cur indices INSIDE"..list_to_string(cur))
-		    table_Size = table.getn(cur)
-		    print("\n Table Size is: %d",table_Size) 	
-		    level_tx = find_cur_level(stmt,"tx")
-		    print("\n level TX is: %d",level_tx)
-		    level_ty = find_cur_level(stmt,ty_lookup_idx)
-		    print("\n level TY is: %d",level_ty)
-		    idx_flag = -1
-		   -- find the level of the next valid index after ty+1
-		    for num= level_ty+ty_lookup,table_Size do
-			if(cur[num] ~= nil and cur[num] ~= "") then
-				idx_flag = find_cur_level(stmt,cur[num])
-				print("\n I am checking all indexes after ty+1 %s",cur[num])
-				break
-	
-				end
-   			     end
-        	        end
-		end
-          end
+   if(how_many_levels <2) then
+      while( idx_flag >= 0) do
+         for num = level_ty+ty_lookup,(table_Size) do
+            --print(string.format("at top of loop, num is %d", num))
+            --print(string.format("num %d", num))
+            --print(string.format("cur[num] = '%s'", cur[num]))
+            if(cur[num] ~= "") then
+               idx=cur[num]
+               --print(string.format("idx '%s'", idx))
+               
+               curlev = find_cur_level(stmt,idx)
+               --print(string.format("curlev %d", curlev))
+               
+               --print_code()
+               --print(string.format("\n[COPYTOREG]tile(%d,%d,%d)",stmt,find_cur_level(stmt,idx),level_tx))
+               tile(stmt,find_cur_level(stmt,idx),find_cur_level(stmt,idx))
+               curlev = find_cur_level(stmt,idx)
+               --print(string.format("curlev %d", curlev))
+               tile(stmt,find_cur_level(stmt,idx),level_tx)
+               --print(string.format("hehe '%s'",cur[num]))
+               
+               cur = cur_indices(stmt)
+               --print("Cur indices INSIDE"..list_to_string(cur))
+               table_Size = table.getn(cur)
+               --print(string.format("Table Size is: %d",table_Size))
+               level_tx = find_cur_level(stmt,"tx")
+               --print(string.format("\n level TX is: %d",level_tx))
+               level_ty = find_cur_level(stmt,ty_lookup_idx)
+               --print(string.format("\n level TY is: %d",level_ty))
+               idx_flag = -1
+               --print "idx_flag = -1"
+               
+               -- find the level of the next valid index after ty+1
+               
+               -- the following was num, which conflicts with loop we're already in, and otherwise wasn't used (?)
+               for num= level_ty+ty_lookup,table_Size do
+                  --print(string.format("num mucking num = %d", num))
+                  if(cur[num] ~= nil and cur[num] ~= "") then
+                     idx_flag = find_cur_level(stmt,cur[num])
+                     --print("\n(second) I am checking all indexes after ty+1 %s",cur[num])
+                     break
+                  end
+               end
+               --print(string.format("num mucked to %d     idx_flag = %d", num, idx_flag))
+               
+            end
+            --print(string.format("at bottom of loop, num is %d", num))
+         end
+      end
    end
---end
---print_code()
---exit(0)
---]]
---print_code()
---exit(0)
-
-
---   level_tx = find_cur_level(stmt,"tx")
---   level_ty = find_cur_level(stmt,"ty")
---   print("\ntile(%d,%d,%d)",stmt,level_ty,level_tx+1)
---   tile(stmt,level_ty,level_tx+1)
-   --idx_flag = -1
-   -- find the level of the next valid index after ty+1
---[[
-   for num= level_ty+1,table_Size do
-	if(cur[num] ~= "") then
-		idx_flag = find_cur_level(stmt,cur[num])
-		break
-		--print("\n I am checking all indexes after ty+1 %s",idx)
-	end
-   end
-   -- change this all to reflect the real logic which is to normalize all loops inside the thread loops. 
-   while(level_ty+1 < (table_Size-1) and idx_flag >= 0) do
-          for num = level_ty+2,(table_Size) do
-                if(cur[num] ~= "") then
-                    idx=cur[num]
-                    print_code()
-                    print("\n[COPYTOREG]tile(%d,%d,%d)",stmt,find_cur_level(stmt,idx),level_tx)
-                    tile(stmt,find_cur_level(stmt,idx),find_cur_level(stmt,idx))
-                    tile(stmt,find_cur_level(stmt,idx),level_tx)
-                    --print("hehe "..cur[num])
-		    cur = cur_indices(stmt)
-		    print("Cur indices "..list_to_string(cur))
-		    table_Size = table.getn(cur)
-		    print("\n Table Size is: %d",table_Size) 	
-		    level_tx = find_cur_level(stmt,"tx")
-		    print("\n level TX is: %d",level_tx)
-		    level_ty = find_cur_level(stmt,"ty")
-		    print("\n level TY is: %d",level_ty)
-		    idx_flag = -1
-		   -- find the level of the next valid index after ty+1
-		    for num= level_ty+1,table_Size do
-			if(cur[num] ~= "") then
-				idx_flag = find_cur_level(stmt,cur[num])
-			break
-			--print("\n I am checking all indexes after ty+1 %s",idx)
-			end
-   		     end
-                end
-          end
-   end
---]]
+   --print "done with levels"
+   
+   
+   
+   
+   --print "ARE WE SYNCED HERE?"
    --print_code()
    --print("\ntile(%d,%d,%d)",stmt,level_k,level_k)
    --tile(stmt,level_k,level_k)
    
    -- [Malik] end logic
    --print_code()
-   print("start loop is ", start_loop) 
    start_level = find_cur_level(stmt, start_loop)
    --We should hold contant any block or tile loop
    block_idxs = block_indices()
    thread_idxs = thread_indices()
-   --print("\nblock indices are\n")
-   table.foreach(block_idxs, print)
-   --print("\nthread indices are\n")
-   table.foreach(thread_idxs, print)
-   --print("\nStart Level: %d",start_level)
+   --print("\nblock indices are")
+   --table.foreach(block_idxs, print)
+   --print("\nthread indices are")
+   --table.foreach(thread_idxs, print)
+   --print(string.format("\nStart Level: %d",start_level))
+   
+   hold_constant = {}
    --print("\n Now in Blocks")
    for i,idx in ipairs(block_idxs) do
-	--print("\n Idx:%s : Level: %d",idx,find_cur_level(stmt,idx))
+      --print(string.format("\n Idx:%s : Level: %d",idx,find_cur_level(stmt,idx)))
       if find_cur_level(stmt,idx) >= start_level then
          table.insert(hold_constant, idx)
-	 --print("\nJust inserted %s in block_idxs",idx)
+         --print(string.format("\nJust inserted block %s in hold_constant",idx))
       end
    end
+   
+   
    --print("\n Now in Threads")
    for i,idx in ipairs(thread_idxs) do
-	--print("\n Idx:%s : Level: %d",idx,find_cur_level(stmt,idx))
+      --print(string.format("\n Idx:%s : Level: %d",idx,find_cur_level(stmt,idx)))
       if find_cur_level(stmt,idx) >= start_level then
          table.insert(hold_constant, idx)
-	 --if idx=="ty" then 
-	--	for t,tdx in ipairs(hold_constant) do
-	--		if tdx == "tx"
-		 --print("\nJust inserted %s in th_idxs",idx)
+         --print(string.format("\nJust inserted thread %s in hold_constant",idx))
       end
    end
+   
+   --print "\nhold constant table is: "
+   --table.foreach(hold_constant, print)
+   
    --print("\nbefore datacopy pvt")
    old_num_stmts = num_statements()
    --print_code()
-   print(string.format("\n[DataCopy]datacopy_privatized(%d, %s, %s, vector having privatized levels)",stmt, start_loop, array_name)) 
-   table.foreach(hold_constant, print)
+   --print(string.format("\n[DataCopy]datacopy_privatized(%d, %s, %s, vector having privatized levels)",stmt, start_loop, array_name)) 
+   --table.foreach(hold_constant, print)
    datacopy_privatized(stmt, start_loop, array_name, hold_constant)
-
+   
    --print(hold_constant)
    new_num_stmts = num_statements()
    --print("\nthe num of statements:%d\n",new_num_stmt)
@@ -473,36 +436,45 @@ if(how_many_levels <2) then
    for cidx,i in ipairs(cur) do
       if i ~= "tx" and i~="ty" and i~="bx" and i~="by" then
          --tile(old_num_stmts,find_cur_level(old_num_stmts,i),find_cur_level(old_num_stmts,i))
-		 --print("\nTILE OF REG: tile(%d,%d,%d)",old_num_stmts,find_cur_level(old_num_stmts,i),find_cur_level(old_num_stmts,i))
+         --print("\nTILE OF REG: tile(%d,%d,%d)",old_num_stmts,find_cur_level(old_num_stmts,i),find_cur_level(old_num_stmts,i))
       end
    end
    --print_code()
    --print("\nthe num of statements OLD+1 :",(old_num_stmts+1))  
+
+
 --[[ 
+   is this commented out? why yes, yes it is   block comment 
    if( (old_num_stmts+1) <= new_num_stmts) then
-   	cur = cur_indices(old_num_stmts+1)
-   --print("Cur indices+1 "..list_to_string(cur))
-   	for cidx,i in ipairs(cur) do
-      		if i ~= "tx" and i~="ty" and i~="bx" and i~="by" then
-         		tile(old_num_stmts+1,find_cur_level(old_num_stmts+1,i),find_cur_level(old_num_stmts+1,i))
-		 	print("\nTILE OF REG: tile(%d,%d,%d)",old_num_stmts+1,find_cur_level(old_num_stmts+1,i),find_cur_level(old_num_stmts+1,i))
-      		end
-   	end
+      cur = cur_indices(old_num_stmts+1)
+      --print("Cur indices+1 "..list_to_string(cur))
+      for cidx,i in ipairs(cur) do
+         if i ~= "tx" and i~="ty" and i~="bx" and i~="by" then
+            tile(old_num_stmts+1,find_cur_level(old_num_stmts+1,i),find_cur_level(old_num_stmts+1,i))
+	    --print("\nTILE OF REG: tile(%d,%d,%d)",old_num_stmts+1,find_cur_level(old_num_stmts+1,i),find_cur_level(old_num_stmts+1,i))
+         end
+      end
    end
 --]]
+
+
    --Unroll to the last thread level
    --for stmt=old_num_stmts,new_num_stmts-1 do
-     -- level = find_cur_level(stmt,thread_idxs[#thread_idxs])--get last thread level
-      --if level < #cur_indices(stmt) then
-        -- unroll(stmt,level+1,0)
-	 --print(string.format("\n[Unroll]unroll(%d, %d, 0)",stmt, level+1)) 
-         ----print_code()
-      --end
+   -- level = find_cur_level(stmt,thread_idxs[#thread_idxs])--get last thread level
+   --if level < #cur_indices(stmt) then
+   -- unroll(stmt,level+1,0)
+   --print(string.format("\n[Unroll]unroll(%d, %d, 0)",stmt, level+1)) 
+   ----print_code()
    --end
+   --end
+   io.flush()
+   --print("****** ending copy to registers\n\n")
+   --io.flush()
+  
 end
 
-function copy_to_shared(start_loop, array_name, alignment)
-   stmt = 0 --assume stmt 0
+function copy_to_shared(stmt, start_loop, array_name, alignment)
+   --stmt = 0 --assume stmt 0
    cur = cur_indices(stmt)
    --print("Cur indices "..list_to_string(cur))
 
@@ -548,6 +520,7 @@ function copy_to_shared(start_loop, array_name, alignment)
 	    tile(stmt, level, level)
 	
 	    lower,upper = hard_loop_bounds(stmt, level)
+
             upper = upper + 1
 	    --print_code()
 	    print("2-loop cleanup: lower, upper: "..lower..", "..upper..", tx: "..tx..", level: "..level)
@@ -758,13 +731,16 @@ print(string.format("\n[Tile2]tile(%d, %d, %d,%d,%s,%s,counted)",stmt, second_le
  	 --print("\n Copy to shared: [If was error]\n")
          level = find_cur_level(stmt,"tmp1")
          tile(stmt, level, level)
-	 --print(string.format("\n[Tile]tile(%d, %d, %d)",stmt, level, level)) 
+	 print(string.format("\n[Tile]tile(%d, %d, %d)",stmt, level, level)) 
          tx,ty = thread_dims()
          lower,upper = hard_loop_bounds(stmt, level)
          upper = upper+1 --upper bound given as <=, compare to dimentions tx which is <
-         --print("upper "..upper.." tx "..tx)
+         print("upper "..upper.." tx "..tx)
          if upper == tx then
             rename_index(stmt, "tmp1", "tx")
+            add_sync(stmt,"tx")
+
+	    print("stmt is "..stmt)	
          else
              --TODO: Don't know, maybe do some tileing etc
             --print_code()
@@ -796,7 +772,7 @@ end
 
 function unroll_to_depth(max_depth)
    cur = cur_indices(0)
-   print("Cur indices "..list_to_string(cur))
+   --print("Cur indices "..list_to_string(cur))
    thread_idxs = thread_indices()
    guard_idx = thread_idxs[#thread_idxs]
 
@@ -1149,7 +1125,7 @@ function setup_for_segreduce(stmt_num, target_level,parallel_levels,segment_inde
 
      kernels[2] = peeled_statement
 
-          print_code(1)	
+          --print_code(1)	
 
      distribute(kernels, find_cur_level(stmt_num, parallel_levels[1]))   
 
@@ -1236,4 +1212,3 @@ new_indices = {}
   
   return peeled_statement
 end
-

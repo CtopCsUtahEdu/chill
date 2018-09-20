@@ -1,0 +1,565 @@
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 2 entries
+0  i
+1  j
+
+
+['i', 'j']
+curOrder: i,j
+idxNames: i,j
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 2 entries
+0  i
+1  j
+
+
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+
+
+curOrder: ii,i,j
+idxNames: ii,i,j
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 4 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+
+
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 6 entries
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+
+
+curOrder: ii,k,i,j
+idxNames: ii,k,i,j
+ii
+thread= i
+
+ii,k,i,j
+// ~cuda~ preferredIdx: ii
+for(t2 = 0; t2 <= 31; t2++) {
+  // ~cuda~ preferredIdx: k
+  for(t4 = 0; t4 <= 15; t4++) {
+    // ~cuda~ preferredIdx: i
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      // ~cuda~ preferredIdx: j
+      for(t8 = 64*t4; t8 <= 64*t4+63; t8++) {
+        s0(t2,t6,t8);
+      }
+    }
+  }
+}
+
+block idx ii level 1 lb: 0 ub 31
+bx,k,i,j
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 31; t2++) {
+  // ~cuda~ preferredIdx: k
+  for(t4 = 0; t4 <= 15; t4++) {
+    // ~cuda~ preferredIdx: i
+    for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {
+      // ~cuda~ preferredIdx: j
+      for(t8 = 64*t4; t8 <= 64*t4+63; t8++) {
+        s0(t2,t6,t8);
+      }
+    }
+  }
+}
+
+Cudaize: doing tile at level 3 to try and normalize lower bounds
+bx,k,i,,j
+// ~cuda~ preferredIdx: bx
+for(t2 = 0; t2 <= 31; t2++) {
+  // ~cuda~ preferredIdx: k
+  for(t4 = 0; t4 <= 15; t4++) {
+    // ~cuda~ preferredIdx: i
+    for(t6 = 0; t6 <= 31; t6++) {
+      // ~cuda~ preferredIdx: j
+      for(t10 = 64*t4; t10 <= 64*t4+63; t10++) {
+        s0(t2,t4,t6+32*t2,t10);
+      }
+    }
+  }
+}
+
+thread idx i level 3 lb: 0 ub 31
+Codegen: current names: bx,k,tx,,j
+before datacopy_privatized:
+ printing statement:0
+{[chill_t10,chill_t11,chill_t12,chill_t13] : 32chill_t10, 0 <= chill_t12 <= 32chill_t10+31, 1023 && 64chill_t11, 0 <= chill_t13 <= 64chill_t11+63, 1023 && 0 <= chill_t10 <= 31 && 0 <= chill_t11 <= 15 }
+after datacopy_privatized:
+ printing statement:0
+{[chill_t17,chill_t18,chill_t19,chill_t20,chill_t21] : 32chill_t17+chill_t19 = chill_t20 && 64chill_t18, 0 <= chill_t21 <= 64chill_t18+63, 1023 && 32chill_t17, 0 <= chill_t20 <= 32chill_t17+31, 1023 && 0 <= chill_t17 <= 31 && 0 <= chill_t18 <= 15 }
+ printing statement:1
+{[chill_t17,chill_t19] : 0 <= chill_t19 <= 31, -32chill_t17+1023 && 0 <= chill_t17 }
+ printing statement:2
+{[chill_t17,chill_t19] : 0 <= chill_t19 <= 31, -32chill_t17+1023 && 0 <= chill_t17 }
+
+
+
+
+
+
+
+
+
+a wo 
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+
+c wo 
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+
+b wo 
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+
+a wo 
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  c
+1  a
+2  b
+
+0  i
+1  j
+2  chill_t1
+3  chill_t2
+4  chill_t4
+5  chill_t5
+6  t2
+7  chill_t10
+8  chill_t12
+9  chill_t13
+10  chill_t17
+11  chill_t18
+12  chill_t20
+13  chill_t21
+14  chill_t19
+15  newVariable0
+16  t4
+17  t6
+18  t8
+19  t10
+
+0  int bx = blockIdx.x
+1  int tx = threadIdx.x
+2  int k
+3  int j
+4  int by = blockIdx.y
+5  float newVariable0
+

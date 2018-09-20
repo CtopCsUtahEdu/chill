@@ -1,4 +1,4 @@
-index[i]index[1 * i]index[1 * i + 1]index[i + 1]index[1 * i + 1]index[1 * i]struct inspector {
+index[1 * i]index[1 * i + 1]index[1 * i + 1]index[1 * i]struct inspector {
   int *i;
   int *j;
   int count;

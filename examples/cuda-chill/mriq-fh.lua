@@ -4,7 +4,7 @@
 --call init() and use global variables to specify procedure and loop
 
 --Second parameter is procedure # and third is loop #
-init("mriq-fh.c", "mriFH_cpu", 0) 
+init("mriq-fh.cu", "mriFH_cpu", 0) 
 
 dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,
                       --copy_to_shared methods

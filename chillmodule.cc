@@ -673,7 +673,6 @@ static PyObject* chill_copy_to_registers(PyObject* self, PyObject* args) {
         myloop->tile_cuda(stmt, level_ty, level_tx + 1);
     }
     else {
-        // Not sure if correct
         ty_lookup_idx = cur_idxs[cur_idxs.size() - 1];
     }
 
@@ -723,7 +722,7 @@ static PyObject* chill_copy_to_registers(PyObject* self, PyObject* args) {
                     myloop->tile_cuda(stmt, idx_level, idx_level);
 
                     idx_level = find_cur_level(stmt, idx);
-                    myloop->tile_cuda(stmt, idx_level, idx_level);
+                    myloop->tile_cuda(stmt, idx_level, level_tx);
 
                     cur_indices(stmt, cur_idxs);
                     level_tx = find_cur_level(stmt, "tx");

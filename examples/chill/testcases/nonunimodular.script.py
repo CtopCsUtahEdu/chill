@@ -8,10 +8,8 @@
 
 from chill import *
 
-#>SKIP
-
 source('nonunimodular.c')
-destination('nonumimodularmodified.c')
+destination('nonunimodularmodified.c')
 procedure('foo')
 
 ##############################################################################

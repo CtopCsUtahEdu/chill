@@ -1,4 +1,4 @@
-init("mv-shadow.c","normalMV",0)
+init("mv-shadow.cu","normalMV",0)
 dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,
                       --copy_to_shared methods
 
@@ -45,7 +45,8 @@ print_code()
 --given block and thread loops's indexes to the approviate values from
 --the set {"bx","by","tx","ty","tz"}. The second parameter specifies the
 --size of the arrays to be copied in the CUDA scaffolding.
-cudaize("mv_GPU", {a=N, b=N, c=N*N}, {block={"ii"}, thread={"i"}})
+cudaize("mv_GPU", {a=N, b=N, c=N*N},
+        {block={"ii"}, thread={"i"}})
 --print_code()
 
 --Does a datacopy, tile, and add_sync to get a shared memory copy

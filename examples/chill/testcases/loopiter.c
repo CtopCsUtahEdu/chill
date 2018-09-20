@@ -1,12 +1,13 @@
 
 
-void main( )
+int main( )
 {
-   float A[ 48 ];
+   float A[48];
+   int i;
 
    // test loop variable defined only in the loop 
-   for (int i=0; i< 48; i++) {
+   for (i=0; i< 48; i++) {
       A[i] = i;
    }
-
 }
+

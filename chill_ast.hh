@@ -45,7 +45,7 @@ char *restricthack( char *typeinfo );
 #ifdef chillast_nodetype
 #error "chillast_nodetype already defined"
 #else
-#define chillast_nodetype(n, s)                     CHILLAST_NODETYPE_##n,
+#define chillast_nodetype(n, i, s)                  CHILLAST_NODETYPE_##i,
 #define chillast_nodetype_alias(a, b)               CHILLAST_NODETYPE_##a = CHILLAST_NODETYPE_##b,
 #endif
 
@@ -53,9 +53,6 @@ enum CHILL_ASTNODE_TYPE {
   CHILLAST_NODETYPE_UNKNOWN = 0,
 #include "chill_ast.def"
 };
-
-#undef chillast_nodetype
-#undef chillast_nodetype_alias
 
 enum CHILL_FUNCTION_TYPE { 
   CHILL_FUNCTION_CPU = 0,
@@ -598,8 +595,8 @@ public:
   }
 
   template<typename ASTDestClass>
-  ASTDestClass* as() {
-      return dynamic_cast<ASTDestClass*>(this);
+  inline ASTDestClass* as() const noexcept {
+      return dynamic_cast<ASTDestClass*>(const_cast<chillAST_node*>(this));
   }
 };
 
@@ -614,7 +611,7 @@ private:
   chillAST_node* _parent;
   int _pos;
 
-  ASTNodeClass* get() const {
+  inline ASTNodeClass* get() const {
     return dynamic_cast<ASTNodeClass*>(_parent->getChild(_pos));
   }
 public:
@@ -626,7 +623,7 @@ public:
   }
 
   chillAST_Child(const chillAST_Child<ASTNodeClass>&) = delete;
-  chillAST_Child(const chillAST_Child<ASTNodeClass>&&) = delete;
+  chillAST_Child(chillAST_Child<ASTNodeClass>&&) = delete;
 
   //! Assignment operator will set the child
   ASTNodeClass* operator=(ASTNodeClass *ptr) {

@@ -1,13 +1,16 @@
-AC_INIT([chill],[`cat CHILL_VERSION`])
+
+m4_define([__CHILL_VERSION__], [0.3])
+
+AC_INIT([chill],[__CHILL_VERSION__])
 AC_CONFIG_AUX_DIR([.])
 
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 
 ### Use the C++ compiler for linking (C is default) ###
 AC_SUBST([CCLD],["$""(CXX)"])
-AC_SUBST([CHILL_BUILD_VERSION],["\\\"`cat CHILL_VERSION`\\\""])
+AC_SUBST([CHILL_BUILD_VERSION],"__CHILL_VERSION__")
 
-AC_DEFINE([CHILL_BUILD_VERSION],["`cat CHILL_VERSION`"],[CHiLL Version])
+AC_DEFINE_UNQUOTED([CHILL_BUILD_VERSION],["__CHILL_VERSION__"],[CHiLL Version])
 
 AM_PROG_AR
 AM_PROG_LEX

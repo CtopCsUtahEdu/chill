@@ -1,4 +1,4 @@
-init("tmv-shadow.c","normalMV",0)
+init("tmv-shadow.cu","normalMV",0)
 dofile("cudaize.lua") --defines custom tile_by_index, copy_to_registers,
                       --copy_to_shared methods
 

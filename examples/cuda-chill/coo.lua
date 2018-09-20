@@ -41,9 +41,9 @@ scalar_expand_by_index(last_kernel,{"coalesced_index"},segment,shared_memory, NO
 scalar_expand_by_index(last_kernel,{"coalesced_index"},"RHS",shared_memory, NO_PAD, ASSIGN_THEN_ACCUMULATE)
 
 --Designate block and thread dimensions via cudaize 
-cudaize5arg(first_kernel,"spmv_GPU",{ a=NNZ,x=N,y=N,col=NNZ,temp=NNZ, c_j=NNZ, c_i=NNZ },{block={"block"}, thread={"coalesced_index", "warp"}},{"_P_DATA1", "_P_DATA2"})
-cudaize5arg(second_kernel,"spmv_second_level_GPU",{ a=NNZ,x=N,y=N,col=NNZ,temp=NNZ,c_i=NNZ},{block={}, thread={"warp","block"}}, {"_P_DATA1", "_P_DATA2"})
-cudaize5arg(last_kernel,"spmv_final_level_GPU",{ a=NNZ,x=N,y=N,col=NNZ, temp=NNZ, c_j=NNZ, c_i=NNZ},{block={}, thread={"coalesced_index"}}, {})
+cudaize(first_kernel,"spmv_GPU",{ a=NNZ,x=N,y=N,col=NNZ,temp=NNZ, c_j=NNZ, c_i=NNZ },{block={"block"}, thread={"coalesced_index", "warp"}},{"_P_DATA1", "_P_DATA2"})
+cudaize(second_kernel,"spmv_second_level_GPU",{ a=NNZ,x=N,y=N,col=NNZ,temp=NNZ,c_i=NNZ},{block={}, thread={"warp","block"}}, {"_P_DATA1", "_P_DATA2"})
+cudaize(last_kernel,"spmv_final_level_GPU",{ a=NNZ,x=N,y=N,col=NNZ, temp=NNZ, c_j=NNZ, c_i=NNZ},{block={}, thread={"coalesced_index"}}, {})
 
 --reduction
 reduce_by_index(first_kernel,{"tx"},"segreduce_warp",{"by_warp"}, {})

@@ -11,8 +11,8 @@ dest   'AKp256modified.c'
 ../../../chill AKp256.script
 checking to see if AKp256modified.c exists
 AKp256modified.c exists and has 368 bytes
-1525713681.54
-elapsed 15.081584
+1526939657.9
+elapsed 15.484580
 
 knowngood RIGHTANSWERS/AKp256modified.c
 checking for knowngood RIGHTANSWERS/AKp256modified.c
@@ -34,8 +34,8 @@ dest   'AKp256hackmodified.c'
 ../../../chill AKp256hack.script
 checking to see if AKp256hackmodified.c exists
 AKp256hackmodified.c exists and has 295 bytes
-1525713681.76
-elapsed 14.893752
+1526939658.1
+elapsed 15.313022
 
 knowngood RIGHTANSWERS/AKp256hackmodified.c
 checking for knowngood RIGHTANSWERS/AKp256hackmodified.c
@@ -79,8 +79,8 @@ dest   'bug1modified.c'
 ../../../chill bug1.script
 checking to see if bug1modified.c exists
 bug1modified.c exists and has 512 bytes
-1525713682.26
-elapsed 14.437060
+1526939658.59
+elapsed 14.882249
 
 knowngood RIGHTANSWERS/bug1modified.c
 checking for knowngood RIGHTANSWERS/bug1modified.c
@@ -105,8 +105,8 @@ dest   'coalescemodified.c'
 ../../../chill coalesce.script
 checking to see if coalescemodified.c exists
 coalescemodified.c exists and has 768 bytes
-1525713682.48
-elapsed 14.248843
+1526939658.81
+elapsed 14.692620
 
 knowngood RIGHTANSWERS/coalescemodified.c
 checking for knowngood RIGHTANSWERS/coalescemodified.c
@@ -132,8 +132,8 @@ dest   'distribute1modified.c'
 ../../../chill distribute1.script
 checking to see if distribute1modified.c exists
 distribute1modified.c exists and has 531 bytes
-1525713684.02
-elapsed 12.732837
+1526939661.73
+elapsed 11.797694
 
 knowngood RIGHTANSWERS/distribute1modified.c
 checking for knowngood RIGHTANSWERS/distribute1modified.c
@@ -185,8 +185,8 @@ dest   'fuseexamplemodified.c'
 ../../../chill fuseexample.script
 checking to see if fuseexamplemodified.c exists
 fuseexamplemodified.c exists and has 724 bytes
-1525713684.5
-elapsed 12.294498
+1526939662.19
+elapsed 11.384970
 
 knowngood RIGHTANSWERS/fuseexamplemodified.c
 checking for knowngood RIGHTANSWERS/fuseexamplemodified.c
@@ -215,8 +215,8 @@ dest   'includemodified.c'
 ../../../chill include.script
 checking to see if includemodified.c exists
 includemodified.c exists and has 339 bytes
-1525713685.47
-elapsed 11.345023
+1526939663.08
+elapsed 10.515134
 
 knowngood RIGHTANSWERS/includemodified.c
 checking for knowngood RIGHTANSWERS/includemodified.c
@@ -246,8 +246,8 @@ dest   'jacobi2modified.c'
 ../../../chill jacobi2.script
 checking to see if jacobi2modified.c exists
 jacobi2modified.c exists and has 1513 bytes
-1525713685.95
-elapsed 10.888671
+1526939663.56
+elapsed 10.079193
 
 knowngood RIGHTANSWERS/jacobi2modified.c
 checking for knowngood RIGHTANSWERS/jacobi2modified.c
@@ -368,8 +368,8 @@ dest   'p38modified.c'
 ../../../chill p38.script
 checking to see if p38modified.c exists
 p38modified.c exists and has 363 bytes
-1525713689.56
-elapsed 7.395541
+1526939667.18
+elapsed 6.608696
 
 knowngood RIGHTANSWERS/p38modified.c
 checking for knowngood RIGHTANSWERS/p38modified.c
@@ -404,8 +404,8 @@ dest   'p39modified.c'
 ../../../chill p39.script
 checking to see if p39modified.c exists
 p39modified.c exists and has 310 bytes
-1525713689.78
-elapsed 7.208946
+1526939667.4
+elapsed 6.420518
 
 knowngood RIGHTANSWERS/p39modified.c
 checking for knowngood RIGHTANSWERS/p39modified.c
@@ -441,8 +441,8 @@ dest   'p40modified.c'
 ../../../chill p40.script
 checking to see if p40modified.c exists
 p40modified.c exists and has 373 bytes
-1525713690.0
-elapsed 7.020095
+1526939667.54
+elapsed 6.324651
 
 knowngood RIGHTANSWERS/p40modified.c
 checking for knowngood RIGHTANSWERS/p40modified.c
@@ -479,8 +479,8 @@ dest   'p46modified.c'
 ../../../chill p46.script
 checking to see if p46modified.c exists
 p46modified.c exists and has 432 bytes
-1525713690.22
-elapsed 6.833915
+1526939667.75
+elapsed 6.138416
 
 knowngood RIGHTANSWERS/p46modified.c
 checking for knowngood RIGHTANSWERS/p46modified.c
@@ -518,8 +518,8 @@ dest   'p47modified.c'
 ../../../chill p47.script
 checking to see if p47modified.c exists
 p47modified.c exists and has 360 bytes
-1525713690.43
-elapsed 6.645881
+1526939667.97
+elapsed 5.951005
 
 knowngood RIGHTANSWERS/p47modified.c
 checking for knowngood RIGHTANSWERS/p47modified.c
@@ -558,8 +558,8 @@ dest   'p48modified.c'
 ../../../chill p48.script
 checking to see if p48modified.c exists
 p48modified.c exists and has 59721 bytes
-1525713690.72
-elapsed 6.382177
+1526939668.26
+elapsed 5.688418
 
 knowngood RIGHTANSWERS/p48modified.c
 checking for knowngood RIGHTANSWERS/p48modified.c
@@ -599,8 +599,8 @@ dest   'p49modified.c'
 ../../../chill p49.script
 checking to see if p49modified.c exists
 p49modified.c exists and has 350 bytes
-1525713690.92
-elapsed 6.201838
+1526939668.47
+elapsed 5.498193
 
 knowngood RIGHTANSWERS/p49modified.c
 checking for knowngood RIGHTANSWERS/p49modified.c
@@ -641,8 +641,8 @@ dest   'peel1modified.c'
 ../../../chill peel1.script
 checking to see if peel1modified.c exists
 peel1modified.c exists and has 615 bytes
-1525713691.14
-elapsed 6.008892
+1526939668.7
+elapsed 5.297042
 
 knowngood RIGHTANSWERS/peel1modified.c
 checking for knowngood RIGHTANSWERS/peel1modified.c
@@ -684,8 +684,8 @@ dest   'peel10modified.c'
 ../../../chill peel10.script
 checking to see if peel10modified.c exists
 peel10modified.c exists and has 1721 bytes
-1525713691.34
-elapsed 5.831466
+1526939668.87
+elapsed 5.151506
 
 knowngood RIGHTANSWERS/peel10modified.c
 checking for knowngood RIGHTANSWERS/peel10modified.c
@@ -728,8 +728,8 @@ dest   'peel11modified.c'
 ../../../chill peel11.script
 checking to see if peel11modified.c exists
 peel11modified.c exists and has 3307 bytes
-1525713691.58
-elapsed 5.609686
+1526939669.1
+elapsed 4.937820
 
 knowngood RIGHTANSWERS/peel11modified.c
 checking for knowngood RIGHTANSWERS/peel11modified.c
@@ -773,8 +773,8 @@ dest   'peel12modified.c'
 ../../../chill peel12.script
 checking to see if peel12modified.c exists
 peel12modified.c exists and has 3427 bytes
-1525713691.82
-elapsed 5.388081
+1526939669.42
+elapsed 4.640789
 
 knowngood RIGHTANSWERS/peel12modified.c
 checking for knowngood RIGHTANSWERS/peel12modified.c
@@ -819,8 +819,8 @@ dest   'peel2modified.c'
 ../../../chill peel2.script
 checking to see if peel2modified.c exists
 peel2modified.c exists and has 711 bytes
-1525713692.14
-elapsed 5.115374
+1526939669.78
+elapsed 4.310860
 
 knowngood RIGHTANSWERS/peel2modified.c
 checking for knowngood RIGHTANSWERS/peel2modified.c
@@ -866,8 +866,8 @@ dest   'peel3modified.c'
 ../../../chill peel3.script
 checking to see if peel3modified.c exists
 peel3modified.c exists and has 1060 bytes
-1525713692.3
-elapsed 4.989803
+1526939669.99
+elapsed 4.120965
 
 knowngood RIGHTANSWERS/peel3modified.c
 checking for knowngood RIGHTANSWERS/peel3modified.c
@@ -914,8 +914,8 @@ dest   'peel4modified.c'
 ../../../chill peel4.script
 checking to see if peel4modified.c exists
 peel4modified.c exists and has 1160 bytes
-1525713692.54
-elapsed 4.777292
+1526939670.16
+elapsed 3.975123
 
 knowngood RIGHTANSWERS/peel4modified.c
 checking for knowngood RIGHTANSWERS/peel4modified.c
@@ -963,8 +963,8 @@ dest   'peel5modified.c'
 ../../../chill peel5.script
 checking to see if peel5modified.c exists
 peel5modified.c exists and has 585 bytes
-1525713692.76
-elapsed 4.582702
+1526939670.31
+elapsed 3.845221
 
 knowngood RIGHTANSWERS/peel5modified.c
 checking for knowngood RIGHTANSWERS/peel5modified.c
@@ -1013,8 +1013,8 @@ dest   'peel6modified.c'
 ../../../chill peel6.script
 checking to see if peel6modified.c exists
 peel6modified.c exists and has 633 bytes
-1525713692.99
-elapsed 4.382084
+1526939670.46
+elapsed 3.711282
 
 knowngood RIGHTANSWERS/peel6modified.c
 checking for knowngood RIGHTANSWERS/peel6modified.c
@@ -1064,8 +1064,8 @@ dest   'peel7modified.c'
 ../../../chill peel7.script
 checking to see if peel7modified.c exists
 peel7modified.c exists and has 1006 bytes
-1525713693.23
-elapsed 4.172339
+1526939670.64
+elapsed 3.557585
 
 knowngood RIGHTANSWERS/peel7modified.c
 checking for knowngood RIGHTANSWERS/peel7modified.c
@@ -1116,8 +1116,8 @@ dest   'peel8modified.c'
 ../../../chill peel8.script
 checking to see if peel8modified.c exists
 peel8modified.c exists and has 1026 bytes
-1525713693.46
-elapsed 3.978356
+1526939670.83
+elapsed 3.391658
 
 knowngood RIGHTANSWERS/peel8modified.c
 checking for knowngood RIGHTANSWERS/peel8modified.c
@@ -1169,8 +1169,8 @@ dest   'peel9modified.c'
 ../../../chill peel9.script
 checking to see if peel9modified.c exists
 peel9modified.c exists and has 1665 bytes
-1525713693.72
-elapsed 3.767931
+1526939671.04
+elapsed 3.201739
 
 knowngood RIGHTANSWERS/peel9modified.c
 checking for knowngood RIGHTANSWERS/peel9modified.c
@@ -1223,8 +1223,8 @@ dest   'permute1modified.c'
 ../../../chill permute1.script
 checking to see if permute1modified.c exists
 permute1modified.c exists and has 581 bytes
-1525713693.94
-elapsed 3.582319
+1526939671.2
+elapsed 3.063931
 
 knowngood RIGHTANSWERS/permute1modified.c
 checking for knowngood RIGHTANSWERS/permute1modified.c
@@ -1278,12 +1278,63 @@ dest   'permute10modified.c'
 ../../../chill permute10.script
 checking to see if permute10modified.c exists
 permute10modified.c exists and has 564 bytes
-1525713694.15
-elapsed 3.416347
+1526939671.4
+elapsed 2.889990
 
 knowngood RIGHTANSWERS/permute10modified.c
 checking for knowngood RIGHTANSWERS/permute10modified.c
-there is no dest file permute10modified.c
+// this source is derived from CHILL AST originally from file 'permute8910.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute8910.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// a slightly different permute example. Only one statement inside nested loops
+contains comment // a slightly different permute example. Only one statement inside nested loops
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t6;
+  int t4;
+  int t2;
+  int i;
+  int j;
+  for (i = 0; i < an; i++) 
+    for (j = 0; j < bm; j++) 
+      C[i][j] = 0.0f;
+  for (t2 = 0; t2 <= ambn - 1; t2 += 1) 
+    for (t4 = 0; t4 <= an - 1; t4 += 1) 
+      for (t6 = 0; t6 <= bm - 1; t6 += 1) 
+        C[t4][t6] += A[t4][t2] * B[t2][t6];
+}
+// this source is derived from CHILL AST originally from file 'permute8910.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute8910.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// a slightly different permute example. Only one statement inside nested loops
+contains comment // a slightly different permute example. Only one statement inside nested loops
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t6;
+  int t4;
+  int t2;
+  int i;
+  int j;
+  for (i = 0; i < an; i++) 
+    for (j = 0; j < bm; j++) 
+      C[i][j] = 0.0f;
+  for (t2 = 0; t2 <= ambn - 1; t2 += 1) 
+    for (t4 = 0; t4 <= an - 1; t4 += 1) 
+      for (t6 = 0; t6 <= bm - 1; t6 += 1) 
+        C[t4][t6] += A[t4][t2] * B[t2][t6];
+}
+permute10modified.c is the same as RIGHTANSWERS/permute10modified.c
+
+
+file permute10.script     SUCCEEDED
 
 file AKp256.script        FAILED    no output file AKp256modified.c was generated ???
 file AKp256hack.script    FAILED    no output file AKp256hackmodified.c was generated ???
@@ -1318,10 +1369,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
 
-0 / 68 passed
-34 / 68 failed
+1 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute2.script
 permute2.script shouldfail  False
@@ -1334,12 +1384,64 @@ dest   'permute2modified.c'
 ../../../chill permute2.script
 checking to see if permute2modified.c exists
 permute2modified.c exists and has 581 bytes
-1525713694.37
-elapsed 3.235786
+1526939671.59
+elapsed 2.716316
 
 knowngood RIGHTANSWERS/permute2modified.c
 checking for knowngood RIGHTANSWERS/permute2modified.c
-there is no dest file permute2modified.c
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t2;
+  int t6;
+  int t4;
+  for (t4 = 0; t4 <= bm - 1; t4 += 1) 
+    for (t6 = 0; t6 <= an - 1; t6 += 1) {
+      C[t6][t4] = 0.0f;
+      C[t6][t4] += A[t6][0] * B[0][t4];
+    }
+  for (t2 = 1; t2 <= ambn - 1; t2 += 1) 
+    for (t4 = 0; t4 <= bm - 1; t4 += 1) 
+      for (t6 = 0; t6 <= an - 1; t6 += 1) 
+        C[t6][t4] += A[t6][t2] * B[t2][t4];
+}
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t2;
+  int t6;
+  int t4;
+  for (t4 = 0; t4 <= bm - 1; t4 += 1) 
+    for (t6 = 0; t6 <= an - 1; t6 += 1) {
+      C[t6][t4] = 0.0f;
+      C[t6][t4] += A[t6][0] * B[0][t4];
+    }
+  for (t2 = 1; t2 <= ambn - 1; t2 += 1) 
+    for (t4 = 0; t4 <= bm - 1; t4 += 1) 
+      for (t6 = 0; t6 <= an - 1; t6 += 1) 
+        C[t6][t4] += A[t6][t2] * B[t2][t4];
+}
+permute2modified.c is the same as RIGHTANSWERS/permute2modified.c
+
+
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
 
 file AKp256.script        FAILED    no output file AKp256modified.c was generated ???
 file AKp256hack.script    FAILED    no output file AKp256hackmodified.c was generated ???
@@ -1374,11 +1476,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
 
-0 / 68 passed
-35 / 68 failed
+2 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute3.script
 permute3.script shouldfail  False
@@ -1391,12 +1491,65 @@ dest   'permute3modified.c'
 ../../../chill permute3.script
 checking to see if permute3modified.c exists
 permute3modified.c exists and has 547 bytes
-1525713694.52
-elapsed 3.131447
+1526939671.82
+elapsed 2.506622
 
 knowngood RIGHTANSWERS/permute3modified.c
 checking for knowngood RIGHTANSWERS/permute3modified.c
-there is no dest file permute3modified.c
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t4;
+  int t6;
+  int t2;
+  for (t2 = 0; t2 <= bm - 1; t2 += 1) {
+    for (t6 = 0; t6 <= an - 1; t6 += 1) {
+      C[t6][t2] = 0.0f;
+      C[t6][t2] += A[t6][0] * B[0][t2];
+    }
+    for (t4 = 1; t4 <= ambn - 1; t4 += 1) 
+      for (t6 = 0; t6 <= an - 1; t6 += 1) 
+        C[t6][t2] += A[t6][t4] * B[t4][t2];
+  }
+}
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t4;
+  int t6;
+  int t2;
+  for (t2 = 0; t2 <= bm - 1; t2 += 1) {
+    for (t6 = 0; t6 <= an - 1; t6 += 1) {
+      C[t6][t2] = 0.0f;
+      C[t6][t2] += A[t6][0] * B[0][t2];
+    }
+    for (t4 = 1; t4 <= ambn - 1; t4 += 1) 
+      for (t6 = 0; t6 <= an - 1; t6 += 1) 
+        C[t6][t2] += A[t6][t4] * B[t4][t2];
+  }
+}
+permute3modified.c is the same as RIGHTANSWERS/permute3modified.c
+
+
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
 
 file AKp256.script        FAILED    no output file AKp256modified.c was generated ???
 file AKp256hack.script    FAILED    no output file AKp256hackmodified.c was generated ???
@@ -1431,12 +1584,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
 
-0 / 68 passed
-36 / 68 failed
+3 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute4.script
 permute4.script shouldfail  False
@@ -1449,12 +1599,62 @@ dest   'permute4modified.c'
 ../../../chill permute4.script
 checking to see if permute4modified.c exists
 permute4modified.c exists and has 501 bytes
-1525713694.66
-elapsed 3.032064
+1526939672.01
+elapsed 2.344965
 
 knowngood RIGHTANSWERS/permute4modified.c
 checking for knowngood RIGHTANSWERS/permute4modified.c
-there is no dest file permute4modified.c
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t6;
+  int t4;
+  int t2;
+  for (t2 = 0; t2 <= bm - 1; t2 += 1) 
+    for (t4 = 0; t4 <= an - 1; t4 += 1) {
+      C[t4][t2] = 0.0f;
+      C[t4][t2] += A[t4][0] * B[0][t2];
+      for (t6 = 1; t6 <= ambn - 1; t6 += 1) 
+        C[t4][t2] += A[t4][t6] * B[t6][t2];
+    }
+}
+// this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+contains comment // this source is derived from CHILL AST originally from file 'permute123456.c' as parsed by frontend compiler rose
+length 0 ''
+removing comment-only line
+
+// code from CHiLL manual permute example
+contains comment // code from CHiLL manual permute example
+length 0 ''
+removing comment-only line
+
+void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
+  int t6;
+  int t4;
+  int t2;
+  for (t2 = 0; t2 <= bm - 1; t2 += 1) 
+    for (t4 = 0; t4 <= an - 1; t4 += 1) {
+      C[t4][t2] = 0.0f;
+      C[t4][t2] += A[t4][0] * B[0][t2];
+      for (t6 = 1; t6 <= ambn - 1; t6 += 1) 
+        C[t4][t2] += A[t4][t6] * B[t6][t2];
+    }
+}
+permute4modified.c is the same as RIGHTANSWERS/permute4modified.c
+
+
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 
 file AKp256.script        FAILED    no output file AKp256modified.c was generated ???
 file AKp256hack.script    FAILED    no output file AKp256hackmodified.c was generated ???
@@ -1489,13 +1689,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-0 / 68 passed
-37 / 68 failed
+4 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute5.script
 permute5.script shouldfail  False
@@ -1508,8 +1704,8 @@ dest   'permute5modified.c'
 ../../../chill permute5.script
 checking to see if permute5modified.c exists
 permute5modified.c exists and has 547 bytes
-1525713694.86
-elapsed 2.871397
+1526939672.22
+elapsed 2.151237
 
 knowngood RIGHTANSWERS/permute5modified.c
 checking for knowngood RIGHTANSWERS/permute5modified.c
@@ -1564,6 +1760,10 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 permute5modified.c is the same as RIGHTANSWERS/permute5modified.c
 
 
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 
 file AKp256.script        FAILED    no output file AKp256modified.c was generated ???
@@ -1599,13 +1799,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-1 / 68 passed
-37 / 68 failed
+5 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute6.script
 permute6.script shouldfail  False
@@ -1618,8 +1814,8 @@ dest   'permute6modified.c'
 ../../../chill permute6.script
 checking to see if permute6modified.c exists
 permute6modified.c exists and has 501 bytes
-1525713695.01
-elapsed 2.764874
+1526939672.4
+elapsed 1.997616
 
 knowngood RIGHTANSWERS/permute6modified.c
 checking for knowngood RIGHTANSWERS/permute6modified.c
@@ -1670,6 +1866,10 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 permute6modified.c is the same as RIGHTANSWERS/permute6modified.c
 
 
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 
@@ -1706,13 +1906,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-2 / 68 passed
-37 / 68 failed
+6 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute7.script
 permute7.script shouldfail  False
@@ -1725,8 +1921,8 @@ dest   'permute7modified.c'
 ../../../chill permute7.script
 checking to see if permute7modified.c exists
 permute7modified.c exists and has 812 bytes
-1525713695.22
-elapsed 2.582757
+1526939672.57
+elapsed 1.851860
 
 knowngood RIGHTANSWERS/permute7modified.c
 checking for knowngood RIGHTANSWERS/permute7modified.c
@@ -1797,6 +1993,10 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 permute7modified.c is the same as RIGHTANSWERS/permute7modified.c
 
 
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -1834,13 +2034,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-3 / 68 passed
-37 / 68 failed
+7 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute8.script
 permute8.script shouldfail  False
@@ -1853,8 +2049,8 @@ dest   'permute8modified.c'
 ../../../chill permute8.script
 checking to see if permute8modified.c exists
 permute8modified.c exists and has 548 bytes
-1525713695.37
-elapsed 2.470152
+1526939672.73
+elapsed 1.714311
 
 knowngood RIGHTANSWERS/permute8modified.c
 checking for knowngood RIGHTANSWERS/permute8modified.c
@@ -1909,6 +2105,10 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 permute8modified.c is the same as RIGHTANSWERS/permute8modified.c
 
 
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -1947,13 +2147,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-4 / 68 passed
-37 / 68 failed
+8 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 permute9.script
 permute9.script shouldfail  False
@@ -1966,8 +2162,8 @@ dest   'permute9modified.c'
 ../../../chill permute9.script
 checking to see if permute9modified.c exists
 permute9modified.c exists and has 564 bytes
-1525713695.56
-elapsed 2.308258
+1526939672.88
+elapsed 1.580811
 
 knowngood RIGHTANSWERS/permute9modified.c
 checking for knowngood RIGHTANSWERS/permute9modified.c
@@ -2022,6 +2218,10 @@ void mm(float **A, float **B, float **C, int ambn, int an, int bm) {
 permute9modified.c is the same as RIGHTANSWERS/permute9modified.c
 
 
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2061,13 +2261,9 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 
-5 / 68 passed
-37 / 68 failed
+9 / 68 passed
+33 / 68 failed
 something is wrong. the totals do not add up
 reverse1.script
 reverse1.script shouldfail  False
@@ -2080,12 +2276,16 @@ dest   'reverse1modified.c'
 ../../../chill reverse1.script
 checking to see if reverse1modified.c exists
 reverse1modified.c exists and has 531 bytes
-1525662151.39
-elapsed 51546.502538
+1526938742.2
+elapsed 932.287825
 
 knowngood RIGHTANSWERS/reverse1modified.c
 checking for knowngood RIGHTANSWERS/reverse1modified.c
 there is no dest file reverse1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2125,14 +2325,10 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 
-5 / 68 passed
-38 / 68 failed
+9 / 68 passed
+34 / 68 failed
 something is wrong. the totals do not add up
 reverse2.script
 reverse2.script shouldfail  False
@@ -2145,12 +2341,16 @@ dest   'reverse2modified.c'
 ../../../chill reverse2.script
 checking to see if reverse2modified.c exists
 reverse2modified.c exists and has 531 bytes
-1525662152.21
-elapsed 51545.712612
+1526938743.01
+elapsed 931.502146
 
 knowngood RIGHTANSWERS/reverse2modified.c
 checking for knowngood RIGHTANSWERS/reverse2modified.c
 there is no dest file reverse2modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2190,15 +2390,11 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 
-5 / 68 passed
-39 / 68 failed
+9 / 68 passed
+35 / 68 failed
 something is wrong. the totals do not add up
 reverse3.script
 reverse3.script shouldfail  False
@@ -2211,12 +2407,16 @@ dest   'reverse3modified.c'
 ../../../chill reverse3.script
 checking to see if reverse3modified.c exists
 reverse3modified.c exists and has 534 bytes
-1525662153.02
-elapsed 51544.925813
+1526938743.75
+elapsed 930.801198
 
 knowngood RIGHTANSWERS/reverse3modified.c
 checking for knowngood RIGHTANSWERS/reverse3modified.c
 there is no dest file reverse3modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2256,16 +2456,12 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
 
-5 / 68 passed
-40 / 68 failed
+9 / 68 passed
+36 / 68 failed
 something is wrong. the totals do not add up
 scale1.script
 scale1.script shouldfail  False
@@ -2278,12 +2474,16 @@ dest   'scale1modified.c'
 ../../../chill scale1.script
 checking to see if scale1modified.c exists
 scale1modified.c exists and has 559 bytes
-1525662153.95
-elapsed 51544.017440
+1526938744.56
+elapsed 930.032393
 
 knowngood RIGHTANSWERS/scale1modified.c
 checking for knowngood RIGHTANSWERS/scale1modified.c
 there is no dest file scale1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2323,17 +2523,13 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
 file scale1.script        FAILED    no output file scale1modified.c was generated ???
 
-5 / 68 passed
-41 / 68 failed
+9 / 68 passed
+37 / 68 failed
 something is wrong. the totals do not add up
 scale2.script
 scale2.script shouldfail  False
@@ -2346,12 +2542,16 @@ dest   'scale2modified.c'
 ../../../chill scale2.script
 checking to see if scale2modified.c exists
 scale2modified.c exists and has 547 bytes
-1525662154.8
-elapsed 51543.196012
+1526938745.38
+elapsed 929.253887
 
 knowngood RIGHTANSWERS/scale2modified.c
 checking for knowngood RIGHTANSWERS/scale2modified.c
 there is no dest file scale2modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2391,18 +2591,14 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
 file scale1.script        FAILED    no output file scale1modified.c was generated ???
 file scale2.script        FAILED    no output file scale2modified.c was generated ???
 
-5 / 68 passed
-42 / 68 failed
+9 / 68 passed
+38 / 68 failed
 something is wrong. the totals do not add up
 scale3.script
 scale3.script shouldfail  False
@@ -2415,12 +2611,16 @@ dest   'scale3modified.c'
 ../../../chill scale3.script
 checking to see if scale3modified.c exists
 scale3modified.c exists and has 547 bytes
-1525662155.65
-elapsed 51542.370252
+1526938746.19
+elapsed 928.479569
 
 knowngood RIGHTANSWERS/scale3modified.c
 checking for knowngood RIGHTANSWERS/scale3modified.c
 there is no dest file scale3modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2460,10 +2660,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2471,8 +2667,8 @@ file scale1.script        FAILED    no output file scale1modified.c was generate
 file scale2.script        FAILED    no output file scale2modified.c was generated ???
 file scale3.script        FAILED    no output file scale3modified.c was generated ???
 
-5 / 68 passed
-43 / 68 failed
+9 / 68 passed
+39 / 68 failed
 something is wrong. the totals do not add up
 scale4.script
 scale4.script shouldfail  False
@@ -2485,12 +2681,16 @@ dest   'scale4modified.c'
 ../../../chill scale4.script
 checking to see if scale4modified.c exists
 scale4modified.c exists and has 559 bytes
-1525662156.56
-elapsed 51541.476486
+1526938747.05
+elapsed 927.646031
 
 knowngood RIGHTANSWERS/scale4modified.c
 checking for knowngood RIGHTANSWERS/scale4modified.c
 there is no dest file scale4modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2530,10 +2730,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2542,8 +2738,8 @@ file scale2.script        FAILED    no output file scale2modified.c was generate
 file scale3.script        FAILED    no output file scale3modified.c was generated ???
 file scale4.script        FAILED    no output file scale4modified.c was generated ???
 
-5 / 68 passed
-44 / 68 failed
+9 / 68 passed
+40 / 68 failed
 something is wrong. the totals do not add up
 shift1.script
 shift1.script shouldfail  False
@@ -2556,12 +2752,16 @@ dest   'shift1modified.c'
 ../../../chill shift1.script
 checking to see if shift1modified.c exists
 shift1modified.c exists and has 850 bytes
-1525662157.55
-elapsed 51540.514785
+1526938747.97
+elapsed 926.750466
 
 knowngood RIGHTANSWERS/shift1modified.c
 checking for knowngood RIGHTANSWERS/shift1modified.c
 there is no dest file shift1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2601,10 +2801,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2614,8 +2810,8 @@ file scale3.script        FAILED    no output file scale3modified.c was generate
 file scale4.script        FAILED    no output file scale4modified.c was generated ???
 file shift1.script        FAILED    no output file shift1modified.c was generated ???
 
-5 / 68 passed
-45 / 68 failed
+9 / 68 passed
+41 / 68 failed
 something is wrong. the totals do not add up
 shift_to1.script
 shift_to1.script shouldfail  False
@@ -2628,12 +2824,16 @@ dest   'shift_to1modified.c'
 ../../../chill shift_to1.script
 checking to see if shift_to1modified.c exists
 shift_to1modified.c exists and has 525 bytes
-1525662158.47
-elapsed 51539.630270
+1526938748.8
+elapsed 925.949132
 
 knowngood RIGHTANSWERS/shift_to1modified.c
 checking for knowngood RIGHTANSWERS/shift_to1modified.c
 there is no dest file shift_to1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2673,10 +2873,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2687,8 +2883,8 @@ file scale4.script        FAILED    no output file scale4modified.c was generate
 file shift1.script        FAILED    no output file shift1modified.c was generated ???
 file shift_to1.script     FAILED    no output file shift_to1modified.c was generated ???
 
-5 / 68 passed
-46 / 68 failed
+9 / 68 passed
+42 / 68 failed
 something is wrong. the totals do not add up
 shift_to2.script
 shift_to2.script shouldfail  False
@@ -2701,12 +2897,16 @@ dest   'shift_to2modified.c'
 ../../../chill shift_to2.script
 checking to see if shift_to2modified.c exists
 shift_to2modified.c exists and has 525 bytes
-1525662159.32
-elapsed 51538.820854
+1526938749.64
+elapsed 925.134401
 
 knowngood RIGHTANSWERS/shift_to2modified.c
 checking for knowngood RIGHTANSWERS/shift_to2modified.c
 there is no dest file shift_to2modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2746,10 +2946,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2761,8 +2957,8 @@ file shift1.script        FAILED    no output file shift1modified.c was generate
 file shift_to1.script     FAILED    no output file shift_to1modified.c was generated ???
 file shift_to2.script     FAILED    no output file shift_to2modified.c was generated ???
 
-5 / 68 passed
-47 / 68 failed
+9 / 68 passed
+43 / 68 failed
 something is wrong. the totals do not add up
 shift_to3.script
 shift_to3.script shouldfail  False
@@ -2775,12 +2971,16 @@ dest   'shift_to3modified.c'
 ../../../chill shift_to3.script
 checking to see if shift_to3modified.c exists
 shift_to3modified.c exists and has 514 bytes
-1525662160.31
-elapsed 51537.876345
+1526938750.47
+elapsed 924.330361
 
 knowngood RIGHTANSWERS/shift_to3modified.c
 checking for knowngood RIGHTANSWERS/shift_to3modified.c
 there is no dest file shift_to3modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2820,10 +3020,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2836,8 +3032,8 @@ file shift_to1.script     FAILED    no output file shift_to1modified.c was gener
 file shift_to2.script     FAILED    no output file shift_to2modified.c was generated ???
 file shift_to3.script     FAILED    no output file shift_to3modified.c was generated ???
 
-5 / 68 passed
-48 / 68 failed
+9 / 68 passed
+44 / 68 failed
 something is wrong. the totals do not add up
 skew1.script
 skew1.script shouldfail  False
@@ -2850,12 +3046,16 @@ dest   'skew1modified.c'
 ../../../chill skew1.script
 checking to see if skew1modified.c exists
 skew1modified.c exists and has 349 bytes
-1525662161.15
-elapsed 51537.076996
+1526938751.27
+elapsed 923.557887
 
 knowngood RIGHTANSWERS/skew1modified.c
 checking for knowngood RIGHTANSWERS/skew1modified.c
 there is no dest file skew1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2895,10 +3095,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2912,8 +3108,8 @@ file shift_to2.script     FAILED    no output file shift_to2modified.c was gener
 file shift_to3.script     FAILED    no output file shift_to3modified.c was generated ???
 file skew1.script         FAILED    no output file skew1modified.c was generated ???
 
-5 / 68 passed
-49 / 68 failed
+9 / 68 passed
+45 / 68 failed
 something is wrong. the totals do not add up
 smooth_fused_64.script
 smooth_fused_64.script shouldfail  False
@@ -2925,13 +3121,13 @@ dest   'smooth_fused_64modified.c'
 
 ../../../chill smooth_fused_64.script
 checking to see if smooth_fused_64modified.c exists
-smooth_fused_64modified.c exists and has 3567 bytes
-1525712220.78
-elapsed 1477.488453
-
 knowngood RIGHTANSWERS/smooth_fused_64modified.c
 checking for knowngood RIGHTANSWERS/smooth_fused_64modified.c
 there is no dest file smooth_fused_64modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -2971,10 +3167,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -2989,8 +3181,8 @@ file shift_to3.script     FAILED    no output file shift_to3modified.c was gener
 file skew1.script         FAILED    no output file skew1modified.c was generated ???
 file smooth_fused_64.script FAILED    no output file smooth_fused_64modified.c was generated ???
 
-5 / 68 passed
-50 / 68 failed
+9 / 68 passed
+46 / 68 failed
 something is wrong. the totals do not add up
 split1.script
 split1.script shouldfail  False
@@ -3003,12 +3195,16 @@ dest   'split1modified.c'
 ../../../chill split1.script
 checking to see if split1modified.c exists
 split1modified.c exists and has 702 bytes
-1525662162.03
-elapsed 51536.280276
+1526938752.19
+elapsed 922.678751
 
 knowngood RIGHTANSWERS/split1modified.c
 checking for knowngood RIGHTANSWERS/split1modified.c
 there is no dest file split1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3048,10 +3244,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3067,8 +3259,8 @@ file skew1.script         FAILED    no output file skew1modified.c was generated
 file smooth_fused_64.script FAILED    no output file smooth_fused_64modified.c was generated ???
 file split1.script        FAILED    no output file split1modified.c was generated ???
 
-5 / 68 passed
-51 / 68 failed
+9 / 68 passed
+47 / 68 failed
 something is wrong. the totals do not add up
 split2.script
 split2.script shouldfail  False
@@ -3081,12 +3273,16 @@ dest   'split2modified.c'
 ../../../chill split2.script
 checking to see if split2modified.c exists
 split2modified.c exists and has 583 bytes
-1525662162.93
-elapsed 51535.416464
+1526938752.93
+elapsed 921.961447
 
 knowngood RIGHTANSWERS/split2modified.c
 checking for knowngood RIGHTANSWERS/split2modified.c
 there is no dest file split2modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3126,10 +3322,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3146,8 +3338,8 @@ file smooth_fused_64.script FAILED    no output file smooth_fused_64modified.c w
 file split1.script        FAILED    no output file split1modified.c was generated ???
 file split2.script        FAILED    no output file split2modified.c was generated ???
 
-5 / 68 passed
-52 / 68 failed
+9 / 68 passed
+48 / 68 failed
 something is wrong. the totals do not add up
 split3.script
 split3.script shouldfail  False
@@ -3160,12 +3352,16 @@ dest   'split3modified.c'
 ../../../chill split3.script
 checking to see if split3modified.c exists
 split3modified.c exists and has 623 bytes
-1525662163.81
-elapsed 51534.586147
+1526938753.73
+elapsed 921.179964
 
 knowngood RIGHTANSWERS/split3modified.c
 checking for knowngood RIGHTANSWERS/split3modified.c
 there is no dest file split3modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3205,10 +3401,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3226,8 +3418,8 @@ file split1.script        FAILED    no output file split1modified.c was generate
 file split2.script        FAILED    no output file split2modified.c was generated ???
 file split3.script        FAILED    no output file split3modified.c was generated ???
 
-5 / 68 passed
-53 / 68 failed
+9 / 68 passed
+49 / 68 failed
 something is wrong. the totals do not add up
 structs.script
 structs.script shouldfail  False
@@ -3242,6 +3434,10 @@ checking to see if structsmodified.c exists
 knowngood RIGHTANSWERS/structsmodified.c
 checking for knowngood RIGHTANSWERS/structsmodified.c
 there is no dest file structsmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3281,10 +3477,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3303,8 +3495,8 @@ file split2.script        FAILED    no output file split2modified.c was generate
 file split3.script        FAILED    no output file split3modified.c was generated ???
 file structs.script       FAILED    no output file structsmodified.c was generated ???
 
-5 / 68 passed
-54 / 68 failed
+9 / 68 passed
+50 / 68 failed
 something is wrong. the totals do not add up
 tile1.script
 tile1.script shouldfail  False
@@ -3317,12 +3509,16 @@ dest   'tile1modified.c'
 ../../../chill tile1.script
 checking to see if tile1modified.c exists
 tile1modified.c exists and has 593 bytes
-1525662164.71
-elapsed 51533.765075
+1526938754.55
+elapsed 920.412673
 
 knowngood RIGHTANSWERS/tile1modified.c
 checking for knowngood RIGHTANSWERS/tile1modified.c
 there is no dest file tile1modified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3362,10 +3558,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3385,8 +3577,8 @@ file split3.script        FAILED    no output file split3modified.c was generate
 file structs.script       FAILED    no output file structsmodified.c was generated ???
 file tile1.script         FAILED    no output file tile1modified.c was generated ???
 
-5 / 68 passed
-55 / 68 failed
+9 / 68 passed
+51 / 68 failed
 something is wrong. the totals do not add up
 unroll1a.script
 unroll1a.script shouldfail  False
@@ -3399,12 +3591,16 @@ dest   'unroll1amodified.c'
 ../../../chill unroll1a.script
 checking to see if unroll1amodified.c exists
 unroll1amodified.c exists and has 563 bytes
-1525662165.58
-elapsed 51532.939067
+1526938755.42
+elapsed 919.558786
 
 knowngood RIGHTANSWERS/unroll1amodified.c
 checking for knowngood RIGHTANSWERS/unroll1amodified.c
 there is no dest file unroll1amodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3444,10 +3640,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3468,8 +3660,8 @@ file structs.script       FAILED    no output file structsmodified.c was generat
 file tile1.script         FAILED    no output file tile1modified.c was generated ???
 file unroll1a.script      FAILED    no output file unroll1amodified.c was generated ???
 
-5 / 68 passed
-56 / 68 failed
+9 / 68 passed
+52 / 68 failed
 something is wrong. the totals do not add up
 unroll1b.script
 unroll1b.script shouldfail  False
@@ -3482,12 +3674,16 @@ dest   'unroll1bmodified.c'
 ../../../chill unroll1b.script
 checking to see if unroll1bmodified.c exists
 unroll1bmodified.c exists and has 566 bytes
-1525662166.4
-elapsed 51532.149155
+1526938756.2
+elapsed 918.801016
 
 knowngood RIGHTANSWERS/unroll1bmodified.c
 checking for knowngood RIGHTANSWERS/unroll1bmodified.c
 there is no dest file unroll1bmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3527,10 +3723,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3552,8 +3744,8 @@ file tile1.script         FAILED    no output file tile1modified.c was generated
 file unroll1a.script      FAILED    no output file unroll1amodified.c was generated ???
 file unroll1b.script      FAILED    no output file unroll1bmodified.c was generated ???
 
-5 / 68 passed
-57 / 68 failed
+9 / 68 passed
+53 / 68 failed
 something is wrong. the totals do not add up
 unroll1c.script
 unroll1c.script shouldfail  False
@@ -3566,12 +3758,16 @@ dest   'unroll1cmodified.c'
 ../../../chill unroll1c.script
 checking to see if unroll1cmodified.c exists
 unroll1cmodified.c exists and has 563 bytes
-1525662167.31
-elapsed 51531.276442
+1526938757.03
+elapsed 917.995450
 
 knowngood RIGHTANSWERS/unroll1cmodified.c
 checking for knowngood RIGHTANSWERS/unroll1cmodified.c
 there is no dest file unroll1cmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3611,10 +3807,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3637,8 +3829,8 @@ file unroll1a.script      FAILED    no output file unroll1amodified.c was genera
 file unroll1b.script      FAILED    no output file unroll1bmodified.c was generated ???
 file unroll1c.script      FAILED    no output file unroll1cmodified.c was generated ???
 
-5 / 68 passed
-58 / 68 failed
+9 / 68 passed
+54 / 68 failed
 something is wrong. the totals do not add up
 unroll1d.script
 unroll1d.script shouldfail  False
@@ -3651,12 +3843,16 @@ dest   'unroll1dmodified.c'
 ../../../chill unroll1d.script
 checking to see if unroll1dmodified.c exists
 unroll1dmodified.c exists and has 461 bytes
-1525662168.09
-elapsed 51530.517212
+1526938757.88
+elapsed 917.165669
 
 knowngood RIGHTANSWERS/unroll1dmodified.c
 checking for knowngood RIGHTANSWERS/unroll1dmodified.c
 there is no dest file unroll1dmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3696,10 +3892,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3723,8 +3915,8 @@ file unroll1b.script      FAILED    no output file unroll1bmodified.c was genera
 file unroll1c.script      FAILED    no output file unroll1cmodified.c was generated ???
 file unroll1d.script      FAILED    no output file unroll1dmodified.c was generated ???
 
-5 / 68 passed
-59 / 68 failed
+9 / 68 passed
+55 / 68 failed
 something is wrong. the totals do not add up
 unroll2a.script
 unroll2a.script shouldfail  False
@@ -3737,12 +3929,16 @@ dest   'unroll2amodified.c'
 ../../../chill unroll2a.script
 checking to see if unroll2amodified.c exists
 unroll2amodified.c exists and has 447 bytes
-1525662168.96
-elapsed 51529.676289
+1526938758.7
+elapsed 916.372551
 
 knowngood RIGHTANSWERS/unroll2amodified.c
 checking for knowngood RIGHTANSWERS/unroll2amodified.c
 there is no dest file unroll2amodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3782,10 +3978,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3810,8 +4002,8 @@ file unroll1c.script      FAILED    no output file unroll1cmodified.c was genera
 file unroll1d.script      FAILED    no output file unroll1dmodified.c was generated ???
 file unroll2a.script      FAILED    no output file unroll2amodified.c was generated ???
 
-5 / 68 passed
-60 / 68 failed
+9 / 68 passed
+56 / 68 failed
 something is wrong. the totals do not add up
 unroll2b.script
 unroll2b.script shouldfail  False
@@ -3824,12 +4016,16 @@ dest   'unroll2bmodified.c'
 ../../../chill unroll2b.script
 checking to see if unroll2bmodified.c exists
 unroll2bmodified.c exists and has 445 bytes
-1525662169.79
-elapsed 51528.871979
+1526938759.49
+elapsed 915.602601
 
 knowngood RIGHTANSWERS/unroll2bmodified.c
 checking for knowngood RIGHTANSWERS/unroll2bmodified.c
 there is no dest file unroll2bmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3869,10 +4065,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3898,8 +4090,8 @@ file unroll1d.script      FAILED    no output file unroll1dmodified.c was genera
 file unroll2a.script      FAILED    no output file unroll2amodified.c was generated ???
 file unroll2b.script      FAILED    no output file unroll2bmodified.c was generated ???
 
-5 / 68 passed
-61 / 68 failed
+9 / 68 passed
+57 / 68 failed
 something is wrong. the totals do not add up
 unroll2c.script
 unroll2c.script shouldfail  False
@@ -3912,12 +4104,16 @@ dest   'unroll2cmodified.c'
 ../../../chill unroll2c.script
 checking to see if unroll2cmodified.c exists
 unroll2cmodified.c exists and has 447 bytes
-1525662170.61
-elapsed 51528.086205
+1526938760.31
+elapsed 914.800875
 
 knowngood RIGHTANSWERS/unroll2cmodified.c
 checking for knowngood RIGHTANSWERS/unroll2cmodified.c
 there is no dest file unroll2cmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -3957,10 +4153,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -3987,8 +4179,8 @@ file unroll2a.script      FAILED    no output file unroll2amodified.c was genera
 file unroll2b.script      FAILED    no output file unroll2bmodified.c was generated ???
 file unroll2c.script      FAILED    no output file unroll2cmodified.c was generated ???
 
-5 / 68 passed
-62 / 68 failed
+9 / 68 passed
+58 / 68 failed
 something is wrong. the totals do not add up
 unroll2d.script
 unroll2d.script shouldfail  False
@@ -4001,12 +4193,16 @@ dest   'unroll2dmodified.c'
 ../../../chill unroll2d.script
 checking to see if unroll2dmodified.c exists
 unroll2dmodified.c exists and has 368 bytes
-1525662171.43
-elapsed 51527.291823
+1526938761.17
+elapsed 913.967116
 
 knowngood RIGHTANSWERS/unroll2dmodified.c
 checking for knowngood RIGHTANSWERS/unroll2dmodified.c
 there is no dest file unroll2dmodified.c
+file permute10.script     SUCCEEDED
+file permute2.script      SUCCEEDED
+file permute3.script      SUCCEEDED
+file permute4.script      SUCCEEDED
 file permute5.script      SUCCEEDED
 file permute6.script      SUCCEEDED
 file permute7.script      SUCCEEDED
@@ -4046,10 +4242,6 @@ file peel7.script         FAILED    no output file peel7modified.c was generated
 file peel8.script         FAILED    no output file peel8modified.c was generated ???
 file peel9.script         FAILED    no output file peel9modified.c was generated ???
 file permute1.script      FAILED    no output file permute1modified.c was generated ???
-file permute10.script     FAILED    no output file permute10modified.c was generated ???
-file permute2.script      FAILED    no output file permute2modified.c was generated ???
-file permute3.script      FAILED    no output file permute3modified.c was generated ???
-file permute4.script      FAILED    no output file permute4modified.c was generated ???
 file reverse1.script      FAILED    no output file reverse1modified.c was generated ???
 file reverse2.script      FAILED    no output file reverse2modified.c was generated ???
 file reverse3.script      FAILED    no output file reverse3modified.c was generated ???
@@ -4077,5 +4269,5 @@ file unroll2b.script      FAILED    no output file unroll2bmodified.c was genera
 file unroll2c.script      FAILED    no output file unroll2cmodified.c was generated ???
 file unroll2d.script      FAILED    no output file unroll2dmodified.c was generated ???
 
-5 / 68 passed
-63 / 68 failed
+9 / 68 passed
+59 / 68 failed

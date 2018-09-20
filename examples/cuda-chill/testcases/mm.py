@@ -1,8 +1,6 @@
 from chill import *
 execfile("cudaize.py")
 
-#>SKIP
-
 destination("mmmodified.cu")
 read_IR("mm.c", "normalMM")
 
@@ -25,4 +23,4 @@ copy_to_shared("tx","a",-16)
 copy_to_shared("tx","b",-16)
 copy_to_registers("kk","c")
 #--print_code()
-unroll_to_depth(2)
+#unroll_to_depth(2)

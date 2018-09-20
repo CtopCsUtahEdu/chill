@@ -1,11 +1,6 @@
+// this source is derived from CHILL AST originally from file 'loopiter.c' as parsed by frontend compiler rose
 
-
-
-// this source derived from CHILL AST originally from file 'loopiter.c' as parsed by frontend compiler rose
-
-
-void main(  )
-{
+int main() {
   float A[48];
   A[0] = 0.0f;
   A[1] = 1.0f;
@@ -55,5 +50,4 @@ void main(  )
   A[45] = 45.0f;
   A[46] = 46.0f;
   A[47] = 47.0f;
-
 }
