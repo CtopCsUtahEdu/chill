@@ -704,6 +704,8 @@ namespace omega {
     for (int i = 0; i < stmts.size(); i++)
       stmts[i] = new CG_stringRepr("s" + to_string(i));
 
+    uninterpreted_symbols.resize(stmts.size());
+
     CG_stringRepr *repr = static_cast<CG_stringRepr *>(printRepr(&ocg, 
                                                                  stmts,
                                                                  uninterpreted_symbols, 
@@ -965,8 +967,14 @@ namespace omega {
       return NULL;
     }
     
-    Relation hull = SimpleHull(Rs, true, true);
-    
+    Relation truehull = SimpleHull(Rs, true, true);
+
+    Relation hull = copy(truehull);
+    for (Variable_ID_Iterator v(*hull.global_decls()); v; v++) {
+      auto var = (*v)->get_global_var();
+      if (var->arity() >= level_)
+        hull = Project(hull, var);
+    }
     //hull.simplify(2,4);
     //Anand:Variables for inspector constraint check
     bool has_insp = false;
@@ -1225,7 +1233,7 @@ namespace omega {
     }
     bounds_.copy_names(hull);
     bounds_.setup_names();
-    
+
     // additional guard/stride condition extraction
     if (needLoop_) {
       Relation cur_known = Intersection(copy(bounds_), copy(known_));
@@ -1386,6 +1394,12 @@ namespace omega {
       hull = Project(hull, hull.set_var(level_));
       hull.simplify(2, 4);
       guard_ = Gist(hull, Intersection(copy(bounds_), copy(known_)), 1);
+
+      for (Variable_ID_Iterator v(*guard_.global_decls()); v; v++) {
+        auto var = (*v)->get_global_var();
+        if (var->arity() >= level_)
+          guard_ = Project(guard_, var);
+      }
     }
     // don't generate guard for non-actual loop, postpone it. otherwise
     // redundant if-conditions might be generated since for-loop semantics
@@ -1535,7 +1549,7 @@ namespace omega {
   Relation CG_loop::hoistGuard() {
     
     Relation r = body_->hoistGuard();
-    
+
     // TODO: should bookkeep catched contraints in loop output as enforced and check if anything missing
     // if (!Gist(copy(b), copy(enforced)).is_obvious_tautology()) {
     //   debug_fprintf(stderr, "need to generate extra guard inside the loop\n");
@@ -1545,7 +1559,13 @@ namespace omega {
       r = Intersection(r, copy(bounds_));
     r = Project(r, r.set_var(level_));
     r = Gist(r, copy(known_), 1);
-    
+
+    for (Variable_ID_Iterator v(*r.global_decls()); v; v++) {
+      auto var = (*v)->get_global_var();
+      if (var->arity() >= level_)
+        r = Project(r, var);
+    }
+
     Relation eliminate_existentials_r;
     Relation eliminate_existentials_known;
     
@@ -2000,8 +2020,8 @@ namespace omega {
         }
       }
     }
-    
-    
+
+
     if (active_.empty()) {
       delete this;
       return NULL;
@@ -2080,7 +2100,7 @@ namespace omega {
                                     const std::vector<std::pair<CG_outputRepr *, int> > &assigned_on_the_fly,
                                     std::vector<std::map<std::string, std::vector<CG_outputRepr *> > > unin, 
                                     bool printString) const {
-    debug_fprintf(stderr, "CG_leaf::printRepr()\n"); 
+    debug_fprintf(stderr, "CG_leaf::printRepr()\n");
     return leaf_print_repr(active_, guards_, NULL, known_, indent, ocg,
                            codegen_->remap_, codegen_->xforms_, stmts, 
                            assigned_on_the_fly, unin);
