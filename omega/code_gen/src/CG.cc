@@ -1459,7 +1459,34 @@ namespace omega {
       body_ = result.first;
       if (result.second.is_obvious_tautology())
         return std::make_pair(this, result.second);
-      
+      else {
+        // Block propagation of guards with wildcard and UFs when they require more depths than current loop
+        int max_level = 0;
+        for (EQ_Iterator e(result.second.single_conjunct()->EQs()); e; e++) {
+          if ((*e).has_wildcards())
+            for (Constr_Vars_Iter cvi(*e); cvi; cvi++) {
+              if (cvi.curr_var()->kind() == Input_Var
+                  && cvi.curr_var()->get_position() > max_level)
+                max_level = cvi.curr_var()->get_position();
+            }
+        }
+        for (GEQ_Iterator e(result.second.single_conjunct()->GEQs()); e; e++) {
+          if ((*e).has_wildcards())
+            for (Constr_Vars_Iter cvi(*e); cvi; cvi++) {
+              if (cvi.curr_var()->kind() == Input_Var
+                  && cvi.curr_var()->get_position() > max_level)
+                max_level = cvi.curr_var()->get_position();
+            }
+        }
+        for (Variable_ID_Iterator v(*result.second.global_decls()); v; v++) {
+          auto var = (*v)->get_global_var();
+          if (var->arity() >= max_level)
+            max_level = var->arity();
+        }
+        if (max_level >= level_)
+          return std::make_pair(this, Relation::True(num_level()));
+      }
+
       // loop is an assignment, replace this loop variable in overhead condition
       if (!needLoop_) {
         result.second = Intersection(result.second, copy(bounds_));
@@ -2036,29 +2063,8 @@ namespace omega {
     for (std::map<int, Relation>::iterator i = guards_.begin();
          i != guards_.end(); i++) {
       Relation r = pick_one_guard(i->second);
-      if (!r.is_obvious_tautology()) {
-        bool has_wildcard = false;
-        int max_level = 0;
-        for (EQ_Iterator e(r.single_conjunct()->EQs()); e; e++) {
-          if ((*e).has_wildcards())
-            has_wildcard = true;
-          for (Constr_Vars_Iter cvi(*e); cvi; cvi++)
-            if (cvi.curr_var()->kind() == Input_Var
-                && cvi.curr_var()->get_position() > max_level)
-              max_level = cvi.curr_var()->get_position();
-        }
-        for (GEQ_Iterator e(r.single_conjunct()->GEQs()); e; e++) {
-          if ((*e).has_wildcards())
-            has_wildcard = true;
-          for (Constr_Vars_Iter cvi(*e); cvi; cvi++)
-            if (cvi.curr_var()->kind() == Input_Var
-                && cvi.curr_var()->get_position() > max_level)
-              max_level = cvi.curr_var()->get_position();
-        }
-        
-        if (!(has_wildcard && max_level == codegen_->num_level()))
-          return std::make_pair(this, r);
-      }
+      if (!r.is_obvious_tautology())
+        return std::make_pair(this, r);
     }
     
     return std::make_pair(this, Relation::True(num_level()));
