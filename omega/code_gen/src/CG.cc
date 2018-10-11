@@ -704,7 +704,7 @@ namespace omega {
     for (int i = 0; i < stmts.size(); i++)
       stmts[i] = new CG_stringRepr("s" + to_string(i));
 
-    uninterpreted_symbols.resize(stmts.size());
+    uninterpreted_symbols.resize(active_.size());
 
     CG_stringRepr *repr = static_cast<CG_stringRepr *>(printRepr(&ocg, 
                                                                  stmts,
@@ -1494,7 +1494,7 @@ namespace omega {
                                 result.second.set_var(level_));
         result.second.simplify(2, 4);
       }
-      
+
       int max_level = 0;
       bool has_wildcard = false;
       bool direction = true;
@@ -1508,15 +1508,18 @@ namespace omega {
             if (cvi.curr_var()->kind() == Input_Var
                 && cvi.curr_var()->get_position() > max_level)
               max_level = cvi.curr_var()->get_position();
-        } else
-          assert(false);
-      
+        }
+
+
       if (!has_wildcard) {
+        Relation r(result.second.n_set());
+
         int num_simple_geq = 0;
         for (GEQ_Iterator e(result.second.single_conjunct()->GEQs()); e;
              e++)
           if (!(*e).has_wildcards()) {
             num_simple_geq++;
+            r.and_with_GEQ(*e);
             for (Constr_Vars_Iter cvi(*e); cvi; cvi++)
               if (cvi.curr_var()->kind() == Input_Var
                   && cvi.curr_var()->get_position() > max_level) {
@@ -1531,10 +1534,27 @@ namespace omega {
                 max_level = cvi.curr_var()->get_position();
               }
           }
+
+        for (EQ_Iterator e(result.second.single_conjunct()->EQs()); e; e++) {
+          num_simple_geq++;
+          r.and_with_GEQ(*e);
+          for (Constr_Vars_Iter cvi(*e); cvi; cvi++)
+            if (cvi.curr_var()->kind() == Input_Var
+                && cvi.curr_var()->get_position() > max_level)
+              max_level = cvi.curr_var()->get_position();
+        }
         assert(
                (has_wildcard && num_simple_geq == 0) 
                || (!has_wildcard && num_simple_geq == 1));
+
+        if (!has_wildcard) {
+          r.simplify();
+          r.copy_names(result.second);
+          r.setup_names();
+          result.second = copy(r);
+        }
       }
+
       
       // check if this is the top loop level for splitting for this overhead
       if (!propagate_up || (has_wildcard && max_level == level_ - 1)
