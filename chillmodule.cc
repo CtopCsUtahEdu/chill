@@ -2020,7 +2020,17 @@ chill_print_dep_ufs(PyObject *self, PyObject *args) {
   std::string privatizable_arrays = strArg(args, 1); // listed in a string separated with comma
   std::string reduction_operations = strArg(args, 2);// listed in a string separated with comma
 
-  myloop->depRelsForAllLoopPar(output_filename, privatizable_arrays, reduction_operations);
+//  myloop->depRelsForAllLoopPar(output_filename, privatizable_arrays, reduction_operations);
+  std::vector<std::pair<std::string, std::string > > dep_rels = 
+     myloop->depRelsForParallelization(privatizable_arrays, reduction_operations);
+  //
+  std::ofstream outf;
+  outf.open (output_filename.c_str(), std::ofstream::out);
+  for(int i = 0 ; i < dep_rels.size() ; i++){
+    outf<<dep_rels[i].first<<std::endl<<dep_rels[i].second<<std::endl;
+  }
+  outf.close();
+
 
   Py_RETURN_NONE;
 }
