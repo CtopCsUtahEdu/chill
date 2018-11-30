@@ -1602,7 +1602,7 @@ omega::Relation Loop::parseExpWithWhileToRel(omega::CG_outputRepr *repr,
 // Mahdi: A helper function to correct embedded iteration space: from Tuowen's topdown branch
 // buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
 // however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
-extern std::string index_name(int level);
+//extern std::string index_name(int level);
 
 typedef struct depRelationParts{
   omega::Relation write_st_is;
@@ -1783,7 +1783,7 @@ Loop::depRelsForParallelization(std::string privatizable_arrays,
                                 std::string reduction_operations, 
                                 int first_stmt_in_parallel_loop, int parallelLoopLevel){
 
-  int maxDim = stmt[0].IS.n_set();
+//std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
 
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   // Currently, codegen seg faulting trying to generate modified code for some of our examples.
@@ -1797,35 +1797,24 @@ Loop::depRelsForParallelization(std::string privatizable_arrays,
   // for parallelisim purposes, they are given as an input.
   std::set<int> redOps = reductionOps(reduction_operations);
 
-
-//std::cout<<"\n\nStart of depRelsForParallelization!\n\n";
-
+  // Recording name and tuple location (nestedness) of all unique loop iterators.
+  int maxDim = stmt[0].IS.n_set(), inner_st = 0;
+  std::set<std::pair<std::string,int>> tv_names_nl;
+  for( int i=0; i<stmt.size() ; i++){
+    for( int j = 1; j <= stmt_nesting_level_[i] ; j++ ){
+      tv_names_nl.insert( std::pair<std::string,int>( stmt[i].IS.set_var(j)->name() , j ) );
+    }
+  }
+//  for (std::set<std::pair<std::string,int>>::iterator it=tv_names_nl.begin(); it!=tv_names_nl.end(); ++it)
+//    std::cout<<"\ntv = "<<(*it).first << "  nl = " <<(*it).second << "\n";
 
   std::vector<int> lex_ = getLexicalOrder(first_stmt_in_parallel_loop);
   std::set<int> same_loop_ = getStatements(lex_, (parallelLoopLevel - 1)*2 );
-/*
-  std::cout<<"\n\n No. of stmt = "<<stmt.size();
-  for( int j=0; j<stmt.size() ; j++){
-    //CG_outputRepr *co = 
-    std::cout<<"\n St #"<<j<<" = ";
-    (stmt[j].code)->dump();
-  }
 
-  std::cout<<"\n\n Lex ord = ["<<lex_[0];
-  for(int i=1; i<lex_.size(); i++)
-    std::cout<<", "<<lex_[i];
-  std::cout<<"]\n\nFS = "<<first_stmt_in_parallel_loop<<"  PLL = "<<parallelLoopLevel;
-  std::cout<<"\n\nSame its = ";
-  for (std::set<int>::iterator it = same_loop_.begin(); it != same_loop_.end();  it++) {
-    std::cout<<*it<<" , ";
-  }
-  std::cout<<"\n\n";
-*/
 
   // Store all accesses in all the statements of the parallel loop level in access
   std::vector<IR_ArrayRef *> access;
   int access_st[100]={-1},ct=0;
-
 //std::cout<<"\n\nAcc gath:";
   for (std::set<int>::iterator i = same_loop_.begin(); i != same_loop_.end(); i++) {
 //std::cout<<"\n   sit = "<<*i;
@@ -1885,10 +1874,10 @@ int relCounter = 1;
         }
         omega::Relation accessEqRel(maxDim, maxDim);
         for (int i = 1; i <= maxDim; i++)
-          accessEqRel.name_input_var(i, index_name(i));//r1.name_input_var(i, write_r.set_var(i)->name());
+          accessEqRel.name_input_var(i,  write_r.set_var(i)->name()); //accessEqRel.name_input_var(i, index_name(i));//r1.name_input_var(i, write_r.set_var(i)->name());
 
         for (int i = 1; i <= maxDim; i++)
-          accessEqRel.name_output_var(i, index_name(i) + "p");//r1.name_output_var(i, read_r.set_var(i)->name() + "p");
+          accessEqRel.name_output_var(i, read_r.set_var(i)->name() + "p"); //accessEqRel.name_output_var(i, index_name(i) + "p");//r1.name_output_var(i, read_r.set_var(i)->name() + "p");
 
         F_And *f_root = accessEqRel.add_and(); 
 
@@ -1956,8 +1945,11 @@ relCounter = 1;
 
   // Creating a map for tuple variable name adjusment because of applying schedule to Iteration Space
   std::vector<std::pair<std::string,std::string>> replace_tuple_var;
-  for (int j = 1; j <= maxDim; j++){
-    std::string is_tv = index_name(j);
+
+  for (std::set<std::pair<std::string,int>>::iterator it=tv_names_nl.begin();
+       it!=tv_names_nl.end(); ++it){
+    int j = (*it).second;
+    std::string is_tv = (*it).first;
     std::string is_tvp = is_tv+"p";
     replace_tuple_var.push_back( std::pair<std::string,std::string>(is_tv, ("In_"+to_string(j*2))) );
     replace_tuple_var.push_back( std::pair<std::string,std::string>(is_tvp, ("Out_"+to_string(j*2))) );
