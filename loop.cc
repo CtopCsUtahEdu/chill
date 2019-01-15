@@ -578,12 +578,9 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
         
 // Mahdi: In current form, following only supports one condition in the if-statement
 //        something like following is not supported: if( A && B )
-//std::cout<<"\n\n\n+++++++++++++++++++++++++HI FROM IFFFFF\n\n\n";
 
         CG_outputRepr *cond =
           static_cast<IR_If *>(itn->content)->condition();
-        
-//cond->dump();
 
         try {
           if (itn->payload % 2 == 1)
@@ -901,6 +898,316 @@ bool Loop::init_loop(std::vector<ir_tree_node *> &ir_tree,
 }
 
 
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+// buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
+// however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
+std::string index_name(int level) {
+  std::string iname = ("chill_idx"+to_string(level));
+  return iname;
+}
+
+void Loop::buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexicalOrder,std::vector<ir_tree_node*> &ctrls, int level) {
+  for (int i = 0; i < ir_tree.size(); i++) {
+    switch (ir_tree[i]->content->type()) {
+      case IR_CONTROL_BLOCK: {
+        // A new stmt
+        // Setting up basic variables
+        // Needs cleanup
+        ir_stmt.push_back(ir_tree[i]);
+        stmt.push_back(Statement());
+        uninterpreted_symbols.emplace_back();
+        uninterpreted_symbols_stringrepr.emplace_back();
+        unin_rel.emplace_back();
+        stmt_nesting_level_.push_back(level);
+        int loc = ir_stmt.size() - 1;
+        // Setup the IS holder
+        Relation r(num_dep_dim);
+        F_And *f_root = r.add_and();
+        // Setup inspector bounds
+        std::vector<std::string> insp_lb;
+        std::vector<std::string> insp_ub;
+
+        int current = 0;
+
+        // Processing information from containing control structs
+        for (int j = 0; j < ctrls.size(); ++j) {
+          switch (ctrls[j]->content->type()) {
+            case IR_CONTROL_LOOP: {
+              IR_Loop *lp = static_cast<IR_Loop *>(ctrls[j]->content);
+              ++current;
+              Variable_ID v = r.set_var(current);
+
+              // Create index replacement
+              std::string iname = index_name(current);
+              r.name_set_var(current,iname);
+
+              int step = lp->step_size();
+              CG_outputRepr *lb = lp->lower_bound();
+              CG_outputRepr *ub = lp->upper_bound();
+              IR_CONDITION_TYPE cond = lp->stop_cond();
+              exp2formula(this, ir,r,f_root,freevar,lb,v,'s',IR_COND_GE,false,uninterpreted_symbols[loc],uninterpreted_symbols_stringrepr[loc], unin_rel[loc]);
+              if (cond == IR_COND_LT || cond == IR_COND_LE)
+                exp2formula(this, ir,r,f_root,freevar,ub,v,'s',cond,false,uninterpreted_symbols[loc],uninterpreted_symbols_stringrepr[loc], unin_rel[loc]);
+              else throw ir_error("loop condition not supported");
+
+              // strided
+              if (step != 1) {
+                F_Exists *f_exists = f_root->add_exists();
+                Variable_ID  e = f_exists -> declare();
+                F_And *f_and = f_exists->add_and();
+                Stride_Handle h = f_and->add_stride(step);
+                h.update_coef(e ,1);
+                h.update_coef(v, -1);
+                // Here is using substituted lowerbound
+                exp2formula(this,ir, r, f_and, freevar, lb,e,'s',IR_COND_EQ, false, uninterpreted_symbols[loc],uninterpreted_symbols_stringrepr[loc], unin_rel[loc]);
+              }
+              if ((ir->QueryExpOperation(lp->lower_bound())
+                   == IR_OP_ARRAY_VARIABLE)
+                  && (ir->QueryExpOperation(lp->lower_bound())
+                      == ir->QueryExpOperation(
+                  lp->upper_bound()))) {
+                std::vector<CG_outputRepr *> v =
+                    ir->QueryExpOperand(lp->lower_bound());
+                IR_ArrayRef *ref =
+                    static_cast<IR_ArrayRef *>(ir->Repr2Ref(
+                        v[0]));
+                std::string s0 = ref->name();
+                std::vector<CG_outputRepr *> v2 =
+                    ir->QueryExpOperand(lp->upper_bound());
+                IR_ArrayRef *ref2 =
+                    static_cast<IR_ArrayRef *>(ir->Repr2Ref(
+                        v2[0]));
+                std::string s1 = ref2->name();
+
+                if (s0 == s1) {
+                  insp_lb.push_back(s0);
+                  insp_ub.push_back(s1);
+
+                }
+              }
+              break;
+            }
+            case IR_CONTROL_IF: {
+              IR_If *ip = static_cast<IR_If *>(ctrls[j]->content);
+              CG_outputRepr *cond = ip->condition();
+              if (ctrls[j]->payload & 1)
+                exp2constraint(this,ir,r,f_root,freevar,cond,false, uninterpreted_symbols[loc],uninterpreted_symbols_stringrepr[loc], unin_rel[loc]);
+              else {
+                F_Not *f_not = f_root->add_not();
+                F_And *f_and = f_not->add_and();
+                exp2constraint(this,ir,r,f_and,freevar,cond,false, uninterpreted_symbols[loc],uninterpreted_symbols_stringrepr[loc], unin_rel[loc]);
+              }
+              break;
+            }
+            default:
+              throw ir_error("unknown ir type"); // should never happen
+          }
+        }
+
+        // add information for missing loops
+        for (int j = level; j < num_dep_dim; j++) {
+          Variable_ID v = r.set_var(j + 1);
+          EQ_Handle e = f_root->add_EQ();
+          e.update_coef(v, 1);
+        }
+        r.setup_names();
+        r.simplify();
+        // Inspector initialization
+        for (int j = 0; j < insp_lb.size(); j++) {
+
+          std::string lb = insp_lb[j] + "_";
+          std::string ub = lb + "_";
+
+          Global_Var_ID u, l;
+          bool found_ub = false;
+          bool found_lb = false;
+          for (DNF_Iterator di(copy(r).query_DNF()); di; di++)
+            for (Constraint_Iterator ci = (*di)->constraints(); ci; ci++)
+
+              for (Constr_Vars_Iter cvi(*ci); cvi; cvi++) {
+                Variable_ID v = cvi.curr_var();
+                if (v->kind() == Global_Var)
+                  if (v->get_global_var()->arity() > 0) {
+
+                    std::string name =
+                        v->get_global_var()->base_name();
+                    if (name == lb) {
+                      l = v->get_global_var();
+                      found_lb = true;
+                    } else if (name == ub) {
+                      u = v->get_global_var();
+                      found_ub = true;
+                    }
+                  }
+
+              }
+
+          if (found_lb && found_ub) {
+            Relation known_(copy(r).n_set());
+            known_.copy_names(copy(r));
+            known_.setup_names();
+            Variable_ID index_lb = known_.get_local(l, Input_Tuple);
+            Variable_ID index_ub = known_.get_local(u, Input_Tuple);
+            F_And *fr = known_.add_and();
+            GEQ_Handle g = fr->add_GEQ();
+            g.update_coef(index_ub, 1);
+            g.update_coef(index_lb, -1);
+            g.update_const(-1);
+            addKnown(known_);
+          }
+        }
+        // Write back
+        stmt[loc].code = static_cast<IR_Block*>(ir_stmt[loc]->content)->extract();
+        stmt[loc].IS = r;
+        stmt[loc].loop_level = std::vector<LoopLevel>(num_dep_dim);
+        stmt[loc].has_inspector = false;
+        stmt[loc].ir_stmt_node = ir_tree[i];
+        for (int ii = 0; ii < num_dep_dim; ++ii) {
+          stmt[loc].loop_level[ii].type = LoopLevelOriginal;
+          stmt[loc].loop_level[ii].payload = ii;
+          stmt[loc].loop_level[ii].parallel_level = 0;
+        }
+        // Lexical ordering
+        stmt[loc].xform = Relation(num_dep_dim, 2 * num_dep_dim + 1);
+        F_And *f_xform = stmt[loc].xform.add_and();
+
+        for (int j = 1; j <= num_dep_dim; j++) {
+          EQ_Handle h = f_xform->add_EQ();
+          h.update_coef(stmt[loc].xform.output_var(2 * j), 1);
+          h.update_coef(stmt[loc].xform.input_var(j), -1);
+        }
+        for (int j = 1; j <= 2 * num_dep_dim + 1; j += 2) {
+          EQ_Handle h = f_xform->add_EQ();
+          h.update_coef(stmt[loc].xform.output_var(j), 1);
+          if (j/2 < lexicalOrder.size())
+          h.update_const(-lexicalOrder[j/2]);
+        }
+        stmt[loc].xform.simplify();
+        // Update lexical ordering for next statement
+        lexicalOrder[lexicalOrder.size()-1]++;
+        break;
+      }
+      case IR_CONTROL_LOOP: {
+        ir_tree[i]->payload = level;
+        ctrls.push_back(ir_tree[i]);
+        try {
+          lexicalOrder.push_back(0);
+          buildIS(ir_tree[i]->children, lexicalOrder, ctrls, level +1);
+          lexicalOrder.pop_back();
+        } catch (ir_error &e) {
+          for (int j =0;j<ir_tree[i]->children.size(); ++j)
+            delete ir_tree[i]->children[j];
+          ir_tree[i]->children = std::vector<ir_tree_node*>();
+          ir_tree[i]->content = ir_tree[i]->content->convert();
+          throw chill::error::build("converted ir_tree_node");
+        }
+        ctrls.pop_back();
+        // Update lexical ordering for next statement
+        lexicalOrder[lexicalOrder.size()-1]++;
+        break;
+      }
+      case IR_CONTROL_IF: {
+        // need to change condition to align loop vars
+        ctrls.push_back(ir_tree[i]);
+        try {
+          buildIS(ir_tree[i]->children, lexicalOrder, ctrls, level);
+        } catch (ir_error &e) {
+          for (int j =0;j<ir_tree[i]->children.size(); ++j)
+            delete ir_tree[i]->children[j];
+          ir_tree[i]->children = std::vector<ir_tree_node*>();
+          ir_tree[i]->content = ir_tree[i]->content->convert();
+          throw chill::error::build("converted ir_tree_node");
+        }
+        ctrls.pop_back();
+        // if statement shouldn't update the lexical ordering on its own.
+        break;
+      }
+      default:
+        throw std::invalid_argument("invalid ir tree");
+    }
+  }
+}
+
+int find_depth(std::vector<ir_tree_node *> &ir_tree) {
+  int maxd = 0;
+  for (int i = 0; i < ir_tree.size(); i++)
+    switch (ir_tree[i]->content->type()) {
+      case IR_CONTROL_BLOCK:
+        // A new stmt
+        break;
+      case IR_CONTROL_LOOP:
+        maxd = max(maxd,find_depth(ir_tree[i]->children)+1);
+        break;
+      case IR_CONTROL_IF:
+        maxd = max(maxd,find_depth(ir_tree[i]->children));
+        break;
+      default:
+        throw std::invalid_argument("invalid ir tree");
+    }
+  return maxd;
+}
+
+void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<CG_outputRepr*> &vars_replacement,int level) {
+  for (int i = 0; i < ir_tree.size(); i++) {
+    CG_outputBuilder *ocg = ir->builder();
+    switch (ir_tree[i]->content->type()) {
+      case IR_CONTROL_BLOCK: {
+        IR_Block *bp = static_cast<IR_Block *>(ir_tree[i]->content);
+        ocg->CreateSubstitutedStmt(0,bp->extract(),vars_to_be_replaced,vars_replacement,false);
+        break;
+      }
+      case IR_CONTROL_LOOP: {
+        IR_chillLoop *clp = static_cast<IR_chillLoop *>(ir_tree[i]->content);
+        if (!clp->well_formed) {
+          for (int j = 0; j < ir_tree[i]->children.size(); ++j)
+            delete ir_tree[i]->children[j];
+          ir_tree[i]->children = std::vector<ir_tree_node *>();
+          ir_tree[i]->content = ir_tree[i]->content->convert();
+        } else {
+          clp->chilllowerbound = ocg->CreateSubstitutedStmt(0,clp->chilllowerbound,vars_to_be_replaced,vars_replacement,false);
+          clp->chillupperbound = ocg->CreateSubstitutedStmt(0,clp->chillupperbound,vars_to_be_replaced,vars_replacement,false);
+          std::string iname = index_name(level);
+          CG_outputRepr *ivar = ocg->CreateIdent(iname);
+          vars_to_be_replaced.push_back(clp->index()->name());
+          vars_replacement.push_back(ivar);
+          // FIXME: this breaks abstraction
+          if (clp->step_size()<0) {
+            IR_CONDITION_TYPE cond = clp->conditionoperator;
+            if (cond == IR_COND_GE) cond = IR_COND_LE;
+            else if (cond == IR_COND_GT) cond = IR_COND_LT;
+            clp->conditionoperator = cond;
+            clp->chilllowerbound = ocg->CreateMinus(NULL, clp->chilllowerbound);
+            clp->chillupperbound = ocg->CreateMinus(NULL, clp->chillupperbound);
+            clp->step_size_ = -clp->step_size_;
+            CG_outputRepr *inv = ocg->CreateMinus(NULL,ivar);
+            vars_to_be_replaced.push_back(iname);
+            vars_replacement.push_back(inv);
+            clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
+                ,((CG_chillRepr*)ivar)->chillnodes[0]);
+          } else
+            clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
+                ,((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0]);
+          clp->chillforstmt->init = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"=",((CG_chillRepr*)(clp->chilllowerbound))->chillnodes[0]);
+          clp->chillforstmt->incr = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"+=",new chillAST_IntegerLiteral(clp->step_size_));
+          // Ready to recurse
+          align_loops(ir_tree[i]->children,vars_to_be_replaced,vars_replacement,level+1);
+        }
+        break;
+      }
+      case IR_CONTROL_IF: {
+        IR_If *ip = static_cast<IR_If *>(ir_tree[i]->content);
+        ocg->CreateSubstitutedStmt(0,ip->condition(),vars_to_be_replaced,vars_replacement,false);
+        // Ready to recurse
+        align_loops(ir_tree[i]->children,vars_to_be_replaced,vars_replacement,level);
+        break;
+      }
+      default:
+        throw std::invalid_argument("invalid ir tree");
+    }
+  }
+}
+
+
 
 Loop::Loop(const IR_Control *control) {
   
@@ -908,7 +1215,7 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "control type is %d   ", control->type()); 
   echocontroltype(control);
   
-  // Mahdi: a temporary hack for getting dependence extraction changes integrated
+  // Mahdi: A temporary hack for getting dependence extraction changes integrated       
   replaceCode_ind = 1;
 
   last_compute_cgr_ = NULL;
@@ -935,6 +1242,8 @@ Loop::Loop(const IR_Control *control) {
   //    std::vector<ir_tree_node *> ir_stmt;
   //debug_fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
   
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+/*
   while (!init_loop(ir_tree, ir_stmt)) {
     //debug_fprintf(stderr, "count %d\n", count++); 
   }
@@ -942,6 +1251,35 @@ Loop::Loop(const IR_Control *control) {
   
   
   debug_fprintf(stderr, "loop.cc after init_loop, %d statements\n",  (int)stmt.size()); 
+*/
+  {
+    std::vector<std::string> vars_to_be_relaced;
+    std::vector<CG_outputRepr*> vars_replacement;
+    align_loops(ir_tree, vars_to_be_relaced,vars_replacement,/*loop_index_start*/1);
+  }
+  bool trybuild = true;
+
+  while (trybuild)
+  {
+    uninterpreted_symbols_stringrepr.clear();
+    uninterpreted_symbols.clear();
+    unin_rel.clear();
+    stmt.clear();
+    ir_stmt.clear();
+    stmt_nesting_level_.clear();
+    num_dep_dim = find_depth(ir_tree);
+    std::vector<int> lexicalOrder;
+    std::vector<ir_tree_node*> ctrls;
+    lexicalOrder.push_back(0);
+    trybuild = false;
+    try{
+      buildIS(ir_tree,lexicalOrder,ctrls,0);
+    } catch (chill::error::build &e) {
+      debug_printf("Retry: %s", e.what());
+      trybuild=true;
+    }
+  }
+
   for (int i = 0; i < stmt.size(); i++) {
     std::map<int, CG_outputRepr*>::iterator it = replace.find(i);
     
@@ -962,7 +1300,7 @@ Loop::Loop(const IR_Control *control) {
   // init the dependence graph
   for (int i = 0; i < stmt.size(); i++)
     dep.insert();
-  
+
   for (int i = 0; i < stmt.size(); i++) {
     stmt[i].reduction = 0; // Manu -- initialization
     for (int j = i; j < stmt.size(); j++) {
@@ -1003,7 +1341,7 @@ Loop::Loop(const IR_Control *control) {
       }
     }
   }
-  
+
   debug_fprintf(stderr, "\n\n*** LOTS OF REDUCTIONS ***\n\n"); 
   
   // TODO: Reduction check
@@ -1088,6 +1426,10 @@ Loop::Loop(const IR_Control *control) {
         std::cout << "Unknown reduction type\n";
     }
   }
+
+
+// Mahdi: Commented to correct embedded iteration space: from Tuowen's topdown branch
+/*
   // cleanup the IR tree
   
   // init transformations adding auxiliary indices e.g. [i, j] -> [ 0, i, 0, j, 0]
@@ -1114,6 +1456,7 @@ Loop::Loop(const IR_Control *control) {
     num_dep_dim = stmt[0].IS.n_set();
   else
     num_dep_dim = 0;
+*/
   // debug
   /*for (int i = 0; i < stmt.size(); i++) {
     std::cout << i << ": ";

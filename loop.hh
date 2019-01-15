@@ -164,7 +164,14 @@ protected:
   mutable int last_compute_effort_;
   
 protected:
+  // Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch init_loop
+  // is renamed as buildIS, actualy commented in Tuowen's branch, it is related to current way of 
+  // generating iteration space that Tuowen may want to keep, so I am leaving it in there for now 
   bool init_loop(std::vector<ir_tree_node *> &ir_tree, std::vector<ir_tree_node *> &ir_stmt);
+  // Mahdi: Following two functions are added for above reason
+  void buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexicalOrder,std::vector<ir_tree_node*> &ctrls, int level);
+  void align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<omega::CG_outputRepr*> &vars_replacement,int level);
+
   int get_dep_dim_of(int stmt, int level) const;
   int get_last_dep_dim_before(int stmt, int level) const;
   std::vector<omega::Relation> getNewIS() const;
@@ -266,12 +273,16 @@ public:
    * Output: dependence relations in teh form of strings that are in ISL (IEGenLib) syntax  
    */
   std::vector<std::pair<std::string, std::string >> 
-    depRelsForParallelization(int parallelLoopLevel = 0);
+    depRelsForParallelization(std::string privatizable_arrays, std::string reduction_operations, 
+                              int first_stmt_in_parallel_loop = 0, int parallelLoopLevel = 1);
+  void depRelsForAllLoopPar(std::string output_filename, std::string privatizable_arrays, 
+                            std::string reduction_operations);
   // Mahdi: a temporary hack for getting dependence extraction changes integrated
   // Reason: Transformed code that is suppose to be printed out when Chill finishes everything,
   //         is not correct for our examples!
   int replaceCode_ind;
   int replaceCode(){ return replaceCode_ind;}
+  int getMaxDim(){ return stmt[0].IS.n_set();}
 
   void removeDependence(int stmt_num_from, int stmt_num_to);
   void dump() const;
