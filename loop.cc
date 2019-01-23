@@ -1147,6 +1147,33 @@ int find_depth(std::vector<ir_tree_node *> &ir_tree) {
   return maxd;
 }
 
+void Loop::renameIndex(int stmt_num, std::string idx, std::string new_idx) {
+  int level = findCurLevel(stmt_num, idx);
+  idxNames.clear(idx, stmt_num);
+  idxNames.set(new_idx, stmt_num, level);
+}
+
+bool Loop::validIndexes(int stmt_num, const std::vector<std::string>& idxs) {
+  for(auto idx: idxs) {
+    if(!idxNames.validIndex(idx, stmt_num)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+int Loop::findCurLevel(int stmt, std::string idx) {
+  return idxNames.get(idx, stmt);
+}
+
+void Loop::setCurLevel(std::string idx, int level) {
+  idxNames.set(idx, level);
+}
+
+void Loop::setCurLevel(int stmt, std::string idx, int level) {
+  idxNames.set(idx, stmt, level);
+}
+
 void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<CG_outputRepr*> &vars_replacement,int level) {
   for (int i = 0; i < ir_tree.size(); i++) {
     CG_outputBuilder *ocg = ir->builder();
@@ -1166,7 +1193,9 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
         } else {
           clp->chilllowerbound = ocg->CreateSubstitutedStmt(0,clp->chilllowerbound,vars_to_be_replaced,vars_replacement,false);
           clp->chillupperbound = ocg->CreateSubstitutedStmt(0,clp->chillupperbound,vars_to_be_replaced,vars_replacement,false);
+
           std::string iname = index_name(level);
+
           CG_outputRepr *ivar = ocg->CreateIdent(iname);
           vars_to_be_replaced.push_back(clp->index()->name());
           vars_replacement.push_back(ivar);
@@ -1184,9 +1213,11 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
             vars_replacement.push_back(inv);
             clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
                 ,((CG_chillRepr*)ivar)->chillnodes[0]);
-          } else
+          }
+          else {
             clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
                 ,((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0]);
+          }
           clp->chillforstmt->init = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"=",((CG_chillRepr*)(clp->chilllowerbound))->chillnodes[0]);
           clp->chillforstmt->incr = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"+=",new chillAST_IntegerLiteral(clp->step_size_));
           // Ready to recurse

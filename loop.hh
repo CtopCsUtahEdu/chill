@@ -116,6 +116,30 @@ public:
   }
 };
 
+/*!
+ * @brief Index name mapping
+ */
+struct IndexNameMap {
+  //std::map<std::string, int>                  default_levels;  //!< Default loop level by name
+  std::map<std::pair<int,std::string>, int>   index_levels;    //!< Specific loop level by stmt & name
+
+  //void set(std::string idx, int ll) { default_levels[idx] = ll; }
+  void set(std::string idx, int s, int ll)  { index_levels[std::make_pair(idx, s)] = ll; }
+  int  get(std::string idx, int s)          { return index_levels[std::make_pair(idx, s)]; }
+
+  void clear(std::string idx, int s) {
+    auto iter = index_levels.find(std::make_pair(s, idx));
+    if(iter != index_levels.end()) {
+      index_levels.erase(iter);
+    }
+  }
+
+  bool isset(std::string idx, int s) {
+    return index_levels.find(std::make_pair(s, idx)) != index_levels.end();
+  }
+};
+
+
 class Loop {
 protected:
   int tmp_loop_var_name_counter;
@@ -126,6 +150,7 @@ protected:
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
+  IndexNameMap  idxNames;
 
 public:
   void debugRelations() const;
@@ -214,8 +239,16 @@ protected:
   //
   // OMP operations
   //
-
   void                  omp_apply_pragmas() const;
+
+  //
+  // Index Variable Names
+  //
+  int                   findCurLevel(int stmt_num, std::string idx);
+  void                  setCurLevel(std::string stmt_num, int level);
+  void                  setCurLevel(int stmt_num, std::string idx, int level);
+  void                  renameIndex(int stmt_num, std::string idx, std::string new_idx);
+  bool                  validIndexes(int stmt_num, const std::vector<std::string>& idxs);
 
 public:
 

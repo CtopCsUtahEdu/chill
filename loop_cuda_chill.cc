@@ -138,15 +138,6 @@ void LoopCuda::addSync(int stmt_num, std::string idxName) {
   syncs.push_back(make_pair(stmt_num, idxName));
 }
 
-void LoopCuda::renameIndex(int stmt_num, std::string idx, std::string newName) {
-  int level = findCurLevel(stmt_num, idx);
-  if (idxNames.size() <= stmt_num || idxNames[stmt_num].size() < level)
-    throw std::runtime_error("Invalid statment number of index");
-  debug_fprintf(stderr, "renaming inxname[%d][%d] to %s\n", stmt_num, level - 1,  newName.c_str());
-  idxNames[stmt_num][level - 1] = newName.c_str();
-  
-}
-
 enum Type {
   Int
 };
@@ -319,23 +310,6 @@ void findReplacePreferedIdxs(chillAST_node *newkernelcode,
   kernel->getBody()->findLoopIndexesToReplace( symtab, false ); 
 }
 
-
-
-
-bool LoopCuda::validIndexes(int stmt_num, const std::vector<std::string>& idxs) {
-  for (int i = 0; i < idxs.size(); i++) {
-    bool found = false;
-    for (int j = 0; j < idxNames[stmt_num].size(); j++) {
-      if (strcmp(idxNames[stmt_num][j].c_str(), idxs[i].c_str()) == 0) {
-        found = true;
-      }
-    }
-    if (!found) {
-      return false;
-    }
-  }
-  return true;
-}
 
 #define NOTRUNONGPU (ordered_cudaized_stmts[iter].second == -1)
 #define RUNONGPU (ordered_cudaized_stmts[iter].second != -1)
@@ -789,18 +763,6 @@ int LoopCuda::nonDummyLevel(int stmt, int level) {
   throw std::runtime_error(
                            std::string("Unable to find a non-dummy level starting from ")
                            + std::string(buf));
-}
-
-
-
-int LoopCuda::findCurLevel(int stmt, std::string idx) {
-  for (int j = 0; j < idxNames[stmt].size(); j++) {
-    if (strcmp(idxNames[stmt][j].c_str(), idx.c_str()) == 0)
-      return j + 1;
-  }
-  throw std::runtime_error(
-                           std::string("Unable to find index ") + idx
-                           + std::string(" in current list of indexes"));
 }
 
 
