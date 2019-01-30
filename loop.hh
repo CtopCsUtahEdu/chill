@@ -130,6 +130,7 @@ protected:
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
+public: //TODO: making this public is a lazy hack (should be protected)
   std::vector< std::vector<std::string> > idxNames;
 
 public:
@@ -223,21 +224,18 @@ protected:
   //
   void                  omp_apply_pragmas() const;
 
+public:
+
   //
   // Index Variable Names
   //
   int                   findCurLevel(int stmt_num, std::string idx);
-  void                  setCurLevel(std::string stmt_num, int level);
-  void                  setCurLevel(int stmt_num, std::string idx, int level);
   void                  renameIndex(int stmt_num, std::string idx, std::string new_idx);
   bool                  validIndexes(int stmt_num, const std::vector<std::string>& idxs);
-
-public:
 
   //
   // OMP Interface
   //
-
   void                  omp_mark_pragma(int, int, std::string);
   void                  omp_mark_parallel_for(int, int, const std::vector<std::string>&, const std::vector<std::string>&);
 
