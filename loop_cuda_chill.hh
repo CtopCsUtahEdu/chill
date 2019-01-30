@@ -82,7 +82,6 @@ class LoopCuda: public Loop{  // chill version
   
 public:
   //std::vector<proc_sym*> new_procs; //Need adding to a fse
-  std::vector< std::vector<std::string> > idxNames_; //TODO: Nuke
   std::vector< std::pair<int, std::string> > syncs;
   bool useIdxNames;
   std::vector<std::string> index;

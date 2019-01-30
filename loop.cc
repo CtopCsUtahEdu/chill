@@ -1147,40 +1147,84 @@ int find_depth(std::vector<ir_tree_node *> &ir_tree) {
   return maxd;
 }
 
-void Loop::renameIndex(int stmt_num, std::string idx, std::string new_idx) {
+
+void Loop::renameIndex(int stmt_num, std::string idx, std::string newName) {
   int level = findCurLevel(stmt_num, idx);
-  idxNames.clear(idx, stmt_num);
-  idxNames.set(new_idx, stmt_num, level);
+  if (idxNames.size() <= stmt_num || idxNames[stmt_num].size() < level)
+    throw std::runtime_error("Invalid statment number of index");
+  idxNames[stmt_num][level - 1] = newName.c_str();
 }
 
+
 bool Loop::validIndexes(int stmt_num, const std::vector<std::string>& idxs) {
-  for(auto idx: idxs) {
-    if(!idxNames.validIndex(idx, stmt_num)) {
+  for (int i = 0; i < idxs.size(); i++) {
+    bool found = false;
+    for (int j = 0; j < idxNames[stmt_num].size(); j++) {
+      if (strcmp(idxNames[stmt_num][j].c_str(), idxs[i].c_str()) == 0) {
+        found = true;
+      }
+    }
+    if (!found) {
       return false;
     }
   }
   return true;
 }
 
+
 int Loop::findCurLevel(int stmt, std::string idx) {
-  return idxNames.get(idx, stmt);
+  for (int j = 0; j < idxNames[stmt].size(); j++) {
+    if (strcmp(idxNames[stmt][j].c_str(), idx.c_str()) == 0)
+      return j + 1;
+  }
+  throw std::runtime_error(
+                           std::string("Unable to find index ") + idx
+                           + std::string(" in current list of indexes"));
 }
 
-void Loop::setCurLevel(std::string idx, int level) {
-  idxNames.set(idx, level);
-}
 
-void Loop::setCurLevel(int stmt, std::string idx, int level) {
-  idxNames.set(idx, stmt, level);
-}
+struct align_reset_info {
+  std::vector<std::string>            original_names;
+  std::vector<omega::CG_outputRepr*>  original_exprs;
+  std::vector<std::string>            aligned_names;
+  std::vector<omega::CG_outputRepr*>  aligned_exprs;
 
-void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<CG_outputRepr*> &vars_replacement,int level) {
+  CG_outputRepr* add_substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
+    CG_outputRepr* ivar = ocg->CreateIdent(subst_name);
+    original_names.push_back(name);
+    original_exprs.push_back(ocg->CreateIdent(name));
+    aligned_names.push_back(subst_name);
+    aligned_exprs.push_back(ivar);
+    return ivar;
+  }
+
+  void add_negative_substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
+    original_names.push_back(name);
+    original_exprs.push_back(ocg->CreateMinus(NULL, ocg->CreateIdent(name)));
+    aligned_names.push_back(subst_name);
+    aligned_exprs.push_back(ocg->CreateMinus(NULL, ocg->CreateIdent(subst_name)));
+  }
+
+  void substitute_vars(CG_outputBuilder* ocg, CG_outputRepr* expr) {
+    ocg->CreateSubstitutedStmt(0, expr, original_names, aligned_exprs, false);
+  }
+
+  void restore_vars(CG_outputBuilder* ocg, CG_outputRepr* expr) {
+    ocg->CreateSubstitutedStmt(0, expr, aligned_names, original_exprs, false);
+  }
+};
+
+
+static void align_loops(
+        CG_outputBuilder*               ocg,
+        std::vector<ir_tree_node*>&     ir_tree,
+        align_reset_info&               align_info,
+        int                             level) {
   for (int i = 0; i < ir_tree.size(); i++) {
-    CG_outputBuilder *ocg = ir->builder();
     switch (ir_tree[i]->content->type()) {
       case IR_CONTROL_BLOCK: {
         IR_Block *bp = static_cast<IR_Block *>(ir_tree[i]->content);
-        ocg->CreateSubstitutedStmt(0,bp->extract(),vars_to_be_replaced,vars_replacement,false);
+        align_info.substitute_vars(ocg, bp->extract());
         break;
       }
       case IR_CONTROL_LOOP: {
@@ -1191,14 +1235,12 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
           ir_tree[i]->children = std::vector<ir_tree_node *>();
           ir_tree[i]->content = ir_tree[i]->content->convert();
         } else {
-          clp->chilllowerbound = ocg->CreateSubstitutedStmt(0,clp->chilllowerbound,vars_to_be_replaced,vars_replacement,false);
-          clp->chillupperbound = ocg->CreateSubstitutedStmt(0,clp->chillupperbound,vars_to_be_replaced,vars_replacement,false);
+          align_info.substitute_vars(ocg, clp->upper_bound());
+          align_info.substitute_vars(ocg, clp->lower_bound());
 
           std::string iname = index_name(level);
+          CG_outputRepr* ivar = align_info.add_substitution(ocg, clp->index()->name(), iname);
 
-          CG_outputRepr *ivar = ocg->CreateIdent(iname);
-          vars_to_be_replaced.push_back(clp->index()->name());
-          vars_replacement.push_back(ivar);
           // FIXME: this breaks abstraction
           if (clp->step_size()<0) {
             IR_CONDITION_TYPE cond = clp->conditionoperator;
@@ -1208,9 +1250,9 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
             clp->chilllowerbound = ocg->CreateMinus(NULL, clp->chilllowerbound);
             clp->chillupperbound = ocg->CreateMinus(NULL, clp->chillupperbound);
             clp->step_size_ = -clp->step_size_;
-            CG_outputRepr *inv = ocg->CreateMinus(NULL,ivar);
-            vars_to_be_replaced.push_back(iname);
-            vars_replacement.push_back(inv);
+
+            align_info.add_negative_substitution(ocg, iname, iname);
+
             clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
                 ,((CG_chillRepr*)ivar)->chillnodes[0]);
           }
@@ -1218,18 +1260,19 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
             clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
                 ,((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0]);
           }
+
           clp->chillforstmt->init = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"=",((CG_chillRepr*)(clp->chilllowerbound))->chillnodes[0]);
           clp->chillforstmt->incr = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"+=",new chillAST_IntegerLiteral(clp->step_size_));
           // Ready to recurse
-          align_loops(ir_tree[i]->children,vars_to_be_replaced,vars_replacement,level+1);
+          align_loops(ocg, ir_tree[i]->children, align_info,level+1);
         }
         break;
       }
       case IR_CONTROL_IF: {
         IR_If *ip = static_cast<IR_If *>(ir_tree[i]->content);
-        ocg->CreateSubstitutedStmt(0,ip->condition(),vars_to_be_replaced,vars_replacement,false);
+        align_info.substitute_vars(ocg, ip->condition());
         // Ready to recurse
-        align_loops(ir_tree[i]->children,vars_to_be_replaced,vars_replacement,level);
+        align_loops(ocg, ir_tree[i]->children, align_info, level);
         break;
       }
       default:
@@ -1238,6 +1281,45 @@ void Loop::align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::str
   }
 }
 
+
+static void reset_names(
+        CG_outputBuilder*               ocg,
+        std::vector<ir_tree_node*>&     ir_tree,
+        align_reset_info&               reset_info,
+        int                             level) {
+
+  for(auto ir_node: ir_tree) {
+    switch(ir_node->content->type()) {
+      case IR_CONTROL_BLOCK: {
+          auto ib = static_cast<IR_Block*>(ir_node->content);
+          reset_info.restore_vars(ocg, ib->extract());
+        }
+        break;
+      case IR_CONTROL_LOOP: {
+          auto clp = static_cast<IR_chillLoop*>(ir_node->content);
+          if(clp->well_formed) {
+            reset_info.restore_vars(ocg, clp->upper_bound());
+            reset_info.restore_vars(ocg, clp->lower_bound());
+            //
+            //  ...
+            //
+            reset_names(ocg, ir_node->children, reset_info, level + 1);
+          }
+          else {
+            // Not well formed
+            //  ...
+          }
+        }
+        break;
+      case IR_CONTROL_IF: {
+          auto ip = static_cast<IR_If*>(ir_node->content);
+          reset_info.restore_vars(ocg, ip->condition());
+          reset_names(ocg, ir_node->children, reset_info, level + 1);
+        }
+        break;
+    }
+  }
+}
 
 
 Loop::Loop(const IR_Control *control) {
@@ -1284,9 +1366,9 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "loop.cc after init_loop, %d statements\n",  (int)stmt.size()); 
 */
   {
-    std::vector<std::string> vars_to_be_relaced;
-    std::vector<CG_outputRepr*> vars_replacement;
-    align_loops(ir_tree, vars_to_be_relaced,vars_replacement,/*loop_index_start*/1);
+    align_reset_info ar_info;
+    align_loops(ir->builder(), ir_tree, ar_info,  1);
+    reset_names(ir->builder(), ir_tree, ar_info,  1);
   }
   bool trybuild = true;
 

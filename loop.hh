@@ -99,6 +99,7 @@ public:
 
 };
 
+
 /*!
  * @brief Info for omp pragma during code generation
  */
@@ -116,29 +117,8 @@ public:
   }
 };
 
-/*!
- * @brief Index name mapping
- */
-struct IndexNameMap {
-  //std::map<std::string, int>                  default_levels;  //!< Default loop level by name
-  std::map<std::pair<int,std::string>, int>   index_levels;    //!< Specific loop level by stmt & name
 
-  //void set(std::string idx, int ll) { default_levels[idx] = ll; }
-  void set(std::string idx, int s, int ll)  { index_levels[std::make_pair(idx, s)] = ll; }
-  int  get(std::string idx, int s)          { return index_levels[std::make_pair(idx, s)]; }
-
-  void clear(std::string idx, int s) {
-    auto iter = index_levels.find(std::make_pair(s, idx));
-    if(iter != index_levels.end()) {
-      index_levels.erase(iter);
-    }
-  }
-
-  bool isset(std::string idx, int s) {
-    return index_levels.find(std::make_pair(s, idx)) != index_levels.end();
-  }
-};
-
+struct align_reset_info;
 
 class Loop {
 protected:
@@ -150,7 +130,7 @@ protected:
   std::vector<std::string> index;
   std::map<int, omega::CG_outputRepr *> replace;
   std::map<int, std::pair<int, std::string> > reduced_statements;
-  IndexNameMap  idxNames;
+  std::vector< std::vector<std::string> > idxNames;
 
 public:
   void debugRelations() const;
@@ -195,7 +175,9 @@ protected:
   bool init_loop(std::vector<ir_tree_node *> &ir_tree, std::vector<ir_tree_node *> &ir_stmt);
   // Mahdi: Following two functions are added for above reason
   void buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexicalOrder,std::vector<ir_tree_node*> &ctrls, int level);
-  void align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<omega::CG_outputRepr*> &vars_replacement,int level);
+
+  //void align_loops(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &vars_to_be_replaced, std::vector<omega::CG_outputRepr*> &vars_replacement,int level);
+  //void reset_names(std::vector<ir_tree_node*> &ir_tree, std::vector<std::string> &original_names, std::vector<omega::CG_outputRepr*> &aligned_vars, int level);
 
   int get_dep_dim_of(int stmt, int level) const;
   int get_last_dep_dim_before(int stmt, int level) const;
