@@ -845,6 +845,7 @@ IR_chillCode::IR_chillCode(chill::Parser *parser, const char *fname, const char 
   chillAST_FunctionDecl *localFD = findFunctionDecl(  entire_file_AST, proc_name );
   chillfunc =  localFD;
   ocg_ = new omega::CG_chillBuilder(entire_file_AST, chillfunc); // transition - use chillAST based builder
+  func_defn = localFD;
 }
 
 IR_chillCode::~IR_chillCode() {

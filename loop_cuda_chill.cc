@@ -1919,42 +1919,7 @@ LoopCuda::LoopCuda(IR_Control *irc, int loop_num) :
   //chillAST_CompoundStmt *CS = (chillAST_CompoundStmt *)FD->getBody();
   CPUbodySymtab = FD->getSymbolTable(); // gets it from body 
   
-  printsyms(); 
-  
-  //debug_fprintf(stderr, "param symbol table has %d entries\n", CPUparamSymtab->size()); 
-  //printSymbolTable( CPUparamSymtab ); 
-  //debug_fprintf(stderr, "body symbol table has %d entries\n", CPUbodySymtab->size()); 
-  //printSymbolTable( CPUbodySymta ); 
-  
-  
-  
-  std::vector<chillAST_ForStmt *> loops;
-  func_body->get_top_level_loops( loops); 
-  debug_fprintf(stderr, "%d loops    loop_num %d\n", loops.size(), loop_num); 
-  
-  std::vector<chillAST_ForStmt *> deeploops;
-  //loops[loop_num]->get_deep_loops( deeploops); 
-  loops[loop_num]->find_deepest_loops( deeploops);  // loops[loop_num]  is chillAST_ForStmt *
-
-  debug_fprintf(stderr, "%d deepest\n", deeploops.size()); 
-  
-  std::vector<std::string> loopvars;
-  for (int i=0; i<deeploops.size(); i++) { 
-    deeploops[i]->gatherLoopVars( loopvars );
-  }
-  
-  debug_fprintf(stderr, "\nloopCuda::loopCuda() %d loop variables\n", loopvars.size());
-  for (int i=0; i<loopvars.size(); i++) { 
-    debug_fprintf(stderr, "index[%d] = '%s'\n", i, loopvars[i].c_str());
-  }
-  
-  debug_fprintf(stderr, "\nin LoopCuda::LoopCuda   adding IDXNAMES  %d stmts\n", stmt.size()); 
-  for (int i = 0; i < stmt.size(); i++){
-    idxNames.push_back(loopvars); //refects prefered index names (used as handles in cudaize v2)
-    //pushes the entire array of loop vars for each stmt? 
-  }
-
-  useIdxNames = false;
+  printsyms();
 }
 
 

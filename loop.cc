@@ -1200,7 +1200,7 @@ struct align_reset_info {
 
   void add_negative_substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
     original_names.push_back(name);
-    original_exprs.push_back(ocg->CreateMinus(NULL, ocg->CreateIdent(name)));
+    original_exprs.push_back(ocg->CreateIdent(name));
     aligned_names.push_back(subst_name);
     aligned_exprs.push_back(ocg->CreateMinus(NULL, ocg->CreateIdent(subst_name)));
   }
@@ -1211,6 +1211,12 @@ struct align_reset_info {
 
   void restore_vars(CG_outputBuilder* ocg, CG_outputRepr* expr) {
     ocg->CreateSubstitutedStmt(0, expr, aligned_names, original_exprs, false);
+  }
+
+  chillAST_node* restore_vars(CG_outputBuilder* ocg, chillAST_node* node) {
+    CG_chillRepr repr(std::vector<chillAST_node*>({node}));
+    auto res = ocg->CreateSubstitutedStmt(0, &repr, aligned_names, original_exprs, false);
+    return ((CG_chillRepr*) res)->GetCode();
   }
 };
 
@@ -1298,11 +1304,15 @@ static void reset_names(
       case IR_CONTROL_LOOP: {
           auto clp = static_cast<IR_chillLoop*>(ir_node->content);
           if(clp->well_formed) {
-            reset_info.restore_vars(ocg, clp->upper_bound());
+            //reset_info.restore_vars(ocg, clp->upper_bound());
             reset_info.restore_vars(ocg, clp->lower_bound());
-            //
-            //  ...
-            //
+
+            auto clpf = clp->chillforstmt;
+
+            clpf->init = reset_info.restore_vars(ocg, clpf->init);
+            clpf->cond = reset_info.restore_vars(ocg, clpf->cond);
+            clpf->incr = reset_info.restore_vars(ocg, clpf->incr);
+
             reset_names(ocg, ir_node->children, reset_info, level + 1);
           }
           else {
@@ -1333,13 +1343,8 @@ Loop::Loop(const IR_Control *control) {
 
   last_compute_cgr_ = NULL;
   last_compute_cg_ = NULL;
-  debug_fprintf(stderr, "2set last_compute_cg_ = NULL; \n"); 
 
   ir = const_cast<IR_Code *>(control->ir_); // point to the CHILL IR that this loop came from
-  if (!ir) {
-    debug_fprintf(stderr, "ir gotten from control = 0x%x\n", (long)ir);
-    debug_fprintf(stderr, "loop.cc GONNA DIE SOON *******************************\n\n");
-  }
   
   init_code = NULL;
   cleanup_code = NULL;
@@ -1350,21 +1355,7 @@ Loop::Loop(const IR_Control *control) {
   debug_fprintf(stderr, "in Loop::Loop, calling  build_ir_tree()\n"); 
   debug_fprintf(stderr, "\nloop.cc, Loop::Loop() about to clone control\n"); 
   ir_tree = build_ir_tree(control->clone(), NULL);
-  //debug_fprintf(stderr,"in Loop::Loop. ir_tree has %ld parts\n", ir_tree.size()); 
   
-  //    std::vector<ir_tree_node *> ir_stmt;
-  //debug_fprintf(stderr, "loop.cc after build_ir_tree() %ld statements\n",  stmt.size()); 
-  
-// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
-/*
-  while (!init_loop(ir_tree, ir_stmt)) {
-    //debug_fprintf(stderr, "count %d\n", count++); 
-  }
-  debug_fprintf(stderr, "after init_loop, %d freevar\n", (int)freevar.size()); 
-  
-  
-  debug_fprintf(stderr, "loop.cc after init_loop, %d statements\n",  (int)stmt.size()); 
-*/
   {
     align_reset_info ar_info;
     align_loops(ir->builder(), ir_tree, ar_info,  1);
@@ -1398,8 +1389,8 @@ Loop::Loop(const IR_Control *control) {
     
     if (it != replace.end())
       stmt[i].code = it->second;
-    else
-      stmt[i].code = stmt[i].code;
+    //else
+    //  stmt[i].code = stmt[i].code;
 
     // TODO replace_set_var_as_another_set_var
     // Relation r = parseExpWithWhileToRel(stmt[i].code, stmt[i].IS, i);
@@ -1540,45 +1531,22 @@ Loop::Loop(const IR_Control *control) {
     }
   }
 
+  auto fd = ir->GetChillFuncDefinition();
+  auto fb = fd->getBody();
 
-// Mahdi: Commented to correct embedded iteration space: from Tuowen's topdown branch
-/*
-  // cleanup the IR tree
-  
-  // init transformations adding auxiliary indices e.g. [i, j] -> [ 0, i, 0, j, 0]
-  for (int i = 0; i < stmt.size(); i++) {
-    int n = stmt[i].IS.n_set();
-    stmt[i].xform = Relation(n, 2 * n + 1);
-    F_And *f_root = stmt[i].xform.add_and();
-    
-    for (int j = 1; j <= n; j++) {
-      EQ_Handle h = f_root->add_EQ();
-      h.update_coef(stmt[i].xform.output_var(2 * j), 1);
-      h.update_coef(stmt[i].xform.input_var(j), -1);
-    }
-    
-    for (int j = 1; j <= 2 * n + 1; j += 2) {
-      EQ_Handle h = f_root->add_EQ();
-      h.update_coef(stmt[i].xform.output_var(j), 1);
-    }
-    stmt[i].xform.simplify();
+  std::vector<chillAST_ForStmt*>  loops;
+  std::vector<chillAST_ForStmt*>  deeploops;
+  std::vector<std::string>        loopvars;
+  fb->get_top_level_loops(loops);
+  loops[0]->find_deepest_loops(deeploops);
+
+  for(auto dl: deeploops) {
+    dl->gatherLoopVars(loopvars);
   }
-  //debug_fprintf(stderr, "done with dumb\n");
-  
-  if (stmt.size() != 0)
-    num_dep_dim = stmt[0].IS.n_set();
-  else
-    num_dep_dim = 0;
-*/
-  // debug
-  /*for (int i = 0; i < stmt.size(); i++) {
-    std::cout << i << ": ";
-    //stmt[i].xform.print();
-    stmt[i].IS.print();
-    std::cout << std::endl;
-    
-    }*/
-  //end debug
+
+  for(int i = 0; i < stmt.size(); i++) {
+    idxNames.push_back(loopvars);
+  }
 }
 
 Loop::~Loop() {
