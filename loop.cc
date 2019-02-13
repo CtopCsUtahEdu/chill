@@ -938,7 +938,7 @@ void Loop::buildIS(std::vector<ir_tree_node*> &ir_tree,std::vector<int> &lexical
               Variable_ID v = r.set_var(current);
 
               // Create index replacement
-              std::string iname = index_name(current);
+              std::string iname = lp->index()->name();
               r.name_set_var(current,iname);
 
               int step = lp->step_size();
