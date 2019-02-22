@@ -1,1 +1,1 @@
-Lp[1 * chill_idx1]Lp[1 * chill_idx1 + 1]Lp[1 * chill_idx1 + 1]Lp[1 * chill_idx1]Li[1 * chill_idx2p]Li[1 * chill_idx2p + 1]Li[1 * chill_idx2]Li[1 * chill_idx2 + 1]
+Lp[1 * j]Lp[1 * j + 1]Lp[1 * j + 1]Lp[1 * j]Li[1 * pp]Li[1 * pp + 1]Segmentation fault (core dumped)

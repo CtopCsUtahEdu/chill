@@ -1,5 +1,0 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/p48.c", line 13: warning: 
-          variable "C" was set but never used
-     float C[100][100];
-           ^
-

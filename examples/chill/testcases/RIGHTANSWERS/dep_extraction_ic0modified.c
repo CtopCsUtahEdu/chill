@@ -1,22 +1,22 @@
 // this source is derived from CHILL AST originally from file 'dep_extraction_ic0.c' as parsed by frontend compiler rose
 
-#define row_______(chill_idx1p) row[1 * chill_idx1p + 1]
-#define row_____(chill_idx1p) row[1 * chill_idx1p]
-#define col______(chill_idx1, chill_idx2, chill_idx3, chill_idx4) col[1 * chill_idx4]
-#define col_______(chill_idx1, chill_idx2, chill_idx3) col[1 * chill_idx3 + 1]
-#define col_____(chill_idx1, chill_idx2, chill_idx3) col[1 * chill_idx3]
-#define col____(chill_idx1, chill_idx2, chill_idx3, chill_idx4) col[1 * chill_idx4 + 1]
-#define col__(chill_idx1, chill_idx2, chill_idx3, chill_idx4) col[1 * chill_idx4]
-#define row_col_____(chill_idx1, chill_idx2) row[1 * col_(chill_idx1, chill_idx2)]
-#define row_col___(chill_idx1, chill_idx2) row[1 * col_(chill_idx1, chill_idx2) + 1]
-#define row_col____(chill_idx1, chill_idx2) row[1 * col_(chill_idx1, chill_idx2) + 1]
-#define row_col__(chill_idx1, chill_idx2) row[1 * col_(chill_idx1, chill_idx2)]
-#define col___(chill_idx1, chill_idx2) col[1 * chill_idx2 + 1]
-#define col_(chill_idx1, chill_idx2) col[1 * chill_idx2]
-#define row____(chill_idx1) row[1 * chill_idx1]
-#define row__(chill_idx1) row[1 * chill_idx1 + 1]
-#define row___(chill_idx1) row[1 * chill_idx1 + 1]
-#define row_(chill_idx1) row[1 * chill_idx1]
+#define row_______(ip) row[1 * ip + 1]
+#define row_____(ip) row[1 * ip]
+#define col______(i, m, k, l) col[1 * l]
+#define col_______(i, m, k) col[1 * k + 1]
+#define col_____(i, m, k) col[1 * k]
+#define col____(i, m, k, l) col[1 * l + 1]
+#define col__(i, m, k, l) col[1 * l]
+#define row_col_____(i, m) row[1 * col_(i, m)]
+#define row_col___(i, m) row[1 * col_(i, m) + 1]
+#define row_col____(i, m) row[1 * col_(i, m) + 1]
+#define row_col__(i, m) row[1 * col_(i, m)]
+#define col___(i, m) col[1 * m + 1]
+#define col_(i, m) col[1 * m]
+#define row____(i) row[1 * i]
+#define row__(i) row[1 * i + 1]
+#define row___(i) row[1 * i + 1]
+#define row_(i) row[1 * i]
 //#include <math.h>
 
 double sqrt(double in);
@@ -25,27 +25,27 @@ double sqrt(double in);
 //}
 
 void ic0_csr(int n, double *val, int *row, int *col) {
-  int chill_idx4;
-  int chill_idx3;
-  int chill_idx2;
-  int chill_idx1;
+  int i;
+  int k;
+  int l;
+  int m;
   double temp;
-  for (chill_idx1 = 0; chill_idx1 < n - 1; chill_idx1 += 1) {
-    temp = val[row[chill_idx1]];
+  for (i = 0; i < n - 1; i += 1) {
+    temp = val[row[i]];
     //S1
 
-    val[row[chill_idx1]] = val[row[chill_idx1]] / sqrt(temp);
-    for (chill_idx2 = row[chill_idx1] + 1; chill_idx2 < row[chill_idx1 + 1]; chill_idx2 += 1) 
+    val[row[i]] = val[row[i]] / sqrt(temp);
+    for (m = row[i] + 1; m < row[i + 1]; m += 1) 
       //S2
 
-      val[chill_idx2] = val[chill_idx2] / val[row[chill_idx1]];
-    for (chill_idx2 = row[chill_idx1] + 1; chill_idx2 < row[chill_idx1 + 1]; chill_idx2 += 1) 
-      for (chill_idx3 = row[col[chill_idx2]]; chill_idx3 < row[col[chill_idx2] + 1]; chill_idx3 += 1) 
-        for (chill_idx4 = chill_idx2; chill_idx4 < row[chill_idx1 + 1]; chill_idx4 += 1) 
-          if (col[chill_idx4] == col[chill_idx3]) 
-            if (col[chill_idx4 + 1] <= col[chill_idx3]) 
+      val[m] = val[m] / val[row[i]];
+    for (m = row[i] + 1; m < row[i + 1]; m += 1) 
+      for (k = row[col[m]]; k < row[col[m] + 1]; k += 1) 
+        for (l = m; l < row[i + 1]; l += 1) 
+          if (col[l] == col[k]) 
+            if (col[l + 1] <= col[k]) 
               //S3
 
-              val[chill_idx3] -= val[chill_idx2] * val[chill_idx4];
+              val[k] -= val[m] * val[l];
   }
 }
