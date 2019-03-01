@@ -1,5 +1,7 @@
 from chill import *
 
+#>EXFAIL
+
 source('dep_extraction_fs_csc.c')
 destination('dep_extraction_fs_cscmodified.c')
 procedure('fs_csc')

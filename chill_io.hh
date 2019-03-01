@@ -5,7 +5,11 @@
 #include "config.h"
 #endif
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdio>
+#include <vector>
+#include <set>
+#include <type_traits>
 
 // ----------------------------------------- //
 // Stream output (for debugging, and stdout) //
@@ -30,6 +34,22 @@ bool debug_isdefined(char* symbol);
 #define debug_printf(...)                   do { if(debug_isenabled()) { chill_printf(__VA_ARGS__); } } while (false)
 #define debug_cond_fprintf(s, f, ...)       do { if(debug_isdefined(s)) { debug_fprintf(f, __VA_ARGS__); } } while (false)
 #define debug_cond_printf(s, ...)           do { if(debug_isdefined(s)) { debug_printf(__VA_ARGS__); } } while (false)
+
+template<class T>
+static inline
+typename std::enable_if<
+          std::is_integral<T>::value,
+          void>::type
+printvec(const std::vector<T>& v) {
+  printf("{");
+  for(int i = 0; i < v.size()-1; i++) {
+    printf("%d, ", v[i]);
+  }
+  if(v.size() > 0) {
+    printf("%d", v[v.size() - 1]);
+  }
+  printf("}\n");
+}
 
 #define debug_begin                         if(debug_isenabled()) {
 #define debug_end                           }
