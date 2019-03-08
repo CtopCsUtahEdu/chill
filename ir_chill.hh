@@ -272,8 +272,16 @@ struct IR_chillLoop: public IR_Loop {
 
   chillAST_DeclRefExpr *chillindex;   // the loop index variable  (I)  // was DeclRefExpr
   chillAST_ForStmt     *chillforstmt; 
-  chillAST_node        *chilllowerbound;
-  chillAST_node        *chillupperbound;
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+// next 2 lines are commented in Tuowen's branch, they related to current way of 
+// generating iteration space that Tuowen may want to keep, I wanted to keep them, but
+// variables have the same name as the newly introduced ones  
+//  chillAST_node        *chilllowerbound;
+//  chillAST_node        *chillupperbound;
+  omega::CG_outputRepr *chilllowerbound; 
+  omega::CG_outputRepr *chillupperbound;
+  bool well_formed; //<! Declare whether the loop is gonna be parse-able or not
+
   chillAST_node        *chillbody;    // presumably a compound statement, but not guaranteeed
   IR_CONDITION_TYPE conditionoperator;
 

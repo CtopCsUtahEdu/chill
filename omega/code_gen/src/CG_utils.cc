@@ -1493,8 +1493,8 @@ namespace omega {
     assert(R.n_out()==0);
     
     Relation r = Relation::True(R.n_set());
-    
-    for (GEQ_Iterator e(const_cast<Relation &>(R).single_conjunct()->GEQs()); 
+
+    for (GEQ_Iterator e(const_cast<Relation &>(R).single_conjunct()->GEQs());
          e; 
          e++)
       if (!(*e).has_wildcards()) {
@@ -1509,7 +1509,7 @@ namespace omega {
          e; 
          e++)
       if (!(*e).has_wildcards()) {
-        r.and_with_GEQ(*e);
+        r.and_with_EQ(*e);
         r.simplify();
         r.copy_names(R);
         r.setup_names();

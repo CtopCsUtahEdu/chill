@@ -1,1 +1,1 @@
-rowptr[1 * i]rowptr[1 * i + 1]rowptr[1 * i + 1]rowptr[1 * i]colidx[1 * j]colidx[1 * j + 1]rowptr[1 * i]rowptr[1 * i + 1]colidx[1 * jp]colidx[1 * jp + 1]
+rowptr[1 * i]rowptr[1 * i + 1]rowptr[1 * i + 1]rowptr[1 * i]colidx[1 * j]colidx[1 * j + 1]colidx[1 * jp]colidx[1 * jp + 1]

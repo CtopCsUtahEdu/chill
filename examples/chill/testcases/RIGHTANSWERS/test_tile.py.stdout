@@ -1,20 +1,10 @@
 if (an >= 1) {
   for(t2 = 0; t2 <= bm-1; t2 += 4) {
-    if (ambn >= 1) {
-      for(t4 = 0; t4 <= an-1; t4++) {
-        for(t6 = t2; t6 <= min(bm-1,t2+3); t6++) {
-          s0(t4,t6,0);
-          s1(t4,t6,0);
-          for(t8 = 1; t8 <= ambn-1; t8++) {
-            s1(t4,t6,t8);
-          }
-        }
-      }
-    }
-    else {
-      for(t4 = 0; t4 <= an-1; t4++) {
-        for(t6 = t2; t6 <= min(bm-1,t2+3); t6++) {
-          s0(t4,t6,0);
+    for(t4 = 0; t4 <= an-1; t4++) {
+      for(t6 = t2; t6 <= min(bm-1,t2+3); t6++) {
+        s0(t4,t6,0);
+        for(t8 = 0; t8 <= ambn-1; t8++) {
+          s1(t4,t6,t8);
         }
       }
     }

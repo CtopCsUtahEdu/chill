@@ -1422,6 +1422,9 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
   invalidateCodeGen();
   int dim = 2 * level - 1;
   int ref_stmt_num;
+
+  setLexicalOrder(0, stmt_nums);
+
   // check for sanity of parameters
   std::vector<int> ref_lex;
   for (std::set<int>::const_iterator i = stmt_nums.begin();
@@ -1435,16 +1438,21 @@ void Loop::distribute(const std::set<int> &stmt_nums, int level) {
             || level > stmt[*i].loop_level.size()))
       throw std::invalid_argument(
         "8invalid loop level " + to_string(level));
-    if (ref_lex.size() == 0) {
-      ref_lex = getLexicalOrder(*i);
+//    if (ref_lex.size() == 0) {
+//      ref_lex = getLexicalOrder(*i);
+//      ref_stmt_num = *i;
+//    } else {
+//      std::vector<int> lex = getLexicalOrder(*i);
+//      for (int j = 0; j <= dim - 1; j += 2)
+//        if (lex[j] != ref_lex[j])
+//          throw std::invalid_argument(
+//            "statements for distribution must be in the same level-"
+//            + to_string(level) + " subloop");
+//    }
+    auto lex = getLexicalOrder(*i);
+    if(lex.size() > 0) {
       ref_stmt_num = *i;
-    } else {
-      std::vector<int> lex = getLexicalOrder(*i);
-      for (int j = 0; j <= dim - 1; j += 2)
-        if (lex[j] != ref_lex[j])
-          throw std::invalid_argument(
-            "statements for distribution must be in the same level-"
-            + to_string(level) + " subloop");
+      ref_lex = lex;
     }
   }
 

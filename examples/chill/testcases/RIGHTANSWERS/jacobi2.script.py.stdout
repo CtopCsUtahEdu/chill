@@ -22,7 +22,7 @@ for(t2 = 4; t2 <= 708; t2 += 32) {
       s1(t4,-2*t4+t6);
     }
   }
-  for(t4 = intCeil(t2-2,2); t4 <= min(intFloor(t2+28,2),100); t4++) {
+  for(t4 = intCeil(t2-2,2); t4 <= min(100,intFloor(t2+28,2)); t4++) {
     s0(t4,2*t4+2);
     for(t6 = 2*t4+3; t6 <= t2+31; t6++) {
       s0(t4,t6);

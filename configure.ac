@@ -43,8 +43,8 @@ AC_ARG_ENABLE([debug],
 AM_CONDITIONAL([DEBUG_OPT],[test "x$enable_debug" != xyes])
 AS_IF([test "x$enable_debug" == xyes],
     [AC_DEFINE([DEBUGCHILL], [], [Enable CHiLL debug messages])
-     AC_SUBST([CFLAGS],["-g2 -O0"])
-     AC_SUBST([CXXFLAGS],["-g2 -O0"])],
+     AC_SUBST([CFLAGS],["-g3 -O0"])
+     AC_SUBST([CXXFLAGS],["-g3 -O0"])],
     [AC_DEFINE([NO_DEBUGCHILL], [], [Disable CHiLL debug messages])])
 
 AC_ARG_WITH([rose],

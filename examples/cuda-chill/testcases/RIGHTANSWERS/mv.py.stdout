@@ -5,9 +5,11 @@ parameter_symtab has 3 entries
 2  b
 
 
-body_symtab has 2 entries
+body_symtab has 4 entries
 0  i
 1  j
+2  chill_idx1
+3  chill_idx2
 
 
 ['i', 'j']
@@ -20,39 +22,11 @@ parameter_symtab has 3 entries
 2  b
 
 
-body_symtab has 2 entries
-0  i
-1  j
-
-
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
 body_symtab has 4 entries
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-
-
-curOrder: ii,i,j
-idxNames: ii,i,j
-
-parameter_symtab has 3 entries
-0  c
-1  a
-2  b
-
-
-body_symtab has 4 entries
-0  i
-1  j
-2  chill_t1
-3  chill_t2
+2  chill_idx1
+3  chill_idx2
 
 
 
@@ -65,10 +39,46 @@ parameter_symtab has 3 entries
 body_symtab has 6 entries
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+
+
+curOrder: ii,i,j
+idxNames: ii,i,j
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 6 entries
+0  i
+1  j
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+
+
+
+parameter_symtab has 3 entries
+0  c
+1  a
+2  b
+
+
+body_symtab has 8 entries
+0  i
+1  j
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
 
 
 curOrder: ii,k,i,j
@@ -147,24 +157,26 @@ after datacopy_privatized:
 a wo 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -172,45 +184,49 @@ a wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -218,24 +234,26 @@ a wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -245,24 +263,26 @@ a wo
 c wo 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -270,45 +290,49 @@ c wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -316,24 +340,26 @@ c wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -343,24 +369,26 @@ c wo
 b wo 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -368,45 +396,49 @@ b wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -414,24 +446,26 @@ b wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -441,24 +475,26 @@ b wo
 a wo 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -466,45 +502,49 @@ a wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -512,24 +552,26 @@ a wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  c
 1  a
@@ -537,24 +579,26 @@ a wo
 
 0  i
 1  j
-2  chill_t1
-3  chill_t2
-4  chill_t4
-5  chill_t5
-6  t2
-7  chill_t10
-8  chill_t12
-9  chill_t13
-10  chill_t17
-11  chill_t18
-12  chill_t20
-13  chill_t21
-14  chill_t19
-15  newVariable0
-16  t4
-17  t6
-18  t8
-19  t10
+2  chill_idx1
+3  chill_idx2
+4  chill_t1
+5  chill_t2
+6  chill_t4
+7  chill_t5
+8  t2
+9  chill_t10
+10  chill_t12
+11  chill_t13
+12  chill_t17
+13  chill_t18
+14  chill_t20
+15  chill_t21
+16  chill_t19
+17  newVariable0
+18  t4
+19  t6
+20  t8
+21  t10
 
 0  int bx = blockIdx.x
 1  int tx = threadIdx.x
