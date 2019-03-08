@@ -14,9 +14,9 @@ void gs_csr(int n, int *rowptr, int *colidx, int *idiag, double *values, double 
   int i;
   int j;
   double sum;
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n; i += 1) {
     sum = b[i];
-    for (j = rowptr[i]; j < rowptr[i + 1]; j++) 
+    for (j = rowptr[i]; j < rowptr[i + 1]; j += 1) 
       sum -= values[j] * y[colidx[j]];
     y[i] = sum * (double)idiag[i];
   }

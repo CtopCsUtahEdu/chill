@@ -1,7 +1,2 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/loopnoinit.c", line 5: warning: 
-          variable "A" was set but never used
-     float A[ 48 ];
-           ^
-
 for (/* (NULL statement) */; i < 48; i++) 
-  A[i] = (float)i;
+  A[i] = (float)i;Segmentation fault (core dumped)

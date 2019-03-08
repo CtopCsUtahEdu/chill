@@ -1,5 +1,0 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/loopiter.c", line 5: warning: 
-          variable "A" was set but never used
-     float A[48];
-           ^
-

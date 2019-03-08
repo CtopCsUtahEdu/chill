@@ -500,7 +500,8 @@ Relation SimpleHull(const std::vector<Relation> &Rs,
 									cvi.curr_coef());
 						else {
 							Global_Var_ID g = globals_reverse[pos];
-							h.update_coef(r.get_local(g), cvi.curr_coef());
+							// We known in case of arity > 0 its a function of the the Input_Tuple
+							h.update_coef(r.get_local(g, Input_Tuple), cvi.curr_coef());
 						}
 						break;
 					}

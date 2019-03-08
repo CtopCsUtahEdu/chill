@@ -102,18 +102,18 @@ private:
  * @brief Loop
  */
 struct CG_loop: public CG_result {
-  int level_;               //!< Current level in the iteration space (1-based)
-  CG_result *body_;         //!< Body node
+  int level_;                         //!< Current level in the iteration space (1-based)
+  CG_result *body_;                   //!< Body node
 
-  Relation known_;          //!< What is known globally/from parents
-  Relation restriction_;    //!< Restriction based on split
-  Relation bounds_;         //!< Iteration bounds
-  Relation guard_;          //!< Conditions other than bounds
+  Relation known_;                    //!< What is known globally/from parents
+  Relation restriction_;              //!< Restriction based on split
+  Relation bounds_;                   //!< Iteration bounds
+  Relation guard_;                    //!< Conditions other than bounds
   bool needLoop_;
-  int depth_;               //!< Current depth of loop - start with 0 at leaf(max)
+  int depth_;                         //!< Current depth of loop - start with 0 at leaf(max)
 
-  bool attachPragma_;       //!< Apply pragma to a loop
-  std::string pragmaName_;  //!< Pragma text
+  //bool attachPragma_;       //!< Apply pragma to a loop
+  std::vector<std::string> pragmas_;  //!< Pragma text
 
   CG_loop(CodeGen *codegen, const BoolSet<> &active, int level, CG_result *body) {
     codegen_ = codegen;
@@ -123,7 +123,6 @@ struct CG_loop: public CG_result {
 
     needLoop_     = false;
     depth_        = 0;
-    attachPragma_ = false;
   }
   ~CG_loop() { delete body_; }
   

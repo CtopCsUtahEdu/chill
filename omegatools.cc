@@ -443,6 +443,20 @@ std::string tmp_e() {
 }
 
 
+// Mahdi: This is needed for a change in exp2formula's concept that itself was related to
+//        how iteration space is cacluated for imperfect loops.
+//* When faced with nested function calls while calculated experssion for a dependence
+//  exp2formual, now, passes output tuple of relation (r relation in the input list) to recursive 
+//  call to exp2formual, instead of passing input tuple of relation that previously was getting passed.
+std::string rmvExtraPrime(std::string str){
+  if(str[(str.size()-1)] == 'p' || str[(str.size()-1)] == '\'')
+    str.erase(str.end()-1, str.end()); // removing extra "p" or "'"
+}
+
+// Mahdi: A helper function to correct embedded iteration space: from Tuowen's topdown branch
+// buildIS is basically suppose to replace init_loop in Tuowens branch, and init_loop commented out
+// however since Tuowen may want to keep somethings from init_loop I am leaving it there for now
+extern std::string index_name(int level);
 
 //-----------------------------------------------------------------------------
 // Convert expression tree to omega relation.  "destroy" means shallow
@@ -453,7 +467,8 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                  Variable_ID lhs, char side, IR_CONDITION_TYPE rel, bool destroy,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
-                 std::map<std::string, std::vector<omega::Relation> > &index_variables) {
+                 std::map<std::string, std::vector<omega::Relation> > &index_variables, bool extractingDepRel) {
+
   switch (ir->QueryExpOperation(repr)) {
 
     case IR_OP_MACRO: {
@@ -513,6 +528,15 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       break;
     }
     case IR_OP_ARRAY_VARIABLE: {
+// Mahdi: comment: Whenever you see something like if(side == 'r'); += "p"; += "\'"; 
+// these rae related to building data access equality for dependence relations. 
+// if(side == 'r') is checking to see if we have gotten an expression related to read access. 
+// Note, iterators for read access, at the end, are going to have 
+// an extra "p" in built for IEGenLib relations and an extra "\'" in CHILL specific relations. 
+// So exp2formula needs to know that input relation for building
+//  a dependence would be something like: Relation &r = {[chillidx_1]->[chillidx1p] :}
+// But, both chillidx_1 and chillidx1p are (probably) representing the same iterator in the code (IR_Code *ir). 
+ 
 
       std::vector<CG_outputRepr *> v = ir->QueryExpOperand(repr);
 
@@ -522,10 +546,16 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
       int max_dim = 0;
       bool need_new_fsymbol = false;
+
+      // Mahdi: comment: vars stores the prefix tuple variable up to (and including) 
+      // the input iterator parameter to an index array.
       std::set<std::string> vars;
       std::vector<Relation> reprs3;
       std::vector<EQ_Handle> reprs_3;
 
+// Mahdi: comment: These are the names that are going to built for an uninetreted function call (UFC). 
+// Then if the UFC does not already exists in the maps, its going to be added to them. 
+// Different names are for differnt maps (code to omega, omega to iegenlib).
       std::set<std::string> unin_syms;
       CG_outputRepr *curr_repr = NULL;
       CG_outputRepr *curr_repr_s = NULL;
@@ -534,8 +564,33 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       CG_outputRepr *curr_repr_s_no_const = NULL;
       CG_outputRepr *curr_repr_s2_no_const = NULL;
 
+
+      // Mahdi: comment: This loop traverses different dimentions of a multi dimentional array, e.g A[i1][i2][i3].
       for (int i = 0; i < ref->n_dim(); i++) {
 
+/* Mahdi: Here exp2formula recursively traverses nested calls, e.g a[b[c[i]]].
+To tell the recursive calls what is the tuple declaration for the relation that 
+includes the overall term, here a temporary set is created out of tuple declaration of 
+the input omega relation to first exp2formula call. It used to be the case that 
+this set was created  ONLY with INPUT tuple declaration of the original input relation. 
+And, it used to work fine, because we call exp2formula in 2 general case: 
+(1) when chill is building the iteration space of the statements, in which case 
+the input relation for first call to exp2formual is already just a set, e.g r = {[...] : ...}. 
+So, when we build temporary set out of set, their tuple declaration is the same. 
+(2) chill calls exp2formula when building some sort of dependence relation. 
+Depenedence relations are actually relations, meaning their tuple declaration have 
+input and output parts, e.g r = {[...]->[...] : ...}. Now, in this case, 
+the tuple declaration of the temporary set would not be same as input relation to 
+first call of exp2formula. The old behaivour of using only input part of tuple declaration 
+used to work since chill had certain form of creating iteration space for 
+imperfectly nested loops that was skewed toward this behaivour working. 
+But chill previous way of creating iteration space was not correct for general cases. 
+Now, that Tuowen has implemented a better way of generating iteration sapce for loop nests, 
+following code cannot just use the input part of tuple declaration of input relation to 
+create the temporary set. It needs to create the temporary set with either input or output part of 
+the input relation depending on whether we are creating constraints related to 
+write-access (input part), or constraints for read-access (output part).
+*/
         Relation temp(r.n_inp());
 
         r.setup_names();
@@ -546,13 +601,12 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
             temp.name_set_var(j, r.set_var(j)->name());
 
           }
-        else
+        else{
           for (int j = 1; j <= r.n_inp(); j++) {
-
-            temp.name_input_var(j, r.input_var(j)->name());
-
+            if(side == 'w') temp.name_input_var(j, r.input_var(j)->name());
+            else if(side == 'r') temp.name_input_var(j, r.output_var(j)->name());
           }
-
+        }
         F_And *temp_root = temp.add_and();
 
         CG_outputRepr* repr2 = repr->clone();
@@ -580,19 +634,35 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
         EQ_Handle e1;
 
-        //std::set<std::string> arg_set_vars;
+// Mahdi: comment: when there are nested index arrays (Val[A[B[i+1]]]). 
+// I think exp2formula's output is kept inide omega::Relation temp in a way that is not straightforward.
+// Since things can get complicated, when we reach inner most parameter for instance for Val[A[B[i+1]] example, 
+// and say input relation to first call to exp2formula was:
+// r = {[i] : }
+// the output for inner most call would be something like:
+// r = {[i] : B = i+1}
+// And, then:
+// // r = {[i] : A = B__(i)}
+// And finally, "e" (Variable_ID lhs) should return A_(B__(i))) for the very first call to exp2formula.
+// Following trying to fish out the output of recursive calls from the output relation
 
+        //std::set<std::string> arg_set_vars;
         for (DNF_Iterator di(temp.query_DNF()); di; di++) {
           for (EQ_Iterator ei = (*di)->EQs(); ei; ei++) {
+
             e1 = *ei;
             for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
               if ((*cvi).var->kind() == Input_Var) {
+                // Mahdi: change to consider changes of iteration space
+                std::string tv_name = (*cvi).var->name();
+                if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+                  tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+
                 if ((*cvi).var->get_position() > max_dim)
                   max_dim = (*cvi).var->get_position();
-                std::string name = (*cvi).var->name();
+                std::string name = tv_name;
                 if (side == 'r')
                   name += "p";
-
                 curr_repr = ir->builder()->CreatePlus(curr_repr,
                                                       ir->builder()->CreateTimes(
                                                           ir->builder()->CreateInt(
@@ -607,7 +677,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                           ir->builder_s().CreateIdent(
                               name)));
                   if (side == 'r') {
-                    std::string name = (*cvi).var->name();
+                    std::string name = tv_name;
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateTimes(
@@ -618,7 +688,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
                   } else {
 
-                    name += "p";
+                  name += "p";
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateTimes(
@@ -632,7 +702,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                       curr_repr_s,
                       ir->builder_s().CreateIdent(name));
                   if (side == 'r') {
-                    std::string name = (*cvi).var->name();
+                    std::string name = tv_name;
                     curr_repr_s2 = ir->builder_s().CreatePlus(
                         curr_repr_s2,
                         ir->builder_s().CreateIdent(name));
@@ -671,18 +741,21 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                   std::string arg_string = "(";
                   std::string arg_string2 = "(";
                   for (int l = 1; l <= g->arity(); l++) {
+                    std::string tv_name = temp.set_var(l)->name();
+                    if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+                      tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
                     if (l > 1) {
                       arg_string += ",";
                       arg_string2 += ",";
                     }
                     args.push_back(
                         ir->builder()->CreateIdent(
-                            temp.set_var(l)->name()));
+                            tv_name));
                     args2.push_back(
                         ir->builder_s().CreateIdent(
-                            temp.set_var(l)->name()));
-                    arg_string += temp.set_var(l)->name();
-                    arg_string2 += temp.set_var(l)->name();
+                            tv_name));
+                    arg_string += tv_name;
+                    arg_string2 += tv_name;
                     if (side == 'r')
                       arg_string += "p";
                     else
@@ -708,10 +781,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                                                                 -(*cvi).coef),
                                                             ir->builder()->CreateInvoke(
                                                                 g->base_name(), args)));
-
                   if (-(*cvi).coef != 1) {
                     if (lookup2
-                        != loop->unin_symbol_for_iegen.end())
+                        != loop->unin_symbol_for_iegen.end()){
                       curr_repr_s =
                           ir->builder_s().CreatePlus(
                               curr_repr_s,
@@ -719,7 +791,7 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                                   ir->builder_s().CreateInt(
                                       -(*cvi).coef),
                                   new CG_stringRepr(
-                                      lookup2->second)));
+                                      lookup2->second)));}
                     if (lookup3
                         != loop->unin_symbol_for_iegen.end())
                       curr_repr_s2 =
@@ -778,7 +850,6 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
                 }
               }   // Mahdi: end of: for (Constr_Vars_Iter cvi(*ei); cvi; cvi++)
             if ((*ei).get_const() != 0) {
-
               curr_repr_no_const = curr_repr->clone();
               curr_repr_s_no_const = curr_repr_s->clone();
               curr_repr_s2_no_const = curr_repr_s2->clone();
@@ -804,7 +875,6 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
               curr_repr_s2_no_const = ir->builder_s().CreatePlus(
                   curr_repr_s2->clone(),
                   ir->builder_s().CreateInt(1));
-
             }
 
           }
@@ -818,6 +888,8 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 
       //if(side == 'r')
       //	s+="'";
+
+      // Mahdi: comment: The s+= "_" are related to building a UFC like A__(i) out of A[i+1]
       for (std::set<std::string>::iterator i = unin_syms.begin();
            i != unin_syms.end(); i++)
         s += "_" + *i;
@@ -998,6 +1070,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
               std::pair<std::string, std::set<std::string> >(s1,
                                                              vars));
         }
+
+        // Mahdi: comment: vars stores the prefix tuple variable up to (and including) 
+        // the input iterator parameter to an index array.
         for (int j = 1; j <= max_dim; j++) {
 
           if (vars.find(r.input_var(j)->name()) == vars.end())
@@ -1036,9 +1111,35 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
 //          reprs2.push_back(ir->builder_s().CreateIdent(*it));
 //        }
 
+        for (std::set<std::string>::iterator it = vars.begin();
+             it != vars.end(); it++) {
+          reprs.push_back(ir->builder()->CreateIdent(*it));
+          reprs2.push_back(ir->builder_s().CreateIdent(*it));
+        }
+
+        // Mahdi: comment:  max_dim represents the number of prefix iterators up to 
+        // parameter iterator of UFC (e.g A[i3], A_(i1,i2,i3), max_dim=3). 
         for (int j = 1; j <= max_dim; j++) {
-          std::string tv_name = r.input_var(j)->name();
-          if (vars.find( tv_name ) != vars.end()){
+          std::string tv_name;// = r.input_var(j)->name();
+
+          // Mahdi: comment: I am first removing extra "p" or "'" if they already exists.
+          // But I would add them later.
+          if (r.is_set() ) {
+            tv_name = r.set_var(j)->name();
+            if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+              tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+          } else if (side == 'r') {
+
+            tv_name = r.output_var(j)->name();
+            if(tv_name[(tv_name.size()-1)] == 'p' || tv_name[(tv_name.size()-1)] == '\'')
+              tv_name.erase(tv_name.end()-1, tv_name.end()); // removing extra "p" or "'"
+          } else {
+            tv_name = r.input_var(j)->name();          // There is no extra "p" or "'"
+          }
+          //if (vars.find( tv_name ) != vars.end()){
+            //  Mahdi: comment: we always build 2 version of an UFC, A_(i1,i2,i3) and A_(i1p,i2p,i3p)
+            //  The A_(i1p,i2p,i3p) is for read part of a dependence relation. 
+            //  Note, we might end up needing only one of them, or both.
             if (side == 'r') {
               args.push_back(tv_name + "p");
               args2.push_back(tv_name);
@@ -1046,11 +1147,13 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
               args.push_back(tv_name);
               args2.push_back(tv_name + "p");
             }
-            reprs.push_back(ir->builder()->CreateIdent(tv_name));
-            reprs2.push_back(ir->builder_s().CreateIdent(tv_name));
-          }
+          //}
+          std::string parameters = static_cast<CG_stringRepr*>(curr_repr_s)->GetString();
+          if( parameters.find(tv_name) !=std::string::npos ) break;
         }
 
+        // Mahdi: comment: Checking to see if UFC is already in the maps that keep track of mapping 
+        // UFCs between code, omega, and IEGenLib representations.
         if (need_new_fsymbol) {
           std::vector<CG_outputRepr *> a;
           a.push_back(curr_repr_s);
@@ -1173,6 +1276,9 @@ void exp2formula(Loop *loop, IR_Code *ir, Relation &r, F_And *f_root,
       Variable_ID e = find_index(r, s, side);
 
       if (e == NULL) { // must be free variable
+        if( extractingDepRel && side == 'r' ){
+          s = s+"p";
+        }
         Free_Var_Decl *t = NULL;
         for (unsigned i = 0; i < freevars.size(); i++) {
           std::string ss = freevars[i]->base_name();
@@ -1720,7 +1826,7 @@ Relation arrays2relation(Loop *loop, IR_Code *ir,
 // reset the output variable names lost in restriction
   for (int i = 1; i <= IS2.n_set(); i++)
     r.name_output_var(i, IS2.set_var(i)->name() + "'");
-
+  r.setup_names();
   return r;
 }
 
@@ -2866,11 +2972,15 @@ Relation permute_relation(const std::vector<int> &pi) {
 Variable_ID find_index(Relation &r, const std::string &s, char side) {
   // Omega quirks: assure the names are propagated inside the relation
   r.setup_names();
-  
   if (r.is_set()) { // side == 's'
     for (int i = 1; i <= r.n_set(); i++) {
       std::string ss = r.set_var(i)->name();
       if (s == ss) {
+        return r.set_var(i);
+      } else if (s+"\'" == ss) {
+        return r.set_var(i);
+      }
+      else if (s+"p" == ss) {    // Mahdi: 
         return r.set_var(i);
       }
     }
@@ -2886,7 +2996,7 @@ Variable_ID find_index(Relation &r, const std::string &s, char side) {
   else { // side == 'r'
     for (int i = 1; i <= r.n_out(); i++) {
       std::string ss = r.output_var(i)->name();
-      if (s+"'" == ss) {
+      if (s+"\'" == ss) {
         return r.output_var(i);
       }
       else if (s+"p" == ss) {    // Mahdi: I added this else if, THE FIX FOR (') ISSUE for Gauss-Seidel example (only?)
@@ -3172,11 +3282,13 @@ std::set<std::string> get_global_vars(const omega::Relation &r) {
 //       but 1 tuple variable at a time, which is not efficient for dependence extractiion.
 //       Also, those functions are not handling all kinds of variables.
 Relation replace_set_vars(const omega::Relation &new_relation,
-                                            const omega::Relation &old_relation, int counter) {
+                                            const omega::Relation &old_relation) {
   Relation r = copy(new_relation);
   r.copy_names(new_relation);
   r.setup_names();
-  
+ 
+  Relation old = old_relation, new_r = new_relation;
+
   F_Exists *f_exists = r.and_with_and()->add_exists();
   F_And *f_root = f_exists->add_and();
   std::map<Variable_ID, Variable_ID> exists_mapping;

@@ -19,7 +19,7 @@ void gemm(int **A, int **B, int **C, int n) {
         for (t8 = t4; t8 <= (n - 1 < t4 + 127 ? n - 1 : t4 + 127); t8 += 1) 
           _P1[t6 - t2][t8 - t4] = A[t6][t8];
       for (t6 = 0; t6 <= n - 1; t6 += 8) {
-        for (t8 = t6; t8 <= (t6 + 7 < n - 1 ? t6 + 7 : n - 1); t8 += 1) 
+        for (t8 = t6; t8 <= (n - 1 < t6 + 7 ? n - 1 : t6 + 7); t8 += 1) 
           for (t10 = t2; t10 <= (t2 + 511 < n - 1 ? t2 + 511 : n - 1); t10 += 1) 
             _P2[t8 - t6][t10 - t2] = B[t8][t10];
         over1 = n % 2;

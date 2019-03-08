@@ -35,23 +35,19 @@ void foo(int n, float *x, float *y, float *z, float *f3, float *f1, float *w) {
   over1 = 0;
   if (0 <= n) 
     over1 = (1 + n) % 2;
-  for (t2 = 0; t2 <= n - over1; t2 += 2) {
-    for (t4 = t2; t4 <= n + t2 - 1; t4 += 1) 
+  for (t2 = 0; t2 <= -over1 + n; t2 += 2) {
+    for (t4 = t2; t4 <= t2 + n; t4 += 1) 
       f3[t2] = f3[t2] + f1[t4] * w[t4 - t2];
-    f3[t2] = f3[t2] + f1[t2 + n] * w[t2 + n - t2];
     f3[t2] = (float)((double)f3[t2] * 3.1400000000000001);
-    for (t4 = t2 + 1; t4 <= n + t2; t4 += 1) 
+    for (t4 = t2 + 1; t4 <= t2 + n + 1; t4 += 1) 
       f3[t2 + 1] = f3[t2 + 1] + f1[t4] * w[t4 - (t2 + 1)];
-    f3[t2 + 1] = f3[t2 + 1] + f1[t2 + n + 1] * w[t2 + n + 1 - (t2 + 1)];
     f3[t2 + 1] = (float)((double)f3[t2 + 1] * 3.1400000000000001);
   }
   if (1 <= over1) {
-    for (t4 = n; t4 <= 2 * n - 1; t4 += 1) 
+    for (t4 = n; t4 <= 2 * n; t4 += 1) 
       f3[n] = f3[n] + f1[t4] * w[t4 - n];
-    if (0 <= n) {
-      f3[n] = f3[n] + f1[2 * n] * w[2 * n - n];
+    if (0 <= n) 
       f3[n] = (float)((double)f3[n] * 3.1400000000000001);
-    }
   }
   return;
 }
