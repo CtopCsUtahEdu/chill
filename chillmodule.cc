@@ -340,6 +340,20 @@ static PyObject* chill_pragma(PyObject* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
+static PyObject* chill_permute_by_index(PyObject *self, PyObject *args)
+{
+  strict_arg_num(args, 2, "permute");
+
+  std::vector<std::string> order;
+  int stmt = intArg(args, 0);
+  to_string_vector(args, 1, order);
+  myloop->permute_by_index(stmt, order);
+
+  //DEBUG_PRINT("returned from permute_cuda()\n");
+
+  Py_RETURN_NONE;  // return Py_BuildValue( "" );
+}
+
 //TODO: this should be specific to CHiLL
 static PyObject* chill_omp_for(PyObject* self, PyObject* args) {
     strict_arg_range(args, 2, 3, "omp_parallel_for");
@@ -504,26 +518,6 @@ chill_rename_index(PyObject *self, PyObject *args)
   Py_RETURN_NONE;  // return Py_BuildValue( "" );
 }
 
-
-
-//THIS NEEDS TO MOVE
-
-
-
-static PyObject *
-chill_permute_v2(PyObject *self, PyObject *args)
-{
-  strict_arg_num(args, 2, "permute");
-  
-  std::vector<std::string> order;
-  int stmt = intArg(args, 0);
-  to_string_vector(args, 1, order);
-  myloop->permute_cuda(stmt, order);
-
-  //DEBUG_PRINT("returned from permute_cuda()\n"); 
-
-  Py_RETURN_NONE;  // return Py_BuildValue( "" );
-}
 
 
 static PyObject *
@@ -2047,7 +2041,7 @@ static PyMethodDef ChillMethods[] = {
   {"print_space",         chill_print_space,         METH_VARARGS,    "print something or other "},
   {"add_sync",            chill_add_sync,            METH_VARARGS,    "add sync, whatever that is"},
   {"rename_index",        chill_rename_index,        METH_VARARGS,    "rename a loop index"},
-  {"permute",             chill_permute_v2,          METH_VARARGS,    "change the order of loops?"},
+  {"permute",             chill_permute_by_index,    METH_VARARGS,    "change the order of loops?"},
   {"tile3",               chill_tile_v2_3arg,        METH_VARARGS,    "something to do with tile"},
   {"tile7",               chill_tile_v2_7arg,        METH_VARARGS,    "something to do with tile"},
   {"thread_dims",         thread_dims,               METH_VARARGS,    "tx, ty, tz"},
@@ -2079,7 +2073,7 @@ static PyMethodDef ChillMethods[] = {
 #else
 static PyMethodDef ChillMethods[] = { 
   
-  //python name           C routine                  parameter passing comment
+  //python name           C routine                        parameter passing comment
   {"source",              chill_source,                    METH_VARARGS,     "set source file for chill script"},
   {"procedure",           chill_procedure,                 METH_VARARGS,     "set the name of the procedure"},
   {"destination",         chill_destination,               METH_VARARGS,     "set the destination file"},
@@ -2092,9 +2086,11 @@ static PyMethodDef ChillMethods[] = {
   {"remove_dep",          chill_remove_dep,                METH_VARARGS,     "remove dependency i suppose"},
   {"original",            chill_original,                  METH_VARARGS,     "original"},
   {"permute",             chill_permute,                   METH_VARARGS,     "permute"},
+  //{"permute_by_index",    chill_permute,                   METH_VARARGS,     "permute"},
   {"pragma",              chill_pragma,                    METH_VARARGS,     "pragma"},
   {"prefetch",            chill_prefetch,                  METH_VARARGS,     "prefetch"},
   {"tile",                chill_tile,                      METH_VARARGS,     "tile"},
+  //{"tile_by_index",       chill_tilye_by_index,            METH_VARARGS,     "tile_by_index"},
   {"datacopy",            chill_datacopy,                  METH_VARARGS,     "datacopy"},
   {"datacopy_privitized", chill_datacopy_privatized,       METH_VARARGS,     "datacopy_privatized"},
   {"unroll",              chill_unroll,                    METH_VARARGS,     "unroll"},

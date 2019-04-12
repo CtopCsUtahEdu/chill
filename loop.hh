@@ -320,6 +320,12 @@ public:
   std::set<int> split(int stmt_num, int level, const omega::Relation &cond);
   std::set<int> unroll(int stmt_num, int level, int unroll_amount, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >(), int cleanup_split_level = 0);
 
+  void permute_by_index(int stmt, const std::vector<std::string>& curOrder);
+  void tile_by_index(int stmt, int level, int outer_level, TilingMethodType method = CountedTile);
+  void tile_by_index(int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
+  void tile_by_index(int stmt_num, int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
+
+
   //! Datacopy function by reffering arrays by numbers
   /*!
    * for example
@@ -401,6 +407,8 @@ public:
   void make_dense(int stmt_num, int loop_level, std::string new_loop_index);
   void set_array_size(std::string name, int size );
   omega::CG_outputRepr * iegen_parser(std::string &str, std::vector<std::string> &index_names);
+
+
 
   //
   // other public operations

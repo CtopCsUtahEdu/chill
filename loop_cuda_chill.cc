@@ -738,7 +738,7 @@ bool LoopCuda::cudaize_v3(int stmt_num,
 
 
 //Order taking out dummy variables
-std::vector<std::string> cleanOrder(std::vector<std::string> idxNames) {
+static std::vector<std::string> cleanOrder(std::vector<std::string> idxNames) {
   std::vector<std::string> results;
   for (int j = 0; j < idxNames.size(); j++) {
     if (idxNames[j].length() != 0)
@@ -767,8 +767,7 @@ int LoopCuda::nonDummyLevel(int stmt, int level) {
 
 
 
-void LoopCuda::permute_cuda(int stmt,
-                            const std::vector<std::string>& curOrder) {
+void LoopCuda::permute_cuda(int stmt, const std::vector<std::string>& curOrder) {
   debug_fprintf(stderr, "LoopCuda::permute_cuda()\n"); 
   printf("curOrder: ");
   printVs(curOrder);

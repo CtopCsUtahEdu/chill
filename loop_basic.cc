@@ -15,12 +15,14 @@
 
 using namespace omega;
 
-void Loop::permute(const std::vector<int> &pi) {
-  std::set<int> active;
-  for (int i = 0; i < stmt.size(); i++)
-    active.insert(i);
-  
-  permute(active, pi);
+//Order taking out dummy variables
+static std::vector<std::string> cleanOrder(std::vector<std::string> idxNames) {
+  std::vector<std::string> results;
+  for (int j = 0; j < idxNames.size(); j++) {
+    if (idxNames[j].length() != 0)
+      results.push_back(idxNames[j]);
+  }
+  return results;
 }
 
 void Loop::original() {
@@ -31,6 +33,15 @@ void Loop::original() {
   invalidateCodeGen();
   //apply_xform();
 }
+
+void Loop::permute(const std::vector<int> &pi) {
+  std::set<int> active;
+  for (int i = 0; i < stmt.size(); i++)
+    active.insert(i);
+
+  permute(active, pi);
+}
+
 void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   // check for sanity of parameters
   int starting_order;
@@ -249,6 +260,8 @@ void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   
   setLexicalOrder(2 * level - 2, active, starting_order);
 }
+
+
 void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
   if (active.size() == 0 || pi.size() == 0)
     return;
@@ -479,6 +492,70 @@ void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
   }
   
   setLexicalOrder(2 * level - 2, active);
+}
+
+
+void Loop::permute_by_index(int stmt_num, const std::vector<std::string>& curOrder) {
+  std::vector<std::string> cIdxNames = cleanOrder(idxNames[stmt_num]);
+  bool same = true;
+  std::vector<int> pi;
+  for (int i = 0; i < curOrder.size(); i++) {
+    bool found = false;
+    for (int j = 0; j < cIdxNames.size(); j++) {
+      if (strcmp(cIdxNames[j].c_str(), curOrder[i].c_str()) == 0) {
+        debug_fprintf(stderr, "pushing pi for j+1=%d\n", j+1);
+
+        pi.push_back(j + 1);
+        found = true;
+        if (j != i)
+          same = false;
+      }
+    }
+    if (!found) {
+      throw std::runtime_error(
+                               "One of the indexes in the permute order were not "
+                               "found in the current set of indexes.");
+    }
+  }
+  for (int i = curOrder.size(); i < cIdxNames.size(); i++) {
+    debug_fprintf(stderr, "pushing pi for i=%d\n", i);
+    pi.push_back(i);
+  }
+  if (same)
+    return;
+
+  if (stmt_num >= stmt.size() || stmt_num < 0)
+    throw std::invalid_argument("invalid statement " + to_string(stmt_num));
+  const int n = stmt[stmt_num].xform.n_out();
+  if (pi.size() > (n - 1) / 2) {
+    throw std::invalid_argument(
+                                "iteration space dimensionality does not match permute dimensionality");
+  }
+
+  int first_level = 0;
+  int last_level = 0;
+  for (int i = 0; i < pi.size(); i++) {
+    if (pi[i] > (n - 1) / 2 || pi[i] <= 0)
+      throw std::invalid_argument(
+                                  "invalid loop level " + to_string(pi[i])
+                                  + " in permuation");
+
+    if (pi[i] != i + 1) {
+      if (first_level == 0)
+        first_level = i + 1;
+      last_level = i + 1;
+    }
+  }
+  if (first_level == 0)
+    return;
+
+  std::vector<int> lex = this->getLexicalOrder(stmt_num);
+  std::set<int> active = getStatements(lex, 2 * first_level - 2);
+  permute(active, pi);
+  //Set old indexe names as new
+  for (int i = 0; i < curOrder.size(); i++) {
+    idxNames[stmt_num][i] = curOrder[i].c_str(); //what about sibling stmts?
+  }
 }
 
 

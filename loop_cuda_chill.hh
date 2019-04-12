@@ -84,7 +84,7 @@ public:
   //std::vector<proc_sym*> new_procs; //Need adding to a fse
   std::vector< std::pair<int, std::string> > syncs;
   bool useIdxNames;
-  std::vector<std::string> index;
+  //std::vector<std::string> index;
   std::vector<std::set< int> > cudaized;
 
   //Anand: Adding a placeholder for variables that
