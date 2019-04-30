@@ -43,6 +43,7 @@ core_src += dep.cc
 core_src += irtools.cc
 core_src += loop.cc
 core_src += loop_basic.cc
+core_src += loop_by_index.cc
 core_src += loop_datacopy.cc
 core_src += loop_extra.cc
 core_src += loop_ghostcells.cc

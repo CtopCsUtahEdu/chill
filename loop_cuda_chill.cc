@@ -749,32 +749,14 @@ static std::vector<std::string> cleanOrder(std::vector<std::string> idxNames) {
 
 
 
-//First non-dummy level in ascending order
-int LoopCuda::nonDummyLevel(int stmt, int level) {
-  //level comes in 1-basd and should leave 1-based
-  for (int j = level - 1; j < idxNames[stmt].size(); j++) {
-    if (idxNames[stmt][j].length() != 0) {
-      //printf("found non dummy level of %d with idx: %s when searching for %d\n", j+1, (const char*) idxNames[stmt][j], level);
-      return j + 1;
-    }
-  }
-  char buf[128];
-  sprintf(buf, "%d", level);
-  throw std::runtime_error(
-                           std::string("Unable to find a non-dummy level starting from ")
-                           + std::string(buf));
-}
-
-
-
-void LoopCuda::permute_cuda(int stmt, const std::vector<std::string>& curOrder) {
+void LoopCuda::permute_cuda(int stmt_num, const std::vector<std::string>& curOrder) {
   debug_fprintf(stderr, "LoopCuda::permute_cuda()\n"); 
   printf("curOrder: ");
   printVs(curOrder);
   printf("idxNames: ");
-  printVS(idxNames[stmt]);
+  printVS(idxNames[stmt_num]);
 
-  std::vector<std::string> cIdxNames = cleanOrder(idxNames[stmt]);
+  std::vector<std::string> cIdxNames = cleanOrder(idxNames[stmt_num]);
   bool same = true;
   std::vector<int> pi;
   for (int i = 0; i < curOrder.size(); i++) {
@@ -801,14 +783,14 @@ void LoopCuda::permute_cuda(int stmt, const std::vector<std::string>& curOrder) 
   }
   if (same)
     return;
-  permute(stmt, pi);
+  permute_cuda(stmt_num, pi);
   //Set old indexe names as new
   for (int i = 0; i < curOrder.size(); i++) {
-    idxNames[stmt][i] = curOrder[i].c_str(); //what about sibling stmts?
+    idxNames[stmt_num][i] = curOrder[i].c_str(); //what about sibling stmts?
   }
 }
 
-bool LoopCuda::permute(int stmt_num, const std::vector<int> &pi) {
+bool LoopCuda::permute_cuda(int stmt_num, const std::vector<int> &pi) {
   // check for sanity of parameters
   if (stmt_num >= stmt.size() || stmt_num < 0)
     throw std::invalid_argument("invalid statement " + to_string(stmt_num));
@@ -1997,6 +1979,29 @@ void LoopCuda::fuse_cuda(std::vector<int> &stmt_nums, int loop_level) {
   
 }
 
+void LoopCuda::peel_cuda(int stmt_num, int level, int amount) {
+  debug_fprintf(stderr, "LoopCuda::peel_cuda( stmt_num %d, level %d, amount %d)\n", stmt_num, level, amount);
+  debug_fprintf(stderr, "\n%d statements\n", stmt.size());
+  for (int i=0; i<stmt.size(); i++) {
+    debug_fprintf(stderr, "%2d   ", i);
+    ((CG_chillRepr *)stmt[i].code)->Dump();
+  }
+  debug_fprintf(stderr, "\n");
+
+
+
+  int old_stmt_num = stmt.size();
+  peel(stmt_num, level, amount);
+  int new_stmt_num = stmt.size();
+  //For all statements that were in this unroll together, drop index name for unrolled level
+  for (int i = old_stmt_num; i < new_stmt_num; i++) {
+    idxNames.push_back(idxNames[stmt_num]);
+    stmt_nonSplitLevels.push_back(std::vector<int>());
+  }
+  //syncs.push_back()
+
+}
+
 void LoopCuda::shift_to_cuda(int stmt_num, int level, int absolute_position) {
   
   shift_to(stmt_num, level, absolute_position);
@@ -2184,31 +2189,6 @@ void LoopCuda::reduce_cuda(int stmt_num, std::vector<int> level, int param,
 
   reduce(stmt_num, level, param, func_name, seq_level, cudaized_levels,
          bound_level);
-  
-}
-
-
-
-void LoopCuda::peel_cuda(int stmt_num, int level, int amount) {
-  debug_fprintf(stderr, "LoopCuda::peel_cuda( stmt_num %d, level %d, amount %d)\n", stmt_num, level, amount); 
-  debug_fprintf(stderr, "\n%d statements\n", stmt.size());
-  for (int i=0; i<stmt.size(); i++) { 
-    debug_fprintf(stderr, "%2d   ", i); 
-    ((CG_chillRepr *)stmt[i].code)->Dump();
-  }
-  debug_fprintf(stderr, "\n"); 
-
-
-
-  int old_stmt_num = stmt.size();
-  peel(stmt_num, level, amount);
-  int new_stmt_num = stmt.size();
-  //For all statements that were in this unroll together, drop index name for unrolled level
-  for (int i = old_stmt_num; i < new_stmt_num; i++) {
-    idxNames.push_back(idxNames[stmt_num]);
-    stmt_nonSplitLevels.push_back(std::vector<int>());
-  }
-  //syncs.push_back()
   
 }
 

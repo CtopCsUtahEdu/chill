@@ -170,7 +170,6 @@ public:
   std::string cu_nx_name, cu_ny_name, cu_kernel_name; // TODO remove 
   std::vector<std::string> Vcu_kernel_name; 
 
-  int nonDummyLevel(int stmt, int level);
   bool symbolExists(std::string s);
   void addSync(int stmt, std::string idx);
   void printSyncs();
@@ -187,34 +186,33 @@ public:
   
   void permute_cuda(int stmt, const std::vector<std::string>& curOrder);
   //protonu-writing a wrapper for the Chun's new permute function
-  bool permute(int stmt_num, const std::vector<int> &pi);
+  bool permute_cuda(int stmt_num, const std::vector<int> &pi);
   //end--protonu.
 	void tile_cuda(int stmt, int level, int outer_level, TilingMethodType method = CountedTile);
   //void tile_cuda(int stmt, int level, int outer_level);
   void tile_cuda(int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
-
   void tile_cuda(int stmt, int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
   bool datacopy_privatized_cuda(int stmt_num, int level, const std::string &array_name, const std::vector<int> &privatized_levels, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 1, bool cuda_shared=false);
   bool datacopy_cuda(int stmt_num, int level, const std::string &array_name, std::vector<std::string> new_idxs, bool allow_extra_read = false, int fastest_changing_dimension = -1, int padding_stride = 1, int padding_alignment = 4, bool cuda_shared=false);
   bool unroll_cuda(int stmt_num, int level, int unroll_amount);
 
 
-  void flatten_cuda(int stmt_num, std::string idxs, std::vector<int> &loop_levels, std::string inspector_name);
+
   void ELLify_cuda(int stmt_num, std::vector<std::string> arrays_to_pad, int pad_to,bool dense_pad, std::string pos_array_name);
 
+  void flatten_cuda(int stmt_num, std::string idxs, std::vector<int> &loop_levels, std::string inspector_name);
   void distribute_cuda(std::vector<int> &stmt_nums, int loop_level);
   void fuse_cuda(std::vector<int> &stmt_nums, int loop_level);
   void peel_cuda(int stmt_num, int level, int amount);
   void shift_to_cuda(int stmt_num, int level, int absolute_position);
   void scalar_expand_cuda(int stmt_num, std::vector<int> level, std::string arrName, int memory_type =0, int padding =0,int assign_then_accumulate = 1);
   void split_with_alignment_cuda(int stmt_num, int level, int alignment, int direction=0);
+  void reduce_cuda(int stmt_num, std::vector<int> level, int param, std::string func_name,  std::vector<int> seq_level, int bound_level=-1);
 
-  void compact_cuda(int stmt_num, int level, std::string new_array, int zero,
-        std::string data_array);
+  void compact_cuda(int stmt_num, int level, std::string new_array, int zero, std::string data_array);
   void make_dense_cuda(int stmt_num, int loop_level, std::string new_loop_index);
   void addKnown_cuda(std::string var, int value);
   void skew_cuda(std::vector<int> stmt_num,int level, std::vector<int> coefs);
-  void reduce_cuda(int stmt_num, std::vector<int> level, int param, std::string func_name,  std::vector<int> seq_level, int bound_level=-1);
 
 
 
