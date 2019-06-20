@@ -8,6 +8,16 @@
 
 #include <stdexcept>
 
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+namespace chill {
+  namespace error {
+    struct build : public std::runtime_error {
+      build(const std::string &msg) : std::runtime_error(msg) {}
+    };
+  }
+}
+
+
 //! for loop transformation problem
 struct loop_error: public std::runtime_error {
   loop_error(const std::string &msg): std::runtime_error(msg){}

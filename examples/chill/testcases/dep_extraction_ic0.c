@@ -7,9 +7,11 @@ extern double sqrt(double in);
 
 void ic0_csr(int n, double *val, int * row, int *col)
 {
-  int i, k,l, m;
+  int i, k,l,m;
+  double temp;
   for (i = 0; i < n - 1; i++){
-    val[row[i]] = val[row[i]]/sqrt(val[row[i]]);//S1
+    temp = val[row[i]];
+    val[row[i]] = val[row[i]]/sqrt(temp);//S1
 
     for (m = row[i] + 1; m < row[i+1]; m++){
       val[m] = val[m] / val[row[i]];//S2

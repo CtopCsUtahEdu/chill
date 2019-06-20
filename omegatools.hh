@@ -18,7 +18,7 @@ void exp2formula(Loop *loop, IR_Code *ir, omega::Relation &r, omega::F_And *f_ro
                  omega::Variable_ID lhs, char side, IR_CONDITION_TYPE rel, bool destroy,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols,
                  std::map<std::string, std::vector<omega::CG_outputRepr *> > &uninterpreted_symbols_stringrepr,
-                 std::map<std::string, std::vector<omega::Relation> > &index_variables);
+                 std::map<std::string, std::vector<omega::Relation> > &index_variables, bool extractingDepRel=false);
 
 omega::Relation arrays2relation(Loop *loop, IR_Code *ir,
                          std::vector<omega::Free_Var_Decl*> &freevars, const IR_ArrayRef *ref_src,
@@ -83,7 +83,7 @@ std::set<std::string> get_global_vars(const omega::Relation &r);
 // NOte: replace_set_var_as_another_set_var functions are suppose to do the same thing
 //       but 1 tuple variable at a time, which is not efficient for dependence extractiion.
 //       Also, those functions are not handling all kinds of variables.
-omega::Relation replace_set_vars(const omega::Relation &new_relation, const omega::Relation &old_relation, int counter);
+omega::Relation replace_set_vars(const omega::Relation &new_relation, const omega::Relation &old_relation);
 
 //! Replicates old_relation's bounds for set var at old_pos into new_relation at new_pos
 /**

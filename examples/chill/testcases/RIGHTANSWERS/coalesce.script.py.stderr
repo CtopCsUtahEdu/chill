@@ -13,8 +13,8 @@ index[1 * i]index[1 * i + 1]index[1 * i + 1]index[1 * i]struct inspector {
   int index[11];
   int col[100];
   n = 10;
-  for (i = 0; i < n; i++) 
-    for (j = index[i]; j < index[i + 1]; j++) 
+  for (i = 0; i < n; i += 1) 
+    for (j = index[i]; j < index[i + 1]; j += 1) 
       x[i] += a[j] * y[col[j]];
   return 0;
 }c.countc.j[coalesced_index]c.i[coalesced_index]col[c.j[coalesced_index]]

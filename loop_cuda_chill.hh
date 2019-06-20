@@ -82,7 +82,6 @@ class LoopCuda: public Loop{  // chill version
   
 public:
   //std::vector<proc_sym*> new_procs; //Need adding to a fse
-  std::vector< std::vector<std::string> > idxNames;
   std::vector< std::pair<int, std::string> > syncs;
   bool useIdxNames;
   std::vector<std::string> index;
@@ -175,8 +174,6 @@ public:
   bool symbolExists(std::string s);
   void addSync(int stmt, std::string idx);
   void printSyncs();
-  void renameIndex(int stmt, std::string idx, std::string newName);
-  bool validIndexes(int stmt, const std::vector<std::string>& idxs);
   omega::CG_outputRepr* extractCudaUB(int stmt_num, int level, int &outUpperBound, int &outLowerBound);
   
   void printCode(int stmt_num, int effort=3, bool actuallyPrint=true) const; 
@@ -225,7 +222,6 @@ public:
   //protonu--using texture memory
   void copy_to_texture(const char *array_name);
   void copy_to_constant(const char *array_name);
-int findCurLevel(int stmt, std::string idx);
   /**
    *
    * @param kernel_name Name of the GPU generated kernel

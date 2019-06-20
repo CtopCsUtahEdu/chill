@@ -563,18 +563,27 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
 
   ir_ = ir; 
   chillforstmt = achillforstmt;
+// Mahdi: added to correct embedded iteration space: from Tuowen's topdown branch
+  well_formed = true;  
 
   chillAST_BinaryOperator *init = (chillAST_BinaryOperator *)chillforstmt->getInit();
   chillAST_BinaryOperator *cond = (chillAST_BinaryOperator *)chillforstmt->getCond();
   // check to be sure  (assert) 
-  if (!init->isAssignmentOp() || !cond->isComparisonOp() ) {
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//  if (!init->isAssignmentOp() || !cond->isComparisonOp() ) {
+  if (!init || !cond || !init->isAssignmentOp() || !cond->isComparisonOp() ) {
     debug_fprintf(stderr, "ir_chill.cc, malformed loop init or cond:\n");
     achillforstmt->print(); 
-    exit(-1); 
+    //exit(-1); 
+    well_formed = false;
   }
 
-  chilllowerbound = init->getRHS();
-  chillupperbound = cond->getRHS();
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//  chilllowerbound = init->getRHS();
+//  chillupperbound = cond->getRHS();
+  chilllowerbound = new CG_chillRepr(init->getRHS());
+  chillupperbound = new CG_chillRepr(cond->getRHS());
+
   conditionoperator = achillforstmt->conditionoperator; 
   
   chillAST_node *inc  = chillforstmt->getInc();
@@ -624,13 +633,17 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
     if (beets) {
       debug_fprintf(stderr, "malformed loop increment (or more likely unhandled case)\n");
       inc->print(); 
-      exit(-1); 
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//      exit(-1); 
+      well_formed = false;
     }
   } // binary operator 
   else { 
     debug_fprintf(stderr, "IR_chillLoop constructor, unhandled loop increment\n");
       inc->print(); 
-      exit(-1); 
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//      exit(-1); 
+      well_formed = false;
   }
   //inc->print(0, stderr);debug_fprintf(stderr, "\n"); 
 
@@ -638,6 +651,8 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
   if (!dre->isDeclRefExpr()) { 
     debug_fprintf(stderr, "malformed loop init.\n"); 
     init->print(); 
+// Mahdi: Added to correct embedded iteration space: from Tuowen's topdown branch
+      well_formed = false;
   }
 
   chillindex = dre; // the loop index variable
@@ -657,12 +672,16 @@ IR_chillLoop::IR_chillLoop(const IR_Code *ir, chillAST_ForStmt *achillforstmt) {
 
 CG_outputRepr *IR_chillLoop::lower_bound() const {
   //debug_fprintf(stderr, "IR_chillLoop::lower_bound()\n"); 
-  return new CG_chillRepr(chilllowerbound);
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//  return new CG_chillRepr(chilllowerbound);
+  return chilllowerbound;
 }
 
 CG_outputRepr *IR_chillLoop::upper_bound() const {
   //debug_fprintf(stderr, "IR_chillLoop::upper_bound()\n"); 
-  return new CG_chillRepr(chillupperbound);
+// Mahdi: Change to correct embedded iteration space: from Tuowen's topdown branch
+//  return new CG_chillRepr(chillupperbound);
+  return chillupperbound;
 }
 
 IR_Block *IR_chillLoop::body() const {
@@ -826,6 +845,7 @@ IR_chillCode::IR_chillCode(chill::Parser *parser, const char *fname, const char 
   chillAST_FunctionDecl *localFD = findFunctionDecl(  entire_file_AST, proc_name );
   chillfunc =  localFD;
   ocg_ = new omega::CG_chillBuilder(entire_file_AST, chillfunc); // transition - use chillAST based builder
+  func_defn = localFD;
 }
 
 IR_chillCode::~IR_chillCode() {

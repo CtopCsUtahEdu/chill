@@ -1,5 +1,3 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/bug1.c", line 6: warning: 
-          variable "wat" was set but never used
-     int wat;
-         ^
-
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  statements for distribution must be in the same level-1 subloop
+Aborted (core dumped)

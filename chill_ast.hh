@@ -516,6 +516,7 @@ public:
     std::vector<chillAST_ForStmt *>deepest; // deepest below here 
     
     for (auto i: children) {
+      if(i == nullptr) continue;
       std::vector<chillAST_ForStmt *> subloops;  // loops below here among a child of mine 
       
       i->find_deepest_loops( subloops );

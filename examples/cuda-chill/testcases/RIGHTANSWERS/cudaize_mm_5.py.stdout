@@ -5,10 +5,13 @@ parameter_symtab has 3 entries
 2  b
 
 
-body_symtab has 3 entries
+body_symtab has 6 entries
 0  i
 1  j
 2  k
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
 
 
 i,j
@@ -61,9 +64,12 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -72,16 +78,22 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -90,9 +102,12 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -102,9 +117,12 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -113,16 +131,22 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -131,9 +155,12 @@ c wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -143,9 +170,12 @@ a wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -154,16 +184,22 @@ a wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -172,9 +208,12 @@ a wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -185,9 +224,12 @@ b wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -196,16 +238,22 @@ b wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -214,9 +262,12 @@ b wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  c
 1  a
@@ -226,9 +277,12 @@ b wo
 0  i
 1  j
 2  k
-3  t2
-4  t4
-5  t6
+3  chill_idx1
+4  chill_idx2
+5  chill_idx3
+6  t2
+7  t4
+8  t6
 
 0  int bx = blockIdx.x
 1  int by = blockIdx.y

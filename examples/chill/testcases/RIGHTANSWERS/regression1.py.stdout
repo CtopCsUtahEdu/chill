@@ -1,11 +1,128 @@
 
 
-smooth_fused_64.script
-source 'smooth_fused_64.c'
-dest   'smooth_fused_64modified.c'
+shift_to3.script
+source 'shift_to.c'
+dest   'shift_to3modified.c'
 
 
-before   1526939675.16
-../../../chill smooth_fused_64.script
-now   1526939675.21
-smooth_fused_64.script succeeded?   status 0
+before   1550795760.68
+../../../chill shift_to3.script
+now   1550795760.7
+shift_to3.script succeeded?   status 0
+shift_to3modified.c exists and has 474 bytes
+1550795209.1
+elapsed 551.599551
+
+scale4.script
+source 'scale.c'
+dest   'scale4modified.c'
+
+
+before   1550795760.7
+../../../chill scale4.script
+now   1550795760.73
+scale4.script succeeded?   status 0
+scale4modified.c exists and has 559 bytes
+1550795190.36
+elapsed 570.369415
+
+peel8.script
+source 'peel5678.c'
+dest   'peel8modified.c'
+
+
+before   1550795760.73
+../../../chill peel8.script
+now   1550795760.75
+peel8.script succeeded?   status 0
+peel8modified.c exists and has 834 bytes
+1550795744.38
+elapsed 16.368896
+
+unroll1b.script
+source 'unroll1.c'
+dest   'unroll1bmodified.c'
+
+
+before   1550795760.75
+../../../chill unroll1b.script
+now   1550795760.77
+unroll1b.script succeeded?   status 0
+unroll1bmodified.c exists and has 566 bytes
+1550795241.98
+elapsed 518.792084
+
+p49.script
+source 'p49.c'
+dest   'p49modified.c'
+
+
+before   1550795760.77
+../../../chill p49.script
+now   1550795760.8
+p49.script succeeded?   status 0
+p49modified.c exists and has 350 bytes
+1550795730.9
+elapsed 29.898255
+
+permute2.script
+source 'permute123456.c'
+dest   'permute2modified.c'
+
+
+before   1550795760.8
+../../../chill permute2.script
+now   1550795760.82
+permute2.script succeeded?   status 0
+permute2modified.c exists and has 581 bytes
+1550795748.81
+elapsed 12.008065
+
+split1.script
+source 'split.c'
+dest   'split1modified.c'
+
+
+before   1550795760.82
+../../../chill split1.script
+now   1550795760.84
+split1.script succeeded?   status 0
+split1modified.c exists and has 622 bytes
+1550795218.53
+elapsed 542.310637
+
+p47.script
+source 'p47.c'
+dest   'p47modified.c'
+
+
+before   1550795760.84
+../../../chill p47.script
+now   1550795760.87
+p47.script succeeded?   status 0
+p47modified.c exists and has 360 bytes
+1550795728.66
+elapsed 32.205905
+
+permute8.script
+source 'permute8910.c'
+dest   'permute8modified.c'
+
+
+before   1550795760.87
+../../../chill permute8.script
+now   1550795760.89
+permute8.script succeeded?   status 0
+permute8modified.c exists and has 548 bytes
+1550795755.5
+elapsed 5.390173
+
+nonunimodular.script
+source 'nonunimodular.sp2'
+dest   'nonunimodularmodified.sp2'
+
+
+before   1550795760.89
+../../../chill nonunimodular.script
+now   1550795760.92
+nonunimodular.script succeeded?   status 0

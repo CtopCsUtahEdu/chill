@@ -1758,8 +1758,8 @@ namespace omega {
       else
         loopRepr = ocg->CreateLoop(indent + 1, ctrlRepr, bodyRepr);
       
-      if(attachPragma_) {
-        loopRepr = ocg->CreatePragmaAttribute(loopRepr, level_ / 2, pragmaName_);
+      for(auto itr = pragmas_.rbegin(); itr != pragmas_.rend(); itr++) {
+        loopRepr = ocg->CreatePragmaAttribute(loopRepr, level_ / 2, *itr);
       }
       
       if (!smtNonSplitLevels.empty()) {
@@ -1985,8 +1985,7 @@ namespace omega {
   void CG_loop::addPragma(int stmt, int loop_level, std::string name) {
     if(active_.get(stmt)) {
       if(level_/2 == loop_level && needLoop_) {
-        attachPragma_ = true;
-        pragmaName_   = name;
+        pragmas_.push_back(name);
       }
       else if(level_/2 < loop_level) {
         body_->addPragma(stmt, loop_level, name);
@@ -1997,9 +1996,6 @@ namespace omega {
   void CG_loop::addOmpPragma(int stmt, int loop_level, const std::vector<std::string>& privitized_vars, const std::vector<std::string>& shared_vars) {
     if(active_.get(stmt)) {
       if(level_/2 == loop_level && needLoop_) {
-        attachPragma_ = true;
-        pragmaName_   = "omp for";
-
         // -------------------------------- //
         // Create privitized variables list //
         // -------------------------------- //
@@ -2025,7 +2021,7 @@ namespace omega {
 
         // TODO: ...
 
-        pragmaName_  += std::string(" private(") + privitized_vars_str + ")";
+        pragmas_.push_back(std::string("omp for private(") + privitized_vars_str + ")");
       }
       else if(level_/2 < loop_level) {
         body_->addOmpPragma(stmt, loop_level, privitized_vars, shared_vars);

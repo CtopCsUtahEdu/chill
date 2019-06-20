@@ -1,0 +1,4 @@
+{ [0, In_2, 2, 0, 0] -> [0, Out_2, 1, Out_4, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && rowptr(Out_2) <= Out_4 && Out_2 < n && Out_4 < rowptr(Out_2+1)  && In_2 = colidx(Out_4)}
+{ [0, Out_2, 1, Out_4, 0] -> [0, In_2, 2, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && rowptr(Out_2) <= Out_4 && Out_2 < n && Out_4 < rowptr(Out_2+1)  && In_2 = colidx(Out_4)}
+{ [0, In_2, 2, 0, 0] -> [0, Out_2, 2, 0, 0]  : In_2 < Out_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}
+{ [0, Out_2, 2, 0, 0] -> [0, In_2, 2, 0, 0]  : Out_2 < In_2 &&  0 <= In_2 && In_2 < n  &&  0 <= Out_2 && Out_2 < n  && In_2 = Out_2}

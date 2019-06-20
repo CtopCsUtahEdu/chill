@@ -1,8 +1,3 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/AKp257.c", line 8: warning: 
-          variable "j" was declared but never referenced
-     int i,j ;
-           ^
-
 terminate called after throwing an instance of 'loop_error'
   what():  loop error: statements 0 and 1 cannot be fused together due to negative dependence
 Aborted (core dumped)

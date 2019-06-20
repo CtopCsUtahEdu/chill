@@ -9,9 +9,9 @@ check
 y
 check
 {[i,j]->[r2] : r2 = col(j)}
-IS_for_iegen   { Sym=[index_(i),index__(i),n] [i,j] : index_(i) <= j < index__(i) && 0 <= i < n }
+IS_for_iegen   { Sym=[n,index_(i),index__(i)] [i,j] : 0 <= i < n && index_(i) <= j < index__(i) }
 
-{[i,j]  : index_(i) <= j && j < index__(i) && 0 <= i && i < n}
+{[i,j]  : 0 <= i && i < n && index_(i) <= j && j < index__(i)}
 
 *** flattened_index   { Sym=[nnz] [coalesced_index] : 0 <= coalesced_index < nnz }
 

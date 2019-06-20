@@ -12,9 +12,9 @@ void fs_csr(int n, int *rowPtr, int *colIdx, double *val, double *b, double *x) 
   int i;
   int j;
   int tmp;
-  for (i = 0; i < n; i++) {
+  for (i = 0; i < n; i += 1) {
     tmp = (int)b[i];
-    for (j = rowPtr[i]; j < rowPtr[i + 1] - 1; j++) 
+    for (j = rowPtr[i]; j < rowPtr[i + 1] - 1; j += 1) 
       tmp -= val[j] * x[colIdx[j]];
     x[i] = (double)tmp / val[rowPtr[i + 1] - 1];
   }

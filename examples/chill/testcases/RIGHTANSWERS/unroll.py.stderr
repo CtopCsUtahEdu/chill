@@ -1,5 +1,0 @@
-"/home/derick/dev/chill/chill-src/examples/chill/testcases/unroll.c", line 5: warning: 
-          variable "k" was declared but never referenced
-    int i, j, k;
-              ^
-
