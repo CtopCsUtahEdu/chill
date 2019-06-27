@@ -1172,6 +1172,23 @@ bool Loop::validIndexes(int stmt_num, const std::vector<std::string>& idxs) {
 }
 
 
+//First non-dummy level in ascending order
+int Loop::nonDummyLevel(int stmt, int level) {
+  //level comes in 1-basd and should leave 1-based
+  for (int j = level - 1; j < idxNames[stmt].size(); j++) {
+    if (idxNames[stmt][j].length() != 0) {
+      //printf("found non dummy level of %d with idx: %s when searching for %d\n", j+1, (const char*) idxNames[stmt][j], level);
+      return j + 1;
+    }
+  }
+  char buf[128];
+  sprintf(buf, "%d", level);
+  throw std::runtime_error(
+                           std::string("Unable to find a non-dummy level starting from ")
+                           + std::string(buf));
+}
+
+
 int Loop::findCurLevel(int stmt, std::string idx) {
   for (int j = 0; j < idxNames[stmt].size(); j++) {
     if (strcmp(idxNames[stmt][j].c_str(), idx.c_str()) == 0)

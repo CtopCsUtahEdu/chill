@@ -15,6 +15,15 @@
 
 using namespace omega;
 
+//Order taking out dummy variables
+static std::vector<std::string> cleanOrder(std::vector<std::string> idxNames) {
+  std::vector<std::string> results;
+  for (int j = 0; j < idxNames.size(); j++) {
+    if (idxNames[j].length() != 0)
+      results.push_back(idxNames[j]);
+  }
+  return results;
+}
 
 std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
                            std::vector<std::vector<std::string> > idxNames,
@@ -1211,3 +1220,119 @@ std::set<int> Loop::unroll(int stmt_num, int level, int unroll_amount,
 }
 
 
+bool Loop::unroll_by_index(int stmt_num, int level, int unroll_amount) {
+  fflush(stdout);
+  debug_fprintf(stderr, "\nLoopCuda::unroll_cuda( stmt_num %d,  level %d,  unroll_amount %d )\n",stmt_num, level, unroll_amount);
+
+  int old_stmts = stmt.size();
+  //bool b= unroll(stmt_num, , unroll_amount);
+
+  int dim = 2 * level - 1;
+  std::vector<int> lex = getLexicalOrder(stmt_num);
+  std::set<int> same_loop = getStatements(lex, dim - 1);
+
+  level = nonDummyLevel(stmt_num, level);
+  //printf("unrolling %d at level %d\n", stmt_num,level);
+
+  //protonu--using the new version of unroll, which returns
+  //a set of ints instead of a bool. To keep Gabe's logic
+  //I'll check the size of the set, if it's 0 return true
+  //bool b= unroll(stmt_num, level, unroll_amount);
+  std::set<int> b_set = unroll(stmt_num, level, unroll_amount, idxNames);
+  bool b = false;
+  if (b_set.size() == 0)
+    b = true;
+  //end--protonu
+
+  //Adjust idxNames to reflect updated state
+  std::vector<std::string> cIdxNames = cleanOrder(idxNames[stmt_num]);
+  std::vector<std::string> origSource = idxNames[stmt_num];
+
+  //Drop index names at level
+  if (unroll_amount == 0) {
+    //For all statements that were in this unroll together, drop index name for unrolled level
+    idxNames[stmt_num][level - 1] = "";
+    for (std::set<int>::iterator i = same_loop.begin();
+         i != same_loop.end(); i++) {
+      //printf("in same loop as %d is %d\n", stmt_num, (*i));
+      //idxNames[(*i)][level-1] = "";
+      idxNames[(*i)] = idxNames[stmt_num];
+    }
+  }
+
+  lex = getLexicalOrder(stmt_num);
+  same_loop = getStatements(lex, dim - 1);
+
+  //struct mallinfo info;
+
+  bool same_as_source = false;
+  int new_stmts = stmt.size();
+
+  //int size = syncs.size();
+  //debug_fprintf(stderr, "BEFORE LOOP syncs size %d\n", size);
+  //printSyncs();
+
+  for (int i = old_stmts; i < new_stmts; i++) {
+    debug_fprintf(stderr, "i=%d/%d\n", i, new_stmts-1);
+    //Check whether we had a sync for the statement we are unrolling, if
+    //so, propogate that to newly created statements so that if they are
+    //in a different loop structure, they will also get a syncthreads
+    //size = syncs.size();
+    //debug_fprintf(stderr, "syncs size %d\n", size);
+
+    //We expect that new statements have a constant for the variable in
+    //stmt[i].IS at level (as seen with print_with_subs), otherwise there
+    //will be a for loop at level and idxNames should match stmt's
+    //idxNames pre-unrolled
+    Relation IS = stmt[i].IS;
+    //Ok, if you know how the hell to get anything out of a Relation, you
+    //should probably be able to do this more elegantly. But for now, I'm
+    //hacking it.
+    std::string s = IS.print_with_subs_to_string();
+    //s looks looks like
+    //{[_t49,8,_t51,_t52,128]: 0 <= _t52 <= 3 && 0 <= _t51 <= 15 && 0 <= _t49 && 64_t49+16_t52+_t51 <= 128}
+    //where level == 5, you see a integer in the input set
+
+    //If that's not an integer and this is the first new statement, then
+    //we think codegen will have a loop at that level. It's not perfect,
+    //not sure if it can be determined without round-tripping to codegen.
+    int sIdx = 0;
+    int eIdx = 0;
+    for (int j = 0; j < level - 1; j++) {
+      sIdx = s.find(",", sIdx + 1);
+      if (sIdx < 0)
+        break;
+    }
+    if (sIdx > 0) {
+      eIdx = s.find("]");
+      int tmp = s.find(",", sIdx + 1);
+      if (tmp > 0 && tmp < eIdx)
+        eIdx = tmp; //", before ]"
+      if (eIdx > 0) {
+        sIdx++;
+        std::string var = s.substr(sIdx, eIdx - sIdx);
+        //printf("%s\n", s.c_str());
+        //printf("set var for stmt %d at level %d is %s\n", i, level, var.c_str());
+        if (atoi(var.c_str()) == 0 && i == old_stmts) {
+          //TODO:Maybe do see if this new statement would be in the same
+          //group as the original and if it would, don't say
+          //same_as_source
+          if (same_loop.find(i) == same_loop.end()) {
+            printf(
+                   "stmt %d level %d, newly created unroll statement should have same level indexes as source\n",
+                   i, level);
+            same_as_source = true;
+          }
+        }
+      }
+    }
+
+    //printf("fixing up statement %d n_set %d with %d levels\n", i, stmt[i].IS.n_set(), level-1);
+    if (same_as_source)
+      idxNames.push_back(origSource);
+    else
+      idxNames.push_back(idxNames[stmt_num]);
+  }
+
+  return b;
+}

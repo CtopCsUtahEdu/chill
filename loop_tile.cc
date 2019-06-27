@@ -679,3 +679,45 @@ void Loop::tile(int stmt_num, int level, int tile_size, int outer_level,
   }
 }
 
+void Loop::tile_by_index(int stmt, int level, int outer_level, TilingMethodType method) {
+  tile_by_index(stmt, level, 1, outer_level, "", "", method);
+}
+
+void Loop::tile_by_index(int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method) {
+  tile_by_index(0, level, tile_size, outer_level, idxName, ctrlName, method);
+}
+
+void Loop::tile_by_index(int stmt_num, int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method) {
+
+  tile(stmt_num, level, tile_size, outer_level, method);
+
+  std::vector<int> lex = getLexicalOrder(stmt_num);
+  int dim = 2 * level - 1;
+  std::set<int> same_loop = getStatements(lex, dim - 1);
+
+  for (std::set<int>::iterator j = same_loop.begin(); j != same_loop.end(); j++) {
+    if (idxName.size())
+      idxNames[*j][level - 1] = idxName.c_str();
+
+    if (tile_size == 1) {
+      //potentially rearrange loops
+      if (outer_level < level) {
+        std::string tmp = idxNames[*j][level - 1];
+        for (int i = level - 1; i > outer_level - 1; i--) {
+          if (i - 1 >= 0)
+            idxNames[*j][i] = idxNames[*j][i - 1];
+        }
+        idxNames[*j][outer_level - 1] = tmp;
+      }
+      //TODO: even with a tile size of one, you need a insert (of a dummy loop)
+      idxNames[*j].insert(idxNames[*j].begin() + (level), "");
+    } else {
+      if (!ctrlName.size())
+        throw std::runtime_error("No ctrl loop name for tile");
+      //insert
+      idxNames[*j].insert(idxNames[*j].begin() + (outer_level - 1),
+                          ctrlName.c_str());
+    }
+  }
+}
+

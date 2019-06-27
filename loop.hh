@@ -232,6 +232,7 @@ public:
   int                   findCurLevel(int stmt_num, std::string idx);
   void                  renameIndex(int stmt_num, std::string idx, std::string new_idx);
   bool                  validIndexes(int stmt_num, const std::vector<std::string>& idxs);
+  int                   nonDummyLevel(int stmt, int level);
 
   //
   // OMP Interface
@@ -320,6 +321,14 @@ public:
   std::set<int> split(int stmt_num, int level, const omega::Relation &cond);
   std::set<int> unroll(int stmt_num, int level, int unroll_amount, std::vector< std::vector<std::string> >idxNames= std::vector< std::vector<std::string> >(), int cleanup_split_level = 0);
 
+  void permute_by_index(int stmt, const std::vector<std::string>& curOrder);
+  bool permute_by_index(int stmt_num, const std::vector<int> &pi);
+  void tile_by_index(int stmt, int level, int outer_level, TilingMethodType method = CountedTile);
+  void tile_by_index(int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
+  void tile_by_index(int stmt_num, int level, int tile_size, int outer_level, std::string idxName, std::string ctrlName, TilingMethodType method=StridedTile);
+  bool unroll_by_index(int stmt_num, int level, int unroll_amount);
+
+
   //! Datacopy function by reffering arrays by numbers
   /*!
    * for example
@@ -369,6 +378,20 @@ public:
   void scale(const std::set<int> &stmt_nums, int level, int scale_amount);
   void reverse(const std::set<int> &stmt_nums, int level);
   void peel(int stmt_num, int level, int peel_amount = 1);
+
+  void flatten_by_index(int stmt_num, std::string idxs, std::vector<std::string> &loop_levels, std::string inspector_name);
+  void distribute_by_index(std::vector<int> &stmt_nums, std::string loop_level);
+  void fuse_by_index(std::vector<int> &stmt_nums, std::string loop_level);
+  void peel_by_index(int stmt_num, std::string level, int amount);
+  void shift_to_by_index(int stmt_num, std::string level, int absolute_position);
+  void scalar_by_index(int stmt_num, std::vector<std::string>& level, std::string arrName, int memory_type =0, int padding =0,int assign_then_accumulate = 1);
+  void split_with_alignment_by_index(int stmt_num, std::string level, int alignment, int direction=0);
+  void compact_by_index(int stmt_num, std::string level, std::string new_array, int zero, std::string data_array);
+
+  void make_dense_by_index(int stmt_num, std::string loop_level, std::string new_loop_index);
+  void skew_by_index(std::vector<int> stmt_num, std::string level, std::vector<int> coefs);
+  void reduce_by_index(int stmt_num, std::vector<std::string>& level, int param, std::string func_name,  std::vector<int> seq_level, int bound_level=-1);
+
   //
   // more fancy loop transformations
   //
@@ -401,6 +424,8 @@ public:
   void make_dense(int stmt_num, int loop_level, std::string new_loop_index);
   void set_array_size(std::string name, int size );
   omega::CG_outputRepr * iegen_parser(std::string &str, std::vector<std::string> &index_names);
+
+
 
   //
   // other public operations

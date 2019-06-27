@@ -15,14 +15,6 @@
 
 using namespace omega;
 
-void Loop::permute(const std::vector<int> &pi) {
-  std::set<int> active;
-  for (int i = 0; i < stmt.size(); i++)
-    active.insert(i);
-  
-  permute(active, pi);
-}
-
 void Loop::original() {
   std::set<int> active;
   for (int i = 0; i < stmt.size(); i++)
@@ -31,6 +23,15 @@ void Loop::original() {
   invalidateCodeGen();
   //apply_xform();
 }
+
+void Loop::permute(const std::vector<int> &pi) {
+  std::set<int> active;
+  for (int i = 0; i < stmt.size(); i++)
+    active.insert(i);
+
+  permute(active, pi);
+}
+
 void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   // check for sanity of parameters
   int starting_order;
@@ -249,6 +250,8 @@ void Loop::permute(int stmt_num, int level, const std::vector<int> &pi) {
   
   setLexicalOrder(2 * level - 2, active, starting_order);
 }
+
+
 void Loop::permute(const std::set<int> &active, const std::vector<int> &pi) {
   if (active.size() == 0 || pi.size() == 0)
     return;
