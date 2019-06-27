@@ -19,11 +19,7 @@ body_symtab has 8 entries
 7  chill_idx2
 
 
-curOrder: j,i
-idxNames: i,j
 ['j', 'i']
-curOrder: j,i
-idxNames: j,i
 
 parameter_symtab has 6 entries
 0  kVals
@@ -68,8 +64,6 @@ body_symtab has 10 entries
 9  chill_t1
 
 
-curOrder: jj,j,i
-idxNames: jj,j,i
 
 parameter_symtab has 6 entries
 0  kVals
@@ -118,8 +112,6 @@ body_symtab has 12 entries
 11  chill_t5
 
 
-curOrder: jj,ii,j,i
-idxNames: jj,ii,j,i
 
 parameter_symtab has 6 entries
 0  kVals

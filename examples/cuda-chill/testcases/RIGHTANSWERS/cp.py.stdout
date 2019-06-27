@@ -109,8 +109,6 @@ body_symtab has 12 entries
 
 
 ['j', 'i', 'n']
-curOrder: j,i,n
-idxNames: j,i,n,
 
 parameter_symtab has 3 entries
 0  atoms
@@ -158,8 +156,6 @@ body_symtab has 15 entries
 14  chill_t7
 
 
-curOrder: jj,j,i,n
-idxNames: jj,j,i,n,
 
 parameter_symtab has 3 entries
 0  atoms
@@ -214,8 +210,6 @@ body_symtab has 19 entries
 18  chill_t12
 
 
-curOrder: jj,ii,j,i,n
-idxNames: jj,ii,j,i,n,
 for(t2 = 0; t2 <= 15; t2++) {
   for(t4 = 0; t4 <= 31; t4++) {
     for(t6 = 32*t2; t6 <= 32*t2+31; t6++) {

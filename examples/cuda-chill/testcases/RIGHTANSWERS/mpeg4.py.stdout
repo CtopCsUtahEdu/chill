@@ -17,8 +17,6 @@ body_symtab has 8 entries
 
 
 ['i', 'j', 'k', 'l']
-curOrder: i,j,k,l
-idxNames: i,j,k,l
 
 parameter_symtab has 3 entries
 0  result
@@ -59,8 +57,6 @@ body_symtab has 12 entries
 11  chill_t4
 
 
-curOrder: ii,i,j,k,l
-idxNames: ii,i,j,k,l
 
 parameter_symtab has 3 entries
 0  result
@@ -109,11 +105,7 @@ body_symtab has 16 entries
 15  chill_t9
 
 
-curOrder: ii,jj,i,j,k,l
-idxNames: ii,jj,i,j,k,l
 ['ii', 'jj', 'i', 'j', 'k', 'l']
-curOrder: ii,jj,i,j,k,l
-idxNames: ii,jj,i,j,k,l
 
 parameter_symtab has 3 entries
 0  result
@@ -171,8 +163,6 @@ body_symtab has 21 entries
 20  chill_t15
 
 
-curOrder: ii,jj,iii,i,j,k,l
-idxNames: ii,jj,iii,i,j,k,l
 
 parameter_symtab has 3 entries
 0  result
@@ -241,8 +231,6 @@ body_symtab has 27 entries
 26  chill_t22
 
 
-curOrder: ii,jj,iii,i,jjj,j,k,l
-idxNames: ii,jj,iii,i,jjj,j,k,l
 ii,jj
 thread= i,j
 

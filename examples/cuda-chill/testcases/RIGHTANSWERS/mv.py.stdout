@@ -13,8 +13,6 @@ body_symtab has 4 entries
 
 
 ['i', 'j']
-curOrder: i,j
-idxNames: i,j
 
 parameter_symtab has 3 entries
 0  c
@@ -45,8 +43,6 @@ body_symtab has 6 entries
 5  chill_t2
 
 
-curOrder: ii,i,j
-idxNames: ii,i,j
 
 parameter_symtab has 3 entries
 0  c
@@ -81,8 +77,6 @@ body_symtab has 8 entries
 7  chill_t5
 
 
-curOrder: ii,k,i,j
-idxNames: ii,k,i,j
 ii
 thread= i
 
