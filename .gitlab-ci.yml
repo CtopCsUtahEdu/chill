@@ -15,7 +15,7 @@ build-cmake:
     artifacts:
         paths:
             - build/
-        expire_in: 1 week
+        expire_in: 1 day
 
 build-automake:
     stage: build
@@ -27,7 +27,7 @@ build-automake:
         - master
     artifacts:
         untracked: true
-        expire_in: 1 week
+        expire_in: 1 day
 
 test-cmake:
     stage: test
@@ -39,6 +39,10 @@ test-cmake:
     only:
         - master
         - /^cmake-.*$/
+    artifacts:
+        untracked: true
+        expire_in: 1 week
+        when: on_failure
 
 test-automake:
     stage: test
@@ -49,4 +53,8 @@ test-automake:
         - make check
     only:
         - master
+    artifacts:
+        untracked: true
+        expire_in: 1 week
+        when: on_failure
 
