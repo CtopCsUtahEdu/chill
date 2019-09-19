@@ -2,8 +2,8 @@ add_custom_target(UnitTests)
 
 include(ExternalProject)
 ExternalProject_Add(googletest
-    URL https://github.com/google/googletest/archive/release-1.8.0.zip
-    URL_MD5 "adfafc8512ab65fd3cf7955ef0100ff5"
+    URL https://github.com/google/googletest/archive/release-1.8.1.zip
+    URL_MD5 "ad6868782b5952b7476a7c1c72d5a714"
     CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/gtest;-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
     LOG_CONFIGURE 1
     LOG_INSTALL 1
