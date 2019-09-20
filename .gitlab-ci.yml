@@ -2,12 +2,27 @@ stages:
     - build
     - test
 
-build-cmake:
+build-cmake-rose:
     stage: build
     script:
         - mkdir build
         - cd build
-        - cmake ..
+        - cmake .. -DFRONTEND=Rose
+        - make $CMAKEBUILD
+    only:
+        - master
+        - /^cmake-.*$/
+    artifacts:
+        paths:
+            - build/
+        expire_in: 1 day
+
+build-cmake-clang:
+    stage: build
+    script:
+        - mkdir build
+        - cd build
+        - cmake .. -DFRONTEND=Clang
         - make $CMAKEBUILD
     only:
         - master
@@ -29,10 +44,10 @@ build-automake:
         untracked: true
         expire_in: 1 day
 
-test-cmake:
+test-cmake-rose:
     stage: test
     dependencies:
-        - build-cmake
+        - build-cmake-rose
     script:
         - cd build
         - make check-all
@@ -43,6 +58,24 @@ test-cmake:
         untracked: true
         expire_in: 1 week
         when: on_failure
+
+test-cmake-clang:
+    stage: test
+    dependencies:
+        - build-cmake-clang
+    script:
+        - cd build
+        - make check-all
+    only:
+        - master
+        - /^cmake-.*$/
+    artifacts:
+        untracked: true
+        expire_in: 1 week
+        when: on_failure
+    # fail in this job doesn't make the whole CI fail
+    allow_failure: true
+
 
 test-automake:
     stage: test
