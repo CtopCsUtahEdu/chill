@@ -22,8 +22,8 @@
  10/2009 Initialize unfusible loop nest without bailing out, -chun
 *****************************************************************************/
 
-#include <limits.h>
-#include <math.h>
+#include <climits>
+#include <cmath>
 #include <omega/code_gen/include/codegen.h>
 #include <code_gen/CG_utils.h>
 #include <code_gen/CG_chillBuilder.h> // Manu   bad idea.  TODO
@@ -36,8 +36,9 @@
 #include "omegatools.hh"
 #include "irtools.hh"
 #include "chill_error.hh"
-#include <string.h>
+#include <cstring>
 #include <list>
+#include <map>
 
 // TODO 
 #define _DEBUG_ true
@@ -1201,38 +1202,33 @@ int Loop::findCurLevel(int stmt, std::string idx) {
 
 
 struct align_reset_info {
-  std::vector<std::string>            original_names;
-  std::vector<omega::CG_outputRepr*>  original_exprs;
-  std::vector<std::string>            aligned_names;
-  std::vector<omega::CG_outputRepr*>  aligned_exprs;
+  std::map<std::string, std::string>            trans_repl;
+  std::set<std::string> orig_name;
+  std::vector<std::string> aligned_names;
+  std::vector<CG_outputRepr*> restore_exprs;
 
-  CG_outputRepr* add_substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
-    CG_outputRepr* ivar = ocg->CreateIdent(subst_name);
-    original_names.push_back(name);
-    original_exprs.push_back(ocg->CreateIdent(name));
-    aligned_names.push_back(subst_name);
-    aligned_exprs.push_back(ivar);
-    return ivar;
+  void substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
+    if (trans_repl.find(subst_name) == trans_repl.end() && orig_name.find(name) == orig_name.end()) {
+      trans_repl.emplace(subst_name, name);
+      orig_name.emplace(name);
+    }
   }
 
-  void add_negative_substitution(CG_outputBuilder* ocg, std::string name, std::string subst_name) {
-    original_names.push_back(name);
-    original_exprs.push_back(ocg->CreateIdent(name));
-    aligned_names.push_back(subst_name);
-    aligned_exprs.push_back(ocg->CreateMinus(NULL, ocg->CreateIdent(subst_name)));
-  }
-
-  void substitute_vars(CG_outputBuilder* ocg, CG_outputRepr* expr) {
-    ocg->CreateSubstitutedStmt(0, expr, original_names, aligned_exprs, false);
+  void prepare(CG_outputBuilder *ocg) {
+    for (auto i: trans_repl) {
+      auto ivar = ocg->CreateIdent(i.second);
+      aligned_names.emplace_back(i.first);
+      restore_exprs.emplace_back(ivar);
+    }
   }
 
   void restore_vars(CG_outputBuilder* ocg, CG_outputRepr* expr) {
-    ocg->CreateSubstitutedStmt(0, expr, aligned_names, original_exprs, false);
+    ocg->CreateSubstitutedStmt(0, expr, aligned_names, restore_exprs, false);
   }
 
   chillAST_node* restore_vars(CG_outputBuilder* ocg, chillAST_node* node) {
     CG_chillRepr repr(std::vector<chillAST_node*>({node}));
-    auto res = ocg->CreateSubstitutedStmt(0, &repr, aligned_names, original_exprs, false);
+    auto res = ocg->CreateSubstitutedStmt(0, &repr, aligned_names, restore_exprs, false);
     return ((CG_chillRepr*) res)->GetCode();
   }
 };
@@ -1242,15 +1238,19 @@ static void align_loops(
         CG_outputBuilder*               ocg,
         std::vector<ir_tree_node*>&     ir_tree,
         align_reset_info&               align_info,
+        std::vector<std::string>&       original_names,
+        std::vector<CG_outputRepr*>&    aligned_exprs,
         int                             level) {
   for (int i = 0; i < ir_tree.size(); i++) {
     switch (ir_tree[i]->content->type()) {
       case IR_CONTROL_BLOCK: {
         IR_Block *bp = static_cast<IR_Block *>(ir_tree[i]->content);
-        align_info.substitute_vars(ocg, bp->extract());
+        ocg->CreateSubstitutedStmt(0, bp->extract(), original_names, aligned_exprs, false);
         break;
       }
       case IR_CONTROL_LOOP: {
+        auto orig = original_names;
+        auto aligned = aligned_exprs;
         IR_chillLoop *clp = static_cast<IR_chillLoop *>(ir_tree[i]->content);
         if (!clp->well_formed) {
           for (int j = 0; j < ir_tree[i]->children.size(); ++j)
@@ -1258,11 +1258,14 @@ static void align_loops(
           ir_tree[i]->children = std::vector<ir_tree_node *>();
           ir_tree[i]->content = ir_tree[i]->content->convert();
         } else {
-          align_info.substitute_vars(ocg, clp->upper_bound());
-          align_info.substitute_vars(ocg, clp->lower_bound());
+          ocg->CreateSubstitutedStmt(0, clp->upper_bound(), original_names, aligned_exprs, false);
+          ocg->CreateSubstitutedStmt(0, clp->lower_bound(), original_names, aligned_exprs, false);
 
           std::string iname = index_name(level);
-          CG_outputRepr* ivar = align_info.add_substitution(ocg, clp->index()->name(), iname);
+          align_info.substitution(ocg, clp->index()->name(), iname);
+          CG_outputRepr* ivar = ocg->CreateIdent(iname);
+          orig.emplace_back(clp->index()->name());
+          aligned.emplace_back(ivar);
 
           // FIXME: this breaks abstraction
           if (clp->step_size()<0) {
@@ -1274,7 +1277,8 @@ static void align_loops(
             clp->chillupperbound = ocg->CreateMinus(NULL, clp->chillupperbound);
             clp->step_size_ = -clp->step_size_;
 
-            align_info.add_negative_substitution(ocg, iname, iname);
+            orig.emplace_back(iname);
+            aligned.emplace_back(ocg->CreateMinus(NULL, ivar));
 
             clp->chillforstmt->cond = new chillAST_BinaryOperator(((CG_chillRepr*)(clp->chillupperbound))->chillnodes[0],((chillAST_BinaryOperator*)(clp->chillforstmt->getCond()))->getOp()
                 ,((CG_chillRepr*)ivar)->chillnodes[0]);
@@ -1285,17 +1289,18 @@ static void align_loops(
           }
 
           clp->chillforstmt->init = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"=",((CG_chillRepr*)(clp->chilllowerbound))->chillnodes[0]);
+          clp->chillindex = static_cast<chillAST_DeclRefExpr*>(((CG_chillRepr*)ivar)->chillnodes[0]);
           clp->chillforstmt->incr = new chillAST_BinaryOperator(((CG_chillRepr*)ivar)->chillnodes[0],"+=",new chillAST_IntegerLiteral(clp->step_size_));
           // Ready to recurse
-          align_loops(ocg, ir_tree[i]->children, align_info,level+1);
+          align_loops(ocg, ir_tree[i]->children, align_info, orig, aligned, level+1);
         }
         break;
       }
       case IR_CONTROL_IF: {
         IR_If *ip = static_cast<IR_If *>(ir_tree[i]->content);
-        align_info.substitute_vars(ocg, ip->condition());
+        ocg->CreateSubstitutedStmt(0, ip->condition(), original_names, aligned_exprs, false);
         // Ready to recurse
-        align_loops(ocg, ir_tree[i]->children, align_info, level);
+        align_loops(ocg, ir_tree[i]->children, align_info, original_names, aligned_exprs, level);
         break;
       }
       default:
@@ -1321,14 +1326,13 @@ static void reset_names(
       case IR_CONTROL_LOOP: {
           auto clp = static_cast<IR_chillLoop*>(ir_node->content);
           if(clp->well_formed) {
-            //reset_info.restore_vars(ocg, clp->upper_bound());
-            reset_info.restore_vars(ocg, clp->lower_bound());
-
             auto clpf = clp->chillforstmt;
 
             clpf->init = reset_info.restore_vars(ocg, clpf->init);
             clpf->cond = reset_info.restore_vars(ocg, clpf->cond);
             clpf->incr = reset_info.restore_vars(ocg, clpf->incr);
+            if (clp->chillindex)
+              clp->chillindex = static_cast<chillAST_DeclRefExpr*>(reset_info.restore_vars(ocg, clp->chillindex));
 
             reset_names(ocg, ir_node->children, reset_info, level + 1);
           }
@@ -1375,8 +1379,11 @@ Loop::Loop(const IR_Control *control) {
   
   {
     align_reset_info ar_info;
-    align_loops(ir->builder(), ir_tree, ar_info,  1);
-    reset_names(ir->builder(), ir_tree, ar_info,  1);
+    std::vector<std::string> original_names;
+    std::vector<CG_outputRepr *> aligned_exprs;
+    align_loops(ir->builder(), ir_tree, ar_info, original_names, aligned_exprs, 1);
+    ar_info.prepare(ir->builder());
+    reset_names(ir->builder(), ir_tree, ar_info, 1);
   }
   bool trybuild = true;
 
