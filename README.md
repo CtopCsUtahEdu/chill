@@ -107,4 +107,13 @@ void foo(double A[100], double B[100]) {
 
 Additional examples and testcases for CHiLL can be found under examples/chill/testcases. Testcases and exemples for CUDA-CHiLL can be found under exaples/cuda-chill/testcases.
 
+# Using Clang as frontend (experimental)
 
+CHiLL and CUDA-CHiLL can operate with either Rose or Clang as its parser implementation. We recommend building with Rose first and try Clang if that doesn't work.
+
+Rose will give more verbose parsing output that includes most information from the preprocessors whereas Clang will expand all includes and macros. Although we don't test result from Clang in our CI due to these minor differences, we expect it to run fine. However, Clang tends to be able to build on more platforms and is included in the official repositories of most mainstream distros, making it a good backup choice.
+
+1. Install dependencies from repository: clang(-dev), cmake, isl, boost
+2. Install [IEGenLib](install-iegenlib)
+
+Building with Clang is currently only supported by the CMake build system. Pass "-DFRONTEND=Clang" to CMake when you are configuring, and build as above.
