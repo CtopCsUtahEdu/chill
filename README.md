@@ -6,10 +6,10 @@ CHiLL is a source-to-source translator for composing high level loop transformat
 
 ### Install Prerequisites
 
-1. Install [a boost version for Rose](install-boost).
-2. Install [Rose](install-rose).
+1. Install [a boost version for Rose](https://github.com/CtopCsUtahEdu/chill/wiki/Install-Boost).
+2. Install [Rose](https://github.com/CtopCsUtahEdu/chill/wiki/Install-Rose).
 3. Install isl from repository. [optional but recomended]
-4. Install [IEGenLib](install-iegenlib)
+4. Install [IEGenLib](https://github.com/CtopCsUtahEdu/chill/wiki/Install-IEGenLib)
 
 ### Build CHiLL
 
