@@ -13,13 +13,13 @@ endif()
 
 find_path(Rose_INCLUDE_DIR rose/rose.h
     HINTS ${ROSEHOME} ${CHILLENV}
-    PATHS /usr
+    PATHS /usr /usr/rose
     PATH_SUFFIXES include) # This ONLY includes the include dir
 
 MACRO(FIND_AND_ADD_Rose_LIB _libname_)
     find_library(Rose_${_libname_}_LIB ${_libname_}
         HINTS ${ROSEHOME} ${CHILLENV}
-        PATHS /usr
+        PATHS /usr /usr/rose
         PATH_SUFFIXES lib)
     if (Rose_${_libname_}_LIB)
         set(Rose_LIBS ${Rose_LIBS} ${Rose_${_libname_}_LIB})
